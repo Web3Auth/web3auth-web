@@ -2,7 +2,9 @@ import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-con
 import { type BUILD_ENV_TYPE, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
-import { type CustomChainConfig } from "../chain/IChainInterface";
+import type { AuthLoginParams } from "@/core/auth-connector";
+
+import { ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   CONNECTOR_EVENTS,
   type CONNECTOR_STATUS_TYPE,
@@ -16,7 +18,7 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
 import { type IPlugin, PluginFn } from "../plugin";
-import { type WALLET_CONNECTOR_TYPE } from "../wallet";
+import { type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 
 export type WalletServicesConfig = Omit<
   WsEmbedParams,
@@ -145,9 +147,16 @@ export interface IWeb3AuthCoreOptions {
   authBuildEnv?: BUILD_ENV_TYPE;
 }
 
+export type LoginParamMap = {
+  [WALLET_CONNECTORS.AUTH]: Partial<AuthLoginParams>;
+  [WALLET_CONNECTORS.METAMASK]: { chainNamespace: ChainNamespaceType };
+  [WALLET_CONNECTORS.COINBASE]: { chainNamespace: ChainNamespaceType };
+  [WALLET_CONNECTORS.WALLET_CONNECT_V2]: { chainNamespace: ChainNamespaceType };
+};
+
 export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
-  connectedConnectorName: string | null;
+  connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
@@ -168,7 +177,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
    * Connect to a specific wallet connector
    * @param walletName - Key of the wallet connector to use.
    */
-  connectTo<T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null>;
+  connectTo<T extends WALLET_CONNECTOR_TYPE>(walletName: T, loginParams?: LoginParamMap[T]): Promise<IProvider | null>;
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
   cleanup(): Promise<void>;

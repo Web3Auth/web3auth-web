@@ -11,6 +11,8 @@ import {
   PLUGIN_STATUS,
   PLUGIN_STATUS_TYPE,
   PluginFn,
+  WALLET_CONNECTOR_TYPE,
+  WALLET_CONNECTORS,
 } from "@/core/base";
 
 import { NFTCheckoutEmbed } from "./embed";
@@ -25,7 +27,7 @@ class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
 
   status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  SUPPORTED_CONNECTORS = ["all"];
+  SUPPORTED_CONNECTORS: WALLET_CONNECTOR_TYPE[] = Object.values(WALLET_CONNECTORS);
 
   pluginNamespace = PLUGIN_NAMESPACES.EIP155;
 

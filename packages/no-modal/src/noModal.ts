@@ -20,6 +20,7 @@ import {
   IWeb3Auth,
   IWeb3AuthCoreOptions,
   log,
+  LoginParamMap,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   ProjectConfig,
@@ -37,6 +38,8 @@ import {
 } from "@/core/base";
 import { CommonJRPCProvider } from "@/core/base-provider";
 import { metaMaskConnector } from "@/core/metamask-connector";
+
+import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
@@ -189,7 +192,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * Connect to a specific wallet connector
    * @param connectorName - Key of the wallet connector to use.
    */
-  async connectTo<T>(connectorName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null> {
+  async connectTo<T extends WALLET_CONNECTOR_TYPE>(connectorName: T, loginParams?: LoginParamMap[T]): Promise<IProvider | null> {
     const connector = this.getConnector(connectorName, (loginParams as { chainNamespace?: ChainNamespaceType })?.chainNamespace);
     if (!connector || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
@@ -423,7 +426,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected async initPlugins(): Promise<void> {
-    const pluginFns = this.coreOptions.plugins || [];
+    const { chains, plugins } = this.coreOptions;
+    const pluginFns = plugins || [];
+    const isWsSupportedChain = chains.some((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA);
+    if (isWsSupportedChain) {
+      pluginFns.push(walletServicesPlugin());
+    }
     for (const pluginFn of pluginFns) {
       const plugin = pluginFn();
       if (!this.plugins[plugin.name]) this.plugins[plugin.name] = plugin;
@@ -474,7 +482,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
-      this.connectedConnectorName = data.connector;
+      this.connectedConnectorName = data.connector as WALLET_CONNECTOR_TYPE;
       this.status = CONNECTOR_STATUS.CONNECTED;
       this.cacheWallet(data.connector);
       log.debug("connected", this.status, this.connectedConnectorName);
@@ -499,7 +507,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       log.debug("disconnected", this.status, this.connectedConnectorName);
       await Promise.all(
         Object.values(this.plugins).map(async (plugin) => {
-          if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(connector.name)) return;
+          if (!plugin.SUPPORTED_CONNECTORS.includes(connector.name as WALLET_CONNECTOR_TYPE)) return;
           if (plugin.status !== PLUGIN_STATUS.CONNECTED) return;
           return plugin.disconnect().catch((error: Web3AuthError) => {
             // swallow error if connector doesn't supports this plugin.
@@ -536,6 +544,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (storageAvailable(this.storage)) {
         this.clearCache();
       }
+    });
+
+    connector.on(CONNECTOR_EVENTS.MFA_ENABLED, (isMFAEnabled: boolean) => {
+      log.debug("mfa enabled", isMFAEnabled);
+      this.emit(CONNECTOR_EVENTS.MFA_ENABLED, isMFAEnabled);
     });
   }
 
@@ -582,7 +595,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     Object.values(this.plugins).map(async (plugin) => {
       try {
         // skip if it's not compatible with the connector
-        if (!plugin.SUPPORTED_CONNECTORS.includes("all") && !plugin.SUPPORTED_CONNECTORS.includes(data.connector)) return;
+        if (!plugin.SUPPORTED_CONNECTORS.includes(data.connector)) return;
         // skip if it's not compatible with the current chain
         if (plugin.pluginNamespace !== PLUGIN_NAMESPACES.MULTICHAIN && plugin.pluginNamespace !== this.currentChain?.chainNamespace) return;
         // skip if it's already connected

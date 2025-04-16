@@ -1,8 +1,10 @@
 import { createElement, type PropsWithChildren } from "react";
 
+import { WalletServicesContextProvider } from "./context/WalletServicesInnerContext";
+import { Web3AuthInnerContext, Web3AuthInnerProvider } from "./context/Web3AuthInnerContext";
 import { Web3AuthProviderProps } from "./interfaces";
-import { Web3AuthInnerProvider } from "./Web3AuthInnerContext";
 
 export function Web3AuthProvider({ config, children }: PropsWithChildren<Web3AuthProviderProps>) {
-  return createElement(Web3AuthInnerProvider, { config }, children);
+  const pluginChild = createElement(WalletServicesContextProvider, { context: Web3AuthInnerContext }, children);
+  return createElement(Web3AuthInnerProvider, { config }, pluginChild);
 }

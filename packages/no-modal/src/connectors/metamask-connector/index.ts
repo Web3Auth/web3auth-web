@@ -1,1 +1,1 @@
-export { metaMaskConnector } from "./metamaskConnector";
+export * from "./metamaskConnector";

@@ -18,6 +18,7 @@ import {
   PLUGIN_STATUS_TYPE,
   PluginFn,
   SafeEventEmitterProvider,
+  WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletServicesPluginError,
 } from "@/core/base";
@@ -30,7 +31,7 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public status: PLUGIN_STATUS_TYPE = PLUGIN_STATUS.DISCONNECTED;
 
-  readonly SUPPORTED_CONNECTORS = [WALLET_CONNECTORS.AUTH, WALLET_CONNECTORS.SFA];
+  readonly SUPPORTED_CONNECTORS: WALLET_CONNECTOR_TYPE[] = [WALLET_CONNECTORS.AUTH];
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.MULTICHAIN;
 

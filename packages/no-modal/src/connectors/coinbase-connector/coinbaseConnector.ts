@@ -1,6 +1,7 @@
 import { AppMetadata, createCoinbaseWalletSDK, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
 
 import {
+  BaseConnectorLoginParams,
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -17,6 +18,7 @@ import {
   ConnectorParams,
   IProvider,
   UserInfo,
+  WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletLoginError,
   Web3AuthError,
@@ -37,7 +39,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
 
   readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
-  readonly name: string = WALLET_CONNECTORS.COINBASE;
+  readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.COINBASE;
 
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
@@ -86,7 +88,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
+  async connect({ chainId }: BaseConnectorLoginParams): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Connector is not initialized");
     this.status = CONNECTOR_STATUS.CONNECTING;

@@ -7,6 +7,7 @@ import type {
   IPlugin,
   IProvider,
   IWeb3AuthCoreOptions,
+  LoginParamMap,
   PluginFn,
   UserAuthInfo,
   WALLET_CONNECTOR_TYPE,
@@ -44,5 +45,5 @@ interface IBaseWeb3AuthComposableContext {
 
 export interface IWeb3AuthContext extends IBaseWeb3AuthComposableContext {
   web3Auth: ShallowRef<Web3AuthNoModal | null>;
-  connectTo<T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null>;
+  connectTo<T extends WALLET_CONNECTOR_TYPE>(walletName: T, loginParams?: LoginParamMap[T]): Promise<IProvider | null>;
 }

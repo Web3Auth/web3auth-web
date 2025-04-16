@@ -6,6 +6,7 @@ import {
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
   type IProvider,
+  LoginParamMap,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -59,7 +60,7 @@ export const Web3AuthProvider = defineComponent({
       await web3Auth.value.logout(logoutParams);
     };
 
-    const connectTo = async <T>(walletName: WALLET_CONNECTOR_TYPE, loginParams?: T) => {
+    const connectTo = async <T extends WALLET_CONNECTOR_TYPE>(walletName: T, loginParams?: LoginParamMap[T]) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       try {
         connectError.value = null;

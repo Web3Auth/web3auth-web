@@ -2,9 +2,10 @@ import { SafeEventEmitter } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
-import { WALLET_CONNECTORS } from "../wallet";
+import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
+  BaseConnectorLoginParams,
   BaseConnectorSettings,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_STATUS_TYPE,
@@ -31,7 +32,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
 
   public abstract type: CONNECTOR_CATEGORY_TYPE;
 
-  public abstract name: string;
+  public abstract name: WALLET_CONNECTOR_TYPE | string;
 
   public abstract status: CONNECTOR_STATUS_TYPE;
 
@@ -94,7 +95,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   }
 
   abstract init(options?: ConnectorInitOptions): Promise<void>;
-  abstract connect(params: T & { chainId: string }): Promise<IProvider | null>;
+  abstract connect(params: T & BaseConnectorLoginParams): Promise<IProvider | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;

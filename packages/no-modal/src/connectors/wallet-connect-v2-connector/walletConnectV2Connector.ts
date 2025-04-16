@@ -7,6 +7,7 @@ import deepmerge from "deepmerge";
 
 import {
   BaseConnector,
+  BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   checkIfTokenIsExpired,
@@ -28,6 +29,7 @@ import {
   saveToken,
   UserAuthInfo,
   UserInfo,
+  WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletConnectV2Data,
   WalletInitializationError,
@@ -40,7 +42,7 @@ import { IConnectorSettings, WalletConnectV2ConnectorOptions } from "./interface
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
 
 class WalletConnectV2Connector extends BaseConnector<void> {
-  readonly name: string = WALLET_CONNECTORS.WALLET_CONNECT_V2;
+  readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.WALLET_CONNECT_V2;
 
   readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 
@@ -137,7 +139,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
+  async connect({ chainId }: BaseConnectorLoginParams): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
