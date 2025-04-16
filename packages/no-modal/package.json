@@ -35,16 +35,24 @@
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
     "react": "^18 || ^19",
-    "vue": "^3.x"
+    "vue": "^3.x",
+    "viem": "^2.23.x",
+    "wagmi": "^2.x"
   },
   "peerDependenciesMeta": {
     "@coinbase/wallet-sdk": {
+      "optional": true
+    },
+    "@tanstack/react-query": {
       "optional": true
     },
     "react": {
       "optional": true
     },
     "vue": {
+      "optional": true
+    },
+    "wagmi": {
       "optional": true
     }
   },
@@ -91,8 +99,8 @@
     "@coinbase/wallet-sdk": "^4.3.x",
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
-    "@types/react": "^18.3.12",
-    "react": "^18 || ^19",
+    "@types/react": "^19.1.2",
+    "react": "^18",
     "vue": "^3.x"
   },
   "exports": {
@@ -106,6 +114,11 @@
       "require": "./dist/lib.cjs/react/index.js",
       "types": "./dist/lib.cjs/types/react/index.d.ts"
     },
+    "./react/wagmi": {
+      "import": "./dist/lib.esm/react/wagmi/index.js",
+      "require": "./dist/lib.cjs/react/wagmi/index.js",
+      "types": "./dist/lib.cjs/types/react/wagmi/index.d.ts"
+    },
     "./vue": {
       "import": "./dist/lib.esm/vue/index.js",
       "require": "./dist/lib.cjs/vue/index.js",
@@ -116,6 +129,9 @@
     "*": {
       "react": [
         "./dist/lib.cjs/types/react/index.d.ts"
+      ],
+      "react/wagmi": [
+        "./dist/lib.cjs/types/react/wagmi/index.d.ts"
       ],
       "vue": [
         "./dist/lib.cjs/types/vue/index.d.ts"

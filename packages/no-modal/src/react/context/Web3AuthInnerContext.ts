@@ -2,7 +2,7 @@ import { createContext, createElement, PropsWithChildren, useCallback, useEffect
 
 import { CONNECTED_EVENT_DATA, CONNECTOR_EVENTS, CONNECTOR_STATUS, CONNECTOR_STATUS_TYPE, IProvider, WalletInitializationError } from "@/core/base";
 
-import { Web3AuthNoModal } from "../../../noModal";
+import { Web3AuthNoModal } from "../../noModal";
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 
 export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
