@@ -117,7 +117,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
 
 export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiProviderProps>) {
   const { config } = props;
-  const { web3Auth } = useWeb3Auth();
+  const { web3Auth, isInitialized } = useWeb3Auth();
 
   const finalConfig = useMemo(() => {
     const finalConfig: CreateConfigParameters = {
@@ -131,7 +131,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     };
 
     const wagmiChains: Chain[] = [];
-    if (web3Auth?.coreOptions?.chains) {
+    if (isInitialized && web3Auth?.coreOptions?.chains) {
       const defaultChainId = web3Auth.currentChain?.chainId;
       const chains = web3Auth.coreOptions.chains;
       chains.forEach((chain) => {
@@ -172,7 +172,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
 
     if (!finalConfig.chains) return;
     return createWagmiConfig(finalConfig);
-  }, [config, web3Auth]);
+  }, [config, web3Auth, isInitialized]);
 
   // WagmiProviderBase requires a config to initialize
   // If no config is provided, it will throw an error.
