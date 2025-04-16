@@ -19,7 +19,7 @@ import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vu
 import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { AUTH_CONNECTION, type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
+import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -162,11 +162,7 @@ const modalParams = computed(() => {
   const modalConfig = {
     [WALLET_CONNECTORS.AUTH]: {
       label: "auth",
-      loginMethods: {
-        [AUTH_CONNECTION.EMAIL_PASSWORDLESS]: {
-          authConnectionId: "custom-email-passwordless1",
-        },
-      }
+      loginMethods: loginMethodsConfig.value,
     },
   };
   return modalConfig;
