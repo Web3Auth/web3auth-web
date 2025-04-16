@@ -176,27 +176,31 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   private async getProjectAndWalletConfig() {
-    // get project config
-    let projectConfig: ProjectConfig;
-    try {
-      projectConfig = await fetchProjectConfig({
+    const [projectConfigResult, walletRegistryResult] = await Promise.allSettled([
+      fetchProjectConfig({
         clientId: this.options.clientId,
         web3AuthNetwork: this.options.web3AuthNetwork,
         aaProvider: this.options.accountAbstractionConfig?.smartAccountType,
         authBuildEnv: this.options.authBuildEnv,
-      });
-    } catch (e) {
-      log.error("Failed to fetch project configurations", e);
-      throw WalletInitializationError.notReady("failed to fetch project configurations", e);
+      }),
+      fetchWalletRegistry(walletRegistryUrl),
+    ]);
+
+    // handle project config result
+    if (projectConfigResult.status === "rejected") {
+      log.error("Failed to fetch project configurations", projectConfigResult.reason);
+      throw WalletInitializationError.notReady("failed to fetch project configurations", projectConfigResult.reason);
     }
-    // get wallet registry
+    const projectConfig = projectConfigResult.value;
+
+    // handle wallet registry result
     let walletRegistry: WalletRegistry = { others: {}, default: {} };
     const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
     if (isExternalWalletEnabled && !this.modalConfig?.hideWalletDiscovery) {
-      try {
-        walletRegistry = await fetchWalletRegistry(walletRegistryUrl);
-      } catch (e) {
-        log.error("Failed to fetch wallet registry", e);
+      if (walletRegistryResult.status === "fulfilled") {
+        walletRegistry = walletRegistryResult.value;
+      } else {
+        log.error("Failed to fetch wallet registry", walletRegistryResult.reason);
       }
     }
     return { projectConfig, walletRegistry };
