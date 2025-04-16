@@ -1,7 +1,7 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
 import deepmerge from "deepmerge";
 
-import { authConnector } from "@/core/auth-connector";
+import { authConnector, AuthLoginParams } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -43,6 +43,14 @@ import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
 const CURRENT_CHAIN_CACHE_KEY = "Web3Auth-currentChain";
+
+export type LoginParamMap = {
+  [WALLET_CONNECTORS.AUTH]: Partial<AuthLoginParams>;
+  [WALLET_CONNECTORS.METAMASK]: Partial<UserInfo>;
+  [WALLET_CONNECTORS.COINBASE]: Partial<UserInfo>;
+  [WALLET_CONNECTORS.WALLET_CONNECT_V2]: Partial<UserInfo>;
+  [WALLET_CONNECTORS.SFA]: Partial<UserInfo>;
+};
 
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
@@ -191,7 +199,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * Connect to a specific wallet connector
    * @param connectorName - Key of the wallet connector to use.
    */
-  async connectTo<T>(connectorName: WALLET_CONNECTOR_TYPE, loginParams?: T): Promise<IProvider | null> {
+  async connectTo<T extends WALLET_CONNECTOR_TYPE>(connectorName: T, loginParams?: LoginParamMap[T]): Promise<IProvider | null> {
     const connector = this.getConnector(connectorName, (loginParams as { chainNamespace?: ChainNamespaceType })?.chainNamespace);
     if (!connector || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
@@ -213,6 +221,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     await this.connectedConnector.disconnect(options);
+    this.connectTo(WALLET_CONNECTORS.METAMASK, {});
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -477,7 +486,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
-      this.connectedConnectorName = data.connector;
+      this.connectedConnectorName = data.connector as WALLET_CONNECTOR_TYPE;
       this.status = CONNECTOR_STATUS.CONNECTED;
       this.cacheWallet(data.connector);
       log.debug("connected", this.status, this.connectedConnectorName);

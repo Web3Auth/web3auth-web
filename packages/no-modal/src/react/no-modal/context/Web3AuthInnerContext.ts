@@ -13,10 +13,11 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
 
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
+  const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
 
   const getPlugin = useCallback(
     (name: string) => {
@@ -29,7 +30,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   useEffect(() => {
     const resetHookState = () => {
       setProvider(null);
-      setIsAuthenticated(false);
+      setIsConnected(false);
       setStatus(null);
     };
 
@@ -60,8 +61,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
   }, [web3Auth]);
 
-  // TODO: don't throw error in init, connect in v9
-
   useEffect(() => {
     const notReadyListener = () => setStatus(CONNECTOR_STATUS.NOT_READY);
     const readyListener = () => {
@@ -73,13 +72,13 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);
-        setIsAuthenticated(true);
+        setIsConnected(true);
         setProvider(data.provider);
       }
     };
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
-      setIsAuthenticated(false);
+      setIsConnected(false);
       setProvider(null);
     };
 
@@ -89,6 +88,11 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     const errorListener = () => {
       setStatus(CONNECTOR_STATUS.ERRORED);
     };
+
+    const mfaEnabledListener = async (isMFAEnabled: boolean) => {
+      setIsMFAEnabled(isMFAEnabled);
+    };
+
     if (web3Auth) {
       // web3Auth is initialized here.
       setStatus(web3Auth.status);
@@ -98,6 +102,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
       web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
+      web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
     }
 
     return () => {
@@ -108,6 +113,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         web3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
         web3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
         web3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
+        web3Auth.off(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
       }
     };
   }, [web3Auth]);
@@ -115,15 +121,16 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const value = useMemo(() => {
     return {
       web3Auth,
-      isAuthenticated,
+      isConnected,
       isInitialized,
       provider,
       status,
       isInitializing,
       initError,
+      isMFAEnabled,
       getPlugin,
     };
-  }, [web3Auth, isAuthenticated, isInitialized, provider, status, getPlugin, isInitializing, initError]);
+  }, [web3Auth, isConnected, isInitialized, provider, status, getPlugin, isInitializing, initError, isMFAEnabled]);
 
   return createElement(Web3AuthInnerContext.Provider, { value }, children);
 }

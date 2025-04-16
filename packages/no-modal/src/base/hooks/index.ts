@@ -7,7 +7,8 @@ export interface IBaseWeb3AuthHookContext {
   isInitialized: boolean;
   isInitializing: boolean;
   initError: unknown;
-  isAuthenticated: boolean;
+  isConnected: boolean;
+  isMFAEnabled: boolean;
   provider: IProvider | null;
   status: CONNECTOR_STATUS_TYPE | null;
   getPlugin(pluginName: string): IPlugin | null;

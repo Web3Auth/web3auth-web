@@ -12,14 +12,14 @@ export interface IUseWalletConnectScanner {
 }
 
 export const useWalletConnectScanner = (): IUseWalletConnectScanner => {
-  const { plugin, isConnected } = useWalletServicesPlugin();
+  const { plugin, ready } = useWalletServicesPlugin();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
 
   const showWalletConnectScanner = useCallback(
     async (showWalletConnectScannerParams?: BaseEmbedControllerState["showWalletConnect"]) => {
       if (!plugin) throw WalletServicesPluginError.notInitialized();
-      if (!isConnected) throw WalletServicesPluginError.walletPluginNotConnected();
+      if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
 
       setLoading(true);
       setError(null);
@@ -31,7 +31,7 @@ export const useWalletConnectScanner = (): IUseWalletConnectScanner => {
         setLoading(false);
       }
     },
-    [plugin, isConnected]
+    [plugin, ready]
   );
 
   return { loading, error, showWalletConnectScanner };

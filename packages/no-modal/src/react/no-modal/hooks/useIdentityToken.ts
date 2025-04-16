@@ -4,14 +4,14 @@ import { Web3AuthError } from "@/core/base";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export interface IUseUserToken {
+export interface IUseIdentityToken {
   loading: boolean;
   error: Web3AuthError | null;
   token: string | null;
   authenticateUser: () => Promise<string | null>;
 }
 
-export const useUserToken = () => {
+export const useIdentityToken = () => {
   const { web3Auth } = useWeb3AuthInner();
 
   const [loading, setLoading] = useState(false);
