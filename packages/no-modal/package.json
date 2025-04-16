@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "10.0.0-beta.3",
+  "version": "10.0.0-beta.4",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -35,8 +35,8 @@
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
     "react": ">=18",
-    "vue": "^3.x",
     "viem": "^2.23.x",
+    "vue": "^3.x",
     "wagmi": "^2.x"
   },
   "peerDependenciesMeta": {
