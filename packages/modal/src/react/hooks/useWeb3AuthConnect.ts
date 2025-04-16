@@ -1,26 +1,32 @@
 import type { IProvider, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@web3auth/no-modal";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
 
 export interface IUseWeb3AuthConnect {
-  connecting: boolean;
-  connectingError: Web3AuthError | null;
+  isConnected: boolean;
+  loading: boolean;
+  error: Web3AuthError | null;
   connectorName: WALLET_CONNECTOR_TYPE | null;
   connect(): Promise<IProvider | null>;
 }
 
 export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
-  const context = useWeb3AuthInner();
-  const { web3Auth } = context;
+  const { web3Auth, isConnected } = useWeb3AuthInner();
 
-  const [connecting, setConnecting] = useState(false);
-  const [connectingError, setConnectingError] = useState<Web3AuthError | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<Web3AuthError | null>(null);
   const [connectorName, setConnectorName] = useState<WALLET_CONNECTOR_TYPE | null>(null);
 
+  useEffect(() => {
+    if (!isConnected && connectorName) {
+      setConnectorName(null);
+    }
+  }, [isConnected, connectorName]);
+
   const connect = useCallback(async () => {
-    setConnecting(true);
-    setConnectingError(null);
+    setLoading(true);
+    setError(null);
     try {
       const provider = await web3Auth.connect();
       if (provider) {
@@ -28,16 +34,17 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
       }
       return provider;
     } catch (error) {
-      setConnectingError(error as Web3AuthError);
+      setError(error as Web3AuthError);
     } finally {
-      setConnecting(false);
+      setLoading(false);
     }
   }, [web3Auth]);
 
   return {
-    connecting,
+    isConnected,
+    loading,
+    error,
     connectorName,
-    connectingError,
     connect,
   };
 };

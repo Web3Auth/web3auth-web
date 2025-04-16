@@ -1,17 +1,17 @@
 import { Web3AuthError } from "@web3auth/no-modal";
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export interface IUseUserToken {
+export interface IUseIdentityToken {
   loading: boolean;
   error: Web3AuthError | null;
   token: string | null;
   authenticateUser: () => Promise<string | null>;
 }
 
-export const useUserToken = () => {
-  const { web3Auth } = useWeb3AuthInner();
+export const useIdentityToken = () => {
+  const { web3Auth, isConnected } = useWeb3AuthInner();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
@@ -32,6 +32,12 @@ export const useUserToken = () => {
       setLoading(false);
     }
   }, [web3Auth]);
+
+  useEffect(() => {
+    if (!isConnected && token) {
+      setToken(null);
+    }
+  }, [isConnected, token]);
 
   return { loading, error, token, authenticateUser };
 };

@@ -1,4 +1,4 @@
-import { CONNECTOR_EVENTS, UserInfo, Web3AuthError } from "@web3auth/no-modal";
+import { type UserInfo, Web3AuthError } from "@web3auth/no-modal";
 import { useCallback, useEffect, useState } from "react";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
@@ -12,9 +12,8 @@ export interface IUseWeb3AuthUser {
 }
 
 export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
-  const { web3Auth, isConnected } = useWeb3AuthInner();
+  const { web3Auth, isConnected, isMFAEnabled, setIsMFAEnabled } = useWeb3AuthInner();
 
-  const [isMFAEnabled, setIsMFAEnabled] = useState(false);
   const [userInfo, setUserInfo] = useState<Partial<UserInfo> | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
@@ -37,30 +36,16 @@ export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
     const saveUserInfo = async () => {
       const userInfo = await getUserInfo();
       setUserInfo(userInfo);
+      setIsMFAEnabled(userInfo?.isMfaEnabled || false);
     };
 
     if (isConnected && !userInfo) saveUserInfo();
 
     if (!isConnected && userInfo) {
       setUserInfo(null);
+      setIsMFAEnabled(false);
     }
-  }, [isConnected, userInfo, getUserInfo]);
-
-  useEffect(() => {
-    const mfaEnabledListener = async (isMFAEnabled: boolean) => {
-      setIsMFAEnabled(isMFAEnabled);
-      if (isMFAEnabled) {
-        const userInfo = await web3Auth.getUserInfo();
-        setUserInfo(userInfo);
-      }
-    };
-
-    web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
-
-    return () => {
-      web3Auth.off(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
-    };
-  }, [web3Auth]);
+  }, [isConnected, userInfo, getUserInfo, setIsMFAEnabled]);
 
   return { loading, error, userInfo, isMFAEnabled, getUserInfo };
 };

@@ -273,7 +273,7 @@ function Root(props: RootProps) {
 
   const installedConnectorButtons = useMemo(() => {
     const installedConnectors = Object.keys(config).reduce((acc, connector) => {
-      if ([WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(connector) || !connectorVisibilityMap[connector]) return acc;
+      if (connector === WALLET_CONNECTORS.WALLET_CONNECT_V2 || !connectorVisibilityMap[connector]) return acc;
       const connectorConfig = config[connector];
       acc.push({
         name: connector,

@@ -1,4 +1,4 @@
-import { type ChainNamespaceType, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { type ChainNamespaceType, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
@@ -88,11 +88,11 @@ function ConnectWallet(props: ConnectWalletProps) {
   const installedWalletButtons = useMemo(() => {
     const visibilityMap = connectorVisibilityMap;
     return Object.keys(config).reduce((acc, adapter) => {
-      if (![WALLET_CONNECTORS.WALLET_CONNECT_V2].includes(adapter) && visibilityMap[adapter]) {
+      if (adapter !== WALLET_CONNECTORS.WALLET_CONNECT_V2 && visibilityMap[adapter]) {
         acc.push({
           name: adapter,
-          displayName: config[adapter].label || adapter,
-          hasInjectedWallet: config[adapter].isInjected,
+          displayName: config[adapter as WALLET_CONNECTOR_TYPE].label || adapter,
+          hasInjectedWallet: config[adapter as WALLET_CONNECTOR_TYPE].isInjected,
           hasWalletConnect: false,
           hasInstallLinks: false,
         });

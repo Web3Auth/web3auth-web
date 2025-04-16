@@ -85,7 +85,10 @@ export interface LoginModalProps extends UIConfig {
 export interface LoginModalCallbacks {
   onInitExternalWallets: (params: { externalWalletsInitialized: boolean }) => Promise<void>;
   onSocialLogin: (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: ModalLoginParams }) => Promise<void>;
-  onExternalWalletLogin: (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: { chainNamespace: ChainNamespaceType } }) => Promise<void>;
+  onExternalWalletLogin: (params: {
+    connector: WALLET_CONNECTOR_TYPE | string;
+    loginParams: { chainNamespace: ChainNamespaceType };
+  }) => Promise<void>;
   onModalVisibility: (visibility: boolean) => Promise<void>;
 }
 
@@ -127,8 +130,8 @@ export interface ModalState {
   authBuildEnv: BUILD_ENV_TYPE;
 }
 
-export type SocialLoginEventType = { connector: string; loginParams: ModalLoginParams };
-export type ExternalWalletEventType = { connector: string; chainNamespace?: ChainNamespaceType };
+export type SocialLoginEventType = { connector: WALLET_CONNECTOR_TYPE; loginParams: ModalLoginParams };
+export type ExternalWalletEventType = { connector: WALLET_CONNECTOR_TYPE | string; chainNamespace?: ChainNamespaceType };
 
 export type StateEmitterEvents = {
   STATE_UPDATED: (state: Partial<ModalState>) => void;

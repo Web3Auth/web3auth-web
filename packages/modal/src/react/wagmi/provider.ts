@@ -84,33 +84,33 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 }
 
 function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
-  const { isAuthenticated, provider } = useWeb3Auth();
+  const { isConnected, provider } = useWeb3Auth();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
 
   useAccountEffect({
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
-      if (isAuthenticated) await disconnect();
+      if (isConnected) await disconnect();
     },
   });
 
   useEffect(() => {
     (async () => {
-      if (isAuthenticated && provider) {
+      if (isConnected && provider) {
         const connector = await setupConnector(provider, wagmiConfig);
         if (!connector) {
           throw new Error("Failed to setup connector");
         }
 
         await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-      } else if (!isAuthenticated) {
+      } else if (!isConnected) {
         if (wagmiConfig.state.status === "connected") {
           await disconnectWeb3AuthFromWagmi(wagmiConfig);
         }
       }
     })();
-  }, [isAuthenticated, wagmiConfig, provider]);
+  }, [isConnected, wagmiConfig, provider]);
 
   return createElement(Fragment, null, children);
 }

@@ -4,9 +4,8 @@ import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import type { AuthLoginParams } from "@/core/auth-connector";
 
-import { type CustomChainConfig } from "../chain/IChainInterface";
+import { ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
-  type BaseConnectorLoginParams,
   CONNECTOR_EVENTS,
   type CONNECTOR_STATUS_TYPE,
   ConnectorEvents,
@@ -149,10 +148,10 @@ export interface IWeb3AuthCoreOptions {
 }
 
 export type LoginParamMap = {
-  [WALLET_CONNECTORS.AUTH]: Partial<AuthLoginParams> & BaseConnectorLoginParams;
-  [WALLET_CONNECTORS.METAMASK]: BaseConnectorLoginParams;
-  [WALLET_CONNECTORS.COINBASE]: BaseConnectorLoginParams;
-  [WALLET_CONNECTORS.WALLET_CONNECT_V2]: BaseConnectorLoginParams;
+  [WALLET_CONNECTORS.AUTH]: Partial<AuthLoginParams>;
+  [WALLET_CONNECTORS.METAMASK]: { chainNamespace: ChainNamespaceType };
+  [WALLET_CONNECTORS.COINBASE]: { chainNamespace: ChainNamespaceType };
+  [WALLET_CONNECTORS.WALLET_CONNECT_V2]: { chainNamespace: ChainNamespaceType };
 };
 
 export interface IWeb3AuthCore extends SafeEventEmitter {

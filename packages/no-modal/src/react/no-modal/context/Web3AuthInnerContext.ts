@@ -89,8 +89,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(CONNECTOR_STATUS.ERRORED);
     };
 
-    const mfaEnabledListener = async (isMFAEnabled: boolean) => {
-      setIsMFAEnabled(isMFAEnabled);
+    const mfaEnabledListener = (isMFAEnabled: boolean) => {
+      if (typeof isMFAEnabled === "boolean") setIsMFAEnabled(isMFAEnabled);
     };
 
     if (web3Auth) {

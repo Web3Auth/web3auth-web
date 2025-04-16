@@ -1,4 +1,4 @@
-import type { IBaseWeb3AuthHookContext } from "@web3auth/no-modal";
+import type { IBaseWeb3AuthHookContext, WalletServicesPluginType } from "@web3auth/no-modal";
 
 import type { Web3Auth, Web3AuthOptions } from "../modalManager";
 
@@ -12,6 +12,11 @@ export interface Web3AuthProviderProps {
 
 export interface IWeb3AuthInnerContext extends IBaseWeb3AuthHookContext {
   web3Auth: Web3Auth | null;
+}
+export interface IWalletServicesContext {
+  ready: boolean;
+  connecting: boolean;
+  plugin: WalletServicesPluginType | null;
 }
 
 export type IWeb3AuthContext = IWeb3AuthInnerContext;
