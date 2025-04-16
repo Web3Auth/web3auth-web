@@ -2,6 +2,7 @@ import { post } from "@toruslabs/http-helpers";
 import { AUTH_CONNECTION, BUILD_ENV, storageAvailable } from "@web3auth/auth";
 import { WalletInitializationError } from "@web3auth/no-modal";
 
+import { version } from "../../config";
 import { PASSWORDLESS_BUILD_ENV_MAP } from "../config";
 import {
   CodeInitiateRequestBodyParams,
@@ -19,6 +20,8 @@ export abstract class PasswordlessHandler {
   passwordlessParams: PasswordlessHandlerParams;
 
   trackingIdentifier?: string;
+
+  version: string = `web3auth-${version.split(".")[0]}`;
 
   constructor(params: PasswordlessHandlerParams) {
     if (!params.authConnection) throw WalletInitializationError.invalidParams("authConnection is required");
@@ -120,7 +123,7 @@ export abstract class PasswordlessHandler {
     };
   }
 
-  abstract sendVerificationCode(params?: { captchaToken: string }): Promise<IStartResponse>;
+  abstract sendVerificationCode(params: { captchaToken: string }): Promise<IStartResponse>;
 
   abstract verifyCode(code: string): Promise<IVerifyResponse>;
 }

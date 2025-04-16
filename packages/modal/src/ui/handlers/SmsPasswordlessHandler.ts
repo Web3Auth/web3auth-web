@@ -28,7 +28,7 @@ export default class SmsPasswordlessHandler extends PasswordlessHandler {
       login_hint: loginHint,
       tracking_id: this.trackingId,
       whitelabel: this.whiteLabelParams,
-      version: "",
+      version: this.version,
       network,
       captcha_token: captchaToken,
     };
@@ -44,7 +44,7 @@ export default class SmsPasswordlessHandler extends PasswordlessHandler {
       code,
       connection: this.connection,
       tracking_id: this.trackingId as string,
-      version: "",
+      version: this.version,
       network,
     };
     return super.verify(params);

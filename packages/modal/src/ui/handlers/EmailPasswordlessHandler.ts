@@ -14,7 +14,7 @@ export default class EmailPasswordlessHandler extends PasswordlessHandler {
     if (this.sessionStorageAvailable) this.trackingId = window.sessionStorage.getItem("trackingId") ?? undefined;
   }
 
-  async sendVerificationCode() {
+  async sendVerificationCode({ captchaToken }: { captchaToken?: string }) {
     const { loginHint, network, web3authClientId } = this.passwordlessParams;
 
     const finalParams: CodeInitiateRequestBodyParams = {
@@ -24,9 +24,10 @@ export default class EmailPasswordlessHandler extends PasswordlessHandler {
       login_hint: loginHint,
       tracking_id: this.trackingId,
       whitelabel: this.whiteLabelParams,
-      version: "",
+      version: this.version,
       network,
       flow_type: EMAIL_FLOW.code,
+      captcha_token: captchaToken,
     };
 
     return super.start(finalParams);
@@ -41,7 +42,7 @@ export default class EmailPasswordlessHandler extends PasswordlessHandler {
       code,
       connection: "email",
       tracking_id: this.trackingId as string,
-      version: "",
+      version: this.version,
       network,
       flow_type: EMAIL_FLOW.code,
     };

@@ -2,6 +2,8 @@ import { EVM_CONNECTORS } from "@web3auth/no-modal";
 
 import { ConnectorsModalConfig } from "./interface";
 
+export const version = process.env.WEB3AUTH_VERSION;
+
 export const defaultConnectorsModalConfig: ConnectorsModalConfig = {
   hideWalletDiscovery: false,
   connectors: {

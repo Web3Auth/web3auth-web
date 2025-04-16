@@ -186,14 +186,11 @@ function Login(props: LoginProps) {
         authBuildEnv,
       });
 
-      let token = "";
-      if (authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS) {
-        const res = await captchaRef.current?.execute({ async: true });
-        if (!res) {
-          throw WalletLoginError.connectionError("Captcha token is required");
-        }
-        token = res.response;
+      const res = await captchaRef.current?.execute({ async: true });
+      if (!res) {
+        throw WalletLoginError.connectionError("Captcha token is required");
       }
+      const token = res.response;
 
       const result = await handler.sendVerificationCode({ captchaToken: token });
       if (result?.error) {

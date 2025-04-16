@@ -51,6 +51,7 @@
     "@coinbase/wallet-sdk": "^4.3.x",
     "@mertasan/tailwindcss-variables": "^2.7.0",
     "@rollup/plugin-json": "^6.1.0",
+    "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-url": "^8.0.2",
     "@svgr/rollup": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
