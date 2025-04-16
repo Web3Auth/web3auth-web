@@ -426,6 +426,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :label="$t('app.walletPlugin.confirmationStrategy')"
             :aria-label="$t('app.walletPlugin.confirmationStrategy')"
             :placeholder="$t('app.walletPlugin.confirmationStrategy')"
+            :options="confirmationStrategyOptions"
             matchParentsWidth
             class=""
           />
