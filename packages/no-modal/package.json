@@ -34,7 +34,7 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
-    "react": "^18 || ^19",
+    "react": ">=18",
     "vue": "^3.x",
     "viem": "^2.23.x",
     "wagmi": "^2.x"
@@ -100,7 +100,7 @@
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
     "@types/react": "^19.1.2",
-    "react": "^18",
+    "react": "^19.1.0",
     "vue": "^3.x"
   },
   "exports": {
