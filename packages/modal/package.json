@@ -60,7 +60,7 @@
   },
   "devDependencies": {
     "@babel/preset-react": "^7.26.3",
-    "@coinbase/wallet-sdk": "^4.3.x",
+    "@coinbase/wallet-sdk": "^4.3.2",
     "@mertasan/tailwindcss-variables": "^2.7.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-replace": "^6.0.2",
