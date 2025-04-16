@@ -1,26 +1,26 @@
 import {
   useCheckout,
   useEnableMFA,
+  useIdentityToken,
   useManageMFA,
-  useUserToken,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
-  useWeb3AuthAccount,
   useWeb3AuthConnect,
   useWeb3AuthDisconnect,
+  useWeb3AuthUser,
 } from "@web3auth/modal/react";
 import { useAccount, useBalance, useSignMessage, useSignTypedData } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, isAuthenticated } = useWeb3Auth();
-  const { connecting, connect, connectingError, connectorName } = useWeb3AuthConnect();
+  const { provider, isConnected } = useWeb3Auth();
+  const { loading: connecting, connect, error: connectingError, connectorName } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { signMessageAsync, data: signedMessageData } = useSignMessage();
   const { address, isConnected: isWagmiConnected } = useAccount();
-  const { userInfo, isMFAEnabled } = useWeb3AuthAccount();
+  const { userInfo, isMFAEnabled } = useWeb3AuthUser();
   const { data: balance } = useBalance({ address });
   const { signTypedData, data: signedTypedDataData } = useSignTypedData();
   const { enableMFA, loading: isEnableMFALoading, error: enableMFAError } = useEnableMFA();
@@ -28,7 +28,7 @@ const Main = () => {
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
-  const { token, loading: isUserTokenLoading, error: userTokenError, authenticateUser } = useUserToken();
+  const { token, loading: isUserTokenLoading, error: userTokenError, authenticateUser } = useIdentityToken();
   const loggedInView = (
     <>
       <div className={styles.container}>
@@ -200,7 +200,7 @@ const Main = () => {
 
   return (
     <div className={styles.grid}>
-      <p>Web3Auth: {isAuthenticated ? "Connected" : "Disconnected"}</p>
+      <p>Web3Auth: {isConnected ? "Connected" : "Disconnected"}</p>
       <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p>
       {provider || isWagmiConnected ? loggedInView : unloggedInView}
     </div>
