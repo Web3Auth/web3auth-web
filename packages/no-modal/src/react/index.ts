@@ -1,1 +1,3 @@
-export * from "./no-modal";
+export * from "./hooks";
+export * from "./interfaces";
+export * from "./Web3AuthProvider";
