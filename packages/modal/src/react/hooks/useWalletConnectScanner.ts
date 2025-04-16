@@ -17,12 +17,12 @@ export const useWalletConnectScanner = (): IUseWalletConnectScanner => {
 
   const showWalletConnectScanner = useCallback(
     async (showWalletConnectScannerParams?: BaseEmbedControllerState["showWalletConnect"]) => {
-      if (!plugin) throw WalletServicesPluginError.notInitialized();
-      if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
-
       setLoading(true);
       setError(null);
       try {
+        if (!plugin) throw WalletServicesPluginError.notInitialized();
+        if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
+
         await plugin.showWalletConnectScanner(showWalletConnectScannerParams);
       } catch (error) {
         setError(error as Web3AuthError);

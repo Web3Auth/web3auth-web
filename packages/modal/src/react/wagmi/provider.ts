@@ -132,7 +132,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
 
     const wagmiChains: Chain[] = [];
     if (web3Auth?.coreOptions?.chains) {
-      const defaultChainId = web3Auth.coreOptions.defaultChainId;
+      const defaultChainId = web3Auth.currentChain?.chainId;
       const chains = web3Auth.coreOptions.chains;
       chains.forEach((chain) => {
         const wagmiChain = defineChain({

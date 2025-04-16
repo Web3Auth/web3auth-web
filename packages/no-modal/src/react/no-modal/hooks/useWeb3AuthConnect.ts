@@ -30,9 +30,11 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
     async <T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]) => {
       setLoading(true);
       setError(null);
-      setConnectorName(connector);
       try {
         const provider = await web3Auth.connectTo(connector, params);
+        if (provider) {
+          setConnectorName(web3Auth.connectedConnectorName);
+        }
         return provider;
       } catch (error) {
         setError(error as Web3AuthError);

@@ -17,12 +17,12 @@ export const useWalletUI = (): IUseWalletUI => {
 
   const showWalletUI = useCallback(
     async (showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]) => {
-      if (!plugin) throw WalletServicesPluginError.notInitialized();
-      if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
-
       setLoading(true);
       setError(null);
       try {
+        if (!plugin) throw WalletServicesPluginError.notInitialized();
+        if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
+
         await plugin.showWalletUi(showWalletUiParams);
       } catch (error) {
         setError(error as Web3AuthError);

@@ -87,12 +87,12 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const installedWalletButtons = useMemo(() => {
     const visibilityMap = connectorVisibilityMap;
-    return Object.keys(config).reduce((acc, adapter) => {
-      if (adapter !== WALLET_CONNECTORS.WALLET_CONNECT_V2 && visibilityMap[adapter]) {
+    return Object.keys(config).reduce((acc, localConnector) => {
+      if (localConnector !== WALLET_CONNECTORS.WALLET_CONNECT_V2 && visibilityMap[localConnector]) {
         acc.push({
-          name: adapter,
-          displayName: config[adapter as WALLET_CONNECTOR_TYPE].label || adapter,
-          hasInjectedWallet: config[adapter as WALLET_CONNECTOR_TYPE].isInjected,
+          name: localConnector,
+          displayName: config[localConnector as WALLET_CONNECTOR_TYPE].label || localConnector,
+          hasInjectedWallet: config[localConnector as WALLET_CONNECTOR_TYPE].isInjected,
           hasWalletConnect: false,
           hasInstallLinks: false,
         });

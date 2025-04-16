@@ -5,5 +5,6 @@ import { Web3AuthInnerContext, Web3AuthInnerProvider } from "./context/Web3AuthI
 import { Web3AuthProviderProps } from "./interfaces";
 
 export function Web3AuthProvider({ config, children }: PropsWithChildren<Web3AuthProviderProps>) {
-  return createElement(Web3AuthInnerProvider, { config }, createElement(WalletServicesContextProvider, { context: Web3AuthInnerContext }, children));
+  const pluginChild = createElement(WalletServicesContextProvider, { context: Web3AuthInnerContext }, children);
+  return createElement(Web3AuthInnerProvider, { config }, pluginChild);
 }

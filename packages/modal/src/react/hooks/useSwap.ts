@@ -17,12 +17,12 @@ export const useSwap = (): IUseSwap => {
 
   const showSwap = useCallback(
     async (showSwapParams?: BaseEmbedControllerState["showSwap"]) => {
-      if (!plugin) throw WalletServicesPluginError.notInitialized();
-      if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
-
       setLoading(true);
       setError(null);
       try {
+        if (!plugin) throw WalletServicesPluginError.notInitialized();
+        if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
+
         await plugin.showSwap(showSwapParams);
       } catch (error) {
         setError(error as Web3AuthError);

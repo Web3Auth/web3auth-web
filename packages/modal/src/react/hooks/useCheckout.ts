@@ -17,12 +17,12 @@ export const useCheckout = (): IUseCheckout => {
 
   const showCheckout = useCallback(
     async (showCheckoutParams?: BaseEmbedControllerState["showCheckout"]) => {
-      if (!plugin) throw WalletServicesPluginError.notInitialized();
-      if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
-
       setLoading(true);
       setError(null);
       try {
+        if (!plugin) throw WalletServicesPluginError.notInitialized();
+        if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
+
         await plugin.showCheckout(showCheckoutParams);
       } catch (error) {
         setError(error as Web3AuthError);
