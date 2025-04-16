@@ -13,6 +13,8 @@ import {
   walletServicesPlugin,
   type AccountAbstractionMultiChainConfig,
   type Web3AuthOptions,
+  WALLET_CONNECTOR_TYPE,
+  ModalConfig,
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
@@ -164,7 +166,7 @@ const modalParams = computed(() => {
       label: "auth",
       loginMethods: loginMethodsConfig.value,
     },
-  };
+  } as Record<WALLET_CONNECTOR_TYPE, ModalConfig>;
   return modalConfig;
 });
 
