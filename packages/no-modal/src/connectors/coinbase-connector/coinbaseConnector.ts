@@ -1,4 +1,4 @@
-import { AppMetadata, createCoinbaseWalletSDK, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
+import { type AppMetadata, type Preference, type ProviderInterface } from "@coinbase/wallet-sdk";
 
 import {
   BaseConnectorLoginParams,
@@ -67,6 +67,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     await super.init(options);
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
+    const { createCoinbaseWalletSDK } = await import("@coinbase/wallet-sdk");
 
     const coinbaseInstance = createCoinbaseWalletSDK({
       ...this.coinbaseOptions,
