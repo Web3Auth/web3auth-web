@@ -229,14 +229,12 @@ const configs = computed<Web3AuthContextConfig>(() => {
 
 <template>
   <Web3AuthProvider :config="configs">
-    <WalletServicesProvider>
-      <AppHeader />
-      <div class="flex flex-col items-center justify-center">
-        <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-          <AppSettings />
-          <AppDashboard :chains="options.chains || []" />
-        </main>
-      </div>
-    </WalletServicesProvider>
+    <AppHeader />
+    <div class="flex flex-col items-center justify-center">
+      <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+        <AppSettings />
+        <AppDashboard :chains="options.chains || []" />
+      </main>
+    </div>
   </Web3AuthProvider>
 </template>

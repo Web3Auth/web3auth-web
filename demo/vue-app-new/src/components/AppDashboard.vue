@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
-import { useWeb3Auth } from "@web3auth/modal/vue";
+import { useCheckout, useEnableMFA, useIdentityToken, useManageMFA, useSwitchChain, useWalletConnectScanner, useWalletUI, useWeb3Auth, useWeb3AuthUser } from "@web3auth/modal/vue";
 import { CustomChainConfig, type NFTCheckoutPluginType, type WalletServicesPluginType } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
@@ -29,13 +29,13 @@ import {
   signMessage as signSolMessage,
   signTransaction as signSolTransaction,
 } from "../services/solHandlers";
-import {
-  walletSendEth,
-  walletSignPersonalMessage,
-  walletSignSolanaMessage,
-  walletSignSolanaVersionedTransaction,
-  walletSignTypedMessage,
-} from "../services/walletServiceHandlers";
+// import {
+//   walletSendEth,
+//   walletSignPersonalMessage,
+//   walletSignSolanaMessage,
+//   walletSignSolanaVersionedTransaction,
+//   walletSignTypedMessage,
+// } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 
@@ -49,7 +49,16 @@ const props = defineProps<{
   chains: CustomChainConfig[];
 }>();
 
-const { userInfo, isConnected, provider, switchChain, web3Auth, isMFAEnabled, enableMFA, manageMFA } = useWeb3Auth();
+const { isConnected, provider, web3Auth, isMFAEnabled } = useWeb3Auth();
+const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
+const { enableMFA } = useEnableMFA();
+const { manageMFA } = useManageMFA();
+const { switchChain } = useSwitchChain();
+const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
+const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
+const { showCheckout, loading: showCheckoutLoading } = useCheckout();
+const { authenticateUser, loading: authenticateUserLoading } = useIdentityToken();
+
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
 const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
@@ -134,41 +143,28 @@ const printToConsole = (...args: unknown[]) => {
   }
 };
 
-// Wallet Services
-const showWalletUI = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-  await walletPlugin.showWalletUi();
-};
-const showCheckout = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-  await walletPlugin.showCheckout();
-};
-const showWalletConnectScanner = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-  await walletPlugin.showWalletConnectScanner();
-};
-const onWalletSignPersonalMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-  await walletSignPersonalMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
-};
-const onWalletSignTypedData_v4 = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-  await walletSignTypedMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
-};
-const onWalletSendEth = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-  await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
-};
+// const onWalletSignPersonalMessage = async () => {
+//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
+//   await walletSignPersonalMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
+// };
+// const onWalletSignTypedData_v4 = async () => {
+//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
+//   await walletSignTypedMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
+// };
+// const onWalletSendEth = async () => {
+//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
+//   await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
+// };
 
-const onWalletSignSolanaMessage = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-  await walletSignSolanaMessage(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
-};
+// const onWalletSignSolanaMessage = async () => {
+//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
+//   await walletSignSolanaMessage(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
+// };
 
-const onWalletSignSolanaVersionedTransaction = async () => {
-  const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-  await walletSignSolanaVersionedTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, connection.value as Connection, printToConsole);
-};
+// const onWalletSignSolanaVersionedTransaction = async () => {
+//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
+//   await walletSignSolanaVersionedTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, connection.value as Connection, printToConsole);
+// };
 
 // NFT Checkout
 const showPaidMintNFTCheckout = async () => {
@@ -295,16 +291,6 @@ const onSwitchChainNamespace = async () => {
     printToConsole("switchedChainNamespace error", error);
   }
 };
-
-const authenticateUser = async () => {
-  try {
-    const idToken = await web3Auth.value?.authenticateUser();
-    printToConsole("idToken", idToken);
-  } catch (error) {
-    log.error("authenticateUser error", error);
-    printToConsole("authenticateUser error", error);
-  }
-};
 </script>
 
 <template>
@@ -317,7 +303,7 @@ const authenticateUser = async () => {
           </Button>
         </div>
         <div class="mb-2">
-          <Button block size="xs" pill @click="onGetUserInfo">
+          <Button :loading="userInfoLoading" block size="xs" pill @click="onGetUserInfo">
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
 
@@ -334,13 +320,13 @@ const authenticateUser = async () => {
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
-          <Button block size="xs" pill class="mb-2" @click="showWalletUI">
+          <Button :loading="showWalletUILoading" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
             {{ $t("app.buttons.btnShowWalletUI") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="showWalletConnectScanner">
+          <Button :loading="showWalletConnectScannerLoading" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
             {{ $t("app.buttons.btnShowWalletConnectScanner") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="showCheckout">
+          <Button :loading="showCheckoutLoading" block size="xs" pill class="mb-2" @click="() => showCheckout()">
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
           <!-- <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
@@ -400,7 +386,7 @@ const authenticateUser = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
+          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="() => authenticateUser()">Get id token</Button>
         </Card>
 
         <!-- SOLANA -->
@@ -422,7 +408,7 @@ const authenticateUser = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="authenticateUser">Get id token</Button>
+          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="() => authenticateUser()">Get id token</Button>
         </Card>
       </Card>
       <Card
