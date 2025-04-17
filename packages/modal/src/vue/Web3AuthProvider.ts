@@ -85,22 +85,6 @@ export const Web3AuthProvider = defineComponent({
       { immediate: true }
     );
 
-    watch(isConnected, (newIsConnected) => {
-      if (web3Auth.value) {
-        const addState = async (web3AuthInstance: Web3Auth) => {
-          provider.value = web3AuthInstance.provider;
-        };
-
-        const resetState = () => {
-          provider.value = null;
-          isMFAEnabled.value = false;
-        };
-
-        if (newIsConnected) addState(web3Auth.value as Web3Auth);
-        else resetState();
-      }
-    });
-
     watch(
       web3Auth,
       (newWeb3Auth, prevWeb3Auth) => {
@@ -118,12 +102,15 @@ export const Web3AuthProvider = defineComponent({
           if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED) {
             if (!isInitialized.value) isInitialized.value = true;
             isConnected.value = true;
+            provider.value = newWeb3Auth.provider;
           }
         };
 
         const disconnectedListener = () => {
           status.value = web3Auth.value!.status;
           isConnected.value = false;
+          provider.value = null;
+          isMFAEnabled.value = false;
         };
 
         const connectingListener = () => {

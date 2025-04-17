@@ -100,7 +100,6 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
     case "walletServices":
       return (
         (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) &&
-        formData.walletPlugin.enable &&
         web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH
       );
 
@@ -179,6 +178,11 @@ const showFreeMintNFTCheckout = async () => {
 // Ethereum Provider
 const onGetUserInfo = async () => {
   printToConsole("User Info", userInfo.value);
+};
+
+const onAuthenticateUser = async () => {
+  const idToken = await authenticateUser();
+  printToConsole("id token", idToken);
 };
 
 const onSendEth = async () => {
@@ -386,7 +390,7 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="() => authenticateUser()">Get id token</Button>
+          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="onAuthenticateUser">Get id token</Button>
         </Card>
 
         <!-- SOLANA -->
@@ -408,7 +412,7 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
-          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="() => authenticateUser()">Get id token</Button>
+          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="onAuthenticateUser">Get id token</Button>
         </Card>
       </Card>
       <Card
