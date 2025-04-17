@@ -28,7 +28,7 @@ export interface IWeb3AuthInnerContext extends IBaseWeb3AuthComposableContext {
 }
 
 export interface IWalletServicesInnerContext {
-  plugin: Ref<WalletServicesPluginType | null>;
+  plugin: ShallowRef<WalletServicesPluginType | null>;
   ready: Ref<boolean>;
   connecting: Ref<boolean>;
 }

@@ -1,4 +1,4 @@
-import { defineComponent, h, provide, Ref, ref, watch } from "vue";
+import { defineComponent, h, provide, Ref, ref, shallowRef, watch } from "vue";
 
 import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS, WalletServicesPluginError } from "@/core/base";
 import { WalletServicesPluginType } from "@/core/wallet-services-plugin";
@@ -15,7 +15,7 @@ export const WalletServicesInnerProvider = defineComponent({
 
     const { getPlugin, isInitialized, isConnected } = web3AuthContext;
 
-    const walletServicesPlugin = ref<WalletServicesPluginType | null>(null);
+    const walletServicesPlugin = shallowRef<WalletServicesPluginType | null>(null);
     const ready = ref<boolean>(false);
     const connecting = ref<boolean>(false);
 

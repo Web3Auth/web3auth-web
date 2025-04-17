@@ -33,18 +33,22 @@ export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
     }
   };
 
-  watch(isConnected, async (newIsConnected) => {
-    if (newIsConnected && !userInfo.value) {
-      const result = await getUserInfo();
-      userInfo.value = result;
-      setIsMFAEnabled(result?.isMfaEnabled || false);
-    }
+  watch(
+    isConnected,
+    async (newIsConnected) => {
+      if (newIsConnected && !userInfo.value) {
+        const result = await getUserInfo();
+        userInfo.value = result;
+        setIsMFAEnabled(result?.isMfaEnabled || false);
+      }
 
-    if (!newIsConnected && userInfo.value) {
-      userInfo.value = null;
-      setIsMFAEnabled(false);
-    }
-  });
+      if (!newIsConnected && userInfo.value) {
+        userInfo.value = null;
+        setIsMFAEnabled(false);
+      }
+    },
+    { immediate: true }
+  );
 
   return {
     loading,
