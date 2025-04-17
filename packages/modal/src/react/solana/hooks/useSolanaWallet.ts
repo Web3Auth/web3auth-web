@@ -4,13 +4,13 @@ import { useEffect, useMemo, useState } from "react";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
-  address: string[] | null;
+  accounts: string[] | null;
   solanaWallet: SolanaWallet | null;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { provider } = useWeb3Auth();
-  const [address, setAddress] = useState<string[] | null>(null);
+  const [accounts, setAccounts] = useState<string[] | null>(null);
 
   const solanaWallet = useMemo(() => {
     if (!provider) return null;
@@ -22,12 +22,12 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
       if (!solanaWallet) return;
       const accounts = await solanaWallet.requestAccounts();
       if (accounts?.length > 0) {
-        setAddress(accounts);
+        setAccounts(accounts);
       }
     };
 
     if (solanaWallet) fetchAccounts();
   }, [solanaWallet]);
 
-  return { solanaWallet, address };
+  return { solanaWallet, accounts };
 };
