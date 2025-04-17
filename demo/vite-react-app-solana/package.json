@@ -1,0 +1,38 @@
+{
+  "name": "react-test",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@web3auth/modal": "file:../../packages/modal",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0"
+  },
+  "scripts": {
+    "start": "vite",
+    "build": "tsc && vite build",
+    "lint": "eslint --fix 'src/**/*.ts' 'src/**/*.tsx'",
+    "preview": "vite preview"
+  },
+  "browserslist": {
+    "production": [
+      "supports bigint",
+      "not dead"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "@toruslabs/eslint-config-react": "^4.1.3",
+    "@types/node": "^22.10.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "buffer": "^6.0.3",
+    "process": "^0.11.10",
+    "typescript": "^5.2.2",
+    "vite": "^6.0.11",
+    "vite-tsconfig-paths": "^5.1.3",
+    "webpack-bundle-analyzer": "^4.10.2"
+  }
+}
