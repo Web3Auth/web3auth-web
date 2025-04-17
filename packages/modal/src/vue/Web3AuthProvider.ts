@@ -32,7 +32,7 @@ export const Web3AuthProvider = defineComponent({
       return web3Auth.value.getPlugin(name);
     };
 
-    const setIsMfaEnabled = (isMfaEnabled: boolean) => {
+    const setIsMFAEnabled = (isMfaEnabled: boolean) => {
       isMFAEnabled.value = isMfaEnabled;
     };
 
@@ -161,7 +161,7 @@ export const Web3AuthProvider = defineComponent({
       initError,
       isMFAEnabled,
       getPlugin,
-      setIsMfaEnabled,
+      setIsMFAEnabled,
     });
   },
   render() {

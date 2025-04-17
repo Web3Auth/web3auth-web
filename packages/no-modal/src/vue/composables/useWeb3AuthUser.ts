@@ -1,5 +1,6 @@
-import { type UserInfo, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref, watch } from "vue";
+
+import { type UserInfo, WalletInitializationError, Web3AuthError } from "@/core/base";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
