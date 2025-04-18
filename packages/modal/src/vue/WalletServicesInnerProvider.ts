@@ -9,7 +9,6 @@ import { IWalletServicesInnerContext } from "./interfaces";
 export const WalletServicesInnerProvider = defineComponent({
   name: "WalletServicesInnerProvider",
   setup() {
-    // eslint-disable-next-line react-hooks/rules-of-hooks
     const web3AuthContext = useWeb3AuthInner();
     if (!web3AuthContext) throw WalletServicesPluginError.fromCode(1000, "`WalletServicesProvider` must be wrapped by `Web3AuthProvider`");
 
