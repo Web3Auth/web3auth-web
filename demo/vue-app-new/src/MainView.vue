@@ -18,7 +18,6 @@ import {
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
-import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
