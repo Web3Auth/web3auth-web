@@ -1,10 +1,9 @@
-import { WalletInitializationError, Web3AuthContextKey } from "@web3auth/no-modal";
-import { inject } from "vue";
+import { IWeb3AuthInnerContext } from "../interfaces";
+import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-import { IWeb3AuthContext } from "../interfaces";
+export type IWeb3AuthModalContext = IWeb3AuthInnerContext;
 
-export const useWeb3Auth = () => {
-  const context = inject<IWeb3AuthContext>(Web3AuthContextKey);
-  if (!context) throw WalletInitializationError.fromCode(1000, "usage of `useWeb3Auth` not wrapped in `Web3AuthProvider`.");
+export const useWeb3Auth = (): IWeb3AuthModalContext => {
+  const context = useWeb3AuthInner();
   return context;
 };

@@ -71,6 +71,7 @@
     "@svgr/webpack": "^8.1.0",
     "@tanstack/react-query": "^5.74.3",
     "@toruslabs/eslint-config-react": "^4.1.3",
+    "@toruslabs/eslint-config-vue": "^4.1.4",
     "@toruslabs/isomorphic-style-loader": "^5.4.0",
     "@toruslabs/vue-components": "^8.0.6",
     "@types/react": "^19.1.2",

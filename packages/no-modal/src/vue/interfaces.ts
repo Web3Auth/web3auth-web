@@ -1,10 +1,12 @@
-import type { CONNECTOR_STATUS_TYPE, IPlugin, IProvider, WalletServicesPluginType } from "@web3auth/no-modal";
 import { Ref, ShallowRef } from "vue";
 
-import type { Web3Auth, Web3AuthOptions } from "../modalManager";
+import type { CONNECTOR_STATUS_TYPE, IPlugin, IProvider, IWeb3AuthCoreOptions } from "@/core/base";
+import { WalletServicesPluginType } from "@/core/wallet-services-plugin";
+
+import type { Web3AuthNoModal } from "../noModal";
 
 export type Web3AuthContextConfig = {
-  web3AuthOptions: Web3AuthOptions;
+  web3AuthOptions: IWeb3AuthCoreOptions;
 };
 
 export interface Web3AuthProviderProps {
@@ -24,7 +26,7 @@ interface IBaseWeb3AuthComposableContext {
 }
 
 export interface IWeb3AuthInnerContext extends IBaseWeb3AuthComposableContext {
-  web3Auth: ShallowRef<Web3Auth | null>;
+  web3Auth: ShallowRef<Web3AuthNoModal | null>;
 }
 
 export interface IWalletServicesInnerContext {

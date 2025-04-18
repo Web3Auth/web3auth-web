@@ -17,7 +17,6 @@ import {
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
-import { WalletServicesProvider } from "@web3auth/no-modal/vue";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
@@ -228,14 +227,12 @@ const configs = computed<Web3AuthContextConfig>(() => {
 
 <template>
   <Web3AuthProvider :config="configs">
-    <WalletServicesProvider>
-      <AppHeader />
-      <div class="flex flex-col items-center justify-center">
-        <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-          <AppSettings />
-          <AppDashboard :chains="options.chains || []" />
-        </main>
-      </div>
-    </WalletServicesProvider>
+    <AppHeader />
+    <div class="flex flex-col items-center justify-center">
+      <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+        <AppSettings />
+        <AppDashboard :chains="options.chains || []" />
+      </main>
+    </div>
   </Web3AuthProvider>
 </template>

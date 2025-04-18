@@ -1,17 +1,14 @@
 <script setup lang="ts">
 import { Button } from "@toruslabs/vue-components";
-import { useWeb3Auth } from "@web3auth/modal/vue";
+import { useWeb3Auth, useWeb3AuthDisconnect } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 import { watch } from "vue";
 
 const { log } = console;
 const { t } = useI18n({ useScope: "global" });
 
-const { status, logout, isConnected } = useWeb3Auth();
-
-const onLogout = async () => {
-  await logout();
-};
+const { status, isConnected } = useWeb3Auth();
+const { disconnect } = useWeb3AuthDisconnect();
 
 const isDisplay = (name: string): boolean => {
   switch (name) {
@@ -39,7 +36,7 @@ watch(status, () => {
         <img :src="`/web3auth.svg`" class="h-8" alt="W3A Logo" />
       </a>
       <div class="flex md:order-2 space-x-3 md:space-x-0 rtl:space-x-reverse">
-        <Button v-if="isDisplay('btnLogout')" block size="xs" pill variant="tertiary" @click="onLogout">
+        <Button v-if="isDisplay('btnLogout')" block size="xs" pill variant="tertiary" @click="() => disconnect()">
           {{ t("app.btnLogout") }}
         </Button>
         <Button v-else block size="xs" pill variant="secondary" @click="() => {}">
