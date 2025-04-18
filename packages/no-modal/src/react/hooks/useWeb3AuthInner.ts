@@ -1,7 +1,6 @@
 import { useContext } from "react";
 
-import { WalletInitializationError } from "@/core/base";
-
+import { WalletInitializationError } from "../../base";
 import { Web3AuthInnerContext } from "../context/Web3AuthInnerContext";
 import { IWeb3AuthInnerContext } from "../interfaces";
 

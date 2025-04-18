@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { IProvider, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@/core/base";
-
+import { IProvider, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
 
 export interface IUseWeb3AuthConnect {

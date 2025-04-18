@@ -1,7 +1,6 @@
 import { Ref, ref, watch } from "vue";
 
-import { IProvider, LoginParamMap, WALLET_CONNECTOR_TYPE, WalletInitializationError, Web3AuthError } from "@/core/base";
-
+import { IProvider, LoginParamMap, WALLET_CONNECTOR_TYPE, WalletInitializationError, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseWeb3AuthConnect {

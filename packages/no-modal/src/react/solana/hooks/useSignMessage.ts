@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { Web3AuthError } from "@/core/base";
-
+import { Web3AuthError } from "../../../base";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignMessage = {

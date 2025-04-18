@@ -1,7 +1,6 @@
 import { inject } from "vue";
 
-import { WalletInitializationError, Web3AuthContextKey } from "@/core/base";
-
+import { WalletInitializationError, Web3AuthContextKey } from "../../base";
 import { IWeb3AuthInnerContext } from "../interfaces";
 
 export const useWeb3AuthInner = (): IWeb3AuthInnerContext => {
