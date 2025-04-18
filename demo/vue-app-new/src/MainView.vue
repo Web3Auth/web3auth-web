@@ -164,7 +164,7 @@ const modalParams = computed(() => {
       label: "auth",
       loginMethods: loginMethodsConfig.value,
     },
-  } as Record<WALLET_CONNECTOR_TYPE, ModalConfig>;
+  };
   return modalConfig;
 });
 
