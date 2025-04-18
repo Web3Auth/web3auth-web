@@ -1,4 +1,4 @@
-import { type AppMetadata, type Preference, type ProviderInterface } from "@coinbase/wallet-sdk";
+import type { AppMetadata, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
 
 import {
   BaseConnectorLoginParams,

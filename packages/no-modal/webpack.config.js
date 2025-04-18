@@ -10,7 +10,6 @@ const config = generateWebpackConfig({
     "@/core/auth-connector": path.resolve(__dirname, "src/connectors/auth-connector"),
     "@/core/base-evm-connector": path.resolve(__dirname, "src/connectors/base-evm-connector"),
     "@/core/base-solana-connector": path.resolve(__dirname, "src/connectors/base-solana-connector"),
-    "@/core/coinbase-connector": path.resolve(__dirname, "src/connectors/coinbase-connector"),
     "@/core/metamask-connector": path.resolve(__dirname, "src/connectors/metamask-connector"),
     "@/core/injected-evm-connector": path.resolve(__dirname, "src/connectors/injected-evm-connector"),
     "@/core/injected-solana-connector": path.resolve(__dirname, "src/connectors/injected-solana-connector"),
