@@ -547,7 +547,7 @@ function Login(props: LoginProps) {
         <figure
           className={cn(
             "w3a--mx-auto w3a--h-12 w3a--w-[200px]",
-            logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0"
+            logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0 w3a--w-auto"
           )}
         >
           <img src={headerLogo || getIcons(isDark ? "logo-dark" : "logo-light")} alt="Logo" className="w3a--size-full w3a--object-contain" />

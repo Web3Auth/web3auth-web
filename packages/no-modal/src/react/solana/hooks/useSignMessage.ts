@@ -12,7 +12,7 @@ export type IUseSignMessage = {
 };
 
 export const useSignMessage = (): IUseSignMessage => {
-  const { solanaWallet, address } = useSolanaWallet();
+  const { solanaWallet, accounts } = useSolanaWallet();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
   const [data, setData] = useState<string | null>(null);
@@ -23,7 +23,7 @@ export const useSignMessage = (): IUseSignMessage => {
       setError(null);
       try {
         if (!solanaWallet) throw new Error("Solana wallet not found");
-        const signature = await solanaWallet.signMessage(message, from ?? address[0]);
+        const signature = await solanaWallet.signMessage(message, from ?? accounts?.[0]);
         setData(signature);
         return signature;
       } catch (error) {
@@ -32,7 +32,7 @@ export const useSignMessage = (): IUseSignMessage => {
         setLoading(false);
       }
     },
-    [solanaWallet, address]
+    [solanaWallet, accounts]
   );
 
   return { loading, error, data, signMessage };

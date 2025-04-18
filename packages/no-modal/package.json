@@ -128,6 +128,11 @@
       "import": "./dist/lib.esm/vue/index.js",
       "require": "./dist/lib.cjs/vue/index.js",
       "types": "./dist/lib.cjs/types/vue/index.d.ts"
+    },
+    "./connectors/coinbase-connector": {
+      "import": "./dist/lib.esm/connectors/coinbase-connector/index.js",
+      "require": "./dist/lib.cjs/connectors/coinbase-connector/index.js",
+      "types": "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
     }
   },
   "typesVersions": {
@@ -143,6 +148,9 @@
       ],
       "vue": [
         "./dist/lib.cjs/types/vue/index.d.ts"
+      ],
+      "connectors/coinbase-connector": [
+        "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
       ]
     }
   },

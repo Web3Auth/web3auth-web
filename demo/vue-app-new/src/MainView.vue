@@ -2,7 +2,6 @@
 import {
   authConnector,
   CHAIN_NAMESPACES,
-  coinbaseConnector,
   type ConnectorFn,
   type CustomChainConfig,
   nftCheckoutPlugin,
@@ -18,6 +17,7 @@ import {
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
+import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
@@ -29,7 +29,6 @@ import { FormConfigSettings } from "./interfaces";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
 import { SmartAccountType } from "@toruslabs/ethereum-controllers";
-import { Implementation } from "@metamask/delegation-toolkit";
 
 const formData = formDataStore;
 
