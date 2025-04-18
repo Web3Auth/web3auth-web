@@ -1,7 +1,6 @@
 import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
 import deepmerge from "deepmerge";
 
-import { authConnector } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -35,11 +34,11 @@ import {
   Web3AuthError,
   Web3AuthNoModalEvents,
   withAbort,
-} from "@/core/base";
-import { CommonJRPCProvider } from "@/core/base-provider";
-import { metaMaskConnector } from "@/core/metamask-connector";
-
+} from "./base";
+import { authConnector } from "./connectors/auth-connector";
+import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
+import { CommonJRPCProvider } from "./providers/base-provider";
 
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
@@ -385,7 +384,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (isMipdEnabled) {
       // Solana chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
-        const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("@/core/injected-solana-connector");
+        const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("./connectors/injected-solana-connector");
         const solanaMipd = createSolanaMipd();
         // subscribe to new injected connectors
         solanaMipd.on("register", async (...wallets) => {
@@ -401,7 +400,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
       // EVM chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
-        const { createMipd, injectedEvmConnector } = await import("@/core/injected-evm-connector");
+        const { createMipd, injectedEvmConnector } = await import("./connectors/injected-evm-connector");
         const evmMipd = createMipd();
         // subscribe to new injected connectors
         evmMipd.subscribe((providerDetails) => {
@@ -417,7 +416,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // add WalletConnectV2 connector if external wallets are enabled
     if (isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
-      const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
+      const { walletConnectV2Connector } = await import("./connectors/wallet-connect-v2-connector");
       connectorFns.push(walletConnectV2Connector());
     }
 
@@ -471,7 +470,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const isExternalWalletAndAAEnabled = data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet;
       if (isExternalWalletAndAAEnabled && doesAASupportCurrentChain) {
         const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
-        const { accountAbstractionProvider } = await import("@/core/account-abstraction-provider");
+        const { accountAbstractionProvider } = await import("./providers/account-abstraction-provider");
         const aaProvider = await accountAbstractionProvider({
           accountAbstractionConfig,
           provider,

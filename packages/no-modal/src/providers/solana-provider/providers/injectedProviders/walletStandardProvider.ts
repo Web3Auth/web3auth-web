@@ -11,8 +11,7 @@ import { bs58 } from "@toruslabs/bs58";
 import { type WalletWithFeatures } from "@wallet-standard/base";
 import { type StandardConnectFeature, type StandardDisconnectFeature, type StandardEventsFeature } from "@wallet-standard/features";
 
-import { WalletLoginError } from "@/core/base";
-
+import { WalletLoginError } from "../../../../base";
 import { type ISolanaProviderHandlers } from "../../rpc";
 import { BaseInjectedProvider } from "./base/baseInjectedProvider";
 import { getBaseProviderHandlers } from "./base/providerHandlers";

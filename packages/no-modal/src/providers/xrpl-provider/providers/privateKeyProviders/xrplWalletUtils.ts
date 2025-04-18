@@ -3,8 +3,7 @@ import { generateSeed, sign } from "ripple-keypairs";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";
 import ECDSA from "xrpl/dist/npm/ECDSA";
 
-import { CustomChainConfig } from "@/core/base";
-
+import { CustomChainConfig } from "../../../../base";
 import { IXrplProviderHandlers, KeyPair } from "../../rpc/xrplRpcMiddlewares";
 
 const deriveKeypair = (web3authKey: string): { publicKey: string; privateKey: string } => {

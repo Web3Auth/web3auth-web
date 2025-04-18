@@ -1,8 +1,7 @@
 import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@web3auth/auth";
 
-import { WalletLoginError } from "@/core/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
-
+import { WalletLoginError } from "../../../../../base";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../../providers/base-provider";
 import { ISolanaProviderHandlers } from "../../../rpc";
 import { createConfigMiddleware } from "../../../rpc/JrpcClient";
 import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";

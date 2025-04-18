@@ -1,6 +1,6 @@
 import type { Transaction, VersionedTransaction } from "@solana/web3.js";
 
-import { RequestArguments } from "@/core/base";
+import { RequestArguments } from "../../base";
 
 export type TransactionOrVersionedTransaction = Transaction | VersionedTransaction;
 
