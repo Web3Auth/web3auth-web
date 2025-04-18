@@ -23,6 +23,9 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
       if (!newVal && connectorName.value) {
         connectorName.value = null;
       }
+      if (newVal && !connectorName.value) {
+        connectorName.value = web3Auth.value?.connectedConnectorName;
+      }
     },
     { immediate: true }
   );

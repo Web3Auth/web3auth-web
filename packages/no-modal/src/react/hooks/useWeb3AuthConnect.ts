@@ -24,6 +24,9 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
     if (!isConnected && connectorName) {
       setConnectorName(null);
     }
+    if (isConnected && !connectorName) {
+      setConnectorName(web3Auth.connectedConnectorName);
+    }
   }, [isConnected, connectorName]);
 
   const connect = useCallback(

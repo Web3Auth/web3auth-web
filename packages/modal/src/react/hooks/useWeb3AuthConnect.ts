@@ -22,7 +22,10 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
     if (!isConnected && connectorName) {
       setConnectorName(null);
     }
-  }, [isConnected, connectorName]);
+    if (isConnected && !connectorName) {
+      setConnectorName(web3Auth.connectedConnectorName);
+    }
+  }, [isConnected, connectorName, web3Auth.connectedConnectorName]);
 
   const connect = useCallback(async () => {
     setLoading(true);
