@@ -1,7 +1,7 @@
-import type { Transaction } from "@solana/web3.js";
 import { useCallback, useState } from "react";
 
 import { Web3AuthError } from "@/core/base";
+import { TransactionOrVersionedTransaction } from "@/core/solana-provider";
 
 import { useSolanaWallet } from "./useSolanaWallet";
 
@@ -9,7 +9,7 @@ export type IUseSignAndSendTransaction = {
   loading: boolean;
   error: Web3AuthError | null;
   data: string | null;
-  signAndSendTransaction: (transaction: Transaction) => Promise<string>;
+  signAndSendTransaction: (transaction: TransactionOrVersionedTransaction) => Promise<string>;
 };
 
 export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
@@ -19,7 +19,7 @@ export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
   const [data, setData] = useState<string | null>(null);
 
   const signAndSendTransaction = useCallback(
-    async (transaction: Transaction) => {
+    async (transaction: TransactionOrVersionedTransaction) => {
       setLoading(true);
       setError(null);
       try {
