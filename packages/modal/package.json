@@ -52,6 +52,7 @@
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
     "@tanstack/react-query": "^5.72.x",
+    "@solana/web3.js": ">=1.98",
     "react": ">=18",
     "react-dom": ">=18",
     "viem": "^2.23.x",
@@ -65,6 +66,7 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-replace": "^6.0.2",
     "@rollup/plugin-url": "^8.0.2",
+    "@solana/web3.js": "^1.98.0",
     "@svgr/rollup": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
     "@tanstack/react-query": "^5.74.3",
@@ -121,6 +123,11 @@
       "require": "./dist/lib.cjs/packages/modal/src/react/wagmi/index.js",
       "types": "./dist/lib.cjs/types/react/wagmi/index.d.ts"
     },
+    "./react/solana": {
+      "import": "./dist/lib.esm/packages/modal/src/react/solana/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/react/solana/index.js",
+      "types": "./dist/lib.cjs/types/react/solana/index.d.ts"
+    },
     "./vue": {
       "import": "./dist/lib.esm/packages/modal/src/vue/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/vue/index.js",
@@ -134,6 +141,9 @@
       ],
       "react/wagmi": [
         "./dist/lib.cjs/types/react/wagmi/index.d.ts"
+      ],
+      "react/solana": [
+        "./dist/lib.cjs/types/react/solana/index.d.ts"
       ],
       "vue": [
         "./dist/lib.cjs/types/vue/index.d.ts"
