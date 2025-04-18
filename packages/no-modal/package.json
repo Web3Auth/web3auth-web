@@ -148,6 +148,9 @@
       ],
       "vue": [
         "./dist/lib.cjs/types/vue/index.d.ts"
+      ],
+      "connectors/coinbase-connector": [
+        "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
       ]
     }
   },
