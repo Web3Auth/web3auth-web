@@ -19,6 +19,7 @@ import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
+  AuthLoginParams,
   BaseConnector,
   CHAIN_NAMESPACES,
   cloneDeep,
@@ -43,11 +44,6 @@ import {
   Web3AuthError,
 } from "../../base";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
-
-export type AuthLoginParams = LoginParams & {
-  // to maintain backward compatibility
-  login_hint?: string;
-};
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
