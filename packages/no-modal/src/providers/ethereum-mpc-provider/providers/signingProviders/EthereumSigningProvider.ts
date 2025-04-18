@@ -1,16 +1,15 @@
 import { isHexString } from "@ethereumjs/util";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@/core/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "../../../../base";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../providers/base-provider";
 import {
   createEthChainSwitchMiddleware,
   createEthJsonRpcClient,
   createEthMiddleware,
   IEthChainSwitchHandlers,
   TransactionFormatter,
-} from "@/core/ethereum-provider";
-
+} from "../../../ethereum-provider";
 import { createEthAccountMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { IAccountHandlers } from "../../rpc/interfaces";
 import { getProviderHandlers } from "./signingUtils";

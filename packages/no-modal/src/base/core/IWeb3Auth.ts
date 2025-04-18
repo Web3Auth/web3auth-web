@@ -2,8 +2,7 @@ import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-con
 import { type BUILD_ENV_TYPE, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
-import type { AuthLoginParams } from "@/core/auth-connector";
-
+import type { AuthLoginParams } from "../../connectors/auth-connector";
 import { ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   CONNECTOR_EVENTS,

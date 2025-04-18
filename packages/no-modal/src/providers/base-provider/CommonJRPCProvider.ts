@@ -1,7 +1,6 @@
 import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 
-import { CustomChainConfig, SafeEventEmitterProvider } from "@/core/base";
-
+import { CustomChainConfig, SafeEventEmitterProvider } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 import { createJsonRpcClient } from "./jrpcClient";
 

@@ -2,11 +2,15 @@ import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "@/core/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
-import { createEthChainSwitchMiddleware, createEthJsonRpcClient, createEthMiddleware, IEthChainSwitchHandlers } from "@/core/ethereum-provider";
-import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "@/core/solana-provider";
-
+import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "../../base";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../providers/base-provider";
+import {
+  createEthChainSwitchMiddleware,
+  createEthJsonRpcClient,
+  createEthMiddleware,
+  IEthChainSwitchHandlers,
+} from "../../providers/ethereum-provider";
+import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "../../providers/solana-provider";
 import { getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
 export type WalletConnectV2ProviderConfig = BaseProviderConfig;

@@ -1,6 +1,6 @@
 import { IdentifierString } from "@wallet-standard/base";
 
-import { CustomChainConfig } from "@/core/base";
+import { CustomChainConfig } from "../../base";
 
 export const getSolanaChainByChainConfig = (chainConfig: CustomChainConfig): IdentifierString => {
   switch (chainConfig.chainId) {

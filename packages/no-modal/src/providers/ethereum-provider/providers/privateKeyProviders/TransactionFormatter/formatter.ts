@@ -3,8 +3,7 @@ import { Block } from "@web3auth/auth";
 import { BigNumber } from "bignumber.js";
 import { AddressLike } from "ethers";
 
-import { CustomChainConfig, log, SafeEventEmitterProvider } from "@/core/base";
-
+import { CustomChainConfig, log, SafeEventEmitterProvider } from "../../../../../base";
 import { TransactionParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
 import { bnLessThan, BnMultiplyByFraction, bnToHex, hexToBn } from "../../utils";

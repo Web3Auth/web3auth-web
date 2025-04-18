@@ -3,8 +3,7 @@ import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { Chain, createWalletClient, Hex, http } from "viem";
 import { BundlerClient, SendUserOperationParameters, SmartAccount } from "viem/account-abstraction";
 
-import { IProvider, log } from "@/core/base";
-
+import { IProvider, log } from "../../../base";
 import { IEthProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "../../ethereum-provider";
 
 export function getProviderHandlers({

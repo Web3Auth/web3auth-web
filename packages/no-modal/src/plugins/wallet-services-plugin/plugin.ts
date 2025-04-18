@@ -2,7 +2,6 @@ import { type BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import WsEmbed from "@web3auth/ws-embed";
 
-import { type AuthConnectorType } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -21,7 +20,8 @@ import {
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletServicesPluginError,
-} from "@/core/base";
+} from "../../base";
+import { type AuthConnectorType } from "../../connectors/auth-connector";
 
 export { BUTTON_POSITION, type BUTTON_POSITION_TYPE, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/ws-embed";
 

@@ -1,6 +1,6 @@
 import { BaseControllerEvents } from "@toruslabs/base-controllers";
 
-import { ProviderEvents } from "@/core/base";
+import { ProviderEvents } from "../../base";
 
 export type BaseProviderEvents<S> = ProviderEvents &
   BaseControllerEvents<S> & {

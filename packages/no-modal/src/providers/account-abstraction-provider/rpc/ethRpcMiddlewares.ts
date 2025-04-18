@@ -1,7 +1,6 @@
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 
-import { IProvider } from "@/core/base";
-
+import { IProvider } from "../../../base";
 import { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../ethereum-provider";
 
 export async function createAaMiddleware({

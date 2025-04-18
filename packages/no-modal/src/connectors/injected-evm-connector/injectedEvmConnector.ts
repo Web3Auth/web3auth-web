@@ -22,8 +22,7 @@ import {
   UserInfo,
   WalletLoginError,
   Web3AuthError,
-} from "@/core/base";
-
+} from "../../base";
 import { BaseEvmConnector } from "../base-evm-connector";
 
 class InjectedEvmConnector extends BaseEvmConnector<void> {

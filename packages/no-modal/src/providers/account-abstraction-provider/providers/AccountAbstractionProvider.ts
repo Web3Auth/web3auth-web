@@ -16,9 +16,8 @@ import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
 import { type Client, createPublicClient, createWalletClient, custom, defineChain, Hex, http } from "viem";
 import { type BundlerClient, createBundlerClient, createPaymasterClient, type PaymasterClient, type SmartAccount } from "viem/account-abstraction";
 
-import { CHAIN_NAMESPACES, type CustomChainConfig, type IProvider, WalletInitializationError } from "@/core/base";
-
-import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../../base-provider";
+import { CHAIN_NAMESPACES, type CustomChainConfig, type IProvider, WalletInitializationError } from "../../../base";
+import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../../../providers/base-provider";
 import { createAaMiddleware, eoaProviderAsMiddleware } from "../rpc/ethRpcMiddlewares";
 import { getProviderHandlers } from "./utils";
 
