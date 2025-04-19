@@ -1,9 +1,8 @@
 import { JRPCEngine, JRPCMiddleware, JRPCRequest, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 import type { PingResponse } from "xrpl";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@/core/base";
-import { BaseProvider, BaseProviderConfig, BaseProviderState } from "@/core/base-provider";
-
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "../../../../base";
+import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../providers/base-provider";
 import { createXrplJsonRpcClient } from "../../rpc/JrpcClient";
 import { createXRPLMiddleware, creatXrplChainSwitchMiddleware, IXrplChainSwitchHandlers, KeyPair, RPC_METHODS } from "../../rpc/xrplRpcMiddlewares";
 import { getProviderHandlers } from "./xrplWalletUtils";

@@ -8,8 +8,7 @@ import {
   providerFromEngine,
 } from "@web3auth/auth";
 
-import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "@/core/base";
-
+import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
 
 export type CommonPrivKeyProviderConfig = BaseProviderConfig;

@@ -19,6 +19,7 @@ import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
+  AuthLoginParams,
   BaseConnector,
   CHAIN_NAMESPACES,
   cloneDeep,
@@ -41,14 +42,8 @@ import {
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
-} from "@/core/base";
-
+} from "../../base";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
-
-export type AuthLoginParams = LoginParams & {
-  // to maintain backward compatibility
-  login_hint?: string;
-};
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
@@ -162,7 +157,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         case CHAIN_NAMESPACES.XRPL:
           throw WalletLoginError.connectionError("Private key provider is required for XRPL");
         default: {
-          const { CommonPrivateKeyProvider } = await import("@/core/base-provider");
+          const { CommonPrivateKeyProvider } = await import("../../providers/base-provider");
           this.privateKeyProvider = new CommonPrivateKeyProvider({
             config: {
               chain: chainConfig,

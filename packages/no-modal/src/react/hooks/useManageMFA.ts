@@ -1,7 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { Web3AuthError } from "@/core/base";
-
+import { Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseManageMFA {

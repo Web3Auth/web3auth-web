@@ -13,8 +13,7 @@ import {
   PluginFn,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
-} from "@/core/base";
-
+} from "../../base";
 import { NFTCheckoutEmbed } from "./embed";
 
 export interface NFTCheckoutPluginParams {

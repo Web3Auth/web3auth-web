@@ -9,8 +9,7 @@ import {
   SafeEventEmitterProvider,
   WalletInitializationError,
   WalletProviderError,
-} from "@/core/base";
-
+} from "../../base";
 import { BaseProviderEvents } from "./interfaces";
 import { EIP1193_EVENTS } from "./utils";
 

@@ -1,8 +1,7 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { useCallback, useState } from "react";
 
-import { WalletServicesPluginError, Web3AuthError } from "@/core/base";
-
+import { WalletServicesPluginError, Web3AuthError } from "../../base";
 import { useWalletServicesPlugin } from "./useWalletServicesPlugin";
 
 export interface IUseWalletUI {

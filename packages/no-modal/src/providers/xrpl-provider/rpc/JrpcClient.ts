@@ -1,8 +1,7 @@
 import { createFetchMiddleware } from "@toruslabs/base-controllers";
 import { Block, JRPCEngineEndCallback, JRPCEngineNextCallback, JRPCMiddleware, JRPCRequest, JRPCResponse, mergeMiddleware } from "@web3auth/auth";
 
-import { CustomChainConfig } from "@/core/base";
-
+import { CustomChainConfig } from "../../../base";
 import { RPC_METHODS } from "./xrplRpcMiddlewares";
 
 export function createXrplChainIdMiddleware(chainId: string): JRPCMiddleware<unknown, string> {

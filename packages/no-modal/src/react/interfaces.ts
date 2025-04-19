@@ -1,7 +1,6 @@
-import type { ConnectorFn, IBaseWeb3AuthHookContext, IWeb3AuthCoreOptions, PluginFn } from "@/core/base";
-import type { WalletServicesPluginType } from "@/core/wallet-services-plugin";
-
+import type { ConnectorFn, IBaseWeb3AuthHookContext, IWeb3AuthCoreOptions, PluginFn } from "../base";
 import { Web3AuthNoModal } from "../noModal";
+import type { WalletServicesPluginType } from "../plugins/wallet-services-plugin";
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: IWeb3AuthCoreOptions;

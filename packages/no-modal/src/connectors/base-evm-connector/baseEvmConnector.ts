@@ -13,7 +13,7 @@ import {
   UserAuthInfo,
   WalletInitializationError,
   WalletLoginError,
-} from "@/core/base";
+} from "../../base";
 
 export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}

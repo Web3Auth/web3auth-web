@@ -1,10 +1,8 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import { type BUILD_ENV_TYPE, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
+import { type BUILD_ENV_TYPE, type LoginParams, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
-import type { AuthLoginParams } from "@/core/auth-connector";
-
-import { ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
+import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   CONNECTOR_EVENTS,
   type CONNECTOR_STATUS_TYPE,
@@ -17,8 +15,13 @@ import {
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
-import { type IPlugin, PluginFn } from "../plugin";
+import { type IPlugin, type PluginFn } from "../plugin";
 import { type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
+
+export type AuthLoginParams = LoginParams & {
+  // to maintain backward compatibility
+  login_hint?: string;
+};
 
 export type WalletServicesConfig = Omit<
   WsEmbedParams,

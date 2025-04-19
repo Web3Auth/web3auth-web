@@ -1,7 +1,6 @@
 import type { EngineTypes, ProposalTypes } from "@walletconnect/types";
 
-import { CHAIN_NAMESPACES, CustomChainConfig } from "@/core/base";
-
+import { CHAIN_NAMESPACES, CustomChainConfig } from "../../base";
 import { getSiteIcon, getSiteName } from "../utils";
 import { IConnectorSettings } from "./interface";
 

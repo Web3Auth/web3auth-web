@@ -1,7 +1,7 @@
 import { type AuthConnectionConfigItem, type AuthOptions, type LoginParams } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
-import { type BaseConnectorSettings, type IBaseProvider } from "@/core/base";
+import { type BaseConnectorSettings, type IBaseProvider } from "../../base";
 
 export type LoginSettings = Partial<LoginParams>;
 

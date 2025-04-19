@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { SolanaWallet } from "@/core/solana-provider";
-
+import { SolanaWallet } from "../../../providers/solana-provider";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {

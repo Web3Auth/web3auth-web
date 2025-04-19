@@ -14,8 +14,7 @@ import {
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 
-import { log } from "@/core/base";
-
+import { log } from "../../base";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../hooks";
 import { WagmiProviderProps } from "./interface";
 

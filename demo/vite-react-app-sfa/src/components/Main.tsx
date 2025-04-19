@@ -1,23 +1,13 @@
+import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { AuthLoginParams, WALLET_CONNECTORS } from "@web3auth/no-modal";
+
 import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
-import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { decodeToken } from "../utils";
 
 const Main = () => {
-  const {
-    provider,
-    logout,
-    getUserInfo,
-    getAccounts,
-    getBalance,
-    signMessage,
-    signTransaction,
-    web3Auth,
-    switchChain,
-    enableMFA,
-    manageMFA,
-  } = useWeb3Auth();
+  const { provider, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, web3Auth, switchChain, enableMFA, manageMFA } =
+    useWeb3Auth();
 
   const loggedInView = (
     <>
@@ -68,11 +58,11 @@ const Main = () => {
     const { payload } = decodeToken<{ email: string }>(idToken);
     console.log(payload);
 
-    await web3Auth?.connectTo<AuthLoginParams>(WALLET_CONNECTORS.AUTH, { 
-      authConnection: "custom", 
+    await web3Auth?.connectTo<AuthLoginParams>(WALLET_CONNECTORS.AUTH, {
+      authConnection: "custom",
       authConnectionId: "w3a-sfa-web-google",
-      login_hint: payload.email, 
-      extraLoginOptions: { 
+      login_hint: payload.email,
+      extraLoginOptions: {
         id_token: idToken,
         mfaLevel: "none",
       },

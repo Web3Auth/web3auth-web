@@ -15,7 +15,7 @@ import {
   SmartAccountOptions,
 } from "../config";
 import { formDataStore } from "../store/form";
-import { getChainConfig } from "@/utils/chainconfig";
+import { getChainConfig } from "../utils/chainconfig";
 
 const formData = formDataStore;
 

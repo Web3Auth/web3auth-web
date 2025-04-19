@@ -1,9 +1,8 @@
 import { Ref, ShallowRef } from "vue";
 
-import type { CONNECTOR_STATUS_TYPE, IPlugin, IProvider, IWeb3AuthCoreOptions } from "@/core/base";
-import { WalletServicesPluginType } from "@/core/wallet-services-plugin";
-
+import type { CONNECTOR_STATUS_TYPE, IPlugin, IProvider, IWeb3AuthCoreOptions } from "../base";
 import type { Web3AuthNoModal } from "../noModal";
+import { WalletServicesPluginType } from "../plugins/wallet-services-plugin";
 
 export type Web3AuthContextConfig = {
   web3AuthOptions: IWeb3AuthCoreOptions;

@@ -1,8 +1,7 @@
 import { Context, createContext, createElement, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 
-import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS } from "@/core/base";
-import { type WalletServicesPluginType } from "@/core/wallet-services-plugin";
-
+import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS } from "../../base";
+import { type WalletServicesPluginType } from "../../plugins/wallet-services-plugin";
 import { IWalletServicesContext, IWeb3AuthInnerContext } from "../interfaces";
 
 export const WalletServicesContext = createContext<IWalletServicesContext>(null);

@@ -1,7 +1,7 @@
 import { createFetchMiddleware } from "@toruslabs/base-controllers";
 import { Block, JRPCEngineEndCallback, JRPCEngineNextCallback, JRPCMiddleware, JRPCRequest, JRPCResponse, mergeMiddleware } from "@web3auth/auth";
 
-import { CustomChainConfig } from "@/core/base";
+import { CustomChainConfig } from "../../../base";
 
 export function createSolanaChainIdMiddleware(chainId: string): JRPCMiddleware<unknown, string> {
   return (req: JRPCRequest<unknown>, res: JRPCResponse<string>, next: JRPCEngineNextCallback, end: JRPCEngineEndCallback) => {
