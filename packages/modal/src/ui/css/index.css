@@ -57,6 +57,10 @@
     @apply w3a--w-[98%];
   }
 
+  .w3a--connected-logo {
+    @apply w3a--size-16 w3a--text-app-green-500 dark:w3a--text-app-green-400;
+  }
+
   .w3a--error-logo {
     @apply w3a--w-16 w3a--h-16 w3a--text-app-red-500 dark:w3a--text-app-red-400;
   }
