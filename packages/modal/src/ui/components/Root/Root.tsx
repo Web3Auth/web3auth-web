@@ -3,7 +3,7 @@ import Bowser from "bowser";
 import { JSX, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { CONNECT_WALLET_PAGES, PAGES } from "../../constants";
+import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
 import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform, TOAST_TYPE, ToastType } from "../../interfaces";
@@ -306,7 +306,13 @@ function Root(props: RootProps) {
     const metamaskCustomConnectorIdx = installedConnectors.findIndex((button) => button.name === WALLET_CONNECTORS.METAMASK);
     if (metamaskCustomConnectorIdx !== -1) {
       const metamaskCustomConnector = installedConnectors[metamaskCustomConnectorIdx];
-      const metamaskRegistryButton = allButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
+      let metamaskRegistryButton = allButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
+      if (!metamaskRegistryButton) {
+        // if metamask is not in the registry, use the default metamask registry item
+        metamaskRegistryButton = generateWalletButtons({
+          [WALLET_CONNECTORS.METAMASK]: DEFAULT_METAMASK_WALLET_REGISTRY_ITEM,
+        })[0];
+      }
       if (metamaskRegistryButton) {
         installedConnectors.splice(metamaskCustomConnectorIdx, 1, {
           ...metamaskRegistryButton,
@@ -317,7 +323,7 @@ function Root(props: RootProps) {
 
     // make metamask the first button and limit the number of buttons
     return installedConnectors;
-  }, [allButtons, config, connectorVisibilityMap]);
+  }, [allButtons, config, connectorVisibilityMap, generateWalletButtons]);
 
   const customConnectorButtons = useMemo(() => {
     return installedConnectorButtons.filter((button) => !button.hasInjectedWallet);
