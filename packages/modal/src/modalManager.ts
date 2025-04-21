@@ -420,12 +420,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (connector.status !== CONNECTOR_STATUS.NOT_READY) return;
 
           // only initialize a external connectors here if it is a cached connector.
-          if (
-            this.cachedConnector !== connectorName &&
-            connectorName !== WALLET_CONNECTORS.METAMASK &&
-            connector.type === CONNECTOR_CATEGORY.EXTERNAL
-          )
-            return;
+          if (this.cachedConnector !== connectorName && connector.type === CONNECTOR_CATEGORY.EXTERNAL) return;
 
           // in-app wallets or cached wallet (being connected or already connected) are initialized first.
           // if connector is configured then only initialize in app or cached connector.
@@ -533,6 +528,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   private onModalVisibility = async (visibility: boolean): Promise<void> => {
     log.debug("is login modal visible", visibility);
     this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
+
+    // handle WC session refresh
     const wcConnector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
     if (wcConnector) {
       const walletConnectStatus = wcConnector?.status;
@@ -555,6 +552,32 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       ) {
         log.debug("this stops wc connector from trying to reconnect once proposal expires");
         wcConnector.status = CONNECTOR_STATUS.READY;
+      }
+    }
+
+    // handle MM session refresh if MM is not injected
+    const metamaskConnector = this.getConnector(WALLET_CONNECTORS.METAMASK);
+    if (metamaskConnector && !metamaskConnector.isInjected) {
+      const status = metamaskConnector?.status;
+      log.debug("trying refreshing MM session", visibility, status);
+      if (visibility && (status === CONNECTOR_STATUS.READY || status === CONNECTOR_STATUS.CONNECTING)) {
+        log.debug("refreshing MM session");
+
+        // refreshing session for MM whenever modal is opened.
+        try {
+          const initialChain = this.getInitialChainIdForConnector(metamaskConnector);
+          metamaskConnector.connect({ chainId: initialChain.chainId });
+        } catch (error) {
+          log.error(`Error while connecting to MM`, error);
+        }
+      }
+      if (
+        !visibility &&
+        this.status === CONNECTOR_STATUS.CONNECTED &&
+        (status === CONNECTOR_STATUS.READY || status === CONNECTOR_STATUS.CONNECTING)
+      ) {
+        log.debug("this stops MM connector from trying to reconnect once proposal expires");
+        metamaskConnector.status = CONNECTOR_STATUS.READY;
       }
     }
   };

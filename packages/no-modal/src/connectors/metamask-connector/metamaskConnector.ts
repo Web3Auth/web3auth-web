@@ -79,10 +79,14 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       iconUrl,
     };
 
-    // Initialize the MetaMask SDK
+    // initialize the MetaMask SDK
     const metamaskOptions = deepmerge(this.metamaskOptions || { headless: true }, { dappMetadata: appMetadata }); // TODO: only use headless for Modal SDK
     this.metamaskSDK = new MetaMaskSDK(metamaskOptions);
-    await this.metamaskSDK.init();
+    // Note: in case there is an existing SDK instance in memory (window.mmsdk exists), it won't initialize the new SDK instance and return the existing instance instead of undefined
+    const initResult = await this.metamaskSDK.init();
+    if (initResult) {
+      this.metamaskSDK = initResult;
+    }
     this.isInjected = this.metamaskSDK.isExtensionActive();
 
     this.status = CONNECTOR_STATUS.READY;
@@ -103,15 +107,18 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     try {
-      // when metamask is not injected and headless is true, broadcast the uri to the login modal
-      if (!this.metamaskSDK.isExtensionActive() && this.metamaskOptions.headless) {
-        this.metamaskSDK.getProvider().on("display_uri", (uri) => {
-          this.updateConnectorData({ uri } as MetaMaskConnectorData);
-        });
-      }
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         this.status = CONNECTOR_STATUS.CONNECTING;
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
+        if (!this.metamaskSDK.isInitialized()) {
+          await this.metamaskSDK.init();
+        }
+        // when metamask is not injected and headless is true, broadcast the uri to the login modal
+        if (!this.metamaskSDK.isExtensionActive() && this.metamaskOptions.headless) {
+          this.metamaskSDK.getProvider().on("display_uri", (uri) => {
+            this.updateConnectorData({ uri } as MetaMaskConnectorData);
+          });
+        }
         await this.metamaskSDK.connect();
       }
 

@@ -371,7 +371,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected async loadConnectors({ projectConfig, modalMode }: { projectConfig: ProjectConfig; modalMode?: boolean }) {
     // always add auth and metaMask connector
-    const connectorFns = [...(this.coreOptions.connectors || []), authConnector(), metaMaskConnector(modalMode ? { headless: true } : undefined)];
+    const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
     const config = {
       projectConfig,
       coreOptions: this.coreOptions,
@@ -410,6 +410,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connectorFns.push(...evmMipd.getProviders().map(injectedEvmConnector));
       }
     }
+
+    // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
+    connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
 
     // add WalletConnectV2 connector if external wallets are enabled
     if (isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
