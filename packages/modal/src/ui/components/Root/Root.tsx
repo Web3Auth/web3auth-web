@@ -359,7 +359,12 @@ function Root(props: RootProps) {
 
     // Wallet Details Screen
     if (isWalletDetailsExpanded) {
-      return "588px";
+      return isPrivacyPolicyOrTncLink ? "640px" : "588px";
+    }
+
+    // MetaMask QR Code Screen
+    if (bodyState.metamaskQrCode?.show) {
+      return isPrivacyPolicyOrTncLink ? "640px" : "588px";
     }
 
     // Connect Wallet Screen
@@ -393,6 +398,7 @@ function Root(props: RootProps) {
     modalState.status,
     modalState.currentPage,
     isWalletDetailsExpanded,
+    bodyState.metamaskQrCode?.show,
     isSocialLoginsExpanded,
     topInstalledConnectorButtons.length,
   ]);
