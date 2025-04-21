@@ -5,6 +5,8 @@ import { useCheckout, useEnableMFA, useIdentityToken, useManageMFA, useSwitchCha
 import { CustomChainConfig, type NFTCheckoutPluginType, type WalletServicesPluginType } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
+import { useAccount } from "@wagmi/vue";
+
 import { Connection } from "@solana/web3.js";
 import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
@@ -58,6 +60,7 @@ const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { authenticateUser, loading: authenticateUserLoading } = useIdentityToken();
+const { status } = useAccount();
 
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
@@ -141,6 +144,10 @@ const printToConsole = (...args: unknown[]) => {
     consoleBtn.style.display = "block";
   }
 };
+
+watch(status, (newStatus) => {
+  console.log("status", newStatus);
+}, { immediate: true });
 
 // const onWalletSignPersonalMessage = async () => {
 //   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;

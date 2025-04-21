@@ -11,7 +11,15 @@ const pkg = await readJSONFile(path.resolve("./package.json"));
 // TODO: use ssr module for cjs build
 
 export const baseConfig = {
-  input: ["./src/index.ts", "./src/react/index.ts", "./src/vue/index.ts", "./src/react/wagmi/index.ts", "./src/react/solana/index.ts"],
+  input: [
+    "./src/index.ts",
+    "./src/react/index.ts",
+    "./src/vue/index.ts",
+    "./src/react/wagmi/index.ts",
+    "./src/react/solana/index.ts",
+    "./src/vue/solana/index.ts",
+    "./src/vue/wagmi/index.ts",
+  ],
   plugins: [
     replace({
       "process.env.WEB3AUTH_VERSION": `"${pkg.version}"`,

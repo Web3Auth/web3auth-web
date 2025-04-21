@@ -1,4 +1,4 @@
-import { TransactionOrVersionedTransaction, Web3AuthError } from "@web3auth/no-modal";
+import { TransactionOrVersionedTransaction, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { useCallback, useState } from "react";
 
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -21,7 +21,7 @@ export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
       setLoading(true);
       setError(null);
       try {
-        if (!solanaWallet) throw new Error("Solana wallet not found");
+        if (!solanaWallet) throw WalletInitializationError.notReady();
         const signature = await solanaWallet.signAndSendTransaction(transaction);
         setData(signature);
         return signature;

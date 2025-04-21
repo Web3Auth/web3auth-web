@@ -18,6 +18,7 @@
     "@toruslabs/tweetnacl-js": "^1.0.4",
     "@toruslabs/vue-components": "^8.0.6",
     "@toruslabs/vue-icons": "^8.0.2",
+    "@wagmi/vue": "^0.1.15",
     "@web3auth/auth": "^10.4.0",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/no-modal": "file:../../packages/no-modal",

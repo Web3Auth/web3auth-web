@@ -5,6 +5,7 @@ export const baseConfig = {
     "./src/vue/index.ts",
     "./src/react/wagmi/index.ts",
     "./src/react/solana/index.ts",
+    "./src/vue/solana/index.ts",
     "./src/connectors/coinbase-connector/index.ts",
   ],
 };
