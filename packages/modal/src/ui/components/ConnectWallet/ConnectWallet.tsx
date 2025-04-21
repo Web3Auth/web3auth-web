@@ -74,7 +74,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
       ...customConnectorButtons,
       ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
-    ];
+    ].sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1));
 
     const buttonSet = new Set();
     return buttons
@@ -115,6 +115,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   const filteredButtons = useMemo(() => {
     if (walletDiscoverySupported) {
       return [...allUniqueButtons.filter((button) => button.hasInjectedWallet), ...allUniqueButtons.filter((button) => !button.hasInjectedWallet)]
+        .sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1))
         .filter((button) => selectedChain === "all" || button.chainNamespaces.includes(selectedChain as ChainNamespaceType))
         .filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
     }
