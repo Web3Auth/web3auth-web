@@ -108,7 +108,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
     });
 
-    await withAbort(() => super.loadConnectors({ projectConfig }), signal);
+    await withAbort(() => super.loadConnectors({ projectConfig, modalMode: true }), signal);
 
     // initialize plugins
     await withAbort(() => super.initPlugins(), signal);

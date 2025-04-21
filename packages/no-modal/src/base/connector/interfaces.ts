@@ -186,3 +186,5 @@ export type LoginMethodConfig = Partial<
 >;
 
 export type WalletConnectV2Data = { uri: string };
+
+export type MetaMaskConnectorData = { uri: string };

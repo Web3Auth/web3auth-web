@@ -6,6 +6,7 @@ export interface ConnectWalletProps {
   isDark: boolean;
   config: Record<string, BaseConnectorConfig>;
   walletConnectUri: string | undefined;
+  metamaskConnectUri: string | undefined;
   walletRegistry?: WalletRegistry;
   allExternalButtons: ExternalButton[];
   customConnectorButtons: ExternalButton[];

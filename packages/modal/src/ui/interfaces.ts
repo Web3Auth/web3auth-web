@@ -119,6 +119,7 @@ export interface ModalState {
   modalVisibilityDelayed: boolean;
   postLoadingMessage: string;
   walletConnectUri: string;
+  metamaskConnectUri: string;
   socialLoginsConfig: SocialLoginsConfig;
   externalWalletsConfig: Record<string, BaseConnectorConfig>;
   detailedLoaderConnector: string;

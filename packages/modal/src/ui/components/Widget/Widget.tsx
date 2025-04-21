@@ -37,6 +37,7 @@ function Widget(props: WidgetProps) {
     modalVisibilityDelayed: false,
     postLoadingMessage: "",
     walletConnectUri: "",
+    metamaskConnectUri: "",
     socialLoginsConfig: {
       loginMethods: {},
       loginMethodsOrder: [],
@@ -170,10 +171,15 @@ function Widget(props: WidgetProps) {
 
   useEffect(() => {
     // TODO: maybe move this inside root
+    if (!modalState.modalVisibility) return;
     if (typeof modalState.externalWalletsConfig === "object") {
       const wcAvailable = (modalState.externalWalletsConfig[WALLET_CONNECTORS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
+      const mmAvailable = !modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]?.isInjected;
       if (wcAvailable && !modalState.walletConnectUri && typeof handleExternalWalletClick === "function") {
         handleExternalWalletClick({ connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
+      }
+      if (mmAvailable && !modalState.metamaskConnectUri && typeof handleExternalWalletClick === "function") {
+        handleExternalWalletClick({ connector: WALLET_CONNECTORS.METAMASK });
       }
     }
   }, [modalState, handleExternalWalletClick]);

@@ -1,16 +1,18 @@
 import Bowser from "bowser";
-import { useMemo } from "react";
+import { useContext, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { QRCode } from "react-qrcode-logo";
 
 import { WALLET_CONNECT_LOGO } from "../../../constants";
+import { RootContext } from "../../../context/RootContext";
 import i18n from "../../../localeImport";
 import Image from "../../Image";
 import { ConnectWalletQrCodeProps } from "./ConnectWalletQrCode.type";
 
 function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   const [t] = useTranslation(undefined, { i18n });
-  const { walletConnectUri, isDark, selectedButton, setBodyState, bodyState, logoImage, primaryColor } = props;
+  const { bodyState, setBodyState } = useContext(RootContext);
+  const { qrCodeValue, isDark, selectedButton, logoImage, primaryColor } = props;
 
   const isDesktop = useMemo<boolean>(() => {
     const browser = Bowser.getParser(window.navigator.userAgent);
@@ -25,7 +27,7 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
 
   return (
     <div className="w3a--contents">
-      {walletConnectUri ? (
+      {qrCodeValue ? (
         <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--rounded-2xl w3a--border w3a--border-app-gray-200 w3a--p-4 dark:w3a--border-app-gray-700">
           <div className="w3a--relative w3a--flex w3a--size-[300px] w3a--items-center w3a--justify-center w3a--rounded-2xl">
             <QRCode
@@ -34,7 +36,7 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
               qrStyle="dots"
               removeQrCodeBehindLogo
               logoImage={logoImage || WALLET_CONNECT_LOGO}
-              value={walletConnectUri}
+              value={qrCodeValue}
               logoHeight={32}
               logoWidth={32}
               logoPadding={10}
@@ -74,8 +76,10 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
           onClick={() => {
             setBodyState({
               ...bodyState,
-              showWalletDetails: true,
-              walletDetails: selectedButton,
+              installLinks: {
+                show: true,
+                wallet: selectedButton,
+              },
             });
           }}
         >

@@ -19,6 +19,7 @@ import {
   type ConnectorParams,
   type CustomChainConfig,
   type IProvider,
+  type MetaMaskConnectorData,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -29,7 +30,7 @@ import { BaseEvmConnector } from "../base-evm-connector";
 import { getSiteIcon, getSiteName } from "../utils";
 
 export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
-  connectorSettings?: MetaMaskSDKOptions;
+  connectorSettings?: Partial<MetaMaskSDKOptions>;
 }
 
 class MetaMaskConnector extends BaseEvmConnector<void> {
@@ -47,7 +48,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   private metamaskSDK: MetaMaskSDK = null;
 
-  private metamaskOptions: MetaMaskSDKOptions;
+  private metamaskOptions: Partial<MetaMaskSDKOptions>;
 
   constructor(connectorOptions: MetaMaskConnectorOptions) {
     super(connectorOptions);
@@ -79,8 +80,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     };
 
     // Initialize the MetaMask SDK
-    const metamaskOptions = deepmerge(this.metamaskOptions || {}, { dappMetadata: appMetadata });
+    const metamaskOptions = deepmerge(this.metamaskOptions || { headless: true }, { dappMetadata: appMetadata }); // TODO: only use headless for Modal SDK
     this.metamaskSDK = new MetaMaskSDK(metamaskOptions);
+    await this.metamaskSDK.init();
+    this.isInjected = this.metamaskSDK.isExtensionActive();
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
@@ -99,11 +102,19 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-
-    this.status = CONNECTOR_STATUS.CONNECTING;
-    this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
     try {
-      await this.metamaskSDK.connect();
+      // when metamask is not injected and headless is true, broadcast the uri to the login modal
+      if (!this.metamaskSDK.isExtensionActive() && this.metamaskOptions.headless) {
+        this.metamaskSDK.getProvider().on("display_uri", (uri) => {
+          this.updateConnectorData({ uri } as MetaMaskConnectorData);
+        });
+      }
+      if (this.status !== CONNECTOR_STATUS.CONNECTING) {
+        this.status = CONNECTOR_STATUS.CONNECTING;
+        this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
+        await this.metamaskSDK.connect();
+      }
+
       this.metamaskProvider = this.metamaskSDK.getProvider() as unknown as IProvider;
       if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
 
@@ -204,7 +215,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 }
 
-export const metaMaskConnector = (params?: MetaMaskSDKOptions): ConnectorFn => {
+export const metaMaskConnector = (params?: Partial<MetaMaskSDKOptions>): ConnectorFn => {
   return ({ coreOptions }: ConnectorParams) => {
     return new MetaMaskConnector({ connectorSettings: params, coreOptions });
   };

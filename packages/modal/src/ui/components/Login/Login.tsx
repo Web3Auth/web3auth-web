@@ -1,6 +1,6 @@
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
-import { log, type ModalSignInMethodType, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WalletLoginError } from "@web3auth/no-modal";
+import { log, type ModalSignInMethodType, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WalletLoginError } from "@web3auth/no-modal";
 import { MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -328,12 +328,26 @@ function Login(props: LoginProps) {
   };
 
   const handleInstalledWalletClick = (wallet: ExternalButton) => {
+    // for non-injected Metamask, show QR code to connect
+    if (wallet.name === WALLET_CONNECTORS.METAMASK && !wallet.hasInjectedWallet) {
+      setBodyState({
+        ...bodyState,
+        metamaskQrCode: {
+          show: true,
+          wallet: wallet,
+        },
+      });
+      return;
+    }
+
     // when having multiple namespaces, ask user to select one
     if (wallet.chainNamespaces?.length > 1) {
       setBodyState({
         ...bodyState,
-        showMultiChainSelector: true,
-        walletDetails: wallet,
+        multiChainSelector: {
+          show: true,
+          wallet: wallet,
+        },
       });
     } else {
       handleExternalWalletClick({ connector: wallet.name });
