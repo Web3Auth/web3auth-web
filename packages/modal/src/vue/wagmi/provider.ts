@@ -1,6 +1,6 @@
 /* eslint-disable react-hooks/rules-of-hooks */
 import { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn, hydrate } from "@wagmi/core";
-import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig, WagmiPluginOptions } from "@wagmi/vue";
+import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
 import { log } from "@web3auth/no-modal";
 import { type Chain, defineChain, http } from "viem";
@@ -8,6 +8,7 @@ import { defineComponent, h, PropType, provide, shallowRef, watch } from "vue";
 
 // import type { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn } from "wagmi";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../composables";
+import { WagmiProviderProps } from "./interface";
 
 const WEB3AUTH_CONNECTOR_ID = "web3auth";
 
@@ -126,7 +127,7 @@ const Web3AuthWagmiInnerProvider = defineComponent({
 
 export const WagmiProvider = defineComponent({
   name: "WagmiProvider",
-  props: { config: { type: Object as PropType<WagmiPluginOptions>, required: false } },
+  props: { config: { type: Object as PropType<WagmiProviderProps>, required: false } },
   setup(props) {
     const { config } = props;
     const { web3Auth, isInitialized } = useWeb3Auth();

@@ -1,5 +1,5 @@
-import type { CreateConfigParameters, WagmiProviderProps as WagmiProviderPropsBase } from "wagmi";
+import type { CreateConfigParameters, WagmiPluginOptions } from "@wagmi/vue";
 
-export type WagmiProviderProps = Omit<WagmiProviderPropsBase, "config"> & {
-  config?: Partial<CreateConfigParameters>;
+export type WagmiProviderProps = Omit<WagmiPluginOptions, "config"> & {
+  config?: Omit<CreateConfigParameters, "chains" | "connectors" | "transports" | "multiInjectedProviderDiscovery" | "client">;
 };
