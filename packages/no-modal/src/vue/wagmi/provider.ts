@@ -1,11 +1,10 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn, hydrate } from "@wagmi/core";
 import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig, WagmiPluginOptions } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
-import { log } from "@web3auth/no-modal";
 import { type Chain, defineChain, http } from "viem";
 import { defineComponent, h, PropType, provide, shallowRef, watch } from "vue";
 
+import { log } from "../../base/loglevel";
 // import type { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn } from "wagmi";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../composables";
 

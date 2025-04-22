@@ -2,42 +2,28 @@
 import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
 import { useCheckout, useEnableMFA, useIdentityToken, useManageMFA, useSwitchChain, useWalletConnectScanner, useWalletUI, useWeb3Auth, useWeb3AuthUser } from "@web3auth/modal/vue";
-import { CustomChainConfig, type NFTCheckoutPluginType, type WalletServicesPluginType } from "@web3auth/no-modal";
+import { type CustomChainConfig, type NFTCheckoutPluginType } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
-import { useAccount } from "@wagmi/vue";
+import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana"
+import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData } from "@wagmi/vue";
 
-import { Connection } from "@solana/web3.js";
+import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
 import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
 import {
-  getAccounts,
-  getBalance,
-  getChainId,
   getPrivateKey,
   sendEth,
-  signEthMessage,
   signTransaction as signEthTransaction,
-  signPersonalMessage,
-  signTypedMessage,
 } from "../services/ethHandlers";
 import {
+  getConnection,
   getBalance as getSolBalance,
   getPrivateKey as getSolPrivateKey,
   signAllTransactions,
-  signAndSendTransaction,
-  signMessage as signSolMessage,
-  signTransaction as signSolTransaction,
 } from "../services/solHandlers";
-// import {
-//   walletSendEth,
-//   walletSignPersonalMessage,
-//   walletSignSolanaMessage,
-//   walletSignSolanaVersionedTransaction,
-//   walletSignTypedMessage,
-// } from "../services/walletServiceHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 
@@ -60,14 +46,22 @@ const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { authenticateUser, loading: authenticateUserLoading } = useIdentityToken();
-const { status } = useAccount();
+const { status, address } = useAccount();
+const { signTypedDataAsync } = useSignTypedData();
+const { signMessageAsync } = useSignMessage();
+const chainId = useChainId();
+const balance = useBalance({ 
+  address: address.value,
+});
+
+const { accounts: solanaAccounts } = useSolanaWallet()
+const { signMessage: signSolanaMessage } = useSolanaSignMessage();
+const { signTransaction: signSolTransaction } = useSignTransaction();
+const { signAndSendTransaction } = useSignAndSendTransaction();
 
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
 const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
 const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
-const connection = computed(() => {
-  return currentChainConfig?.value ? new Connection(currentChainConfig?.value.rpcTarget) : null;
-});
 
 const chainChangedListener = (chainId: string) => {
   currentChainId.value = chainId;
@@ -146,31 +140,8 @@ const printToConsole = (...args: unknown[]) => {
 };
 
 watch(status, (newStatus) => {
-  console.log("status", newStatus);
+  console.log("wagmi status", newStatus);
 }, { immediate: true });
-
-// const onWalletSignPersonalMessage = async () => {
-//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-//   await walletSignPersonalMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
-// };
-// const onWalletSignTypedData_v4 = async () => {
-//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-//   await walletSignTypedMessage(walletPlugin.wsEmbedInstance.provider, printToConsole);
-// };
-// const onWalletSendEth = async () => {
-//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-//   await walletSendEth(walletPlugin.wsEmbedInstance.provider, printToConsole);
-// };
-
-// const onWalletSignSolanaMessage = async () => {
-//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-//   await walletSignSolanaMessage(walletPlugin.wsEmbedInstance.provider as IProvider, printToConsole);
-// };
-
-// const onWalletSignSolanaVersionedTransaction = async () => {
-//   const walletPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-//   await walletSignSolanaVersionedTransaction(walletPlugin.wsEmbedInstance.provider as IProvider, connection.value as Connection, printToConsole);
-// };
 
 // NFT Checkout
 const showPaidMintNFTCheckout = async () => {
@@ -197,11 +168,14 @@ const onSendEth = async () => {
 };
 
 const onSignEthMessage = async () => {
-  await signEthMessage(provider.value as IProvider, printToConsole);
+  const result = await signMessageAsync({
+    message: "Hello, Bob!",
+  });
+  printToConsole("result", result);
 };
 
 const onGetAccounts = async () => {
-  await getAccounts(provider.value as IProvider, printToConsole);
+  printToConsole('account', address.value);
 };
 
 const onGetPrivateKey = async () => {
@@ -209,11 +183,11 @@ const onGetPrivateKey = async () => {
 };
 
 const getConnectedChainId = async () => {
-  await getChainId(provider.value as IProvider, printToConsole);
+  printToConsole('chainId', chainId.value);
 };
 
 const onGetBalance = async () => {
-  await getBalance(provider.value as IProvider, printToConsole);
+  printToConsole("balance", balance.data.value?.formatted);
 };
 
 const onSignEthTransaction = async () => {
@@ -221,11 +195,39 @@ const onSignEthTransaction = async () => {
 };
 
 const onSignTypedData_v4 = async () => {
-  await signTypedMessage(provider.value as IProvider, printToConsole);
+  const result = await signTypedDataAsync({
+    types: {
+      Person: [
+        { name: "name", type: "string" },
+          { name: 'wallet', type: 'address' },
+        ],
+        Mail: [
+          { name: 'from', type: 'Person' },
+          { name: 'to', type: 'Person' },
+          { name: 'contents', type: 'string' },
+        ],
+      },
+      primaryType: 'Mail',
+      message: {
+        from: {
+          name: "Cow",
+          wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
+        },
+        to: {
+          name: "Bob",
+          wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
+        },
+        contents: "Hello, Bob!",
+      },
+    });
+  printToConsole("result", result);
 };
 
 const onSignPersonalMsg = async () => {
-  await signPersonalMessage(provider.value as IProvider, printToConsole);
+  const result = await signMessageAsync({
+    message: "Hello, Bob!",
+  });
+  printToConsole("result", result);
 };
 
 // Solana
@@ -234,15 +236,52 @@ const onGetSolPrivateKey = async () => {
 };
 
 const onSignAndSendTransaction = async () => {
-  await signAndSendTransaction(provider.value as IProvider, printToConsole);
+  if (!solanaAccounts.value) throw new Error('No account connected');
+  const conn = await getConnection(provider.value as IProvider);
+  const block = await conn.getLatestBlockhash("finalized");
+  const pubKey = solanaAccounts.value[0];
+
+  const transactionInstruction = SystemProgram.transfer({
+      fromPubkey: new PublicKey(pubKey),
+      toPubkey: new PublicKey(pubKey),
+      lamports: 0.01 * LAMPORTS_PER_SOL,
+    });
+
+    const transaction = new Transaction({
+      blockhash: block.blockhash,
+      lastValidBlockHeight: block.lastValidBlockHeight,
+      feePayer: new PublicKey(pubKey),
+    }).add(transactionInstruction);
+  
+  const data = await signAndSendTransaction(transaction);
+  printToConsole('result', data);
 };
 
 const onSignSolTransaction = async () => {
-  await signSolTransaction(provider.value as IProvider, printToConsole);
+  if (!solanaAccounts.value) throw new Error('No account connected');
+  const conn = await getConnection(provider.value as IProvider);
+  const block = await conn.getLatestBlockhash("finalized");
+  const pubKey = solanaAccounts.value[0];
+
+  const transactionInstruction = SystemProgram.transfer({
+      fromPubkey: new PublicKey(pubKey),
+      toPubkey: new PublicKey(pubKey),
+      lamports: 0.01 * LAMPORTS_PER_SOL,
+    });
+
+  const transaction = new Transaction({
+    blockhash: block.blockhash,
+    lastValidBlockHeight: block.lastValidBlockHeight,
+    feePayer: new PublicKey(pubKey),
+  }).add(transactionInstruction);
+
+  const result = await signSolTransaction(transaction)
+  printToConsole('result', result);
 };
 
 const onSignSolMessage = async () => {
-  await signSolMessage(provider.value as IProvider, printToConsole);
+  const result = await signSolanaMessage("Hello, Bob!");
+  printToConsole("result", result);
 };
 
 const onGetSolBalance = async () => {

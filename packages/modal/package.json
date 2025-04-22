@@ -38,6 +38,12 @@
     "@tanstack/react-query": {
       "optional": true
     },
+    "@wagmi/core": {
+      "optional": true
+    },
+    "@wagmi/vue": {
+      "optional": true
+    },
     "viem": {
       "optional": true
     },
@@ -45,12 +51,6 @@
       "optional": true
     },
     "wagmi": {
-      "optional": true
-    },
-    "@wagmi/core": {
-      "optional": true
-    },
-    "@wagmi/vue": {
       "optional": true
     }
   },
