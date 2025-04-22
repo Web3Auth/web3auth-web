@@ -48,8 +48,9 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   public abstract get provider(): IProvider | null;
 
   checkConnectionRequirements(): void {
-    // we reconnect without killing existing wallet connect session on calling connect again.
+    // we reconnect without killing existing Wallet Connect or Metamask Connect session on calling connect again.
     if (this.name === WALLET_CONNECTORS.WALLET_CONNECT_V2 && this.status === CONNECTOR_STATUS.CONNECTING) return;
+    if (this.name === WALLET_CONNECTORS.METAMASK && !this.isInjected && this.status === CONNECTOR_STATUS.CONNECTING) return;
 
     if (this.status === CONNECTOR_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
     if (this.status === CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");

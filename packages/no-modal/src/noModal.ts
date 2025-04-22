@@ -370,7 +370,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected async loadConnectors({ projectConfig, modalMode }: { projectConfig: ProjectConfig; modalMode?: boolean }) {
-    // always add auth and metaMask connector
+    // always add auth connector
     const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
     const config = {
       projectConfig,
@@ -412,6 +412,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
+    // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
     connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
 
     // add WalletConnectV2 connector if external wallets are enabled

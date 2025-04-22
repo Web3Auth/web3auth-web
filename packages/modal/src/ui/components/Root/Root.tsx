@@ -303,20 +303,20 @@ function Root(props: RootProps) {
     }, [] as ExternalButton[]);
 
     // if metamask connector is not injected, use the registry button instead to display QR code
-    const metamaskCustomConnectorIdx = installedConnectors.findIndex((button) => button.name === WALLET_CONNECTORS.METAMASK);
-    if (metamaskCustomConnectorIdx !== -1) {
-      const metamaskCustomConnector = installedConnectors[metamaskCustomConnectorIdx];
+    const metamaskConnectorIdx = installedConnectors.findIndex((x) => x.name === WALLET_CONNECTORS.METAMASK && !x.hasInjectedWallet);
+    if (metamaskConnectorIdx !== -1) {
+      const metamaskConnector = installedConnectors[metamaskConnectorIdx];
       let metamaskRegistryButton = allButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
       if (!metamaskRegistryButton) {
-        // if metamask is not in the registry, use the default metamask registry item
+        // use the default metamask registry item if it's not in the registry
         metamaskRegistryButton = generateWalletButtons({
           [WALLET_CONNECTORS.METAMASK]: DEFAULT_METAMASK_WALLET_REGISTRY_ITEM,
         })[0];
       }
       if (metamaskRegistryButton) {
-        installedConnectors.splice(metamaskCustomConnectorIdx, 1, {
+        installedConnectors.splice(metamaskConnectorIdx, 1, {
           ...metamaskRegistryButton,
-          chainNamespaces: metamaskCustomConnector.chainNamespaces, // preserve the chain namespaces
+          chainNamespaces: metamaskConnector.chainNamespaces, // preserve the chain namespaces
         });
       }
     }

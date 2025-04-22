@@ -80,9 +80,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     };
 
     // initialize the MetaMask SDK
-    const metamaskOptions = deepmerge(this.metamaskOptions || { headless: true }, { dappMetadata: appMetadata }); // TODO: only use headless for Modal SDK
+    const metamaskOptions = deepmerge(this.metamaskOptions || {}, { dappMetadata: appMetadata });
     this.metamaskSDK = new MetaMaskSDK(metamaskOptions);
-    // Note: in case there is an existing SDK instance in memory (window.mmsdk exists), it won't initialize the new SDK instance and return the existing instance instead of undefined
+    // Work around: in case there is an existing SDK instance in memory (window.mmsdk exists), it won't initialize the new SDK instance again
+    // and return the existing instance instead of undefined (this is an assumption, not sure if it's a bug or feature of the MetaMask SDK)
     const initResult = await this.metamaskSDK.init();
     if (initResult) {
       this.metamaskSDK = initResult;
@@ -110,11 +111,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         this.status = CONNECTOR_STATUS.CONNECTING;
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
-        if (!this.metamaskSDK.isInitialized()) {
-          await this.metamaskSDK.init();
-        }
-        // when metamask is not injected and headless is true, broadcast the uri to the login modal
         if (!this.metamaskSDK.isExtensionActive() && this.metamaskOptions.headless) {
+          // when metamask is not injected and headless is true, broadcast the uri to the login modal
           this.metamaskSDK.getProvider().on("display_uri", (uri) => {
             this.updateConnectorData({ uri } as MetaMaskConnectorData);
           });

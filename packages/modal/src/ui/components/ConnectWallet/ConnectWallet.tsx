@@ -153,8 +153,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     const isInjectedConnectorAndSingleChainNamespace = button.hasInjectedWallet && button.chainNamespaces?.length === 1;
     // if doesn't have wallet connect & doesn't have install links, must be a custom connector
     const isCustomConnector = !button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks;
-    // for non-injected Metamask, handle it as a discoverable wallet to display QR code instead of treating as custom connector
-    if (isInjectedConnectorAndSingleChainNamespace || (button.name !== WALLET_CONNECTORS.METAMASK && isCustomConnector)) {
+    if (isInjectedConnectorAndSingleChainNamespace || isCustomConnector) {
       return handleExternalWalletClick({ connector: button.name });
     }
 

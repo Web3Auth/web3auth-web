@@ -173,11 +173,14 @@ function Widget(props: WidgetProps) {
     // TODO: maybe move this inside root
     if (!modalState.modalVisibility) return;
     if (typeof modalState.externalWalletsConfig === "object") {
+      // auto connect to WC if not injected to generate QR code URI for mobile connection
       const wcAvailable = (modalState.externalWalletsConfig[WALLET_CONNECTORS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;
-      const mmAvailable = !modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]?.isInjected;
       if (wcAvailable && !modalState.walletConnectUri && typeof handleExternalWalletClick === "function") {
         handleExternalWalletClick({ connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
       }
+
+      // auto connect to MetaMask if not injected to generate QR code URI for mobile connection
+      const mmAvailable = !modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]?.isInjected;
       if (mmAvailable && !modalState.metamaskConnectUri && typeof handleExternalWalletClick === "function") {
         handleExternalWalletClick({ connector: WALLET_CONNECTORS.METAMASK });
       }
