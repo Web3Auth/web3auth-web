@@ -20,13 +20,14 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
   const [connectorName, setConnectorName] = useState<WALLET_CONNECTOR_TYPE | null>(null);
 
   useEffect(() => {
+    if (!web3Auth) return;
     if (!isConnected && connectorName) {
       setConnectorName(null);
     }
     if (isConnected && !connectorName) {
       setConnectorName(web3Auth.connectedConnectorName);
     }
-  }, [isConnected, connectorName]);
+  }, [isConnected, connectorName, web3Auth]);
 
   const connect = useCallback(
     async <T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]) => {

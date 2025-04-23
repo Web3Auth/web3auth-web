@@ -4,7 +4,7 @@ import { log } from "@web3auth/no-modal";
 import clsx, { ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 
-import { browser, mobileOs, platform } from "./interfaces";
+import { browser, mobileOs, platform, ValidatePhoneNumberApiResponse } from "./interfaces";
 
 const cache = new Map<string, string>();
 
@@ -119,21 +119,21 @@ export const getUserCountry = async (): Promise<{ country: string; dialCode: str
   }
 };
 
-export const validatePhoneNumber = async (phoneNumber: string): Promise<string | boolean> => {
+export const validatePhoneNumber = async (phoneNumber: string): Promise<ValidatePhoneNumberApiResponse> => {
   try {
-    const result = await post<{ success: boolean; parsed_number: string }>(`${passwordlessBackendUrl}/api/v3/phone_number/validate`, {
+    const result = await post<ValidatePhoneNumberApiResponse>(`${passwordlessBackendUrl}/api/v3/phone_number/validate`, {
       phone_number: phoneNumber,
     });
-    if (result && result.success) return result.parsed_number;
-    return false;
+    if (result && result.success) return result;
+    return { success: false, parsed_number: "", country_flag: "" };
   } catch (error: unknown) {
     log.error("error validating phone number", error);
     if ((error as Response).status === 400) {
-      return false;
+      return { success: false, parsed_number: "", country_flag: "" };
     }
     // sending true because we don't want the user to be stuck on a flow
     // if there is an error with the api or something went wrong.
-    return true;
+    return { success: false, parsed_number: "", country_flag: "" };
   }
 };
 

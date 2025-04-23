@@ -13,7 +13,7 @@ import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
  * @returns OtpInput component
  */
 function OtpInput(props: OtpInputProps) {
-  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint = "", errorMessage, otpLoading } = props;
+  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint = "", errorMessage, otpLoading, countryFlag } = props;
   const isMobileOtp = useMemo(() => authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS, [authConnection]);
   const [t] = useTranslation(undefined, { i18n });
 
@@ -22,8 +22,8 @@ function OtpInput(props: OtpInputProps) {
 
     const [countryCode, number] = loginHint.includes("-") ? loginHint.split("-") : ["", loginHint];
     const masked = `${number}`.slice(-Math.floor((number as string).length / 2)).padStart(`${number}`.length, "*");
-    return `${countryCode} ${masked}`;
-  }, [loginHint, authConnection]);
+    return `${countryFlag} ${countryCode} ${masked}`;
+  }, [loginHint, authConnection, countryFlag]);
 
   return (
     <>
@@ -77,7 +77,7 @@ function OtpInput(props: OtpInputProps) {
  * @returns LoginOtp component
  */
 function LoginOtp(props: LoginOtpProps) {
-  const { otpLoading, setShowOtpFlow, handleOtpComplete, authConnection, loginHint, errorMessage } = props;
+  const { otpLoading, setShowOtpFlow, handleOtpComplete, authConnection, loginHint, errorMessage, countryFlag } = props;
 
   return (
     <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
@@ -88,6 +88,7 @@ function LoginOtp(props: LoginOtpProps) {
         authConnection={authConnection}
         loginHint={loginHint}
         otpLoading={otpLoading}
+        countryFlag={countryFlag}
       />
     </div>
   );
