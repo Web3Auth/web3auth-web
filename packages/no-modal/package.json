@@ -34,6 +34,8 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
+    "@wagmi/core": ">=2.16",
+    "@wagmi/vue": ">=0.1.x",
     "react": ">=18",
     "viem": "^2.23.x",
     "vue": "^3.x",
@@ -44,6 +46,12 @@
       "optional": true
     },
     "@tanstack/react-query": {
+      "optional": true
+    },
+    "@wagmi/core": {
+      "optional": true
+    },
+    "@wagmi/vue": {
       "optional": true
     },
     "react": {
@@ -70,6 +78,8 @@
     "@toruslabs/loglevel-sentry": "^8.1.0",
     "@toruslabs/secure-pub-sub": "3.0.2",
     "@toruslabs/tweetnacl-js": "^1.0.4",
+    "@wagmi/core": "^2.16.1",
+    "@wagmi/vue": "^0.1.15",
     "@wallet-standard/app": "^1.1.0",
     "@wallet-standard/base": "^1.1.0",
     "@wallet-standard/features": "^1.1.0",
@@ -120,14 +130,24 @@
       "types": "./dist/lib.cjs/types/react/wagmi/index.d.ts"
     },
     "./react/solana": {
-      "import": "./dist/lib.esm/packages/modal/src/react/solana/index.js",
-      "require": "./dist/lib.cjs/packages/modal/src/react/solana/index.js",
+      "import": "./dist/lib.esm/react/solana/index.js",
+      "require": "./dist/lib.cjs/react/solana/index.js",
       "types": "./dist/lib.cjs/types/react/solana/index.d.ts"
     },
     "./vue": {
       "import": "./dist/lib.esm/vue/index.js",
       "require": "./dist/lib.cjs/vue/index.js",
       "types": "./dist/lib.cjs/types/vue/index.d.ts"
+    },
+    "./vue/solana": {
+      "import": "./dist/lib.esm/vue/solana/index.js",
+      "require": "./dist/lib.cjs/vue/solana/index.js",
+      "types": "./dist/lib.cjs/types/vue/solana/index.d.ts"
+    },
+    "./vue/wagmi": {
+      "import": "./dist/lib.esm/vue/wagmi/index.js",
+      "require": "./dist/lib.cjs/vue/wagmi/index.js",
+      "types": "./dist/lib.cjs/types/vue/wagmi/index.d.ts"
     },
     "./connectors/coinbase-connector": {
       "import": "./dist/lib.esm/connectors/coinbase-connector/index.js",
@@ -148,6 +168,9 @@
       ],
       "vue": [
         "./dist/lib.cjs/types/vue/index.d.ts"
+      ],
+      "vue/solana": [
+        "./dist/lib.cjs/types/vue/solana/index.d.ts"
       ],
       "connectors/coinbase-connector": [
         "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"

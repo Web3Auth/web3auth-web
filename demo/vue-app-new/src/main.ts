@@ -1,6 +1,7 @@
 import "./global";
 import "./style.css";
 
+import { VueQueryPlugin } from "@tanstack/vue-query";
 import { createI18n, PathValue } from "petite-vue-i18n";
 import { createApp } from "vue";
 
@@ -33,4 +34,5 @@ const app = createApp(App);
 
 app.use(createIcons);
 app.use(i18n);
+app.use(VueQueryPlugin);
 app.mount("#app");
