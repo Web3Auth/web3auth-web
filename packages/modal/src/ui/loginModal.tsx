@@ -9,6 +9,7 @@ import {
   type IConnectorDataEvent,
   log,
   type LoginMethodConfig,
+  type MetaMaskConnectorData,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
@@ -67,6 +68,8 @@ export class LoginModal {
   private walletRegistry: WalletRegistry;
 
   private callbacks: LoginModalCallbacks;
+
+  private externalWalletsConfig: Record<string, BaseConnectorConfig>;
 
   constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
@@ -273,6 +276,7 @@ export class LoginModal {
     externalWalletsConfig: Record<string, BaseConnectorConfig>,
     options?: { externalWalletsInitialized: boolean; externalWalletsVisibility: boolean; showExternalWalletsOnly: boolean }
   ): void => {
+    this.externalWalletsConfig = externalWalletsConfig;
     this.setState({
       externalWalletsConfig,
       externalWalletsInitialized: !!options.externalWalletsInitialized,
@@ -332,30 +336,32 @@ export class LoginModal {
     this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
-  private updateWalletConnect = (walletConnectUri: string): void => {
-    if (!walletConnectUri) return;
-    this.setState({
-      walletConnectUri,
-    });
-  };
-
   private handleConnectorData = (connectorData: IConnectorDataEvent) => {
     if (connectorData.connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2) {
       const walletConnectData = connectorData.data as WalletConnectV2Data;
-      this.updateWalletConnect(walletConnectData.uri);
+      if (walletConnectData.uri) {
+        this.setState({ walletConnectUri: walletConnectData.uri });
+      }
+    }
+    if (connectorData.connectorName === WALLET_CONNECTORS.METAMASK) {
+      const metamaskData = connectorData.data as MetaMaskConnectorData;
+      if (metamaskData.uri) {
+        this.setState({ metamaskConnectUri: metamaskData.uri });
+      }
     }
   };
 
   private subscribeCoreEvents = (listener: SafeEventEmitter<Web3AuthNoModalEvents>) => {
     listener.on(CONNECTOR_EVENTS.CONNECTING, (data) => {
       log.info("connecting with connector", data);
-      // don't show loader in case of wallet connect, because currently it listens for incoming for incoming
-      // connections without any user interaction.
-      if (data?.connector !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-        // const provider = data?.loginProvider || "";
+      // don't show loader in case of wallet connect, because currently it listens for incoming connections without any user interaction
+      if (data?.connector === WALLET_CONNECTORS.WALLET_CONNECT_V2) return;
 
-        this.setState({ status: MODAL_STATUS.CONNECTING });
-      }
+      // don't show loader in case of metamask qr code, because currently it listens for incoming connections without any user interaction
+      const isMetamaskInjected = this.externalWalletsConfig?.[WALLET_CONNECTORS.METAMASK]?.isInjected;
+      if (data?.connector === WALLET_CONNECTORS.METAMASK && !isMetamaskInjected) return;
+
+      this.setState({ status: MODAL_STATUS.CONNECTING });
     });
     listener.on(CONNECTOR_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);

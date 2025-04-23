@@ -3,7 +3,7 @@ import Bowser from "bowser";
 import { JSX, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-import { PAGES } from "../../constants";
+import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
 import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform, TOAST_TYPE, ToastType } from "../../interfaces";
@@ -12,6 +12,8 @@ import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallL
 import BottomSheet from "../BottomSheet";
 import ConnectWallet from "../ConnectWallet";
 import ConnectWalletChainNamespaceSelect from "../ConnectWallet/ConnectWalletChainNamespaceSelect";
+import ConnectWalletHeader from "../ConnectWallet/ConnectWalletHeader";
+import ConnectWalletQrCode from "../ConnectWallet/ConnectWalletQrCode";
 import Footer from "../Footer/Footer";
 import Image from "../Image";
 import Loader from "../Loader";
@@ -55,9 +57,18 @@ function Root(props: RootProps) {
   const { isDark } = useContext(ThemedContext);
 
   const [bodyState, setBodyState] = useState<BodyState>({
-    showWalletDetails: false,
-    walletDetails: null,
-    showMultiChainSelector: false,
+    metamaskQrCode: {
+      show: false,
+      wallet: null,
+    },
+    installLinks: {
+      show: false,
+      wallet: null,
+    },
+    multiChainSelector: {
+      show: false,
+      wallet: null,
+    },
   });
 
   const [toast, setToast] = useState<{
@@ -99,7 +110,7 @@ function Root(props: RootProps) {
 
   const mobileInstallLinks = useMemo<JSX.Element[]>(() => {
     if (deviceDetails.platform === "desktop") return [];
-    const installConfig = bodyState.walletDetails?.walletRegistryItem?.app || {};
+    const installConfig = bodyState.installLinks?.wallet?.walletRegistryItem?.app || {};
     const installLinks = Object.keys(installConfig).reduce((acc, osKey) => {
       if (!["android", "ios"].includes(osKey)) return acc;
       const appId = installConfig[osKey as mobileOs];
@@ -109,7 +120,7 @@ function Root(props: RootProps) {
       const logoLight = `${osKey}-light`;
       const logoDark = `${osKey}-dark`;
       acc.push(
-        <li className="w3a--w-full">
+        <li key={appUrl} className="w3a--w-full">
           <a href={appUrl} rel="noopener noreferrer" target="_blank">
             <button
               type="button"
@@ -148,20 +159,20 @@ function Root(props: RootProps) {
       return acc;
     }, []);
     return installLinks;
-  }, [bodyState.walletDetails?.walletRegistryItem?.app, deviceDetails.platform, isDark, t, buttonRadiusType]);
+  }, [bodyState.installLinks?.wallet?.walletRegistryItem?.app, deviceDetails.platform, isDark, t, buttonRadiusType]);
 
   const desktopInstallLinks = useMemo<JSX.Element[]>(() => {
     if (deviceDetails.platform !== "desktop") return [];
     // if browser is brave, use chrome extension
     const browserType = deviceDetails.browser === "brave" ? "chrome" : deviceDetails.browser;
 
-    const browserExtensionConfig = bodyState.walletDetails?.walletRegistryItem?.app || {};
+    const browserExtensionConfig = bodyState.installLinks?.wallet?.walletRegistryItem?.app || {};
     const extensionForCurrentBrowser =
       browserExtensionConfig.browser && browserExtensionConfig.browser.includes(browserType) ? browserExtensionConfig.browser : undefined;
     const browserExtensionId = browserExtensionConfig[browserType as keyof typeof browserExtensionConfig] || extensionForCurrentBrowser;
     const browserExtensionUrl = browserExtensionId ? getBrowserExtensionUrl(browserType, browserExtensionId) : null;
     const installLink = browserExtensionUrl ? (
-      <li>
+      <li key={browserExtensionUrl}>
         <a href={browserExtensionUrl} rel="noopener noreferrer" target="_blank">
           <button
             type="button"
@@ -199,7 +210,7 @@ function Root(props: RootProps) {
     ) : null;
     return [installLink, ...mobileInstallLinks];
   }, [
-    bodyState.walletDetails?.walletRegistryItem?.app,
+    bodyState.installLinks?.wallet?.walletRegistryItem?.app,
     deviceDetails.browser,
     deviceDetails.platform,
     isDark,
@@ -271,6 +282,10 @@ function Root(props: RootProps) {
     [connectorVisibilityMap, chainNamespaces, config, deviceDetails.platform, isWalletConnectConnectorIncluded]
   );
 
+  const allButtons = useMemo(() => {
+    return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
+  }, [generateWalletButtons, walletRegistry.default, walletRegistry.others]);
+
   const installedConnectorButtons = useMemo(() => {
     const installedConnectors = Object.keys(config).reduce((acc, connector) => {
       if (connector === WALLET_CONNECTORS.WALLET_CONNECT_V2 || !connectorVisibilityMap[connector]) return acc;
@@ -287,9 +302,28 @@ function Root(props: RootProps) {
       return acc;
     }, [] as ExternalButton[]);
 
+    // if metamask connector is not injected, use the registry button instead to display QR code
+    const metamaskConnectorIdx = installedConnectors.findIndex((x) => x.name === WALLET_CONNECTORS.METAMASK && !x.hasInjectedWallet);
+    if (metamaskConnectorIdx !== -1) {
+      const metamaskConnector = installedConnectors[metamaskConnectorIdx];
+      let metamaskRegistryButton = allButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
+      if (!metamaskRegistryButton) {
+        // use the default metamask registry item if it's not in the registry
+        metamaskRegistryButton = generateWalletButtons({
+          [WALLET_CONNECTORS.METAMASK]: DEFAULT_METAMASK_WALLET_REGISTRY_ITEM,
+        })[0];
+      }
+      if (metamaskRegistryButton) {
+        installedConnectors.splice(metamaskConnectorIdx, 1, {
+          ...metamaskRegistryButton,
+          chainNamespaces: metamaskConnector.chainNamespaces, // preserve the chain namespaces
+        });
+      }
+    }
+
     // make metamask the first button and limit the number of buttons
     return installedConnectors;
-  }, [config, connectorVisibilityMap]);
+  }, [allButtons, config, connectorVisibilityMap, generateWalletButtons]);
 
   const customConnectorButtons = useMemo(() => {
     return installedConnectorButtons.filter((button) => !button.hasInjectedWallet);
@@ -303,10 +337,6 @@ function Root(props: RootProps) {
       .sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1))
       .slice(0, displayInstalledExternalWallets ? MAX_TOP_INSTALLED_CONNECTORS : 1);
   }, [installedConnectorButtons, displayInstalledExternalWallets]);
-
-  const allButtons = useMemo(() => {
-    return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
-  }, [generateWalletButtons, walletRegistry.default, walletRegistry.others]);
 
   const totalExternalWallets = useMemo(() => {
     const uniqueWalletSet = new Set();
@@ -335,7 +365,12 @@ function Root(props: RootProps) {
 
     // Wallet Details Screen
     if (isWalletDetailsExpanded) {
-      return "588px";
+      return isPrivacyPolicyOrTncLink ? "640px" : "588px";
+    }
+
+    // MetaMask QR Code Screen
+    if (bodyState.metamaskQrCode?.show) {
+      return isPrivacyPolicyOrTncLink ? "640px" : "588px";
     }
 
     // Connect Wallet Screen
@@ -369,6 +404,7 @@ function Root(props: RootProps) {
     modalState.status,
     modalState.currentPage,
     isWalletDetailsExpanded,
+    bodyState.metamaskQrCode?.show,
     isSocialLoginsExpanded,
     topInstalledConnectorButtons.length,
   ]);
@@ -383,6 +419,14 @@ function Root(props: RootProps) {
     [bodyState, setBodyState, toast, setToast]
   );
 
+  const isShowLoader = useMemo(() => {
+    // don't show loader if metamask is connecting and there is a connect uri
+    if (modalState.detailedLoaderConnector === WALLET_CONNECTORS.METAMASK && modalState.metamaskConnectUri) {
+      return false;
+    }
+    return modalState.status !== MODAL_STATUS.INITIALIZED;
+  }, [modalState.detailedLoaderConnector, modalState.metamaskConnectUri, modalState.status]);
+
   return (
     <RootContext.Provider value={contextValue}>
       <div className="w3a--relative w3a--flex w3a--flex-col">
@@ -395,7 +439,7 @@ function Root(props: RootProps) {
           <div className="w3a--modal-curtain" />
           <div className="w3a--relative w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--p-6">
             {/* Content */}
-            {modalState.status !== MODAL_STATUS.INITIALIZED ? (
+            {isShowLoader ? (
               <Loader
                 connector={modalState.detailedLoaderConnector}
                 connectorName={modalState.detailedLoaderConnectorName}
@@ -405,54 +449,77 @@ function Root(props: RootProps) {
               />
             ) : (
               <>
-                {modalState.currentPage === PAGES.LOGIN && showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
-                  <Login
-                    web3authClientId={modalState.web3authClientId}
-                    web3authNetwork={modalState.web3authNetwork}
-                    authBuildEnv={modalState.authBuildEnv}
-                    isModalVisible={modalState.modalVisibility}
-                    isDark={isDark}
-                    appLogo={appLogo}
-                    showPasswordLessInput={showPasswordLessInput}
-                    showExternalWalletButton={showExternalWalletButton}
-                    showExternalWalletCount={displayExternalWalletsCount}
-                    showInstalledExternalWallets={displayInstalledExternalWallets}
-                    socialLoginsConfig={socialLoginsConfig}
-                    areSocialLoginsVisible={areSocialLoginsVisible}
-                    isEmailPrimary={isEmailPrimary}
-                    isExternalPrimary={isExternalPrimary}
-                    installedExternalWalletConfig={topInstalledConnectorButtons}
-                    isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
-                    isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
-                    totalExternalWallets={totalExternalWallets}
-                    logoAlignment={logoAlignment}
-                    buttonRadius={buttonRadiusType}
-                    handleSocialLoginClick={handleSocialLoginClick}
-                    handleExternalWalletBtnClick={onExternalWalletBtnClick}
-                    handleSocialLoginHeight={handleSocialLoginHeight}
-                    handleExternalWalletClick={preHandleExternalWalletClick}
-                  />
-                )}
-                {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
-                  <ConnectWallet
-                    isDark={isDark}
-                    walletConnectUri={modalState.walletConnectUri}
-                    config={modalState.externalWalletsConfig}
-                    walletRegistry={walletRegistry}
-                    allExternalButtons={allButtons}
-                    connectorVisibilityMap={connectorVisibilityMap}
-                    customConnectorButtons={customConnectorButtons}
-                    deviceDetails={{
-                      platform: deviceDetails.platform,
-                      browser: deviceDetails.browser,
-                      os: deviceDetails.os as os,
-                    }}
-                    chainNamespace={chainNamespaces}
-                    buttonRadius={buttonRadiusType}
-                    handleWalletDetailsHeight={handleWalletDetailsHeight}
-                    onBackClick={onBackClick}
-                    handleExternalWalletClick={preHandleExternalWalletClick}
-                  />
+                {/* MetaMask Connect via QR Code */}
+                {bodyState.metamaskQrCode?.show ? (
+                  <div className="w3a--relative w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
+                    <ConnectWalletHeader
+                      onBackClick={() => setBodyState({ ...bodyState, metamaskQrCode: { show: false, wallet: null } })}
+                      currentPage={CONNECT_WALLET_PAGES.SELECTED_WALLET}
+                      selectedButton={bodyState.metamaskQrCode.wallet}
+                    />
+                    <ConnectWalletQrCode
+                      qrCodeValue={modalState.metamaskConnectUri}
+                      isDark={isDark}
+                      selectedButton={bodyState.metamaskQrCode.wallet}
+                      primaryColor={bodyState.metamaskQrCode.wallet.walletRegistryItem?.primaryColor}
+                      logoImage={`https://images.web3auth.io/login-${bodyState.metamaskQrCode.wallet.name}.${bodyState.metamaskQrCode.wallet.imgExtension}`}
+                    />
+                  </div>
+                ) : (
+                  <>
+                    {/* Login Screen */}
+                    {modalState.currentPage === PAGES.LOGIN && showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
+                      <Login
+                        web3authClientId={modalState.web3authClientId}
+                        web3authNetwork={modalState.web3authNetwork}
+                        authBuildEnv={modalState.authBuildEnv}
+                        isModalVisible={modalState.modalVisibility}
+                        isDark={isDark}
+                        appLogo={appLogo}
+                        showPasswordLessInput={showPasswordLessInput}
+                        showExternalWalletButton={showExternalWalletButton}
+                        showExternalWalletCount={displayExternalWalletsCount}
+                        showInstalledExternalWallets={displayInstalledExternalWallets}
+                        socialLoginsConfig={socialLoginsConfig}
+                        areSocialLoginsVisible={areSocialLoginsVisible}
+                        isEmailPrimary={isEmailPrimary}
+                        isExternalPrimary={isExternalPrimary}
+                        installedExternalWalletConfig={topInstalledConnectorButtons}
+                        isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
+                        isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
+                        totalExternalWallets={totalExternalWallets}
+                        logoAlignment={logoAlignment}
+                        buttonRadius={buttonRadiusType}
+                        handleSocialLoginClick={handleSocialLoginClick}
+                        handleExternalWalletBtnClick={onExternalWalletBtnClick}
+                        handleSocialLoginHeight={handleSocialLoginHeight}
+                        handleExternalWalletClick={preHandleExternalWalletClick}
+                      />
+                    )}
+                    {/* Connect Wallet Screen */}
+                    {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
+                      <ConnectWallet
+                        isDark={isDark}
+                        walletConnectUri={modalState.walletConnectUri}
+                        metamaskConnectUri={modalState.metamaskConnectUri}
+                        config={modalState.externalWalletsConfig}
+                        walletRegistry={walletRegistry}
+                        allExternalButtons={allButtons}
+                        connectorVisibilityMap={connectorVisibilityMap}
+                        customConnectorButtons={customConnectorButtons}
+                        deviceDetails={{
+                          platform: deviceDetails.platform,
+                          browser: deviceDetails.browser,
+                          os: deviceDetails.os as os,
+                        }}
+                        chainNamespace={chainNamespaces}
+                        buttonRadius={buttonRadiusType}
+                        handleWalletDetailsHeight={handleWalletDetailsHeight}
+                        onBackClick={onBackClick}
+                        handleExternalWalletClick={preHandleExternalWalletClick}
+                      />
+                    )}
+                  </>
                 )}
               </>
             )}
@@ -461,38 +528,42 @@ function Root(props: RootProps) {
             <Footer privacyPolicy={privacyPolicy} termsOfService={tncLink} />
 
             {/* Multi Chain Selector */}
-            {bodyState.showMultiChainSelector && (
+            {bodyState.multiChainSelector?.show && (
               <BottomSheet
                 uiConfig={uiConfig}
-                isShown={bodyState.showMultiChainSelector}
-                onClose={() => setBodyState({ showMultiChainSelector: false })}
+                isShown={bodyState.multiChainSelector.show}
+                onClose={() => setBodyState({ ...bodyState, multiChainSelector: { show: false, wallet: null } })}
               >
                 <ConnectWalletChainNamespaceSelect
                   isDark={isDark}
-                  wallet={bodyState.walletDetails}
+                  wallet={bodyState.multiChainSelector.wallet}
                   handleExternalWalletClick={(params) => {
                     preHandleExternalWalletClick(params);
-                    setBodyState({ showMultiChainSelector: false });
+                    setBodyState({ ...bodyState, multiChainSelector: { show: false, wallet: null } });
                   }}
                 />
               </BottomSheet>
             )}
 
             {/* Wallet Install Links */}
-            {bodyState.showWalletDetails && (
-              <BottomSheet uiConfig={uiConfig} isShown={bodyState.showWalletDetails} onClose={() => setBodyState({ showWalletDetails: false })}>
+            {bodyState.installLinks?.show && (
+              <BottomSheet
+                uiConfig={uiConfig}
+                isShown={bodyState.installLinks.show}
+                onClose={() => setBodyState({ ...bodyState, installLinks: { show: false, wallet: null } })}
+              >
                 <p className="w3a--mb-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
                   {t("modal.getWallet")}
                 </p>
                 <div className="w3a--my-4 w3a--flex w3a--justify-center">
                   <Image
-                    imageId={`login-${bodyState.walletDetails.name}`}
-                    hoverImageId={`login-${bodyState.walletDetails.name}`}
+                    imageId={`login-${bodyState.installLinks.wallet.name}`}
+                    hoverImageId={`login-${bodyState.installLinks.wallet.name}`}
                     fallbackImageId="wallet"
                     height="80"
                     width="80"
                     isButton
-                    extension={bodyState.walletDetails.imgExtension}
+                    extension={bodyState.installLinks.wallet.imgExtension}
                   />
                 </div>
                 <ul className="w3a--flex w3a--flex-col w3a--gap-y-2">
