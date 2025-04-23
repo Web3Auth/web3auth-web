@@ -1,4 +1,4 @@
-import { AuthConnectionConfigItem } from "@web3auth/auth";
+import { AuthConnectionConfigItem, serializeError } from "@web3auth/auth";
 import {
   type AUTH_CONNECTION_TYPE,
   type AuthLoginParams,
@@ -188,8 +188,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // handle project config result
     if (projectConfigResult.status === "rejected") {
-      log.error("Failed to fetch project configurations", projectConfigResult.reason);
-      throw WalletInitializationError.notReady("failed to fetch project configurations", projectConfigResult.reason);
+      const error = await serializeError(projectConfigResult.reason);
+      log.error("Failed to fetch project configurations", error);
+      throw WalletInitializationError.notReady("failed to fetch project configurations", error);
     }
     const projectConfig = projectConfigResult.value;
 

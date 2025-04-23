@@ -100,6 +100,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
       if (isConnected && provider) {
         const connector = await setupConnector(provider, wagmiConfig);
         if (!connector) {
+          log.error("Failed to setup react wagmi connector");
           throw new Error("Failed to setup connector");
         }
 

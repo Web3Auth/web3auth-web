@@ -95,6 +95,7 @@ const Web3AuthWagmiProvider = defineComponent({
         if (newIsConnected && provider.value) {
           const connector = await setupConnector(provider.value, wagmiConfig);
           if (!connector) {
+            log.error("Failed to setup vue wagmi connector");
             throw new Error("Failed to setup connector");
           }
 

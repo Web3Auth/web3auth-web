@@ -1,4 +1,4 @@
-import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
+import { SafeEventEmitter, type SafeEventEmitterProvider, serializeError } from "@web3auth/auth";
 import deepmerge from "deepmerge";
 
 import {
@@ -108,8 +108,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         authBuildEnv: this.coreOptions.authBuildEnv,
       });
     } catch (e) {
-      log.error("Failed to fetch project configurations", e);
-      throw WalletInitializationError.notReady("failed to fetch project configurations", e);
+      const error = await serializeError(e);
+      log.error("Failed to fetch project configurations", error);
+      throw WalletInitializationError.notReady("failed to fetch project configurations", error);
     }
 
     // init config
