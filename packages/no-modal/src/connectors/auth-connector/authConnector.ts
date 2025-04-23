@@ -536,7 +536,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       const { payload } = parseToken<Auth0UserInfo>(params.extraLoginOptions.id_token);
       finalUserId = getUserId(
         payload,
-        finalExtraLoginOptions.authConnection as AUTH_CONNECTION_TYPE,
+        loginParams.authConnection as AUTH_CONNECTION_TYPE,
         finalExtraLoginOptions.userIdField,
         finalExtraLoginOptions.isUserIdCaseSensitive
       );

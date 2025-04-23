@@ -58,14 +58,14 @@ const Main = () => {
     const { payload } = decodeToken<{ email: string }>(idToken);
     console.log(payload);
 
-    await web3Auth?.connectTo<AuthLoginParams>(WALLET_CONNECTORS.AUTH, {
+    await web3Auth?.connectTo(WALLET_CONNECTORS.AUTH, {
       authConnection: "custom",
       authConnectionId: "w3a-sfa-web-google",
-      login_hint: payload.email,
+      id_token: idToken,
       extraLoginOptions: {
-        id_token: idToken,
-        mfaLevel: "none",
-      },
+        userIdField: "email",
+        isUserIdCaseSensitive: false,
+      }
     });
   };
 
