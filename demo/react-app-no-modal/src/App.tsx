@@ -1,5 +1,5 @@
 import { AuthLoginParams, CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
-import { Web3AuthNoModal } from "@web3auth/no-modal";
+import { AUTH_CONNECTION, Web3AuthNoModal } from "@web3auth/no-modal";
 import { useEffect, useState } from "react";
 import "./App.css";
 import RPC from "./web3RPC"; // for using web3.js
@@ -13,20 +13,10 @@ function App() {
   useEffect(() => {
     const init = async () => {
       try {
-        const chainConfig = {
-          displayName: "Ethereum Mainnet",
-          chainId: "0x1",
-          rpcTarget: `https://rpc.ankr.com/eth`,
-          blockExplorerUrl: "https://etherscan.io/",
-          ticker: "ETH",
-          tickerName: "Ethereum",
-          logo: "https://images.toruswallet.io/eth.svg",
-          chainNamespace: CHAIN_NAMESPACES.EIP155,
-        }
-
         const web3auth = new Web3AuthNoModal({
-          clientId,
-          web3AuthNetwork: "cyan",
+          clientId: "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ",
+          web3AuthNetwork: "sapphire_mainnet",
+          authBuildEnv: "testing",
         });
 
         setWeb3auth(web3auth);
@@ -44,12 +34,13 @@ function App() {
   }, []);
 
   const login = async () => {
-    if (!web3auth) {
-      uiConsole("web3auth not initialized yet");
-      return;
-    }
-    const web3authProvider = await web3auth.connectTo<AuthLoginParams>(WALLET_CONNECTORS.AUTH, { loginProvider: "google" });
-    setProvider(web3authProvider);
+    await web3auth?.connectTo(WALLET_CONNECTORS.AUTH, {
+      authConnection: AUTH_CONNECTION.CUSTOM,
+      authConnectionId: "w3a-cognito-demo",
+      extraLoginOptions: {
+        clientId: "7i7vcbpuj37mqmfr6qrqbj55s",
+      },
+    });
   };
 
   const authenticateUser = async () => {
