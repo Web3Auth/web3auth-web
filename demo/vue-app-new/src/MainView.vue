@@ -198,6 +198,7 @@ onBeforeMount(() => {
         formData.smartAccountType = json.smartAccountType;
         formData.smartAccountChains = json.smartAccountChains || [];
         formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
+        formData.defaultChainId = json.defaultChainId;
       }
     } catch (error) {}
   }

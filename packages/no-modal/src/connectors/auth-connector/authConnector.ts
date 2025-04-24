@@ -4,10 +4,12 @@ import {
   Auth,
   type AUTH_CONNECTION_TYPE,
   type Auth0ClientOptions,
+  type Auth0UserInfo,
   AuthConnectionConfigItem,
   BUILD_ENV,
   createHandler,
   type CreateHandlerParams,
+  getUserId,
   type LoginParams,
   PopupHandler,
   randomId,
@@ -43,6 +45,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
+import { parseToken } from "../utils";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
@@ -342,6 +345,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         ? this.authInstance?.sessionId
         : this._getFinalPrivKey();
 
+    if (params.id_token) params.extraLoginOptions = { ...params.extraLoginOptions, id_token: params.id_token };
+
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
       // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
       this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
@@ -422,7 +427,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const popupParams: CreateHandlerParams = {
       authConnection: params.authConnection as AUTH_CONNECTION_TYPE,
       authConnectionId: providerConfig.authConnectionId,
-      clientId: providerConfig.clientId,
+      clientId: providerConfig.clientId || jwtParams.client_id,
       groupedAuthConnectionId: providerConfig.groupedAuthConnectionId,
       redirect_uri: `${this.authInstance.baseUrl}/auth`,
       jwtParams,
@@ -513,9 +518,36 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
 
     const loginParams = cloneDeep(params);
+
+    const finalExtraLoginOptions = {
+      ...(loginConfig?.jwtParameters || {}),
+      ...(params.extraLoginOptions || {}),
+    } as Auth0ClientOptions;
+
+    let finalUserId;
+    if (params.login_hint || params.extraLoginOptions?.login_hint) {
+      finalUserId = params.login_hint || params.extraLoginOptions?.login_hint;
+    } else if (params.extraLoginOptions?.id_token) {
+      if (typeof finalExtraLoginOptions.isUserIdCaseSensitive === "undefined") {
+        throw WalletInitializationError.invalidParams(
+          `isUserIdCaseSensitive is required for this connection: ${finalExtraLoginOptions.authConnection}`
+        );
+      }
+      const { payload } = parseToken<Auth0UserInfo>(params.extraLoginOptions.id_token);
+      finalUserId = getUserId(
+        payload,
+        loginParams.authConnection as AUTH_CONNECTION_TYPE,
+        finalExtraLoginOptions.userIdField,
+        finalExtraLoginOptions.isUserIdCaseSensitive
+      );
+    } else {
+      throw WalletLoginError.connectionError("Invalid login hint or id_token");
+    }
+
+    // Adds the login_hint to the extraLoginOptions.
     loginParams.extraLoginOptions = {
-      ...(loginParams.extraLoginOptions || {}),
-      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+      ...finalExtraLoginOptions,
+      login_hint: finalUserId,
     };
 
     delete loginParams.chainId;

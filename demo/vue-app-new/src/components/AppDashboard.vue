@@ -19,7 +19,6 @@ import {
   signTransaction as signEthTransaction,
 } from "../services/ethHandlers";
 import {
-  getConnection,
   getBalance as getSolBalance,
   getPrivateKey as getSolPrivateKey,
   signAllTransactions,
@@ -54,7 +53,7 @@ const balance = useBalance({
   address: address.value,
 });
 
-const { accounts: solanaAccounts } = useSolanaWallet()
+const { accounts: solanaAccounts, connection } = useSolanaWallet()
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -237,8 +236,8 @@ const onGetSolPrivateKey = async () => {
 
 const onSignAndSendTransaction = async () => {
   if (!solanaAccounts.value) throw new Error('No account connected');
-  const conn = await getConnection(provider.value as IProvider);
-  const block = await conn.getLatestBlockhash("finalized");
+  if (!connection.value) throw new Error('No connection');
+  const block = await connection.value?.getLatestBlockhash("finalized");
   const pubKey = solanaAccounts.value[0];
 
   const transactionInstruction = SystemProgram.transfer({
@@ -259,8 +258,8 @@ const onSignAndSendTransaction = async () => {
 
 const onSignSolTransaction = async () => {
   if (!solanaAccounts.value) throw new Error('No account connected');
-  const conn = await getConnection(provider.value as IProvider);
-  const block = await conn.getLatestBlockhash("finalized");
+  if (!connection.value) throw new Error('No connection');
+  const block = await connection.value?.getLatestBlockhash("finalized");
   const pubKey = solanaAccounts.value[0];
 
   const transactionInstruction = SystemProgram.transfer({

@@ -58,6 +58,7 @@ function Login(props: LoginProps) {
   const { bodyState, setBodyState } = useContext(RootContext);
 
   const [countryCode, setCountryCode] = useState<string>("");
+  const [countryFlag, setCountryFlag] = useState<string>("");
   const [passwordlessErrorMessage, setPasswordlessErrorMessage] = useState<string>("");
   const [otpErrorMessage, setOtpErrorMessage] = useState<string>("");
   const [expand, setExpand] = useState(false);
@@ -235,8 +236,8 @@ function Login(props: LoginProps) {
     if (isSmsPasswordLessLoginVisible) {
       const number = loginHint.startsWith("+") ? loginHint : `${countryCode}${loginHint}`;
       const result = await validatePhoneNumber(number);
-      if (result) {
-        const finalLoginHint = typeof result === "string" ? result : number;
+      if (result.success) {
+        const finalLoginHint = typeof result.parsed_number === "string" ? result.parsed_number : number;
         const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS];
         if (connectorConfig.isDefault) {
           return handleSocialLoginClick({
@@ -251,6 +252,7 @@ function Login(props: LoginProps) {
             },
           });
         } else {
+          setCountryFlag(result.country_flag);
           return handleCustomLogin(AUTH_CONNECTION.SMS_PASSWORDLESS, finalLoginHint);
         }
       }
@@ -369,6 +371,7 @@ function Login(props: LoginProps) {
         authConnection={authConnection}
         handleOtpComplete={handleOtpComplete}
         errorMessage={otpErrorMessage}
+        countryFlag={countryFlag}
       />
     );
   }
