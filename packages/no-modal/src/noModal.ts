@@ -332,6 +332,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // merge project config with core options, code config take precedence over project config
     const { walletScope, ...configWithoutWalletScope } = projectConfig?.smartAccounts || {};
+    // TODO: use chainMap to merge chains
     this.coreOptions.accountAbstractionConfig = deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {});
 
     // determine if we should use AA with external wallet
