@@ -9,5 +9,6 @@ export const baseConfig = {
     "./src/vue/wagmi/index.ts",
     "./src/connectors/coinbase-connector/index.ts",
     "./src/providers/xrpl-provider/index.ts",
+    "./src/providers/ethereum-mpc-provider/index.ts",
   ],
 };
