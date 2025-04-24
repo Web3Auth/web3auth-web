@@ -1,38 +1,40 @@
+import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import { SafeEventEmitter, type SafeEventEmitterProvider, serializeError } from "@web3auth/auth";
 import deepmerge from "deepmerge";
 
 import {
   CHAIN_NAMESPACES,
-  ChainNamespaceType,
-  CONNECTED_EVENT_DATA,
+  type ChainNamespaceType,
+  type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
-  CONNECTOR_STATUS_TYPE,
-  CustomChainConfig,
+  type CONNECTOR_STATUS_TYPE,
+  type CustomChainConfig,
   fetchProjectConfig,
-  IBaseProvider,
-  IConnector,
-  IPlugin,
-  IProvider,
+  type IBaseProvider,
+  type IConnector,
+  type IPlugin,
+  type IProvider,
   isHexStrict,
-  IWeb3Auth,
-  IWeb3AuthCoreOptions,
+  type IWeb3Auth,
+  type IWeb3AuthCoreOptions,
   log,
-  LoginParamMap,
+  type LoginParamMap,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
-  ProjectConfig,
+  type ProjectConfig,
   SMART_ACCOUNT_WALLET_SCOPE,
+  type SmartAccountsConfig,
   storageAvailable,
-  UserAuthInfo,
-  UserInfo,
-  WALLET_CONNECTOR_TYPE,
+  type UserAuthInfo,
+  type UserInfo,
+  type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
-  Web3AuthNoModalEvents,
+  type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
 import { authConnector } from "./connectors/auth-connector";
@@ -330,10 +332,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const isAAEnabled = Boolean(this.coreOptions.accountAbstractionConfig || projectConfig?.smartAccounts);
     if (!isAAEnabled) return;
 
-    // merge project config with core options, code config take precedence over project config
-    const { walletScope, ...configWithoutWalletScope } = projectConfig?.smartAccounts || {};
-    // TODO: use chainMap to merge chains
-    this.coreOptions.accountAbstractionConfig = deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {});
+    // merge smart account config from project config with core options, core options will take precedence over project config
+    const { walletScope, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
+    const aaChainMap = new Map<string, AccountAbstractionMultiChainConfig["chains"][number]>();
+    const allAaChains = [...(configWithoutWalletScope?.chains || []), ...(this.coreOptions.accountAbstractionConfig?.chains || [])];
+    for (const chain of allAaChains) {
+      const existingChain = aaChainMap.get(chain.chainId);
+      if (!existingChain) aaChainMap.set(chain.chainId, chain);
+      else aaChainMap.set(chain.chainId, { ...existingChain, ...chain });
+    }
+
+    this.coreOptions.accountAbstractionConfig = {
+      ...deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {}),
+      chains: Array.from(aaChainMap.values()),
+    };
 
     // determine if we should use AA with external wallet
     if (this.coreOptions.useAAWithExternalWallet === undefined) {
