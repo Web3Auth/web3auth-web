@@ -40,6 +40,7 @@ import {
 import { authConnector } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
+import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
 
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
@@ -54,6 +55,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
   public cachedConnector: string | null = null;
+
+  protected aaProvider: AccountAbstractionProvider | null = null;
 
   protected currentChainId: string;
 
@@ -92,6 +95,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   get connectedConnector(): IConnector<unknown> | null {
     return this.getConnector(this.connectedConnectorName, this.currentChain?.chainNamespace);
+  }
+
+  get accountAbstractionProvider(): AccountAbstractionProvider | null {
+    return this.aaProvider;
   }
 
   set provider(_: IProvider | null) {
@@ -477,22 +484,29 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
 
-      // setup AA provider for external wallets on EVM chains, no need for app wallet as it uses WS provider which already supports AA
+      // setup AA provider if AA is enabled
       const { accountAbstractionConfig } = this.coreOptions;
-      const doesAASupportCurrentChain =
+      const isAaSupportedForCurrentChain =
         this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
         accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
-      const isExternalWalletAndAAEnabled = data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet;
-      if (isExternalWalletAndAAEnabled && doesAASupportCurrentChain) {
+      if (isAaSupportedForCurrentChain && (data.connector === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
+        const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
+        // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
+        const eoaProvider: IProvider = data.connector === WALLET_CONNECTORS.AUTH ? await toEoaProvider(provider) : provider;
         const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
-        const { accountAbstractionProvider } = await import("./providers/account-abstraction-provider");
         const aaProvider = await accountAbstractionProvider({
           accountAbstractionConfig,
-          provider,
+          provider: eoaProvider,
           chain: this.currentChain,
           chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
         });
-        finalProvider = aaProvider;
+        this.aaProvider = aaProvider;
+
+        // if external wallet is used and AA is enabled for external wallets, use AA provider
+        // for embedded wallets, we use ws-embed provider which already supports AA
+        if (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet) {
+          finalProvider = this.aaProvider;
+        }
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
