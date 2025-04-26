@@ -53,7 +53,7 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^20.8.0",
+    "@nx/nx-linux-x64-gnu": "^20.8.1",
     "@rollup/rollup-linux-x64-gnu": "^4.40.0"
   },
   "private": true,
