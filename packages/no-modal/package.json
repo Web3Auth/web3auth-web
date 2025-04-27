@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "10.0.0-beta.7",
+  "version": "10.0.0-beta.8",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -107,11 +107,11 @@
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
     "@types/react": "^19.1.2",
-    "react": "^19.1.0",
-    "vue": "^3.x",
     "@wagmi/core": "^2.14.5",
     "@wagmi/vue": "^0.1.16",
-    "viem": "^2.23.2"
+    "react": "^19.1.0",
+    "viem": "^2.23.2",
+    "vue": "^3.x"
   },
   "exports": {
     ".": {
