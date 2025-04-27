@@ -111,7 +111,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         this.status = CONNECTOR_STATUS.CONNECTING;
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
-        if (!this.metamaskSDK.isExtensionActive() && this.metamaskOptions.headless) {
+        if (!this.metamaskSDK.isExtensionActive() && this.metamaskOptions?.headless) {
           // when metamask is not injected and headless is true, broadcast the uri to the login modal
           this.metamaskSDK.getProvider().on("display_uri", (uri) => {
             this.updateConnectorData({ uri } as MetaMaskConnectorData);

@@ -18,7 +18,7 @@ import { type BundlerClient, createBundlerClient, createPaymasterClient, type Pa
 
 import { CHAIN_NAMESPACES, type CustomChainConfig, type IProvider, WalletInitializationError } from "../../../base";
 import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../../../providers/base-provider";
-import { createAaMiddleware, eoaProviderAsMiddleware } from "../rpc/ethRpcMiddlewares";
+import { createAaMiddleware, createEoaMiddleware, providerAsMiddleware } from "../rpc/ethRpcMiddlewares";
 import { getProviderHandlers } from "./utils";
 
 interface AccountAbstractionProviderConfig extends BaseProviderConfig {
@@ -153,7 +153,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       handlers: providerHandlers,
     });
     engine.push(aaMiddleware);
-    const eoaMiddleware = eoaProviderAsMiddleware(eoaProvider);
+    const eoaMiddleware = providerAsMiddleware(eoaProvider);
     engine.push(eoaMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
@@ -191,7 +191,7 @@ export const accountAbstractionProvider = async ({
   chain: CustomChainConfig;
   chains: CustomChainConfig[];
   provider: IProvider;
-}) => {
+}): Promise<AccountAbstractionProvider> => {
   let smartAccountInit: ISmartAccount;
   const { smartAccountType, chains: smartAccountChainsConfig } = accountAbstractionConfig;
   const { smartAccountConfig } = smartAccountChainsConfig.find((config) => config.chainId === chain.chainId) || {};
@@ -238,4 +238,13 @@ export const accountAbstractionProvider = async ({
   });
 };
 
-export { type AccountAbstractionMultiChainConfig, type BundlerConfig, type PaymasterConfig, SMART_ACCOUNT };
+export const toEoaProvider = async (aaProvider: IProvider): Promise<IProvider> => {
+  // derive EOA provider from AA provider
+  const engine = new JRPCEngine();
+  const eoaMiddleware = await createEoaMiddleware({ aaProvider });
+  engine.push(eoaMiddleware);
+  engine.push(providerAsMiddleware(aaProvider));
+  return providerFromEngine(engine) as IProvider;
+};
+
+export { type AccountAbstractionMultiChainConfig, type AccountAbstractionProvider, type BundlerConfig, type PaymasterConfig, SMART_ACCOUNT };
