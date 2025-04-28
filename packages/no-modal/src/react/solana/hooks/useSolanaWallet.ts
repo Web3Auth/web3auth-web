@@ -1,6 +1,7 @@
 import { Connection } from "@solana/web3.js";
 import { useEffect, useMemo, useState } from "react";
 
+import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { SolanaWallet } from "../../../providers/solana-provider";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
@@ -27,6 +28,9 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   useEffect(() => {
     const init = async () => {
       if (!solanaWallet) return;
+      if (!web3Auth?.currentChain?.chainNamespace || web3Auth.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        return;
+      }
       const accounts = await solanaWallet.requestAccounts();
       if (accounts?.length > 0) {
         setAccounts(accounts);
