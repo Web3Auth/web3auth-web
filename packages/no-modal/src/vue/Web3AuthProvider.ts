@@ -7,8 +7,7 @@ import {
   type IProvider,
   WalletInitializationError,
   Web3AuthContextKey,
-} from "@/core/base";
-
+} from "../base";
 import { Web3AuthNoModal } from "../noModal";
 import { IWeb3AuthInnerContext, Web3AuthContextConfig } from "./interfaces";
 import { WalletServicesInnerProvider } from "./WalletServicesInnerProvider";

@@ -1,7 +1,6 @@
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
-import { CONNECTED_EVENT_DATA, CONNECTOR_EVENTS, CONNECTOR_STATUS, CONNECTOR_STATUS_TYPE, IProvider, WalletInitializationError } from "@/core/base";
-
+import { CONNECTED_EVENT_DATA, CONNECTOR_EVENTS, CONNECTOR_STATUS, CONNECTOR_STATUS_TYPE, IProvider, WalletInitializationError } from "../../base";
 import { Web3AuthNoModal } from "../../noModal";
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 

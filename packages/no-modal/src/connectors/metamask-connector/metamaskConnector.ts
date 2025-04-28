@@ -19,18 +19,18 @@ import {
   type ConnectorParams,
   type CustomChainConfig,
   type IProvider,
+  type MetaMaskConnectorData,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletLoginError,
   Web3AuthError,
-} from "@/core/base";
-
+} from "../../base";
 import { BaseEvmConnector } from "../base-evm-connector";
 import { getSiteIcon, getSiteName } from "../utils";
 
 export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
-  connectorSettings?: MetaMaskSDKOptions;
+  connectorSettings?: Partial<MetaMaskSDKOptions>;
 }
 
 class MetaMaskConnector extends BaseEvmConnector<void> {
@@ -48,7 +48,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   private metamaskSDK: MetaMaskSDK = null;
 
-  private metamaskOptions: MetaMaskSDKOptions;
+  private metamaskOptions: Partial<MetaMaskSDKOptions>;
 
   constructor(connectorOptions: MetaMaskConnectorOptions) {
     super(connectorOptions);
@@ -79,9 +79,16 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       iconUrl,
     };
 
-    // Initialize the MetaMask SDK
+    // initialize the MetaMask SDK
     const metamaskOptions = deepmerge(this.metamaskOptions || {}, { dappMetadata: appMetadata });
     this.metamaskSDK = new MetaMaskSDK(metamaskOptions);
+    // Work around: in case there is an existing SDK instance in memory (window.mmsdk exists), it won't initialize the new SDK instance again
+    // and return the existing instance instead of undefined (this is an assumption, not sure if it's a bug or feature of the MetaMask SDK)
+    const initResult = await this.metamaskSDK.init();
+    if (initResult) {
+      this.metamaskSDK = initResult;
+    }
+    this.isInjected = this.metamaskSDK.isExtensionActive();
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
@@ -100,11 +107,19 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-
-    this.status = CONNECTOR_STATUS.CONNECTING;
-    this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
     try {
-      await this.metamaskSDK.connect();
+      if (this.status !== CONNECTOR_STATUS.CONNECTING) {
+        this.status = CONNECTOR_STATUS.CONNECTING;
+        this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
+        if (!this.metamaskSDK.isExtensionActive() && this.metamaskOptions?.headless) {
+          // when metamask is not injected and headless is true, broadcast the uri to the login modal
+          this.metamaskSDK.getProvider().on("display_uri", (uri) => {
+            this.updateConnectorData({ uri } as MetaMaskConnectorData);
+          });
+        }
+        await this.metamaskSDK.connect();
+      }
+
       this.metamaskProvider = this.metamaskSDK.getProvider() as unknown as IProvider;
       if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
 
@@ -205,7 +220,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 }
 
-export const metaMaskConnector = (params?: MetaMaskSDKOptions): ConnectorFn => {
+export const metaMaskConnector = (params?: Partial<MetaMaskSDKOptions>): ConnectorFn => {
   return ({ coreOptions }: ConnectorParams) => {
     return new MetaMaskConnector({ connectorSettings: params, coreOptions });
   };

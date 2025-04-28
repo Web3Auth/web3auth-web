@@ -1,6 +1,6 @@
 import type { EngineTypes, SignClientTypes } from "@walletconnect/types";
 
-import { BaseConnectorSettings } from "@/core/base";
+import { BaseConnectorSettings } from "../../base";
 
 export interface OpenOptions {
   uri: string;

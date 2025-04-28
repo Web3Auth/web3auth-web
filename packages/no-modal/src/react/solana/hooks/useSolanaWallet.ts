@@ -1,16 +1,17 @@
+import { Connection } from "@solana/web3.js";
 import { useEffect, useMemo, useState } from "react";
 
-import { SolanaWallet } from "@/core/solana-provider";
-
+import { SolanaWallet } from "../../../providers/solana-provider";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
   accounts: string[] | null;
   solanaWallet: SolanaWallet | null;
+  connection: Connection | null;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
-  const { provider } = useWeb3Auth();
+  const { provider, web3Auth } = useWeb3Auth();
   const [accounts, setAccounts] = useState<string[] | null>(null);
 
   const solanaWallet = useMemo(() => {
@@ -18,8 +19,13 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     return new SolanaWallet(provider);
   }, [provider]);
 
+  const connection = useMemo(() => {
+    if (!web3Auth || !provider) return null;
+    return new Connection(web3Auth.currentChain.rpcTarget);
+  }, [web3Auth, provider]);
+
   useEffect(() => {
-    const fetchAccounts = async () => {
+    const init = async () => {
       if (!solanaWallet) return;
       const accounts = await solanaWallet.requestAccounts();
       if (accounts?.length > 0) {
@@ -27,8 +33,8 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
       }
     };
 
-    if (solanaWallet) fetchAccounts();
+    if (solanaWallet) init();
   }, [solanaWallet]);
 
-  return { solanaWallet, accounts };
+  return { solanaWallet, accounts, connection };
 };

@@ -1,6 +1,6 @@
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
-import { log, type ModalSignInMethodType, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WalletLoginError } from "@web3auth/no-modal";
+import { log, type ModalSignInMethodType, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WalletLoginError } from "@web3auth/no-modal";
 import { MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -58,6 +58,7 @@ function Login(props: LoginProps) {
   const { bodyState, setBodyState } = useContext(RootContext);
 
   const [countryCode, setCountryCode] = useState<string>("");
+  const [countryFlag, setCountryFlag] = useState<string>("");
   const [passwordlessErrorMessage, setPasswordlessErrorMessage] = useState<string>("");
   const [otpErrorMessage, setOtpErrorMessage] = useState<string>("");
   const [expand, setExpand] = useState(false);
@@ -235,8 +236,8 @@ function Login(props: LoginProps) {
     if (isSmsPasswordLessLoginVisible) {
       const number = loginHint.startsWith("+") ? loginHint : `${countryCode}${loginHint}`;
       const result = await validatePhoneNumber(number);
-      if (result) {
-        const finalLoginHint = typeof result === "string" ? result : number;
+      if (result.success) {
+        const finalLoginHint = typeof result.parsed_number === "string" ? result.parsed_number : number;
         const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS];
         if (connectorConfig.isDefault) {
           return handleSocialLoginClick({
@@ -251,6 +252,7 @@ function Login(props: LoginProps) {
             },
           });
         } else {
+          setCountryFlag(result.country_flag);
           return handleCustomLogin(AUTH_CONNECTION.SMS_PASSWORDLESS, finalLoginHint);
         }
       }
@@ -328,12 +330,26 @@ function Login(props: LoginProps) {
   };
 
   const handleInstalledWalletClick = (wallet: ExternalButton) => {
+    // for non-injected Metamask, show QR code to connect
+    if (wallet.name === WALLET_CONNECTORS.METAMASK && !wallet.hasInjectedWallet) {
+      setBodyState({
+        ...bodyState,
+        metamaskQrCode: {
+          show: true,
+          wallet: wallet,
+        },
+      });
+      return;
+    }
+
     // when having multiple namespaces, ask user to select one
     if (wallet.chainNamespaces?.length > 1) {
       setBodyState({
         ...bodyState,
-        showMultiChainSelector: true,
-        walletDetails: wallet,
+        multiChainSelector: {
+          show: true,
+          wallet: wallet,
+        },
       });
     } else {
       handleExternalWalletClick({ connector: wallet.name });
@@ -355,6 +371,7 @@ function Login(props: LoginProps) {
         authConnection={authConnection}
         handleOtpComplete={handleOtpComplete}
         errorMessage={otpErrorMessage}
+        countryFlag={countryFlag}
       />
     );
   }

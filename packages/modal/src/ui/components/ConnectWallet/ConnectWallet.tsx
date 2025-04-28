@@ -1,4 +1,4 @@
-import { type ChainNamespaceType, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { type ChainNamespaceType, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
@@ -16,6 +16,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     isDark,
     config,
     walletConnectUri,
+    metamaskConnectUri,
     walletRegistry,
     allExternalButtons,
     customConnectorButtons,
@@ -28,7 +29,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     handleWalletDetailsHeight,
   } = props;
 
-  const { bodyState, setBodyState, toast, setToast } = useContext(RootContext);
+  const { bodyState, setBodyState } = useContext(RootContext);
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = useState(false);
@@ -73,7 +74,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
       ...customConnectorButtons,
       ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
-    ];
+    ].sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1));
 
     const buttonSet = new Set();
     return buttons
@@ -114,6 +115,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   const filteredButtons = useMemo(() => {
     if (walletDiscoverySupported) {
       return [...allUniqueButtons.filter((button) => button.hasInjectedWallet), ...allUniqueButtons.filter((button) => !button.hasInjectedWallet)]
+        .sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1))
         .filter((button) => selectedChain === "all" || button.chainNamespaces.includes(selectedChain as ChainNamespaceType))
         .filter((button) => button.name.toLowerCase().includes(walletSearch.toLowerCase()));
     }
@@ -140,8 +142,10 @@ function ConnectWallet(props: ConnectWalletProps) {
     if (isChainNamespaceSelectorRequired) {
       setBodyState({
         ...bodyState,
-        showMultiChainSelector: true,
-        walletDetails: button,
+        multiChainSelector: {
+          show: true,
+          wallet: button,
+        },
       });
       return;
     }
@@ -161,8 +165,10 @@ function ConnectWallet(props: ConnectWalletProps) {
     } else {
       setBodyState({
         ...bodyState,
-        showWalletDetails: true,
-        walletDetails: button,
+        installLinks: {
+          show: true,
+          wallet: button,
+        },
       });
     }
   };
@@ -171,6 +177,15 @@ function ConnectWallet(props: ConnectWalletProps) {
     setIsShowAllWallets(true);
   };
 
+  const qrCodeValue = useMemo(() => {
+    if (!selectedWallet) return null;
+
+    if (selectedButton.name === WALLET_CONNECTORS.METAMASK && !selectedButton.hasInjectedWallet) {
+      return metamaskConnectUri;
+    }
+    return walletConnectUri;
+  }, [metamaskConnectUri, selectedButton, selectedWallet, walletConnectUri]);
+
   return (
     <div className="w3a--relative w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
       {/* Header */}
@@ -178,15 +193,11 @@ function ConnectWallet(props: ConnectWalletProps) {
       {/* Body */}
       {selectedWallet ? (
         <ConnectWalletQrCode
-          toast={toast}
-          setToast={setToast}
-          walletConnectUri={walletConnectUri}
+          qrCodeValue={qrCodeValue}
           isDark={isDark}
           selectedButton={selectedButton}
-          bodyState={bodyState}
           primaryColor={selectedButton.walletRegistryItem?.primaryColor}
           logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
-          setBodyState={setBodyState}
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">

@@ -1,7 +1,9 @@
+import "./App.css";
+
 import { AuthLoginParams, CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
 import { AUTH_CONNECTION, Web3AuthNoModal } from "@web3auth/no-modal";
 import { useEffect, useState } from "react";
-import "./App.css";
+
 import RPC from "./web3RPC"; // for using web3.js
 
 const clientId = "BEglQSgt4cUWcj6SKRdu5QkOXTsePmMcusG5EAoyjyOYKlVRjIF1iCNnMOTfpzCiunHRrMui8TIwQPXdkQ8Yxuk"; // get from https://dashboard.web3auth.io

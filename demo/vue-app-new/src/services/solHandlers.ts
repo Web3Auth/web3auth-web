@@ -3,7 +3,7 @@ import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } f
 import { CustomChainConfig, IProvider, log, SolanaWallet, TransactionOrVersionedTransaction } from "@web3auth/modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-const getConnection = async (provider: IProvider): Promise<Connection> => {
+export const getConnection = async (provider: IProvider): Promise<Connection> => {
   const solanaWallet = new SolanaWallet(provider);
 
   const connectionConfig = await solanaWallet.request<never, CustomChainConfig>({ method: "solana_provider_config" });

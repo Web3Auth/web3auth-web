@@ -12,25 +12,6 @@ export type ErrorCodes = {
   [key: number]: string;
 };
 
-export function serializeError(args: unknown[]): [Error, unknown[]] {
-  // Find first Error or create an "unknown" Error to keep stack trace.
-  const index = args.findIndex((arg) => arg instanceof Error);
-  const msgIndex = args.findIndex((arg) => typeof arg === "string");
-  const apiErrorIdx = args.findIndex((arg) => arg && typeof arg === "object" && "status" in arg && "type" in arg);
-  let err: Error;
-  if (apiErrorIdx !== -1) {
-    const apiError = args[apiErrorIdx] as Response;
-    err = new Error(`${apiError.status} ${apiError.type.toString()} ${apiError.statusText}`);
-  } else if (index !== -1) {
-    err = args.splice(index, 1)[0] as Error;
-  } else if (msgIndex !== -1) {
-    err = new Error(args.splice(msgIndex, 1)[0] as string);
-  } else {
-    err = new Error("Unknown error");
-  }
-  return [err, args];
-}
-
 export abstract class Web3AuthError extends CustomError implements IWeb3AuthError {
   code: number;
 
@@ -54,7 +35,7 @@ export abstract class Web3AuthError extends CustomError implements IWeb3AuthErro
       name: this.name,
       code: this.code,
       message: this.message,
-      cause: serializeError([this.cause]),
+      cause: this.cause,
     };
   }
 

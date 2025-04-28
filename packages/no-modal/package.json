@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "10.0.0-beta.6",
+  "version": "10.0.0-beta.8",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -34,16 +34,24 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
+    "@wagmi/core": ">=2.14",
+    "@wagmi/vue": ">=0.1",
     "react": ">=18",
-    "viem": "^2.23.x",
+    "viem": ">=2.23",
     "vue": "^3.x",
-    "wagmi": "^2.x"
+    "wagmi": ">=2.14"
   },
   "peerDependenciesMeta": {
     "@coinbase/wallet-sdk": {
       "optional": true
     },
     "@tanstack/react-query": {
+      "optional": true
+    },
+    "@wagmi/core": {
+      "optional": true
+    },
+    "@wagmi/vue": {
       "optional": true
     },
     "react": {
@@ -60,12 +68,12 @@
     "@ethereumjs/util": "^9.1.0",
     "@metamask/sdk": "^0.32.1",
     "@solana/wallet-standard-features": "^1.3.0",
-    "@solana/web3.js": "^1.98.0",
-    "@toruslabs/base-controllers": "^8.4.0",
+    "@solana/web3.js": "^1.98.2",
+    "@toruslabs/base-controllers": "^8.4.3",
     "@toruslabs/bs58": "^1.0.0",
     "@toruslabs/constants": "^15.0.0",
-    "@toruslabs/eccrypto": "^6.0.2",
-    "@toruslabs/ethereum-controllers": "^8.4.1",
+    "@toruslabs/eccrypto": "^6.1.0",
+    "@toruslabs/ethereum-controllers": "^8.4.3",
     "@toruslabs/http-helpers": "^8.1.1",
     "@toruslabs/loglevel-sentry": "^8.1.0",
     "@toruslabs/secure-pub-sub": "3.0.2",
@@ -79,20 +87,19 @@
     "@web3auth/auth": "^10.4.0",
     "@web3auth/ws-embed": "^5.0.5",
     "assert": "^2.1.0",
-    "bignumber.js": "^9.2.1",
-    "bn.js": "^5.2.1",
+    "bignumber.js": "~9.2.1",
+    "bn.js": "^5.2.2",
     "bowser": "^2.11.0",
     "deepmerge": "^4.3.1",
-    "ethers": "^6.13.5",
+    "ethers": "^6.13.7",
     "json-rpc-random-id": "^1.0.1",
     "jsonschema": "^1.5.0",
     "jwt-decode": "^4.0.0",
     "loglevel": "^1.9.2",
     "mipd": "^0.0.7",
-    "permissionless": "^0.2.42",
+    "permissionless": "^0.2.43",
     "ripple-keypairs": "^1.3.1",
     "ts-custom-error": "^3.3.1",
-    "viem": "^2.27.2",
     "xrpl": "^2.14.0"
   },
   "devDependencies": {
@@ -100,7 +107,10 @@
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
     "@types/react": "^19.1.2",
+    "@wagmi/core": "^2.14.5",
+    "@wagmi/vue": "^0.1.16",
     "react": "^19.1.0",
+    "viem": "^2.23.2",
     "vue": "^3.x"
   },
   "exports": {
@@ -120,8 +130,8 @@
       "types": "./dist/lib.cjs/types/react/wagmi/index.d.ts"
     },
     "./react/solana": {
-      "import": "./dist/lib.esm/packages/modal/src/react/solana/index.js",
-      "require": "./dist/lib.cjs/packages/modal/src/react/solana/index.js",
+      "import": "./dist/lib.esm/react/solana/index.js",
+      "require": "./dist/lib.cjs/react/solana/index.js",
       "types": "./dist/lib.cjs/types/react/solana/index.d.ts"
     },
     "./vue": {
@@ -129,10 +139,30 @@
       "require": "./dist/lib.cjs/vue/index.js",
       "types": "./dist/lib.cjs/types/vue/index.d.ts"
     },
+    "./vue/solana": {
+      "import": "./dist/lib.esm/vue/solana/index.js",
+      "require": "./dist/lib.cjs/vue/solana/index.js",
+      "types": "./dist/lib.cjs/types/vue/solana/index.d.ts"
+    },
+    "./vue/wagmi": {
+      "import": "./dist/lib.esm/vue/wagmi/index.js",
+      "require": "./dist/lib.cjs/vue/wagmi/index.js",
+      "types": "./dist/lib.cjs/types/vue/wagmi/index.d.ts"
+    },
     "./connectors/coinbase-connector": {
       "import": "./dist/lib.esm/connectors/coinbase-connector/index.js",
       "require": "./dist/lib.cjs/connectors/coinbase-connector/index.js",
       "types": "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
+    },
+    "./providers/xrpl-provider": {
+      "import": "./dist/lib.esm/providers/xrpl-provider/index.js",
+      "require": "./dist/lib.cjs/providers/xrpl-provider/index.js",
+      "types": "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
+    },
+    "./providers/ethereum-mpc-provider": {
+      "import": "./dist/lib.esm/providers/ethereum-mpc-provider/index.js",
+      "require": "./dist/lib.cjs/providers/ethereum-mpc-provider/index.js",
+      "types": "./dist/lib.cjs/types/providers/ethereum-mpc-provider/index.d.ts"
     }
   },
   "typesVersions": {
@@ -149,8 +179,17 @@
       "vue": [
         "./dist/lib.cjs/types/vue/index.d.ts"
       ],
+      "vue/solana": [
+        "./dist/lib.cjs/types/vue/solana/index.d.ts"
+      ],
       "connectors/coinbase-connector": [
         "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
+      ],
+      "providers/xrpl-provider": [
+        "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
+      ],
+      "providers/ethereum-mpc-provider": [
+        "./dist/lib.cjs/types/providers/ethereum-mpc-provider/index.d.ts"
       ]
     }
   },

@@ -1,7 +1,7 @@
+import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 
-import { IProvider } from "@/core/base";
-
+import { IProvider } from "../../../base";
 import { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../ethereum-provider";
 
 export async function createAaMiddleware({
@@ -11,7 +11,7 @@ export async function createAaMiddleware({
   eoaProvider: IProvider;
   handlers: IEthProviderHandlers;
 }): Promise<JRPCMiddleware<unknown, unknown>> {
-  const [eoaAddress] = (await eoaProvider.request({ method: "eth_accounts" })) as string[];
+  const [eoaAddress] = (await eoaProvider.request({ method: METHOD_TYPES.GET_ACCOUNTS })) as string[];
 
   /**
    * Validates the keyholder address, and returns a normalized (i.e. lowercase)
@@ -188,7 +188,24 @@ export async function createAaMiddleware({
   });
 }
 
-export function eoaProviderAsMiddleware(provider: IProvider): JRPCMiddleware<unknown, unknown> {
+export async function createEoaMiddleware({ aaProvider }: { aaProvider: IProvider }): Promise<JRPCMiddleware<unknown, unknown>> {
+  async function getAccounts(_req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    const [, eoaAddress] = await aaProvider.request<never, string[]>({ method: METHOD_TYPES.GET_ACCOUNTS });
+    res.result = [eoaAddress];
+  }
+
+  async function requestAccounts(_req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    const [, eoaAddress] = await aaProvider.request<never, string[]>({ method: METHOD_TYPES.ETH_REQUEST_ACCOUNTS });
+    res.result = [eoaAddress];
+  }
+
+  return createScaffoldMiddleware({
+    eth_accounts: createAsyncMiddleware(getAccounts),
+    eth_requestAccounts: createAsyncMiddleware(requestAccounts),
+  });
+}
+
+export function providerAsMiddleware(provider: IProvider): JRPCMiddleware<unknown, unknown> {
   return async (req, res, _next, end) => {
     // send request to provider
     try {

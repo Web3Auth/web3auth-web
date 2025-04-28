@@ -1,45 +1,47 @@
-import { SafeEventEmitter, type SafeEventEmitterProvider } from "@web3auth/auth";
+import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
+import { SafeEventEmitter, type SafeEventEmitterProvider, serializeError } from "@web3auth/auth";
 import deepmerge from "deepmerge";
 
-import { authConnector } from "@/core/auth-connector";
 import {
   CHAIN_NAMESPACES,
-  ChainNamespaceType,
-  CONNECTED_EVENT_DATA,
+  type ChainNamespaceType,
+  type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
-  CONNECTOR_STATUS_TYPE,
-  CustomChainConfig,
+  type CONNECTOR_STATUS_TYPE,
+  type CustomChainConfig,
   fetchProjectConfig,
-  IBaseProvider,
-  IConnector,
-  IPlugin,
-  IProvider,
+  type IBaseProvider,
+  type IConnector,
+  type IPlugin,
+  type IProvider,
   isHexStrict,
-  IWeb3Auth,
-  IWeb3AuthCoreOptions,
+  type IWeb3Auth,
+  type IWeb3AuthCoreOptions,
   log,
-  LoginParamMap,
+  type LoginParamMap,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
-  ProjectConfig,
+  type ProjectConfig,
   SMART_ACCOUNT_WALLET_SCOPE,
+  type SmartAccountsConfig,
   storageAvailable,
-  UserAuthInfo,
-  UserInfo,
-  WALLET_CONNECTOR_TYPE,
+  type UserAuthInfo,
+  type UserInfo,
+  type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
-  Web3AuthNoModalEvents,
+  type Web3AuthNoModalEvents,
   withAbort,
-} from "@/core/base";
-import { CommonJRPCProvider } from "@/core/base-provider";
-import { metaMaskConnector } from "@/core/metamask-connector";
-
+} from "./base";
+import { authConnector } from "./connectors/auth-connector";
+import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
+import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
+import { CommonJRPCProvider } from "./providers/base-provider";
 
 const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
 
@@ -53,6 +55,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
   public cachedConnector: string | null = null;
+
+  protected aaProvider: AccountAbstractionProvider | null = null;
 
   protected currentChainId: string;
 
@@ -93,6 +97,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.getConnector(this.connectedConnectorName, this.currentChain?.chainNamespace);
   }
 
+  get accountAbstractionProvider(): AccountAbstractionProvider | null {
+    return this.aaProvider;
+  }
+
   set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
@@ -109,8 +117,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         authBuildEnv: this.coreOptions.authBuildEnv,
       });
     } catch (e) {
-      log.error("Failed to fetch project configurations", e);
-      throw WalletInitializationError.notReady("failed to fetch project configurations", e);
+      const error = await serializeError(e);
+      log.error("Failed to fetch project configurations", error);
+      throw WalletInitializationError.notReady("failed to fetch project configurations", error);
     }
 
     // init config
@@ -330,9 +339,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const isAAEnabled = Boolean(this.coreOptions.accountAbstractionConfig || projectConfig?.smartAccounts);
     if (!isAAEnabled) return;
 
-    // merge project config with core options, code config take precedence over project config
-    const { walletScope, ...configWithoutWalletScope } = projectConfig?.smartAccounts || {};
-    this.coreOptions.accountAbstractionConfig = deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {});
+    // merge smart account config from project config with core options, core options will take precedence over project config
+    const { walletScope, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
+    const aaChainMap = new Map<string, AccountAbstractionMultiChainConfig["chains"][number]>();
+    const allAaChains = [...(configWithoutWalletScope?.chains || []), ...(this.coreOptions.accountAbstractionConfig?.chains || [])];
+    for (const chain of allAaChains) {
+      const existingChain = aaChainMap.get(chain.chainId);
+      if (!existingChain) aaChainMap.set(chain.chainId, chain);
+      else aaChainMap.set(chain.chainId, { ...existingChain, ...chain });
+    }
+
+    this.coreOptions.accountAbstractionConfig = {
+      ...deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {}),
+      chains: Array.from(aaChainMap.values()),
+    };
 
     // determine if we should use AA with external wallet
     if (this.coreOptions.useAAWithExternalWallet === undefined) {
@@ -370,7 +390,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  protected async loadConnectors({ projectConfig }: { projectConfig: ProjectConfig }) {
+  protected async loadConnectors({ projectConfig, modalMode }: { projectConfig: ProjectConfig; modalMode?: boolean }) {
     // always add auth connector
     const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
     const config = {
@@ -385,7 +405,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (isMipdEnabled) {
       // Solana chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
-        const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("@/core/injected-solana-connector");
+        const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("./connectors/injected-solana-connector");
         const solanaMipd = createSolanaMipd();
         // subscribe to new injected connectors
         solanaMipd.on("register", async (...wallets) => {
@@ -401,7 +421,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
       // EVM chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
-        const { createMipd, injectedEvmConnector } = await import("@/core/injected-evm-connector");
+        const { createMipd, injectedEvmConnector } = await import("./connectors/injected-evm-connector");
         const evmMipd = createMipd();
         // subscribe to new injected connectors
         evmMipd.subscribe((providerDetails) => {
@@ -413,11 +433,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
-    connectorFns.push(metaMaskConnector());
+    // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
+    connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
 
     // add WalletConnectV2 connector if external wallets are enabled
     if (isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
-      const { walletConnectV2Connector } = await import("@/core/wallet-connect-v2-connector");
+      const { walletConnectV2Connector } = await import("./connectors/wallet-connect-v2-connector");
       connectorFns.push(walletConnectV2Connector());
     }
 
@@ -463,22 +484,29 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
 
-      // setup AA provider for external wallets on EVM chains, no need for app wallet as it uses WS provider which already supports AA
+      // setup AA provider if AA is enabled
       const { accountAbstractionConfig } = this.coreOptions;
-      const doesAASupportCurrentChain =
+      const isAaSupportedForCurrentChain =
         this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
         accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
-      const isExternalWalletAndAAEnabled = data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet;
-      if (isExternalWalletAndAAEnabled && doesAASupportCurrentChain) {
+      if (isAaSupportedForCurrentChain && (data.connector === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
+        const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
+        // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
+        const eoaProvider: IProvider = data.connector === WALLET_CONNECTORS.AUTH ? await toEoaProvider(provider) : provider;
         const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
-        const { accountAbstractionProvider } = await import("@/core/account-abstraction-provider");
         const aaProvider = await accountAbstractionProvider({
           accountAbstractionConfig,
-          provider,
+          provider: eoaProvider,
           chain: this.currentChain,
           chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
         });
-        finalProvider = aaProvider;
+        this.aaProvider = aaProvider;
+
+        // if external wallet is used and AA is enabled for external wallets, use AA provider
+        // for embedded wallets, we use ws-embed provider which already supports AA
+        if (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet) {
+          finalProvider = this.aaProvider;
+        }
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);

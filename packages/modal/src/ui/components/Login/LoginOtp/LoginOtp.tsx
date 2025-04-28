@@ -13,7 +13,7 @@ import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
  * @returns OtpInput component
  */
 function OtpInput(props: OtpInputProps) {
-  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint = "", errorMessage, otpLoading } = props;
+  const { setShowOtpFlow, handleOtpComplete, authConnection, loginHint = "", errorMessage, otpLoading, countryFlag } = props;
   const isMobileOtp = useMemo(() => authConnection === AUTH_CONNECTION.SMS_PASSWORDLESS, [authConnection]);
   const [t] = useTranslation(undefined, { i18n });
 
@@ -22,8 +22,8 @@ function OtpInput(props: OtpInputProps) {
 
     const [countryCode, number] = loginHint.includes("-") ? loginHint.split("-") : ["", loginHint];
     const masked = `${number}`.slice(-Math.floor((number as string).length / 2)).padStart(`${number}`.length, "*");
-    return `${countryCode} ${masked}`;
-  }, [loginHint, authConnection]);
+    return `${countryFlag} ${countryCode} ${masked}`;
+  }, [loginHint, authConnection, countryFlag]);
 
   return (
     <>
@@ -45,15 +45,15 @@ function OtpInput(props: OtpInputProps) {
       </div>
       <div className="-w3a--mt-10 w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
         <img src={getIcons(isMobileOtp ? "sms-otp-light" : "email-otp-light")} alt="otp" className="w3a--size-auto" />
-        <div className="-w3a--mt-6 w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+        <div className="w3a--mx-auto -w3a--mt-6 w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
           <p className="w3a--text-lg w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">
             {isMobileOtp ? t("modal.otp.mobile-title") : t("modal.otp.email-title")}
           </p>
-          <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-1">
-            <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
+          <div className="w3a--mx-auto w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-1">
+            <p className="w3a--text-center w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
               {isMobileOtp ? t("modal.otp.mobile-subtext") : t("modal.otp.email-subtext")}
             </p>
-            <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
+            <p className="w3a--text-center w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
               {isMobileOtp ? parsedLoginHint : t("modal.otp.email-subtext-example", { email: parsedLoginHint })}
             </p>
           </div>
@@ -77,7 +77,7 @@ function OtpInput(props: OtpInputProps) {
  * @returns LoginOtp component
  */
 function LoginOtp(props: LoginOtpProps) {
-  const { otpLoading, setShowOtpFlow, handleOtpComplete, authConnection, loginHint, errorMessage } = props;
+  const { otpLoading, setShowOtpFlow, handleOtpComplete, authConnection, loginHint, errorMessage, countryFlag } = props;
 
   return (
     <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
@@ -88,6 +88,7 @@ function LoginOtp(props: LoginOtpProps) {
         authConnection={authConnection}
         loginHint={loginHint}
         otpLoading={otpLoading}
+        countryFlag={countryFlag}
       />
     </div>
   );

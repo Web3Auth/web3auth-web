@@ -1,4 +1,4 @@
-import { Web3AuthError } from "@web3auth/no-modal";
+import { WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { useCallback, useState } from "react";
 
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -21,7 +21,7 @@ export const useSignMessage = (): IUseSignMessage => {
       setLoading(true);
       setError(null);
       try {
-        if (!solanaWallet) throw new Error("Solana wallet not found");
+        if (!solanaWallet) throw WalletInitializationError.notReady();
         const signature = await solanaWallet.signMessage(message, from ?? accounts?.[0]);
         setData(signature);
         return signature;

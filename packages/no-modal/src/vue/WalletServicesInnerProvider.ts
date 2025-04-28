@@ -1,8 +1,7 @@
 import { defineComponent, h, provide, Ref, ref, shallowRef, watch } from "vue";
 
-import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS, WalletServicesPluginError } from "@/core/base";
-import { WalletServicesPluginType } from "@/core/wallet-services-plugin";
-
+import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS, WalletServicesPluginError } from "../base";
+import { WalletServicesPluginType } from "../plugins/wallet-services-plugin";
 import { useWeb3AuthInner } from "./composables/useWeb3AuthInner";
 import { WalletServicesContextKey } from "./context";
 import { IWalletServicesInnerContext } from "./interfaces";

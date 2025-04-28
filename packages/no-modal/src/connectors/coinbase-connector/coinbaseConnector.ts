@@ -22,8 +22,7 @@ import {
   WALLET_CONNECTORS,
   WalletLoginError,
   Web3AuthError,
-} from "@/core/base";
-
+} from "../../base";
 import { BaseEvmConnector } from "../base-evm-connector";
 
 export type CoinbaseWalletSDKOptions = Partial<AppMetadata & Preference>;

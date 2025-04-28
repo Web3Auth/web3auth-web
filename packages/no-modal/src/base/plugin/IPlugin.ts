@@ -2,7 +2,7 @@ import { type SafeEventEmitter, WhiteLabelData } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES } from "../chain/IChainInterface";
 import { type IWeb3AuthCore } from "../core/IWeb3Auth";
-import { WALLET_CONNECTOR_TYPE } from "../wallet";
+import { type WALLET_CONNECTOR_TYPE } from "../wallet";
 
 export const PLUGIN_NAMESPACES = {
   ...CHAIN_NAMESPACES,

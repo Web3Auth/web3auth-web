@@ -119,6 +119,7 @@ export interface ModalState {
   modalVisibilityDelayed: boolean;
   postLoadingMessage: string;
   walletConnectUri: string;
+  metamaskConnectUri: string;
   socialLoginsConfig: SocialLoginsConfig;
   externalWalletsConfig: Record<string, BaseConnectorConfig>;
   detailedLoaderConnector: string;
@@ -239,3 +240,9 @@ export enum TOAST_TYPE {
 }
 
 export type ToastType = (typeof TOAST_TYPE)[keyof typeof TOAST_TYPE];
+
+export interface ValidatePhoneNumberApiResponse {
+  success: boolean;
+  parsed_number: string;
+  country_flag: string;
+}

@@ -22,9 +22,8 @@ import {
   UserInfo,
   WalletLoginError,
   Web3AuthError,
-} from "@/core/base";
-import { getSolanaChainByChainConfig, type WalletStandard, WalletStandardProvider } from "@/core/solana-provider";
-
+} from "../../base";
+import { getSolanaChainByChainConfig, type WalletStandard, WalletStandardProvider } from "../../providers/solana-provider";
 import { BaseSolanaConnector } from "../base-solana-connector";
 
 export class WalletStandardConnector extends BaseSolanaConnector<void> {

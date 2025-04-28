@@ -3,9 +3,18 @@ import { createContext, Dispatch, SetStateAction } from "react";
 import { ExternalButton, TOAST_TYPE, ToastType } from "../interfaces";
 
 export type BodyState = {
-  showWalletDetails?: boolean;
-  showMultiChainSelector?: boolean;
-  walletDetails?: ExternalButton;
+  installLinks?: {
+    show: boolean;
+    wallet: ExternalButton;
+  };
+  multiChainSelector: {
+    show: boolean;
+    wallet: ExternalButton;
+  };
+  metamaskQrCode: {
+    show: boolean;
+    wallet: ExternalButton;
+  };
 };
 
 export type ToastState = {
@@ -22,9 +31,18 @@ export type RootContextType = {
 
 export const RootContext = createContext<RootContextType>({
   bodyState: {
-    showWalletDetails: false,
-    walletDetails: null,
-    showMultiChainSelector: false,
+    metamaskQrCode: {
+      show: false,
+      wallet: null,
+    },
+    installLinks: {
+      show: false,
+      wallet: null,
+    },
+    multiChainSelector: {
+      show: false,
+      wallet: null,
+    },
   },
   toast: {
     message: "",

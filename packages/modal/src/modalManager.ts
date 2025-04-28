@@ -1,4 +1,4 @@
-import { AuthConnectionConfigItem } from "@web3auth/auth";
+import { AuthConnectionConfigItem, serializeError } from "@web3auth/auth";
 import {
   type AUTH_CONNECTION_TYPE,
   type AuthLoginParams,
@@ -108,7 +108,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
     });
 
-    await withAbort(() => super.loadConnectors({ projectConfig }), signal);
+    await withAbort(() => super.loadConnectors({ projectConfig, modalMode: true }), signal);
 
     // initialize plugins
     await withAbort(() => super.initPlugins(), signal);
@@ -188,8 +188,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     // handle project config result
     if (projectConfigResult.status === "rejected") {
-      log.error("Failed to fetch project configurations", projectConfigResult.reason);
-      throw WalletInitializationError.notReady("failed to fetch project configurations", projectConfigResult.reason);
+      const error = await serializeError(projectConfigResult.reason);
+      log.error("Failed to fetch project configurations", error);
+      throw WalletInitializationError.notReady("failed to fetch project configurations", error);
     }
     const projectConfig = projectConfigResult.value;
 
@@ -210,7 +211,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
-    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig);
+    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig, {
+      arrayMerge: (_, sourceArray) => sourceArray,
+    });
 
     // merge login methods order from project config and user config, with user config taking precedence
     const defaultAuthConnections = projectConfig.embeddedWalletAuth.filter((x) => x.isDefault).map((x) => x.authConnection);
@@ -420,12 +423,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (connector.status !== CONNECTOR_STATUS.NOT_READY) return;
 
           // only initialize a external connectors here if it is a cached connector.
-          if (
-            this.cachedConnector !== connectorName &&
-            connectorName !== WALLET_CONNECTORS.METAMASK &&
-            connector.type === CONNECTOR_CATEGORY.EXTERNAL
-          )
-            return;
+          if (this.cachedConnector !== connectorName && connector.type === CONNECTOR_CATEGORY.EXTERNAL) return;
 
           // in-app wallets or cached wallet (being connected or already connected) are initialized first.
           // if connector is configured then only initialize in app or cached connector.
@@ -533,6 +531,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   private onModalVisibility = async (visibility: boolean): Promise<void> => {
     log.debug("is login modal visible", visibility);
     this.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, visibility);
+
+    // handle WC session refresh
     const wcConnector = this.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2);
     if (wcConnector) {
       const walletConnectStatus = wcConnector?.status;
@@ -555,6 +555,32 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       ) {
         log.debug("this stops wc connector from trying to reconnect once proposal expires");
         wcConnector.status = CONNECTOR_STATUS.READY;
+      }
+    }
+
+    // handle MM session refresh if MM is not injected
+    const metamaskConnector = this.getConnector(WALLET_CONNECTORS.METAMASK);
+    if (metamaskConnector && !metamaskConnector.isInjected) {
+      const status = metamaskConnector?.status;
+      log.debug("trying refreshing MM session", visibility, status);
+      if (visibility && (status === CONNECTOR_STATUS.READY || status === CONNECTOR_STATUS.CONNECTING)) {
+        log.debug("refreshing MM session");
+
+        // refreshing session for MM whenever modal is opened.
+        try {
+          const initialChain = this.getInitialChainIdForConnector(metamaskConnector);
+          metamaskConnector.connect({ chainId: initialChain.chainId });
+        } catch (error) {
+          log.error(`Error while connecting to MM`, error);
+        }
+      }
+      if (
+        !visibility &&
+        this.status === CONNECTOR_STATUS.CONNECTED &&
+        (status === CONNECTOR_STATUS.READY || status === CONNECTOR_STATUS.CONNECTING)
+      ) {
+        log.debug("this stops MM connector from trying to reconnect once proposal expires");
+        metamaskConnector.status = CONNECTOR_STATUS.READY;
       }
     }
   };

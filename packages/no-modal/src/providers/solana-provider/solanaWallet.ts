@@ -1,8 +1,7 @@
 import { VersionedTransaction } from "@solana/web3.js";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { IProvider, RequestArguments } from "@/core/base";
-
+import { IProvider, RequestArguments } from "../../base";
 import { ISolanaWallet, type TransactionOrVersionedTransaction } from "./interface";
 
 export class SolanaWallet implements ISolanaWallet {

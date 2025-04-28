@@ -1,6 +1,6 @@
 import type { EngineTypes } from "@walletconnect/types";
 
-import type { ChainNamespaceType } from "@/core/base";
+import type { ChainNamespaceType } from "../../base";
 
 export const isChainIdSupported = (chainNamespace: ChainNamespaceType, chainID: number, loginSettings: EngineTypes.ConnectParams | undefined) => {
   const supportedNamespaces = { ...(loginSettings?.requiredNamespaces || {}), ...(loginSettings?.optionalNamespaces || {}) };

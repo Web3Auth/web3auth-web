@@ -1,4 +1,4 @@
-import { TransactionOrVersionedTransaction, Web3AuthError } from "@web3auth/no-modal";
+import { type TransactionOrVersionedTransaction, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { useCallback, useState } from "react";
 
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -21,6 +21,7 @@ export const useSignTransaction = () => {
       setLoading(true);
       setError(null);
       try {
+        if (!solanaWallet) throw WalletInitializationError.notReady();
         const signedTransaction = await solanaWallet.signTransaction(transaction);
         setData(signedTransaction);
         return signedTransaction;

@@ -5,7 +5,7 @@ export interface ModalConfig extends Omit<BaseConnectorConfig, "isInjected" | "c
 }
 
 export interface ConnectorsModalConfig {
-  connectors?: Record<WALLET_CONNECTOR_TYPE, ModalConfig>;
+  connectors?: Partial<Record<WALLET_CONNECTOR_TYPE, ModalConfig>>;
   hideWalletDiscovery?: boolean;
 }
 export interface IWeb3AuthModal extends IWeb3Auth {

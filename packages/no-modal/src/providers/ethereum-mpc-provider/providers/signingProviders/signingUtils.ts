@@ -4,7 +4,7 @@ import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@web3auth
 import { hashMessage, Signature } from "ethers";
 import { hashTypedData, hexToBytes, validateTypedData } from "viem";
 
-import { log } from "@/core/base";
+import { log } from "../../../../base";
 import {
   IEthProviderHandlers,
   MessageParams,
@@ -13,7 +13,7 @@ import {
   TransactionParams,
   TypedMessageParams,
   validateTypedSignMessageDataV4,
-} from "@/core/ethereum-provider";
+} from "../../../ethereum-provider";
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },

@@ -4,10 +4,9 @@ import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils"
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { WalletLoginError } from "@/core/base";
-import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "@/core/ethereum-provider";
-import type { ISolanaProviderHandlers } from "@/core/solana-provider";
-
+import { WalletLoginError } from "../../base";
+import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
+import type { ISolanaProviderHandlers } from "../../providers/solana-provider";
 import { SOLANA_CAIP_CHAIN_MAP } from "./config";
 
 async function getLastActiveSession(signClient: ISignClient): Promise<SessionTypes.Struct | null> {

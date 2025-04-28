@@ -35,8 +35,7 @@ import {
   WalletInitializationError,
   WalletLoginError,
   Web3AuthError,
-} from "@/core/base";
-
+} from "../../base";
 import { getWalletConnectV2Settings } from "./config";
 import { IConnectorSettings, WalletConnectV2ConnectorOptions } from "./interface";
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
