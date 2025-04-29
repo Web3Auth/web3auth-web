@@ -6,7 +6,7 @@
     "type-check": "vue-tsc --noEmit -p tsconfig.json",
     "dev": "vite",
     "serve": "vite preview",
-    "build": "vite build",
+    "build": "npm run type-check && vite build",
     "lint": "eslint --cache --fix"
   },
   "dependencies": {
