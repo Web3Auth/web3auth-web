@@ -1,6 +1,7 @@
 import { Connection } from "@solana/web3.js";
 import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
+import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { SolanaWallet } from "../../../providers/solana-provider/solanaWallet";
 import { useWeb3Auth } from "../../composables";
 
@@ -17,6 +18,9 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   const connection = shallowRef<Connection | null>(null);
 
   watch(provider, async (newVal) => {
+    if (!web3Auth.value?.currentChain?.chainNamespace || web3Auth.value.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+      return;
+    }
     if (!newVal && solanaWallet.value) {
       solanaWallet.value = null;
       accounts.value = null;
