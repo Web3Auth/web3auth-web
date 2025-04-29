@@ -34,33 +34,21 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
-    "@wagmi/core": ">=2.14",
-    "@wagmi/vue": ">=0.1",
     "react": ">=18",
     "viem": ">=2.23",
-    "vue": "^3.x",
-    "wagmi": ">=2.14"
+    "vue": "^3.x"
   },
   "peerDependenciesMeta": {
     "@coinbase/wallet-sdk": {
       "optional": true
     },
-    "@tanstack/react-query": {
-      "optional": true
-    },
-    "@wagmi/core": {
-      "optional": true
-    },
-    "@wagmi/vue": {
-      "optional": true
-    },
     "react": {
       "optional": true
     },
-    "vue": {
+    "viem": {
       "optional": true
     },
-    "wagmi": {
+    "vue": {
       "optional": true
     }
   },

@@ -8,6 +8,8 @@ import path from "path";
 import postcss from "rollup-plugin-postcss";
 
 const pkg = await readJSONFile(path.resolve("./package.json"));
+const allDeps = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peerDependencies || {}), "wagmi", "@wagmi/vue", "@wagmi/core"];
+
 // TODO: use ssr module for cjs build
 
 export const baseConfig = {
@@ -36,4 +38,5 @@ export const baseConfig = {
     svgr(),
     json(),
   ],
+  external: [...allDeps, ...allDeps.map((x) => new RegExp(`^${x}/`)), /@babel\/runtime/],
 };
