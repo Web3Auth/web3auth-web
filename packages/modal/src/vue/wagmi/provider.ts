@@ -1,5 +1,5 @@
 import { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn, hydrate } from "@wagmi/core";
-import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig } from "@wagmi/vue";
+import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig, useReconnect } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
 import { log } from "@web3auth/no-modal";
 import { type Chain, defineChain, http, webSocket } from "viem";
@@ -80,6 +80,7 @@ const Web3AuthWagmiProvider = defineComponent({
     const { isConnected, provider } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
+    const { reconnect } = useReconnect();
 
     useAccountEffect({
       onDisconnect: async () => {
@@ -99,6 +100,7 @@ const Web3AuthWagmiProvider = defineComponent({
           }
 
           await connectWeb3AuthWithWagmi(connector, wagmiConfig);
+          reconnect();
         } else if (!newIsConnected) {
           if (wagmiConfig.state.status === "connected") {
             await disconnectWeb3AuthFromWagmi(wagmiConfig);
