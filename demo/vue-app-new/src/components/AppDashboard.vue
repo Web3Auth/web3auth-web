@@ -192,7 +192,8 @@ const getConnectedChainId = async () => {
 };
 
 const onGetBalance = async () => {
-  printToConsole("balance", balance.data.value?.formatted);
+  const data = await balance.refetch();
+  printToConsole("balance", data.data?.value.toString());
 };
 
 const onSignEthTransaction = async () => {
