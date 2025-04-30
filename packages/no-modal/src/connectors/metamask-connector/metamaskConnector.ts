@@ -73,15 +73,16 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
     // Detect app metadata
     const iconUrl = await getSiteIcon(window);
+    // TODO: handle ssr
     const appMetadata: MetaMaskSDKOptions["dappMetadata"] = {
-      name: getSiteName(window),
-      url: window.location.origin,
+      name: getSiteName(window) || "web3auth",
+      url: window.location.origin || "https://web3auth.io",
       iconUrl,
     };
 
     // initialize the MetaMask SDK
     const metamaskOptions = deepmerge(this.metamaskOptions || {}, { dappMetadata: appMetadata });
-    this.metamaskSDK = new MetaMaskSDK(metamaskOptions);
+    this.metamaskSDK = new MetaMaskSDK({ ...metamaskOptions, _source: "web3auth", useDeeplink: metamaskOptions.useDeeplink ?? true });
     // Work around: in case there is an existing SDK instance in memory (window.mmsdk exists), it won't initialize the new SDK instance again
     // and return the existing instance instead of undefined (this is an assumption, not sure if it's a bug or feature of the MetaMask SDK)
     const initResult = await this.metamaskSDK.init();

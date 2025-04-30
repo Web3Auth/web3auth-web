@@ -1,6 +1,6 @@
 import { log } from "@web3auth/no-modal";
 import { createElement, Fragment, PropsWithChildren, useEffect, useMemo } from "react";
-import { type Chain, defineChain, http } from "viem";
+import { type Chain, defineChain, http, webSocket } from "viem";
 import {
   Config,
   Connection,
@@ -11,7 +11,6 @@ import {
   useAccountEffect,
   useConfig as useWagmiConfig,
   WagmiProvider as WagmiProviderBase,
-  WagmiProviderProps as WagmiProviderPropsBase,
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 
@@ -165,7 +164,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
         } else {
           wagmiChains.push(wagmiChain);
         }
-        finalConfig.transports[wagmiChain.id] = http(chain.rpcTarget);
+        finalConfig.transports[wagmiChain.id] = chain.wsTarget ? webSocket(chain.wsTarget) : http(chain.rpcTarget);
       });
 
       finalConfig.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
@@ -184,7 +183,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     // typecast to WagmiProviderPropsBase to avoid type error
     // as we are omitting the config prop from WagmiProviderProps
     // and creating a new config object with the finalConfig
-    { config: finalConfig, ...props, reconnectOnMount: false } as WagmiProviderPropsBase,
+    { ...props, config: finalConfig, reconnectOnMount: false },
     createElement(Web3AuthWagmiProvider, null, children)
   );
 }

@@ -100,6 +100,7 @@ function Root(props: RootProps) {
 
   // Wallet Details
   const deviceDetails = useMemo<{ platform: platform; browser: browser; os: mobileOs }>(() => {
+    if (typeof window === "undefined") return { platform: "mobile", browser: "chrome", os: "ios" };
     const browserData = Bowser.getParser(window.navigator.userAgent);
     return {
       platform: browserData.getPlatformType() as platform,
