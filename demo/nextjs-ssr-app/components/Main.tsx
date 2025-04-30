@@ -12,12 +12,10 @@ import {
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
-import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useAccount, useBalance, useSignMessage, useSignTypedData } from "wagmi";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
-  const { accounts: solanaAccounts } = useSolanaWallet();
   const { loading: connecting, connect, error: connectingError, connectorName } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { signMessageAsync, data: signedMessageData } = useSignMessage();
@@ -38,7 +36,6 @@ const Main = () => {
           <p>Account Address: {address}</p>
           <p>Account Balance: {balance?.value}</p>
           <p>MFA Enabled: {isMFAEnabled ? "Yes" : "No"}</p>
-          <p>Solana Address: {solanaAccounts}</p>
         </div>
 
         {/* User Info */}

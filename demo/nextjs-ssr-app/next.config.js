@@ -1,7 +1,15 @@
+const path = require('path')
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    reactStrictMode: false,
-    // swcMinify: true,
-  }
+  reactStrictMode: true,
+  webpack: (config) => {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      wagmi: path.resolve(__dirname, 'node_modules/wagmi'),
+    };
+    return config;
+  },
+}
   
-  module.exports = nextConfig
+module.exports = nextConfig
