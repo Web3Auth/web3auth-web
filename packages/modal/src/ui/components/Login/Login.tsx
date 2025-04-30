@@ -223,7 +223,7 @@ function Login(props: LoginProps) {
               authConnectionId: connectorConfig.authConnectionId,
               groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
               extraLoginOptions: connectorConfig.extraLoginOptions,
-              login_hint: loginHint,
+              loginHint: loginHint,
               name: "Email",
             },
           });
@@ -247,7 +247,7 @@ function Login(props: LoginProps) {
               authConnectionId: connectorConfig.authConnectionId,
               groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
               extraLoginOptions: connectorConfig.extraLoginOptions,
-              login_hint: finalLoginHint,
+              loginHint: finalLoginHint,
               name: "Mobile",
             },
           });
@@ -317,7 +317,7 @@ function Login(props: LoginProps) {
             authConnectionId: connectorConfig.authConnectionId,
             groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
             extraLoginOptions: { ...connectorConfig.extraLoginOptions, id_token: result.data?.id_token },
-            login_hint: passwordlessHandler.passwordlessParams.loginHint,
+            loginHint: passwordlessHandler.passwordlessParams.loginHint,
             name: passwordlessHandler.name,
           },
         });

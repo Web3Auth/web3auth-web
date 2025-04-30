@@ -1,15 +1,17 @@
 {
-  "name": "react-test",
+  "name": "react-app-sfa",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
     "@react-oauth/google": "^0.12.1",
+    "@tanstack/react-query": "^5.74.11",
     "@web3auth/auth": "^10.2.3",
     "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/sign-in-with-ethereum": "^4.2.2",
     "ethers": "^6.13.4",
     "react": "^18.2.0",
-    "react-dom": "^18.2.0"
+    "react-dom": "^18.2.0",
+    "wagmi": "^2.15.1"
   },
   "scripts": {
     "start": "vite",
@@ -31,10 +33,11 @@
   "devDependencies": {
     "@toruslabs/eslint-config-react": "^3.4.4",
     "@types/node": "^22.10.1",
-    "@types/react": "^18.2.34",
-    "@types/react-dom": "^18.2.14",
+    "@types/react": "^19.1.2",
+    "@types/react-dom": "^19.1.2",
     "@vitejs/plugin-react": "^4.3.4",
     "buffer": "^6.0.3",
+    "eslint": "^8.57.1",
     "process": "^0.11.10",
     "typescript": "^5.2.2",
     "vite": "^6.0.11",

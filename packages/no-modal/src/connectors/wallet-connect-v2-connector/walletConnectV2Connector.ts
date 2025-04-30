@@ -103,8 +103,15 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     super.checkInitializationRequirements({ chainConfig });
 
     const projectId = this.connectorOptions.connectorSettings?.walletConnectInitOptions?.projectId;
+    const filteredChains = this.coreOptions.chains.filter(
+      (x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA
+    );
 
-    const wc2Settings = await getWalletConnectV2Settings(this.coreOptions.chains, projectId);
+    if (filteredChains.length === 0) {
+      throw WalletInitializationError.invalidParams("No supported chains found");
+    }
+
+    const wc2Settings = await getWalletConnectV2Settings(filteredChains, projectId);
     if (!this.connectorOptions.loginSettings || Object.keys(this.connectorOptions.loginSettings).length === 0) {
       this.connectorOptions.loginSettings = wc2Settings.loginSettings;
     }

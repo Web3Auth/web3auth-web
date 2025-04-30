@@ -1,6 +1,6 @@
 import "./App.css";
 
-import { AuthLoginParams, CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { useEffect, useState } from "react";
 
@@ -50,7 +50,7 @@ function App() {
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const web3authProvider = await web3auth.connectTo<AuthLoginParams>(WALLET_CONNECTORS.AUTH, { loginProvider: "google" });
+    const web3authProvider = await web3auth.connectTo(WALLET_CONNECTORS.AUTH, { authConnection: "google" });
     setProvider(web3authProvider);
   };
 
