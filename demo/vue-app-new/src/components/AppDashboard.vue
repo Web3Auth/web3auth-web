@@ -139,7 +139,7 @@ const printToConsole = (...args: unknown[]) => {
 };
 
 watch(status, (newStatus) => {
-  console.log("wagmi status", newStatus);
+  console.log("wagmi status", newStatus)
 }, { immediate: true });
 
 // NFT Checkout
@@ -186,7 +186,8 @@ const getConnectedChainId = async () => {
 };
 
 const onGetBalance = async () => {
-  printToConsole("balance", balance.data.value?.formatted);
+  const data = await balance.refetch();
+  printToConsole("balance", data.data?.value.toString());
 };
 
 const onSignEthTransaction = async () => {

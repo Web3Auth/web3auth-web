@@ -11,7 +11,6 @@ import {
   useAccountEffect,
   useConfig as useWagmiConfig,
   WagmiProvider as WagmiProviderBase,
-  WagmiProviderProps as WagmiProviderPropsBase,
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 
@@ -184,7 +183,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     // typecast to WagmiProviderPropsBase to avoid type error
     // as we are omitting the config prop from WagmiProviderProps
     // and creating a new config object with the finalConfig
-    { config: finalConfig, ...props, reconnectOnMount: false } as WagmiProviderPropsBase,
+    { ...props, config: finalConfig, reconnectOnMount: false },
     createElement(Web3AuthWagmiProvider, null, children)
   );
 }

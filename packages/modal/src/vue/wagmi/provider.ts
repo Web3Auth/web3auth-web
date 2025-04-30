@@ -1,4 +1,3 @@
-/* eslint-disable react-hooks/rules-of-hooks */
 import { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn, hydrate } from "@wagmi/core";
 import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";

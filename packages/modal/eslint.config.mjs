@@ -6,7 +6,7 @@ export default [
     ignores: ["./rollup.config.mjs"],
   },
   {
-    files: ["./src/react/wagmi/provider.ts"],
+    files: ["./src/react/wagmi/provider.ts", "./src/vue/wagmi/provider.ts"],
     rules: {
       "import/no-extraneous-dependencies": "off",
     },
