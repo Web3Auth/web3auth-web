@@ -15,6 +15,7 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   const { qrCodeValue, isDark, selectedButton, logoImage, primaryColor } = props;
 
   const isDesktop = useMemo<boolean>(() => {
+    if (typeof window === "undefined") return false;
     const browser = Bowser.getParser(window.navigator.userAgent);
     return browser.getPlatformType() === "desktop";
   }, []);
