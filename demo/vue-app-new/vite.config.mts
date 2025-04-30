@@ -1,3 +1,5 @@
+import { resolve } from "node:path";
+
 import vue from "@vitejs/plugin-vue";
 import { defineConfig, loadEnv } from "vite";
 
@@ -17,6 +19,7 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         "@": "/src",
+        "@wagmi/vue": resolve("./node_modules/@wagmi/vue"),
       },
     },
     define: {

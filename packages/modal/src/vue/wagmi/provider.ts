@@ -2,7 +2,7 @@ import { Config, Connection, Connector, CreateConfigParameters, CreateConnectorF
 import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
 import { log } from "@web3auth/no-modal";
-import { type Chain, defineChain, http } from "viem";
+import { type Chain, defineChain, http, webSocket } from "viem";
 import { defineComponent, h, PropType, provide, shallowRef, watch } from "vue";
 
 // import type { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn } from "wagmi";
@@ -178,7 +178,7 @@ export const WagmiProvider = defineComponent({
           } else {
             wagmiChains.push(wagmiChain);
           }
-          configParams.transports[wagmiChain.id] = http(chain.rpcTarget);
+          configParams.transports[wagmiChain.id] = chain.wsTarget ? webSocket(chain.wsTarget) : http(chain.rpcTarget);
         });
 
         configParams.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
