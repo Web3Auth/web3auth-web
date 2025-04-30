@@ -1,11 +1,21 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
-import { useCheckout, useEnableMFA, useIdentityToken, useManageMFA, useSwitchChain, useWalletConnectScanner, useWalletUI, useWeb3Auth, useWeb3AuthUser } from "@web3auth/modal/vue";
+import {
+  useCheckout,
+  useEnableMFA,
+  useIdentityToken,
+  useManageMFA,
+  useSwitchChain,
+  useWalletConnectScanner,
+  useWalletUI,
+  useWeb3Auth,
+  useWeb3AuthUser,
+} from "@web3auth/modal/vue";
 import { type CustomChainConfig, type NFTCheckoutPluginType } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
-import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana"
+import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
 import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData } from "@wagmi/vue";
 
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
@@ -13,16 +23,8 @@ import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
 import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
-import {
-  getPrivateKey,
-  sendEth,
-  signTransaction as signEthTransaction,
-} from "../services/ethHandlers";
-import {
-  getBalance as getSolBalance,
-  getPrivateKey as getSolPrivateKey,
-  signAllTransactions,
-} from "../services/solHandlers";
+import { getPrivateKey, sendEth, signTransaction as signEthTransaction } from "../services/ethHandlers";
+import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey, signAllTransactions } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 
@@ -49,11 +51,11 @@ const { status, address } = useAccount();
 const { signTypedDataAsync } = useSignTypedData();
 const { signMessageAsync } = useSignMessage();
 const chainId = useChainId();
-const balance = useBalance({ 
-  address: address.value,
+const balance = useBalance({
+  address: address,
 });
 
-const { accounts: solanaAccounts, connection } = useSolanaWallet()
+const { accounts: solanaAccounts, connection } = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -138,9 +140,13 @@ const printToConsole = (...args: unknown[]) => {
   }
 };
 
-watch(status, (newStatus) => {
-  console.log("wagmi status", newStatus);
-}, { immediate: true });
+watch(
+  status,
+  (newStatus) => {
+    console.log("wagmi status", newStatus);
+  },
+  { immediate: true }
+);
 
 // NFT Checkout
 const showPaidMintNFTCheckout = async () => {
@@ -174,7 +180,7 @@ const onSignEthMessage = async () => {
 };
 
 const onGetAccounts = async () => {
-  printToConsole('account', address.value);
+  printToConsole("account", address.value);
 };
 
 const onGetPrivateKey = async () => {
@@ -182,7 +188,7 @@ const onGetPrivateKey = async () => {
 };
 
 const getConnectedChainId = async () => {
-  printToConsole('chainId', chainId.value);
+  printToConsole("chainId", chainId.value);
 };
 
 const onGetBalance = async () => {
@@ -198,27 +204,27 @@ const onSignTypedData_v4 = async () => {
     types: {
       Person: [
         { name: "name", type: "string" },
-          { name: 'wallet', type: 'address' },
-        ],
-        Mail: [
-          { name: 'from', type: 'Person' },
-          { name: 'to', type: 'Person' },
-          { name: 'contents', type: 'string' },
-        ],
+        { name: "wallet", type: "address" },
+      ],
+      Mail: [
+        { name: "from", type: "Person" },
+        { name: "to", type: "Person" },
+        { name: "contents", type: "string" },
+      ],
+    },
+    primaryType: "Mail",
+    message: {
+      from: {
+        name: "Cow",
+        wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
       },
-      primaryType: 'Mail',
-      message: {
-        from: {
-          name: "Cow",
-          wallet: "0xCD2a3d9F938E13CD947Ec05AbC7FE734Df8DD826",
-        },
-        to: {
-          name: "Bob",
-          wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
-        },
-        contents: "Hello, Bob!",
+      to: {
+        name: "Bob",
+        wallet: "0xbBbBBBBbbBBBbbbBbbBbbbbBBbBbbbbBbBbbBBbB",
       },
-    });
+      contents: "Hello, Bob!",
+    },
+  });
   printToConsole("result", result);
 };
 
@@ -235,38 +241,16 @@ const onGetSolPrivateKey = async () => {
 };
 
 const onSignAndSendTransaction = async () => {
-  if (!solanaAccounts.value) throw new Error('No account connected');
-  if (!connection.value) throw new Error('No connection');
+  if (!solanaAccounts.value) throw new Error("No account connected");
+  if (!connection.value) throw new Error("No connection");
   const block = await connection.value?.getLatestBlockhash("finalized");
   const pubKey = solanaAccounts.value[0];
 
   const transactionInstruction = SystemProgram.transfer({
-      fromPubkey: new PublicKey(pubKey),
-      toPubkey: new PublicKey(pubKey),
-      lamports: 0.01 * LAMPORTS_PER_SOL,
-    });
-
-    const transaction = new Transaction({
-      blockhash: block.blockhash,
-      lastValidBlockHeight: block.lastValidBlockHeight,
-      feePayer: new PublicKey(pubKey),
-    }).add(transactionInstruction);
-  
-  const data = await signAndSendTransaction(transaction);
-  printToConsole('result', data);
-};
-
-const onSignSolTransaction = async () => {
-  if (!solanaAccounts.value) throw new Error('No account connected');
-  if (!connection.value) throw new Error('No connection');
-  const block = await connection.value?.getLatestBlockhash("finalized");
-  const pubKey = solanaAccounts.value[0];
-
-  const transactionInstruction = SystemProgram.transfer({
-      fromPubkey: new PublicKey(pubKey),
-      toPubkey: new PublicKey(pubKey),
-      lamports: 0.01 * LAMPORTS_PER_SOL,
-    });
+    fromPubkey: new PublicKey(pubKey),
+    toPubkey: new PublicKey(pubKey),
+    lamports: 0.01 * LAMPORTS_PER_SOL,
+  });
 
   const transaction = new Transaction({
     blockhash: block.blockhash,
@@ -274,8 +258,30 @@ const onSignSolTransaction = async () => {
     feePayer: new PublicKey(pubKey),
   }).add(transactionInstruction);
 
-  const result = await signSolTransaction(transaction)
-  printToConsole('result', result);
+  const data = await signAndSendTransaction(transaction);
+  printToConsole("result", data);
+};
+
+const onSignSolTransaction = async () => {
+  if (!solanaAccounts.value) throw new Error("No account connected");
+  if (!connection.value) throw new Error("No connection");
+  const block = await connection.value?.getLatestBlockhash("finalized");
+  const pubKey = solanaAccounts.value[0];
+
+  const transactionInstruction = SystemProgram.transfer({
+    fromPubkey: new PublicKey(pubKey),
+    toPubkey: new PublicKey(pubKey),
+    lamports: 0.01 * LAMPORTS_PER_SOL,
+  });
+
+  const transaction = new Transaction({
+    blockhash: block.blockhash,
+    lastValidBlockHeight: block.lastValidBlockHeight,
+    feePayer: new PublicKey(pubKey),
+  }).add(transactionInstruction);
+
+  const result = await signSolTransaction(transaction);
+  printToConsole("result", result);
 };
 
 const onSignSolMessage = async () => {
@@ -356,13 +362,21 @@ const onSwitchChainNamespace = async () => {
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
 
-          <Button class="my-2" block size="xs" pill @click="() => {
-            if (isMFAEnabled) {
-              manageMFA();
-            } else {
-              enableMFA();
-            }
-          }">
+          <Button
+            class="my-2"
+            block
+            size="xs"
+            pill
+            @click="
+              () => {
+                if (isMFAEnabled) {
+                  manageMFA();
+                } else {
+                  enableMFA();
+                }
+              }
+            "
+          >
             {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
         </div>
