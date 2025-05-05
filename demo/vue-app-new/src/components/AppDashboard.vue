@@ -6,17 +6,17 @@ import {
   useEnableMFA,
   useIdentityToken,
   useManageMFA,
-  useSwitchChain,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
+  useSwitchChain as useWeb3AuthSwitchChain,
 } from "@web3auth/modal/vue";
 import { type CustomChainConfig, type NFTCheckoutPluginType } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
-import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData } from "@wagmi/vue";
+import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
 
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { ProviderConfig } from "@toruslabs/base-controllers";
@@ -42,7 +42,8 @@ const { isConnected, provider, web3Auth, isMFAEnabled } = useWeb3Auth();
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
-const { switchChain } = useSwitchChain();
+const { switchChainAsync } = useWagmiSwitchChain();
+const { switchChain } = useWeb3AuthSwitchChain();
 const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
@@ -50,7 +51,7 @@ const { authenticateUser, loading: authenticateUserLoading } = useIdentityToken(
 const { status, address } = useAccount();
 const { signTypedDataAsync } = useSignTypedData();
 const { signMessageAsync } = useSignMessage();
-const chainId = useChainId();
+const wagmiChainId = useChainId();
 const balance = useBalance({
   address: address,
 });
@@ -188,7 +189,7 @@ const onGetPrivateKey = async () => {
 };
 
 const getConnectedChainId = async () => {
-  printToConsole("chainId", chainId.value);
+  printToConsole("chainId", wagmiChainId.value);
 };
 
 const onGetBalance = async () => {
@@ -323,8 +324,8 @@ const onSwitchChain = async () => {
     const currentNamespace = currentChainNamespace.value;
     const newChain = props.chains.find((x) => x.chainNamespace === currentNamespace && x.chainId !== chainId);
     if (!newChain) throw new Error(`Please configure at least 2 chains for ${currentNamespace} in the config`);
-    await switchChain({ chainId: newChain.chainId });
-    printToConsole("switchedChain", { chainId: newChain.chainId });
+    const data =await switchChainAsync({ chainId: Number(newChain.chainId) });
+    printToConsole("switchedChain", { chainId: data.id });
   } catch (error) {
     printToConsole("switchedChain error", error);
   }
