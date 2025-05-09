@@ -109,3 +109,5 @@ export function withAbort<T>(fn: () => Promise<T>, signal?: AbortSignal, onAbort
 export const fromViemChain = fromWagmiChain;
 
 export { cloneDeep };
+
+export const sdkVersion = process.env.WEB3AUTH_VERSION;
