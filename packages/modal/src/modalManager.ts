@@ -1,5 +1,6 @@
 import { AuthConnectionConfigItem, serializeError } from "@web3auth/auth";
 import {
+  Analytics,
   type AUTH_CONNECTION_TYPE,
   type AuthLoginParams,
   type BaseConnectorConfig,
@@ -72,6 +73,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     super.initAccountAbstractionConfig(projectConfig);
     super.initChainsConfig(projectConfig);
     super.initCachedConnectorAndChainId();
+
+    // init analytics
+    Analytics.init();
+    Analytics.identify(window.location.hostname, {
+      web3auth_client_id: this.options.clientId,
+      web3auth_network: this.options.web3AuthNetwork,
+    });
 
     // init login modal
     const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
