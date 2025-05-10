@@ -12,29 +12,32 @@ import {
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
-import { useAccount, useBalance, useSignMessage, useSignTypedData } from "wagmi";
+// import { useAccount, useBalance, useSignMessage, useSignTypedData } from "wagmi";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
   const { loading: connecting, connect, error: connectingError, connectorName } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
-  const { signMessageAsync, data: signedMessageData } = useSignMessage();
-  const { address, isConnected: isWagmiConnected } = useAccount();
+  // const { signMessageAsync, data: signedMessageData } = useSignMessage();
+  // const { address, isConnected: isWagmiConnected } = useAccount();
   const { userInfo, isMFAEnabled } = useWeb3AuthUser();
-  const { data: balance } = useBalance({ address });
-  const { signTypedData, data: signedTypedDataData } = useSignTypedData();
+  // const { data: balance } = useBalance({ address });
+  // const { signTypedData, data: signedTypedDataData } = useSignTypedData();
   const { enableMFA, loading: isEnableMFALoading, error: enableMFAError } = useEnableMFA();
   const { manageMFA, loading: isManageMFALoading, error: manageMFAError } = useManageMFA();
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
   const { token, loading: isUserTokenLoading, error: userTokenError, authenticateUser } = useIdentityToken();
+ 
+  console.log("isConnected", isConnected);
+  
   const loggedInView = (
     <>
       <div className="container">
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
-          <p>Account Address: {address}</p>
-          <p>Account Balance: {balance?.value}</p>
+          {/* <p>Account Address: {address}</p> */}
+          {/* <p>Account Balance: {balance?.value}</p> */}
           <p>MFA Enabled: {isMFAEnabled ? "Yes" : "No"}</p>
         </div>
 
@@ -133,13 +136,13 @@ const Main = () => {
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
           <p>Provider Actions</p>
           {/* Sign Message */}
-          <button onClick={() => signMessageAsync({ message: "Hello, world!" })} className="card">
+          {/* <button onClick={() => signMessageAsync({ message: "Hello, world!" })} className="card">
             Sign Message
           </button>
-          {signedMessageData && <textarea disabled rows={5} value={signedMessageData} style={{ width: "100%" }} />}
+          {signedMessageData && <textarea disabled rows={5} value={signedMessageData} style={{ width: "100%" }} />} */}
 
           {/* Sign Typed Data */}
-          <button
+          {/* <button
             onClick={() =>
               signTypedData({
                 types: {
@@ -171,7 +174,7 @@ const Main = () => {
           >
             Sign Typed Data
           </button>
-          {signedTypedDataData && <textarea disabled rows={5} value={signedTypedDataData} style={{ width: "100%" }} />}
+          {signedTypedDataData && <textarea disabled rows={5} value={signedTypedDataData} style={{ width: "100%" }} />} */}
         </div>
 
         {/* Disconnect */}
@@ -201,8 +204,8 @@ const Main = () => {
   return (
     <div className="grid">
       <p>Web3Auth: {isConnected ? "Connected" : "Disconnected"}</p>
-      <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p>
-      {provider || isWagmiConnected ? loggedInView : unloggedInView}
+      {/* <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p> */}
+      {provider ? loggedInView : unloggedInView}
     </div>
   );
 };

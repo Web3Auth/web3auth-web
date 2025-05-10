@@ -15,6 +15,7 @@ import {
   type IConnector,
   type IProvider,
   type IWeb3AuthCoreOptions,
+  IWeb3AuthState,
   log,
   type LoginMethodConfig,
   type ProjectConfig,
@@ -50,8 +51,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private modalConfig: ConnectorsModalConfig = cloneDeep(defaultConnectorsModalConfig);
 
-  constructor(options: Web3AuthOptions) {
-    super(options);
+  constructor(options: Web3AuthOptions, initialState?: IWeb3AuthState) {
+    super(options, initialState);
     this.options = { ...options };
 
     if (!this.options.uiConfig) this.options.uiConfig = {};

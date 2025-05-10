@@ -82,7 +82,7 @@ export interface IWeb3AuthCoreOptions {
    * @defaultValue "local"
    */
   // TODO: rename this to match customauth, sfa
-  storageType?: "session" | "local";
+  storageType?: "session" | "local" | "cookies";
 
   /**
    * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
@@ -143,6 +143,13 @@ export interface IWeb3AuthCoreOptions {
    * Private key provider for xrpl, mpc cases
    */
   privateKeyProvider?: IBaseProvider<string>;
+
+  /**
+   * Whether to enable SSR mode
+   *
+   * @defaultValue false
+   */
+  ssr?: boolean;
 
   /**
    * Build environment for Auth connector

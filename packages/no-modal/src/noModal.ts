@@ -1,5 +1,5 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import { SafeEventEmitter, type SafeEventEmitterProvider, serializeError } from "@web3auth/auth";
+import { IStorage, MemoryStore, SafeEventEmitter, type SafeEventEmitterProvider, serializeError } from "@web3auth/auth";
 import deepmerge from "deepmerge";
 
 import {
@@ -16,9 +16,11 @@ import {
   type IConnector,
   type IPlugin,
   type IProvider,
+  isBrowser,
   isHexStrict,
   type IWeb3Auth,
   type IWeb3AuthCoreOptions,
+  IWeb3AuthState,
   log,
   type LoginParamMap,
   PLUGIN_NAMESPACES,
@@ -33,32 +35,23 @@ import {
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
+  WEB3AUTH_STATE_COOKIE_KEY,
   Web3AuthError,
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
+import { cookieStorage } from "./base/cookie";
 import { authConnector } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
-
-const CONNECTOR_CACHE_KEY = "Web3Auth-cachedConnector";
-
-const CURRENT_CHAIN_CACHE_KEY = "Web3Auth-currentChain";
-
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
-  public connectedConnectorName: WALLET_CONNECTOR_TYPE | null = null;
-
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
-  public cachedConnector: string | null = null;
-
   protected aaProvider: AccountAbstractionProvider | null = null;
-
-  protected currentChainId: string;
 
   protected connectors: IConnector<unknown>[] = [];
 
@@ -66,16 +59,24 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private plugins: Record<string, IPlugin> = {};
 
-  private storage: "sessionStorage" | "localStorage" = "localStorage";
+  private state: IWeb3AuthState = {
+    connectedConnectorName: null,
+    cachedConnector: null,
+    currentChainId: null,
+    idToken: null,
+  };
 
-  constructor(options: IWeb3AuthCoreOptions) {
+  constructor(options: IWeb3AuthCoreOptions, initialState?: IWeb3AuthState) {
     super();
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    if (options.storageType === "session") this.storage = "sessionStorage";
     this.coreOptions = options;
-    this.currentChainId = options.defaultChainId;
+
+    this.loadState(initialState);
+    if (this.state.idToken && this.coreOptions.ssr && !isBrowser()) {
+      this.status = CONNECTOR_STATUS.CONNECTED;
+    }
   }
 
   get currentChain(): CustomChainConfig | undefined {
@@ -93,12 +94,32 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return null;
   }
 
+  get connectedConnectorName(): WALLET_CONNECTOR_TYPE | null {
+    return this.state.connectedConnectorName;
+  }
+
+  get cachedConnector(): string | null {
+    return this.state.cachedConnector;
+  }
+
+  get currentChainId(): string | null {
+    return this.state.currentChainId;
+  }
+
   get connectedConnector(): IConnector<unknown> | null {
     return this.getConnector(this.connectedConnectorName, this.currentChain?.chainNamespace);
   }
 
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
     return this.aaProvider;
+  }
+
+  private get storage(): IStorage {
+    if (this.coreOptions.ssr || this.coreOptions.storageType === "cookies") return cookieStorage({ expiry: this.coreOptions.sessionTime });
+    if (this.coreOptions.storageType === "session" && storageAvailable("sessionStorage")) return window.sessionStorage;
+    if (this.coreOptions.storageType === "local" && storageAvailable("localStorage")) return window.localStorage;
+    // If no storage is available, use a memory store.
+    return new MemoryStore();
   }
 
   set provider(_: IProvider | null) {
@@ -166,10 +187,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public clearCache() {
-    if (!storageAvailable(this.storage)) return;
-    window[this.storage].removeItem(CONNECTOR_CACHE_KEY);
-    window[this.storage].removeItem(CURRENT_CHAIN_CACHE_KEY);
-    this.cachedConnector = null;
+    this.setState({
+      connectedConnectorName: null,
+      cachedConnector: null,
+      currentChainId: null,
+    });
+    this.storage.removeItem(WEB3AUTH_STATE_COOKIE_KEY);
   }
 
   public async cleanup(): Promise<void> {
@@ -207,7 +230,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
 
     return new Promise((resolve, reject) => {
-      this.once(CONNECTOR_EVENTS.CONNECTED, (_) => {
+      this.once(CONNECTOR_EVENTS.CONNECTED, async (_) => {
+        // when ssr is enabled, we need to get the idToken from the connector.
+        if (this.coreOptions.ssr) {
+          const data = await connector.authenticateUser();
+          this.setState({
+            idToken: data.idToken,
+          });
+        }
+
         resolve(this.provider);
       });
       this.once(CONNECTOR_EVENTS.ERRORED, (err) => {
@@ -361,13 +392,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected initCachedConnectorAndChainId() {
-    this.cachedConnector = storageAvailable(this.storage) ? window[this.storage].getItem(CONNECTOR_CACHE_KEY) : null;
     // init chainId using cached chainId if it exists and is valid, otherwise use the defaultChainId or the first chain
-    const cachedChainId = storageAvailable(this.storage) ? window[this.storage].getItem(CURRENT_CHAIN_CACHE_KEY) : null;
+    const cachedChainId = this.state.currentChainId;
     const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
     if (this.coreOptions.defaultChainId && !isHexStrict(this.coreOptions.defaultChainId))
       throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
-    this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
+    const currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
+    this.setState({ currentChainId });
   }
 
   protected async setupCommonJRPCProvider() {
@@ -402,7 +433,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
     const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
     const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
-    if (isMipdEnabled) {
+    if (isMipdEnabled && isBrowser()) {
       // Solana chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
         const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("./connectors/injected-solana-connector");
@@ -434,10 +465,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
     // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
-    connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
+    if (isBrowser()) connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
 
     // add WalletConnectV2 connector if external wallets are enabled
-    if (isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
+    if (isBrowser() && isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
       const { walletConnectV2Connector } = await import("./connectors/wallet-connect-v2-connector");
       connectorFns.push(walletConnectV2Connector());
     }
@@ -510,9 +541,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
-      this.connectedConnectorName = data.connector as WALLET_CONNECTOR_TYPE;
-      this.status = CONNECTOR_STATUS.CONNECTED;
+      this.setState({ connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connector);
+
+      this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
       this.connectToPlugins(data);
       this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data });
@@ -525,11 +557,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       // get back to ready state for rehydrating.
       this.status = CONNECTOR_STATUS.READY;
-      if (storageAvailable(this.storage)) {
-        const cachedConnector = window[this.storage].getItem(CONNECTOR_CACHE_KEY);
-        if (this.connectedConnectorName === cachedConnector) {
-          this.clearCache();
-        }
+      const cachedConnector = this.state.cachedConnector;
+      if (this.connectedConnectorName === cachedConnector) {
+        this.clearCache();
       }
 
       log.debug("disconnected", this.status, this.connectedConnectorName);
@@ -547,7 +577,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           });
         })
       );
-      this.connectedConnectorName = null;
+      this.setState({ connectedConnectorName: null });
       this.emit(CONNECTOR_EVENTS.DISCONNECTED);
     });
     connector.on(CONNECTOR_EVENTS.CONNECTING, (data) => {
@@ -569,9 +599,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     connector.on(CONNECTOR_EVENTS.CACHE_CLEAR, (data) => {
       log.debug("connector cache clear", data);
-      if (storageAvailable(this.storage)) {
-        this.clearCache();
-      }
+      this.clearCache();
     });
 
     connector.on(CONNECTOR_EVENTS.MFA_ENABLED, (isMFAEnabled: boolean) => {
@@ -600,23 +628,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private cacheWallet(walletName: string) {
-    if (!storageAvailable(this.storage)) return;
-    // TODO: use the key from user + this
-    window[this.storage].setItem(CONNECTOR_CACHE_KEY, walletName);
-    this.cachedConnector = walletName;
+    this.setState({
+      cachedConnector: walletName,
+    });
   }
 
   private setCurrentChain(chainId: string) {
     if (chainId === this.currentChainId) return;
     const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
     if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
-    this.currentChainId = chainId;
-    this.cacheCurrentChain(chainId);
-  }
-
-  private cacheCurrentChain(chainId: string) {
-    if (!storageAvailable(this.storage)) return;
-    window[this.storage].setItem(CURRENT_CHAIN_CACHE_KEY, chainId);
+    this.setState({
+      currentChainId: chainId,
+    });
   }
 
   private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {
@@ -639,5 +662,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         log.error(error);
       }
     });
+  }
+
+  private setState(newState: Partial<IWeb3AuthState>) {
+    this.state = { ...this.state, ...newState };
+    this.storage.setItem(WEB3AUTH_STATE_COOKIE_KEY, JSON.stringify(this.state));
+  }
+
+  private loadState(initialState?: IWeb3AuthState) {
+    if (initialState) {
+      this.state = initialState;
+      return;
+    }
+    const state = this.storage.getItem(WEB3AUTH_STATE_COOKIE_KEY);
+    if (!state) return;
+    this.state = JSON.parse(state);
   }
 }

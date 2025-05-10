@@ -14,15 +14,17 @@ import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
 
 export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProviderProps>) {
-  const { children, config } = params;
-  const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(null);
+  const { children, config, initialState } = params;
+  const { web3AuthOptions } = config;
+  const web3Auth = useMemo(() => new Web3Auth(web3AuthOptions, initialState), [web3AuthOptions, initialState]);
+  // const [web3Auth, setWeb3Auth] = useState<Web3Auth | null>(web3AuthInstance);
 
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [isConnected, setIsConnected] = useState<boolean>(web3Auth.status === CONNECTOR_STATUS.CONNECTED);
   const [provider, setProvider] = useState<IProvider | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
+  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(web3Auth.status);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
 
   const getPlugin = useCallback(
@@ -33,18 +35,23 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     [web3Auth]
   );
 
-  useEffect(() => {
-    const resetHookState = () => {
-      setProvider(null);
-      setIsConnected(false);
-      setStatus(null);
-    };
+  // useEffect(() => {
+  //   const resetHookState = () => {
+  //     setProvider(null);
+  //     setIsConnected(false);
+  //     setStatus(null);
+  //   };
 
-    resetHookState();
-    const { web3AuthOptions } = config;
-    const web3AuthInstance = new Web3Auth(web3AuthOptions);
-    setWeb3Auth(web3AuthInstance);
-  }, [config]);
+  //   resetHookState();
+  //   const { web3AuthOptions } = config;
+
+  //   setWeb3Auth(web3AuthInstance);
+  //   setStatus(web3AuthInstance.status);
+  //   if (web3AuthInstance.status === CONNECTOR_STATUS.CONNECTED) {
+  //     setIsConnected(true);
+  //     setProvider(web3AuthInstance.provider);
+  //   }
+  // }, [config, initialState]);
 
   useEffect(() => {
     const controller = new AbortController();

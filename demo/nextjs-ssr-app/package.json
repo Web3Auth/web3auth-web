@@ -11,7 +11,8 @@
   "//IMP START": "IMP START - Web3Auth Installation",
   "dependencies": {
     "@tanstack/react-query": "^5.37.1",
-    "@web3auth/modal": "file:../../packages/modal/web3auth-modal-10.0.0-beta.8.tgz",
+    "@web3auth/modal": "../../packages/modal",
+    "@web3auth/no-modal": "../../packages/no-modal",
     "next": "14.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
