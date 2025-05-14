@@ -1,7 +1,9 @@
+import "./index.css";
+
+import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Web3AuthProvider, type Web3AuthContextConfig } from "@web3auth/modal/react";
-import "./index.css";
+
 import App from "./App";
 
 const container = document.getElementById("root") as HTMLElement;

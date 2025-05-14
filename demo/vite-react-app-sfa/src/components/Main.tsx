@@ -1,44 +1,29 @@
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import { AuthLoginParams, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from "@web3auth/no-modal/react";
+import { useAccount, useSignMessage } from "wagmi";
 
-import { useWeb3Auth } from "../services/web3auth";
 import styles from "../styles/Home.module.css";
-import { decodeToken } from "../utils";
 
 const Main = () => {
-  const { provider, logout, getUserInfo, getAccounts, getBalance, signMessage, signTransaction, web3Auth, switchChain, enableMFA, manageMFA } =
-    useWeb3Auth();
+  const { provider, isConnected } = useWeb3Auth();
+  const { connect, loading: connecting, error: connectingError, connectorName } = useWeb3AuthConnect();
+  const { disconnect } = useWeb3AuthDisconnect();
+  const { isConnected: isWagmiConnected } = useAccount();
+  const { signMessageAsync, data: signedMessageData } = useSignMessage();
 
   const loggedInView = (
     <>
-      <button onClick={getUserInfo} className={styles.card}>
-        Get User Info
-      </button>
-      <button onClick={getAccounts} className={styles.card}>
-        Get Accounts
-      </button>
-      <button onClick={getBalance} className={styles.card}>
-        Get Balance
-      </button>
-      <button onClick={signMessage} className={styles.card}>
-        Sign Message
-      </button>
-      <button onClick={switchChain} className={styles.card}>
-        Switch Chain
-      </button>
-      <button onClick={enableMFA} className={styles.card}>
-        Enable MFA
-      </button>
-      <button onClick={manageMFA} className={styles.card}>
-        Manage MFA
-      </button>
-      {web3Auth?.connectedConnectorName === WALLET_CONNECTORS.AUTH && (
-        <button onClick={signTransaction} className={styles.card}>
-          Sign Transaction
+      <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+        <p>Provider Actions</p>
+        {/* Sign Message */}
+        <button onClick={() => signMessageAsync({ message: "Hello, world!" })} className={styles.card}>
+          Sign Message
         </button>
-      )}
+        {signedMessageData && <textarea disabled rows={5} value={signedMessageData} style={{ width: "100%" }} />}
+      </div>
 
-      <button onClick={logout} className={styles.card}>
+      <button onClick={() => disconnect()} className={styles.card}>
         Log Out
       </button>
 
@@ -55,36 +40,47 @@ const Main = () => {
       console.error("No idToken present");
       return;
     }
-    const { payload } = decodeToken<{ email: string }>(idToken);
-    console.log(payload);
 
-    await web3Auth?.connectTo(WALLET_CONNECTORS.AUTH, {
+    await connect(WALLET_CONNECTORS.AUTH, {
       authConnection: "custom",
       authConnectionId: "w3a-sfa-web-google",
-      id_token: idToken,
+      idToken: idToken,
       extraLoginOptions: {
         userIdField: "email",
         isUserIdCaseSensitive: false,
-      }
+      },
     });
   };
 
   const unloggedInView = (
-    <div className="flex justify-center mb-2">
-      <GoogleLogin
-        logo_alignment="left"
-        locale="en"
-        auto_select={false}
-        text="continue_with"
-        onSuccess={onGoogleLogin}
-        size="large"
-        shape="pill"
-        width={window.innerWidth < 640 ? "276px" : "332px"}
-      />
-    </div>
+    <>
+      {connecting ? (
+        <p>Connecting...</p>
+      ) : (
+        <div className="flex justify-center mb-2">
+          <GoogleLogin
+            logo_alignment="left"
+            locale="en"
+            auto_select={false}
+            text="continue_with"
+            onSuccess={onGoogleLogin}
+            size="large"
+            shape="pill"
+            width={window.innerWidth < 640 ? "276px" : "332px"}
+          />
+        </div>
+      )}
+      {connectingError && <p>Error: {connectingError.message}</p>}
+    </>
   );
 
-  return <div className={styles.grid}>{provider ? loggedInView : unloggedInView}</div>;
+  return (
+    <div className={styles.grid}>
+      <p>Web3Auth: {isConnected ? "Connected" : "Disconnected"}</p>
+      <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p>
+      {provider ? loggedInView : unloggedInView}
+    </div>
+  );
 };
 
 export default Main;

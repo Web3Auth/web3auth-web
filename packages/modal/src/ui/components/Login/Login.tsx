@@ -223,7 +223,7 @@ function Login(props: LoginProps) {
               authConnectionId: connectorConfig.authConnectionId,
               groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
               extraLoginOptions: connectorConfig.extraLoginOptions,
-              login_hint: loginHint,
+              loginHint: loginHint,
               name: "Email",
             },
           });
@@ -247,7 +247,7 @@ function Login(props: LoginProps) {
               authConnectionId: connectorConfig.authConnectionId,
               groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
               extraLoginOptions: connectorConfig.extraLoginOptions,
-              login_hint: finalLoginHint,
+              loginHint: finalLoginHint,
               name: "Mobile",
             },
           });
@@ -317,7 +317,7 @@ function Login(props: LoginProps) {
             authConnectionId: connectorConfig.authConnectionId,
             groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
             extraLoginOptions: { ...connectorConfig.extraLoginOptions, id_token: result.data?.id_token },
-            login_hint: passwordlessHandler.passwordlessParams.loginHint,
+            loginHint: passwordlessHandler.passwordlessParams.loginHint,
             name: passwordlessHandler.name,
           },
         });
@@ -567,7 +567,7 @@ function Login(props: LoginProps) {
             logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0 w3a--w-auto"
           )}
         >
-          <img src={headerLogo || getIcons(isDark ? "logo-dark" : "logo-light")} alt="Logo" className="w3a--size-full w3a--object-contain" />
+          <img src={headerLogo || getIcons(isDark ? "logo-w-dark" : "logo-w-light")} alt="Logo" className="w3a--size-full w3a--object-contain" />
         </figure>
         <p
           className={cn(

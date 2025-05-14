@@ -361,7 +361,7 @@ function Root(props: RootProps) {
 
     // Loader Screen
     if (modalState.status !== MODAL_STATUS.INITIALIZED) {
-      return "642px";
+      return "530px";
     }
 
     // Wallet Details Screen

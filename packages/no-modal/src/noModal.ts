@@ -463,7 +463,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
     // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
-    if (isBrowser()) connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
+    if (isBrowser() && (chainNamespaces.has(CHAIN_NAMESPACES.EIP155) || chainNamespaces.has(CHAIN_NAMESPACES.SOLANA))) {
+      connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
+    }
 
     // add WalletConnectV2 connector if external wallets are enabled
     if (isBrowser() && isExternalWalletEnabled && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {

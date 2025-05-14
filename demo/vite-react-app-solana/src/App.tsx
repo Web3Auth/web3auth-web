@@ -1,7 +1,7 @@
 import "./App.css";
-import styles from "./styles/Home.module.css";
-import Main from "./components/Main";
 
+import Main from "./components/Main";
+import styles from "./styles/Home.module.css";
 
 function App() {
   return (

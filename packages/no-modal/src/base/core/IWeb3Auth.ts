@@ -20,9 +20,9 @@ import { type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
-  login_hint?: string;
+  loginHint?: string;
 
-  id_token?: string;
+  idToken?: string;
 };
 
 export type WalletServicesConfig = Omit<

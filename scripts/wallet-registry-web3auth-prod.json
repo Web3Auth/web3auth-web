@@ -8,12 +8,16 @@
         "firefox": "ether-metamask",
         "ios": "id1438144202"
       },
-      "chains": ["eip155:1"],
+      "chains": ["eip155:1", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"],
       "imgExtension": "webp",
       "injected": [
         {
           "injected_id": "isMetaMask",
           "namespace": "eip155"
+        },
+        {
+          "injected_id": "isMetaMask",
+          "namespace": "solana"
         }
       ],
       "mobile": {

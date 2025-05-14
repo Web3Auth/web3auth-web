@@ -345,7 +345,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         ? this.authInstance?.sessionId
         : this._getFinalPrivKey();
 
-    if (params.id_token) params.extraLoginOptions = { ...params.extraLoginOptions, id_token: params.id_token };
+    if (params.idToken) params.extraLoginOptions = { ...params.extraLoginOptions, id_token: params.idToken };
 
     if (!keyAvailable || params.extraLoginOptions?.id_token) {
       // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
@@ -411,7 +411,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const jwtParams = {
       ...(providerConfig.jwtParameters || {}),
       ...(params.extraLoginOptions || {}),
-      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+      login_hint: params.loginHint || params.extraLoginOptions?.login_hint,
     } as Auth0ClientOptions;
 
     const nonce = randomId();
@@ -420,7 +420,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const loginParams = cloneDeep(params);
     loginParams.extraLoginOptions = {
       ...(loginParams.extraLoginOptions || {}),
-      login_hint: params.login_hint || params.extraLoginOptions?.login_hint,
+      login_hint: params.loginHint || params.extraLoginOptions?.login_hint,
     };
     delete loginParams.chainId;
 
@@ -525,8 +525,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     } as Auth0ClientOptions;
 
     let finalUserId;
-    if (params.login_hint || params.extraLoginOptions?.login_hint) {
-      finalUserId = params.login_hint || params.extraLoginOptions?.login_hint;
+    if (params.loginHint || params.extraLoginOptions?.login_hint) {
+      finalUserId = params.loginHint || params.extraLoginOptions?.login_hint;
     } else if (params.extraLoginOptions?.id_token) {
       if (typeof finalExtraLoginOptions.isUserIdCaseSensitive === "undefined") {
         throw WalletInitializationError.invalidParams(

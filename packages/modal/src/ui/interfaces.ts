@@ -69,7 +69,7 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
 
 export type ModalLoginParams = Pick<
   AuthLoginParams,
-  "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "login_hint" | "extraLoginOptions"
+  "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "loginHint" | "extraLoginOptions"
 > & {
   name: string;
 };

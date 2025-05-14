@@ -1,7 +1,7 @@
 import "./App.css";
 
-import { AuthLoginParams, CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
-import { AUTH_CONNECTION, Web3AuthNoModal } from "@web3auth/no-modal";
+import { SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
+import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { useEffect, useState } from "react";
 
 import RPC from "./web3RPC"; // for using web3.js
@@ -16,7 +16,7 @@ function App() {
     const init = async () => {
       try {
         const web3auth = new Web3AuthNoModal({
-          clientId: "BPi5PB_UiIZ-cPz1GtV5i1I2iOSOHuimiXBI0e-Oe_u6X3oVAbCiAZOTEBtTXw4tsluTITPqA8zMsfxIKMjiqNQ",
+          clientId,
           web3AuthNetwork: "sapphire_mainnet",
           authBuildEnv: "testing",
         });
@@ -36,13 +36,12 @@ function App() {
   }, []);
 
   const login = async () => {
-    await web3auth?.connectTo(WALLET_CONNECTORS.AUTH, {
-      authConnection: AUTH_CONNECTION.CUSTOM,
-      authConnectionId: "w3a-cognito-demo",
-      extraLoginOptions: {
-        clientId: "7i7vcbpuj37mqmfr6qrqbj55s",
-      },
-    });
+    if (!web3auth) {
+      uiConsole("web3auth not initialized yet");
+      return;
+    }
+    const web3authProvider = await web3auth.connectTo(WALLET_CONNECTORS.AUTH, { authConnection: "google" });
+    setProvider(web3authProvider);
   };
 
   const authenticateUser = async () => {

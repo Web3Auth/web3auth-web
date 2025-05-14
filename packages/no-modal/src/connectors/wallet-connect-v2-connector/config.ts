@@ -105,7 +105,12 @@ export const getWalletConnectV2Settings = async (
   };
 
   const chainNamespaces = chains.map((chain) => {
-    return `${chain.chainNamespace}:${chain.chainNamespace === CHAIN_NAMESPACES.SOLANA ? SOLANA_CAIP_CHAIN_MAP[chain.chainId] : parseInt(chain.chainId, 16)}`;
+    if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      return `${chain.chainNamespace}:${SOLANA_CAIP_CHAIN_MAP[chain.chainId]}`;
+    } else if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      return `${chain.chainNamespace}:${parseInt(chain.chainId, 16)}`;
+    }
+    throw new Error(`Unsupported chain namespace: ${chain.chainNamespace}`);
   });
 
   const loginSettings: EngineTypes.ConnectParams = { optionalNamespaces: getRequiredNamespaces(chainNamespaces) };
