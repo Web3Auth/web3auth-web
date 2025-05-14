@@ -316,7 +316,7 @@ const canSwitchChainNamespace = computed(() => {
 });
 
 const onSwitchChain = async () => {
-  log.info("switching chain", currentChainId.value);
+  log.info("switching chain");
   try {
     const { chainId } = provider.value as IProvider;
     if (chainId !== currentChainId.value) throw new Error("chainId does not match current chainId");
@@ -324,7 +324,6 @@ const onSwitchChain = async () => {
     const currentNamespace = currentChainNamespace.value;
     const newChain = props.chains.find((x) => x.chainNamespace === currentNamespace && x.chainId !== chainId);
     if (!newChain) throw new Error(`Please configure at least 2 chains for ${currentNamespace} in the config`);
-    console.log("newChain", newChain.chainId);
     const data = await switchChainAsync({ chainId: Number(newChain.chainId) });
     printToConsole("switchedChain", { chainId: data.id });
   } catch (error) {

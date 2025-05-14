@@ -25,7 +25,7 @@ export const cookieStorage = (options?: { expiry?: number }) =>
     },
   }) satisfies IStorage;
 
-export function cookieToInitialState(cookie?: string | null) {
+export function cookieToWeb3AuthState(cookie?: string | null) {
   if (!cookie) return undefined;
   const parsed = parseCookie(cookie, WEB3AUTH_STATE_STORAGE_KEY);
   if (!parsed) return undefined;

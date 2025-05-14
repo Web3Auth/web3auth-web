@@ -3,7 +3,7 @@ import "./globals.css";
 import { Inter } from "next/font/google";
 
 import Provider from "@/components/provider";
-import { cookieToInitialState } from "@web3auth/modal";
+import { cookieToWeb3AuthState } from "@web3auth/modal";
 import { headers } from "next/headers";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -14,7 +14,7 @@ export const metadata = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const initialState = cookieToInitialState((headers()).get('cookie'))
+  const initialState = cookieToWeb3AuthState((headers()).get('cookie'))
   console.log("initialState", initialState)
   return (
     <html lang="en">
