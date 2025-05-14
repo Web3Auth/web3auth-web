@@ -1,6 +1,7 @@
 export const MULTI_CHAIN_CONNECTORS = {
   AUTH: "auth",
   WALLET_CONNECT_V2: "wallet-connect-v2",
+  METAMASK: "metamask",
 } as const;
 
 export const SOLANA_CONNECTORS = {
@@ -9,7 +10,6 @@ export const SOLANA_CONNECTORS = {
 
 export const EVM_CONNECTORS = {
   COINBASE: "coinbase",
-  METAMASK: "metamask",
   ...MULTI_CHAIN_CONNECTORS,
 } as const;
 
