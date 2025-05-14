@@ -37,6 +37,7 @@ import {
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
+import { Analytics } from "./base";
 import { authConnector } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
@@ -126,6 +127,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.initAccountAbstractionConfig(projectConfig);
     this.initChainsConfig(projectConfig);
     this.initCachedConnectorAndChainId();
+
+    // init analytics
+    Analytics.init();
+    Analytics.identify(window.location.hostname, {
+      web3auth_client_id: this.coreOptions.clientId,
+      web3auth_network: this.coreOptions.web3AuthNetwork,
+    });
 
     // setup common JRPC provider
     await withAbort(() => this.setupCommonJRPCProvider(), signal);

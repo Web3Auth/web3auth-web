@@ -1,3 +1,4 @@
+export * from "./analytics";
 export * from "./chain/IChainInterface";
 export * from "./composables";
 export * from "./connector";
