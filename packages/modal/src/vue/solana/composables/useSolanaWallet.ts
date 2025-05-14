@@ -16,31 +16,35 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   const solanaWallet = shallowRef<SolanaWallet | null>(null);
   const connection = shallowRef<Connection | null>(null);
 
-  watch(provider, async (newVal) => {
-    if (!web3Auth.value?.currentChain?.chainNamespace || web3Auth.value.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
-      return;
-    }
-    if (!newVal && solanaWallet.value) {
-      solanaWallet.value = null;
-      accounts.value = null;
-      connection.value = null;
-      return;
-    }
-    if (!solanaWallet.value) {
-      solanaWallet.value = new SolanaWallet(newVal);
-    }
-
-    if (solanaWallet.value && accounts.value?.length === 0) {
-      const result = await solanaWallet.value.requestAccounts();
-      if (result?.length > 0) {
-        accounts.value = result;
+  watch(
+    provider,
+    async (newVal) => {
+      if (!web3Auth.value?.currentChain?.chainNamespace || web3Auth.value.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        return;
       }
-    }
+      if (!newVal && solanaWallet.value) {
+        solanaWallet.value = null;
+        accounts.value = null;
+        connection.value = null;
+        return;
+      }
+      if (!solanaWallet.value) {
+        solanaWallet.value = new SolanaWallet(newVal);
+      }
 
-    if (solanaWallet.value && !connection.value) {
-      connection.value = new Connection(web3Auth.value?.currentChain?.rpcTarget);
-    }
-  });
+      if (solanaWallet.value && accounts.value?.length === 0) {
+        const result = await solanaWallet.value.requestAccounts();
+        if (result?.length > 0) {
+          accounts.value = result;
+        }
+      }
+
+      if (solanaWallet.value && !connection.value) {
+        connection.value = new Connection(web3Auth.value?.currentChain?.rpcTarget);
+      }
+    },
+    { immediate: true }
+  );
 
   return { solanaWallet, accounts, connection };
 };

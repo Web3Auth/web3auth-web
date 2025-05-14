@@ -14,8 +14,9 @@ import {
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 
-import { log } from "../../base";
+import { CHAIN_NAMESPACES, log, WalletInitializationError } from "../../base";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../hooks";
+import { defaultWagmiConfig } from "./constants";
 import { WagmiProviderProps } from "./interface";
 
 const WEB3AUTH_CONNECTOR_ID = "web3auth";
@@ -122,6 +123,8 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
   const { web3Auth, isInitialized } = useWeb3Auth();
 
   const finalConfig = useMemo(() => {
+    if (!isInitialized) return defaultWagmiConfig;
+
     const finalConfig: CreateConfigParameters = {
       ssr: true,
       ...config,
@@ -135,7 +138,9 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     const wagmiChains: Chain[] = [];
     if (isInitialized && web3Auth?.coreOptions?.chains) {
       const defaultChainId = web3Auth.currentChain?.chainId;
-      const chains = web3Auth.coreOptions.chains;
+      const chains = web3Auth.coreOptions.chains.filter((chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155);
+      if (chains.length === 0) throw WalletInitializationError.invalidParams("No valid chains found in web3auth config for wagmi.");
+
       chains.forEach((chain) => {
         const wagmiChain = defineChain({
           id: Number.parseInt(chain.chainId, 16), // id in number form
@@ -175,10 +180,6 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     if (!finalConfig.chains) return;
     return createWagmiConfig(finalConfig);
   }, [config, web3Auth, isInitialized]);
-
-  // WagmiProviderBase requires a config to initialize
-  // If no config is provided, it will throw an error.
-  if (!finalConfig) return null;
 
   return createElement(
     WagmiProviderBase,

@@ -74,6 +74,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
+    if (!options.storageType) options.storageType = "local";
+
     this.coreOptions = options;
     this.storage = this.getStorageMethod();
 
@@ -107,7 +109,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get currentChainId(): string | null {
-    return this.state.currentChainId;
+    return this.state.currentChainId || this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
   }
 
   get connectedConnector(): IConnector<unknown> | null {
@@ -189,7 +191,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       currentChainId: null,
       idToken: null,
     });
-    this.storage.removeItem(WEB3AUTH_STATE_STORAGE_KEY);
   }
 
   public async cleanup(): Promise<void> {
