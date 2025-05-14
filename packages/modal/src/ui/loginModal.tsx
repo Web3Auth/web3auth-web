@@ -1,3 +1,5 @@
+"use client";
+
 import "./css/index.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
@@ -21,7 +23,6 @@ import {
 } from "@web3auth/no-modal";
 import { createRoot } from "react-dom/client";
 
-// import Modal from "./components/Modal";
 import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR } from "./constants";
 import { ThemedContext } from "./context/ThemeContext";

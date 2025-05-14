@@ -62,57 +62,62 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   public async initModal(options?: { signal?: AbortSignal }): Promise<void> {
-    const { signal } = options || {};
+    try {
+      const { signal } = options || {};
 
-    super.checkInitRequirements();
-    // get project config and wallet registry
-    const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
+      super.checkInitRequirements();
+      // get project config and wallet registry
+      const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
 
-    // init config
-    this.initUIConfig(projectConfig);
-    super.initAccountAbstractionConfig(projectConfig);
-    super.initChainsConfig(projectConfig);
-    super.initCachedConnectorAndChainId();
+      // init config
+      this.initUIConfig(projectConfig);
+      super.initAccountAbstractionConfig(projectConfig);
+      super.initChainsConfig(projectConfig);
+      super.initCachedConnectorAndChainId();
 
-    // init login modal
-    const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
-    this.loginModal = new LoginModal(
-      {
-        ...this.options.uiConfig,
-        connectorListener: this,
-        web3authClientId: this.options.clientId,
-        web3authNetwork: this.options.web3AuthNetwork,
-        authBuildEnv: this.options.authBuildEnv,
-        chainNamespaces: this.getChainNamespaces(),
-        walletRegistry: filteredWalletRegistry,
-      },
-      {
-        onInitExternalWallets: this.onInitExternalWallets,
-        onSocialLogin: this.onSocialLogin,
-        onExternalWalletLogin: this.onExternalWalletLogin,
-        onModalVisibility: this.onModalVisibility,
-      }
-    );
-    await withAbort(() => this.loginModal.initModal(), signal);
-
-    // setup common JRPC provider
-    await withAbort(() => this.setupCommonJRPCProvider(), signal);
-
-    // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) => {
-      const onAbortHandler = () => {
-        log.debug("init aborted");
-        if (this.connectors?.length > 0) {
-          super.cleanup();
+      // init login modal
+      const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
+      this.loginModal = new LoginModal(
+        {
+          ...this.options.uiConfig,
+          connectorListener: this,
+          web3authClientId: this.options.clientId,
+          web3authNetwork: this.options.web3AuthNetwork,
+          authBuildEnv: this.options.authBuildEnv,
+          chainNamespaces: this.getChainNamespaces(),
+          walletRegistry: filteredWalletRegistry,
+        },
+        {
+          onInitExternalWallets: this.onInitExternalWallets,
+          onSocialLogin: this.onSocialLogin,
+          onExternalWalletLogin: this.onExternalWalletLogin,
+          onModalVisibility: this.onModalVisibility,
         }
-      };
-      withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
-    });
+      );
+      await withAbort(() => this.loginModal.initModal(), signal);
 
-    await withAbort(() => super.loadConnectors({ projectConfig, modalMode: true }), signal);
+      // setup common JRPC provider
+      await withAbort(() => this.setupCommonJRPCProvider(), signal);
 
-    // initialize plugins
-    await withAbort(() => super.initPlugins(), signal);
+      // initialize connectors
+      this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) => {
+        const onAbortHandler = () => {
+          log.debug("init aborted");
+          if (this.connectors?.length > 0) {
+            super.cleanup();
+          }
+        };
+        withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
+      });
+
+      await withAbort(() => super.loadConnectors({ projectConfig, modalMode: true }), signal);
+
+      // initialize plugins
+      await withAbort(() => super.initPlugins(), signal);
+    } catch (error) {
+      log.error("Failed to initialize modal", error);
+      throw error;
+    }
   }
 
   public async connect(): Promise<IProvider | null> {

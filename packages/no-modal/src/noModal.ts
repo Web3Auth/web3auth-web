@@ -35,12 +35,13 @@ import {
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
-  WEB3AUTH_STATE_COOKIE_KEY,
+  WEB3AUTH_STATE_STORAGE_KEY,
   Web3AuthError,
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
 import { cookieStorage } from "./base/cookie";
+import { deserialize } from "./base/deserialize";
 import { authConnector } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
@@ -59,6 +60,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private plugins: Record<string, IPlugin> = {};
 
+  private storage: IStorage;
+
   private state: IWeb3AuthState = {
     connectedConnectorName: null,
     cachedConnector: null,
@@ -72,9 +75,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
     this.coreOptions = options;
+    this.storage = this.getStorageMethod();
 
     this.loadState(initialState);
-    if (this.state.idToken && this.coreOptions.ssr && !isBrowser()) {
+    if (this.state.idToken && this.coreOptions.ssr) {
       this.status = CONNECTOR_STATUS.CONNECTED;
     }
   }
@@ -112,14 +116,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
     return this.aaProvider;
-  }
-
-  private get storage(): IStorage {
-    if (this.coreOptions.ssr || this.coreOptions.storageType === "cookies") return cookieStorage({ expiry: this.coreOptions.sessionTime });
-    if (this.coreOptions.storageType === "session" && storageAvailable("sessionStorage")) return window.sessionStorage;
-    if (this.coreOptions.storageType === "local" && storageAvailable("localStorage")) return window.localStorage;
-    // If no storage is available, use a memory store.
-    return new MemoryStore();
   }
 
   set provider(_: IProvider | null) {
@@ -191,8 +187,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       connectedConnectorName: null,
       cachedConnector: null,
       currentChainId: null,
+      idToken: null,
     });
-    this.storage.removeItem(WEB3AUTH_STATE_COOKIE_KEY);
+    this.storage.removeItem(WEB3AUTH_STATE_STORAGE_KEY);
   }
 
   public async cleanup(): Promise<void> {
@@ -233,6 +230,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(CONNECTOR_EVENTS.CONNECTED, async (_) => {
         // when ssr is enabled, we need to get the idToken from the connector.
         if (this.coreOptions.ssr) {
+          // TODO: handle the idToken being expired if saved in storage.
           const data = await connector.authenticateUser();
           this.setState({
             idToken: data.idToken,
@@ -609,8 +607,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected checkInitRequirements(): void {
-    if (this.status === CONNECTOR_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already pending connection");
-    if (this.status === CONNECTOR_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
     if (this.status === CONNECTOR_STATUS.READY) throw WalletInitializationError.notReady("Connector is already initialized");
   }
 
@@ -666,7 +662,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private setState(newState: Partial<IWeb3AuthState>) {
     this.state = { ...this.state, ...newState };
-    this.storage.setItem(WEB3AUTH_STATE_COOKIE_KEY, JSON.stringify(this.state));
+    this.storage.setItem(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify(this.state));
   }
 
   private loadState(initialState?: IWeb3AuthState) {
@@ -674,8 +670,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.state = initialState;
       return;
     }
-    const state = this.storage.getItem(WEB3AUTH_STATE_COOKIE_KEY);
+    const state = this.storage.getItem(WEB3AUTH_STATE_STORAGE_KEY);
     if (!state) return;
-    this.state = JSON.parse(state);
+    this.state = deserialize<IWeb3AuthState>(state);
+  }
+
+  private getStorageMethod(): IStorage {
+    if (this.coreOptions.ssr || this.coreOptions.storageType === "cookies") return cookieStorage({ expiry: this.coreOptions.sessionTime });
+    if (this.coreOptions.storageType === "session" && storageAvailable("sessionStorage")) return window.sessionStorage;
+    if (this.coreOptions.storageType === "local" && storageAvailable("localStorage")) return window.localStorage;
+    // If no storage is available, use a memory store.
+    return new MemoryStore();
   }
 }

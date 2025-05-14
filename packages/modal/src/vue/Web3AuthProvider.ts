@@ -118,7 +118,7 @@ export const Web3AuthProvider = defineComponent({
         };
 
         const errorListener = () => {
-          status.value = CONNECTOR_EVENTS.ERRORED;
+          status.value = web3Auth.value!.status;
         };
 
         const mfaEnabledListener = () => {

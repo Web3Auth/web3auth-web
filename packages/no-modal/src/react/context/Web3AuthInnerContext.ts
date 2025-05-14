@@ -7,8 +7,14 @@ import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
 
 export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProviderProps>) {
-  const { children, config } = params;
-  const [web3Auth, setWeb3Auth] = useState<Web3AuthNoModal | null>(null);
+  const { children, config, initialState } = params;
+  const { web3AuthOptions } = config;
+
+  const web3Auth = useMemo(() => {
+    setProvider(null);
+
+    return new Web3AuthNoModal(web3AuthOptions, initialState);
+  }, [web3AuthOptions, initialState]);
 
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
@@ -25,19 +31,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     },
     [web3Auth]
   );
-
-  useEffect(() => {
-    const resetHookState = () => {
-      setProvider(null);
-      setIsConnected(false);
-      setStatus(null);
-    };
-
-    resetHookState();
-    const { web3AuthOptions } = config;
-    const web3Instance = new Web3AuthNoModal(web3AuthOptions);
-    setWeb3Auth(web3Instance);
-  }, [config]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -85,7 +78,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
     };
     const errorListener = () => {
-      setStatus(CONNECTOR_STATUS.ERRORED);
+      setStatus(web3Auth.status);
     };
 
     const mfaEnabledListener = (isMFAEnabled: boolean) => {

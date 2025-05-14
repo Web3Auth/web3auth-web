@@ -14,4 +14,4 @@ export const WIDGET_TYPE = {
   EMBED: "embed",
 } as const;
 
-export const WEB3AUTH_STATE_COOKIE_KEY = "Web3Auth-state";
+export const WEB3AUTH_STATE_STORAGE_KEY = "Web3Auth-state";

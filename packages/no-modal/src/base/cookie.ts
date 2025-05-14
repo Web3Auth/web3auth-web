@@ -1,6 +1,6 @@
 import type { IStorage } from "@web3auth/auth";
 
-import { WEB3AUTH_STATE_COOKIE_KEY } from "./constants";
+import { WEB3AUTH_STATE_STORAGE_KEY } from "./constants";
 import { deserialize } from "./deserialize";
 import type { IWeb3AuthState } from "./interfaces";
 
@@ -15,7 +15,7 @@ export const cookieStorage = (options?: { expiry?: number }) =>
       if (typeof window === "undefined") return;
       let cookieString = `${key}=${value};path=/;samesite=Lax`;
 
-      if (options?.expiry && typeof options.expiry === "number") cookieString += `; max-age=${options.expiry}`;
+      if (options?.expiry && typeof options.expiry === "number") cookieString += `; expires=${new Date(Date.now() + options.expiry).toUTCString()}`;
       if (process.env.NODE_ENV === "production") cookieString += "; secure";
       document.cookie = cookieString;
     },
@@ -27,7 +27,7 @@ export const cookieStorage = (options?: { expiry?: number }) =>
 
 export function cookieToInitialState(cookie?: string | null) {
   if (!cookie) return undefined;
-  const parsed = parseCookie(cookie, WEB3AUTH_STATE_COOKIE_KEY);
+  const parsed = parseCookie(cookie, WEB3AUTH_STATE_STORAGE_KEY);
   if (!parsed) return undefined;
   return deserialize<IWeb3AuthState>(parsed);
 }
