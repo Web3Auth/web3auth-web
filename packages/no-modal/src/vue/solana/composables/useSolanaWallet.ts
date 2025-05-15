@@ -17,6 +17,19 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   const solanaWallet = shallowRef<SolanaWallet | null>(null);
   const connection = shallowRef<Connection | null>(null);
 
+  const setupWallet = async () => {
+    solanaWallet.value = new SolanaWallet(provider.value);
+    const result = await solanaWallet.value.requestAccounts();
+    if (result?.length > 0) {
+      accounts.value = result;
+    }
+    connection.value = new Connection(web3Auth.value?.currentChain?.rpcTarget);
+  };
+
+  if (provider.value && !solanaWallet.value) {
+    setupWallet();
+  }
+
   watch(
     provider,
     async (newVal) => {
@@ -26,21 +39,12 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
       if (!newVal && solanaWallet.value) {
         solanaWallet.value = null;
         accounts.value = null;
+        connection.value = null;
         return;
       }
-      if (!solanaWallet.value) {
-        solanaWallet.value = new SolanaWallet(newVal);
-      }
 
-      if (accounts.value?.length === 0) {
-        const result = await solanaWallet.value.requestAccounts();
-        if (result?.length > 0) {
-          accounts.value = result;
-        }
-      }
-
-      if (solanaWallet.value && !connection.value) {
-        connection.value = new Connection(web3Auth.value?.currentChain?.rpcTarget);
+      if (newVal && !solanaWallet.value) {
+        setupWallet();
       }
     },
     { immediate: true }
