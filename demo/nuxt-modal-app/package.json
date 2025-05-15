@@ -1,0 +1,28 @@
+{
+  "name": "nuxt-app",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare"
+  },
+  "devDependencies": {
+    "buffer": "^6.0.3",
+    "nuxt": "^3.13.2",
+    "process": "^0.11.10",
+    "vue": "^3.5.6",
+    "vue-router": "^4.4.5"
+  },
+  "peerDependencies": {
+    "nuxt": ">=3.x"
+  },
+  "dependencies": {
+    "@tanstack/vue-query": "^5.76.0",
+    "@wagmi/vue": "^0.1.19",
+    "@web3auth/modal": "../../packages/modal",
+    "viem": "^2.21.9"
+  }
+}
