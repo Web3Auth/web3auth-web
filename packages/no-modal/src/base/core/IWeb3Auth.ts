@@ -1,5 +1,5 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import { type BUILD_ENV_TYPE, type LoginParams, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
+import { type BUILD_ENV_TYPE, type LoginParams, MfaSettings, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
@@ -91,17 +91,17 @@ export interface IWeb3AuthCoreOptions {
    * Note: max value can be 30 days (86400 * 30) and min can be  1 sec (1)
    */
   sessionTime?: number;
+
   /**
-   * Web3Auth Network to use for the session & the issued idToken
-   * @defaultValue sapphire_mainnet
+   * Web3Auth Network to use for the session.
    */
-  web3AuthNetwork?: WEB3AUTH_NETWORK_TYPE;
+  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
 
   /**
    * Uses core-kit key with web3auth provider
    * @defaultValue false
    */
-  useCoreKitKey?: boolean;
+  useSFAKey?: boolean;
 
   /**
    * WhiteLabel options for web3auth
@@ -157,6 +157,11 @@ export interface IWeb3AuthCoreOptions {
    * @defaultValue BUILD_ENV.PRODUCTION
    */
   authBuildEnv?: BUILD_ENV_TYPE;
+
+  /**
+   * MFA settings for the auth connector
+   */
+  mfaSettings?: MfaSettings;
 }
 
 export type LoginParamMap = {

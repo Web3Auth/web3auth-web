@@ -111,7 +111,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       throw WalletInitializationError.invalidParams("authConnectionConfig is required before auth's initialization");
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
-    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
+    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useSFAKey };
     this.authInstance = new Auth({
       ...this.authOptions,
       clientId: this.coreOptions.clientId,
@@ -320,13 +320,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   private _getFinalPrivKey() {
     if (!this.authInstance) return "";
     let finalPrivKey = this.authInstance.privKey;
-    // coreKitKey is available only for custom verifiers by default
-    if (this.coreOptions.useCoreKitKey) {
+    // coreKitKey is available only for custom connections by default
+    if (this.coreOptions.useSFAKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
-      // when useCoreKitKey is set to true.
+      // when useSFAKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
       if (this.authInstance.privKey && !this.authInstance.coreKitKey) {
-        throw WalletLoginError.coreKitKeyNotFound();
+        throw WalletLoginError.sfaKeyNotFound();
       }
       finalPrivKey = this.authInstance.coreKitKey;
     }
@@ -642,8 +642,8 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
       walletServicesSettings: finalWsSettings,
       loginSettings: params?.loginSettings,
       coreOptions,
-      // TODO: check, test this and may need to send modal config here later on.!!
       authConnectionConfig: projectConfig.embeddedWalletAuth,
+      mfaSettings: coreOptions.mfaSettings,
     });
   };
 };
