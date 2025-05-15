@@ -16,7 +16,7 @@ import styles from "../styles/Home.module.css";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
-  const { loading: connecting, connect, error: connectingError, connectorName } = useWeb3AuthConnect();
+  const { loading: connecting, connect, error: connectingError, connectorName, connectTo } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { signMessageAsync, data: signedMessageData } = useSignMessage();
   const { address, isConnected: isWagmiConnected } = useAccount();
@@ -210,9 +210,14 @@ const Main = () => {
       {connecting ? (
         <p>Connecting to {connectorName}...</p>
       ) : (
-        <button onClick={() => connect()} className={styles.card}>
-          Login
-        </button>
+        <>
+          <button onClick={() => connect()} className={styles.card}>
+            Login with Modal
+          </button>
+          <button onClick={() => connectTo("auth", { authConnection: "facebook" })} className={styles.card}>
+            Login with Facebook
+          </button>
+        </>
       )}
       {connectingError && <p>Error: {connectingError.message}</p>}
     </>

@@ -74,7 +74,7 @@ export const Web3AuthProvider = defineComponent({
           try {
             initError.value = null;
             isInitializing.value = true;
-            await newWeb3Auth.initModal({ signal: controller.signal });
+            await newWeb3Auth.init({ signal: controller.signal });
           } catch (error) {
             initError.value = error as Error;
           } finally {

@@ -17,7 +17,7 @@ import {
 import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
-import type { ProjectConfig } from "../interfaces";
+import type { LoginModeType, ProjectConfig } from "../interfaces";
 import type { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
@@ -96,7 +96,13 @@ export type BaseConnectorLoginParams = {
 
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
-export type CONNECTED_EVENT_DATA = { connector: WALLET_CONNECTOR_TYPE; provider: IProvider; reconnected: boolean };
+export type CONNECTED_EVENT_DATA = {
+  connector: WALLET_CONNECTOR_TYPE;
+  provider: IProvider;
+  reconnected: boolean;
+  // only available from no-modal instance.
+  loginMode?: LoginModeType;
+};
 
 export interface IConnectorDataEvent {
   connectorName: string;

@@ -15,3 +15,8 @@ export const WIDGET_TYPE = {
 } as const;
 
 export const WEB3AUTH_STATE_STORAGE_KEY = "Web3Auth-state";
+
+export const LOGIN_MODE = {
+  MODAL: "modal",
+  NO_MODAL: "no-modal",
+} as const;

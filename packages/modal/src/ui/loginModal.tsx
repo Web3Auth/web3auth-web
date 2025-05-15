@@ -10,6 +10,7 @@ import {
   CONNECTOR_EVENTS,
   type IConnectorDataEvent,
   log,
+  LOGIN_MODE,
   type LoginMethodConfig,
   type MetaMaskConnectorData,
   type WALLET_CONNECTOR_TYPE,
@@ -367,7 +368,7 @@ export class LoginModal {
     listener.on(CONNECTOR_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);
       // only show success if not being reconnected again.
-      if (!data.reconnected) {
+      if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
         this.setState({
           status: MODAL_STATUS.CONNECTED,
           modalVisibility: true,

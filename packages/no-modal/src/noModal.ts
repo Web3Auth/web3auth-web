@@ -22,6 +22,8 @@ import {
   type IWeb3AuthCoreOptions,
   IWeb3AuthState,
   log,
+  LOGIN_MODE,
+  LoginModeType,
   type LoginParamMap,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
@@ -68,6 +70,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     currentChainId: null,
     idToken: null,
   };
+
+  private loginMode: LoginModeType = LOGIN_MODE.NO_MODAL;
 
   constructor(options: IWeb3AuthCoreOptions, initialState?: IWeb3AuthState) {
     super();
@@ -222,7 +226,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * Connect to a specific wallet connector
    * @param connectorName - Key of the wallet connector to use.
    */
-  async connectTo<T extends WALLET_CONNECTOR_TYPE>(connectorName: T, loginParams?: LoginParamMap[T]): Promise<IProvider | null> {
+  async connectTo<T extends WALLET_CONNECTOR_TYPE>(
+    connectorName: T,
+    loginParams?: LoginParamMap[T],
+    loginMode?: LoginModeType
+  ): Promise<IProvider | null> {
+    this.loginMode = loginMode || "no-modal";
     const connector = this.getConnector(connectorName, (loginParams as { chainNamespace?: ChainNamespaceType })?.chainNamespace);
     if (!connector || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
@@ -510,7 +519,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
-    connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
+    connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: Omit<CONNECTED_EVENT_DATA, "loginMode">) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = data;
 
@@ -548,7 +557,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
       this.connectToPlugins(data);
-      this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data });
+      this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
     });
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {

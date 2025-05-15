@@ -3,7 +3,7 @@ import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
 import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
-import { MODAL_SIGN_IN_METHODS, SMART_ACCOUNT_WALLET_SCOPE, WIDGET_TYPE } from "./constants";
+import { LOGIN_MODE, MODAL_SIGN_IN_METHODS, SMART_ACCOUNT_WALLET_SCOPE, WIDGET_TYPE } from "./constants";
 import { WALLET_CONNECTOR_TYPE } from "./wallet";
 
 export interface WhitelistResponse {
@@ -122,5 +122,7 @@ export interface WalletRegistryItem {
   }[];
   imgExtension?: string;
 }
+
+export type LoginModeType = (typeof LOGIN_MODE)[keyof typeof LOGIN_MODE];
 
 export type WalletRegistry = { others: Record<string, WalletRegistryItem>; default: Record<string, WalletRegistryItem> };
