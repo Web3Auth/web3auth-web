@@ -88,6 +88,12 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
     };
 
+    const rehydrationErrorListener = () => {
+      setStatus(web3Auth.status);
+      setIsConnected(false);
+      setProvider(null);
+    };
+
     const mfaEnabledListener = (isMFAEnabled: boolean) => {
       if (typeof isMFAEnabled === "boolean") setIsMFAEnabled(isMFAEnabled);
     };
@@ -101,6 +107,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
       web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
+      web3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
       web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
     }
 
@@ -112,6 +119,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         web3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
         web3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
         web3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
+        web3Auth.off(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
         web3Auth.off(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
 
         web3Auth.cleanup();

@@ -172,22 +172,26 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
 
     // wait for auth instance to be ready.
+    log.debug("initializing auth connector");
     await authInstancePromise;
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.AUTH);
 
     try {
-      log.debug("initializing auth connector");
       const { sessionId } = this.authInstance || {};
       // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
         await this.connect({ chainId: options.chainId });
+      } else if (!sessionId && options.autoConnect) {
+        // if here, this means that the connector is cached but the sessionId is not available.
+        // this can happen if the sessionId has expired.
+        // we are throwing an error to reset the cached state.
+        throw WalletLoginError.connectionError("Failed to rehydrate");
       }
     } catch (error) {
-      log.error("Failed to connect with cached auth provider", error);
-      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
     }
   }
 

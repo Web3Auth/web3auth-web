@@ -96,10 +96,14 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        await this.connect({ chainId: options.chainId });
+        const provider = await this.connect({ chainId: options.chainId });
+        if (!provider) {
+          this.rehydrated = false;
+          throw WalletLoginError.connectionError("Failed to rehydrate.");
+        }
       }
     } catch (error) {
-      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
     }
   }
 
@@ -149,8 +153,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
+      if (!this.rehydrated) this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       this.rehydrated = false;
-      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with MetaMask wallet", error);
     }

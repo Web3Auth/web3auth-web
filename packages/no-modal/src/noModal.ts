@@ -602,6 +602,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       log.debug("errored", this.status, this.connectedConnectorName);
     });
 
+    connector.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, (error: Web3AuthError) => {
+      this.status = CONNECTOR_STATUS.READY;
+      this.clearCache();
+      this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error);
+    });
+
     connector.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, (data) => {
       log.debug("connector data updated", data);
       this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, data);

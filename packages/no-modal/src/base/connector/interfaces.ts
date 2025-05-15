@@ -116,6 +116,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.DISCONNECTED]: () => void;
   [CONNECTOR_EVENTS.CONNECTING]: (data: { connector: string }) => void;
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError) => void;
+  [CONNECTOR_EVENTS.REHYDRATION_ERROR]: (error: Web3AuthError) => void;
   [CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED]: (data: IConnectorDataEvent) => void;
   [CONNECTOR_EVENTS.CACHE_CLEAR]: () => void;
   [CONNECTOR_EVENTS.CONNECTORS_UPDATED]: (data: { connectors: IConnector<unknown>[] }) => void;
