@@ -12,10 +12,10 @@
   "dependencies": {
     "@solana/web3.js": "^1.98.2",
     "@tanstack/vue-query": "^5.74.6",
-    "@toruslabs/base-controllers": "^8.4.2",
+    "@toruslabs/base-controllers": "^8.4.4",
     "@toruslabs/bs58": "^1.0.0",
-    "@toruslabs/ethereum-controllers": "^8.4.2",
-    "@toruslabs/solana-controllers": "^8.4.2",
+    "@toruslabs/ethereum-controllers": "^8.4.5",
+    "@toruslabs/solana-controllers": "^8.4.4",
     "@toruslabs/tweetnacl-js": "^1.0.4",
     "@toruslabs/vue-components": "^8.0.7",
     "@toruslabs/vue-icons": "^8.0.2",

@@ -87,7 +87,7 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^1.12.0",
-    "@toruslabs/base-controllers": "^8.4.3",
+    "@toruslabs/base-controllers": "^8.4.4",
     "@toruslabs/http-helpers": "^8.1.1",
     "@web3auth/auth": "^10.4.0",
     "@web3auth/no-modal": "^10.0.0-beta.9",
