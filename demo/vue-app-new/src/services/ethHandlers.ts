@@ -1,4 +1,4 @@
-import { IProvider, log } from "@web3auth/modal";
+import { IProvider, log } from "web3auth";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import { BrowserProvider, parseEther, Transaction } from "ethers";

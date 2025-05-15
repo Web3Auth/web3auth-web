@@ -1,6 +1,6 @@
 import "./App.css";
 
-import { SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
+import { SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { useEffect, useState } from "react";
 

@@ -1,6 +1,6 @@
 import "./index.css";
 
-import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/react";
+import { type Web3AuthContextConfig, Web3AuthProvider } from "web3auth/react";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 

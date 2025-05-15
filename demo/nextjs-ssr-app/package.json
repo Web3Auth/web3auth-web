@@ -10,7 +10,7 @@
   },
   "dependencies": {
     "@tanstack/react-query": "^5.37.1",
-    "@web3auth/modal": "../../packages/modal",
+    "web3auth": "../../packages/modal",
     "next": "14.1.0",
     "react": "18.2.0",
     "react-dom": "18.2.0",
