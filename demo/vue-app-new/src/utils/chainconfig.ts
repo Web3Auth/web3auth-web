@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WalletInitializationError } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WalletInitializationError } from "web3auth";
 
 const INFURA_PROXY_URL = "https://api.web3auth.io/infura-service/v1";
 

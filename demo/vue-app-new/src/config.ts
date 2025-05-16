@@ -8,7 +8,7 @@ import {
   WEB3AUTH_NETWORK,
   WEB3AUTH_NETWORK_TYPE,
   type WidgetType,
-} from "@web3auth/modal";
+} from "web3auth";
 
 import { FormConfigSettings } from "./interfaces";
 

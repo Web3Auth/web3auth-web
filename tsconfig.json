@@ -2,7 +2,7 @@
   "extends": "@toruslabs/config/tsconfig.default.json",
   "compilerOptions": {
     "paths": {
-      "@web3auth/modal": ["./packages/modal"],
+      "web3auth": ["./packages/modal"],
       "@web3auth/no-modal": ["./packages/no-modal"]
     }
   }

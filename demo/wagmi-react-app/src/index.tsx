@@ -1,8 +1,8 @@
 import "./index.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/react";
-import { WagmiProvider } from "@web3auth/modal/react/wagmi";
+import { type Web3AuthContextConfig, Web3AuthProvider } from "web3auth/react";
+import { WagmiProvider } from "web3auth/react/wagmi";
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 

@@ -9,7 +9,7 @@ import {
   useWeb3AuthConnect,
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
-} from "@web3auth/modal/react";
+} from "web3auth/react";
 import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 
 import styles from "../styles/Home.module.css";

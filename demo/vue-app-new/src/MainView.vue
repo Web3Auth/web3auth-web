@@ -14,10 +14,10 @@ import {
   type Web3AuthOptions,
   WALLET_CONNECTOR_TYPE,
   ModalConfig,
-} from "@web3auth/modal";
+} from "web3auth";
 
-import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
-import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
+import { type Web3AuthContextConfig, Web3AuthProvider } from "web3auth/vue";
+import { WagmiProvider } from "web3auth/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
