@@ -127,7 +127,7 @@ const options = computed((): Web3AuthOptions => {
     // enableLogging?: boolean;
     // storageType?: "session" | "local";
     // sessionTime?: number;
-    // useCoreKitKey?: boolean;
+    // useSFAKey?: boolean;
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,

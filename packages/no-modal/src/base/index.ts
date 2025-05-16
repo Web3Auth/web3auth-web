@@ -2,6 +2,7 @@ export * from "./chain/IChainInterface";
 export * from "./composables";
 export * from "./connector";
 export * from "./constants";
+export { cookieToWeb3AuthState } from "./cookie";
 export * from "./core/IWeb3Auth";
 export * from "./errors";
 export * from "./hooks";

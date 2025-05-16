@@ -1,0 +1,29 @@
+{
+  "name": "nextjs-ssr-app",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@tanstack/react-query": "^5.37.1",
+    "@web3auth/modal": "../../packages/modal",
+    "next": "14.1.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0",
+    "wagmi": "^2.15.0"
+  },
+  "devDependencies": {
+    "@types/elliptic": "^6.4.14",
+    "@types/node": "20.4.1",
+    "@types/react": "19.1.2",
+    "@types/react-dom": "19.1.2",
+    "@wagmi/core": "^2.17.2",
+    "eslint": "8.44.0",
+    "eslint-config-next": "13.4.9",
+    "typescript": "5.1.6"
+  }
+}

@@ -118,7 +118,7 @@ export const Web3AuthProvider = defineComponent({
         };
 
         const errorListener = () => {
-          status.value = CONNECTOR_EVENTS.ERRORED;
+          status.value = web3Auth.value!.status;
         };
 
         const mfaEnabledListener = () => {
@@ -133,6 +133,7 @@ export const Web3AuthProvider = defineComponent({
           prevWeb3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
         }
 
@@ -145,6 +146,7 @@ export const Web3AuthProvider = defineComponent({
           newWeb3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
         }
       },

@@ -15,7 +15,9 @@ import {
   type IConnector,
   type IProvider,
   type IWeb3AuthCoreOptions,
+  IWeb3AuthState,
   log,
+  LOGIN_MODE,
   type LoginMethodConfig,
   type ProjectConfig,
   type WALLET_CONNECTOR_TYPE,
@@ -50,8 +52,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private modalConfig: ConnectorsModalConfig = cloneDeep(defaultConnectorsModalConfig);
 
-  constructor(options: Web3AuthOptions) {
-    super(options);
+  constructor(options: Web3AuthOptions, initialState?: IWeb3AuthState) {
+    super(options, initialState);
     this.options = { ...options };
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
@@ -60,7 +62,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     log.info("modalConfig", this.modalConfig);
   }
 
-  public async initModal(options?: { signal?: AbortSignal }): Promise<void> {
+  public async init(options?: { signal?: AbortSignal }): Promise<void> {
     const { signal } = options || {};
 
     super.checkInitRequirements();
@@ -511,7 +513,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private onSocialLogin = async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: AuthLoginParams }): Promise<void> => {
     try {
-      await this.connectTo(WALLET_CONNECTORS.AUTH, params.loginParams);
+      await this.connectTo(WALLET_CONNECTORS.AUTH, params.loginParams, LOGIN_MODE.MODAL);
     } catch (error) {
       log.error(`Error while connecting to connector: ${params.connector}`, error);
     }
@@ -522,7 +524,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     loginParams: { chainNamespace: ChainNamespaceType };
   }): Promise<void> => {
     try {
-      await this.connectTo(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams);
+      await this.connectTo(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams, LOGIN_MODE.MODAL);
     } catch (error) {
       log.error(`Error while connecting to connector: ${params.connector}`, error);
     }

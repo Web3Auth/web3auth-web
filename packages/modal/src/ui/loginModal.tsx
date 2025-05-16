@@ -1,3 +1,5 @@
+"use client";
+
 import "./css/index.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
@@ -8,6 +10,7 @@ import {
   CONNECTOR_EVENTS,
   type IConnectorDataEvent,
   log,
+  LOGIN_MODE,
   type LoginMethodConfig,
   type MetaMaskConnectorData,
   type WALLET_CONNECTOR_TYPE,
@@ -21,7 +24,6 @@ import {
 } from "@web3auth/no-modal";
 import { createRoot } from "react-dom/client";
 
-// import Modal from "./components/Modal";
 import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR } from "./constants";
 import { ThemedContext } from "./context/ThemeContext";
@@ -366,7 +368,7 @@ export class LoginModal {
     listener.on(CONNECTOR_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);
       // only show success if not being reconnected again.
-      if (!data.reconnected) {
+      if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
         this.setState({
           status: MODAL_STATUS.CONNECTED,
           modalVisibility: true,

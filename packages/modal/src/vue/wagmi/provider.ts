@@ -1,12 +1,14 @@
 import { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn, hydrate } from "@wagmi/core";
 import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig, useReconnect } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
-import { log } from "@web3auth/no-modal";
+import { randomId } from "@web3auth/auth";
+import { CHAIN_NAMESPACES, log, WalletInitializationError } from "@web3auth/no-modal";
 import { type Chain, defineChain, http, webSocket } from "viem";
-import { defineComponent, h, PropType, provide, shallowRef, watch } from "vue";
+import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
 // import type { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn } from "wagmi";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../composables";
+import { defaultWagmiConfig } from "./constants";
 import { WagmiProviderProps } from "./interface";
 
 const WEB3AUTH_CONNECTOR_ID = "web3auth";
@@ -133,7 +135,8 @@ export const WagmiProvider = defineComponent({
   setup(props) {
     const { config } = props;
     const { web3Auth, isInitialized } = useWeb3Auth();
-    const finalConfig = shallowRef<Config | null>(null);
+    const finalConfig = shallowRef<Config>(defaultWagmiConfig);
+    const configKey = ref<string>(randomId());
 
     const defineWagmiConfig = () => {
       const configParams: CreateConfigParameters = {
@@ -149,7 +152,9 @@ export const WagmiProvider = defineComponent({
       const wagmiChains: Chain[] = [];
       if (isInitialized.value && web3Auth?.value?.coreOptions?.chains) {
         const defaultChainId = web3Auth.value.currentChain?.chainId;
-        const chains = web3Auth.value.coreOptions.chains;
+        const chains = web3Auth.value.coreOptions.chains.filter((chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155);
+        if (chains.length === 0) throw WalletInitializationError.invalidParams("No valid chains found in web3auth config for wagmi.");
+
         chains.forEach((chain) => {
           const wagmiChain = defineChain({
             id: Number.parseInt(chain.chainId, 16), // id in number form
@@ -186,30 +191,37 @@ export const WagmiProvider = defineComponent({
         configParams.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
       }
 
-      if (!configParams.chains) return;
       return createWagmiConfig(configParams);
+    };
+
+    const hydrateWagmiConfig = () => {
+      if (finalConfig.value) {
+        hydrate(finalConfig.value, { reconnectOnMount: false, ...props.config });
+      }
     };
 
     watch(
       isInitialized,
-      (newIsInitialized) => {
-        if (newIsInitialized && !finalConfig.value) {
+      (newIsInitialized: boolean, prevIsInitialized: boolean) => {
+        if (newIsInitialized && !prevIsInitialized) {
           finalConfig.value = defineWagmiConfig();
-          if (finalConfig.value) {
-            hydrate(finalConfig.value, { reconnectOnMount: false, ...props.config });
-          }
+          hydrateWagmiConfig();
+          configKey.value = randomId();
         }
       },
       { immediate: true }
     );
 
-    return { finalConfig };
+    if (!isInitialized.value) {
+      hydrateWagmiConfig();
+    }
+
+    return { finalConfig, configKey };
   },
   render() {
-    if (!this.finalConfig) return null;
     return h(
       Web3AuthWagmiInnerProvider,
-      { config: this.finalConfig },
+      { config: this.finalConfig, key: this.configKey },
       {
         default: () => this.$slots.default?.(),
       }

@@ -136,7 +136,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
           await this.onConnectHandler({ chain: chainConfig });
         } catch (error) {
           log.error("wallet auto connect", error);
-          this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
+          this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
         }
       } else {
         this.status = CONNECTOR_STATUS.NOT_READY;
