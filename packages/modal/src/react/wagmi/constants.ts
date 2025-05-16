@@ -1,4 +1,4 @@
-import { createConfig, http } from "wagmi";
+import { cookieStorage, createConfig, createStorage, http } from "wagmi";
 import { mainnet } from "wagmi/chains";
 
 export const defaultWagmiConfig = createConfig({
@@ -8,4 +8,7 @@ export const defaultWagmiConfig = createConfig({
   transports: {
     [mainnet.id]: http(mainnet.rpcUrls.default.http[0]),
   },
+  storage: createStorage({
+    storage: cookieStorage,
+  }),
 });

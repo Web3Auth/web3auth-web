@@ -31,7 +31,7 @@ const Main = () => {
   const { token, loading: isUserTokenLoading, error: userTokenError, authenticateUser } = useIdentityToken();
  
   console.log("isConnected", isConnected);
-  
+  console.log("isWagmiConnected", isWagmiConnected);
   const loggedInView = (
     <>
       <div className="container">

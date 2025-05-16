@@ -5,7 +5,7 @@ import { Inter } from "next/font/google";
 import Provider from "@/components/provider";
 import { cookieToWeb3AuthState } from "@web3auth/modal";
 import { headers } from "next/headers";
-import { cookieToInitialState } from "wagmi";
+import { cookieToWagmiState } from "@web3auth/modal/react/wagmi";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -16,11 +16,11 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const web3authInitialState = cookieToWeb3AuthState((headers()).get('cookie'))
-  console.log("web3authInitialState", web3authInitialState)
+  const wagmiInitialState = cookieToWagmiState((headers()).get('cookie'))
   return (
     <html lang="en">
       <body className={inter.className}>
-        <Provider web3authInitialState={web3authInitialState}>{children}</Provider>
+        <Provider web3authInitialState={web3authInitialState} wagmiInitialState={wagmiInitialState}>{children}</Provider>
       </body>
     </html>
   );

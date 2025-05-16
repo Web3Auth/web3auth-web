@@ -1,3 +1,5 @@
+"use client";
+
 import { CHAIN_NAMESPACES, log, WalletInitializationError } from "@web3auth/no-modal";
 import { createElement, Fragment, PropsWithChildren, useEffect, useMemo } from "react";
 import { type Chain, defineChain, http, webSocket } from "viem";
@@ -5,9 +7,11 @@ import {
   Config,
   Connection,
   Connector,
+  cookieStorage,
   createConfig as createWagmiConfig,
   type CreateConfigParameters,
   CreateConnectorFn,
+  createStorage,
   useAccountEffect,
   useConfig as useWagmiConfig,
   useReconnect,
@@ -90,6 +94,8 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   const wagmiConfig = useWagmiConfig();
   const { reconnect } = useReconnect();
 
+  console.log("wagmi config", wagmiConfig.chains?.length, wagmiConfig.state);
+
   useAccountEffect({
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
@@ -123,7 +129,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
   const { config } = props;
   const { web3Auth, isInitialized } = useWeb3Auth();
 
-  const finalConfig = useMemo(() => {
+  const wagmiConfig = useMemo(() => {
     if (!isInitialized) return defaultWagmiConfig;
 
     const finalConfig: CreateConfigParameters = {
@@ -178,6 +184,12 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
       finalConfig.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
     }
 
+    if (web3Auth?.coreOptions?.ssr) {
+      finalConfig.storage = createStorage({
+        storage: cookieStorage,
+      });
+    }
+
     return createWagmiConfig(finalConfig);
   }, [config, web3Auth, isInitialized]);
 
@@ -186,7 +198,12 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     // typecast to WagmiProviderPropsBase to avoid type error
     // as we are omitting the config prop from WagmiProviderProps
     // and creating a new config object with the finalConfig
-    { ...props, config: finalConfig, reconnectOnMount: false },
+    {
+      ...props,
+      initialState: props.initialState || (web3Auth?.coreOptions?.ssr && defaultWagmiConfig.state),
+      config: wagmiConfig,
+      reconnectOnMount: web3Auth?.coreOptions?.ssr,
+    },
     createElement(Web3AuthWagmiProvider, null, children)
   );
 }
