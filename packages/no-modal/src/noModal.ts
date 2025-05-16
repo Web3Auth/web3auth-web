@@ -517,7 +517,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
         try {
-          // TODO: handle the idToken being expired if saved in storage.
           const data = await connector.authenticateUser();
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           this.setState({
@@ -525,7 +524,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           });
         } catch (error) {
           log.error(error);
-          throw error;
+          this.status = CONNECTOR_STATUS.ERRORED;
+          this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
+          return;
         }
       }
 
