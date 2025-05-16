@@ -238,15 +238,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     return new Promise((resolve, reject) => {
       this.once(CONNECTOR_EVENTS.CONNECTED, async (_) => {
-        // when ssr is enabled, we need to get the idToken from the connector.
-        if (this.coreOptions.ssr) {
-          // TODO: handle the idToken being expired if saved in storage.
-          const data = await connector.authenticateUser();
-          this.setState({
-            idToken: data.idToken,
-          });
-        }
-
         resolve(this.provider);
       });
       this.once(CONNECTOR_EVENTS.ERRORED, (err) => {
@@ -522,6 +513,21 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: Omit<CONNECTED_EVENT_DATA, "loginMode">) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = data;
+
+      // when ssr is enabled, we need to get the idToken from the connector.
+      if (this.coreOptions.ssr) {
+        try {
+          // TODO: handle the idToken being expired if saved in storage.
+          const data = await connector.authenticateUser();
+          if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
+          this.setState({
+            idToken: data.idToken,
+          });
+        } catch (error) {
+          log.error(error);
+          throw error;
+        }
+      }
 
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
 
