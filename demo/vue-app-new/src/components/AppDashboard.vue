@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "web3auth";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
 import {
   useCheckout,
   useEnableMFA,
@@ -11,11 +11,11 @@ import {
   useWeb3Auth,
   useWeb3AuthUser,
   useSwitchChain as useWeb3AuthSwitchChain,
-} from "web3auth/vue";
+} from "@web3auth/modal/vue";
 import { type CustomChainConfig, type NFTCheckoutPluginType } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
-import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "web3auth/vue/solana";
+import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
 import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
 
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";

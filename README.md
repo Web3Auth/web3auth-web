@@ -28,7 +28,7 @@ Checkout the official [Web3Auth Documentation](https://web3auth.io/docs) and [SD
 
 For using Web3Auth in the web, you have two choices of SDKs to get started with.
 
-[Web3Auth Plug and Play SDK `web3auth`](https://web3auth.io/docs/sdk/web/web3auth/): A simple and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application. You can use the pre-configured Web3Auth Modal UI and whitelabel it according to your needs.
+[Web3Auth Plug and Play Modal SDK `@web3auth/modal`](https://web3auth.io/docs/sdk/web/web3auth/): A simple and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application. You can use the pre-configured Web3Auth Modal UI and whitelabel it according to your needs.
 
 [Web3Auth Plug and Play NoModal SDK `@web3auth/no-modal`](https://web3auth.io/docs/sdk/web/no-modal/): The nomodal module implementing all the Web3Auth features you need and giving you the flexibility of using your own UI with the Web3Auth SDK working in the backend.
 
@@ -37,7 +37,7 @@ For using Web3Auth in the web, you have two choices of SDKs to get started with.
 ### Installation (Web3Auth Plug and Play Modal)
 
 ```shell
-npm install --save web3auth
+npm install --save @web3auth/modal
 ```
 
 ### Get your Client ID from Web3Auth Dashboard

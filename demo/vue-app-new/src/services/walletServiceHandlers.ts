@@ -1,7 +1,7 @@
 import { Connection, PublicKey } from "@solana/web3.js";
 import { bs58 } from "@toruslabs/bs58";
 import { sign } from "@toruslabs/tweetnacl-js";
-import { log, type WalletServicesPluginType } from "web3auth";
+import { log, type WalletServicesPluginType } from "@web3auth/modal";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
 import { SOLANA_METHOD_TYPES as SOL_METHOD_TYPES } from "@web3auth/ws-embed";
 import { BrowserProvider, parseEther } from "ethers";

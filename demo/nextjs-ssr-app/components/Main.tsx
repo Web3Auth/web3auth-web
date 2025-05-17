@@ -11,7 +11,7 @@ import {
   useWeb3AuthConnect,
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
-} from "web3auth/react";
+} from "@web3auth/modal/react";
 import { useAccount, useBalance, useSignMessage, useSignTypedData } from "wagmi";
 
 const Main = () => {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Connection, LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
-import { CustomChainConfig, IProvider, log, SolanaWallet, TransactionOrVersionedTransaction } from "web3auth";
+import { CustomChainConfig, IProvider, log, SolanaWallet, TransactionOrVersionedTransaction } from "@web3auth/modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
 export const getConnection = async (provider: IProvider): Promise<Connection> => {

@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_STATUS, log } from "web3auth";
-import { useWeb3Auth, useWeb3AuthConnect } from "web3auth/vue";
+import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_STATUS, log } from "@web3auth/modal";
+import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 import {
   chainConfigs,

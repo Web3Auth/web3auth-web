@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "dependencies": {
-    "web3auth": "file:../../packages/modal",
+    "@web3auth/modal": "file:../../packages/modal",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },

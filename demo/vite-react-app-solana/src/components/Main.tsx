@@ -1,5 +1,5 @@
-import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from "web3auth/react";
-import { useSignMessage } from "web3auth/react/solana";
+import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from "@web3auth/modal/react";
+import { useSignMessage } from "@web3auth/modal/react/solana";
 
 import styles from "../styles/Home.module.css";
 
