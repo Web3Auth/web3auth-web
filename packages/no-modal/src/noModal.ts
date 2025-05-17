@@ -6,6 +6,7 @@ import {
   Analytics,
   ANALYTICS_EVENTS,
   ANALYTICS_SDK_TYPE,
+  AuthLoginParams,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
@@ -263,22 +264,46 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const initialChain = this.getInitialChainIdForConnector(connector);
     const finalLoginParams = { ...loginParams, chainId: initialChain.chainId };
 
+    // track connection started event
     const startTime = Date.now();
-    const eventData: Record<string, unknown> = { connector: connectorName, ...loginParams, idToken: undefined };
-    this.analytics.track(ANALYTICS_EVENTS.CONNECT_STARTED, eventData);
+    let eventData: Record<string, unknown>;
+    if (connectorName === WALLET_CONNECTORS.AUTH) {
+      const authLoginParams = loginParams as Partial<AuthLoginParams>;
+      eventData = {
+        connector: connectorName,
+        chain_id: initialChain.chainId,
+        auth_connection: authLoginParams.authConnection,
+        login_hint: authLoginParams.loginHint,
+        auth_connection_id: authLoginParams.authConnectionId,
+        group_auth_connection_id: authLoginParams.groupedAuthConnectionId,
+        mfa_level: authLoginParams.mfaLevel,
+        curve: authLoginParams.curve,
+        dapp_url: authLoginParams.dappUrl,
+      };
+    } else {
+      eventData = {
+        connector: connectorName,
+        chain_namespace: (loginParams as { chainNamespace?: ChainNamespaceType })?.chainNamespace,
+        chain_id: initialChain.chainId,
+      };
+    }
+    this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
     return new Promise((resolve, reject) => {
       this.once(CONNECTOR_EVENTS.CONNECTED, (_) => {
-        this.analytics.track(ANALYTICS_EVENTS.CONNECT_COMPLETED, {
+        // track connection completed event
+        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
           ...eventData,
           duration: Date.now() - startTime,
         });
         resolve(this.provider);
       });
       this.once(CONNECTOR_EVENTS.ERRORED, (err) => {
-        this.analytics.track(ANALYTICS_EVENTS.CONNECT_FAILED, {
+        // track connection failed event
+        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
           ...eventData,
-          error: serializeError(err),
+          error_code: err instanceof Web3AuthError ? err.code : undefined,
+          error_message: serializeError(err),
           duration: Date.now() - startTime,
         });
         reject(err);

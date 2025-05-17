@@ -73,9 +73,9 @@ export class Analytics {
 export const ANALYTICS_EVENTS = {
   SDK_INITIALIZATION_COMPLETED: "sdk_initialization_completed",
   SDK_INITIALIZATION_FAILED: "sdk_initialization_failed",
-  CONNECT_STARTED: "connect_started",
-  CONNECT_COMPLETED: "connect_completed",
-  CONNECT_FAILED: "connect_failed",
+  CONNECTION_STARTED: "connection_started",
+  CONNECTION_COMPLETED: "connection_completed",
+  CONNECTION_FAILED: "connection_failed",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {
