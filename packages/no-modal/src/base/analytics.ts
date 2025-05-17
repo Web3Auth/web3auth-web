@@ -14,51 +14,45 @@ type EventProperties = {
 const SEGMENT_WRITE_KEY = "gGjtk5XxaH2OAIlErcBgydrHpoRZ2hkZ"; // TODO: use the production key
 
 export class Analytics {
-  private static instance: Analytics;
+  private segment: AnalyticsBrowser;
 
-  private analytics: AnalyticsBrowser;
+  private globalProperties: Record<string, unknown> = {};
 
-  private constructor() {
-    this.analytics = new AnalyticsBrowser();
-    this.analytics.load({ writeKey: SEGMENT_WRITE_KEY }).catch((error) => {
-      log.error("Failed to initialize Analytics", error);
-    });
-    log.info("Analytics initialized", { sdkVersion });
+  public init(): void {
+    if (this.segment) {
+      throw new Error("Analytics already initialized");
+    }
+
+    this.segment = new AnalyticsBrowser();
+    this.segment
+      .load({ writeKey: SEGMENT_WRITE_KEY })
+      .then(() => {
+        log.debug("Analytics initialized", { sdkVersion });
+        return true;
+      })
+      .catch((error) => {
+        log.error("Failed to initialize Analytics", error);
+      });
   }
 
-  public static init(): void {
-    if (Analytics.isDisabled()) {
-      return;
-    }
-
-    if (!Analytics.instance) {
-      Analytics.instance = new Analytics();
-    }
+  public setGlobalProperties(properties: Record<string, unknown>) {
+    this.globalProperties = { ...this.globalProperties, ...properties };
   }
 
-  public static async identify(userId: string, traits?: UserTraits) {
-    if (Analytics.isDisabled()) {
-      return;
-    }
-
+  public async identify(userId: string, traits?: UserTraits) {
     try {
-      const instance = Analytics.getInstance();
-      return instance.analytics.identify(userId, {
+      return this.getSegment().identify(userId, {
         ...traits,
       });
     } catch (error) {
-      log.error(`Failed to identify user ${userId}`, error);
+      log.error(`Failed to identify user ${userId} in analytics`, error);
     }
   }
 
-  public static async track(event: string, properties?: EventProperties) {
-    if (Analytics.isDisabled()) {
-      return;
-    }
-
+  public async track(event: string, properties?: EventProperties) {
     try {
-      const instance = Analytics.getInstance();
-      return instance.analytics.track(event, {
+      return this.getSegment().track(event, {
+        ...this.globalProperties,
         ...properties,
         sdk_version: sdkVersion,
       });
@@ -67,16 +61,29 @@ export class Analytics {
     }
   }
 
-  private static getInstance() {
-    if (!Analytics.instance) {
+  private getSegment() {
+    if (!this.segment) {
       log.error("Analytics not initialized. Call Analytics.init() first.");
       throw new Error("Analytics not initialized. Call Analytics.init() first.");
     }
-    return Analytics.instance;
-  }
-
-  private static isDisabled() {
-    // disable analytics if the origin is not https
-    return window.location && window.location.protocol !== "https:";
+    return this.segment;
   }
 }
+
+export const ANALYTICS_EVENTS = {
+  SDK_INITIALIZATION_COMPLETED: "sdk_initialization_completed",
+  SDK_INITIALIZATION_FAILED: "sdk_initialization_failed",
+  CONNECT_STARTED: "connect_started",
+  CONNECT_COMPLETED: "connect_completed",
+  CONNECT_FAILED: "connect_failed",
+};
+
+export const ANALYTICS_INTEGRATION_TYPE = {
+  REACT_HOOKS: "React Hooks",
+  VUE_COMPOSABLES: "Vue Composables",
+};
+
+export const ANALYTICS_SDK_TYPE = {
+  WEB_NO_MODAL: "Web NoModal",
+  WEB_MODAL: "Web Modal",
+};

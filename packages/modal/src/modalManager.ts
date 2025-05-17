@@ -1,6 +1,7 @@
 import { AuthConnectionConfigItem, serializeError } from "@web3auth/auth";
 import {
-  Analytics,
+  ANALYTICS_EVENTS,
+  ANALYTICS_SDK_TYPE,
   type AUTH_CONNECTION_TYPE,
   type AuthLoginParams,
   type BaseConnectorConfig,
@@ -23,6 +24,7 @@ import {
   WALLET_CONNECTORS,
   WalletInitializationError,
   type WalletRegistry,
+  Web3AuthError,
   Web3AuthNoModal,
   withAbort,
 } from "@web3auth/no-modal";
@@ -62,64 +64,105 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   public async initModal(options?: { signal?: AbortSignal }): Promise<void> {
-    const { signal } = options || {};
-
-    super.checkInitRequirements();
-    // get project config and wallet registry
-    const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
-
-    // init config
-    this.initUIConfig(projectConfig);
-    super.initAccountAbstractionConfig(projectConfig);
-    super.initChainsConfig(projectConfig);
-    super.initCachedConnectorAndChainId();
-
     // init analytics
-    Analytics.init();
-    Analytics.identify(window.location.hostname, {
+    const startTime = Date.now();
+    this.analytics.init();
+    this.analytics.identify(this.options.clientId, {
       web3auth_client_id: this.options.clientId,
       web3auth_network: this.options.web3AuthNetwork,
     });
-
-    // init login modal
-    const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
-    this.loginModal = new LoginModal(
-      {
-        ...this.options.uiConfig,
-        connectorListener: this,
-        web3authClientId: this.options.clientId,
-        web3authNetwork: this.options.web3AuthNetwork,
-        authBuildEnv: this.options.authBuildEnv,
-        chainNamespaces: this.getChainNamespaces(),
-        walletRegistry: filteredWalletRegistry,
-      },
-      {
-        onInitExternalWallets: this.onInitExternalWallets,
-        onSocialLogin: this.onSocialLogin,
-        onExternalWalletLogin: this.onExternalWalletLogin,
-        onModalVisibility: this.onModalVisibility,
-      }
-    );
-    await withAbort(() => this.loginModal.initModal(), signal);
-
-    // setup common JRPC provider
-    await withAbort(() => this.setupCommonJRPCProvider(), signal);
-
-    // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) => {
-      const onAbortHandler = () => {
-        log.debug("init aborted");
-        if (this.connectors?.length > 0) {
-          super.cleanup();
-        }
-      };
-      withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
+    this.analytics.setGlobalProperties({
+      dapp_url: window.location.origin,
+      sdk_type: ANALYTICS_SDK_TYPE.WEB_MODAL,
     });
+    let trackData: Record<string, unknown> = {};
 
-    await withAbort(() => super.loadConnectors({ projectConfig, modalMode: true }), signal);
+    try {
+      const { signal } = options || {};
 
-    // initialize plugins
-    await withAbort(() => super.initPlugins(), signal);
+      super.checkInitRequirements();
+      // get project config and wallet registry
+      const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
+
+      // init config
+      this.initUIConfig(projectConfig);
+      super.initAccountAbstractionConfig(projectConfig);
+      super.initChainsConfig(projectConfig);
+      super.initCachedConnectorAndChainId();
+      trackData = {
+        chains: this.coreOptions.chains.map((chain) => chain.chainId),
+        rpc_urls: this.coreOptions.chains.map((chain) => chain.rpcTarget),
+        storage_type: this.coreOptions.storageType,
+        session_time: this.coreOptions.sessionTime,
+        is_core_kit_key_used: this.coreOptions.useCoreKitKey,
+        whitelabel: this.coreOptions.uiConfig, // TODO: flatten this
+        account_abstraction: this.coreOptions.accountAbstractionConfig, // TODO: flatten this
+        is_aa_enabled_for_external_wallets: this.coreOptions.useAAWithExternalWallet,
+        is_mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
+        wallet_services: this.coreOptions.walletServicesConfig, // TODO: flatten this
+      };
+
+      // init login modal
+      const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
+      this.loginModal = new LoginModal(
+        {
+          ...this.options.uiConfig,
+          connectorListener: this,
+          web3authClientId: this.options.clientId,
+          web3authNetwork: this.options.web3AuthNetwork,
+          authBuildEnv: this.options.authBuildEnv,
+          chainNamespaces: this.getChainNamespaces(),
+          walletRegistry: filteredWalletRegistry,
+        },
+        {
+          onInitExternalWallets: this.onInitExternalWallets,
+          onSocialLogin: this.onSocialLogin,
+          onExternalWalletLogin: this.onExternalWalletLogin,
+          onModalVisibility: this.onModalVisibility,
+        }
+      );
+      await withAbort(() => this.loginModal.initModal(), signal);
+
+      // setup common JRPC provider
+      await withAbort(() => this.setupCommonJRPCProvider(), signal);
+
+      // initialize connectors
+      this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) => {
+        const onAbortHandler = () => {
+          log.debug("init aborted");
+          if (this.connectors?.length > 0) {
+            super.cleanup();
+          }
+        };
+        withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
+      });
+
+      await withAbort(() => super.loadConnectors({ projectConfig, modalMode: true }), signal);
+
+      // initialize plugins
+      await withAbort(() => super.initPlugins(), signal);
+
+      // track completion event
+      trackData = {
+        ...trackData,
+        connectors: this.connectors.map((connector) => connector.name),
+      };
+      this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_COMPLETED, {
+        ...trackData,
+        duration: Date.now() - startTime,
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+
+      // track failure event
+      this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_FAILED, {
+        ...trackData,
+        duration: Date.now() - startTime,
+        error_code: error instanceof Web3AuthError ? error.code : undefined,
+        error_message: serializeError(error),
+      });
+      log.error("Failed to initialize modal", error);
+    }
   }
 
   public async connect(): Promise<IProvider | null> {

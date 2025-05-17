@@ -1,4 +1,5 @@
 import {
+  ANALYTICS_INTEGRATION_TYPE,
   type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
@@ -43,6 +44,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     resetHookState();
     const { web3AuthOptions } = config;
     const web3AuthInstance = new Web3Auth(web3AuthOptions);
+    web3AuthInstance.setAnalyticsProperties({
+      integration_type: ANALYTICS_INTEGRATION_TYPE.REACT_HOOKS,
+    });
     setWeb3Auth(web3AuthInstance);
   }, [config]);
 
