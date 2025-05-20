@@ -75,7 +75,7 @@
     "@web3auth/auth": "^10.4.1",
     "@web3auth/ws-embed": "^5.0.5",
     "assert": "^2.1.0",
-    "bignumber.js": "~9.2.1",
+    "bignumber.js": "~9.3.0",
     "bn.js": "^5.2.2",
     "bowser": "^2.11.0",
     "deepmerge": "^4.3.1",
