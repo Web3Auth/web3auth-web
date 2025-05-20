@@ -7,7 +7,7 @@ export interface IUseIdentityToken {
   loading: boolean;
   error: Web3AuthError | null;
   token: string | null;
-  authenticateUser: () => Promise<string | null>;
+  getIdentityToken: () => Promise<string | null>;
 }
 
 export const useIdentityToken = () => {
@@ -17,11 +17,11 @@ export const useIdentityToken = () => {
   const [error, setError] = useState<Web3AuthError | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
-  const authenticateUser = useCallback(async () => {
+  const getIdentityToken = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const userAuthInfo = await web3Auth.authenticateUser();
+      const userAuthInfo = await web3Auth.getIdentityToken();
       if (userAuthInfo?.idToken) {
         setToken(userAuthInfo.idToken);
       }
@@ -39,5 +39,5 @@ export const useIdentityToken = () => {
     }
   }, [isConnected, token]);
 
-  return { loading, error, token, authenticateUser };
+  return { loading, error, token, getIdentityToken };
 };

@@ -118,6 +118,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       network: this.coreOptions.web3AuthNetwork,
       sdkMode: SDK_MODE.IFRAME,
       authConnectionConfig: this.authConnectionConfig.filter((x) => !x.isDefault),
+      mfaSettings: this.coreOptions.mfaSettings,
     });
     log.debug("initializing auth connector init", this.authOptions);
 
@@ -266,7 +267,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
-  async authenticateUser(): Promise<{ idToken: string }> {
+  async getIdentityToken(): Promise<{ idToken: string }> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     const userInfo = await this.getUserInfo();
     return { idToken: userInfo.idToken as string };
@@ -498,7 +499,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       this.authInstance
         .postLoginInitiatedMessage(loginParams as LoginParams, nonce)
         .then(resolve)
-        .catch(reject);
+        .catch((error: unknown) => {
+          if (error instanceof Web3AuthError) {
+            throw error;
+          }
+          reject(WalletLoginError.connectionError(error instanceof Error ? error.message : (error as string) || "Failed to login with social"));
+        });
     });
   }
 
@@ -587,6 +593,7 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
     if (sessionTime) connectorSettings.sessionTime = sessionTime;
     if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
+
     const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
     if (!uiConfig.mode) uiConfig.mode = "light";
     connectorSettings.whiteLabel = uiConfig;
@@ -644,10 +651,9 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
     return new AuthConnector({
       connectorSettings: finalConnectorSettings,
       walletServicesSettings: finalWsSettings,
-      loginSettings: params?.loginSettings,
+      loginSettings: { ...(params?.loginSettings || {}), mfaLevel: coreOptions.mfaLevel },
       coreOptions,
       authConnectionConfig: projectConfig.embeddedWalletAuth,
-      mfaSettings: coreOptions.mfaSettings,
     });
   };
 };

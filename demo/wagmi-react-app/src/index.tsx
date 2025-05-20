@@ -17,6 +17,9 @@ const web3authConfig: Web3AuthContextConfig = {
     web3AuthNetwork: "sapphire_devnet",
     clientId: clientId,
     authBuildEnv: "testing",
+    uiConfig: {
+      uxMode: "redirect",
+    },
   },
 };
 
