@@ -41,7 +41,7 @@ import {
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
-import { authConnector } from "./connectors/auth-connector";
+import { authConnector, type AuthConnectorType } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
@@ -196,11 +196,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (error instanceof DOMException && error.name === "AbortError") return;
 
       // track failure event
+      const serializedError = await serializeError(error);
       this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_FAILED, {
         ...trackData,
         duration: Date.now() - startTime,
         error_code: error instanceof Web3AuthError ? error.code : undefined,
-        error_message: serializeError(error),
+        error_message: serializedError.message,
       });
       log.error("Failed to initialize modal", error);
     }
@@ -279,6 +280,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         mfa_level: authLoginParams.mfaLevel,
         curve: authLoginParams.curve,
         dapp_url: authLoginParams.dappUrl,
+        is_sfa: Boolean(authLoginParams.idToken),
       };
     } else {
       eventData = {
@@ -298,12 +300,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         });
         resolve(this.provider);
       });
-      this.once(CONNECTOR_EVENTS.ERRORED, (err) => {
+      this.once(CONNECTOR_EVENTS.ERRORED, async (err) => {
         // track connection failed event
+        const serializedError = await serializeError(err);
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
           ...eventData,
           error_code: err instanceof Web3AuthError ? err.code : undefined,
-          error_message: serializeError(err),
+          error_message: serializedError.message,
           duration: Date.now() - startTime,
         });
         reject(err);
@@ -328,19 +331,62 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this connector.`);
-    return this.connectedConnector.enableMFA(loginParams);
+
+    const authConnector = this.connectedConnector as AuthConnectorType;
+    const trackData = { connector: this.connectedConnector.name, ux_mode: authConnector.authInstance?.options?.uxMode };
+    try {
+      this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_STARTED, trackData);
+      await this.connectedConnector.enableMFA(loginParams);
+    } catch (error) {
+      const serializedError = await serializeError(error);
+      this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_FAILED, {
+        ...trackData,
+        error_code: error instanceof Web3AuthError ? error.code : undefined,
+        error_message: serializedError.message,
+      });
+      throw error;
+    }
   }
 
   async manageMFA<T>(loginParams?: T): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this connector.`);
-    return this.connectedConnector.manageMFA(loginParams);
+
+    const authConnector = this.connectedConnector as AuthConnectorType;
+    const trackData = { connector: this.connectedConnector.name, ux_mode: authConnector.authInstance?.options?.uxMode };
+    try {
+      this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_STARTED, trackData);
+      await this.connectedConnector.manageMFA(loginParams);
+    } catch (error) {
+      const serializedError = await serializeError(error);
+      this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_FAILED, {
+        ...trackData,
+        error_code: error instanceof Web3AuthError ? error.code : undefined,
+        error_message: serializedError.message,
+      });
+      throw error;
+    }
   }
 
   async authenticateUser(): Promise<UserAuthInfo> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.connectedConnector.authenticateUser();
+
+    const trackData = { connector: this.connectedConnector.name };
+    try {
+      this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_STARTED, trackData);
+      const userAuthInfo = await this.connectedConnector.authenticateUser();
+      this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_COMPLETED, trackData);
+      return userAuthInfo;
+    } catch (error) {
+      const serializedError = await serializeError(error);
+      this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_FAILED, {
+        ...trackData,
+        error_code: error instanceof Web3AuthError ? error.code : undefined,
+        error_message: serializedError.message,
+      });
+      throw error;
+    }
   }
 
   public getPlugin(name: string): IPlugin | null {
@@ -673,6 +719,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     connector.on(CONNECTOR_EVENTS.MFA_ENABLED, (isMFAEnabled: boolean) => {
       log.debug("mfa enabled", isMFAEnabled);
+      const authConnector = this.connectedConnector as AuthConnectorType;
+
+      // mfa_enabled event is only emitted when using "popup" ux_mode
+      // TODO: handle mfa_enabled event when using "redirect" ux_mode
+      this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_COMPLETED, {
+        connector: this.connectedConnector.name,
+        ux_mode: authConnector.authInstance?.options?.uxMode,
+        is_mfa_enabled: isMFAEnabled,
+      });
       this.emit(CONNECTOR_EVENTS.MFA_ENABLED, isMFAEnabled);
     });
   }

@@ -155,11 +155,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (error instanceof DOMException && error.name === "AbortError") return;
 
       // track failure event
+      const serializedError = await serializeError(error);
       this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_FAILED, {
         ...trackData,
         duration: Date.now() - startTime,
         error_code: error instanceof Web3AuthError ? error.code : undefined,
-        error_message: serializeError(error),
+        error_message: serializedError.message,
       });
       log.error("Failed to initialize modal", error);
     }

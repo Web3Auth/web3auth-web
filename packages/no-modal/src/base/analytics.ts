@@ -76,6 +76,18 @@ export const ANALYTICS_EVENTS = {
   CONNECTION_STARTED: "connection_started",
   CONNECTION_COMPLETED: "connection_completed",
   CONNECTION_FAILED: "connection_failed",
+  AUTHENTICATION_STARTED: "authentication_started",
+  AUTHENTICATION_COMPLETED: "authentication_completed",
+  AUTHENTICATION_FAILED: "authentication_failed",
+  MFA_ENABLEMENT_STARTED: "mfa_enablement_started",
+  MFA_ENABLEMENT_COMPLETED: "mfa_enablement_completed",
+  MFA_ENABLEMENT_FAILED: "mfa_enablement_failed",
+  MFA_MANAGEMENT_STARTED: "mfa_management_started",
+  MFA_MANAGEMENT_FAILED: "mfa_management_failed",
+  LOGIN_MODAL_OPENED: "login_modal_opened",
+  LOGIN_MODAL_CLOSED: "login_modal_closed",
+  INSTALLED_EXTERNAL_WALLET_CLICKED: "installed_external_wallet_clicked",
+  OTHER_EXTERNAL_WALLET_CLICKED: "other_external_wallet_clicked",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {
