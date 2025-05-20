@@ -89,18 +89,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       super.initAccountAbstractionConfig(projectConfig);
       super.initChainsConfig(projectConfig);
       super.initCachedConnectorAndChainId();
-      trackData = {
-        chains: this.coreOptions.chains.map((chain) => chain.chainId),
-        rpc_urls: this.coreOptions.chains.map((chain) => chain.rpcTarget),
-        storage_type: this.coreOptions.storageType,
-        session_time: this.coreOptions.sessionTime,
-        is_core_kit_key_used: this.coreOptions.useCoreKitKey,
-        whitelabel: this.coreOptions.uiConfig, // TODO: flatten this
-        account_abstraction: this.coreOptions.accountAbstractionConfig, // TODO: flatten this
-        is_aa_enabled_for_external_wallets: this.coreOptions.useAAWithExternalWallet,
-        is_mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
-        wallet_services: this.coreOptions.walletServicesConfig, // TODO: flatten this
-      };
+      trackData = this.getInitializationTrackData();
 
       // init login modal
       const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
@@ -146,6 +135,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       trackData = {
         ...trackData,
         connectors: this.connectors.map((connector) => connector.name),
+        plugins: Object.keys(this.plugins),
       };
       this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_COMPLETED, {
         ...trackData,
@@ -199,6 +189,31 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.once(CONNECTOR_EVENTS.ERRORED, handleError);
       this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
     });
+  }
+
+  // TODO: add more track data
+  protected getInitializationTrackData(): Record<string, unknown> {
+    return {
+      ...super.getInitializationTrackData(),
+      modal_hide_wallet_discovery: this.modalConfig?.hideWalletDiscovery,
+      modal_connectors: Object.keys(this.modalConfig?.connectors || {}),
+      modal_auth_connector_login_methods: Object.keys(this.modalConfig?.connectors?.[WALLET_CONNECTORS.AUTH]?.loginMethods || {}),
+      // UI config
+      ui_login_methods_order: this.options.uiConfig?.loginMethodsOrder,
+      ui_modal_z_index: this.options.uiConfig?.modalZIndex,
+      ui_display_errors_on_modal: this.options.uiConfig?.displayErrorsOnModal,
+      ui_login_grid_col: this.options.uiConfig?.loginGridCol,
+      ui_primary_button: this.options.uiConfig?.primaryButton,
+      ui_modal_widget_type: this.options.uiConfig?.widgetType,
+      ui_modal_target_id_used: Boolean(this.options.uiConfig?.targetId),
+      ui_modal_logo_alignment: this.options.uiConfig?.logoAlignment,
+      ui_modal_border_radius_type: this.options.uiConfig?.borderRadiusType,
+      ui_modal_button_radius_type: this.options.uiConfig?.buttonRadiusType,
+      ui_modal_sign_in_methods: this.options.uiConfig?.signInMethods,
+      ui_modal_add_previous_login_hint: this.options.uiConfig?.addPreviousLoginHint,
+      ui_modal_display_installed_external_wallets: this.options.uiConfig?.displayInstalledExternalWallets,
+      ui_modal_display_external_wallets_count: this.options.uiConfig?.displayExternalWalletsCount,
+    };
   }
 
   private filterWalletRegistry(

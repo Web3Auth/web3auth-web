@@ -25,7 +25,16 @@ export class Analytics {
 
     this.segment = new AnalyticsBrowser();
     this.segment
-      .load({ writeKey: SEGMENT_WRITE_KEY })
+      .load(
+        { writeKey: SEGMENT_WRITE_KEY },
+        {
+          user: {
+            cookie: { key: "web3auth_ajs_user_id" },
+            localStorage: { key: "web3auth_ajs_user_traits" },
+          },
+          globalAnalyticsKey: "web3auth_analytics",
+        }
+      )
       .then(() => {
         log.debug("Analytics initialized", { sdkVersion });
         return true;

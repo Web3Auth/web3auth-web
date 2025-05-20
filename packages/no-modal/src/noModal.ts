@@ -70,7 +70,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected analytics: Analytics;
 
-  private plugins: Record<string, IPlugin> = {};
+  protected plugins: Record<string, IPlugin> = {};
 
   private storage: "sessionStorage" | "localStorage" = "localStorage";
 
@@ -147,18 +147,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.initAccountAbstractionConfig(projectConfig);
       this.initChainsConfig(projectConfig);
       this.initCachedConnectorAndChainId();
-      trackData = {
-        chains: this.coreOptions.chains.map((chain) => chain.chainId),
-        rpc_urls: this.coreOptions.chains.map((chain) => chain.rpcTarget),
-        storage_type: this.coreOptions.storageType,
-        session_time: this.coreOptions.sessionTime,
-        is_core_kit_key_used: this.coreOptions.useCoreKitKey,
-        whitelabel: this.coreOptions.uiConfig, // TODO: flatten this
-        account_abstraction: this.coreOptions.accountAbstractionConfig, // TODO: flatten this
-        is_aa_enabled_for_external_wallets: this.coreOptions.useAAWithExternalWallet,
-        is_mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
-        wallet_services: this.coreOptions.walletServicesConfig, // TODO: flatten this
-      };
+      trackData = this.getInitializationTrackData();
 
       // setup common JRPC provider
       await withAbort(() => this.setupCommonJRPCProvider(), signal);
@@ -187,6 +176,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       trackData = {
         ...trackData,
         connectors: this.connectors.map((connector) => connector.name),
+        plugins: Object.keys(this.plugins),
       };
       this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_COMPLETED, {
         ...trackData,
@@ -511,6 +501,62 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (this.coreOptions.defaultChainId && !isHexStrict(this.coreOptions.defaultChainId))
       throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
     this.currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
+  }
+
+  protected getInitializationTrackData() {
+    try {
+      return {
+        chain_ids: this.coreOptions.chains?.map((chain) => chain.chainId),
+        chain_rpc_targets: this.coreOptions.chains?.map((chain) => chain.rpcTarget),
+        default_chain_id: this.coreOptions.defaultChainId,
+        logging_enabled: this.coreOptions.enableLogging,
+        storage_type: this.coreOptions.storageType,
+        session_time: this.coreOptions.sessionTime,
+        core_kit_key_enabled: this.coreOptions.useCoreKitKey,
+        mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
+        private_key_provider_enabled: Boolean(this.coreOptions.privateKeyProvider),
+        auth_build_env: this.coreOptions.authBuildEnv,
+        // UI config
+        ui_app_name: this.coreOptions.uiConfig?.appName,
+        ui_app_url: this.coreOptions.uiConfig?.appUrl,
+        ui_logo_light_enabled: Boolean(this.coreOptions.uiConfig?.logoLight),
+        ui_logo_dark_enabled: Boolean(this.coreOptions.uiConfig?.logoDark),
+        ui_default_language: this.coreOptions.uiConfig?.defaultLanguage,
+        ui_theme_mode: this.coreOptions.uiConfig?.mode,
+        ui_use_logo_loader: this.coreOptions.uiConfig?.useLogoLoader,
+        ui_theme_primary: this.coreOptions.uiConfig?.theme?.primary,
+        ui_theme_on_primary: this.coreOptions.uiConfig?.theme?.onPrimary,
+        ui_tnc_link_enabled: Boolean(this.coreOptions.uiConfig?.tncLink),
+        ui_privacy_policy_enabled: Boolean(this.coreOptions.uiConfig?.privacyPolicy),
+        ui_auth_ux_mode: this.coreOptions.uiConfig?.uxMode,
+        // AA config
+        aa_smart_account_type: this.coreOptions.accountAbstractionConfig?.smartAccountType,
+        aa_chain_ids: this.coreOptions.accountAbstractionConfig?.chains?.map((chain) => chain.chainId),
+        aa_paymaster_enabled: this.coreOptions.accountAbstractionConfig?.chains?.some((chain) => chain.paymasterConfig),
+        aa_paymaster_context_enabled: this.coreOptions.accountAbstractionConfig?.chains?.some((chain) => chain.bundlerConfig?.paymasterContext),
+        aa_erc20_paymaster_enabled: this.coreOptions.accountAbstractionConfig?.chains?.some(
+          (chain) => (chain.bundlerConfig?.paymasterContext as { token: string })?.token
+        ),
+        aa_enabled_for_external_wallets: this.coreOptions.useAAWithExternalWallet,
+        // Wallet Services config
+        ws_confirmation_strategy: this.coreOptions.walletServicesConfig?.confirmationStrategy,
+        ws_enable_key_export: this.coreOptions.walletServicesConfig?.enableKeyExport,
+        ws_show_widget_button: this.coreOptions.walletServicesConfig?.whiteLabel?.showWidgetButton,
+        ws_button_position: this.coreOptions.walletServicesConfig?.whiteLabel?.buttonPosition,
+        ws_hide_nft_display: this.coreOptions.walletServicesConfig?.whiteLabel?.hideNftDisplay,
+        ws_hide_token_display: this.coreOptions.walletServicesConfig?.whiteLabel?.hideTokenDisplay,
+        ws_hide_transfers: this.coreOptions.walletServicesConfig?.whiteLabel?.hideTransfers,
+        ws_hide_topup: this.coreOptions.walletServicesConfig?.whiteLabel?.hideTopup,
+        ws_hide_receive: this.coreOptions.walletServicesConfig?.whiteLabel?.hideReceive,
+        ws_hide_swap: this.coreOptions.walletServicesConfig?.whiteLabel?.hideSwap,
+        ws_hide_show_all_tokens: this.coreOptions.walletServicesConfig?.whiteLabel?.hideShowAllTokens,
+        ws_hide_wallet_connect: this.coreOptions.walletServicesConfig?.whiteLabel?.hideWalletConnect,
+        ws_default_portfolio: this.coreOptions.walletServicesConfig?.whiteLabel?.defaultPortfolio,
+      };
+    } catch (error) {
+      log.error("Failed to get initialization track data", error);
+      return {};
+    }
   }
 
   protected async setupCommonJRPCProvider() {
