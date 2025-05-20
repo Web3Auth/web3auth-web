@@ -137,6 +137,21 @@
       "import": "./dist/lib.esm/packages/modal/src/vue/wagmi/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/vue/wagmi/index.js",
       "types": "./dist/lib.cjs/types/vue/wagmi/index.d.ts"
+    },
+    "./connectors/coinbase-connector": {
+      "import": "./dist/lib.esm/packages/modal/src/connectors/coinbase-connector/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/connectors/coinbase-connector/index.js",
+      "types": "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
+    },
+    "./providers/xrpl-provider": {
+      "import": "./dist/lib.esm/packages/modal/src/providers/xrpl-provider/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/providers/xrpl-provider/index.js",
+      "types": "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
+    },
+    "./providers/ethereum-mpc-provider": {
+      "import": "./dist/lib.esm/packages/modal/src/providers/ethereum-mpc-provider/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/providers/ethereum-mpc-provider/index.js",
+      "types": "./dist/lib.cjs/types/providers/ethereum-mpc-provider/index.d.ts"
     }
   },
   "typesVersions": {
@@ -158,6 +173,15 @@
       ],
       "vue/wagmi": [
         "./dist/lib.cjs/types/vue/wagmi/index.d.ts"
+      ],
+      "connectors/coinbase-connector": [
+        "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
+      ],
+      "providers/xrpl-provider": [
+        "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
+      ],
+      "providers/ethereum-mpc-provider": [
+        "./dist/lib.cjs/types/providers/ethereum-mpc-provider/index.d.ts"
       ]
     }
   },
