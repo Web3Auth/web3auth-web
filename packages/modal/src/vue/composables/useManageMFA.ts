@@ -19,7 +19,7 @@ export const useManageMFA = (): IUseManageMFA => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       error.value = null;
       loading.value = true;
-      await web3Auth.value.enableMFA();
+      await web3Auth.value.manageMFA();
     } catch (err) {
       error.value = err as Web3AuthError;
     } finally {
