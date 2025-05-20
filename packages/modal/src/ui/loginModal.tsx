@@ -2,10 +2,13 @@ import "./css/index.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
+  type Analytics,
+  ANALYTICS_EVENTS,
   type BaseConnectorConfig,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
+  getWhitelabelAnalyticsProperties,
   type IConnectorDataEvent,
   log,
   type LoginMethodConfig,
@@ -21,6 +24,7 @@ import {
 } from "@web3auth/no-modal";
 import { createRoot } from "react-dom/client";
 
+import { getLoginModalAnalyticsProperties } from "../utils";
 // import Modal from "./components/Modal";
 import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR } from "./constants";
@@ -71,6 +75,8 @@ export class LoginModal {
 
   private externalWalletsConfig: Record<string, BaseConnectorConfig>;
 
+  private analytics: Analytics;
+
   constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
 
@@ -94,6 +100,7 @@ export class LoginModal {
     this.chainNamespaces = uiConfig.chainNamespaces;
     this.walletRegistry = uiConfig.walletRegistry;
     this.callbacks = callbacks;
+    this.analytics = uiConfig.analytics;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
   }
 
@@ -289,6 +296,13 @@ export class LoginModal {
     this.setState({
       modalVisibility: true,
     });
+    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_OPENED, {
+      chain_namespaces: this.chainNamespaces,
+      wallet_registry_count: Object.keys(this.walletRegistry?.default).length + Object.keys(this.walletRegistry?.others).length,
+      external_wallet_connectors: Object.keys(this.externalWalletsConfig || {}),
+      ...getWhitelabelAnalyticsProperties(this.uiConfig),
+      ...getLoginModalAnalyticsProperties(this.uiConfig),
+    });
     if (this.callbacks.onModalVisibility) {
       this.callbacks.onModalVisibility(true);
     }
@@ -299,6 +313,7 @@ export class LoginModal {
       modalVisibility: false,
       externalWalletsVisibility: false,
     });
+    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_CLOSED);
     if (this.callbacks.onModalVisibility) {
       this.callbacks.onModalVisibility(false);
     }
@@ -314,6 +329,9 @@ export class LoginModal {
     if (this.callbacks.onInitExternalWallets) {
       this.callbacks.onInitExternalWallets({ externalWalletsInitialized: status });
     }
+    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_ALL_EXTERNAL_WALLETS_CLICKED, {
+      is_external_wallets_initialized: status,
+    });
   };
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
@@ -322,6 +340,16 @@ export class LoginModal {
     if (this.callbacks.onExternalWalletLogin) {
       this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
     }
+    const externalWalletConfig = this.externalWalletsConfig[params.connector];
+    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_EXTERNAL_WALLET_CLICKED, {
+      connector,
+      wallet_name: externalWalletConfig?.label || connector,
+      is_installed: connector !== WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      is_injected: externalWalletConfig?.isInjected,
+      is_show_on_modal: externalWalletConfig?.showOnModal,
+      chain_namespaces: externalWalletConfig?.chainNamespaces,
+      selected_chain_namespace: chainNamespace,
+    });
   };
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
@@ -330,6 +358,12 @@ export class LoginModal {
     if (this.callbacks.onSocialLogin) {
       this.callbacks.onSocialLogin({ connector, loginParams });
     }
+    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_SOCIAL_LOGIN_CLICKED, {
+      connector,
+      auth_connection: loginParams.authConnection,
+      auth_connection_id: loginParams.authConnectionId,
+      group_auth_connection_id: loginParams.groupedAuthConnectionId,
+    });
   };
 
   private setState = (newState: Partial<ModalState>) => {

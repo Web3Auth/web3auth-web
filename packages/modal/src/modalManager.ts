@@ -102,6 +102,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           authBuildEnv: this.options.authBuildEnv,
           chainNamespaces: this.getChainNamespaces(),
           walletRegistry: filteredWalletRegistry,
+          analytics: this.analytics,
         },
         {
           onInitExternalWallets: this.onInitExternalWallets,

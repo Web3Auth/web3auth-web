@@ -4,8 +4,9 @@ import { get } from "@toruslabs/http-helpers";
 import { BUILD_ENV, BUILD_ENV_TYPE } from "@web3auth/auth";
 import { type Chain } from "viem";
 
-import { CustomChainConfig } from "./chain/IChainInterface";
+import { type CustomChainConfig } from "./chain/IChainInterface";
 import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
+import { type UIConfig } from "./core/IWeb3Auth";
 import type { ProjectConfig, WalletRegistry } from "./interfaces";
 
 export const isHexStrict = (hex: string): boolean => {
@@ -109,5 +110,21 @@ export function withAbort<T>(fn: () => Promise<T>, signal?: AbortSignal, onAbort
 export const fromViemChain = fromWagmiChain;
 
 export { cloneDeep };
+
+export const getWhitelabelAnalyticsProperties = (uiConfig?: UIConfig) => {
+  return {
+    whitelabel_app_name: uiConfig?.appName,
+    whitelabel_app_url: uiConfig?.appUrl,
+    whitelabel_logo_light_enabled: Boolean(uiConfig?.logoLight),
+    whitelabel_logo_dark_enabled: Boolean(uiConfig?.logoDark),
+    whitelabel_default_language: uiConfig?.defaultLanguage,
+    whitelabel_theme_mode: uiConfig?.mode,
+    whitelabel_use_logo_loader: uiConfig?.useLogoLoader,
+    whitelabel_theme_primary: uiConfig?.theme?.primary,
+    whitelabel_theme_on_primary: uiConfig?.theme?.onPrimary,
+    whitelabel_tnc_link_enabled: Boolean(uiConfig?.tncLink),
+    whitelabel_privacy_policy_enabled: Boolean(uiConfig?.privacyPolicy),
+  };
+};
 
 export const sdkVersion = process.env.WEB3AUTH_VERSION;

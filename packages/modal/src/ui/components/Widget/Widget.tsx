@@ -133,7 +133,7 @@ function Widget(props: WidgetProps) {
         externalWalletsVisibility: flag,
       };
     });
-    if (handleShowExternalWallets) handleShowExternalWallets(modalState.externalWalletsInitialized);
+    if (flag && handleShowExternalWallets) handleShowExternalWallets(modalState.externalWalletsInitialized);
   };
 
   const onCloseModal = () => {

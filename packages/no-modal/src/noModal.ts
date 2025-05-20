@@ -16,6 +16,7 @@ import {
   type CONNECTOR_STATUS_TYPE,
   type CustomChainConfig,
   fetchProjectConfig,
+  getWhitelabelAnalyticsProperties,
   type IBaseProvider,
   type IConnector,
   type IPlugin,
@@ -262,9 +263,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const authLoginParams = loginParams as Partial<AuthLoginParams>;
       eventData = {
         connector: connectorName,
+        connector_type: connector.type,
         chain_id: initialChain.chainId,
+        chain_namespace: initialChain.chainNamespace,
         auth_connection: authLoginParams.authConnection,
-        login_hint: authLoginParams.loginHint,
         auth_connection_id: authLoginParams.authConnectionId,
         group_auth_connection_id: authLoginParams.groupedAuthConnectionId,
         mfa_level: authLoginParams.mfaLevel,
@@ -275,8 +277,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     } else {
       eventData = {
         connector: connectorName,
-        chain_namespace: (loginParams as { chainNamespace?: ChainNamespaceType })?.chainNamespace,
+        connector_type: connector.type,
+        is_injected: connector.isInjected,
         chain_id: initialChain.chainId,
+        chain_namespace: initialChain.chainNamespace,
       };
     }
     this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
@@ -516,19 +520,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
         private_key_provider_enabled: Boolean(this.coreOptions.privateKeyProvider),
         auth_build_env: this.coreOptions.authBuildEnv,
-        // UI config
-        ui_app_name: this.coreOptions.uiConfig?.appName,
-        ui_app_url: this.coreOptions.uiConfig?.appUrl,
-        ui_logo_light_enabled: Boolean(this.coreOptions.uiConfig?.logoLight),
-        ui_logo_dark_enabled: Boolean(this.coreOptions.uiConfig?.logoDark),
-        ui_default_language: this.coreOptions.uiConfig?.defaultLanguage,
-        ui_theme_mode: this.coreOptions.uiConfig?.mode,
-        ui_use_logo_loader: this.coreOptions.uiConfig?.useLogoLoader,
-        ui_theme_primary: this.coreOptions.uiConfig?.theme?.primary,
-        ui_theme_on_primary: this.coreOptions.uiConfig?.theme?.onPrimary,
-        ui_tnc_link_enabled: Boolean(this.coreOptions.uiConfig?.tncLink),
-        ui_privacy_policy_enabled: Boolean(this.coreOptions.uiConfig?.privacyPolicy),
-        ui_auth_ux_mode: this.coreOptions.uiConfig?.uxMode,
+        auth_ux_mode: this.coreOptions.uiConfig?.uxMode, // TODO: not sure if this is reliable as we can pass uxMode in authConnector()
+        ...getWhitelabelAnalyticsProperties(this.coreOptions.uiConfig),
         // AA config
         aa_smart_account_type: this.coreOptions.accountAbstractionConfig?.smartAccountType,
         aa_chain_ids: this.coreOptions.accountAbstractionConfig?.chains?.map((chain) => chain.chainId),
