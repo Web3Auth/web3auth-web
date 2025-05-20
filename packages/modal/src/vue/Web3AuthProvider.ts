@@ -56,9 +56,7 @@ export const Web3AuthProvider = defineComponent({
         resetHookState();
         const { web3AuthOptions } = newConfig;
         const web3AuthInstance = new Web3Auth(web3AuthOptions);
-        web3AuthInstance.setAnalyticsProperties({
-          integration_type: ANALYTICS_INTEGRATION_TYPE.VUE_COMPOSABLES,
-        });
+        web3AuthInstance.setAnalyticsProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.VUE_COMPOSABLES });
         web3Auth.value = web3AuthInstance;
       },
       { immediate: true }
@@ -78,7 +76,7 @@ export const Web3AuthProvider = defineComponent({
           try {
             initError.value = null;
             isInitializing.value = true;
-            await newWeb3Auth.initModal({ signal: controller.signal });
+            await newWeb3Auth.init({ signal: controller.signal });
           } catch (error) {
             initError.value = error as Error;
           } finally {
@@ -122,7 +120,11 @@ export const Web3AuthProvider = defineComponent({
         };
 
         const errorListener = () => {
-          status.value = CONNECTOR_EVENTS.ERRORED;
+          status.value = web3Auth.value!.status;
+          if (isConnected.value) {
+            isConnected.value = false;
+            provider.value = null;
+          }
         };
 
         const mfaEnabledListener = () => {
@@ -137,6 +139,7 @@ export const Web3AuthProvider = defineComponent({
           prevWeb3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
         }
 
@@ -149,6 +152,7 @@ export const Web3AuthProvider = defineComponent({
           newWeb3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
         }
       },

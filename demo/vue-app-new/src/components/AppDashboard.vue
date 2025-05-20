@@ -324,7 +324,7 @@ const onSwitchChain = async () => {
     const currentNamespace = currentChainNamespace.value;
     const newChain = props.chains.find((x) => x.chainNamespace === currentNamespace && x.chainId !== chainId);
     if (!newChain) throw new Error(`Please configure at least 2 chains for ${currentNamespace} in the config`);
-    const data =await switchChainAsync({ chainId: Number(newChain.chainId) });
+    const data = await switchChainAsync({ chainId: Number(newChain.chainId) });
     printToConsole("switchedChain", { chainId: data.id });
   } catch (error) {
     printToConsole("switchedChain error", error);

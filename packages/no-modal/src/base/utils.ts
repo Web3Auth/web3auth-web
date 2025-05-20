@@ -107,6 +107,8 @@ export function withAbort<T>(fn: () => Promise<T>, signal?: AbortSignal, onAbort
   });
 }
 
+export const isBrowser = () => typeof window !== "undefined" && typeof document !== "undefined";
+
 export const fromViemChain = fromWagmiChain;
 
 export { cloneDeep };

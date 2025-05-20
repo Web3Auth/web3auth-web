@@ -1,6 +1,6 @@
 import "./App.css";
 
-import { CHAIN_NAMESPACES, SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
+import { SafeEventEmitterProvider, WALLET_CONNECTORS } from "@web3auth/modal";
 import { Web3AuthNoModal } from "@web3auth/no-modal";
 import { useEffect, useState } from "react";
 
@@ -15,20 +15,10 @@ function App() {
   useEffect(() => {
     const init = async () => {
       try {
-        const chainConfig = {
-          displayName: "Ethereum Mainnet",
-          chainId: "0x1",
-          rpcTarget: `https://rpc.ankr.com/eth`,
-          blockExplorerUrl: "https://etherscan.io/",
-          ticker: "ETH",
-          tickerName: "Ethereum",
-          logo: "https://images.toruswallet.io/eth.svg",
-          chainNamespace: CHAIN_NAMESPACES.EIP155,
-        };
-
         const web3auth = new Web3AuthNoModal({
           clientId,
-          web3AuthNetwork: "cyan",
+          web3AuthNetwork: "sapphire_mainnet",
+          authBuildEnv: "testing",
         });
 
         setWeb3auth(web3auth);

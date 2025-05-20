@@ -111,7 +111,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       throw WalletInitializationError.invalidParams("authConnectionConfig is required before auth's initialization");
     const isRedirectResult = this.authOptions.uxMode === UX_MODE.REDIRECT;
 
-    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useCoreKitKey };
+    this.authOptions = { ...this.authOptions, replaceUrlOnRedirect: isRedirectResult, useCoreKitKey: this.coreOptions.useSFAKey };
     this.authInstance = new Auth({
       ...this.authOptions,
       clientId: this.coreOptions.clientId,
@@ -172,22 +172,26 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
 
     // wait for auth instance to be ready.
+    log.debug("initializing auth connector");
     await authInstancePromise;
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.AUTH);
 
     try {
-      log.debug("initializing auth connector");
       const { sessionId } = this.authInstance || {};
       // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
         await this.connect({ chainId: options.chainId });
+      } else if (!sessionId && options.autoConnect) {
+        // if here, this means that the connector is cached but the sessionId is not available.
+        // this can happen if the sessionId has expired.
+        // we are throwing an error to reset the cached state.
+        throw WalletLoginError.connectionError("Failed to rehydrate");
       }
     } catch (error) {
-      log.error("Failed to connect with cached auth provider", error);
-      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
     }
   }
 
@@ -320,13 +324,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   private _getFinalPrivKey() {
     if (!this.authInstance) return "";
     let finalPrivKey = this.authInstance.privKey;
-    // coreKitKey is available only for custom verifiers by default
-    if (this.coreOptions.useCoreKitKey) {
+    // coreKitKey is available only for custom connections by default
+    if (this.coreOptions.useSFAKey) {
       // this is to check if the user has already logged in but coreKitKey is not available.
-      // when useCoreKitKey is set to true.
+      // when useSFAKey is set to true.
       // This is to ensure that when there is no user session active, we don't throw an exception.
       if (this.authInstance.privKey && !this.authInstance.coreKitKey) {
-        throw WalletLoginError.coreKitKeyNotFound();
+        throw WalletLoginError.sfaKeyNotFound();
       }
       finalPrivKey = this.authInstance.coreKitKey;
     }
@@ -642,8 +646,8 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
       walletServicesSettings: finalWsSettings,
       loginSettings: params?.loginSettings,
       coreOptions,
-      // TODO: check, test this and may need to send modal config here later on.!!
       authConnectionConfig: projectConfig.embeddedWalletAuth,
+      mfaSettings: coreOptions.mfaSettings,
     });
   };
 };

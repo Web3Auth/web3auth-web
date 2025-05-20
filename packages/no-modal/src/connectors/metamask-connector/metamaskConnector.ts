@@ -34,9 +34,9 @@ export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
 }
 
 class MetaMaskConnector extends BaseEvmConnector<void> {
-  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.EIP155;
+  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 
-  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
+  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.OTHER;
 
   readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
@@ -96,10 +96,14 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        await this.connect({ chainId: options.chainId });
+        const provider = await this.connect({ chainId: options.chainId });
+        if (!provider) {
+          this.rehydrated = false;
+          throw WalletLoginError.connectionError("Failed to rehydrate.");
+        }
       }
     } catch (error) {
-      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
+      this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
     }
   }
 
@@ -149,8 +153,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
+      if (!this.rehydrated) this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       this.rehydrated = false;
-      this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with MetaMask wallet", error);
     }
@@ -186,7 +190,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     } catch (error) {
       // If the error code is 4902, the network needs to be added
       if ((error as { code?: number })?.code === 4902) {
-        const chainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId && x.chainNamespace === this.connectorNamespace);
+        const chainConfig = this.coreOptions.chains.find(
+          (x) =>
+            x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(x.chainNamespace)
+        );
         await this.addChain(chainConfig);
         await requestSwitchChain();
       } else {
