@@ -24,10 +24,10 @@ import {
   ConnectorParams,
   CustomChainConfig,
   getSavedToken,
+  IdentityTokenInfo,
   IProvider,
   log,
   saveToken,
-  UserAuthInfo,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -213,7 +213,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
-  async authenticateUser(): Promise<UserAuthInfo> {
+  async getIdentityToken(): Promise<IdentityTokenInfo> {
     if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     const { chainId } = this.provider;
     const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);

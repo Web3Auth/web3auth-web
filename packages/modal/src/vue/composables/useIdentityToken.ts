@@ -7,7 +7,7 @@ export interface IUseIdentityToken {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
   token: Ref<string | null>;
-  authenticateUser: () => Promise<string | null>;
+  getIdentityToken: () => Promise<string | null>;
 }
 
 export const useIdentityToken = (): IUseIdentityToken => {
@@ -16,12 +16,12 @@ export const useIdentityToken = (): IUseIdentityToken => {
   const error = ref<Web3AuthError | null>(null);
   const token = ref<string | null>(null);
 
-  const authenticateUser = async () => {
+  const getIdentityToken = async () => {
     try {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       error.value = null;
       loading.value = true;
-      const result = await web3Auth.value.authenticateUser();
+      const result = await web3Auth.value.getIdentityToken();
       if (result?.idToken) {
         token.value = result.idToken;
       }
@@ -43,6 +43,6 @@ export const useIdentityToken = (): IUseIdentityToken => {
     loading,
     error,
     token,
-    authenticateUser,
+    getIdentityToken,
   };
 };

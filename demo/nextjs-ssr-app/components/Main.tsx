@@ -28,7 +28,7 @@ const Main = () => {
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
-  const { token, loading: isUserTokenLoading, error: userTokenError, authenticateUser } = useIdentityToken();
+  const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
  
   console.log("isConnected", isConnected);
   
@@ -56,7 +56,7 @@ const Main = () => {
               {isUserTokenLoading ? (
                 <p>Authenticating...</p>
               ) : (
-                <button onClick={() => authenticateUser()} className="card">
+                <button onClick={() => getIdentityToken()} className="card">
                   Authenticate User
                 </button>
               )}

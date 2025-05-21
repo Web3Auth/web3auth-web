@@ -47,7 +47,7 @@ const { switchChain } = useWeb3AuthSwitchChain();
 const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
-const { authenticateUser, loading: authenticateUserLoading } = useIdentityToken();
+const { getIdentityToken, loading: getIdentityTokenLoading } = useIdentityToken();
 const { status, address } = useAccount();
 const { signTypedDataAsync } = useSignTypedData();
 const { signMessageAsync } = useSignMessage();
@@ -164,8 +164,8 @@ const onGetUserInfo = async () => {
   printToConsole("User Info", userInfo.value);
 };
 
-const onAuthenticateUser = async () => {
-  const idToken = await authenticateUser();
+const ongetIdentityToken = async () => {
+  const idToken = await getIdentityToken();
   printToConsole("id token", idToken);
 };
 
@@ -451,7 +451,7 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="onAuthenticateUser">Get id token</Button>
+          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
         </Card>
 
         <!-- SOLANA -->
@@ -473,7 +473,7 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
-          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="onAuthenticateUser">Get id token</Button>
+          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
         </Card>
       </Card>
       <Card

@@ -9,8 +9,8 @@ import {
   CONNECTOR_STATUS,
   ConnectorInitOptions,
   getSavedToken,
+  IdentityTokenInfo,
   saveToken,
-  UserAuthInfo,
   WalletInitializationError,
   WalletLoginError,
 } from "../../base";
@@ -18,7 +18,7 @@ import {
 export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
-  async authenticateUser(): Promise<UserAuthInfo> {
+  async getIdentityToken(): Promise<IdentityTokenInfo> {
     if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
