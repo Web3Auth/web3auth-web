@@ -12,8 +12,8 @@ import type {
   ConnectorEvents,
   ConnectorInitOptions,
   IConnector,
+  IdentityTokenInfo,
   IProvider,
-  UserAuthInfo,
   UserInfo,
 } from "./interfaces";
 
@@ -101,6 +101,6 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
-  abstract authenticateUser(): Promise<UserAuthInfo>;
+  abstract getIdentityToken(): Promise<IdentityTokenInfo>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }

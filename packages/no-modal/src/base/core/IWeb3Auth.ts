@@ -1,20 +1,31 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import { type BUILD_ENV_TYPE, type LoginParams, MfaSettings, SafeEventEmitter, UX_MODE_TYPE, type WhiteLabelData } from "@web3auth/auth";
+import {
+  type BUILD_ENV_TYPE,
+  type LoginParams,
+  MfaLevelType,
+  MfaSettings,
+  SafeEventEmitter,
+  UX_MODE_TYPE,
+  type WhiteLabelData,
+} from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
+  CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
   type CONNECTOR_STATUS_TYPE,
   ConnectorEvents,
   type ConnectorFn,
   type IBaseProvider,
   type IConnector,
+  type IdentityTokenInfo,
   type IProvider,
-  type UserAuthInfo,
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
+import { Web3AuthError } from "../errors";
+import { LoginModeType } from "../interfaces";
 import { type IPlugin, type PluginFn } from "../plugin";
 import { type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 
@@ -162,6 +173,11 @@ export interface IWeb3AuthCoreOptions {
    * MFA settings for the auth connector
    */
   mfaSettings?: MfaSettings;
+
+  /**
+   * MFA level for the auth connector
+   */
+  mfaLevel?: MfaLevelType;
 }
 
 export type LoginParamMap = {
@@ -182,7 +198,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
-  authenticateUser(): Promise<UserAuthInfo>;
+  getIdentityToken(): Promise<IdentityTokenInfo>;
   switchChain(params: { chainId: string }): Promise<void>;
 }
 
@@ -200,6 +216,13 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   cleanup(): Promise<void>;
 }
 
-export type Web3AuthNoModalEvents = ConnectorEvents & { [CONNECTOR_EVENTS.READY]: () => void; MODAL_VISIBILITY: (visibility: boolean) => void };
+export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType };
+
+export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready"> & {
+  [CONNECTOR_EVENTS.READY]: () => void;
+  [CONNECTOR_EVENTS.CONNECTED]: (data: SDK_CONNECTED_EVENT_DATA) => void;
+  [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError, loginMode: LoginModeType) => void;
+  MODAL_VISIBILITY: (visibility: boolean) => void;
+};
 
 export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;

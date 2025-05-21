@@ -19,6 +19,7 @@ import {
   getWhitelabelAnalyticsProperties,
   type IBaseProvider,
   type IConnector,
+  type IdentityTokenInfo,
   type IPlugin,
   type IProvider,
   isBrowser,
@@ -36,7 +37,6 @@ import {
   SMART_ACCOUNT_WALLET_SCOPE,
   type SmartAccountsConfig,
   storageAvailable,
-  type UserAuthInfo,
   type UserInfo,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -393,15 +393,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  async authenticateUser(): Promise<UserAuthInfo> {
+  async getIdentityToken(): Promise<IdentityTokenInfo> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
 
     const trackData = { connector: this.connectedConnector.name };
     try {
+      // TODO: use a different event name for this
       this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_STARTED, trackData);
-      const userAuthInfo = await this.connectedConnector.authenticateUser();
+      const identityToken = await this.connectedConnector.getIdentityToken();
       this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_COMPLETED, trackData);
-      return userAuthInfo;
+      return identityToken;
     } catch (error) {
       const serializedError = await serializeError(error);
       this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_FAILED, {
@@ -692,14 +693,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
-    connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: Omit<CONNECTED_EVENT_DATA, "loginMode">) => {
+    connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { provider } = data;
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
         try {
-          const data = await connector.authenticateUser();
+          const data = await connector.getIdentityToken();
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           this.setState({
             idToken: data.idToken,
@@ -707,7 +708,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         } catch (error) {
           log.error(error);
           this.status = CONNECTOR_STATUS.ERRORED;
-          this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
+          this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError, this.loginMode);
           return;
         }
       }
@@ -788,7 +789,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.ERRORED, (data) => {
       this.status = CONNECTOR_STATUS.ERRORED;
       this.clearCache();
-      this.emit(CONNECTOR_EVENTS.ERRORED, data);
+      this.emit(CONNECTOR_EVENTS.ERRORED, data, this.loginMode);
       log.debug("errored", this.status, this.connectedConnectorName);
     });
 

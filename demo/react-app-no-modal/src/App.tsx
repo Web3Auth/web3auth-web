@@ -44,12 +44,12 @@ function App() {
     setProvider(web3authProvider);
   };
 
-  const authenticateUser = async () => {
+  const getIdentityToken = async () => {
     if (!web3auth) {
       uiConsole("web3auth not initialized yet");
       return;
     }
-    const idToken = await web3auth.authenticateUser();
+    const idToken = await web3auth.getIdentityToken();
     uiConsole(idToken);
   };
 
@@ -156,7 +156,7 @@ function App() {
           </button>
         </div>
         <div>
-          <button onClick={authenticateUser} className="card">
+          <button onClick={getIdentityToken} className="card">
             Get ID Token
           </button>
         </div>

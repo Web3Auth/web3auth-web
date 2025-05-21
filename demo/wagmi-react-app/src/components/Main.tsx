@@ -28,7 +28,7 @@ const Main = () => {
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
-  const { token, loading: isUserTokenLoading, error: userTokenError, authenticateUser } = useIdentityToken();
+  const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
   const { switchChainAsync, chains } = useSwitchChain();
   const chainId = useChainId();
 
@@ -57,7 +57,7 @@ const Main = () => {
               {isUserTokenLoading ? (
                 <p>Authenticating...</p>
               ) : (
-                <button onClick={() => authenticateUser()} className={styles.card}>
+                <button onClick={() => getIdentityToken()} className={styles.card}>
                   Authenticate User
                 </button>
               )}

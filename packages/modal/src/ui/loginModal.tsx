@@ -8,14 +8,15 @@ import {
   ANALYTICS_EVENTS,
   type BaseConnectorConfig,
   type ChainNamespaceType,
-  type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
   getWhitelabelAnalyticsProperties,
   type IConnectorDataEvent,
   log,
   LOGIN_MODE,
   type LoginMethodConfig,
+  LoginModeType,
   type MetaMaskConnectorData,
+  type SDK_CONNECTED_EVENT_DATA,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
@@ -400,7 +401,7 @@ export class LoginModal {
 
       this.setState({ status: MODAL_STATUS.CONNECTING });
     });
-    listener.on(CONNECTOR_EVENTS.CONNECTED, (data: CONNECTED_EVENT_DATA) => {
+    listener.on(CONNECTOR_EVENTS.CONNECTED, (data: SDK_CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);
       // only show success if not being reconnected again.
       if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
@@ -416,8 +417,9 @@ export class LoginModal {
       }
     });
     // TODO: send connector name in error
-    listener.on(CONNECTOR_EVENTS.ERRORED, (error: Web3AuthError) => {
+    listener.on(CONNECTOR_EVENTS.ERRORED, (error: Web3AuthError, loginMode: LoginModeType) => {
       log.error("error", error, error.message);
+      if (loginMode === LOGIN_MODE.NO_MODAL) return;
       if (error.code === 5000) {
         if (this.uiConfig.displayErrorsOnModal)
           this.setState({
