@@ -31,6 +31,7 @@ import { createRoot } from "react-dom/client";
 import { getLoginModalAnalyticsProperties } from "../utils";
 import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR } from "./constants";
+import { AnalyticsContext } from "./context/AnalyticsContext";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   ExternalWalletEventType,
@@ -241,18 +242,20 @@ export class LoginModal {
       const root = createRoot(container);
       root.render(
         <ThemedContext.Provider value={darkState}>
-          <Widget
-            stateListener={this.stateEmitter}
-            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
-            appName={this.uiConfig.appName}
-            chainNamespaces={this.chainNamespaces}
-            walletRegistry={this.walletRegistry}
-            handleShowExternalWallets={this.handleShowExternalWallets}
-            handleExternalWalletClick={this.handleExternalWalletClick}
-            handleSocialLoginClick={this.handleSocialLoginClick}
-            closeModal={this.closeModal}
-            uiConfig={this.uiConfig}
-          />
+          <AnalyticsContext.Provider value={{ analytics: this.analytics }}>
+            <Widget
+              stateListener={this.stateEmitter}
+              appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
+              appName={this.uiConfig.appName}
+              chainNamespaces={this.chainNamespaces}
+              walletRegistry={this.walletRegistry}
+              handleShowExternalWallets={this.handleShowExternalWallets}
+              handleExternalWalletClick={this.handleExternalWalletClick}
+              handleSocialLoginClick={this.handleSocialLoginClick}
+              closeModal={this.closeModal}
+              uiConfig={this.uiConfig}
+            />
+          </AnalyticsContext.Provider>
         </ThemedContext.Provider>
       );
 
@@ -332,25 +335,12 @@ export class LoginModal {
     if (this.callbacks.onInitExternalWallets) {
       this.callbacks.onInitExternalWallets({ externalWalletsInitialized: status });
     }
-    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_ALL_EXTERNAL_WALLETS_CLICKED, {
-      is_external_wallets_initialized: status,
-    });
   };
 
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
     const { connector, chainNamespace } = params;
     // track event
-    const externalWalletConfig = this.externalWalletsConfig?.[params.connector];
-    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_EXTERNAL_WALLET_CLICKED, {
-      connector,
-      wallet_name: externalWalletConfig?.label || connector,
-      is_installed: connector !== WALLET_CONNECTORS.WALLET_CONNECT_V2,
-      is_injected: externalWalletConfig?.isInjected,
-      is_show_on_modal: externalWalletConfig?.showOnModal,
-      chain_namespaces: externalWalletConfig?.chainNamespaces,
-      selected_chain_namespace: chainNamespace,
-    });
     if (this.callbacks.onExternalWalletLogin) {
       this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
     }
@@ -359,15 +349,15 @@ export class LoginModal {
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { connector, loginParams } = params;
-    if (this.callbacks.onSocialLogin) {
-      this.callbacks.onSocialLogin({ connector, loginParams });
-    }
-    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_SOCIAL_LOGIN_CLICKED, {
+    this.analytics.track(ANALYTICS_EVENTS.SOCIAL_LOGIN_SELECTED, {
       connector,
       auth_connection: loginParams.authConnection,
       auth_connection_id: loginParams.authConnectionId,
       group_auth_connection_id: loginParams.groupedAuthConnectionId,
     });
+    if (this.callbacks.onSocialLogin) {
+      this.callbacks.onSocialLogin({ connector, loginParams });
+    }
   };
 
   private setState = (newState: Partial<ModalState>) => {

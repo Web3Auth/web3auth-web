@@ -18,6 +18,8 @@ export class Analytics {
 
   private globalProperties: Record<string, unknown> = {};
 
+  private enabled: boolean = false;
+
   public init(): void {
     if (this.segment) {
       throw new Error("Analytics already initialized");
@@ -44,11 +46,20 @@ export class Analytics {
       });
   }
 
+  public enable(): void {
+    this.enabled = true;
+  }
+
+  public disable(): void {
+    this.enabled = false;
+  }
+
   public setGlobalProperties(properties: Record<string, unknown>) {
     this.globalProperties = { ...this.globalProperties, ...properties };
   }
 
   public async identify(userId: string, traits?: UserTraits) {
+    if (!this.enabled) return;
     try {
       return this.getSegment().identify(userId, {
         ...traits,
@@ -59,6 +70,7 @@ export class Analytics {
   }
 
   public async track(event: string, properties?: EventProperties) {
+    if (!this.enabled) return;
     try {
       return this.getSegment().track(event, {
         ...this.globalProperties,
@@ -80,24 +92,25 @@ export class Analytics {
 }
 
 export const ANALYTICS_EVENTS = {
-  SDK_INITIALIZATION_COMPLETED: "sdk_initialization_completed",
-  SDK_INITIALIZATION_FAILED: "sdk_initialization_failed",
-  CONNECTION_STARTED: "connection_started",
-  CONNECTION_COMPLETED: "connection_completed",
-  CONNECTION_FAILED: "connection_failed",
-  AUTHENTICATION_STARTED: "authentication_started",
-  AUTHENTICATION_COMPLETED: "authentication_completed",
-  AUTHENTICATION_FAILED: "authentication_failed",
-  MFA_ENABLEMENT_STARTED: "mfa_enablement_started",
-  MFA_ENABLEMENT_COMPLETED: "mfa_enablement_completed",
-  MFA_ENABLEMENT_FAILED: "mfa_enablement_failed",
-  MFA_MANAGEMENT_STARTED: "mfa_management_started",
-  MFA_MANAGEMENT_FAILED: "mfa_management_failed",
-  LOGIN_MODAL_OPENED: "login_modal_opened",
-  LOGIN_MODAL_CLOSED: "login_modal_closed",
-  LOGIN_MODAL_ALL_EXTERNAL_WALLETS_CLICKED: "login_modal_all_external_wallets_clicked",
-  LOGIN_MODAL_SOCIAL_LOGIN_CLICKED: "login_modal_social_login_clicked",
-  LOGIN_MODAL_EXTERNAL_WALLET_CLICKED: "login_modal_external_wallet_clicked",
+  SDK_INITIALIZATION_STARTED: "SDK Initialization Started",
+  SDK_INITIALIZATION_COMPLETED: "SDK Initialization Completed",
+  SDK_INITIALIZATION_FAILED: "SDK Initialization Failed",
+  CONNECTION_STARTED: "Connection Started",
+  CONNECTION_COMPLETED: "Connection Completed",
+  CONNECTION_FAILED: "Connection Failed",
+  IDENTITY_TOKEN_STARTED: "Identity Token Started",
+  IDENTITY_TOKEN_COMPLETED: "Identity Token Completed",
+  IDENTITY_TOKEN_FAILED: "Identity Token Failed",
+  MFA_ENABLEMENT_STARTED: "MFA Enablement Started",
+  MFA_ENABLEMENT_COMPLETED: "MFA Enablement Completed",
+  MFA_ENABLEMENT_FAILED: "MFA Enablement Failed",
+  MFA_MANAGEMENT_STARTED: "MFA Management Started",
+  MFA_MANAGEMENT_FAILED: "MFA Management Failed",
+  LOGIN_MODAL_OPENED: "Login Modal Opened",
+  LOGIN_MODAL_CLOSED: "Login Modal Closed",
+  EXTERNAL_WALLET_LIST_EXPANDED: "External Wallets List Expanded",
+  SOCIAL_LOGIN_SELECTED: "Social Login Selected",
+  EXTERNAL_WALLET_SELECTED: "External Wallet Selected",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {

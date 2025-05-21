@@ -1,7 +1,8 @@
-import { type ChainNamespaceType, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { ANALYTICS_EVENTS, type ChainNamespaceType, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
+import { AnalyticsContext } from "../../context/AnalyticsContext";
 import { RootContext } from "../../context/RootContext";
 import { ExternalButton } from "../../interfaces";
 import { ConnectWalletProps } from "./ConnectWallet.type";
@@ -30,6 +31,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
+  const { analytics } = useContext(AnalyticsContext);
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = useState(false);
@@ -137,6 +139,19 @@ function ConnectWallet(props: ConnectWalletProps) {
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
 
   const handleWalletClick = (button: ExternalButton) => {
+    const isInstalled = button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks);
+    analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_SELECTED, {
+      connector: isInstalled ? button.name : button.hasWalletConnect ? WALLET_CONNECTORS.WALLET_CONNECT_V2 : "",
+      wallet_name: button.displayName,
+      is_installed: isInstalled,
+      is_injected: button.hasInjectedWallet,
+      chain_namespaces: button.chainNamespaces,
+      has_wallet_connect: button.hasWalletConnect,
+      has_install_links: button.hasInstallLinks,
+      has_wallet_registry_item: !!button.walletRegistryItem,
+      total_external_wallets: totalExternalWalletsCount,
+    });
+
     // show chain namespace selector if the button is an injected connector with multiple chain namespaces
     const isChainNamespaceSelectorRequired = button.hasInjectedWallet && button.chainNamespaces?.length > 1;
     if (isChainNamespaceSelectorRequired) {
@@ -157,7 +172,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       return handleExternalWalletClick({ connector: button.name });
     }
 
-    if (button.hasWalletConnect || !isInjectedConnectorAndSingleChainNamespace) {
+    if (button.hasWalletConnect) {
       setSelectedButton(button);
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);

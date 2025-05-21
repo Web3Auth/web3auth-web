@@ -398,14 +398,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     const trackData = { connector: this.connectedConnector.name };
     try {
-      // TODO: use a different event name for this
-      this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_STARTED, trackData);
+      this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_STARTED, trackData);
       const identityToken = await this.connectedConnector.getIdentityToken();
-      this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_COMPLETED, trackData);
+      this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
       return identityToken;
     } catch (error) {
       const serializedError = await serializeError(error);
-      this.analytics.track(ANALYTICS_EVENTS.AUTHENTICATION_FAILED, {
+      this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_FAILED, {
         ...trackData,
         error_code: error instanceof Web3AuthError ? error.code : undefined,
         error_message: serializedError.message,
