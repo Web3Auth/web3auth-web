@@ -1,4 +1,4 @@
-import { BUTTON_POSITION, CONFIRMATION_STRATEGY, type ProviderConfig } from "@toruslabs/base-controllers";
+import { type ProviderConfig } from "@toruslabs/base-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import {
   Auth,
@@ -589,13 +589,12 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
   return ({ projectConfig, coreOptions }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
-    const { whitelist, whitelabel, sessionTime } = projectConfig;
+    const { whitelist, sessionTime } = projectConfig;
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
     if (sessionTime) connectorSettings.sessionTime = sessionTime;
     if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
 
-    const uiConfig = deepmerge(cloneDeep(whitelabel || {}), coreOptions.uiConfig || {});
-    if (!uiConfig.mode) uiConfig.mode = "light";
+    const uiConfig = coreOptions.uiConfig || {};
     connectorSettings.whiteLabel = uiConfig;
     const finalConnectorSettings = deepmerge.all([
       { uxMode: UX_MODE.POPUP, buildEnv: coreOptions.authBuildEnv || BUILD_ENV.PRODUCTION }, // default settings
@@ -604,49 +603,16 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
     ]) as AuthConnectorOptions["connectorSettings"];
 
     // WS settings
-    const { enableKeyExport, walletUi } = projectConfig;
-    const isKeyExportEnabled = typeof enableKeyExport === "boolean" ? enableKeyExport : true;
-    const {
-      enablePortfolioWidget = false,
-      enableTokenDisplay = true,
-      enableNftDisplay = true,
-      enableWalletConnect = true,
-      enableBuyButton = true,
-      enableSendButton = true,
-      enableSwapButton = true,
-      enableReceiveButton = true,
-      enableShowAllTokensButton = true,
-      enableConfirmationModal = false,
-      portfolioWidgetPosition = BUTTON_POSITION.BOTTOM_LEFT,
-      defaultPortfolio = "token",
-    } = walletUi || {};
-    const projectConfigWhiteLabel: WalletServicesSettings["whiteLabel"] = {
-      showWidgetButton: enablePortfolioWidget,
-      hideNftDisplay: !enableNftDisplay,
-      hideTokenDisplay: !enableTokenDisplay,
-      hideTransfers: !enableSendButton,
-      hideTopup: !enableBuyButton,
-      hideReceive: !enableReceiveButton,
-      hideSwap: !enableSwapButton,
-      hideShowAllTokens: !enableShowAllTokensButton,
-      hideWalletConnect: !enableWalletConnect,
-      buttonPosition: portfolioWidgetPosition,
-      defaultPortfolio,
-    };
-    const whiteLabel = deepmerge.all([projectConfigWhiteLabel, uiConfig, coreOptions.walletServicesConfig?.whiteLabel || {}]);
-    const confirmationStrategy =
-      coreOptions.walletServicesConfig?.confirmationStrategy ??
-      (enableConfirmationModal ? CONFIRMATION_STRATEGY.MODAL : CONFIRMATION_STRATEGY.AUTO_APPROVE);
+    const whiteLabel = deepmerge.all([uiConfig, coreOptions.walletServicesConfig?.whiteLabel || {}]);
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
-      confirmationStrategy,
       whiteLabel,
       accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
-      enableKeyExport: enableKeyExport,
     };
 
     // Core options
+    const isKeyExportEnabled = coreOptions.walletServicesConfig?.enableKeyExport ?? true;
     if (coreOptions.privateKeyProvider) coreOptions.privateKeyProvider.setKeyExportFlag(isKeyExportEnabled);
     return new AuthConnector({
       connectorSettings: finalConnectorSettings,

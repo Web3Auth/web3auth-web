@@ -3,6 +3,7 @@ import {
   ANALYTICS_EVENTS,
   ANALYTICS_SDK_TYPE,
   type AUTH_CONNECTION_TYPE,
+  type AuthConnectorType,
   type AuthLoginParams,
   type BaseConnectorConfig,
   type ChainNamespaceType,
@@ -93,6 +94,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       super.initAccountAbstractionConfig(projectConfig);
       super.initChainsConfig(projectConfig);
       super.initCachedConnectorAndChainId();
+      super.initWalletServicesConfig(projectConfig);
       trackData = this.getInitializationTrackData();
 
       // init login modal
@@ -137,10 +139,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       await withAbort(() => super.initPlugins(), signal);
 
       // track completion event
+      const authConnector = this.getConnector(WALLET_CONNECTORS.AUTH) as AuthConnectorType;
       trackData = {
         ...trackData,
         connectors: this.connectors.map((connector) => connector.name),
         plugins: Object.keys(this.plugins),
+        auth_ux_mode: authConnector?.authInstance?.options?.uxMode || this.coreOptions.uiConfig?.uxMode,
       };
       this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_COMPLETED, {
         ...trackData,
@@ -196,7 +200,28 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
-  // TODO: add more track data
+  protected initUIConfig(projectConfig: ProjectConfig) {
+    super.initUIConfig(projectConfig);
+    this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
+    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
+    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
+    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig, {
+      arrayMerge: (_, sourceArray) => sourceArray,
+    });
+
+    // merge login methods order from project config and user config, with user config taking precedence
+    const defaultAuthConnections = projectConfig.embeddedWalletAuth.filter((x) => x.isDefault).map((x) => x.authConnection);
+    const mergedAuthConnections = [...(this.options.uiConfig.loginMethodsOrder || []), ...defaultAuthConnections];
+    const loginMethodsOrder = [];
+    const authConnectionSet = new Set();
+    for (const authConnection of mergedAuthConnections) {
+      if (authConnectionSet.has(authConnection)) continue;
+      authConnectionSet.add(authConnection);
+      loginMethodsOrder.push(authConnection);
+    }
+    this.options.uiConfig.loginMethodsOrder = loginMethodsOrder;
+  }
+
   protected getInitializationTrackData(): Record<string, unknown> {
     return {
       ...super.getInitializationTrackData(),
@@ -277,27 +302,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     }
     return { projectConfig, walletRegistry };
-  }
-
-  private initUIConfig(projectConfig: ProjectConfig) {
-    this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
-    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
-    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
-    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig, {
-      arrayMerge: (_, sourceArray) => sourceArray,
-    });
-
-    // merge login methods order from project config and user config, with user config taking precedence
-    const defaultAuthConnections = projectConfig.embeddedWalletAuth.filter((x) => x.isDefault).map((x) => x.authConnection);
-    const mergedAuthConnections = [...(this.options.uiConfig.loginMethodsOrder || []), ...defaultAuthConnections];
-    const loginMethodsOrder = [];
-    const authConnectionSet = new Set();
-    for (const authConnection of mergedAuthConnections) {
-      if (authConnectionSet.has(authConnection)) continue;
-      authConnectionSet.add(authConnection);
-      loginMethodsOrder.push(authConnection);
-    }
-    this.options.uiConfig.loginMethodsOrder = loginMethodsOrder;
   }
 
   private async initConnectors({

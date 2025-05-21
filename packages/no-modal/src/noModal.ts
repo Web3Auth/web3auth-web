@@ -1,5 +1,7 @@
+import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controllers";
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import { IStorage, MemoryStore, SafeEventEmitter, type SafeEventEmitterProvider, serializeError } from "@web3auth/auth";
+import { cloneDeep, IStorage, MemoryStore, SafeEventEmitter, type SafeEventEmitterProvider, serializeError, UX_MODE } from "@web3auth/auth";
+import { WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
@@ -173,6 +175,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.initAccountAbstractionConfig(projectConfig);
       this.initChainsConfig(projectConfig);
       this.initCachedConnectorAndChainId();
+      this.initWalletServicesConfig(projectConfig);
       trackData = this.getInitializationTrackData();
 
       // setup common JRPC provider
@@ -199,10 +202,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       await withAbort(() => this.initPlugins(), signal);
 
       // track completion event
+      const authConnector = this.getConnector(WALLET_CONNECTORS.AUTH) as AuthConnectorType;
       trackData = {
         ...trackData,
         connectors: this.connectors.map((connector) => connector.name),
         plugins: Object.keys(this.plugins),
+        auth_ux_mode: authConnector?.authInstance?.options?.uxMode || this.coreOptions.uiConfig?.uxMode,
       };
       this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_COMPLETED, {
         ...trackData,
@@ -529,6 +534,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
+  protected initUIConfig(projectConfig: ProjectConfig) {
+    this.coreOptions.uiConfig = deepmerge.all([
+      { mode: "light", uxMode: UX_MODE.POPUP },
+      cloneDeep(projectConfig.whitelabel || {}),
+      this.coreOptions.uiConfig || {},
+    ]);
+  }
+
   protected initCachedConnectorAndChainId() {
     // init chainId using cached chainId if it exists and is valid, otherwise use the defaultChainId or the first chain
     const cachedChainId = this.state.currentChainId;
@@ -539,11 +552,53 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.setState({ currentChainId });
   }
 
+  protected initWalletServicesConfig(projectConfig: ProjectConfig) {
+    const { enableKeyExport, walletUi } = projectConfig;
+    const {
+      enablePortfolioWidget = false,
+      enableTokenDisplay = true,
+      enableNftDisplay = true,
+      enableWalletConnect = true,
+      enableBuyButton = true,
+      enableSendButton = true,
+      enableSwapButton = true,
+      enableReceiveButton = true,
+      enableShowAllTokensButton = true,
+      enableConfirmationModal = false,
+      portfolioWidgetPosition = BUTTON_POSITION.BOTTOM_LEFT,
+      defaultPortfolio = "token",
+    } = walletUi || {};
+    const projectConfigWhiteLabel: WsEmbedParams["whiteLabel"] = {
+      showWidgetButton: enablePortfolioWidget,
+      hideNftDisplay: !enableNftDisplay,
+      hideTokenDisplay: !enableTokenDisplay,
+      hideTransfers: !enableSendButton,
+      hideTopup: !enableBuyButton,
+      hideReceive: !enableReceiveButton,
+      hideSwap: !enableSwapButton,
+      hideShowAllTokens: !enableShowAllTokensButton,
+      hideWalletConnect: !enableWalletConnect,
+      buttonPosition: portfolioWidgetPosition,
+      defaultPortfolio,
+    };
+    const whiteLabel = deepmerge.all([projectConfigWhiteLabel, this.coreOptions.walletServicesConfig?.whiteLabel || {}]);
+    const confirmationStrategy =
+      this.coreOptions.walletServicesConfig?.confirmationStrategy ??
+      (enableConfirmationModal ? CONFIRMATION_STRATEGY.MODAL : CONFIRMATION_STRATEGY.AUTO_APPROVE);
+    const isKeyExportEnabled = this.coreOptions.walletServicesConfig?.enableKeyExport ?? enableKeyExport ?? true;
+    this.coreOptions.walletServicesConfig = {
+      ...this.coreOptions.walletServicesConfig,
+      confirmationStrategy,
+      whiteLabel,
+      enableKeyExport: isKeyExportEnabled,
+    };
+  }
+
   protected getInitializationTrackData() {
     try {
       return {
         chain_ids: this.coreOptions.chains?.map((chain) => chain.chainId),
-        chain_rpc_targets: this.coreOptions.chains?.map((chain) => chain.rpcTarget),
+        chain_rpc_targets: this.coreOptions.chains?.map((chain) => chain.rpcTarget), // TODO: should we collect th
         default_chain_id: this.coreOptions.defaultChainId,
         logging_enabled: this.coreOptions.enableLogging,
         storage_type: this.coreOptions.storageType,
@@ -552,7 +607,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
         private_key_provider_enabled: Boolean(this.coreOptions.privateKeyProvider),
         auth_build_env: this.coreOptions.authBuildEnv,
-        auth_ux_mode: this.coreOptions.uiConfig?.uxMode, // TODO: not sure if this is reliable as we can pass uxMode in authConnector()
+        auth_ux_mode: this.coreOptions.uiConfig?.uxMode,
         ...getWhitelabelAnalyticsProperties(this.coreOptions.uiConfig),
         // AA config
         aa_smart_account_type: this.coreOptions.accountAbstractionConfig?.smartAccountType,
