@@ -28,7 +28,6 @@ import {
 import { createRoot } from "react-dom/client";
 
 import { getLoginModalAnalyticsProperties } from "../utils";
-// import Modal from "./components/Modal";
 import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR } from "./constants";
 import { ThemedContext } from "./context/ThemeContext";
@@ -340,10 +339,8 @@ export class LoginModal {
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
     const { connector, chainNamespace } = params;
-    if (this.callbacks.onExternalWalletLogin) {
-      this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
-    }
-    const externalWalletConfig = this.externalWalletsConfig[params.connector];
+    // track event
+    const externalWalletConfig = this.externalWalletsConfig?.[params.connector];
     this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_EXTERNAL_WALLET_CLICKED, {
       connector,
       wallet_name: externalWalletConfig?.label || connector,
@@ -353,6 +350,9 @@ export class LoginModal {
       chain_namespaces: externalWalletConfig?.chainNamespaces,
       selected_chain_namespace: chainNamespace,
     });
+    if (this.callbacks.onExternalWalletLogin) {
+      this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
+    }
   };
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {

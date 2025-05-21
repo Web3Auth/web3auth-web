@@ -97,7 +97,7 @@ export const ANALYTICS_EVENTS = {
   LOGIN_MODAL_CLOSED: "login_modal_closed",
   LOGIN_MODAL_ALL_EXTERNAL_WALLETS_CLICKED: "login_modal_all_external_wallets_clicked",
   LOGIN_MODAL_SOCIAL_LOGIN_CLICKED: "login_modal_social_login_clicked",
-  LOGIN_MODAL_EXTERNAL_WALLET_CLICKED: "login_modal_other_external_wallet_clicked",
+  LOGIN_MODAL_EXTERNAL_WALLET_CLICKED: "login_modal_external_wallet_clicked",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {
