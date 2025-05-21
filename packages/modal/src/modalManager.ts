@@ -22,6 +22,7 @@ import {
   LOGIN_MODE,
   type LoginMethodConfig,
   type ProjectConfig,
+  sdkVersion,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -75,7 +76,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
     this.analytics.setGlobalProperties({
       dapp_url: window.location.origin,
-      sdk_type: ANALYTICS_SDK_TYPE.WEB_MODAL,
+      sdk_name: ANALYTICS_SDK_TYPE.WEB_MODAL,
+      sdk_version: sdkVersion,
     });
     let trackData: Record<string, unknown> = {};
 

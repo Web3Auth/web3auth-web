@@ -1,15 +1,6 @@
-import { AnalyticsBrowser } from "@segment/analytics-next";
+import { AnalyticsBrowser, type EventProperties, type UserTraits } from "@segment/analytics-next";
 
 import { log } from "./loglevel";
-import { sdkVersion } from "./utils";
-
-type UserTraits = {
-  [key: string]: unknown;
-};
-
-type EventProperties = {
-  [key: string]: unknown;
-};
 
 const SEGMENT_WRITE_KEY = "gGjtk5XxaH2OAIlErcBgydrHpoRZ2hkZ"; // TODO: use the production key
 
@@ -18,7 +9,7 @@ export class Analytics {
 
   private globalProperties: Record<string, unknown> = {};
 
-  private enabled: boolean = false;
+  private enabled: boolean = true;
 
   public init(): void {
     if (this.segment) {
@@ -38,7 +29,7 @@ export class Analytics {
         }
       )
       .then(() => {
-        log.debug("Analytics initialized", { sdkVersion });
+        log.debug("Analytics initialized");
         return true;
       })
       .catch((error) => {
@@ -73,9 +64,8 @@ export class Analytics {
     if (!this.enabled) return;
     try {
       return this.getSegment().track(event, {
-        ...this.globalProperties,
         ...properties,
-        sdk_version: sdkVersion,
+        ...this.globalProperties,
       });
     } catch (error) {
       log.error(`Failed to track event ${event}`, error);
@@ -92,7 +82,6 @@ export class Analytics {
 }
 
 export const ANALYTICS_EVENTS = {
-  SDK_INITIALIZATION_STARTED: "SDK Initialization Started",
   SDK_INITIALIZATION_COMPLETED: "SDK Initialization Completed",
   SDK_INITIALIZATION_FAILED: "SDK Initialization Failed",
   CONNECTION_STARTED: "Connection Started",

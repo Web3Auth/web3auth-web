@@ -34,6 +34,7 @@ import {
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   type ProjectConfig,
+  sdkVersion,
   SMART_ACCOUNT_WALLET_SCOPE,
   type SmartAccountsConfig,
   storageAvailable,
@@ -146,7 +147,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
     this.analytics.setGlobalProperties({
       dapp_url: window.location.origin,
-      sdk_type: ANALYTICS_SDK_TYPE.WEB_NO_MODAL,
+      sdk_name: ANALYTICS_SDK_TYPE.WEB_NO_MODAL,
+      sdk_version: sdkVersion,
     });
     let trackData: Record<string, unknown> = {};
 
