@@ -63,6 +63,7 @@
       "btnGetPrivateKey": "Get Private Key",
       "btnGetBalance": "Get Balance",
       "btnSendEth": "Send ETH",
+      "btnSendAATx": "Send ETH with Smart Account",
       "btnSignEthMessage": "Sign ETH Message",
       "btnGetConnectedChainId": "Get Connected Chain ID",
       "btnAddChain": "Add Chain",

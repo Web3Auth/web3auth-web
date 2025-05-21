@@ -729,6 +729,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           provider: eoaProvider,
           chain: this.currentChain,
           chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
+          useProviderAsTransport: data.connector === WALLET_CONNECTORS.AUTH,
         });
         this.aaProvider = aaProvider;
 

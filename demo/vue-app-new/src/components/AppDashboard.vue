@@ -23,7 +23,7 @@ import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
 import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
-import { getPrivateKey, sendEth, signTransaction as signEthTransaction } from "../services/ethHandlers";
+import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey, signAllTransactions } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
@@ -237,6 +237,14 @@ const onSignPersonalMsg = async () => {
   printToConsole("result", result);
 };
 
+const isSmartAccount = computed(() => {
+  return web3Auth.value?.accountAbstractionProvider?.smartAccount && web3Auth.value?.accountAbstractionProvider?.bundlerClient;
+});
+
+const onSendAATx = async () => {
+  await sendEthWithSmartAccount(web3Auth.value, printToConsole);
+};
+
 // Solana
 const onGetSolPrivateKey = async () => {
   await getSolPrivateKey(provider.value as IProvider, printToConsole);
@@ -360,7 +368,7 @@ const onSwitchChainNamespace = async () => {
           </Button>
         </div>
         <div class="mb-2">
-          <Button :loading="userInfoLoading" block size="xs" pill @click="onGetUserInfo">
+          <Button :loading="userInfoLoading.value" block size="xs" pill @click="onGetUserInfo">
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
 
@@ -385,13 +393,13 @@ const onSwitchChainNamespace = async () => {
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
-          <Button :loading="showWalletUILoading" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
+          <Button :loading="showWalletUILoading.value" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
             {{ $t("app.buttons.btnShowWalletUI") }}
           </Button>
-          <Button :loading="showWalletConnectScannerLoading" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
+          <Button :loading="showWalletConnectScannerLoading.value" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
             {{ $t("app.buttons.btnShowWalletConnectScanner") }}
           </Button>
-          <Button :loading="showCheckoutLoading" block size="xs" pill class="mb-2" @click="() => showCheckout()">
+          <Button :loading="showCheckoutLoading.value" block size="xs" pill class="mb-2" @click="() => showCheckout()">
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
           <!-- <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
@@ -438,6 +446,7 @@ const onSwitchChainNamespace = async () => {
             {{ t("app.buttons.btnSwitchChainNamespace") }} to Solana
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+          <Button v-if="isSmartAccount" block size="xs" pill class="mb-2" @click="onSendAATx">{{ t("app.buttons.btnSendAATx") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
@@ -451,7 +460,7 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="onAuthenticateUser">Get id token</Button>
+          <Button :loading="authenticateUserLoading.value" block size="xs" pill class="mb-2" @click="onAuthenticateUser">Get id token</Button>
         </Card>
 
         <!-- SOLANA -->
@@ -473,7 +482,7 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
-          <Button :loading="authenticateUserLoading" block size="xs" pill class="mb-2" @click="onAuthenticateUser">Get id token</Button>
+          <Button :loading="authenticateUserLoading.value" block size="xs" pill class="mb-2" @click="onAuthenticateUser">Get id token</Button>
         </Card>
       </Card>
       <Card
