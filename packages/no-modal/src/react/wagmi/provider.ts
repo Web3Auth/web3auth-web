@@ -1,5 +1,5 @@
 import { createElement, Fragment, PropsWithChildren, useEffect, useMemo } from "react";
-import { type Chain, defineChain, http, webSocket } from "viem";
+import { type Chain, defineChain } from "viem";
 import {
   Config,
   Connection,
@@ -7,10 +7,12 @@ import {
   createConfig as createWagmiConfig,
   type CreateConfigParameters,
   CreateConnectorFn,
+  http,
   useAccountEffect,
   useConfig as useWagmiConfig,
   useReconnect,
   WagmiProvider as WagmiProviderBase,
+  webSocket,
 } from "wagmi";
 import { injected } from "wagmi/connectors";
 
