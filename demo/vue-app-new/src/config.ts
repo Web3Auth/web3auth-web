@@ -18,7 +18,7 @@ export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => 
 
 export const chainConfigs: Record<ChainNamespaceType, string[]> = {
   [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x61", "0x13882"],
-  [CHAIN_NAMESPACES.SOLANA]: ["0x67", "0x65"],
+  [CHAIN_NAMESPACES.SOLANA]: ["0x65", "0x67"],
   [CHAIN_NAMESPACES.CASPER]: [],
   [CHAIN_NAMESPACES.XRPL]: [],
   [CHAIN_NAMESPACES.OTHER]: [],
@@ -48,7 +48,7 @@ export const initWhiteLabel: WhiteLabelData = {
 };
 
 export const loginProviderOptions = Object.values(AUTH_CONNECTION)
-  .filter((x) => x !== "custom")
+  .filter((x) => x !== "custom" && x !== "authenticator" && x !== "passkeys")
   .map((x) => ({ name: x.replaceAll("_", " "), value: x }));
 
 export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [

@@ -7,9 +7,9 @@ import { chainConfigs, defaultLoginMethod, FormData, initWhiteLabel } from "../c
 export const formDataStore = reactive<FormData>({
   // authMode: "",
   connectors: [],
-  network: WEB3AUTH_NETWORK.TESTNET,
-  chainNamespaces: [CHAIN_NAMESPACES.EIP155],
-  chains: [chainConfigs[CHAIN_NAMESPACES.EIP155][0], chainConfigs[CHAIN_NAMESPACES.EIP155][1]],
+  network: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+  chainNamespaces: [CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA],
+  chains: [chainConfigs[CHAIN_NAMESPACES.EIP155][0], chainConfigs[CHAIN_NAMESPACES.SOLANA][0]],
   defaultChainId: undefined,
   whiteLabel: {
     enable: false,
@@ -21,14 +21,14 @@ export const formDataStore = reactive<FormData>({
   loginMethods: defaultLoginMethod,
   walletPlugin: {
     enable: false,
-    confirmationStrategy: "default",
+    confirmationStrategy: "modal",
   },
   nftCheckoutPlugin: {
     enable: false,
   },
   useAccountAbstractionProvider: false,
   useAAWithExternalWallet: true,
-  smartAccountType: "safe", // default smart account type to safe
+  smartAccountType: "metamask", // default smart account type to safe
   smartAccountChains: [],
   smartAccountChainsConfig: {},
   widget: WIDGET_TYPE.MODAL,
