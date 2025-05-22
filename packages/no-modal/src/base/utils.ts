@@ -8,6 +8,7 @@ import { type Chain } from "viem";
 import { type CustomChainConfig } from "./chain/IChainInterface";
 import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
 import { type UIConfig, type WalletServicesConfig } from "./core/IWeb3Auth";
+import { Web3AuthError } from "./errors";
 import type { ProjectConfig, WalletRegistry } from "./interfaces";
 
 export const isHexStrict = (hex: string): boolean => {
@@ -161,3 +162,13 @@ export const getWalletServicesAnalyticsProperties = (walletServicesConfig?: Wall
 };
 
 export const sdkVersion = process.env.WEB3AUTH_VERSION;
+
+export const getErrorAnalyticsProperties = (error: unknown): { error_message?: string; error_code?: number } => {
+  try {
+    const code = error instanceof Web3AuthError ? error.code : (error as { code?: number })?.code;
+    const message = error instanceof Error ? error.message : (error as { message?: string })?.message || error?.toString();
+    return { error_message: message, error_code: code };
+  } catch {
+    return { error_message: "Unknown error", error_code: undefined };
+  }
+};

@@ -2,7 +2,7 @@ import { AnalyticsBrowser, type EventProperties, type UserTraits } from "@segmen
 
 import { log } from "./loglevel";
 
-const SEGMENT_WRITE_KEY = "gGjtk5XxaH2OAIlErcBgydrHpoRZ2hkZ"; // TODO: use the production key
+const SEGMENT_WRITE_KEY = "rpE5pCcpA6ME2oFu2TbuVydhOXapjHs3"; // TODO: this is dev key, use the production key
 
 export class Analytics {
   private segment: AnalyticsBrowser;
@@ -93,7 +93,7 @@ export const ANALYTICS_EVENTS = {
   MFA_ENABLEMENT_STARTED: "MFA Enablement Started",
   MFA_ENABLEMENT_COMPLETED: "MFA Enablement Completed",
   MFA_ENABLEMENT_FAILED: "MFA Enablement Failed",
-  MFA_MANAGEMENT_STARTED: "MFA Management Started",
+  MFA_MANAGEMENT_SELECTED: "MFA Management Selected",
   MFA_MANAGEMENT_FAILED: "MFA Management Failed",
   LOGIN_MODAL_OPENED: "Login Modal Opened",
   LOGIN_MODAL_CLOSED: "Login Modal Closed",

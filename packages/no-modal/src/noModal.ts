@@ -19,6 +19,7 @@ import {
   type CustomChainConfig,
   fetchProjectConfig,
   getAaAnalyticsProperties,
+  getErrorAnalyticsProperties,
   getWalletServicesAnalyticsProperties,
   getWhitelabelAnalyticsProperties,
   type IBaseProvider,
@@ -220,14 +221,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (error instanceof DOMException && error.name === "AbortError") return;
 
       // track failure event
-      const serializedError = await serializeError(error);
       this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_FAILED, {
         ...trackData,
+        ...getErrorAnalyticsProperties(error),
         duration: Date.now() - startTime,
-        error_code: error instanceof Web3AuthError ? error.code : undefined,
-        error_message: serializedError.message,
       });
       log.error("Failed to initialize modal", error);
+      throw error;
     }
   }
 
@@ -337,11 +337,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       });
       this.once(CONNECTOR_EVENTS.ERRORED, async (err) => {
         // track connection failed event
-        const serializedError = await serializeError(err);
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
           ...eventData,
-          error_code: err instanceof Web3AuthError ? err.code : undefined,
-          error_message: serializedError.message,
+          ...getErrorAnalyticsProperties(err),
           duration: Date.now() - startTime,
         });
         reject(err);
@@ -373,11 +371,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_STARTED, trackData);
       await this.connectedConnector.enableMFA(loginParams);
     } catch (error) {
-      const serializedError = await serializeError(error);
       this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_FAILED, {
         ...trackData,
-        error_code: error instanceof Web3AuthError ? error.code : undefined,
-        error_message: serializedError.message,
+        ...getErrorAnalyticsProperties(error),
       });
       throw error;
     }
@@ -391,14 +387,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const authConnector = this.connectedConnector as AuthConnectorType;
     const trackData = { connector: this.connectedConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
     try {
-      this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_STARTED, trackData);
+      this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_SELECTED, trackData);
       await this.connectedConnector.manageMFA(loginParams);
     } catch (error) {
-      const serializedError = await serializeError(error);
       this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_FAILED, {
         ...trackData,
-        error_code: error instanceof Web3AuthError ? error.code : undefined,
-        error_message: serializedError.message,
+        ...getErrorAnalyticsProperties(error),
       });
       throw error;
     }
@@ -414,11 +408,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
       return identityToken;
     } catch (error) {
-      const serializedError = await serializeError(error);
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_FAILED, {
         ...trackData,
-        error_code: error instanceof Web3AuthError ? error.code : undefined,
-        error_message: serializedError.message,
+        ...getErrorAnalyticsProperties(error),
       });
       throw error;
     }
