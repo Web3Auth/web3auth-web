@@ -1,6 +1,5 @@
 import { isValidAddress } from "@ethereumjs/util";
 import { get } from "@toruslabs/http-helpers";
-import { BigNumber } from "bignumber.js";
 
 import { TypedMessageParams } from "../../../rpc/interfaces";
 import { decGWEIToHexWEI, hexWEIToDecGWEI } from "../../converter";
