@@ -2,7 +2,7 @@ import { AnalyticsBrowser, type EventProperties, type UserTraits } from "@segmen
 
 import { log } from "./loglevel";
 
-const SEGMENT_WRITE_KEY = "rpE5pCcpA6ME2oFu2TbuVydhOXapjHs3"; // TODO: this is dev key, use the production key
+const SEGMENT_WRITE_KEY = "f6LbNqCeVRf512ggdME4b6CyflhF1tsX";
 
 export class Analytics {
   private segment: AnalyticsBrowser;
