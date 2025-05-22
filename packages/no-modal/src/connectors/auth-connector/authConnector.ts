@@ -16,6 +16,7 @@ import {
   SDK_MODE,
   SUPPORTED_KEY_CURVES,
   UX_MODE,
+  version,
 } from "@web3auth/auth";
 import { type default as WsEmbed } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
@@ -444,6 +445,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         uxMode: this.authInstance.options.uxMode,
         whiteLabel: JSON.stringify(this.authInstance.options.whiteLabel),
         loginParams: JSON.stringify(loginParams),
+        version: version.split(".")[0],
       },
       web3AuthClientId: this.coreOptions.clientId,
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
