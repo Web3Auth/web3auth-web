@@ -19,7 +19,9 @@ import {
   type CustomChainConfig,
   fetchProjectConfig,
   getAaAnalyticsProperties,
+  getCaipChainId,
   getErrorAnalyticsProperties,
+  getHostname,
   getWalletServicesAnalyticsProperties,
   getWhitelabelAnalyticsProperties,
   type IBaseProvider,
@@ -304,7 +306,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       eventData = {
         connector: connectorName,
         connector_type: connector.type,
-        chain_id: initialChain.chainId,
+        chain_id: getCaipChainId(initialChain),
         chain_namespace: initialChain.chainNamespace,
         auth_connection: authLoginParams.authConnection,
         auth_connection_id: authLoginParams.authConnectionId,
@@ -320,7 +322,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connector: connectorName,
         connector_type: connector.type,
         is_injected: connector.isInjected,
-        chain_id: initialChain.chainId,
+        chain_id: getCaipChainId(initialChain),
         chain_namespace: initialChain.chainNamespace,
       };
     }
@@ -592,10 +594,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected getInitializationTrackData() {
     try {
+      const defaultChain = this.coreOptions.chains?.find((chain) => chain.chainId === this.coreOptions.defaultChainId);
       return {
-        chain_ids: this.coreOptions.chains?.map((chain) => chain.chainId),
-        chain_rpc_targets: this.coreOptions.chains?.map((chain) => chain.rpcTarget), // TODO: should we collect th
-        default_chain_id: this.coreOptions.defaultChainId,
+        chain_ids: this.coreOptions.chains?.map((chain) => getCaipChainId(chain)),
+        chain_rpc_targets: this.coreOptions.chains?.map((chain) => getHostname(chain.rpcTarget)).filter(Boolean),
+        default_chain_id: defaultChain ? getCaipChainId(defaultChain) : undefined,
         logging_enabled: this.coreOptions.enableLogging,
         storage_type: this.coreOptions.storageType,
         session_time: this.coreOptions.sessionTime,

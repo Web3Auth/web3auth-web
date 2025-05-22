@@ -7,6 +7,7 @@ import { type Chain } from "viem";
 
 import { type CustomChainConfig } from "./chain/IChainInterface";
 import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
+import { SOLANA_CAIP_CHAIN_MAP } from "./constants";
 import { type UIConfig, type WalletServicesConfig } from "./core/IWeb3Auth";
 import { Web3AuthError } from "./errors";
 import type { ProjectConfig, WalletRegistry } from "./interfaces";
@@ -171,4 +172,24 @@ export const getErrorAnalyticsProperties = (error: unknown): { error_message?: s
   } catch {
     return { error_message: "Unknown error", error_code: undefined };
   }
+};
+
+export const getHostname = (url: string) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "";
+  }
+};
+
+export const getCaipChainId = (chain: CustomChainConfig) => {
+  if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    return `${chain.chainNamespace}:${parseInt(chain.chainId, 16)}`;
+  }
+  if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    return `${chain.chainNamespace}:${SOLANA_CAIP_CHAIN_MAP[chain.chainId]}`;
+  }
+
+  // for other chain namespaces, we just return the chainId as is
+  return `${chain.chainNamespace}:${chain.chainId}`;
 };
