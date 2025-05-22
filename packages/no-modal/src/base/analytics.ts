@@ -12,6 +12,9 @@ export class Analytics {
   private enabled: boolean = true;
 
   public init(): void {
+    if (this.isSkipped()) {
+      return;
+    }
     if (this.segment) {
       throw new Error("Analytics already initialized");
     }
@@ -51,6 +54,7 @@ export class Analytics {
 
   public async identify(userId: string, traits?: UserTraits) {
     if (!this.enabled) return;
+    if (this.isSkipped()) return;
     try {
       return this.getSegment().identify(userId, {
         ...traits,
@@ -62,6 +66,7 @@ export class Analytics {
 
   public async track(event: string, properties?: EventProperties) {
     if (!this.enabled) return;
+    if (this.isSkipped()) return;
     try {
       return this.getSegment().track(event, {
         ...properties,
@@ -78,6 +83,21 @@ export class Analytics {
       throw new Error("Analytics not initialized. Call Analytics.init() first.");
     }
     return this.segment;
+  }
+
+  private isSkipped() {
+    const dappOrigin = window.location.origin;
+
+    // skip if the protocol is not http or https
+    if (dappOrigin.startsWith("http://")) {
+      return true;
+    }
+    // skip if dapp contains localhost
+    if (dappOrigin.includes("localhost")) {
+      return true;
+    }
+
+    return false;
   }
 }
 
