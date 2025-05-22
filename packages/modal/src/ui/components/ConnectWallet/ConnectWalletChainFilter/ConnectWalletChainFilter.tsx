@@ -1,3 +1,4 @@
+import { CHAIN_NAMESPACES } from "@web3auth/no-modal";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -12,11 +13,13 @@ function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
   const chains = useMemo(() => {
     const chains = [{ id: "all", name: "modal.allChains", icon: "" }];
     for (const chain of chainNamespace) {
-      chains.push({
-        id: chain,
-        name: chain === "eip155" ? "EVM" : chain,
-        icon: chain === "eip155" ? "ethereum" : chain,
-      });
+      if (chain === CHAIN_NAMESPACES.EIP155 || chain === CHAIN_NAMESPACES.SOLANA) {
+        chains.push({
+          id: chain,
+          name: chain === CHAIN_NAMESPACES.EIP155 ? "EVM" : chain,
+          icon: chain === CHAIN_NAMESPACES.EIP155 ? "ethereum" : chain,
+        });
+      }
     }
     return chains;
   }, [chainNamespace]);
