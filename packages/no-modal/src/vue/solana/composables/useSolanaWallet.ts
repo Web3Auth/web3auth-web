@@ -18,6 +18,9 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   const connection = shallowRef<Connection | null>(null);
 
   const setupWallet = async () => {
+    if (!web3Auth.value?.currentChain?.chainNamespace || web3Auth.value.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+      return;
+    }
     solanaWallet.value = new SolanaWallet(provider.value);
     const result = await solanaWallet.value.requestAccounts();
     if (result?.length > 0) {
@@ -33,9 +36,6 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   watch(
     provider,
     async (newVal) => {
-      if (!web3Auth.value?.currentChain?.chainNamespace || web3Auth.value.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
-        return;
-      }
       if (!newVal && solanaWallet.value) {
         solanaWallet.value = null;
         accounts.value = null;

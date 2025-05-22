@@ -12,11 +12,13 @@ function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
   const chains = useMemo(() => {
     const chains = [{ id: "all", name: "modal.allChains", icon: "" }];
     for (const chain of chainNamespace) {
-      chains.push({
-        id: chain,
-        name: chain === "eip155" ? "EVM" : chain,
-        icon: chain === "eip155" ? "ethereum" : chain,
-      });
+      if (chain === "eip155" || chain === "solana") {
+        chains.push({
+          id: chain,
+          name: chain === "eip155" ? "EVM" : chain,
+          icon: chain === "eip155" ? "ethereum" : chain,
+        });
+      }
     }
     return chains;
   }, [chainNamespace]);
