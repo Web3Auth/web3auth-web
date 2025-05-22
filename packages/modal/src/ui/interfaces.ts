@@ -9,6 +9,7 @@ import type {
   WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 import {
+  type Analytics,
   type AuthLoginParams,
   type BaseConnectorConfig,
   type ChainNamespaceType,
@@ -80,6 +81,7 @@ export interface LoginModalProps extends UIConfig {
   web3authClientId: string;
   web3authNetwork: WEB3AUTH_NETWORK_TYPE;
   authBuildEnv: BUILD_ENV_TYPE;
+  analytics: Analytics;
 }
 
 export interface LoginModalCallbacks {

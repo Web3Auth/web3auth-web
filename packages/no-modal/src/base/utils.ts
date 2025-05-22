@@ -1,24 +1,22 @@
 import { CHAIN_NAMESPACES, cloneDeep } from "@toruslabs/base-controllers";
 import { SIGNER_MAP } from "@toruslabs/constants";
+import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import { get } from "@toruslabs/http-helpers";
-import { BUILD_ENV, BUILD_ENV_TYPE } from "@web3auth/auth";
+import { type BUILD_ENV_TYPE } from "@web3auth/auth";
 import { type Chain } from "viem";
 
-import { CustomChainConfig } from "./chain/IChainInterface";
+import { type CustomChainConfig } from "./chain/IChainInterface";
 import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
+import { SOLANA_CAIP_CHAIN_MAP } from "./constants";
+import { type UIConfig, type WalletServicesConfig } from "./core/IWeb3Auth";
+import { Web3AuthError } from "./errors";
 import type { ProjectConfig, WalletRegistry } from "./interfaces";
 
 export const isHexStrict = (hex: string): boolean => {
   return (typeof hex === "string" || typeof hex === "number") && /^(-)?0x[0-9a-f]*$/i.test(hex);
 };
 
-export const signerHost = (
-  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE = WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-  authBuildEnv: BUILD_ENV_TYPE = BUILD_ENV.PRODUCTION
-): string => {
-  if (authBuildEnv === BUILD_ENV.TESTING || authBuildEnv === BUILD_ENV.DEVELOPMENT) {
-    return "https://test-signer.web3auth.io";
-  }
+export const signerHost = (web3AuthNetwork: WEB3AUTH_NETWORK_TYPE = WEB3AUTH_NETWORK.SAPPHIRE_MAINNET): string => {
   return SIGNER_MAP[web3AuthNetwork];
 };
 
@@ -33,7 +31,7 @@ export const fetchProjectConfig = async ({
   aaProvider?: string;
   authBuildEnv?: BUILD_ENV_TYPE;
 }): Promise<ProjectConfig> => {
-  const url = new URL(`${signerHost(web3AuthNetwork, authBuildEnv)}/api/v2/configuration`);
+  const url = new URL(`${signerHost(web3AuthNetwork)}/api/v2/configuration`);
   url.searchParams.append("project_id", clientId);
   url.searchParams.append("network", web3AuthNetwork);
   if (authBuildEnv) url.searchParams.append("build_env", authBuildEnv);
@@ -111,3 +109,91 @@ export const isBrowser = () => typeof window !== "undefined" && typeof document 
 export const fromViemChain = fromWagmiChain;
 
 export { cloneDeep };
+
+export const getWhitelabelAnalyticsProperties = (uiConfig?: UIConfig) => {
+  return {
+    whitelabel_app_name: uiConfig?.appName,
+    whitelabel_app_url: uiConfig?.appUrl,
+    whitelabel_logo_light_enabled: Boolean(uiConfig?.logoLight),
+    whitelabel_logo_dark_enabled: Boolean(uiConfig?.logoDark),
+    whitelabel_default_language: uiConfig?.defaultLanguage,
+    whitelabel_theme_mode: uiConfig?.mode,
+    whitelabel_use_logo_loader: uiConfig?.useLogoLoader,
+    whitelabel_theme_primary: uiConfig?.theme?.primary,
+    whitelabel_theme_on_primary: uiConfig?.theme?.onPrimary,
+    whitelabel_tnc_link_enabled: Boolean(uiConfig?.tncLink),
+    whitelabel_privacy_policy_enabled: Boolean(uiConfig?.privacyPolicy),
+  };
+};
+
+export const getAaAnalyticsProperties = (accountAbstractionConfig?: AccountAbstractionMultiChainConfig) => {
+  const bundlerHostnames = Array.from(
+    new Set(accountAbstractionConfig?.chains?.map((chain) => getHostname(chain.bundlerConfig?.url)).filter(Boolean))
+  );
+  const paymasterHostnames = Array.from(
+    new Set(accountAbstractionConfig?.chains?.map((chain) => getHostname(chain.paymasterConfig?.url)).filter(Boolean))
+  );
+  return {
+    aa_smart_account_type: accountAbstractionConfig?.smartAccountType,
+    aa_chain_ids: accountAbstractionConfig?.chains?.map((chain) =>
+      getCaipChainId({ chainId: chain.chainId, chainNamespace: CHAIN_NAMESPACES.EIP155 })
+    ),
+    aa_bundler_urls: bundlerHostnames,
+    aa_paymaster_urls: paymasterHostnames,
+    aa_paymaster_enabled: paymasterHostnames.length > 0,
+    aa_paymaster_context_enabled: accountAbstractionConfig?.chains?.some((chain) => chain.bundlerConfig?.paymasterContext),
+    aa_erc20_paymaster_enabled: accountAbstractionConfig?.chains?.some(
+      (chain) => (chain.bundlerConfig?.paymasterContext as { token: string })?.token
+    ),
+  };
+};
+
+export const getWalletServicesAnalyticsProperties = (walletServicesConfig?: WalletServicesConfig) => {
+  return {
+    ws_confirmation_strategy: walletServicesConfig?.confirmationStrategy,
+    ws_enable_key_export: walletServicesConfig?.enableKeyExport,
+    ws_show_widget_button: walletServicesConfig?.whiteLabel?.showWidgetButton,
+    ws_button_position: walletServicesConfig?.whiteLabel?.buttonPosition,
+    ws_hide_nft_display: walletServicesConfig?.whiteLabel?.hideNftDisplay,
+    ws_hide_token_display: walletServicesConfig?.whiteLabel?.hideTokenDisplay,
+    ws_hide_transfers: walletServicesConfig?.whiteLabel?.hideTransfers,
+    ws_hide_topup: walletServicesConfig?.whiteLabel?.hideTopup,
+    ws_hide_receive: walletServicesConfig?.whiteLabel?.hideReceive,
+    ws_hide_swap: walletServicesConfig?.whiteLabel?.hideSwap,
+    ws_hide_show_all_tokens: walletServicesConfig?.whiteLabel?.hideShowAllTokens,
+    ws_hide_wallet_connect: walletServicesConfig?.whiteLabel?.hideWalletConnect,
+    ws_default_portfolio: walletServicesConfig?.whiteLabel?.defaultPortfolio,
+  };
+};
+
+export const sdkVersion = process.env.WEB3AUTH_VERSION;
+
+export const getErrorAnalyticsProperties = (error: unknown): { error_message?: string; error_code?: number } => {
+  try {
+    const code = error instanceof Web3AuthError ? error.code : (error as { code?: number })?.code;
+    const message = error instanceof Error ? error.message : (error as { message?: string })?.message || error?.toString();
+    return { error_message: message, error_code: code };
+  } catch {
+    return { error_message: "Unknown error", error_code: undefined };
+  }
+};
+
+export const getHostname = (url: string) => {
+  try {
+    return new URL(url).hostname;
+  } catch {
+    return "";
+  }
+};
+
+export const getCaipChainId = (chain: Pick<CustomChainConfig, "chainNamespace" | "chainId">) => {
+  if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+    return `${chain.chainNamespace}:${parseInt(chain.chainId, 16)}`;
+  }
+  if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    return `${chain.chainNamespace}:${SOLANA_CAIP_CHAIN_MAP[chain.chainId]}`;
+  }
+
+  // for other chain namespaces, we just return the chainId as is
+  return `${chain.chainNamespace}:${chain.chainId}`;
+};

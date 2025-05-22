@@ -40,6 +40,8 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
 
   private _paymasterClient: PaymasterClient | null;
 
+  private _useProviderAsTransport?: boolean;
+
   constructor({ config, state }: { config: AccountAbstractionProviderConfig; state?: AccountAbstractionProviderState }) {
     super({ config, state });
     this.update({ chainId: config.chain.chainId });
@@ -62,9 +64,10 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
   }
 
   public static getProviderInstance = async (
-    params: AccountAbstractionProviderConfig & { eoaProvider: IProvider }
+    params: AccountAbstractionProviderConfig & { eoaProvider: IProvider; useProviderAsTransport?: boolean }
   ): Promise<AccountAbstractionProvider> => {
     const providerInstance = new AccountAbstractionProvider({ config: params });
+    providerInstance._useProviderAsTransport = params.useProviderAsTransport;
     await providerInstance.setupProvider(params.eoaProvider);
     providerInstance.update({ eoaProvider: params.eoaProvider });
     return providerInstance;
@@ -128,14 +131,14 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     if (paymasterConfig) {
       this._paymasterClient = createPaymasterClient({
         ...paymasterConfig,
-        transport: paymasterConfig.transport ?? http(paymasterConfig.url),
+        transport: this._useProviderAsTransport ? custom(eoaProvider) : (paymasterConfig.transport ?? http(paymasterConfig.url)),
       });
     }
     this._bundlerClient = createBundlerClient({
       ...bundlerConfig,
       account: this.smartAccount,
       client: this._publicClient,
-      transport: bundlerConfig.transport ?? http(bundlerConfig.url),
+      transport: this._useProviderAsTransport ? custom(eoaProvider) : (bundlerConfig.transport ?? http(bundlerConfig.url)),
       paymaster: this._paymasterClient,
     });
 
@@ -186,11 +189,13 @@ export const accountAbstractionProvider = async ({
   chain,
   chains,
   provider,
+  useProviderAsTransport,
 }: {
   accountAbstractionConfig: AccountAbstractionMultiChainConfig;
   chain: CustomChainConfig;
   chains: CustomChainConfig[];
   provider: IProvider;
+  useProviderAsTransport?: boolean;
 }): Promise<AccountAbstractionProvider> => {
   let smartAccountInit: ISmartAccount;
   const { smartAccountType, chains: smartAccountChainsConfig } = accountAbstractionConfig;
@@ -235,6 +240,7 @@ export const accountAbstractionProvider = async ({
     chain,
     chains,
     smartAccountChainsConfig,
+    useProviderAsTransport,
   });
 };
 

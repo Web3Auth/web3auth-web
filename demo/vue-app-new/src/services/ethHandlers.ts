@@ -1,4 +1,4 @@
-import { IProvider, log } from "@web3auth/modal";
+import { IProvider, log, type Web3Auth } from "@web3auth/modal";
 import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import { BrowserProvider, parseEther, Transaction } from "ethers";
@@ -20,6 +20,31 @@ export const sendEth = async (provider: IProvider, uiConsole: (name: string, val
     uiConsole("txRes", txRes.toJSON());
   } catch (error) {
     log.info("error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
+  }
+};
+
+export const sendEthWithSmartAccount = async (web3Auth: Web3Auth | null, uiConsole: (name: string, value: unknown) => void) => {
+  const { smartAccount, bundlerClient } = web3Auth?.accountAbstractionProvider || {};
+  if (!smartAccount || !bundlerClient) {
+    throw new Error("Smart account or bundler client not found");
+  }
+
+  try {
+    const hash = await bundlerClient.sendUserOperation({
+      account: smartAccount,
+      calls: [
+        {
+          to: smartAccount.address,
+          value: parseEther("0.00001"),
+        },
+      ],
+    });
+
+    const { success, userOpHash, reason, receipt } = await bundlerClient.waitForUserOperationReceipt({ hash });
+    uiConsole("result", { userOpHash, txHash: receipt.transactionHash, txStatus: receipt.status, userOpSuccess: success, userOpReason: reason });
+  } catch (error) {
+    log.error("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);
   }
 };

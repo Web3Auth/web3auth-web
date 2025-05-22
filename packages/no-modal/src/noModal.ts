@@ -1,8 +1,14 @@
+import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controllers";
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import { IStorage, MemoryStore, SafeEventEmitter, type SafeEventEmitterProvider, serializeError } from "@web3auth/auth";
+import { cloneDeep, IStorage, MemoryStore, SafeEventEmitter, type SafeEventEmitterProvider, serializeError, UX_MODE } from "@web3auth/auth";
+import { WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
+  Analytics,
+  ANALYTICS_EVENTS,
+  ANALYTICS_SDK_TYPE,
+  AuthLoginParams,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
@@ -12,6 +18,12 @@ import {
   type CONNECTOR_STATUS_TYPE,
   type CustomChainConfig,
   fetchProjectConfig,
+  getAaAnalyticsProperties,
+  getCaipChainId,
+  getErrorAnalyticsProperties,
+  getHostname,
+  getWalletServicesAnalyticsProperties,
+  getWhitelabelAnalyticsProperties,
   type IBaseProvider,
   type IConnector,
   type IdentityTokenInfo,
@@ -29,6 +41,7 @@ import {
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   type ProjectConfig,
+  sdkVersion,
   SMART_ACCOUNT_WALLET_SCOPE,
   type SmartAccountsConfig,
   storageAvailable,
@@ -44,7 +57,7 @@ import {
 } from "./base";
 import { cookieStorage } from "./base/cookie";
 import { deserialize } from "./base/deserialize";
-import { authConnector } from "./connectors/auth-connector";
+import { authConnector, type AuthConnectorType } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
@@ -60,7 +73,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected commonJRPCProvider: CommonJRPCProvider | null = null;
 
-  private plugins: Record<string, IPlugin> = {};
+  protected analytics: Analytics;
+
+  protected plugins: Record<string, IPlugin> = {};
 
   private storage: IStorage;
 
@@ -82,6 +97,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     this.coreOptions = options;
     this.storage = this.getStorageMethod();
+    this.analytics = new Analytics();
 
     this.loadState(initialState);
     if (this.state.idToken && this.coreOptions.ssr) {
@@ -129,49 +145,92 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async init(options?: { signal?: AbortSignal }): Promise<void> {
-    const { signal } = options || {};
-    // get project config
-    let projectConfig: ProjectConfig;
-    try {
-      projectConfig = await fetchProjectConfig({
-        clientId: this.coreOptions.clientId,
-        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-        aaProvider: this.coreOptions.accountAbstractionConfig?.smartAccountType,
-        authBuildEnv: this.coreOptions.authBuildEnv,
-      });
-    } catch (e) {
-      const error = await serializeError(e);
-      log.error("Failed to fetch project configurations", error);
-      throw WalletInitializationError.notReady("failed to fetch project configurations", error);
-    }
-
-    // init config
-    this.initAccountAbstractionConfig(projectConfig);
-    this.initChainsConfig(projectConfig);
-    this.initCachedConnectorAndChainId();
-
-    // setup common JRPC provider
-    await withAbort(() => this.setupCommonJRPCProvider(), signal);
-
-    // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors: newConnectors }) => {
-      const onAbortHandler = () => {
-        if (this.connectors?.length > 0) {
-          this.cleanup();
-        }
-      };
-
-      await withAbort(() => Promise.all(newConnectors.map(this.setupConnector.bind(this))), signal, onAbortHandler);
-
-      // emit connector ready event
-      if (this.status === CONNECTOR_STATUS.NOT_READY) {
-        this.status = CONNECTOR_STATUS.READY;
-        this.emit(CONNECTOR_EVENTS.READY);
-      }
+    // init analytics
+    const startTime = Date.now();
+    this.analytics.init();
+    this.analytics.identify(this.coreOptions.clientId, {
+      web3auth_client_id: this.coreOptions.clientId,
+      web3auth_network: this.coreOptions.web3AuthNetwork,
     });
+    this.analytics.setGlobalProperties({
+      dapp_url: window.location.origin,
+      sdk_name: ANALYTICS_SDK_TYPE.WEB_NO_MODAL,
+      sdk_version: sdkVersion,
+    });
+    let trackData: Record<string, unknown> = {};
 
-    await withAbort(() => this.loadConnectors({ projectConfig }), signal);
-    await withAbort(() => this.initPlugins(), signal);
+    try {
+      const { signal } = options || {};
+      // get project config
+      let projectConfig: ProjectConfig;
+      try {
+        projectConfig = await fetchProjectConfig({
+          clientId: this.coreOptions.clientId,
+          web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+          aaProvider: this.coreOptions.accountAbstractionConfig?.smartAccountType,
+          authBuildEnv: this.coreOptions.authBuildEnv,
+        });
+      } catch (e) {
+        const error = await serializeError(e);
+        log.error("Failed to fetch project configurations", error);
+        throw WalletInitializationError.notReady("failed to fetch project configurations", error);
+      }
+
+      // init config
+      this.initAccountAbstractionConfig(projectConfig);
+      this.initChainsConfig(projectConfig);
+      this.initCachedConnectorAndChainId();
+      this.initUIConfig(projectConfig);
+      this.initWalletServicesConfig(projectConfig);
+      trackData = this.getInitializationTrackData();
+
+      // setup common JRPC provider
+      await withAbort(() => this.setupCommonJRPCProvider(), signal);
+
+      // initialize connectors
+      this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, async ({ connectors: newConnectors }) => {
+        const onAbortHandler = () => {
+          if (this.connectors?.length > 0) {
+            this.cleanup();
+          }
+        };
+
+        await withAbort(() => Promise.all(newConnectors.map(this.setupConnector.bind(this))), signal, onAbortHandler);
+
+        // emit connector ready event
+        if (this.status === CONNECTOR_STATUS.NOT_READY) {
+          this.status = CONNECTOR_STATUS.READY;
+          this.emit(CONNECTOR_EVENTS.READY);
+        }
+      });
+
+      await withAbort(() => this.loadConnectors({ projectConfig }), signal);
+      await withAbort(() => this.initPlugins(), signal);
+
+      // track completion event
+      const authConnector = this.getConnector(WALLET_CONNECTORS.AUTH) as AuthConnectorType;
+      trackData = {
+        ...trackData,
+        connectors: this.connectors.map((connector) => connector.name),
+        plugins: Object.keys(this.plugins),
+        auth_ux_mode: authConnector?.authInstance?.options?.uxMode || this.coreOptions.uiConfig?.uxMode,
+      };
+      this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_COMPLETED, {
+        ...trackData,
+        duration: Date.now() - startTime,
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+
+      // track failure event
+      this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+        duration: Date.now() - startTime,
+      });
+      log.error("Failed to initialize modal", error);
+      throw error;
+    }
   }
 
   // we need to take into account the chainNamespace as for external connectors, same connector name can be used for multiple chain namespaces
@@ -236,15 +295,60 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!connector || !this.commonJRPCProvider)
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
 
+    const initialChain = this.getInitialChainIdForConnector(connector);
+    const finalLoginParams = { ...loginParams, chainId: initialChain.chainId };
+
+    // track connection started event
+    const startTime = Date.now();
+    let eventData: Record<string, unknown>;
+    if (connectorName === WALLET_CONNECTORS.AUTH) {
+      const authLoginParams = loginParams as Partial<AuthLoginParams>;
+      eventData = {
+        connector: connectorName,
+        connector_type: connector.type,
+        chain_id: getCaipChainId(initialChain),
+        chain_namespace: initialChain.chainNamespace,
+        auth_connection: authLoginParams.authConnection,
+        auth_connection_id: authLoginParams.authConnectionId,
+        group_auth_connection_id: authLoginParams.groupedAuthConnectionId,
+        mfa_level: authLoginParams.mfaLevel,
+        wallet_key_enabled: authLoginParams.getWalletKey,
+        extra_login_options_enabled: Boolean(authLoginParams.extraLoginOptions),
+        dapp_share_enabled: Boolean(authLoginParams.dappShare),
+        curve: authLoginParams.curve,
+        auth_dapp_url: authLoginParams.dappUrl,
+        is_sfa: Boolean(authLoginParams.idToken),
+        auth_ux_mode: (connector as AuthConnectorType).authInstance?.options?.uxMode,
+      };
+    } else {
+      eventData = {
+        connector: connectorName,
+        connector_type: connector.type,
+        is_injected: connector.isInjected,
+        chain_id: getCaipChainId(initialChain),
+        chain_namespace: initialChain.chainNamespace,
+      };
+    }
+    this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+
     return new Promise((resolve, reject) => {
       this.once(CONNECTOR_EVENTS.CONNECTED, async (_) => {
+        // track connection completed event
+        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+          ...eventData,
+          duration: Date.now() - startTime,
+        });
         resolve(this.provider);
       });
-      this.once(CONNECTOR_EVENTS.ERRORED, (err) => {
+      this.once(CONNECTOR_EVENTS.ERRORED, async (err) => {
+        // track connection failed event
+        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
+          ...eventData,
+          ...getErrorAnalyticsProperties(err),
+          duration: Date.now() - startTime,
+        });
         reject(err);
       });
-      const initialChain = this.getInitialChainIdForConnector(connector);
-      const finalLoginParams = { ...loginParams, chainId: initialChain.chainId };
       connector.connect(finalLoginParams);
       this.setCurrentChain(initialChain.chainId);
     });
@@ -265,23 +369,64 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this connector.`);
-    return this.connectedConnector.enableMFA(loginParams);
+
+    const authConnector = this.connectedConnector as AuthConnectorType;
+    const trackData = { connector: this.connectedConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
+    try {
+      this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_STARTED, trackData);
+      await this.connectedConnector.enableMFA(loginParams);
+    } catch (error) {
+      this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+      });
+      throw error;
+    }
   }
 
   async manageMFA<T>(loginParams?: T): Promise<void> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this connector.`);
-    return this.connectedConnector.manageMFA(loginParams);
+
+    const authConnector = this.connectedConnector as AuthConnectorType;
+    const trackData = { connector: this.connectedConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
+    try {
+      this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_SELECTED, trackData);
+      await this.connectedConnector.manageMFA(loginParams);
+    } catch (error) {
+      this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+      });
+      throw error;
+    }
   }
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
     if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    return this.connectedConnector.getIdentityToken();
+
+    const trackData = { connector: this.connectedConnector.name };
+    try {
+      this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_STARTED, trackData);
+      const identityToken = await this.connectedConnector.getIdentityToken();
+      this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
+      return identityToken;
+    } catch (error) {
+      this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+      });
+      throw error;
+    }
   }
 
   public getPlugin(name: string): IPlugin | null {
     return this.plugins[name] || null;
+  }
+
+  public setAnalyticsProperties(properties: Record<string, unknown>) {
+    this.analytics.setGlobalProperties(properties);
   }
 
   protected initChainsConfig(projectConfig: ProjectConfig) {
@@ -390,6 +535,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
+  protected initUIConfig(projectConfig: ProjectConfig) {
+    this.coreOptions.uiConfig = deepmerge.all([
+      { mode: "light", uxMode: UX_MODE.POPUP },
+      cloneDeep(projectConfig.whitelabel || {}),
+      this.coreOptions.uiConfig || {},
+    ]);
+  }
+
   protected initCachedConnectorAndChainId() {
     // init chainId using cached chainId if it exists and is valid, otherwise use the defaultChainId or the first chain
     const cachedChainId = this.state.currentChainId;
@@ -398,6 +551,78 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
     const currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
     this.setState({ currentChainId });
+  }
+
+  protected initWalletServicesConfig(projectConfig: ProjectConfig) {
+    const { enableKeyExport, walletUi } = projectConfig;
+    const {
+      enablePortfolioWidget = false,
+      enableTokenDisplay = true,
+      enableNftDisplay = true,
+      enableWalletConnect = true,
+      enableBuyButton = true,
+      enableSendButton = true,
+      enableSwapButton = true,
+      enableReceiveButton = true,
+      enableShowAllTokensButton = true,
+      enableConfirmationModal = false,
+      portfolioWidgetPosition = BUTTON_POSITION.BOTTOM_LEFT,
+      defaultPortfolio = "token",
+    } = walletUi || {};
+    const projectConfigWhiteLabel: WsEmbedParams["whiteLabel"] = {
+      showWidgetButton: enablePortfolioWidget,
+      hideNftDisplay: !enableNftDisplay,
+      hideTokenDisplay: !enableTokenDisplay,
+      hideTransfers: !enableSendButton,
+      hideTopup: !enableBuyButton,
+      hideReceive: !enableReceiveButton,
+      hideSwap: !enableSwapButton,
+      hideShowAllTokens: !enableShowAllTokensButton,
+      hideWalletConnect: !enableWalletConnect,
+      buttonPosition: portfolioWidgetPosition,
+      defaultPortfolio,
+    };
+    const whiteLabel = deepmerge.all([projectConfigWhiteLabel, this.coreOptions.walletServicesConfig?.whiteLabel || {}]);
+    const confirmationStrategy =
+      this.coreOptions.walletServicesConfig?.confirmationStrategy ??
+      (enableConfirmationModal ? CONFIRMATION_STRATEGY.MODAL : CONFIRMATION_STRATEGY.AUTO_APPROVE);
+    const isKeyExportEnabled = this.coreOptions.walletServicesConfig?.enableKeyExport ?? enableKeyExport ?? true;
+    this.coreOptions.walletServicesConfig = {
+      ...this.coreOptions.walletServicesConfig,
+      confirmationStrategy,
+      whiteLabel,
+      enableKeyExport: isKeyExportEnabled,
+    };
+  }
+
+  protected getInitializationTrackData() {
+    try {
+      const defaultChain = this.coreOptions.chains?.find((chain) => chain.chainId === this.coreOptions.defaultChainId);
+      const rpcHostnames = Array.from(new Set(this.coreOptions.chains?.map((chain) => getHostname(chain.rpcTarget)))).filter(Boolean);
+      return {
+        chain_ids: this.coreOptions.chains?.map((chain) => getCaipChainId(chain)),
+        chain_rpc_targets: rpcHostnames,
+        default_chain_id: defaultChain ? getCaipChainId(defaultChain) : undefined,
+        logging_enabled: this.coreOptions.enableLogging,
+        storage_type: this.coreOptions.storageType,
+        session_time: this.coreOptions.sessionTime,
+        sfa_key_enabled: this.coreOptions.useSFAKey,
+        mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
+        private_key_provider_enabled: Boolean(this.coreOptions.privateKeyProvider),
+        ssr_enabled: this.coreOptions.ssr,
+        auth_build_env: this.coreOptions.authBuildEnv,
+        auth_ux_mode: this.coreOptions.uiConfig?.uxMode,
+        auth_mfa_level: this.coreOptions.mfaLevel,
+        auth_mfa_settings: Object.keys(this.coreOptions.mfaSettings || {}),
+        aa_enabled_for_external_wallets: this.coreOptions.accountAbstractionConfig ? this.coreOptions.useAAWithExternalWallet : undefined,
+        ...getWhitelabelAnalyticsProperties(this.coreOptions.uiConfig),
+        ...getAaAnalyticsProperties(this.coreOptions.accountAbstractionConfig),
+        ...getWalletServicesAnalyticsProperties(this.coreOptions.walletServicesConfig),
+      };
+    } catch (error) {
+      log.error("Failed to get initialization track data", error);
+      return {};
+    }
   }
 
   protected async setupCommonJRPCProvider() {
@@ -547,6 +772,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           provider: eoaProvider,
           chain: this.currentChain,
           chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
+          useProviderAsTransport: data.connector === WALLET_CONNECTORS.AUTH,
         });
         this.aaProvider = aaProvider;
 
@@ -627,6 +853,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     connector.on(CONNECTOR_EVENTS.MFA_ENABLED, (isMFAEnabled: boolean) => {
       log.debug("mfa enabled", isMFAEnabled);
+      const authConnector = this.connectedConnector as AuthConnectorType;
+
+      // mfa_enabled event is only emitted when using "popup" ux_mode
+      // TODO: handle mfa_enabled event when using "redirect" ux_mode
+      this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_COMPLETED, {
+        connector: this.connectedConnector.name,
+        auth_ux_mode: authConnector.authInstance?.options?.uxMode,
+        is_mfa_enabled: isMFAEnabled,
+      });
       this.emit(CONNECTOR_EVENTS.MFA_ENABLED, isMFAEnabled);
     });
   }

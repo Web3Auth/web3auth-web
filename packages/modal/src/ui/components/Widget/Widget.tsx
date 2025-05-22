@@ -133,7 +133,7 @@ function Widget(props: WidgetProps) {
         externalWalletsVisibility: flag,
       };
     });
-    if (handleShowExternalWallets) handleShowExternalWallets(modalState.externalWalletsInitialized);
+    if (flag && handleShowExternalWallets) handleShowExternalWallets(modalState.externalWalletsInitialized);
   };
 
   const onCloseModal = () => {
@@ -180,7 +180,8 @@ function Widget(props: WidgetProps) {
       }
 
       // auto connect to MetaMask if not injected to generate QR code URI for mobile connection
-      const mmAvailable = !modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]?.isInjected;
+      const mmAvailable =
+        modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK] && !modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]?.isInjected;
       if (mmAvailable && !modalState.metamaskConnectUri && typeof handleExternalWalletClick === "function") {
         handleExternalWalletClick({ connector: WALLET_CONNECTORS.METAMASK });
       }

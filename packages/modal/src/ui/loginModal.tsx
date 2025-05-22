@@ -4,9 +4,12 @@ import "./css/index.css";
 
 import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
 import {
+  type Analytics,
+  ANALYTICS_EVENTS,
   type BaseConnectorConfig,
   type ChainNamespaceType,
   CONNECTOR_EVENTS,
+  getWhitelabelAnalyticsProperties,
   type IConnectorDataEvent,
   log,
   LOGIN_MODE,
@@ -25,8 +28,10 @@ import {
 } from "@web3auth/no-modal";
 import { createRoot } from "react-dom/client";
 
+import { getLoginModalAnalyticsProperties } from "../utils";
 import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR } from "./constants";
+import { AnalyticsContext } from "./context/AnalyticsContext";
 import { ThemedContext } from "./context/ThemeContext";
 import {
   ExternalWalletEventType,
@@ -74,6 +79,8 @@ export class LoginModal {
 
   private externalWalletsConfig: Record<string, BaseConnectorConfig>;
 
+  private analytics: Analytics;
+
   constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
 
@@ -97,6 +104,7 @@ export class LoginModal {
     this.chainNamespaces = uiConfig.chainNamespaces;
     this.walletRegistry = uiConfig.walletRegistry;
     this.callbacks = callbacks;
+    this.analytics = uiConfig.analytics;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
   }
 
@@ -234,18 +242,20 @@ export class LoginModal {
       const root = createRoot(container);
       root.render(
         <ThemedContext.Provider value={darkState}>
-          <Widget
-            stateListener={this.stateEmitter}
-            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
-            appName={this.uiConfig.appName}
-            chainNamespaces={this.chainNamespaces}
-            walletRegistry={this.walletRegistry}
-            handleShowExternalWallets={this.handleShowExternalWallets}
-            handleExternalWalletClick={this.handleExternalWalletClick}
-            handleSocialLoginClick={this.handleSocialLoginClick}
-            closeModal={this.closeModal}
-            uiConfig={this.uiConfig}
-          />
+          <AnalyticsContext.Provider value={{ analytics: this.analytics }}>
+            <Widget
+              stateListener={this.stateEmitter}
+              appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
+              appName={this.uiConfig.appName}
+              chainNamespaces={this.chainNamespaces}
+              walletRegistry={this.walletRegistry}
+              handleShowExternalWallets={this.handleShowExternalWallets}
+              handleExternalWalletClick={this.handleExternalWalletClick}
+              handleSocialLoginClick={this.handleSocialLoginClick}
+              closeModal={this.closeModal}
+              uiConfig={this.uiConfig}
+            />
+          </AnalyticsContext.Provider>
         </ThemedContext.Provider>
       );
 
@@ -292,6 +302,13 @@ export class LoginModal {
     this.setState({
       modalVisibility: true,
     });
+    this.analytics?.track(ANALYTICS_EVENTS.LOGIN_MODAL_OPENED, {
+      chain_namespaces: this.chainNamespaces,
+      wallet_registry_count: Object.keys(this.walletRegistry?.default).length + Object.keys(this.walletRegistry?.others).length,
+      external_wallet_connectors: Object.keys(this.externalWalletsConfig || {}),
+      ...getWhitelabelAnalyticsProperties(this.uiConfig),
+      ...getLoginModalAnalyticsProperties(this.uiConfig),
+    });
     if (this.callbacks.onModalVisibility) {
       this.callbacks.onModalVisibility(true);
     }
@@ -302,6 +319,7 @@ export class LoginModal {
       modalVisibility: false,
       externalWalletsVisibility: false,
     });
+    this.analytics?.track(ANALYTICS_EVENTS.LOGIN_MODAL_CLOSED);
     if (this.callbacks.onModalVisibility) {
       this.callbacks.onModalVisibility(false);
     }
@@ -330,6 +348,12 @@ export class LoginModal {
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { connector, loginParams } = params;
+    this.analytics?.track(ANALYTICS_EVENTS.SOCIAL_LOGIN_SELECTED, {
+      connector,
+      auth_connection: loginParams.authConnection,
+      auth_connection_id: loginParams.authConnectionId,
+      group_auth_connection_id: loginParams.groupedAuthConnectionId,
+    });
     if (this.callbacks.onSocialLogin) {
       this.callbacks.onSocialLogin({ connector, loginParams });
     }

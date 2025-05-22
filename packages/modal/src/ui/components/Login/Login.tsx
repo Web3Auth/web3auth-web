@@ -1,11 +1,19 @@
 import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
-import { log, type ModalSignInMethodType, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WalletLoginError } from "@web3auth/no-modal";
+import {
+  ANALYTICS_EVENTS,
+  log,
+  type ModalSignInMethodType,
+  type WALLET_CONNECTOR_TYPE,
+  WALLET_CONNECTORS,
+  WalletLoginError,
+} from "@web3auth/no-modal";
 import { MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
+import { AnalyticsContext } from "../../context/AnalyticsContext";
 import { RootContext } from "../../context/RootContext";
 import type { PasswordlessHandler } from "../../handlers/AbstractHandler";
 import { createPasswordlessHandler } from "../../handlers/factory";
@@ -56,6 +64,7 @@ function Login(props: LoginProps) {
 
   const [t] = useTranslation(undefined, { i18n });
   const { bodyState, setBodyState } = useContext(RootContext);
+  const { analytics } = useContext(AnalyticsContext);
 
   const [countryCode, setCountryCode] = useState<string>("");
   const [countryFlag, setCountryFlag] = useState<string>("");
@@ -292,6 +301,10 @@ function Login(props: LoginProps) {
   }, [isSmsPasswordLessLoginVisible]);
 
   const handleConnectWallet = (e: ReactMouseEvent<HTMLButtonElement>) => {
+    analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_LIST_EXPANDED, {
+      total_external_wallets: totalExternalWallets,
+      installed_external_wallets: installedExternalWallets.length,
+    });
     setIsPasswordLessCtaClicked(false);
     e.preventDefault();
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(true);
@@ -330,6 +343,17 @@ function Login(props: LoginProps) {
   };
 
   const handleInstalledWalletClick = (wallet: ExternalButton) => {
+    analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_SELECTED, {
+      connector: wallet.name,
+      wallet_name: wallet.displayName,
+      is_installed: true,
+      is_injected: wallet.hasInjectedWallet,
+      chain_namespaces: wallet.chainNamespaces,
+      has_wallet_connect: wallet.hasWalletConnect,
+      has_install_links: wallet.hasInstallLinks,
+      has_wallet_registry_item: !!wallet.walletRegistryItem,
+      total_external_wallets: totalExternalWallets,
+    });
     // for non-injected Metamask, show QR code to connect
     if (wallet.name === WALLET_CONNECTORS.METAMASK && !wallet.hasInjectedWallet) {
       setBodyState({

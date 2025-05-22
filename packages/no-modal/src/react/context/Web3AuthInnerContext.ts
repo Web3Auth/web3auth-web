@@ -1,6 +1,14 @@
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
-import { CONNECTED_EVENT_DATA, CONNECTOR_EVENTS, CONNECTOR_STATUS, CONNECTOR_STATUS_TYPE, IProvider, WalletInitializationError } from "../../base";
+import {
+  ANALYTICS_INTEGRATION_TYPE,
+  CONNECTED_EVENT_DATA,
+  CONNECTOR_EVENTS,
+  CONNECTOR_STATUS,
+  CONNECTOR_STATUS_TYPE,
+  IProvider,
+  WalletInitializationError,
+} from "../../base";
 import { Web3AuthNoModal } from "../../noModal";
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 
@@ -38,6 +46,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       try {
         setInitError(null);
         setIsInitializing(true);
+        web3Auth.setAnalyticsProperties({
+          integration_type: ANALYTICS_INTEGRATION_TYPE.REACT_HOOKS,
+        });
         await web3Auth.init({ signal: controller.signal });
       } catch (error) {
         setInitError(error as Error);

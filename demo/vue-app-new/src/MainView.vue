@@ -12,8 +12,6 @@ import {
   walletServicesPlugin,
   type AccountAbstractionMultiChainConfig,
   type Web3AuthOptions,
-  WALLET_CONNECTOR_TYPE,
-  ModalConfig,
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
@@ -64,11 +62,11 @@ const options = computed((): Web3AuthOptions => {
 
   // Wallet services settings
   let walletServicesConfig: Web3AuthOptions["walletServicesConfig"] = {
-    walletUrls: {
-      production: {
-        url: "https://develop-wallet.web3auth.io",
-      },
-    },
+    // walletUrls: {
+    //   production: {
+    //     url: "http://localhost:4050",
+    //   },
+    // },
   };
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
