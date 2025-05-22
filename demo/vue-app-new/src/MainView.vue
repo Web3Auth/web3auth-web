@@ -12,6 +12,8 @@ import {
   walletServicesPlugin,
   type AccountAbstractionMultiChainConfig,
   type Web3AuthOptions,
+  type ConnectorsModalConfig,
+  type LoginMethodConfig,
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
@@ -24,7 +26,6 @@ import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
 import { clientIds, NFT_CHECKOUT_CLIENT_ID } from "./config";
-import { FormConfigSettings } from "./interfaces";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
 import { SmartAccountType } from "@toruslabs/ethereum-controllers";
@@ -142,18 +143,30 @@ const options = computed((): Web3AuthOptions => {
 });
 
 const loginMethodsConfig = computed(() => {
-  if (formData.loginProviders.length === 0) return undefined;
+  const customConfig = {
+    email_passwordless: {
+      authConnectionId: `w3a-custom-email-${formData.network.replace("_", "-")}`,
+    },
+    sms_passwordless: {
+      authConnectionId: `w3a-custom-sms-${formData.network.replace("_", "-")}`,
+    },
+  };
+  if (formData.loginProviders.length === 0) return customConfig;
 
   // only show login methods that are configured
-  const config = formData.loginProviders.reduce(
-    (acc, provider) => {
-      acc[provider] = formData.loginMethods[provider];
-      return acc;
-    },
-    {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>
-  );
+  const config = formData.loginProviders.reduce((acc, provider) => {
+    acc[provider] = formData.loginMethods[provider];
+    return acc;
+  }, {} as LoginMethodConfig);
 
-  const loginMethods = JSON.parse(JSON.stringify(config));
+  if (config.email_passwordless) {
+    config.email_passwordless.authConnectionId = `w3a-custom-email-${formData.network.replace("_", "-")}`;
+  }
+  if (config.sms_passwordless) {
+    config.sms_passwordless.authConnectionId = `w3a-custom-sms-${formData.network.replace("_", "-")}`;
+  }
+
+  const loginMethods: LoginMethodConfig = JSON.parse(JSON.stringify(config));
   return loginMethods;
 });
 
@@ -163,7 +176,7 @@ const modalParams = computed(() => {
       label: "auth",
       loginMethods: loginMethodsConfig.value,
     },
-  };
+  } as ConnectorsModalConfig["connectors"];
   return modalConfig;
 });
 
@@ -231,8 +244,8 @@ const configs = computed<Web3AuthContextConfig>(() => {
       <AppHeader />
       <div class="flex flex-col items-center justify-center">
         <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-        <AppSettings />
-        <AppDashboard :chains="options.chains || []" />
+          <AppSettings />
+          <AppDashboard :chains="options.chains || []" />
         </main>
       </div>
     </WagmiProvider>

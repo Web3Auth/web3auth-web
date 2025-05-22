@@ -4,13 +4,12 @@ import {
   ChainNamespaceType,
   CONFIRMATION_STRATEGY,
   type CONFIRMATION_STRATEGY_TYPE,
+  ModalConfig,
   SignTypedDataMessageV4,
   WEB3AUTH_NETWORK,
   WEB3AUTH_NETWORK_TYPE,
   type WidgetType,
 } from "@web3auth/modal";
-
-import { FormConfigSettings } from "./interfaces";
 
 export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
 
@@ -64,7 +63,7 @@ export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
   { name: "Turkish", value: LANGUAGES.tr },
 ];
 
-export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, FormConfigSettings> = loginProviderOptions.reduce(
+export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, ModalConfig> = loginProviderOptions.reduce(
   (acc, curr) => ({
     ...acc,
     [curr.value]: {
@@ -75,9 +74,10 @@ export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, FormConfigSettings
       logoDark: "",
       mainOption: false,
       showOnModal: true,
+      label: "",
     },
   }),
-  {} as Record<AUTH_CONNECTION_TYPE, FormConfigSettings>
+  {} as Record<AUTH_CONNECTION_TYPE, ModalConfig>
 );
 
 export type SmartAccountType = "biconomy" | "safe" | "nexus" | "kernel" | "trust" | "metamask";
@@ -111,7 +111,7 @@ export type FormData = {
   loginProviders: AUTH_CONNECTION_TYPE[];
   showWalletDiscovery: boolean;
   multiInjectedProviderDiscovery: boolean;
-  loginMethods: Record<AUTH_CONNECTION_TYPE, FormConfigSettings>;
+  loginMethods: Record<AUTH_CONNECTION_TYPE, ModalConfig>;
   walletPlugin: {
     enable: boolean;
     confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;
