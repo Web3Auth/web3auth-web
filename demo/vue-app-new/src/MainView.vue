@@ -129,7 +129,7 @@ const options = computed((): Web3AuthOptions => {
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
-    authBuildEnv: BUILD_ENV.TESTING, // Custom build env
+    authBuildEnv: BUILD_ENV.PRODUCTION, // Custom build env
     connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
