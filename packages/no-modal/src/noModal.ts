@@ -612,7 +612,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         private_key_provider_enabled: Boolean(this.coreOptions.privateKeyProvider),
         auth_build_env: this.coreOptions.authBuildEnv,
         auth_ux_mode: this.coreOptions.uiConfig?.uxMode,
-        aa_enabled_for_external_wallets: this.coreOptions.useAAWithExternalWallet,
+        aa_enabled_for_external_wallets: this.coreOptions.accountAbstractionConfig ? this.coreOptions.useAAWithExternalWallet : undefined,
         ...getWhitelabelAnalyticsProperties(this.coreOptions.uiConfig),
         ...getAaAnalyticsProperties(this.coreOptions.accountAbstractionConfig),
         ...getWalletServicesAnalyticsProperties(this.coreOptions.walletServicesConfig),
