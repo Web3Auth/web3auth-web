@@ -23,7 +23,7 @@ import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
 import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
-import { getPrivateKey, sendEth, signTransaction as signEthTransaction } from "../services/ethHandlers";
+import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey, signAllTransactions } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
@@ -237,6 +237,14 @@ const onSignPersonalMsg = async () => {
   printToConsole("result", result);
 };
 
+const isSmartAccount = computed(() => {
+  return web3Auth.value?.accountAbstractionProvider?.smartAccount && web3Auth.value?.accountAbstractionProvider?.bundlerClient;
+});
+
+const onSendAATx = async () => {
+  await sendEthWithSmartAccount(web3Auth.value, printToConsole);
+};
+
 // Solana
 const onGetSolPrivateKey = async () => {
   await getSolPrivateKey(provider.value as IProvider, printToConsole);
@@ -438,6 +446,7 @@ const onSwitchChainNamespace = async () => {
             {{ t("app.buttons.btnSwitchChainNamespace") }} to Solana
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+          <Button v-if="isSmartAccount" block size="xs" pill class="mb-2" @click="onSendAATx">{{ t("app.buttons.btnSendAATx") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>

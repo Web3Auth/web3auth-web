@@ -1,4 +1,5 @@
 import {
+  ANALYTICS_INTEGRATION_TYPE,
   type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
@@ -46,6 +47,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       try {
         setInitError(null);
         setIsInitializing(true);
+        web3Auth.setAnalyticsProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.REACT_HOOKS });
         await web3Auth.init({ signal: controller.signal });
       } catch (error) {
         setInitError(error as Error);

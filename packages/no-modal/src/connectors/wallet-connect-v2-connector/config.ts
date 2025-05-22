@@ -1,6 +1,6 @@
 import type { EngineTypes, ProposalTypes } from "@walletconnect/types";
 
-import { CHAIN_NAMESPACES, CustomChainConfig } from "../../base";
+import { CHAIN_NAMESPACES, CustomChainConfig, SOLANA_CAIP_CHAIN_MAP } from "../../base";
 import { getSiteIcon, getSiteName } from "../utils";
 import { IConnectorSettings } from "./interface";
 
@@ -30,12 +30,6 @@ export enum DEFAULT_SOLANA_EVENTS {
   SOL_CHAIN_CHANGED = "chainChanged",
   SOL_ACCOUNTS_CHANGED = "accountsChanged",
 }
-
-export const SOLANA_CAIP_CHAIN_MAP: Record<string, string> = {
-  "0x65": "5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp",
-  "0x66": "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
-  "0x67": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
-};
 
 /**
  * Gets site metadata and returns it

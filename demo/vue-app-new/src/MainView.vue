@@ -12,8 +12,6 @@ import {
   walletServicesPlugin,
   type AccountAbstractionMultiChainConfig,
   type Web3AuthOptions,
-  WALLET_CONNECTOR_TYPE,
-  ModalConfig,
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";

@@ -1,4 +1,5 @@
 import {
+  ANALYTICS_INTEGRATION_TYPE,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
@@ -55,6 +56,7 @@ export const Web3AuthProvider = defineComponent({
         resetHookState();
         const { web3AuthOptions } = newConfig;
         const web3AuthInstance = new Web3Auth(web3AuthOptions);
+        web3AuthInstance.setAnalyticsProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.VUE_COMPOSABLES });
         web3Auth.value = web3AuthInstance;
       },
       { immediate: true }

@@ -138,6 +138,8 @@ export const WagmiProvider = defineComponent({
     const finalConfig = shallowRef<Config>(defaultWagmiConfig);
     const configKey = ref<string>(randomId());
 
+    web3Auth.value?.setAnalyticsProperties({ wagmi_enabled: true });
+
     const defineWagmiConfig = () => {
       const configParams: CreateConfigParameters = {
         ssr: true,

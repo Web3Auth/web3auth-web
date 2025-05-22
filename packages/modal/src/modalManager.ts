@@ -1,6 +1,9 @@
 import { AuthConnectionConfigItem, serializeError } from "@web3auth/auth";
 import {
+  ANALYTICS_EVENTS,
+  ANALYTICS_SDK_TYPE,
   type AUTH_CONNECTION_TYPE,
+  type AuthConnectorType,
   type AuthLoginParams,
   type BaseConnectorConfig,
   type ChainNamespaceType,
@@ -12,6 +15,7 @@ import {
   CONNECTOR_STATUS,
   fetchProjectConfig,
   fetchWalletRegistry,
+  getErrorAnalyticsProperties,
   type IConnector,
   type IProvider,
   type IWeb3AuthCoreOptions,
@@ -20,6 +24,7 @@ import {
   LOGIN_MODE,
   type LoginMethodConfig,
   type ProjectConfig,
+  sdkVersion,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -63,57 +68,100 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   public async init(options?: { signal?: AbortSignal }): Promise<void> {
-    const { signal } = options || {};
-
-    super.checkInitRequirements();
-    // get project config and wallet registry
-    const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
-
-    // init config
-    this.initUIConfig(projectConfig);
-    super.initAccountAbstractionConfig(projectConfig);
-    super.initChainsConfig(projectConfig);
-    super.initCachedConnectorAndChainId();
-
-    // init login modal
-    const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
-    this.loginModal = new LoginModal(
-      {
-        ...this.options.uiConfig,
-        connectorListener: this,
-        web3authClientId: this.options.clientId,
-        web3authNetwork: this.options.web3AuthNetwork,
-        authBuildEnv: this.options.authBuildEnv,
-        chainNamespaces: this.getChainNamespaces(),
-        walletRegistry: filteredWalletRegistry,
-      },
-      {
-        onInitExternalWallets: this.onInitExternalWallets,
-        onSocialLogin: this.onSocialLogin,
-        onExternalWalletLogin: this.onExternalWalletLogin,
-        onModalVisibility: this.onModalVisibility,
-      }
-    );
-    await withAbort(() => this.loginModal.initModal(), signal);
-
-    // setup common JRPC provider
-    await withAbort(() => this.setupCommonJRPCProvider(), signal);
-
-    // initialize connectors
-    this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) => {
-      const onAbortHandler = () => {
-        log.debug("init aborted");
-        if (this.connectors?.length > 0) {
-          super.cleanup();
-        }
-      };
-      withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
+    // init analytics
+    const startTime = Date.now();
+    this.analytics.init();
+    this.analytics.identify(this.options.clientId, {
+      web3auth_client_id: this.options.clientId,
+      web3auth_network: this.options.web3AuthNetwork,
     });
+    this.analytics.setGlobalProperties({
+      dapp_url: window.location.origin,
+      sdk_name: ANALYTICS_SDK_TYPE.WEB_MODAL,
+      sdk_version: sdkVersion,
+    });
+    let trackData: Record<string, unknown> = {};
 
-    await withAbort(() => super.loadConnectors({ projectConfig, modalMode: true }), signal);
+    try {
+      const { signal } = options || {};
 
-    // initialize plugins
-    await withAbort(() => super.initPlugins(), signal);
+      super.checkInitRequirements();
+      // get project config and wallet registry
+      const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
+
+      // init config
+      this.initUIConfig(projectConfig);
+      super.initAccountAbstractionConfig(projectConfig);
+      super.initChainsConfig(projectConfig);
+      super.initCachedConnectorAndChainId();
+      super.initWalletServicesConfig(projectConfig);
+      trackData = this.getInitializationTrackData();
+
+      // init login modal
+      const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
+      this.loginModal = new LoginModal(
+        {
+          ...this.options.uiConfig,
+          connectorListener: this,
+          web3authClientId: this.options.clientId,
+          web3authNetwork: this.options.web3AuthNetwork,
+          authBuildEnv: this.options.authBuildEnv,
+          chainNamespaces: this.getChainNamespaces(),
+          walletRegistry: filteredWalletRegistry,
+          analytics: this.analytics,
+        },
+        {
+          onInitExternalWallets: this.onInitExternalWallets,
+          onSocialLogin: this.onSocialLogin,
+          onExternalWalletLogin: this.onExternalWalletLogin,
+          onModalVisibility: this.onModalVisibility,
+        }
+      );
+      await withAbort(() => this.loginModal.initModal(), signal);
+
+      // setup common JRPC provider
+      await withAbort(() => this.setupCommonJRPCProvider(), signal);
+
+      // initialize connectors
+      this.on(CONNECTOR_EVENTS.CONNECTORS_UPDATED, ({ connectors: newConnectors }) => {
+        const onAbortHandler = () => {
+          log.debug("init aborted");
+          if (this.connectors?.length > 0) {
+            super.cleanup();
+          }
+        };
+        withAbort(() => this.initConnectors({ connectors: newConnectors, projectConfig, disabledExternalWallets }), signal, onAbortHandler);
+      });
+
+      await withAbort(() => super.loadConnectors({ projectConfig, modalMode: true }), signal);
+
+      // initialize plugins
+      await withAbort(() => super.initPlugins(), signal);
+
+      // track completion event
+      const authConnector = this.getConnector(WALLET_CONNECTORS.AUTH) as AuthConnectorType;
+      trackData = {
+        ...trackData,
+        connectors: this.connectors.map((connector) => connector.name),
+        plugins: Object.keys(this.plugins),
+        auth_ux_mode: authConnector?.authInstance?.options?.uxMode || this.coreOptions.uiConfig?.uxMode,
+      };
+      this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_COMPLETED, {
+        ...trackData,
+        duration: Date.now() - startTime,
+      });
+    } catch (error) {
+      if (error instanceof DOMException && error.name === "AbortError") return;
+
+      // track failure event
+      this.analytics.track(ANALYTICS_EVENTS.SDK_INITIALIZATION_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+        duration: Date.now() - startTime,
+      });
+      log.error("Failed to initialize modal", error);
+      throw error;
+    }
   }
 
   public async connect(): Promise<IProvider | null> {
@@ -149,6 +197,52 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.once(CONNECTOR_EVENTS.ERRORED, handleError);
       this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
     });
+  }
+
+  protected initUIConfig(projectConfig: ProjectConfig) {
+    super.initUIConfig(projectConfig);
+    this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
+    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
+    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
+    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig, {
+      arrayMerge: (_, sourceArray) => sourceArray,
+    });
+
+    // merge login methods order from project config and user config, with user config taking precedence
+    const defaultAuthConnections = projectConfig.embeddedWalletAuth.filter((x) => x.isDefault).map((x) => x.authConnection);
+    const mergedAuthConnections = [...(this.options.uiConfig.loginMethodsOrder || []), ...defaultAuthConnections];
+    const loginMethodsOrder = [];
+    const authConnectionSet = new Set();
+    for (const authConnection of mergedAuthConnections) {
+      if (authConnectionSet.has(authConnection)) continue;
+      authConnectionSet.add(authConnection);
+      loginMethodsOrder.push(authConnection);
+    }
+    this.options.uiConfig.loginMethodsOrder = loginMethodsOrder;
+  }
+
+  protected getInitializationTrackData(): Record<string, unknown> {
+    return {
+      ...super.getInitializationTrackData(),
+      modal_hide_wallet_discovery: this.modalConfig?.hideWalletDiscovery,
+      modal_connectors: Object.keys(this.modalConfig?.connectors || {}),
+      modal_auth_connector_login_methods: Object.keys(this.modalConfig?.connectors?.[WALLET_CONNECTORS.AUTH]?.loginMethods || {}),
+      // UI config
+      ui_login_methods_order: this.options.uiConfig?.loginMethodsOrder,
+      ui_modal_z_index: this.options.uiConfig?.modalZIndex,
+      ui_display_errors_on_modal: this.options.uiConfig?.displayErrorsOnModal,
+      ui_login_grid_col: this.options.uiConfig?.loginGridCol,
+      ui_primary_button: this.options.uiConfig?.primaryButton,
+      ui_modal_widget_type: this.options.uiConfig?.widgetType,
+      ui_modal_target_id_used: Boolean(this.options.uiConfig?.targetId),
+      ui_modal_logo_alignment: this.options.uiConfig?.logoAlignment,
+      ui_modal_border_radius_type: this.options.uiConfig?.borderRadiusType,
+      ui_modal_button_radius_type: this.options.uiConfig?.buttonRadiusType,
+      ui_modal_sign_in_methods: this.options.uiConfig?.signInMethods,
+      ui_modal_add_previous_login_hint: this.options.uiConfig?.addPreviousLoginHint,
+      ui_modal_display_installed_external_wallets: this.options.uiConfig?.displayInstalledExternalWallets,
+      ui_modal_display_external_wallets_count: this.options.uiConfig?.displayExternalWalletsCount,
+    };
   }
 
   private filterWalletRegistry(
@@ -207,27 +301,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
     }
     return { projectConfig, walletRegistry };
-  }
-
-  private initUIConfig(projectConfig: ProjectConfig) {
-    this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
-    if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
-    if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
-    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig, {
-      arrayMerge: (_, sourceArray) => sourceArray,
-    });
-
-    // merge login methods order from project config and user config, with user config taking precedence
-    const defaultAuthConnections = projectConfig.embeddedWalletAuth.filter((x) => x.isDefault).map((x) => x.authConnection);
-    const mergedAuthConnections = [...(this.options.uiConfig.loginMethodsOrder || []), ...defaultAuthConnections];
-    const loginMethodsOrder = [];
-    const authConnectionSet = new Set();
-    for (const authConnection of mergedAuthConnections) {
-      if (authConnectionSet.has(authConnection)) continue;
-      authConnectionSet.add(authConnection);
-      loginMethodsOrder.push(authConnection);
-    }
-    this.options.uiConfig.loginMethodsOrder = loginMethodsOrder;
   }
 
   private async initConnectors({
