@@ -7,7 +7,7 @@ import { Web3AuthProvider } from "@web3auth/modal/react";
 import { WagmiProvider } from "@web3auth/modal/react/wagmi";
 
 const queryClient = new QueryClient();
-const clientId = "BKZDJP0ouZP0PtfQYssMiezINbUwnIthw6ClTtTICvh0MCRgAxi5GJbHKH9cjM6xyWxe73c6c94ASCTxbGNLUt8";
+const clientId = "BHgArYmWwSeq21czpcarYh0EVq2WWOzflX-NTK-tY1-1pauPzHKRRLgpABkmYiIV_og9jAvoIxQ8L3Smrwe04Lw";
 
 const web3authConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
@@ -15,16 +15,20 @@ const web3authConfig: Web3AuthContextConfig = {
     web3AuthNetwork: "sapphire_devnet",
     clientId: clientId,
     authBuildEnv: "testing",
-    ssr: true
+    ssr: true,
   },
 };
-export default function Provider({ children, web3authInitialState }: { children: React.ReactNode, web3authInitialState: IWeb3AuthState | undefined }) {
+export default function Provider({
+  children,
+  web3authInitialState,
+}: {
+  children: React.ReactNode;
+  web3authInitialState: IWeb3AuthState | undefined;
+}) {
   return (
     <Web3AuthProvider config={web3authConfig} initialState={web3authInitialState}>
       <QueryClientProvider client={queryClient}>
-        <WagmiProvider>
-          {children}
-        </WagmiProvider>
+        <WagmiProvider>{children}</WagmiProvider>
       </QueryClientProvider>
     </Web3AuthProvider>
   );

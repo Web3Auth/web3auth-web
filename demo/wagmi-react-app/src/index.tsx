@@ -9,7 +9,7 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 
 const queryClient = new QueryClient();
-const clientId = "BKZDJP0ouZP0PtfQYssMiezINbUwnIthw6ClTtTICvh0MCRgAxi5GJbHKH9cjM6xyWxe73c6c94ASCTxbGNLUt8";
+const clientId = "BHgArYmWwSeq21czpcarYh0EVq2WWOzflX-NTK-tY1-1pauPzHKRRLgpABkmYiIV_og9jAvoIxQ8L3Smrwe04Lw";
 
 const web3authConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
