@@ -434,7 +434,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       authConnectionId: providerConfig.authConnectionId,
       clientId: providerConfig.clientId || jwtParams.client_id,
       groupedAuthConnectionId: providerConfig.groupedAuthConnectionId,
-      redirect_uri: `${this.authInstance.baseUrl}/auth`,
+      redirect_uri: `${this.authInstance.options.sdkUrl}/auth`,
       jwtParams,
       customState: {
         nonce,
