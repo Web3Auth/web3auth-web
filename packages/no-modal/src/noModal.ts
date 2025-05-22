@@ -595,9 +595,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected getInitializationTrackData() {
     try {
       const defaultChain = this.coreOptions.chains?.find((chain) => chain.chainId === this.coreOptions.defaultChainId);
+      const rpcHostnames = Array.from(new Set(this.coreOptions.chains?.map((chain) => getHostname(chain.rpcTarget)))).filter(Boolean);
       return {
         chain_ids: this.coreOptions.chains?.map((chain) => getCaipChainId(chain)),
-        chain_rpc_targets: this.coreOptions.chains?.map((chain) => getHostname(chain.rpcTarget)).filter(Boolean),
+        chain_rpc_targets: rpcHostnames,
         default_chain_id: defaultChain ? getCaipChainId(defaultChain) : undefined,
         logging_enabled: this.coreOptions.enableLogging,
         storage_type: this.coreOptions.storageType,

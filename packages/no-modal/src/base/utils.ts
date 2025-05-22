@@ -133,10 +133,20 @@ export const getWhitelabelAnalyticsProperties = (uiConfig?: UIConfig) => {
 };
 
 export const getAaAnalyticsProperties = (accountAbstractionConfig?: AccountAbstractionMultiChainConfig) => {
+  const bundlerHostnames = Array.from(
+    new Set(accountAbstractionConfig?.chains?.map((chain) => getHostname(chain.bundlerConfig?.url)).filter(Boolean))
+  );
+  const paymasterHostnames = Array.from(
+    new Set(accountAbstractionConfig?.chains?.map((chain) => getHostname(chain.paymasterConfig?.url)).filter(Boolean))
+  );
   return {
     aa_smart_account_type: accountAbstractionConfig?.smartAccountType,
-    aa_chain_ids: accountAbstractionConfig?.chains?.map((chain) => chain.chainId),
-    aa_paymaster_enabled: accountAbstractionConfig?.chains?.some((chain) => chain.paymasterConfig),
+    aa_chain_ids: accountAbstractionConfig?.chains?.map((chain) =>
+      getCaipChainId({ chainId: chain.chainId, chainNamespace: CHAIN_NAMESPACES.EIP155 })
+    ),
+    aa_bundler_urls: bundlerHostnames,
+    aa_paymaster_urls: paymasterHostnames,
+    aa_paymaster_enabled: paymasterHostnames.length > 0,
     aa_paymaster_context_enabled: accountAbstractionConfig?.chains?.some((chain) => chain.bundlerConfig?.paymasterContext),
     aa_erc20_paymaster_enabled: accountAbstractionConfig?.chains?.some(
       (chain) => (chain.bundlerConfig?.paymasterContext as { token: string })?.token
@@ -182,7 +192,7 @@ export const getHostname = (url: string) => {
   }
 };
 
-export const getCaipChainId = (chain: CustomChainConfig) => {
+export const getCaipChainId = (chain: Pick<CustomChainConfig, "chainNamespace" | "chainId">) => {
   if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return `${chain.chainNamespace}:${parseInt(chain.chainId, 16)}`;
   }
