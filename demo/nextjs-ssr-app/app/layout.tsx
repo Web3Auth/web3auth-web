@@ -5,7 +5,6 @@ import { Inter } from "next/font/google";
 import Provider from "@/components/provider";
 import { cookieToWeb3AuthState } from "@web3auth/modal";
 import { headers } from "next/headers";
-import { cookieToInitialState } from "wagmi";
 
 const inter = Inter({ subsets: ["latin"] });
 
