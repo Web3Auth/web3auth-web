@@ -97,9 +97,9 @@ export const ANALYTICS_EVENTS = {
   MFA_MANAGEMENT_FAILED: "MFA Management Failed",
   LOGIN_MODAL_OPENED: "Login Modal Opened",
   LOGIN_MODAL_CLOSED: "Login Modal Closed",
-  EXTERNAL_WALLET_LIST_EXPANDED: "External Wallets List Expanded",
   SOCIAL_LOGIN_SELECTED: "Social Login Selected",
   EXTERNAL_WALLET_SELECTED: "External Wallet Selected",
+  EXTERNAL_WALLET_LIST_EXPANDED: "External Wallet List Expanded",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {

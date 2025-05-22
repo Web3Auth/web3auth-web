@@ -1,12 +1,13 @@
 import { CHAIN_NAMESPACES, cloneDeep } from "@toruslabs/base-controllers";
 import { SIGNER_MAP } from "@toruslabs/constants";
+import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import { get } from "@toruslabs/http-helpers";
-import { BUILD_ENV, BUILD_ENV_TYPE } from "@web3auth/auth";
+import { BUILD_ENV, type BUILD_ENV_TYPE } from "@web3auth/auth";
 import { type Chain } from "viem";
 
 import { type CustomChainConfig } from "./chain/IChainInterface";
 import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
-import { type UIConfig } from "./core/IWeb3Auth";
+import { type UIConfig, type WalletServicesConfig } from "./core/IWeb3Auth";
 import type { ProjectConfig, WalletRegistry } from "./interfaces";
 
 export const isHexStrict = (hex: string): boolean => {
@@ -126,6 +127,36 @@ export const getWhitelabelAnalyticsProperties = (uiConfig?: UIConfig) => {
     whitelabel_theme_on_primary: uiConfig?.theme?.onPrimary,
     whitelabel_tnc_link_enabled: Boolean(uiConfig?.tncLink),
     whitelabel_privacy_policy_enabled: Boolean(uiConfig?.privacyPolicy),
+  };
+};
+
+export const getAaAnalyticsProperties = (accountAbstractionConfig?: AccountAbstractionMultiChainConfig) => {
+  return {
+    aa_smart_account_type: accountAbstractionConfig?.smartAccountType,
+    aa_chain_ids: accountAbstractionConfig?.chains?.map((chain) => chain.chainId),
+    aa_paymaster_enabled: accountAbstractionConfig?.chains?.some((chain) => chain.paymasterConfig),
+    aa_paymaster_context_enabled: accountAbstractionConfig?.chains?.some((chain) => chain.bundlerConfig?.paymasterContext),
+    aa_erc20_paymaster_enabled: accountAbstractionConfig?.chains?.some(
+      (chain) => (chain.bundlerConfig?.paymasterContext as { token: string })?.token
+    ),
+  };
+};
+
+export const getWalletServicesAnalyticsProperties = (walletServicesConfig?: WalletServicesConfig) => {
+  return {
+    ws_confirmation_strategy: walletServicesConfig?.confirmationStrategy,
+    ws_enable_key_export: walletServicesConfig?.enableKeyExport,
+    ws_show_widget_button: walletServicesConfig?.whiteLabel?.showWidgetButton,
+    ws_button_position: walletServicesConfig?.whiteLabel?.buttonPosition,
+    ws_hide_nft_display: walletServicesConfig?.whiteLabel?.hideNftDisplay,
+    ws_hide_token_display: walletServicesConfig?.whiteLabel?.hideTokenDisplay,
+    ws_hide_transfers: walletServicesConfig?.whiteLabel?.hideTransfers,
+    ws_hide_topup: walletServicesConfig?.whiteLabel?.hideTopup,
+    ws_hide_receive: walletServicesConfig?.whiteLabel?.hideReceive,
+    ws_hide_swap: walletServicesConfig?.whiteLabel?.hideSwap,
+    ws_hide_show_all_tokens: walletServicesConfig?.whiteLabel?.hideShowAllTokens,
+    ws_hide_wallet_connect: walletServicesConfig?.whiteLabel?.hideWalletConnect,
+    ws_default_portfolio: walletServicesConfig?.whiteLabel?.defaultPortfolio,
   };
 };
 

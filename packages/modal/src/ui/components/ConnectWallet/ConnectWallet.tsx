@@ -149,7 +149,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       has_wallet_connect: button.hasWalletConnect,
       has_install_links: button.hasInstallLinks,
       has_wallet_registry_item: !!button.walletRegistryItem,
-      total_external_wallets: totalExternalWalletsCount,
+      total_external_wallets: allUniqueButtons.length,
     });
 
     // show chain namespace selector if the button is an injected connector with multiple chain namespaces

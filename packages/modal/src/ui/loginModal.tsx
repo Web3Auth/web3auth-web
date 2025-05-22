@@ -302,7 +302,7 @@ export class LoginModal {
     this.setState({
       modalVisibility: true,
     });
-    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_OPENED, {
+    this.analytics?.track(ANALYTICS_EVENTS.LOGIN_MODAL_OPENED, {
       chain_namespaces: this.chainNamespaces,
       wallet_registry_count: Object.keys(this.walletRegistry?.default).length + Object.keys(this.walletRegistry?.others).length,
       external_wallet_connectors: Object.keys(this.externalWalletsConfig || {}),
@@ -319,7 +319,7 @@ export class LoginModal {
       modalVisibility: false,
       externalWalletsVisibility: false,
     });
-    this.analytics.track(ANALYTICS_EVENTS.LOGIN_MODAL_CLOSED);
+    this.analytics?.track(ANALYTICS_EVENTS.LOGIN_MODAL_CLOSED);
     if (this.callbacks.onModalVisibility) {
       this.callbacks.onModalVisibility(false);
     }
@@ -340,7 +340,6 @@ export class LoginModal {
   private handleExternalWalletClick = (params: ExternalWalletEventType) => {
     log.info("external wallet clicked", params);
     const { connector, chainNamespace } = params;
-    // track event
     if (this.callbacks.onExternalWalletLogin) {
       this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
     }
@@ -349,7 +348,7 @@ export class LoginModal {
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { connector, loginParams } = params;
-    this.analytics.track(ANALYTICS_EVENTS.SOCIAL_LOGIN_SELECTED, {
+    this.analytics?.track(ANALYTICS_EVENTS.SOCIAL_LOGIN_SELECTED, {
       connector,
       auth_connection: loginParams.authConnection,
       auth_connection_id: loginParams.authConnectionId,

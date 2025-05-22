@@ -18,6 +18,8 @@ import {
   type CONNECTOR_STATUS_TYPE,
   type CustomChainConfig,
   fetchProjectConfig,
+  getAaAnalyticsProperties,
+  getWalletServicesAnalyticsProperties,
   getWhitelabelAnalyticsProperties,
   type IBaseProvider,
   type IConnector,
@@ -175,6 +177,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.initAccountAbstractionConfig(projectConfig);
       this.initChainsConfig(projectConfig);
       this.initCachedConnectorAndChainId();
+      this.initUIConfig(projectConfig);
       this.initWalletServicesConfig(projectConfig);
       trackData = this.getInitializationTrackData();
 
@@ -310,6 +313,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         curve: authLoginParams.curve,
         dapp_url: authLoginParams.dappUrl,
         is_sfa: Boolean(authLoginParams.idToken),
+        auth_ux_mode: (connector as AuthConnectorType).authInstance?.options?.uxMode,
       };
     } else {
       eventData = {
@@ -364,7 +368,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this connector.`);
 
     const authConnector = this.connectedConnector as AuthConnectorType;
-    const trackData = { connector: this.connectedConnector.name, ux_mode: authConnector.authInstance?.options?.uxMode };
+    const trackData = { connector: this.connectedConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
     try {
       this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_STARTED, trackData);
       await this.connectedConnector.enableMFA(loginParams);
@@ -385,7 +389,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this connector.`);
 
     const authConnector = this.connectedConnector as AuthConnectorType;
-    const trackData = { connector: this.connectedConnector.name, ux_mode: authConnector.authInstance?.options?.uxMode };
+    const trackData = { connector: this.connectedConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
     try {
       this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_STARTED, trackData);
       await this.connectedConnector.manageMFA(loginParams);
@@ -608,30 +612,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         private_key_provider_enabled: Boolean(this.coreOptions.privateKeyProvider),
         auth_build_env: this.coreOptions.authBuildEnv,
         auth_ux_mode: this.coreOptions.uiConfig?.uxMode,
-        ...getWhitelabelAnalyticsProperties(this.coreOptions.uiConfig),
-        // AA config
-        aa_smart_account_type: this.coreOptions.accountAbstractionConfig?.smartAccountType,
-        aa_chain_ids: this.coreOptions.accountAbstractionConfig?.chains?.map((chain) => chain.chainId),
-        aa_paymaster_enabled: this.coreOptions.accountAbstractionConfig?.chains?.some((chain) => chain.paymasterConfig),
-        aa_paymaster_context_enabled: this.coreOptions.accountAbstractionConfig?.chains?.some((chain) => chain.bundlerConfig?.paymasterContext),
-        aa_erc20_paymaster_enabled: this.coreOptions.accountAbstractionConfig?.chains?.some(
-          (chain) => (chain.bundlerConfig?.paymasterContext as { token: string })?.token
-        ),
         aa_enabled_for_external_wallets: this.coreOptions.useAAWithExternalWallet,
-        // Wallet Services config
-        ws_confirmation_strategy: this.coreOptions.walletServicesConfig?.confirmationStrategy,
-        ws_enable_key_export: this.coreOptions.walletServicesConfig?.enableKeyExport,
-        ws_show_widget_button: this.coreOptions.walletServicesConfig?.whiteLabel?.showWidgetButton,
-        ws_button_position: this.coreOptions.walletServicesConfig?.whiteLabel?.buttonPosition,
-        ws_hide_nft_display: this.coreOptions.walletServicesConfig?.whiteLabel?.hideNftDisplay,
-        ws_hide_token_display: this.coreOptions.walletServicesConfig?.whiteLabel?.hideTokenDisplay,
-        ws_hide_transfers: this.coreOptions.walletServicesConfig?.whiteLabel?.hideTransfers,
-        ws_hide_topup: this.coreOptions.walletServicesConfig?.whiteLabel?.hideTopup,
-        ws_hide_receive: this.coreOptions.walletServicesConfig?.whiteLabel?.hideReceive,
-        ws_hide_swap: this.coreOptions.walletServicesConfig?.whiteLabel?.hideSwap,
-        ws_hide_show_all_tokens: this.coreOptions.walletServicesConfig?.whiteLabel?.hideShowAllTokens,
-        ws_hide_wallet_connect: this.coreOptions.walletServicesConfig?.whiteLabel?.hideWalletConnect,
-        ws_default_portfolio: this.coreOptions.walletServicesConfig?.whiteLabel?.defaultPortfolio,
+        ...getWhitelabelAnalyticsProperties(this.coreOptions.uiConfig),
+        ...getAaAnalyticsProperties(this.coreOptions.accountAbstractionConfig),
+        ...getWalletServicesAnalyticsProperties(this.coreOptions.walletServicesConfig),
       };
     } catch (error) {
       log.error("Failed to get initialization track data", error);
@@ -873,7 +857,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // TODO: handle mfa_enabled event when using "redirect" ux_mode
       this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_COMPLETED, {
         connector: this.connectedConnector.name,
-        ux_mode: authConnector.authInstance?.options?.uxMode,
+        auth_ux_mode: authConnector.authInstance?.options?.uxMode,
         is_mfa_enabled: isMFAEnabled,
       });
       this.emit(CONNECTOR_EVENTS.MFA_ENABLED, isMFAEnabled);
