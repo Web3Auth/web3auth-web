@@ -29,9 +29,9 @@ const Main = () => {
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
   const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
- 
+
   console.log("isConnected", isConnected);
-  
+
   const loggedInView = (
     <>
       <div className="container">
