@@ -4,6 +4,7 @@ import {
   ChainNamespaceType,
   CONFIRMATION_STRATEGY,
   type CONFIRMATION_STRATEGY_TYPE,
+  LoginMethodConfig,
   ModalConfig,
   SignTypedDataMessageV4,
   WEB3AUTH_NETWORK,
@@ -75,7 +76,7 @@ export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, ModalConfig> = log
       mainOption: false,
       showOnModal: true,
       label: "",
-    },
+    } as LoginMethodConfig[AUTH_CONNECTION_TYPE],
   }),
   {} as Record<AUTH_CONNECTION_TYPE, ModalConfig>
 );
@@ -111,7 +112,7 @@ export type FormData = {
   loginProviders: AUTH_CONNECTION_TYPE[];
   showWalletDiscovery: boolean;
   multiInjectedProviderDiscovery: boolean;
-  loginMethods: Record<AUTH_CONNECTION_TYPE, ModalConfig>;
+  loginMethods: LoginMethodConfig;
   walletPlugin: {
     enable: boolean;
     confirmationStrategy: Exclude<CONFIRMATION_STRATEGY_TYPE, "popup">;

@@ -366,46 +366,46 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
           <Card v-for="p in formData.loginProviders" :key="p" :shadow="false" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-3">
             <div class="font-bold leading-tight text-left">{{ p }}</div>
             <Toggle
-              v-model="formData.loginMethods[p].mainOption"
+              v-model="formData.loginMethods[p]!.mainOption"
               :show-label="true"
               :size="'small'"
               :label-disabled="$t('app.loginMethod.mainOption')"
               :label-enabled="$t('app.loginMethod.mainOption')"
             />
             <Toggle
-              v-model="formData.loginMethods[p].showOnModal"
+              v-model="formData.loginMethods[p]!.showOnModal"
               :show-label="true"
               :size="'small'"
               :label-disabled="$t('app.loginMethod.showOnModal')"
               :label-enabled="$t('app.loginMethod.showOnModal')"
             />
             <TextField
-              v-model="formData.loginMethods[p].name"
+              v-model="formData.loginMethods[p]!.name"
               :label="$t('app.loginMethod.name')"
               :aria-label="$t('app.loginMethod.name')"
               :placeholder="$t('app.loginMethod.name')"
             />
             <TextField
-              v-model="formData.loginMethods[p].description"
+              v-model="formData.loginMethods[p]!.description"
               :label="$t('app.loginMethod.description')"
               :aria-label="$t('app.loginMethod.description')"
               :placeholder="$t('app.loginMethod.description')"
               class="sm:col-span-2"
             />
             <TextField
-              v-model="formData.loginMethods[p].logoHover"
+              v-model="formData.loginMethods[p]!.logoHover"
               :label="$t('app.loginMethod.logoHover')"
               :aria-label="$t('app.loginMethod.logoHover')"
               :placeholder="$t('app.loginMethod.logoHover')"
             />
             <TextField
-              v-model="formData.loginMethods[p].logoLight"
+              v-model="formData.loginMethods[p]!.logoLight"
               :label="$t('app.loginMethod.logoLight')"
               :aria-label="$t('app.loginMethod.logoLight')"
               :placeholder="$t('app.loginMethod.logoLight')"
             />
             <TextField
-              v-model="formData.loginMethods[p].logoDark"
+              v-model="formData.loginMethods[p]!.logoDark"
               :label="$t('app.loginMethod.logoDark')"
               :aria-label="$t('app.loginMethod.logoDark')"
               :placeholder="$t('app.loginMethod.logoDark')"
