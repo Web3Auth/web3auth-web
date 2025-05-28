@@ -329,11 +329,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         chain_namespace: initialChain.chainNamespace,
       };
     }
-    this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+
+    // For WalletConnect and non-injected MetaMask, we auto-connect to generate QR codes for mobile.
+    // Since these connections often remain pending, we delay the analytics start event until connection finalizes.
+    const shouldDelayStartEvent =
+      connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2 || (connectorName === WALLET_CONNECTORS.METAMASK && !connector.isInjected);
+    if (!shouldDelayStartEvent) this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
     return new Promise((resolve, reject) => {
       this.once(CONNECTOR_EVENTS.CONNECTED, async (_) => {
         // track connection completed event
+        if (shouldDelayStartEvent) {
+          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+        }
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
           ...eventData,
           duration: Date.now() - startTime,
@@ -342,6 +350,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       });
       this.once(CONNECTOR_EVENTS.ERRORED, async (err) => {
         // track connection failed event
+        if (shouldDelayStartEvent) {
+          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+        }
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
           ...eventData,
           ...getErrorAnalyticsProperties(err),
