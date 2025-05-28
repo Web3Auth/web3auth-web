@@ -334,23 +334,27 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
     return new Promise((resolve, reject) => {
-      this.once(CONNECTOR_EVENTS.CONNECTED, async (_) => {
+      const onConnected = async () => {
         // track connection completed event
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
           ...eventData,
           duration: Date.now() - startTime,
         });
+        this.off(CONNECTOR_EVENTS.ERRORED, onErrored);
         resolve(this.provider);
-      });
-      this.once(CONNECTOR_EVENTS.ERRORED, async (err) => {
+      };
+      const onErrored = async (err: Web3AuthError) => {
         // track connection failed event
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
           ...eventData,
           ...getErrorAnalyticsProperties(err),
           duration: Date.now() - startTime,
         });
+        this.off(CONNECTOR_EVENTS.CONNECTED, onConnected);
         reject(err);
-      });
+      };
+      this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
+      this.once(CONNECTOR_EVENTS.ERRORED, onErrored);
       connector.connect(finalLoginParams);
       this.setCurrentChain(initialChain.chainId);
     });
