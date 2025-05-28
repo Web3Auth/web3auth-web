@@ -330,18 +330,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       };
     }
 
-    // For WalletConnect and non-injected MetaMask, we auto-connect to generate QR codes for mobile.
-    // Since these connections often remain pending, we delay the analytics start event until connection finalizes.
-    const shouldDelayStartEvent =
-      connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2 || (connectorName === WALLET_CONNECTORS.METAMASK && !connector.isInjected);
-    if (!shouldDelayStartEvent) this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+    // track connection started event
+    this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
     return new Promise((resolve, reject) => {
       this.once(CONNECTOR_EVENTS.CONNECTED, async (_) => {
         // track connection completed event
-        if (shouldDelayStartEvent) {
-          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
-        }
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
           ...eventData,
           duration: Date.now() - startTime,
@@ -350,9 +344,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       });
       this.once(CONNECTOR_EVENTS.ERRORED, async (err) => {
         // track connection failed event
-        if (shouldDelayStartEvent) {
-          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
-        }
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
           ...eventData,
           ...getErrorAnalyticsProperties(err),
@@ -766,6 +757,22 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
+      // WalletConnect and non-injected MetaMask is auto-connect in background to generate QR code URI without interfering with user's selected connection
+      // We need to track their events if they're not rehydrated
+      const isConnectionAutoStartedInBackground =
+        connector.name === WALLET_CONNECTORS.WALLET_CONNECT_V2 || (connector.name === WALLET_CONNECTORS.METAMASK && !connector.isInjected);
+      if (isConnectionAutoStartedInBackground && this.cachedConnector !== connector.name) {
+        const eventData = {
+          connector: connector.name,
+          connector_type: connector.type,
+          is_injected: connector.isInjected,
+          chain_id: getCaipChainId(this.currentChain),
+          chain_namespace: this.currentChain?.chainNamespace,
+        };
+        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, eventData);
+      }
+
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
 
       // setup AA provider if AA is enabled
@@ -842,6 +849,23 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.ERRORED, (data) => {
       this.status = CONNECTOR_STATUS.ERRORED;
       this.clearCache();
+
+      // WalletConnect and non-injected MetaMask is auto-connect in background to generate QR code URI without interfering with user's selected connection
+      // We need to track their events if they're not rehydrated
+      const isConnectionAutoStartedInBackground =
+        connector.name === WALLET_CONNECTORS.WALLET_CONNECT_V2 || (connector.name === WALLET_CONNECTORS.METAMASK && !connector.isInjected);
+      if (isConnectionAutoStartedInBackground && this.cachedConnector !== connector.name) {
+        const eventData = {
+          connector: connector.name,
+          connector_type: connector.type,
+          is_injected: connector.isInjected,
+          chain_id: getCaipChainId(this.currentChain),
+          chain_namespace: this.currentChain?.chainNamespace,
+        };
+        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, eventData);
+      }
+
       this.emit(CONNECTOR_EVENTS.ERRORED, data, this.loginMode);
       log.debug("errored", this.status, this.connectedConnectorName);
     });
