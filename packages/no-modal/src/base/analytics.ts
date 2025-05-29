@@ -125,6 +125,7 @@ export const ANALYTICS_EVENTS = {
 export const ANALYTICS_INTEGRATION_TYPE = {
   REACT_HOOKS: "React Hooks",
   VUE_COMPOSABLES: "Vue Composables",
+  NATIVE_SDK: "Native SDK",
 };
 
 export const ANALYTICS_SDK_TYPE = {

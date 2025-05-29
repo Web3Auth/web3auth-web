@@ -7,6 +7,7 @@ import deepmerge from "deepmerge";
 import {
   Analytics,
   ANALYTICS_EVENTS,
+  ANALYTICS_INTEGRATION_TYPE,
   ANALYTICS_SDK_TYPE,
   AuthLoginParams,
   CHAIN_NAMESPACES,
@@ -98,6 +99,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.coreOptions = options;
     this.storage = this.getStorageMethod();
     this.analytics = new Analytics();
+    this.analytics.setGlobalProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.NATIVE_SDK });
 
     this.loadState(initialState);
     if (this.state.idToken && this.coreOptions.ssr) {
@@ -303,6 +305,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     let eventData: Record<string, unknown>;
     if (connectorName === WALLET_CONNECTORS.AUTH) {
       const authLoginParams = loginParams as Partial<AuthLoginParams>;
+      const authConnectionConfig = (connector as AuthConnectorType).getOAuthProviderConfig({
+        authConnection: authLoginParams.authConnection,
+        authConnectionId: authLoginParams.authConnectionId,
+        groupedAuthConnectionId: authLoginParams.groupedAuthConnectionId,
+      });
       eventData = {
         connector: connectorName,
         connector_type: connector.type,
@@ -318,6 +325,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         curve: authLoginParams.curve,
         auth_dapp_url: authLoginParams.dappUrl,
         is_sfa: Boolean(authLoginParams.idToken),
+        is_default_auth_connection: authConnectionConfig?.isDefault,
         auth_ux_mode: (connector as AuthConnectorType).authInstance?.options?.uxMode,
       };
     } else {
