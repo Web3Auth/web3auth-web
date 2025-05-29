@@ -146,6 +146,7 @@ export type ExternalButton = {
   displayName?: string;
   href?: string;
   icon?: string;
+  isInstalled?: boolean;
   hasInjectedWallet: boolean;
   hasWalletConnect: boolean;
   hasInstallLinks: boolean;
