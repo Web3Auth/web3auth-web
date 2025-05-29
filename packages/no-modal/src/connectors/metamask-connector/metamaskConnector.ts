@@ -1,7 +1,10 @@
 import { MetaMaskSDK, type MetaMaskSDKOptions } from "@metamask/sdk";
+import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
 import deepmerge from "deepmerge";
 
 import {
+  type Analytics,
+  ANALYTICS_EVENTS,
   BaseConnectorLoginParams,
   type BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -18,6 +21,7 @@ import {
   type ConnectorNamespaceType,
   type ConnectorParams,
   type CustomChainConfig,
+  getCaipChainId,
   type IProvider,
   type MetaMaskConnectorData,
   type UserInfo,
@@ -50,9 +54,12 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   private metamaskOptions: Partial<MetaMaskSDKOptions>;
 
+  private analytics?: Analytics;
+
   constructor(connectorOptions: MetaMaskConnectorOptions) {
     super(connectorOptions);
     this.metamaskOptions = connectorOptions.connectorSettings;
+    this.analytics = connectorOptions.analytics;
   }
 
   get provider(): IProvider | null {
@@ -112,6 +119,21 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
+    // Skip tracking for injected MetaMask since it's handled in connectTo
+    // Skip tracking for rehydration since only new connections are tracked
+    // Only track non-injected MetaMask when connection completes since it auto-initializes to generate QR code
+    const shouldTrack = !this.isInjected && !this.rehydrated;
+    const startTime = Date.now();
+    const eventData = {
+      connector: this.name,
+      connector_type: this.type,
+      is_injected: this.isInjected,
+      chain_id: getCaipChainId(chainConfig),
+      chain_name: chainConfig?.displayName,
+      chain_namespace: chainConfig?.chainNamespace,
+    };
+
     try {
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         this.status = CONNECTOR_STATUS.CONNECTING;
@@ -144,6 +166,16 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       });
 
       this.status = CONNECTOR_STATUS.CONNECTED;
+
+      // track connection events
+      if (shouldTrack) {
+        this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+        this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+          ...eventData,
+          duration: Date.now() - startTime,
+        });
+      }
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
@@ -155,6 +187,16 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       this.status = CONNECTOR_STATUS.READY;
       if (!this.rehydrated) this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       this.rehydrated = false;
+
+      // track connection events
+      if (shouldTrack) {
+        this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+        this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+          ...eventData,
+          ...getErrorAnalyticsProperties(error),
+          duration: Date.now() - startTime,
+        });
+      }
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with MetaMask wallet", error);
     }
@@ -229,7 +271,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 }
 
 export const metaMaskConnector = (params?: Partial<MetaMaskSDKOptions>): ConnectorFn => {
-  return ({ coreOptions }: ConnectorParams) => {
-    return new MetaMaskConnector({ connectorSettings: params, coreOptions });
+  return ({ coreOptions, analytics }: ConnectorParams) => {
+    return new MetaMaskConnector({ connectorSettings: params, coreOptions, analytics });
   };
 };

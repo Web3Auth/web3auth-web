@@ -314,6 +314,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connector: connectorName,
         connector_type: connector.type,
         chain_id: getCaipChainId(initialChain),
+        chain_name: initialChain.displayName,
         chain_namespace: initialChain.chainNamespace,
         auth_connection: authLoginParams.authConnection,
         auth_connection_id: authLoginParams.authConnectionId,
@@ -334,6 +335,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connector_type: connector.type,
         is_injected: connector.isInjected,
         chain_id: getCaipChainId(initialChain),
+        chain_name: initialChain.displayName,
         chain_namespace: initialChain.chainNamespace,
       };
     }
@@ -342,13 +344,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
     return new Promise((resolve, reject) => {
+      const cleanup = () => {
+        this.off(CONNECTOR_EVENTS.CONNECTED, onConnected);
+        this.off(CONNECTOR_EVENTS.ERRORED, onErrored);
+      };
       const onConnected = async () => {
         // track connection completed event
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
           ...eventData,
           duration: Date.now() - startTime,
         });
-        this.off(CONNECTOR_EVENTS.ERRORED, onErrored);
+        cleanup();
         resolve(this.provider);
       };
       const onErrored = async (err: Web3AuthError) => {
@@ -358,7 +364,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           ...getErrorAnalyticsProperties(err),
           duration: Date.now() - startTime,
         });
-        this.off(CONNECTOR_EVENTS.CONNECTED, onConnected);
+        cleanup();
         reject(err);
       };
       this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
@@ -615,8 +621,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const rpcHostnames = Array.from(new Set(this.coreOptions.chains?.map((chain) => getHostname(chain.rpcTarget)))).filter(Boolean);
       return {
         chain_ids: this.coreOptions.chains?.map((chain) => getCaipChainId(chain)),
+        chain_names: this.coreOptions.chains?.map((chain) => chain.displayName),
         chain_rpc_targets: rpcHostnames,
         default_chain_id: defaultChain ? getCaipChainId(defaultChain) : undefined,
+        default_chain_name: defaultChain?.displayName,
         logging_enabled: this.coreOptions.enableLogging,
         storage_type: this.coreOptions.storageType,
         session_time: this.coreOptions.sessionTime,
@@ -665,6 +673,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const config = {
       projectConfig,
       coreOptions: this.coreOptions,
+      analytics: this.analytics,
     };
 
     // add injected connectors
@@ -769,22 +778,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
-      // WalletConnect and non-injected MetaMask is auto-connect in background to generate QR code URI without interfering with user's selected connection
-      // We need to track their events if they're not rehydrated
-      const isConnectionAutoStartedInBackground =
-        connector.name === WALLET_CONNECTORS.WALLET_CONNECT_V2 || (connector.name === WALLET_CONNECTORS.METAMASK && !connector.isInjected);
-      if (isConnectionAutoStartedInBackground && this.cachedConnector !== connector.name) {
-        const eventData = {
-          connector: connector.name,
-          connector_type: connector.type,
-          is_injected: connector.isInjected,
-          chain_id: getCaipChainId(this.currentChain),
-          chain_namespace: this.currentChain?.chainNamespace,
-        };
-        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
-        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, eventData);
-      }
-
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
 
       // setup AA provider if AA is enabled
@@ -861,23 +854,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.ERRORED, (data) => {
       this.status = CONNECTOR_STATUS.ERRORED;
       this.clearCache();
-
-      // WalletConnect and non-injected MetaMask is auto-connect in background to generate QR code URI without interfering with user's selected connection
-      // We need to track their events if they're not rehydrated
-      const isConnectionAutoStartedInBackground =
-        connector.name === WALLET_CONNECTORS.WALLET_CONNECT_V2 || (connector.name === WALLET_CONNECTORS.METAMASK && !connector.isInjected);
-      if (isConnectionAutoStartedInBackground && this.cachedConnector !== connector.name) {
-        const eventData = {
-          connector: connector.name,
-          connector_type: connector.type,
-          is_injected: connector.isInjected,
-          chain_id: getCaipChainId(this.currentChain),
-          chain_namespace: this.currentChain?.chainNamespace,
-        };
-        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
-        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, eventData);
-      }
-
       this.emit(CONNECTOR_EVENTS.ERRORED, data, this.loginMode);
       log.debug("errored", this.status, this.connectedConnectorName);
     });

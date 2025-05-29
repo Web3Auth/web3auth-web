@@ -1,4 +1,4 @@
-import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { getErrorAnalyticsProperties, signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
 import Client from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
 import { getSdkError, isValidArray } from "@walletconnect/utils";
@@ -6,6 +6,8 @@ import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
+  type Analytics,
+  ANALYTICS_EVENTS,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
@@ -23,6 +25,7 @@ import {
   ConnectorNamespaceType,
   ConnectorParams,
   CustomChainConfig,
+  getCaipChainId,
   getSavedToken,
   IdentityTokenInfo,
   IProvider,
@@ -61,6 +64,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
   private wcProvider: WalletConnectV2Provider | null = null;
 
+  private analytics?: Analytics;
+
   constructor(options: WalletConnectV2ConnectorOptions) {
     super(options);
     this.connectorOptions = { ...options };
@@ -71,6 +76,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       connectorSettings: this.connectorOptions?.connectorSettings ?? {},
       loginSettings: this.connectorOptions?.loginSettings ?? {},
     };
+
+    this.analytics = options.analytics;
 
     if (qrcodeModal) this.connectorOptions.connectorSettings.qrcodeModal = qrcodeModal;
     if (walletConnectInitOptions)
@@ -151,7 +158,31 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
     if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
 
+    // Skip tracking for rehydration since only new connections are tracked
+    // Track when connection completes since it auto-initializes to generate QR code
+    const shouldTrack = !this.connected && !this.rehydrated;
+    const startTime = Date.now();
+    const eventData = {
+      connector: this.name,
+      connector_type: this.type,
+      is_injected: this.isInjected,
+      chain_id: getCaipChainId(chainConfig),
+      chain_name: chainConfig?.displayName,
+      chain_namespace: chainConfig?.chainNamespace,
+    };
+
     try {
+      const trackCompletionEvents = () => {
+        // track connection events
+        if (shouldTrack) {
+          this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+          this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+            ...eventData,
+            duration: Date.now() - startTime,
+          });
+        }
+      };
+
       // if already connected
       if (this.connected) {
         await this.onConnectHandler({ chain: chainConfig });
@@ -159,8 +190,9 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       }
 
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
-        await this.createNewSession({ chainConfig });
+        await this.createNewSession({ chainConfig, trackCompletionEvents });
       }
+
       return this.provider;
     } catch (error) {
       log.error("Wallet connect v2 connector error while connecting", error);
@@ -168,6 +200,16 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       this.status = CONNECTOR_STATUS.READY;
       this.rehydrated = true;
       this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
+
+      // track connection events
+      if (shouldTrack) {
+        this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
+        this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+          ...eventData,
+          ...getErrorAnalyticsProperties(error),
+          duration: Date.now() - startTime,
+        });
+      }
 
       const finalError =
         error instanceof Web3AuthError
@@ -293,9 +335,11 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   private async createNewSession({
     forceNewSession = false,
     chainConfig,
+    trackCompletionEvents,
   }: {
     forceNewSession?: boolean;
     chainConfig: CustomChainConfig;
+    trackCompletionEvents?: () => void;
   }): Promise<void> {
     try {
       if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
@@ -334,7 +378,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       const session = await approval();
       this.activeSession = session;
       // Handle the returned session (e.g. update UI to "connected" state).
-      await this.onConnectHandler({ chain: chainConfig });
+      await this.onConnectHandler({ chain: chainConfig, trackCompletionEvents });
       if (qrcodeModal) {
         qrcodeModal.closeModal();
       }
@@ -357,7 +401,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  private async onConnectHandler({ chain }: { chain: CustomChainConfig }) {
+  private async onConnectHandler({ chain, trackCompletionEvents }: { chain: CustomChainConfig; trackCompletionEvents?: () => void }) {
     if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet connect connector is not ready yet");
     this.subscribeEvents();
     if (this.connectorOptions.connectorSettings?.qrcodeModal) {
@@ -369,6 +413,10 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     await this.wcProvider.setupProvider(this.connector);
     this.cleanupPendingPairings();
     this.status = CONNECTOR_STATUS.CONNECTED;
+
+    // track connection events
+    if (trackCompletionEvents) trackCompletionEvents();
+
     this.emit(CONNECTOR_EVENTS.CONNECTED, {
       connector: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       reconnected: this.rehydrated,
@@ -405,7 +453,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 }
 
 export const walletConnectV2Connector = (params?: IConnectorSettings): ConnectorFn => {
-  return ({ coreOptions, projectConfig }: ConnectorParams) => {
+  return ({ coreOptions, projectConfig, analytics }: ConnectorParams) => {
     const projectId = params?.walletConnectInitOptions?.projectId || projectConfig?.walletConnectProjectId;
 
     const connectorSettings = {
@@ -416,6 +464,7 @@ export const walletConnectV2Connector = (params?: IConnectorSettings): Connector
     return new WalletConnectV2Connector({
       connectorSettings,
       coreOptions,
+      analytics,
     });
   };
 };
