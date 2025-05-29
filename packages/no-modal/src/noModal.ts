@@ -955,7 +955,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         // skip if it's already connected
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
 
-        await plugin.initWithWeb3Auth(this, this.coreOptions.uiConfig);
+        await plugin.initWithWeb3Auth(this, this.coreOptions.uiConfig, this.analytics);
         await plugin.connect();
       } catch (error: unknown) {
         // swallow error if connector connector doesn't supports this plugin.
