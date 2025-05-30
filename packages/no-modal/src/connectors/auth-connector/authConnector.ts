@@ -319,6 +319,21 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
+  public getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
+    const { authConnection, authConnectionId, groupedAuthConnectionId } = params;
+    const providerConfig = this.authConnectionConfig.find((x) => {
+      if (groupedAuthConnectionId) {
+        return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
+      }
+      if (authConnectionId) {
+        return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
+      }
+      // return the default auth connection, if not found, return undefined
+      return x.authConnection === authConnection && x.isDefault;
+    });
+    return providerConfig;
+  }
+
   private getChain(chainId: string) {
     return this.coreOptions.chains.find((x) => x.chainId === chainId);
   }
@@ -565,21 +580,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
-  }
-
-  private getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
-    const { authConnection, authConnectionId, groupedAuthConnectionId } = params;
-    const providerConfig = this.authConnectionConfig.find((x) => {
-      if (groupedAuthConnectionId) {
-        return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
-      }
-      if (authConnectionId) {
-        return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
-      }
-      // return the default auth connection, if not found, return undefined
-      return x.authConnection === authConnection && x.isDefault;
-    });
-    return providerConfig;
   }
 }
 

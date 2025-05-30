@@ -210,6 +210,7 @@ export const WagmiProvider = defineComponent({
     watch(
       isInitialized,
       (newIsInitialized) => {
+        web3Auth.value?.setAnalyticsProperties({ wagmi_enabled: true });
         if (newIsInitialized && !finalConfig.value) {
           finalConfig.value = defineWagmiConfig();
           hydrateWagmiConfig();

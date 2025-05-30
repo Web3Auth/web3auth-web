@@ -3,6 +3,8 @@ import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 import WsEmbed from "@web3auth/ws-embed";
 
 import {
+  type Analytics,
+  ANALYTICS_EVENTS,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTOR_STATUS,
@@ -43,11 +45,13 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   private isInitialized = false;
 
+  private analytics?: Analytics;
+
   get proxyProvider(): SafeEventEmitterProvider | null {
     return this.wsEmbedInstance?.provider ? (this.wsEmbedInstance.provider as unknown as SafeEventEmitterProvider) : null;
   }
 
-  async initWithWeb3Auth(web3auth: IWeb3AuthCore, _whiteLabel?: WhiteLabelData): Promise<void> {
+  async initWithWeb3Auth(web3auth: IWeb3AuthCore, _whiteLabel?: WhiteLabelData, analytics?: Analytics): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.provider && !this.SUPPORTED_CONNECTORS.includes(web3auth.connectedConnectorName)) throw WalletServicesPluginError.notInitialized();
@@ -60,6 +64,7 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       this.provider = web3auth.provider;
     }
     this.web3auth = web3auth;
+    this.analytics = analytics;
 
     // Auth connector uses WS embed
     const authInstance = web3auth.getConnector(WALLET_CONNECTORS.AUTH) as AuthConnectorType;
@@ -105,21 +110,53 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   async showWalletConnectScanner(showWalletConnectParams?: BaseEmbedControllerState["showWalletConnect"]): Promise<void> {
     if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+
+    // analytics
+    this.analytics?.track(ANALYTICS_EVENTS.WALLET_CONNECT_SCANNER_CLICKED, {
+      is_visible: showWalletConnectParams?.show,
+    });
+
     return this.wsEmbedInstance.showWalletConnectScanner(showWalletConnectParams);
   }
 
   async showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void> {
     if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+
+    // analytics
+    this.analytics?.track(ANALYTICS_EVENTS.WALLET_CHECKOUT_CLICKED, {
+      is_visible: showCheckoutParams?.show,
+      receive_wallet_address_enabled: !!showCheckoutParams?.receiveWalletAddress,
+      token_list: showCheckoutParams?.tokenList,
+      fiat_list: showCheckoutParams?.fiatList,
+    });
+
     return this.wsEmbedInstance.showCheckout(showCheckoutParams);
   }
 
   async showWalletUi(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void> {
     if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+
+    // analytics
+    this.analytics?.track(ANALYTICS_EVENTS.WALLET_UI_CLICKED, {
+      is_visible: showWalletUiParams?.show,
+      path: showWalletUiParams?.path,
+    });
+
     return this.wsEmbedInstance.showWalletUi(showWalletUiParams);
   }
 
   async showSwap(showSwapParams?: BaseEmbedControllerState["showSwap"]): Promise<void> {
     if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+
+    // analytics
+    this.analytics?.track(ANALYTICS_EVENTS.WALLET_SWAP_CLICKED, {
+      is_visible: showSwapParams?.show,
+      from_token: showSwapParams?.fromToken,
+      to_token: showSwapParams?.toToken,
+      from_value_enabled: !!showSwapParams?.fromValue,
+      to_address_enabled: !!showSwapParams?.toAddress,
+    });
+
     return this.wsEmbedInstance.showSwap(showSwapParams);
   }
 

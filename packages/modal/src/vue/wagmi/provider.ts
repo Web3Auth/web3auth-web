@@ -138,8 +138,6 @@ export const WagmiProvider = defineComponent({
     const finalConfig = shallowRef<Config>(defaultWagmiConfig);
     const configKey = ref<string>(randomId());
 
-    web3Auth.value?.setAnalyticsProperties({ wagmi_enabled: true });
-
     const defineWagmiConfig = () => {
       const configParams: CreateConfigParameters = {
         ssr: true,
@@ -205,6 +203,7 @@ export const WagmiProvider = defineComponent({
     watch(
       isInitialized,
       (newIsInitialized: boolean, prevIsInitialized: boolean) => {
+        web3Auth.value?.setAnalyticsProperties({ wagmi_enabled: true });
         if (newIsInitialized && !prevIsInitialized) {
           finalConfig.value = defineWagmiConfig();
           hydrateWagmiConfig();

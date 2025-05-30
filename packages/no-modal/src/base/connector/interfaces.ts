@@ -14,6 +14,7 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 
+import { type Analytics } from "../analytics";
 import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
@@ -45,6 +46,7 @@ export type IdentityTokenInfo = { idToken: string };
 
 export interface BaseConnectorSettings {
   coreOptions: IWeb3AuthCoreOptions;
+  analytics?: Analytics;
 }
 
 export interface IProvider extends SafeEventEmitter<ProviderEvents> {
@@ -88,6 +90,7 @@ export interface IConnector<T> extends SafeEventEmitter {
 export type ConnectorParams = {
   projectConfig?: ProjectConfig;
   coreOptions: IWeb3AuthCoreOptions;
+  analytics: Analytics;
 };
 
 export type BaseConnectorLoginParams = {

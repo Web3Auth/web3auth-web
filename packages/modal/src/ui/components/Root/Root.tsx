@@ -265,6 +265,7 @@ function Root(props: RootProps) {
           displayName: walletRegistryItem.name,
           href,
           hasInjectedWallet: connectorConfig?.isInjected || false,
+          isInstalled: !!connectorConfig,
           hasWalletConnect: isWalletConnectConnectorIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
           hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
           walletRegistryItem,
@@ -295,6 +296,7 @@ function Root(props: RootProps) {
         name: connector,
         displayName: connectorConfig?.label || connector,
         hasInjectedWallet: connectorConfig?.isInjected || false,
+        isInstalled: true,
         hasWalletConnect: false,
         hasInstallLinks: false,
         icon: connectorConfig?.icon,
@@ -318,6 +320,7 @@ function Root(props: RootProps) {
         installedConnectors.splice(metamaskConnectorIdx, 1, {
           ...metamaskRegistryButton,
           chainNamespaces: metamaskConnector.chainNamespaces, // preserve the chain namespaces
+          isInstalled: true,
         });
       }
     }

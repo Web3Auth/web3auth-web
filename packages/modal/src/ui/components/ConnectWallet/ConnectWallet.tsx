@@ -76,7 +76,21 @@ function ConnectWallet(props: ConnectWalletProps) {
       ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
       ...customConnectorButtons,
       ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
-    ].sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1));
+    ].sort((a, b) => {
+      // favor MetaMask over other wallets
+      if (a.name === WALLET_CONNECTORS.METAMASK && b.name === WALLET_CONNECTORS.METAMASK) {
+        // favor injected MetaMask over non-injected MetaMask
+        if (a.hasInjectedWallet) return -1;
+        if (b.hasInjectedWallet) return 1;
+        // favor installed MetaMask over non-installed MetaMask
+        if (a.isInstalled) return -1;
+        if (b.isInstalled) return 1;
+        return 0;
+      }
+      if (a.name === WALLET_CONNECTORS.METAMASK) return -1;
+      if (b.name === WALLET_CONNECTORS.METAMASK) return 1;
+      return 0;
+    });
 
     const buttonSet = new Set();
     return buttons
@@ -139,11 +153,10 @@ function ConnectWallet(props: ConnectWalletProps) {
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
 
   const handleWalletClick = (button: ExternalButton) => {
-    const isInstalled = button.hasInjectedWallet || (!button.hasWalletConnect && !button.hasInstallLinks);
     analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_SELECTED, {
-      connector: isInstalled ? button.name : button.hasWalletConnect ? WALLET_CONNECTORS.WALLET_CONNECT_V2 : "",
+      connector: button.isInstalled ? button.name : button.hasWalletConnect ? WALLET_CONNECTORS.WALLET_CONNECT_V2 : "",
       wallet_name: button.displayName,
-      is_installed: isInstalled,
+      is_installed: button.isInstalled,
       is_injected: button.hasInjectedWallet,
       chain_namespaces: button.chainNamespaces,
       has_wallet_connect: button.hasWalletConnect,
@@ -165,19 +178,21 @@ function ConnectWallet(props: ConnectWalletProps) {
       return;
     }
 
+    // connect with connector if injected and single chain namespace or custom connector (except MetaMask)
     const isInjectedConnectorAndSingleChainNamespace = button.hasInjectedWallet && button.chainNamespaces?.length === 1;
-    // if doesn't have wallet connect & doesn't have install links, must be a custom connector
-    const isCustomConnector = !button.hasInjectedWallet && !button.hasWalletConnect && !button.hasInstallLinks;
-    if (isInjectedConnectorAndSingleChainNamespace || isCustomConnector) {
+    const isCustomConnector = !button.hasInjectedWallet && button.isInstalled;
+    if (isInjectedConnectorAndSingleChainNamespace || (isCustomConnector && button.name !== WALLET_CONNECTORS.METAMASK)) {
       return handleExternalWalletClick({ connector: button.name });
     }
 
+    // show QR code for wallet connect v2 and MM (non-injected)
     if (button.hasWalletConnect) {
       setSelectedButton(button);
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
       handleWalletDetailsHeight();
     } else {
+      // show install links
       setBodyState({
         ...bodyState,
         installLinks: {
