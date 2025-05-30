@@ -350,8 +350,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       };
       const onConnected = async () => {
         // track connection completed event
+        const userInfo = await connector.getUserInfo();
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
           ...eventData,
+          is_mfa_enabled: userInfo?.isMfaEnabled,
           duration: Date.now() - startTime,
         });
         cleanup();
