@@ -215,7 +215,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       // track connection events
       if (shouldTrack) {
         this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
-        this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+        this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
           ...eventData,
           ...getErrorAnalyticsProperties(error),
           duration: Date.now() - startTime,
