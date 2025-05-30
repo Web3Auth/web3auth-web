@@ -162,10 +162,11 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     // Track when connection completes since it auto-initializes to generate QR code
     const shouldTrack = !this.connected && !this.rehydrated;
     const startTime = Date.now();
-    const eventData = {
+    let eventData: Record<string, unknown> = {
       connector: this.name,
       connector_type: this.type,
       is_injected: this.isInjected,
+      is_wallet_connect: true,
       chain_id: getCaipChainId(chainConfig),
       chain_name: chainConfig?.displayName,
       chain_namespace: chainConfig?.chainNamespace,
@@ -175,6 +176,16 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       const trackCompletionEvents = () => {
         // track connection events
         if (shouldTrack) {
+          const { name, url, redirect } = this.activeSession?.peer?.metadata || {};
+          const { native, universal, linkMode } = redirect || {};
+          eventData = {
+            ...eventData,
+            connector: name || this.name,
+            wallet_url: url,
+            redirect_native: native,
+            redirect_universal: universal,
+            redirect_link_mode_enabled: linkMode,
+          };
           this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
           this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
             ...eventData,
