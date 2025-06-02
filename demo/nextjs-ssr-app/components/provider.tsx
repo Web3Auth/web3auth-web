@@ -7,17 +7,17 @@ import { Web3AuthProvider } from "@web3auth/modal/react";
 import { WagmiProvider } from "@web3auth/modal/react/wagmi";
 
 const queryClient = new QueryClient();
-const clientId = "BHgArYmWwSeq21czpcarYh0EVq2WWOzflX-NTK-tY1-1pauPzHKRRLgpABkmYiIV_og9jAvoIxQ8L3Smrwe04Lw";
+const clientId = "BMjGyXu-SceWBNiPxfQK6qRlnVOzYLX5YNgI8yrgd1F9_pfAWyMUWfyt2Yr45CYlOs92cJh0C02M2hJonVb_zC0";
 
 const web3authConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
     enableLogging: true,
     web3AuthNetwork: "sapphire_devnet",
     clientId: clientId,
-    authBuildEnv: "testing",
     ssr: true,
   },
 };
+
 export default function Provider({
   children,
   web3authInitialState,

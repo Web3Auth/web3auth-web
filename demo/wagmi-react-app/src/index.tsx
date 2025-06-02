@@ -9,17 +9,13 @@ import { createRoot } from "react-dom/client";
 import App from "./App";
 
 const queryClient = new QueryClient();
-const clientId = "BHgArYmWwSeq21czpcarYh0EVq2WWOzflX-NTK-tY1-1pauPzHKRRLgpABkmYiIV_og9jAvoIxQ8L3Smrwe04Lw";
+const clientId = "BNJiiG6wVmiMMzApYoCbfD2xU0xxh3cp-t94tgKdwWEuf8Z5DOufWs4SnYiTqdqdA6-pTReQkaiI6z-y9rHxTIM";
 
 const web3authConfig: Web3AuthContextConfig = {
   web3AuthOptions: {
     enableLogging: true,
     web3AuthNetwork: "sapphire_devnet",
     clientId: clientId,
-    authBuildEnv: "testing",
-    uiConfig: {
-      uxMode: "redirect",
-    },
   },
 };
 

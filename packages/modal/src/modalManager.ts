@@ -505,7 +505,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           // external wallets are initialized on INIT_EXTERNAL_WALLET event.
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
-          await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: initialChain.chainId });
+          const autoConnect = super.checkIfAutoConnect(connector);
+          await connector.init({ autoConnect, chainId: initialChain.chainId });
 
           // note: not adding cachedWallet to modal if it is external wallet.
           // adding it later if no in-app wallets are available.

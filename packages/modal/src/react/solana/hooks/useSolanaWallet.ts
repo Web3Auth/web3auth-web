@@ -30,7 +30,7 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
         return;
       }
       if (!solanaWallet) return;
-      const accounts = await solanaWallet.requestAccounts();
+      const accounts = await solanaWallet.getAccounts();
       if (accounts?.length > 0) {
         setAccounts(accounts);
       }

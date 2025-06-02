@@ -31,7 +31,7 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
       if (!web3Auth?.currentChain?.chainNamespace || web3Auth.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
         return;
       }
-      const accounts = await solanaWallet.requestAccounts();
+      const accounts = await solanaWallet.getAccounts();
       if (accounts?.length > 0) {
         setAccounts(accounts);
       }

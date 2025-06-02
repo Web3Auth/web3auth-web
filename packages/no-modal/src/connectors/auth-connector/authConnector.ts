@@ -593,7 +593,14 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
     const { whitelist, sessionTime } = projectConfig;
     if (whitelist) connectorSettings.originData = whitelist.signed_urls;
-    if (sessionTime) connectorSettings.sessionTime = sessionTime;
+
+    // If sessionTime is provided in the coreOptions, it takes precedence over the sessionTime in the projectConfig.
+    if (coreOptions.sessionTime) {
+      connectorSettings.sessionTime = coreOptions.sessionTime;
+    } else if (sessionTime) {
+      connectorSettings.sessionTime = sessionTime;
+    }
+
     if (coreOptions.uiConfig?.uxMode) connectorSettings.uxMode = coreOptions.uiConfig.uxMode;
 
     const uiConfig = coreOptions.uiConfig || {};
