@@ -346,7 +346,7 @@ function Login(props: LoginProps) {
     analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_SELECTED, {
       connector: wallet.name,
       wallet_name: wallet.displayName,
-      is_installed: true,
+      is_installed: wallet.isInstalled,
       is_injected: wallet.hasInjectedWallet,
       chain_namespaces: wallet.chainNamespaces,
       has_wallet_connect: wallet.hasWalletConnect,

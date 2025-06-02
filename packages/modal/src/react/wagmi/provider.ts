@@ -123,9 +123,8 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
   const { config } = props;
   const { web3Auth, isInitialized } = useWeb3Auth();
 
-  web3Auth?.setAnalyticsProperties({ wagmi_enabled: true });
-
   const finalConfig = useMemo(() => {
+    web3Auth?.setAnalyticsProperties({ wagmi_enabled: true });
     if (!isInitialized) return defaultWagmiConfig;
 
     const finalConfig: CreateConfigParameters = {

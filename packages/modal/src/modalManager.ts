@@ -598,7 +598,16 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     loginParams: { chainNamespace: ChainNamespaceType };
   }): Promise<void> => {
     try {
-      await this.connectTo(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams, LOGIN_MODE.MODAL);
+      const connector = this.getConnector(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams?.chainNamespace);
+      // auto-connect WalletConnect and non-injected MetaMask in background to generate QR code URI without interfering with user's selected connection
+      const shouldStartConnectionInBackground =
+        connector.name === WALLET_CONNECTORS.WALLET_CONNECT_V2 || (connector.name === WALLET_CONNECTORS.METAMASK && !connector.isInjected);
+      if (shouldStartConnectionInBackground) {
+        const initialChain = this.getInitialChainIdForConnector(connector);
+        await connector.connect({ chainId: initialChain.chainId });
+      } else {
+        await this.connectTo(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams, LOGIN_MODE.MODAL);
+      }
     } catch (error) {
       log.error(`Error while connecting to connector: ${params.connector}`, error);
     }

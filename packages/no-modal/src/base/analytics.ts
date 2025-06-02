@@ -102,29 +102,40 @@ export class Analytics {
 }
 
 export const ANALYTICS_EVENTS = {
+  // SDK Initialization
   SDK_INITIALIZATION_COMPLETED: "SDK Initialization Completed",
   SDK_INITIALIZATION_FAILED: "SDK Initialization Failed",
+  // Connection
   CONNECTION_STARTED: "Connection Started",
   CONNECTION_COMPLETED: "Connection Completed",
   CONNECTION_FAILED: "Connection Failed",
+  // Identity Token
   IDENTITY_TOKEN_STARTED: "Identity Token Started",
   IDENTITY_TOKEN_COMPLETED: "Identity Token Completed",
   IDENTITY_TOKEN_FAILED: "Identity Token Failed",
+  // MFA
   MFA_ENABLEMENT_STARTED: "MFA Enablement Started",
   MFA_ENABLEMENT_COMPLETED: "MFA Enablement Completed",
   MFA_ENABLEMENT_FAILED: "MFA Enablement Failed",
   MFA_MANAGEMENT_SELECTED: "MFA Management Selected",
   MFA_MANAGEMENT_FAILED: "MFA Management Failed",
+  // Login Modal
   LOGIN_MODAL_OPENED: "Login Modal Opened",
   LOGIN_MODAL_CLOSED: "Login Modal Closed",
   SOCIAL_LOGIN_SELECTED: "Social Login Selected",
   EXTERNAL_WALLET_SELECTED: "External Wallet Selected",
   EXTERNAL_WALLET_LIST_EXPANDED: "External Wallet List Expanded",
+  // Wallet Plugin
+  WALLET_UI_CLICKED: "Wallet UI Clicked",
+  WALLET_CONNECT_SCANNER_CLICKED: "Wallet Connect Scanner Clicked",
+  WALLET_CHECKOUT_CLICKED: "Wallet Checkout Clicked",
+  WALLET_SWAP_CLICKED: "Wallet Swap Clicked",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {
   REACT_HOOKS: "React Hooks",
   VUE_COMPOSABLES: "Vue Composables",
+  NATIVE_SDK: "Native SDK",
 };
 
 export const ANALYTICS_SDK_TYPE = {

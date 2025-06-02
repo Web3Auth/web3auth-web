@@ -7,6 +7,7 @@ import deepmerge from "deepmerge";
 import {
   Analytics,
   ANALYTICS_EVENTS,
+  ANALYTICS_INTEGRATION_TYPE,
   ANALYTICS_SDK_TYPE,
   AuthLoginParams,
   CHAIN_NAMESPACES,
@@ -98,6 +99,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.coreOptions = options;
     this.storage = this.getStorageMethod();
     this.analytics = new Analytics();
+    this.analytics.setGlobalProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.NATIVE_SDK });
 
     this.loadState(initialState);
     if (this.state.idToken && this.coreOptions.ssr) {
@@ -302,10 +304,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     let eventData: Record<string, unknown>;
     if (connectorName === WALLET_CONNECTORS.AUTH) {
       const authLoginParams = loginParams as Partial<AuthLoginParams>;
+      const authConnectionConfig = (connector as AuthConnectorType).getOAuthProviderConfig({
+        authConnection: authLoginParams.authConnection,
+        authConnectionId: authLoginParams.authConnectionId,
+        groupedAuthConnectionId: authLoginParams.groupedAuthConnectionId,
+      });
       eventData = {
         connector: connectorName,
         connector_type: connector.type,
         chain_id: getCaipChainId(initialChain),
+        chain_name: initialChain.displayName,
         chain_namespace: initialChain.chainNamespace,
         auth_connection: authLoginParams.authConnection,
         auth_connection_id: authLoginParams.authConnectionId,
@@ -317,6 +325,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         curve: authLoginParams.curve,
         auth_dapp_url: authLoginParams.dappUrl,
         is_sfa: Boolean(authLoginParams.idToken),
+        is_default_auth_connection: authConnectionConfig?.isDefault,
         auth_ux_mode: (connector as AuthConnectorType).authInstance?.options?.uxMode,
       };
     } else {
@@ -325,29 +334,42 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connector_type: connector.type,
         is_injected: connector.isInjected,
         chain_id: getCaipChainId(initialChain),
+        chain_name: initialChain.displayName,
         chain_namespace: initialChain.chainNamespace,
       };
     }
+
+    // track connection started event
     this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
     return new Promise((resolve, reject) => {
-      this.once(CONNECTOR_EVENTS.CONNECTED, async (_) => {
+      const cleanup = () => {
+        this.off(CONNECTOR_EVENTS.CONNECTED, onConnected);
+        this.off(CONNECTOR_EVENTS.ERRORED, onErrored);
+      };
+      const onConnected = async () => {
         // track connection completed event
+        const userInfo = await connector.getUserInfo();
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
           ...eventData,
+          is_mfa_enabled: userInfo?.isMfaEnabled,
           duration: Date.now() - startTime,
         });
+        cleanup();
         resolve(this.provider);
-      });
-      this.once(CONNECTOR_EVENTS.ERRORED, async (err) => {
+      };
+      const onErrored = async (err: Web3AuthError) => {
         // track connection failed event
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
           ...eventData,
           ...getErrorAnalyticsProperties(err),
           duration: Date.now() - startTime,
         });
+        cleanup();
         reject(err);
-      });
+      };
+      this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
+      this.once(CONNECTOR_EVENTS.ERRORED, onErrored);
       connector.connect(finalLoginParams);
       this.setCurrentChain(initialChain.chainId);
     });
@@ -600,8 +622,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const rpcHostnames = Array.from(new Set(this.coreOptions.chains?.map((chain) => getHostname(chain.rpcTarget)))).filter(Boolean);
       return {
         chain_ids: this.coreOptions.chains?.map((chain) => getCaipChainId(chain)),
+        chain_names: this.coreOptions.chains?.map((chain) => chain.displayName),
         chain_rpc_targets: rpcHostnames,
         default_chain_id: defaultChain ? getCaipChainId(defaultChain) : undefined,
+        default_chain_name: defaultChain?.displayName,
         logging_enabled: this.coreOptions.enableLogging,
         storage_type: this.coreOptions.storageType,
         session_time: this.coreOptions.sessionTime,
@@ -651,6 +675,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const config = {
       projectConfig,
       coreOptions: this.coreOptions,
+      analytics: this.analytics,
     };
 
     // add injected connectors
@@ -917,7 +942,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         // skip if it's already connected
         if (plugin.status === PLUGIN_STATUS.CONNECTED) return;
 
-        await plugin.initWithWeb3Auth(this, this.coreOptions.uiConfig);
+        await plugin.initWithWeb3Auth(this, this.coreOptions.uiConfig, this.analytics);
         await plugin.connect();
       } catch (error: unknown) {
         // swallow error if connector connector doesn't supports this plugin.
