@@ -18,6 +18,13 @@ export class SolanaWallet implements ISolanaWallet {
     return accounts;
   }
 
+  public async getAccounts(): Promise<string[]> {
+    const accounts = await this.provider.request<never, string[]>({
+      method: SOLANA_METHOD_TYPES.GET_ACCOUNTS,
+    });
+    return accounts;
+  }
+
   public async signAndSendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<string> {
     const signature = await this.provider.request<{ message: string }, string>({
       method: SOLANA_METHOD_TYPES.SEND_TRANSACTION,

@@ -12,10 +12,12 @@ import {
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
-import { useAccount, useBalance, useSignMessage, useSignTypedData } from "wagmi";
+import { useAccount, useBalance, useSignMessage, useSignTypedData, useSwitchChain, useChainId } from "wagmi";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
+  const { chains, switchChain } = useSwitchChain();
+  const chainId = useChainId();
   const { loading: connecting, connect, error: connectingError, connectorName } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { signMessageAsync, data: signedMessageData } = useSignMessage();
@@ -175,6 +177,16 @@ const Main = () => {
             Sign Typed Data
           </button>
           {signedTypedDataData && <textarea disabled rows={5} value={signedTypedDataData} style={{ width: "100%" }} />}
+        </div>
+
+        {/* Switch Chain */}
+        <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+          <p>Switch Chain</p>
+          {chains.map((chain) => (
+            <button key={chain.id} disabled={chain.id === chainId} onClick={() => switchChain({ chainId: chain.id })} style={{ opacity: chain.id === chainId ? 0.5 : 1 }} className="card">
+              {chain.name}
+            </button>
+          ))}
         </div>
 
         {/* Disconnect */}

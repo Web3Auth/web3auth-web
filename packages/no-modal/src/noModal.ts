@@ -106,6 +106,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get currentChain(): CustomChainConfig | undefined {
+    if (!this.currentChainId) return undefined;
     return this.coreOptions.chains?.find((chain) => chain.chainId === this.currentChainId);
   }
 
@@ -129,7 +130,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get currentChainId(): string | null {
-    return this.state.currentChainId || this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
+    return this.state.currentChainId || this.coreOptions.defaultChainId || this.coreOptions.chains?.[0]?.chainId || null;
   }
 
   get connectedConnector(): IConnector<unknown> | null {
@@ -269,13 +270,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
       await this.connectedConnector.switchChain(params);
-      this.setCurrentChain(params.chainId);
       return;
     }
 
     if (this.commonJRPCProvider) {
       await this.commonJRPCProvider.switchChain(params);
-      this.setCurrentChain(params.chainId);
       return;
     }
     throw WalletInitializationError.notReady(`No wallet is ready`);
@@ -639,7 +638,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.subscribeToConnectorEvents(connector);
     try {
       const initialChain = this.getInitialChainIdForConnector(connector);
-      await connector.init({ autoConnect: this.cachedConnector === connector.name, chainId: initialChain.chainId });
+      const autoConnect = this.checkIfAutoConnect(connector);
+      await connector.init({ autoConnect, chainId: initialChain.chainId });
     } catch (e) {
       log.error(e, connector.name);
     }
@@ -868,6 +868,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected checkInitRequirements(): void {
     if (this.status === CONNECTOR_STATUS.READY) throw WalletInitializationError.notReady("Connector is already initialized");
+  }
+
+  protected checkIfAutoConnect(connector: IConnector<unknown>): boolean {
+    let autoConnect = this.cachedConnector === connector.name;
+    if (autoConnect && this.currentChain?.chainNamespace) {
+      if (connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN) autoConnect = true;
+      else autoConnect = connector.connectorNamespace === this.currentChain.chainNamespace;
+    }
+    return autoConnect;
   }
 
   /**

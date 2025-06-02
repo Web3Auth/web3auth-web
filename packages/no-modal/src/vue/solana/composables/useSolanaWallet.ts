@@ -22,7 +22,7 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
       return;
     }
     solanaWallet.value = new SolanaWallet(provider.value);
-    const result = await solanaWallet.value.requestAccounts();
+    const result = await solanaWallet.value.getAccounts();
     if (result?.length > 0) {
       accounts.value = result;
     }
