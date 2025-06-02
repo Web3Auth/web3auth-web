@@ -2,8 +2,7 @@
 
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
 [![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
-![npm](https://img.shields.io/npm/dw/@web3auth/no-modal)
-![GitHub Workflow Status](https://img.shields.io/github/workflow/status/web3auth/web3auth/Build%20&%20Release)
+![npm](https://img.shields.io/npm/dw/@web3auth/modal)
 
 Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
 
@@ -18,87 +17,185 @@ Checkout the official [Web3Auth Documentation](https://web3auth.io/docs) and [SD
 - End to end Whitelabelable solution
 - Threshold Cryptography based Key Reconstruction
 - Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
-- Support for WebAuthn & Passwordless Login
+- Support for Email and Mobile Passwordless Login
 - Support for connecting to multiple wallets
 - DApp Active Session Management
 
   ...and a lot more
 
-## 💭 Choosing Between SDKs
+## 🎯 Web3Auth Modal SDK
 
-For using Web3Auth in the web, you have two choices of SDKs to get started with.
-
-[Web3Auth Plug and Play Modal SDK `@web3auth/modal`](https://web3auth.io/docs/sdk/web/web3auth/): A simple and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application. You can use the pre-configured Web3Auth Modal UI and whitelabel it according to your needs.
-
-[Web3Auth Plug and Play NoModal SDK `@web3auth/no-modal`](https://web3auth.io/docs/sdk/web/no-modal/): The nomodal module implementing all the Web3Auth features you need and giving you the flexibility of using your own UI with the Web3Auth SDK working in the backend.
+[Web3Auth Plug and Play Modal SDK `@web3auth/modal`](https://web3auth.io/docs/sdk/web/web3auth/) provides a simple and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application. You can use the pre-configured Web3Auth Modal UI and whitelabel it according to your needs.
 
 ## ⚡ Quick Start
 
-### Installation (Web3Auth Plug and Play Modal)
+### Installation
 
 ```shell
 npm install --save @web3auth/modal
 ```
 
-### Get your Client ID from Web3Auth Dashboard
+### Prerequisites
 
-Hop on to the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and create a new project. Use the Client ID of the project to start your integration.
+Before you start, make sure you have registered on the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and have set up your project. Use the Client ID of the project to start your integration.
 
-![Web3Auth Dashboard](https://github-production-user-asset-6210df.s3.amazonaws.com/6962565/272779464-043f6383-e671-4aa5-80fb-ec87c569e5ab.png)
+### React Integration
 
-### Initialize Web3Auth for your preferred blockchain
+Web3Auth provides React Hooks for seamless integration with React applications.
 
-Web3Auth needs to initialise as soon as your app loads up to enable the user to log in. Preferably done within a constructor, initialisation is the step where you can pass on all the configurations for Web3Auth you want. A simple integration for Ethereum blockchain will look like this:
+#### 1. Create Configuration
 
-```js
-import { Web3Auth } from "web3auth";
+```tsx
+// web3authContext.tsx
+import { type Web3AuthContextConfig } from "@web3auth/modal/react";
+import { WEB3AUTH_NETWORK, type Web3AuthOptions } from "@web3auth/modal";
 
-//Initialize within your constructor
+const web3AuthOptions: Web3AuthOptions = {
+  clientId: "YOUR_CLIENT_ID", // Get your Client ID from Web3Auth Dashboard
+  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET, // or WEB3AUTH_NETWORK.SAPPHIRE_DEVNET
+};
+
+const web3AuthContextConfig: Web3AuthContextConfig = {
+  web3AuthOptions,
+};
+
+export default web3AuthContextConfig;
+```
+
+#### 2. Setup Provider
+
+```tsx
+// main.tsx or index.tsx
+import ReactDOM from "react-dom/client";
+import { Web3AuthProvider } from "@web3auth/modal/react";
+import web3AuthContextConfig from "./web3authContext";
+import App from "./App";
+
+ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+  <Web3AuthProvider config={web3AuthContextConfig}>
+    <App />
+  </Web3AuthProvider>
+);
+```
+
+#### 3. Use Web3Auth Hooks
+
+```tsx
+// App.tsx
+import { useWeb3AuthConnect } from "@web3auth/modal/react";
+
+function ConnectButton() {
+  const { connect, loading, isConnected, error } = useWeb3AuthConnect();
+
+  return (
+    <button onClick={() => connect()} disabled={loading || isConnected}>
+      {loading ? "Connecting..." : isConnected ? "Connected" : "Connect"}
+    </button>
+    {error && <div>{error.message}</div>}
+  );
+}
+```
+
+### Vue Integration
+
+Web3Auth provides Vue Composables for seamless integration with Vue applications.
+
+#### 1. Create Configuration
+
+```ts
+// web3authContext.ts
+import { type Web3AuthContextConfig } from "@web3auth/modal/vue";
+import { WEB3AUTH_NETWORK, type Web3AuthOptions } from "@web3auth/modal";
+
+const web3AuthOptions: Web3AuthOptions = {
+  clientId: "YOUR_CLIENT_ID", // Get your Client ID from Web3Auth Dashboard
+  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET, // or WEB3AUTH_NETWORK.SAPPHIRE_DEVNET
+};
+
+const web3AuthContextConfig: Web3AuthContextConfig = {
+  web3AuthOptions,
+};
+
+export default web3AuthContextConfig;
+```
+
+#### 2. Setup Provider
+
+```html
+<!-- App.vue -->
+<script setup lang="ts">
+import Home from "./Home.vue";
+import { Web3AuthProvider } from "@web3auth/modal/vue";
+import web3AuthContextConfig from "./web3authContext";
+</script>
+
+<template>
+  <Web3AuthProvider :config="web3AuthContextConfig">
+    <Home />
+  </Web3AuthProvider>
+</template>
+```
+
+#### 3. Use Web3Auth Composables
+
+```html
+<!-- Home.vue -->
+<script setup lang="ts">
+  import { useWeb3AuthConnect } from "@web3auth/modal/vue";
+
+  const { connect, loading, isConnected, error } = useWeb3AuthConnect();
+</script>
+
+<template>
+  <button @click="connect" :disabled="loading || isConnected">
+    <span v-if="loading">Connecting...</span>
+    <span v-else-if="isConnected">Connected</span>
+    <span v-else>Connect</span>
+  </button>
+  <div v-if="error">{{ error.message }}</div>
+</template>
+```
+
+### JavaScript Integration
+
+For vanilla JavaScript or other frameworks, use the standard Web3Auth Modal SDK.
+
+#### 1. Initialize Web3Auth
+
+```javascript
+import { Web3Auth, WEB3AUTH_NETWORK } from "@web3auth/modal";
+
 const web3auth = new Web3Auth({
-  clientId: "", // Get your Client ID from Web3Auth Dashboard
-  chainConfig: {
-    chainNamespace: "eip155",
-    chainId: "0x1",
-  },
+  clientId: "YOUR_CLIENT_ID", // Get your Client ID from Web3Auth Dashboard
+  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET, // or WEB3AUTH_NETWORK.SAPPHIRE_DEVNET
 });
 
+// Initialize the SDK
 await web3auth.init();
 ```
 
-### Login your User
+#### 2. Login User
 
-Once you're done initialising, just create a button that triggers to open the login modal for the user on their request. Logging in is as easy as:
-
-```js
+```javascript
+// Login
 await web3auth.connect();
+
+// Get user info
+const user = await web3auth.getUserInfo();
+
+// Logout
+await web3auth.logout();
 ```
 
-## 📦 Packages within this repository
+## 🔧 Advanced Configuration
 
-| Packages                                       | `@latest` Version                                                                                                                                                                             | Size                                                                                                                                                                                                     | Description                                                                                                                                                                                                                                                                                                          |
-| ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| 🏠 **PnP Web**                                 |
-| `@web3auth/no-modal`                           | [![npm version](https://img.shields.io/npm/v/@web3auth/no-modal?label=%22%22)](https://www.npmjs.com/package/@web3auth/no-modal/v/latest)                                                     | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/no-modal?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/no-modal@latest)                                                     | Provides the core logic for handling adapters within web3auth. This package acts as a manager for all the adapters. You should use this package to build your custom login UI on top of web3auth.                                                                                                                    |
-| `@web3auth/modal`                              | [![npm version](https://img.shields.io/npm/v/@web3auth/modal?label=%22%22)](https://www.npmjs.com/package/@web3auth/modal/v/latest)                                                           | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/modal?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/modal@latest)                                                           | Provides the main class for using default web3auth modal. It inherits `@web3auth/no-modal` package. So you can still call all the functions available in the `@web3auth/no-modal` api reference. The package includes all of our packages and gives you a simple way of implementing Web3Auth within your interface. |
-| 🪝 **PnP Web Hooks**                           |
-| `@web3auth/modal-react-hooks`                  | [![npm version](https://img.shields.io/npm/v/@web3auth/modal-react-hooks?label=%22%22)](https://www.npmjs.com/package/@web3auth/modal-react-hooks/v/latest)                                   | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/modal-react-hooks?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/modal-react-hooks@latest)                                   | Provides React hooks for easy integration of Web3Auth Modal in React applications. Simplifies state management and Web3Auth interactions within React components.                                                                                                                                                    |
-| `@web3auth/no-modal-react-hooks`               | [![npm version](https://img.shields.io/npm/v/@web3auth/no-modal-react-hooks?label=%22%22)](https://www.npmjs.com/package/@web3auth/no-modal-react-hooks/v/latest)                             | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/no-modal-react-hooks?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/no-modal-react-hooks@latest)                             | Provides React hooks for integrating Web3Auth No Modal SDK in React applications. Offers flexibility for custom UI implementations while simplifying Web3Auth state management and interactions.                                                                                                                     |
-| 🔌 **Adapters**                                |
-| `@web3auth/coinbase-adapter`                   | [![npm version](https://img.shields.io/npm/v/@web3auth/coinbase-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/coinbase-adapter/v/latest)                                     | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/coinbase-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/coinbase-adapter@latest)                                     | Adds coinbase login functionality                                                                                                                                                                                                                                                                                    |
-| `@web3auth/auth-adapter`                       | [![npm version](https://img.shields.io/npm/v/@web3auth/auth-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/auth-adapter/v/latest)                                             | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/auth-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/auth-adapter@latest)                                             | Adds social logins with MFA functionality                                                                                                                                                                                                                                                                            |
-| `@web3auth/torus-evm-adapter`                  | [![npm version](https://img.shields.io/npm/v/@web3auth/torus-evm-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/torus-evm-adapter/v/latest)                                   | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/torus-evm-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/torus-evm-adapter@latest)                                   | Adds Torus Wallet login functionality (https://app.tor.us)                                                                                                                                                                                                                                                           |
-| `@web3auth/torus-solana-adapter`               | [![npm version](https://img.shields.io/npm/v/@web3auth/torus-solana-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/torus-solana-adapter/v/latest)                             | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/torus-solana-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/torus-solana-adapter@latest)                             | Adds Solana Torus Wallet login functionality (https://solana.tor.us)                                                                                                                                                                                                                                                 |
-| `@web3auth/wallet-connect-v2-adapter`          | [![npm version](https://img.shields.io/npm/v/@web3auth/wallet-connect-v2-adapter?label=%22%22)](https://www.npmjs.com/package/@web3auth/wallet-connect-v2-adapter/v/latest)                   | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/wallet-connect-v2-adapter?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/wallet-connect-v2-adapter@latest)                   | Adds wallet connect v2 login functionality + all supported adapters (eg: Metamask mobile, rainbow etc.)                                                                                                                                                                                                              |
-| 🐉 **Providers**                               |
-| `@web3auth/base-provider`                      | [![npm version](https://img.shields.io/npm/v/@web3auth/base-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth/base-provider/v/latest)                                           | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/base-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/base-provider@latest)                                           | Base implementation of JRPC provider                                                                                                                                                                                                                                                                                 |
-| `@web3auth/ethereum-provider`                  | [![npm version](https://img.shields.io/npm/v/@web3auth/ethereum-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth/ethereum-provider/v/latest)                                   | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ethereum-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/ethereum-provider@latest)                                   | EIP-1193 compatible JRPC provider                                                                                                                                                                                                                                                                                    |
-| `@web3auth/solana-provider`                    | [![npm version](https://img.shields.io/npm/v/@web3auth/solana-provider?label=%22%22)](https://www.npmjs.com/package/@web3auth/solana-provider/v/latest)                                       | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/solana-provider?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/solana-provider@latest)                                       | Solana chain compatible JRPC provider                                                                                                                                                                                                                                                                                |
-| 🐉 **Plugins**                                 |                                                                                                                                                                                               |
-| `@web3auth/wallet-services-plugin`             | [![npm version](https://img.shields.io/npm/v/@web3auth/wallet-services-plugin?label=%22%22)](https://www.npmjs.com/package/@web3auth/wallet-services-plugin/v/latest)                         | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/wallet-services-plugin?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/wallet-services-plugin@latest)                         | Allows to inject your web3auth scoped private key into Wallet Services UI                                                                                                                                                                                                                                            |
-| `@web3auth/wallet-services-plugin-react-hooks` | [![npm version](https://img.shields.io/npm/v/@web3auth/wallet-services-plugin-react-hooks?label=%22%22)](https://www.npmjs.com/package/@web3auth/wallet-services-plugin-react-hooks/v/latest) | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/wallet-services-plugin-react-hooks?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/wallet-services-plugin-react-hooks@latest) | Allows to inject your web3auth scoped private key into Wallet Services UI                                                                                                                                                                                                                                            |
-| 🐉 **Low-Level**                               |
-| `@web3auth/base`                               | [![npm version](https://img.shields.io/npm/v/@web3auth/base?label=%22%22)](https://www.npmjs.com/package/@web3auth/base/v/latest)                                                             | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/base?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/base@latest)                                                             | Base reusable functionalities for creating a web3auth instance                                                                                                                                                                                                                                                       |
-| `@web3auth/ui`                                 | [![npm version](https://img.shields.io/npm/v/@web3auth/ui?label=%22%22)](https://www.npmjs.com/package/@web3auth/ui/v/latest)                                                                 | [![minzip](https://img.shields.io/bundlephobia/minzip/@web3auth/ui?label=%22%22)](https://bundlephobia.com/result?p=@web3auth/ui@latest)                                                                 | Provides the UI used for creating the modal                                                                                                                                                                                                                                                                          |
+The Web3Auth Modal SDK offers a rich set of advanced configuration options:
+
+- **Smart Accounts**: Configure account abstraction parameters
+- **Custom Authentication**: Define authentication methods
+- **Whitelabeling & UI Customization**: Personalize the modal's appearance
+- **Multi-Factor Authentication (MFA)**: Set up and manage MFA
+- **Wallet Services**: Integrate additional wallet services
 
 ## ⏪ Requirements
 
@@ -145,7 +242,7 @@ Check out the examples for your preferred blockchain and platform on our [exampl
 
 Checkout the [Web3Auth Demo](https://demo.web3auth.io) to see how Web3Auth can be used in your application.
 
-Further checkout the [demo folder](https://github.com/Web3Auth/Web3Auth/tree/master/demo) within this repository, which contains other hosted demos for different usecases.
+For more detailed examples, visit our [Web3Auth Examples repository](https://github.com/Web3Auth/web3auth-examples/). This repository contains a comprehensive collection of sample projects to help you get started with your Web3Auth integration.
 
 ## 💬 Troubleshooting and Support
 
@@ -153,7 +250,3 @@ Further checkout the [demo folder](https://github.com/Web3Auth/Web3Auth/tree/mas
 - Checkout our [Troubleshooting Documentation Page](https://web3auth.io/docs/troubleshooting) to know the common issues and solutions.
 - For Priority Support, please have a look at our [Pricing Page](https://web3auth.io/pricing.html) for the plan that suits your needs.
 
-TODO:
-
-- add default adapter modules
-- whitelabel only at one place
