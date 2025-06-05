@@ -95,7 +95,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       super.initChainsConfig(projectConfig);
       super.initCachedConnectorAndChainId();
       super.initWalletServicesConfig(projectConfig);
-      this.analytics.setGlobalProperties({ team_id: projectConfig.teamId ? Number(projectConfig.teamId) : undefined });
+      this.analytics.setGlobalProperties({ team_id: projectConfig.teamId });
       trackData = this.getInitializationTrackData();
 
       // init login modal
