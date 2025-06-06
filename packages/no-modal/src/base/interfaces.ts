@@ -76,6 +76,7 @@ export interface LoginModalConfig {
 }
 
 export interface ProjectConfig {
+  teamId: number;
   // General config
   userDataIncludedInToken?: boolean; // TODO: implement this
   sessionTime?: number;

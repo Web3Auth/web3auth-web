@@ -185,6 +185,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.initCachedConnectorAndChainId();
       this.initUIConfig(projectConfig);
       this.initWalletServicesConfig(projectConfig);
+      this.analytics.setGlobalProperties({ team_id: projectConfig.teamId });
       trackData = this.getInitializationTrackData();
 
       // setup common JRPC provider
