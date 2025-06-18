@@ -16,12 +16,12 @@
     "chai": "^5.2.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.5.0",
-    "eslint": "^9.27.0",
-    "eslint-import-resolver-typescript": "^4.3.5",
+    "eslint": "^9.29.0",
+    "eslint-import-resolver-typescript": "^4.4.3",
     "husky": "^9.1.7",
     "lerna": "^8.2.2",
-    "lint-staged": "^16.0.0",
-    "mocha": "^11.4.0",
+    "lint-staged": "^16.1.2",
+    "mocha": "^11.7.0",
     "prettier": "^3.5.3",
     "rimraf": "^6.0.1",
     "ts-node": "^10.9.2",
@@ -53,8 +53,8 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^21.1.1",
-    "@rollup/rollup-linux-x64-gnu": "^4.41.0"
+    "@nx/nx-linux-x64-gnu": "^21.2.0",
+    "@rollup/rollup-linux-x64-gnu": "^4.43.0"
   },
   "private": true,
   "repository": {

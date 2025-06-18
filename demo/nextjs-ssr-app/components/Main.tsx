@@ -12,7 +12,7 @@ import {
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
-import { useAccount, useBalance, useSignMessage, useSignTypedData, useSwitchChain, useChainId } from "wagmi";
+import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
@@ -32,7 +32,7 @@ const Main = () => {
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
   const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
 
-  console.log("isConnected", isConnected);
+  console.log("isConnected", isConnected, balance);
 
   const loggedInView = (
     <>
@@ -183,7 +183,13 @@ const Main = () => {
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
           <p>Switch Chain</p>
           {chains.map((chain) => (
-            <button key={chain.id} disabled={chain.id === chainId} onClick={() => switchChain({ chainId: chain.id })} style={{ opacity: chain.id === chainId ? 0.5 : 1 }} className="card">
+            <button
+              key={chain.id}
+              disabled={chain.id === chainId}
+              onClick={() => switchChain({ chainId: chain.id })}
+              style={{ opacity: chain.id === chainId ? 0.5 : 1 }}
+              className="card"
+            >
               {chain.name}
             </button>
           ))}
