@@ -79,6 +79,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       dapp_url: window.location.origin,
       sdk_name: ANALYTICS_SDK_TYPE.WEB_MODAL,
       sdk_version: sdkVersion,
+      // Required for organization analytics
+      web3auth_client_id: this.options.clientId,
+      web3auth_network: this.options.web3AuthNetwork,
     });
     let trackData: Record<string, unknown> = {};
 
