@@ -159,6 +159,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       dapp_url: window.location.origin,
       sdk_name: ANALYTICS_SDK_TYPE.WEB_NO_MODAL,
       sdk_version: sdkVersion,
+      // Required for organization analytics
+      web3auth_client_id: this.coreOptions.clientId,
+      web3auth_network: this.coreOptions.web3AuthNetwork,
     });
     let trackData: Record<string, unknown> = {};
 
