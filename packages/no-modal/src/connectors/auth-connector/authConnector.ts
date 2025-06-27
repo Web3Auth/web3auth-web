@@ -461,6 +461,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         whiteLabel: JSON.stringify(this.authInstance.options.whiteLabel),
         loginParams: JSON.stringify(loginParams),
         version: version.split(".")[0],
+        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+        web3AuthClientId: this.coreOptions.clientId,
+        originData: this.authInstance.options.originData ? JSON.stringify(this.authInstance.options.originData) : undefined,
       },
       web3AuthClientId: this.coreOptions.clientId,
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
@@ -555,11 +558,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     if (params.loginHint || params.extraLoginOptions?.login_hint) {
       finalUserId = params.loginHint || params.extraLoginOptions?.login_hint;
     } else if (params.extraLoginOptions?.id_token) {
-      if (typeof finalExtraLoginOptions.isUserIdCaseSensitive === "undefined") {
-        throw WalletInitializationError.invalidParams(
-          `isUserIdCaseSensitive is required for this connection: ${finalExtraLoginOptions.authConnection}`
-        );
-      }
       const { payload } = parseToken<Auth0UserInfo>(params.extraLoginOptions.id_token);
       finalUserId = getUserId(
         payload,

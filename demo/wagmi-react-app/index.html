@@ -17,6 +17,7 @@
     -->
     <link rel="manifest" href="/manifest.json" />
     <script type="module">
+      window.global = globalThis;
       import { Buffer } from "buffer";
       import process from "process";
       // window.global ||= window;
