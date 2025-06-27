@@ -12,7 +12,7 @@ export interface IUseWeb3AuthUser {
 }
 
 export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
-  const { web3Auth, isConnected, isMFAEnabled, setIsMFAEnabled } = useWeb3AuthInner();
+  const { web3Auth, isConnected, isInitialized, isMFAEnabled, setIsMFAEnabled } = useWeb3AuthInner();
 
   const [userInfo, setUserInfo] = useState<Partial<UserInfo> | null>(null);
   const [loading, setLoading] = useState(false);
@@ -39,13 +39,15 @@ export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
       setIsMFAEnabled(userInfo?.isMfaEnabled || false);
     };
 
-    if (isConnected && !userInfo) saveUserInfo();
+    // In SSR mode, isConnected is true on the first render, but userInfo is not populated.
+    // hence we also need to check for isInitialized to ensure that userInfo is populated.
+    if (isInitialized && isConnected && !userInfo) saveUserInfo();
 
     if (!isConnected && userInfo) {
       setUserInfo(null);
       setIsMFAEnabled(false);
     }
-  }, [isConnected, userInfo, getUserInfo, setIsMFAEnabled]);
+  }, [isInitialized, isConnected, userInfo, getUserInfo, setIsMFAEnabled]);
 
   return { loading, error, userInfo, isMFAEnabled, getUserInfo };
 };

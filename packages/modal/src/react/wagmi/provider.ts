@@ -17,33 +17,17 @@ import {
   useReconnect,
   WagmiProvider as WagmiProviderBase,
 } from "wagmi";
-import { injected } from "wagmi/connectors";
 
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../hooks";
+import { createWeb3AuthConnector, WEB3AUTH_CONNECTOR_ID } from "./connector";
 import { defaultWagmiConfig } from "./constants";
 import { WagmiProviderProps } from "./interface";
 
-const WEB3AUTH_CONNECTOR_ID = "web3auth";
-
 // Helper to initialize connectors for the given wallets
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function setupConnector(provider: any, config: Config) {
-  let connector: Connector | CreateConnectorFn = config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
+async function setupConnector(config: Config) {
+  const connector: Connector | CreateConnectorFn = config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
 
   if (connector) return connector;
-
-  // Create new connector if not already existing
-  connector = injected({
-    target: {
-      provider: provider,
-      id: WEB3AUTH_CONNECTOR_ID,
-      name: "Web3Auth",
-    },
-  });
-
-  const result = config._internal.connectors.setup(connector);
-  config._internal.connectors.setState((current) => [...current, result]);
-  return result;
 }
 
 // Helper to connect a wallet and update wagmi state
@@ -94,8 +78,6 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   const wagmiConfig = useWagmiConfig();
   const { reconnect } = useReconnect();
 
-  console.log("wagmi config", wagmiConfig.chains?.length, wagmiConfig.state);
-
   useAccountEffect({
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
@@ -106,7 +88,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     (async () => {
       if (isConnected && provider) {
-        const connector = await setupConnector(provider, wagmiConfig);
+        const connector = await setupConnector(wagmiConfig);
         if (!connector) {
           log.error("Failed to setup react wagmi connector");
           throw new Error("Failed to setup connector");
@@ -130,58 +112,63 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
   const { web3Auth, isInitialized } = useWeb3Auth();
 
   const wagmiConfig = useMemo(() => {
-    if (!isInitialized) return defaultWagmiConfig;
+    let finalConfig: CreateConfigParameters;
+    const web3authConnector = createWeb3AuthConnector(web3Auth);
+    if (!isInitialized) {
+      defaultWagmiConfig.connectors = [web3authConnector];
+      finalConfig = defaultWagmiConfig;
+    } else {
+      finalConfig = {
+        ssr: true,
+        ...config,
+        chains: undefined,
+        connectors: [web3authConnector],
+        transports: {},
+        multiInjectedProviderDiscovery: false,
+        client: undefined,
+      };
 
-    const finalConfig: CreateConfigParameters = {
-      ssr: true,
-      ...config,
-      chains: undefined,
-      connectors: [],
-      transports: {},
-      multiInjectedProviderDiscovery: false,
-      client: undefined,
-    };
+      const wagmiChains: Chain[] = [];
+      if (isInitialized && web3Auth?.coreOptions?.chains) {
+        const defaultChainId = web3Auth.currentChain?.chainId;
+        const chains = web3Auth.coreOptions.chains.filter((chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155);
+        if (chains.length === 0) throw WalletInitializationError.invalidParams("No valid chains found in web3auth config for wagmi.");
 
-    const wagmiChains: Chain[] = [];
-    if (isInitialized && web3Auth?.coreOptions?.chains) {
-      const defaultChainId = web3Auth.currentChain?.chainId;
-      const chains = web3Auth.coreOptions.chains.filter((chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155);
-      if (chains.length === 0) throw WalletInitializationError.invalidParams("No valid chains found in web3auth config for wagmi.");
-
-      chains.forEach((chain) => {
-        const wagmiChain = defineChain({
-          id: Number.parseInt(chain.chainId, 16), // id in number form
-          name: chain.displayName,
-          rpcUrls: {
-            default: {
-              http: [chain.rpcTarget],
-              webSocket: [chain.wsTarget],
+        chains.forEach((chain) => {
+          const wagmiChain = defineChain({
+            id: Number.parseInt(chain.chainId, 16), // id in number form
+            name: chain.displayName,
+            rpcUrls: {
+              default: {
+                http: [chain.rpcTarget],
+                webSocket: [chain.wsTarget],
+              },
             },
-          },
-          blockExplorers: chain.blockExplorerUrl
-            ? {
-                default: {
-                  name: "explorer", // TODO: correct name if chain config has it
-                  url: chain.blockExplorerUrl,
-                },
-              }
-            : undefined,
-          nativeCurrency: {
-            name: chain.tickerName,
-            symbol: chain.ticker,
-            decimals: chain.decimals || 18,
-          },
+            blockExplorers: chain.blockExplorerUrl
+              ? {
+                  default: {
+                    name: "explorer", // TODO: correct name if chain config has it
+                    url: chain.blockExplorerUrl,
+                  },
+                }
+              : undefined,
+            nativeCurrency: {
+              name: chain.tickerName,
+              symbol: chain.ticker,
+              decimals: chain.decimals || 18,
+            },
+          });
+
+          if (defaultChainId === chain.chainId) {
+            wagmiChains.unshift(wagmiChain);
+          } else {
+            wagmiChains.push(wagmiChain);
+          }
+          finalConfig.transports[wagmiChain.id] = chain.wsTarget ? webSocket(chain.wsTarget) : http(chain.rpcTarget);
         });
 
-        if (defaultChainId === chain.chainId) {
-          wagmiChains.unshift(wagmiChain);
-        } else {
-          wagmiChains.push(wagmiChain);
-        }
-        finalConfig.transports[wagmiChain.id] = chain.wsTarget ? webSocket(chain.wsTarget) : http(chain.rpcTarget);
-      });
-
-      finalConfig.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
+        finalConfig.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
+      }
     }
 
     if (web3Auth?.coreOptions?.ssr) {
@@ -200,7 +187,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     // and creating a new config object with the finalConfig
     {
       ...props,
-      initialState: props.initialState || (web3Auth?.coreOptions?.ssr && defaultWagmiConfig.state),
+      initialState: props.initialState,
       config: wagmiConfig,
       reconnectOnMount: web3Auth?.coreOptions?.ssr,
     },

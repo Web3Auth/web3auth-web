@@ -12,7 +12,7 @@ import {
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
-import { useAccount, useBalance, useSignMessage, useSignTypedData } from "wagmi";
+import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
@@ -29,16 +29,19 @@ const Main = () => {
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
   const { token, loading: isUserTokenLoading, error: userTokenError, authenticateUser } = useIdentityToken();
- 
+  const { switchChainAsync, chains } = useSwitchChain();
+  const chainId = useChainId();
+
   console.log("isConnected", isConnected);
   console.log("isWagmiConnected", isWagmiConnected);
   const loggedInView = (
     <>
       <div className="container">
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
-          {/* <p>Account Address: {address}</p> */}
-          {/* <p>Account Balance: {balance?.value}</p> */}
+          <p>Account Address: {address}</p>
+          <p>Account Balance: {balance?.formatted}</p>
           <p>MFA Enabled: {isMFAEnabled ? "Yes" : "No"}</p>
+          <p>ConnectedChain ID: {chainId}</p>
         </div>
 
         {/* User Info */}
@@ -177,6 +180,22 @@ const Main = () => {
           {signedTypedDataData && <textarea disabled rows={5} value={signedTypedDataData} style={{ width: "100%" }} />}
         </div>
 
+        {/* Chain Actions */}
+        <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+          <p>Switch Chain</p>
+          {chains.map((chain) => (
+            <button
+              key={chain.id}
+              onClick={async () => switchChainAsync({ chainId: chain.id })}
+              className="card"
+              disabled={chainId === chain.id}
+              style={{ opacity: chainId === chain.id ? 0.5 : 1 }}
+            >
+              Switch to {chain.name}
+            </button>
+          ))}
+        </div>
+
         {/* Disconnect */}
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
           <p>Logout</p>
@@ -205,7 +224,7 @@ const Main = () => {
     <div className="grid">
       <p>Web3Auth: {isConnected ? "Connected" : "Disconnected"}</p>
       <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p>
-      {provider ? loggedInView : unloggedInView}
+      {isConnected ? loggedInView : unloggedInView}
     </div>
   );
 };

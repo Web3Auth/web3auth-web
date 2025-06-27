@@ -17,6 +17,8 @@ export const metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   const web3authInitialState = cookieToWeb3AuthState((headers()).get('cookie'))
   const wagmiInitialState = cookieToWagmiState((headers()).get('cookie'))
+  console.log("web3authInitialState", web3authInitialState);
+  console.log("wagmiInitialState", wagmiInitialState);
   return (
     <html lang="en">
       <body className={inter.className}>
