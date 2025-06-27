@@ -463,7 +463,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         version: version.split(".")[0],
         web3AuthNetwork: this.coreOptions.web3AuthNetwork,
         web3AuthClientId: this.coreOptions.clientId,
-        originData: JSON.stringify(this.authInstance.options.originData),
+        originData: this.authInstance.options.originData ? JSON.stringify(this.authInstance.options.originData) : undefined,
       },
       web3AuthClientId: this.coreOptions.clientId,
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
