@@ -38,7 +38,7 @@ export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
 }
 
 class MetaMaskConnector extends BaseEvmConnector<void> {
-  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.EIP155;
+  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 
   readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
 
