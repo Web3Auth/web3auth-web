@@ -322,8 +322,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   public getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
     const { authConnection, authConnectionId, groupedAuthConnectionId } = params;
     const providerConfig = this.authConnectionConfig.find((x) => {
-      if (groupedAuthConnectionId) {
-        return x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId;
+      if (groupedAuthConnectionId && authConnectionId) {
+        return (
+          x.authConnection === authConnection && x.groupedAuthConnectionId === groupedAuthConnectionId && x.authConnectionId === authConnectionId
+        );
       }
       if (authConnectionId) {
         return x.authConnection === authConnection && x.authConnectionId === authConnectionId;
