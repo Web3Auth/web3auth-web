@@ -518,9 +518,14 @@ function Login(props: LoginProps) {
     );
   };
 
+  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
+
   const delimiter = (index: number) => {
     return (
-      <div className="w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2" key={`section-delimiter-${index}`}>
+      <div
+        className={cn("w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2", headerLogo ? "w3a--my-2" : "w3a--my-4")}
+        key={`section-delimiter-${index}`}
+      >
         <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
         <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
         <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
@@ -575,8 +580,6 @@ function Login(props: LoginProps) {
 
   const expandedView = () => socialLoginSection(otherRow);
 
-  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
-
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-2">
       <div
@@ -585,18 +588,21 @@ function Login(props: LoginProps) {
           logoAlignment === "center" ? "" : "w3a--w-full"
         )}
       >
-        <figure
-          className={cn(
-            "w3a--mx-auto w3a--h-12 w3a--w-[200px]",
-            logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0 w3a--w-auto"
-          )}
-        >
-          <img src={headerLogo || getIcons(isDark ? "logo-w-dark" : "logo-w-light")} alt="Logo" className="w3a--size-full w3a--object-contain" />
-        </figure>
+        {headerLogo && (
+          <figure
+            className={cn(
+              "w3a--mx-auto w3a--h-12 w3a--w-[200px]",
+              logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0 w3a--w-auto"
+            )}
+          >
+            <img src={headerLogo} alt="Logo" className="w3a--size-full w3a--object-contain" />
+          </figure>
+        )}
         <p
           className={cn(
-            "w3a--text-lg w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white",
-            logoAlignment === "center" ? "w3a--text-center" : "w3a--text-left w3a--w-full w3a--ml-4"
+            "w3a--text-app-gray-900 dark:w3a--text-app-white",
+            logoAlignment === "center" ? "w3a--text-center" : "w3a--text-left w3a--w-full w3a--ml-4",
+            headerLogo ? "w3a--text-lg w3a--font-semibold" : "w3a--text-3xl w3a--font-medium"
           )}
         >
           {t("modal.social.sign-in")}
