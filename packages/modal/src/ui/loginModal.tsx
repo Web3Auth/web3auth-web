@@ -297,11 +297,12 @@ export class LoginModal {
     options?: { externalWalletsInitialized: boolean; externalWalletsVisibility: boolean; showExternalWalletsOnly: boolean }
   ): void => {
     this.externalWalletsConfig = externalWalletsConfig;
+    const isMMAvailable = !!externalWalletsConfig[WALLET_CONNECTORS.METAMASK];
     this.setState({
       externalWalletsConfig,
       externalWalletsInitialized: !!options.externalWalletsInitialized,
       showExternalWalletsOnly: !!options.showExternalWalletsOnly,
-      externalWalletsVisibility: !!options.externalWalletsVisibility,
+      externalWalletsVisibility: isMMAvailable ? false : !!options.externalWalletsVisibility,
     });
   };
 

@@ -120,10 +120,15 @@ function Widget(props: WidgetProps) {
     () => isEmailPasswordLessLoginVisible || isSmsPasswordLessLoginVisible,
     [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible]
   );
-  const showExternalWalletButton = useMemo(() => modalState.hasExternalWallets, [modalState]);
+  const showExternalWalletButton = useMemo(
+    () => modalState.hasExternalWallets || !!modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK],
+    [modalState]
+  );
   const showExternalWalletPage = useMemo(
-    () => (areSocialLoginsVisible || showPasswordLessInput) && !modalState.externalWalletsVisibility,
-    [areSocialLoginsVisible, showPasswordLessInput, modalState.externalWalletsVisibility]
+    () =>
+      (areSocialLoginsVisible || showPasswordLessInput || !!modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]) &&
+      !modalState.externalWalletsVisibility,
+    [areSocialLoginsVisible, showPasswordLessInput, modalState]
   );
 
   const handleExternalWalletBtnClick = (flag: boolean) => {
