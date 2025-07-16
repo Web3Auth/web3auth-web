@@ -356,13 +356,17 @@ function Login(props: LoginProps) {
     });
     // for non-injected Metamask, show QR code to connect
     if (wallet.name === WALLET_CONNECTORS.METAMASK && !wallet.hasInjectedWallet) {
-      setBodyState({
-        ...bodyState,
-        metamaskQrCode: {
-          show: true,
-          wallet: wallet,
-        },
-      });
+      handleExternalWalletClick({ connector: wallet.name });
+      // We should show QR code only if the wallet is not installed.
+      if (!wallet.isInstalled) {
+        setBodyState({
+          ...bodyState,
+          metamaskQrCode: {
+            show: true,
+            wallet: wallet,
+          },
+        });
+      }
       return;
     }
 
