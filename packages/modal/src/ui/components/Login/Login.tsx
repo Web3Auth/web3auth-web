@@ -2,7 +2,6 @@ import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import {
   ANALYTICS_EVENTS,
-  isBrowser,
   log,
   type ModalSignInMethodType,
   type WALLET_CONNECTOR_TYPE,
