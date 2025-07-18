@@ -2,6 +2,7 @@ import HCaptcha from "@hcaptcha/react-hcaptcha";
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import {
   ANALYTICS_EVENTS,
+  isBrowser,
   log,
   type ModalSignInMethodType,
   type WALLET_CONNECTOR_TYPE,
@@ -358,15 +359,13 @@ function Login(props: LoginProps) {
     if (wallet.name === WALLET_CONNECTORS.METAMASK && !wallet.hasInjectedWallet) {
       handleExternalWalletClick({ connector: wallet.name });
       // We should show QR code only if the wallet is not installed.
-      if (!wallet.isInstalled) {
-        setBodyState({
-          ...bodyState,
-          metamaskQrCode: {
-            show: true,
-            wallet: wallet,
-          },
-        });
-      }
+      setBodyState({
+        ...bodyState,
+        metamaskQrCode: {
+          show: true,
+          wallet: wallet,
+        },
+      });
       return;
     }
 
