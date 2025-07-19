@@ -424,12 +424,8 @@ function Root(props: RootProps) {
   );
 
   const isShowLoader = useMemo(() => {
-    // don't show loader if metamask is connecting and there is a connect uri
-    if (modalState.detailedLoaderConnector === WALLET_CONNECTORS.METAMASK && modalState.metamaskConnectUri) {
-      return false;
-    }
     return modalState.status !== MODAL_STATUS.INITIALIZED;
-  }, [modalState.detailedLoaderConnector, modalState.metamaskConnectUri, modalState.status]);
+  }, [modalState.status]);
 
   return (
     <RootContext.Provider value={contextValue}>
