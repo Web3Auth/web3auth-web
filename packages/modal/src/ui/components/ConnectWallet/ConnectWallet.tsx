@@ -187,6 +187,10 @@ function ConnectWallet(props: ConnectWalletProps) {
 
     // show QR code for wallet connect v2 and MM (non-injected)
     if (button.hasWalletConnect) {
+      // connect to MM if not injected
+      if (button.name === WALLET_CONNECTORS.METAMASK) {
+        handleExternalWalletClick({ connector: button.name });
+      }
       setSelectedButton(button);
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
