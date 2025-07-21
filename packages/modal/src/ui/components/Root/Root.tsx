@@ -1,12 +1,11 @@
 import { WALLET_CONNECTORS, type WalletRegistryItem } from "@web3auth/no-modal";
-import Bowser from "bowser";
 import { JSX, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
-import { browser, ExternalButton, mobileOs, MODAL_STATUS, os, platform, TOAST_TYPE, ToastType } from "../../interfaces";
+import { ExternalButton, mobileOs, MODAL_STATUS, TOAST_TYPE, ToastType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
 import BottomSheet from "../BottomSheet";
@@ -42,6 +41,7 @@ function Root(props: RootProps) {
     isSmsPasswordLessLoginVisible,
     preHandleExternalWalletClick,
     uiConfig,
+    deviceDetails,
   } = props;
 
   const {
@@ -99,16 +99,6 @@ function Root(props: RootProps) {
   };
 
   // Wallet Details
-  const deviceDetails = useMemo<{ platform: platform; browser: browser; os: mobileOs }>(() => {
-    if (typeof window === "undefined") return { platform: "mobile", browser: "chrome", os: "ios" };
-    const browserData = Bowser.getParser(window.navigator.userAgent);
-    return {
-      platform: browserData.getPlatformType() as platform,
-      browser: browserData.getBrowserName().toLowerCase() as browser,
-      os: browserData.getOSName() as mobileOs,
-    };
-  }, []);
-
   const mobileInstallLinks = useMemo<JSX.Element[]>(() => {
     if (deviceDetails.platform === "desktop") return [];
     const installConfig = bodyState.installLinks?.wallet?.walletRegistryItem?.app || {};
@@ -490,11 +480,7 @@ function Root(props: RootProps) {
                         totalExternalWallets={totalExternalWallets}
                         logoAlignment={logoAlignment}
                         buttonRadius={buttonRadiusType}
-                        deviceDetails={{
-                          platform: deviceDetails.platform,
-                          browser: deviceDetails.browser,
-                          os: deviceDetails.os as os,
-                        }}
+                        deviceDetails={deviceDetails}
                         handleSocialLoginClick={handleSocialLoginClick}
                         handleExternalWalletBtnClick={onExternalWalletBtnClick}
                         handleSocialLoginHeight={handleSocialLoginHeight}
@@ -512,11 +498,7 @@ function Root(props: RootProps) {
                         allExternalButtons={allButtons}
                         connectorVisibilityMap={connectorVisibilityMap}
                         customConnectorButtons={customConnectorButtons}
-                        deviceDetails={{
-                          platform: deviceDetails.platform,
-                          browser: deviceDetails.browser,
-                          os: deviceDetails.os as os,
-                        }}
+                        deviceDetails={deviceDetails}
                         chainNamespace={chainNamespaces}
                         buttonRadius={buttonRadiusType}
                         handleWalletDetailsHeight={handleWalletDetailsHeight}

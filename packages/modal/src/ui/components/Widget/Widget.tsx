@@ -22,6 +22,7 @@ function Widget(props: WidgetProps) {
     chainNamespaces,
     walletRegistry,
     uiConfig,
+    deviceDetails,
   } = props;
 
   const { widgetType } = uiConfig;
@@ -219,6 +220,7 @@ function Widget(props: WidgetProps) {
             isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
             uiConfig={uiConfig}
+            deviceDetails={deviceDetails}
           />
         )}
       </Modal>
@@ -250,6 +252,7 @@ function Widget(props: WidgetProps) {
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
           uiConfig={uiConfig}
+          deviceDetails={deviceDetails}
         />
       )}
     </Embed>
