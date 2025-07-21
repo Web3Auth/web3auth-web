@@ -152,6 +152,16 @@ function ConnectWallet(props: ConnectWalletProps) {
     return walletDiscoverySupported ? defaultButtons.length : installedWalletButtons.length;
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
 
+  /**
+   * Wallet click logic
+   * - For installed wallets
+   *  - For MetaMask non-injected on desktop, show QR code for connection
+   *  - Ask user to select a chain namespace if it has multiple namespaces
+   *  - Otherwise, use their connectors to connect
+   * - For wallet-discovery wallets (not installed)
+   *  - On desktop, show QR code for connection if wallet connect v2 is supported, otherwise show install links
+   *  - On mobile, open deeplink with wallet connect uri (won't go into this function as it'll open the deeplink)
+   */
   const handleWalletClick = (button: ExternalButton) => {
     analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_SELECTED, {
       connector: button.isInstalled ? button.name : button.hasWalletConnect ? WALLET_CONNECTORS.WALLET_CONNECT_V2 : "",
@@ -165,45 +175,50 @@ function ConnectWallet(props: ConnectWalletProps) {
       total_external_wallets: allUniqueButtons.length,
     });
 
-    // show chain namespace selector if the button is an injected connector with multiple chain namespaces
-    const isChainNamespaceSelectorRequired = button.hasInjectedWallet && button.chainNamespaces?.length > 1;
-    if (isChainNamespaceSelectorRequired) {
-      setBodyState({
-        ...bodyState,
-        multiChainSelector: {
-          show: true,
-          wallet: button,
-        },
-      });
-      return;
-    }
-
-    // connect with connector if injected and single chain namespace or custom connector (except MetaMask)
-    const isInjectedConnectorAndSingleChainNamespace = button.hasInjectedWallet && button.chainNamespaces?.length === 1;
-    const isCustomConnector = !button.hasInjectedWallet && button.isInstalled;
-    if (isInjectedConnectorAndSingleChainNamespace || (isCustomConnector && button.name !== WALLET_CONNECTORS.METAMASK)) {
-      return handleExternalWalletClick({ connector: button.name });
-    }
-
-    // show QR code for wallet connect v2 and MM (non-injected)
-    if (button.hasWalletConnect) {
-      // connect to MM if not injected
-      if (button.name === WALLET_CONNECTORS.METAMASK) {
+    // for installed wallets
+    if (button.isInstalled) {
+      // for MetaMask non-injected on desktop, show QR code for connection
+      if (button.name === WALLET_CONNECTORS.METAMASK && !button.hasInjectedWallet && deviceDetails.platform === "desktop") {
         handleExternalWalletClick({ connector: button.name });
+        setSelectedButton(button);
+        setSelectedWallet(true);
+        setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
+        handleWalletDetailsHeight();
+        return;
       }
-      setSelectedButton(button);
-      setSelectedWallet(true);
-      setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
-      handleWalletDetailsHeight();
+
+      // show chain namespace selector if the button has multiple chain namespaces
+      if (button.chainNamespaces?.length > 1) {
+        setBodyState({
+          ...bodyState,
+          multiChainSelector: {
+            show: true,
+            wallet: button,
+          },
+        });
+        return;
+      }
+
+      // otherwise, use their connectors to connect
+      handleExternalWalletClick({ connector: button.name });
+      return;
     } else {
-      // show install links
-      setBodyState({
-        ...bodyState,
-        installLinks: {
-          show: true,
-          wallet: button,
-        },
-      });
+      // show QR code if wallet connect v2 is supported
+      if (button.hasWalletConnect) {
+        setSelectedButton(button);
+        setSelectedWallet(true);
+        setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
+        handleWalletDetailsHeight();
+      } else {
+        // otherwise, show install links
+        setBodyState({
+          ...bodyState,
+          installLinks: {
+            show: true,
+            wallet: button,
+          },
+        });
+      }
     }
   };
 

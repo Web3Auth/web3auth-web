@@ -490,6 +490,11 @@ function Root(props: RootProps) {
                         totalExternalWallets={totalExternalWallets}
                         logoAlignment={logoAlignment}
                         buttonRadius={buttonRadiusType}
+                        deviceDetails={{
+                          platform: deviceDetails.platform,
+                          browser: deviceDetails.browser,
+                          os: deviceDetails.os as os,
+                        }}
                         handleSocialLoginClick={handleSocialLoginClick}
                         handleExternalWalletBtnClick={onExternalWalletBtnClick}
                         handleSocialLoginHeight={handleSocialLoginHeight}
