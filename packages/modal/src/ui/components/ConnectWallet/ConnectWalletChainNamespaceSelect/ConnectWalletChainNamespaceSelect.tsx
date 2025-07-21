@@ -9,7 +9,7 @@ const ConnectWalletChainNamespaceSelect = (props: ConnectWalletChainNamespaceSel
   const { isDark, wallet, handleExternalWalletClick } = props;
   const [t] = useTranslation(undefined, { i18n });
 
-  const chainNamespaces = wallet.chainNamespaces!.map((chainNamespace) => {
+  const chainNamespaces = wallet.chainNamespaces!.sort().map((chainNamespace) => {
     const imageId = chainNamespace === "eip155" ? "evm" : chainNamespace;
     const displayName = chainNamespace === "eip155" ? "EVM" : chainNamespace;
     return {
