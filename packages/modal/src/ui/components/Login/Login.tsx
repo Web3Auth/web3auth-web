@@ -17,6 +17,7 @@ import { AnalyticsContext } from "../../context/AnalyticsContext";
 import { RootContext } from "../../context/RootContext";
 import type { PasswordlessHandler } from "../../handlers/AbstractHandler";
 import { createPasswordlessHandler } from "../../handlers/factory";
+import { isTestAccountPattern } from "../../helper/testAccounts";
 import type { ExternalButton, rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, getUserCountry, validatePhoneNumber } from "../../utils";
@@ -196,11 +197,14 @@ function Login(props: LoginProps) {
         authBuildEnv,
       });
 
-      const res = await captchaRef.current?.execute({ async: true });
-      if (!res) {
-        throw WalletLoginError.connectionError("Captcha token is required");
+      let token: string | undefined = undefined;
+      if (!isTestAccountPattern(authConnection, loginHint)) {
+        const res = await captchaRef.current?.execute({ async: true });
+        if (!res) {
+          throw WalletLoginError.connectionError("Captcha token is required");
+        }
+        token = res.response;
       }
-      const token = res.response;
 
       const result = await handler.sendVerificationCode({ captchaToken: token });
       if (result?.error) {
