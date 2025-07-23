@@ -13,6 +13,7 @@ export default defineConfig({
   resolve: {
     alias: {
       wagmi: resolve("./node_modules/wagmi"),
+      global: "globalThis",
     },
   },
 });
