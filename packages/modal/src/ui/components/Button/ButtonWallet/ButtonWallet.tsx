@@ -15,7 +15,7 @@ function ButtonWallet(props: ButtonWalletProps) {
   const isDark = useContext(ThemedContext);
 
   const isLink = useMemo(
-    () => deviceDetails.platform !== "desktop" && button.href && button.hasWalletConnect && !button.hasInjectedWallet,
+    () => deviceDetails.platform !== "desktop" && button.href && button.hasWalletConnect && !button.isInstalled,
     [deviceDetails, button]
   );
 

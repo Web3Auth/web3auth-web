@@ -1,6 +1,6 @@
 import type { ChainNamespaceType, WalletRegistry } from "@web3auth/no-modal";
 
-import { ModalState, SocialLoginEventType, SocialLoginsConfig, UIConfig } from "../../interfaces";
+import { browser, ModalState, os, platform, SocialLoginEventType, SocialLoginsConfig, UIConfig } from "../../interfaces";
 
 export interface RootProps {
   appLogo?: string;
@@ -18,6 +18,7 @@ export interface RootProps {
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
   uiConfig: UIConfig;
+  deviceDetails: { platform: platform; browser: browser; os: os };
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletBtnClick?: (flag: boolean) => void;
   preHandleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;

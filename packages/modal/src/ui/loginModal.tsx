@@ -26,6 +26,7 @@ import {
   type Web3AuthNoModalEvents,
   WIDGET_TYPE,
 } from "@web3auth/no-modal";
+import Bowser from "bowser";
 import { createRoot } from "react-dom/client";
 
 import { getLoginModalAnalyticsProperties } from "../utils";
@@ -34,11 +35,14 @@ import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAUL
 import { AnalyticsContext } from "./context/AnalyticsContext";
 import { ThemedContext } from "./context/ThemeContext";
 import {
+  browser,
   ExternalWalletEventType,
   LoginModalCallbacks,
   LoginModalProps,
   MODAL_STATUS,
   ModalState,
+  os,
+  platform,
   SocialLoginEventType,
   StateEmitterEvents,
   UIConfig,
@@ -110,6 +114,16 @@ export class LoginModal {
 
   get isDark(): boolean {
     return this.uiConfig.mode === "dark" || (this.uiConfig.mode === "auto" && window.matchMedia("(prefers-color-scheme: dark)").matches);
+  }
+
+  get deviceDetails() {
+    if (typeof window === "undefined") return { platform: "mobile" as platform, browser: "chrome" as browser, os: "ios" as os };
+    const browserData = Bowser.getParser(window.navigator.userAgent);
+    return {
+      platform: browserData.getPlatformType() as platform,
+      browser: browserData.getBrowserName().toLowerCase() as browser,
+      os: browserData.getOSName() as os,
+    };
   }
 
   initModal = async (): Promise<void> => {
@@ -249,6 +263,7 @@ export class LoginModal {
               appName={this.uiConfig.appName}
               chainNamespaces={this.chainNamespaces}
               walletRegistry={this.walletRegistry}
+              deviceDetails={this.deviceDetails}
               handleShowExternalWallets={this.handleShowExternalWallets}
               handleExternalWalletClick={this.handleExternalWalletClick}
               handleSocialLoginClick={this.handleSocialLoginClick}
@@ -394,7 +409,7 @@ export class LoginModal {
 
       // don't show loader in case of metamask qr code, because currently it listens for incoming connections without any user interaction
       const isMetamaskInjected = this.externalWalletsConfig?.[WALLET_CONNECTORS.METAMASK]?.isInjected;
-      if (data?.connector === WALLET_CONNECTORS.METAMASK && !isMetamaskInjected) return;
+      if (data?.connector === WALLET_CONNECTORS.METAMASK && !isMetamaskInjected && this.deviceDetails.platform === "desktop") return;
 
       this.setState({ status: MODAL_STATUS.CONNECTING });
     });

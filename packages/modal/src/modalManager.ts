@@ -608,9 +608,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }): Promise<void> => {
     try {
       const connector = this.getConnector(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams?.chainNamespace);
-      // auto-connect WalletConnect and non-injected MetaMask in background to generate QR code URI without interfering with user's selected connection
-      const shouldStartConnectionInBackground =
-        connector.name === WALLET_CONNECTORS.WALLET_CONNECT_V2 || (connector.name === WALLET_CONNECTORS.METAMASK && !connector.isInjected);
+      // auto-connect WalletConnect in background to generate QR code URI without interfering with user's selected connection
+      const shouldStartConnectionInBackground = connector.name === WALLET_CONNECTORS.WALLET_CONNECT_V2;
       if (shouldStartConnectionInBackground) {
         const initialChain = this.getInitialChainIdForConnector(connector);
         await connector.connect({ chainId: initialChain.chainId });
@@ -649,32 +648,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       ) {
         log.debug("this stops wc connector from trying to reconnect once proposal expires");
         wcConnector.status = CONNECTOR_STATUS.READY;
-      }
-    }
-
-    // handle MM session refresh if MM is not injected
-    const metamaskConnector = this.getConnector(WALLET_CONNECTORS.METAMASK);
-    if (metamaskConnector && !metamaskConnector.isInjected) {
-      const status = metamaskConnector?.status;
-      log.debug("trying refreshing MM session", visibility, status);
-      if (visibility && (status === CONNECTOR_STATUS.READY || status === CONNECTOR_STATUS.CONNECTING)) {
-        log.debug("refreshing MM session");
-
-        // refreshing session for MM whenever modal is opened.
-        try {
-          const initialChain = this.getInitialChainIdForConnector(metamaskConnector);
-          metamaskConnector.connect({ chainId: initialChain.chainId });
-        } catch (error) {
-          log.error(`Error while connecting to MM`, error);
-        }
-      }
-      if (
-        !visibility &&
-        this.status === CONNECTOR_STATUS.CONNECTED &&
-        (status === CONNECTOR_STATUS.READY || status === CONNECTOR_STATUS.CONNECTING)
-      ) {
-        log.debug("this stops MM connector from trying to reconnect once proposal expires");
-        metamaskConnector.status = CONNECTOR_STATUS.READY;
       }
     }
   };
