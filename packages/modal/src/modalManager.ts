@@ -322,9 +322,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // initialize connectors based on availability
     const { hasInAppConnectors, hasExternalConnectors } = await this.checkConnectorAvailability(filteredConnectorNames);
     const filteredConnectors = connectors.filter((x) => filteredConnectorNames.includes(x.name as WALLET_CONNECTOR_TYPE));
-    if (hasInAppConnectors) {
-      await this.initInAppAndCachedConnectors(filteredConnectors);
-    }
+
+    // initialize in-app and cached connector (if there are only external connectors enabled)
+    await this.initInAppAndCachedConnectors(filteredConnectors);
+
     if (hasExternalConnectors) {
       if (hasInAppConnectors) {
         // show connect button if both in-app and external wallets are available
