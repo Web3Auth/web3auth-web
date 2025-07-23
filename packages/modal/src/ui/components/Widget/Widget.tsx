@@ -22,6 +22,7 @@ function Widget(props: WidgetProps) {
     chainNamespaces,
     walletRegistry,
     uiConfig,
+    deviceDetails,
   } = props;
 
   const { widgetType } = uiConfig;
@@ -183,13 +184,6 @@ function Widget(props: WidgetProps) {
       if (wcAvailable && !modalState.walletConnectUri && typeof handleExternalWalletClick === "function") {
         handleExternalWalletClick({ connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
       }
-
-      // auto connect to MetaMask if not injected to generate QR code URI for mobile connection
-      const mmAvailable =
-        modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK] && !modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]?.isInjected;
-      if (mmAvailable && !modalState.metamaskConnectUri && typeof handleExternalWalletClick === "function") {
-        handleExternalWalletClick({ connector: WALLET_CONNECTORS.METAMASK });
-      }
     }
   }, [modalState, handleExternalWalletClick]);
 
@@ -226,6 +220,7 @@ function Widget(props: WidgetProps) {
             isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
             uiConfig={uiConfig}
+            deviceDetails={deviceDetails}
           />
         )}
       </Modal>
@@ -257,6 +252,7 @@ function Widget(props: WidgetProps) {
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
           uiConfig={uiConfig}
+          deviceDetails={deviceDetails}
         />
       )}
     </Embed>

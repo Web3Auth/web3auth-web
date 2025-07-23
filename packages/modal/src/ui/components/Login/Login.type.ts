@@ -1,10 +1,13 @@
 import { BUILD_ENV_TYPE, WEB3AUTH_NETWORK_TYPE } from "@web3auth/auth";
 
 import type {
+  browser,
   ButtonRadiusType,
   ExternalButton,
   ExternalWalletEventType,
   LogoAlignmentType,
+  os,
+  platform,
   SocialLoginEventType,
   SocialLoginsConfig,
 } from "../../interfaces";
@@ -31,6 +34,7 @@ export interface LoginProps {
   totalExternalWallets: number;
   logoAlignment?: LogoAlignmentType;
   buttonRadius?: ButtonRadiusType;
+  deviceDetails: { platform: platform; browser: browser; os: os };
   handleExternalWalletBtnClick?: (flag: boolean) => void;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;

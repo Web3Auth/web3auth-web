@@ -60,6 +60,7 @@ function Login(props: LoginProps) {
     showInstalledExternalWallets,
     logoAlignment = "center",
     buttonRadius = "pill",
+    deviceDetails,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -342,6 +343,12 @@ function Login(props: LoginProps) {
     }
   };
 
+  /**
+   * Installed wallet click logic:
+   * - For MetaMask: If not injected and on desktop, display QR code for connection.
+   * - If wallet supports multiple chain namespaces, prompt user to select a chain.
+   * - Otherwise, connect directly using the wallet connector.
+   */
   const handleInstalledWalletClick = (wallet: ExternalButton) => {
     analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_SELECTED, {
       connector: wallet.name,
@@ -354,8 +361,10 @@ function Login(props: LoginProps) {
       has_wallet_registry_item: !!wallet.walletRegistryItem,
       total_external_wallets: totalExternalWallets,
     });
-    // for non-injected Metamask, show QR code to connect
-    if (wallet.name === WALLET_CONNECTORS.METAMASK && !wallet.hasInjectedWallet) {
+    // for non-injected Metamask on desktop, show QR code to connect
+    if (wallet.name === WALLET_CONNECTORS.METAMASK && !wallet.hasInjectedWallet && deviceDetails.platform === "desktop") {
+      handleExternalWalletClick({ connector: wallet.name });
+      // We should show QR code only if the wallet is not installed.
       setBodyState({
         ...bodyState,
         metamaskQrCode: {
