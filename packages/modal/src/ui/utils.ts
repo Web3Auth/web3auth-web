@@ -190,6 +190,10 @@ export const getErrorMessages = (errorCode: string): string => {
       return "passwordless.error-invalid-otp";
     case "E306":
       return "passwordless.error-otp-expired";
+    case "E308":
+      return "passwordless.error-test-account-invalid-email-flow-type";
+    case "E309":
+      return "passwordless.error-invalid-test-account";
     case "E400":
       return "passwordless.error-no-sms-generated";
     case "E411":
