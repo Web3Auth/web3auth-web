@@ -108,7 +108,7 @@
     "error-plan-limit-reached": "E411. Limiet bereikt",
     "error-recaptcha-verification-failed": "Er is iets misgegaan tijdens het verifiëren. Probeer het opnieuw door de pagina te laden.",
     "error-sending-sms-failed": "Er is een fout opgetreden bij het verzenden van een sms. Probeer het opnieuw.",
-    "error-invalid-test-account": "Ongeldig testaccount.",
+    "error-invalid-test-account": "Ongeldig testaccount",
     "something-wrong-error": "Er is iets misgegaan"
   }
 }
