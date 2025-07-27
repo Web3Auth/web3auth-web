@@ -108,6 +108,7 @@
     "error-plan-limit-reached": "E411. 限制已达到",
     "error-recaptcha-verification-failed": "Captcha 验证失败。请再试一次。",
     "error-sending-sms-failed": "发送短信的错误。请再试一遍。",
+    "error-invalid-test-account": "测试帐户无效。",
     "something-wrong-error": "出问题了"
   }
 }

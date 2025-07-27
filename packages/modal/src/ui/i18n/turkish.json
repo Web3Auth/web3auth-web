@@ -108,6 +108,7 @@
     "error-plan-limit-reached": "E411. Sınır aşıldı",
     "error-recaptcha-verification-failed": "Captcha doğrulama hatası. Lütfen tekrar deneyin.",
     "error-sending-sms-failed": "SMS gönderilirken bir hata oldu. Lütfen tekrar deneyin.",
+    "error-invalid-test-account": "Geçersiz test hesabı.",
     "something-wrong-error": "Bir şeyler ters gitti"
   }
 }

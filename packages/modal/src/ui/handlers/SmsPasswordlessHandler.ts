@@ -1,5 +1,3 @@
-import { WalletLoginError } from "@web3auth/no-modal";
-
 import { CodeInitiateRequestBodyParams, CodeVerifyRequestBodyParams, PasswordlessHandlerParams } from "../interfaces";
 import { PasswordlessHandler } from "./AbstractHandler";
 
@@ -12,14 +10,8 @@ export default class SmsPasswordlessHandler extends PasswordlessHandler {
     }
   }
 
-  async sendVerificationCode(params?: { captchaToken: string }) {
+  async sendVerificationCode({ captchaToken }: { captchaToken?: string }) {
     const { loginHint, network, web3authClientId } = this.passwordlessParams;
-
-    const captchaToken = params?.captchaToken ?? "";
-
-    if (!captchaToken) {
-      throw WalletLoginError.connectionError("Captcha token is required");
-    }
 
     const finalParams: CodeInitiateRequestBodyParams = {
       client_id: web3authClientId,
@@ -30,7 +22,7 @@ export default class SmsPasswordlessHandler extends PasswordlessHandler {
       whitelabel: this.whiteLabelParams,
       version: this.version,
       network,
-      captcha_token: captchaToken,
+      ...(captchaToken && { captcha_token: captchaToken }),
     };
     return super.start(finalParams);
   }

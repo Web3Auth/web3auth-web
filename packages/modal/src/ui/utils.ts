@@ -196,6 +196,8 @@ export const getErrorMessages = (errorCode: string): string => {
       return "passwordless.error-plan-limit-reached";
     case "E412":
       return "passwordless.error-recaptcha-verification-failed";
+    case "E502":
+      return "passwordless.error-invalid-test-account";
     default:
       return "passwordless.something-wrong-error";
   }

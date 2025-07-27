@@ -108,6 +108,7 @@
     "error-plan-limit-reached": "E411. 制限に達しました",
     "error-recaptcha-verification-failed": "Captcha 検証に失敗しました。もう一度試してください。",
     "error-sending-sms-failed": "SMSの送信エラーがありました。もう一度やり直してください。",
+    "error-invalid-test-account": "無効なテスト アカウントです。",
     "something-wrong-error": "何かがうまくいかなかった"
   }
 }
