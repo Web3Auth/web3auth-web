@@ -108,6 +108,7 @@
     "error-plan-limit-reached": "E411. Limit Reached",
     "error-recaptcha-verification-failed": "Captcha verification failed. Please try again.",
     "error-sending-sms-failed": "There was an error sending an sms. Please try again.",
+    "error-invalid-test-account": "Invalid test account",
     "something-wrong-error": "Something went wrong"
   }
 }

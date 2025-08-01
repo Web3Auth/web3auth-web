@@ -108,6 +108,7 @@
     "error-plan-limit-reached": "E411. 제한에 도달했습니다",
     "error-recaptcha-verification-failed": "Captcha 인증에 실패했습니다. 다시 시도해 주세요.",
     "error-sending-sms-failed": "SMS 전송 중 오류가 발생했습니다. 다시 시도해 주세요.",
+    "error-invalid-test-account": "잘못된 테스트 계정입니다",
     "something-wrong-error": "문제가 발생했습니다"
   }
 }
