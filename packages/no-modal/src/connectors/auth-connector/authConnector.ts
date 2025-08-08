@@ -146,6 +146,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           const wsEmbedWhiteLabel = {
             ...this.authOptions.whiteLabel,
             ...this.wsSettings.whiteLabel,
+            logoLight: this.wsSettings.whiteLabel?.logoLight || this.authOptions.whiteLabel?.logoLight || "",
+            logoDark: this.wsSettings.whiteLabel?.logoDark || this.authOptions.whiteLabel?.logoDark || "",
           };
           this.wsEmbedInstancePromise = this.wsEmbedInstance
             .init({
