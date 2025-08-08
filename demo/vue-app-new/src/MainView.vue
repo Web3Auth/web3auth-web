@@ -73,7 +73,7 @@ const options = computed((): Web3AuthOptions => {
     const { confirmationStrategy } = formData.walletPlugin;
     walletServicesConfig = {
       ...walletServicesConfig,
-      whiteLabel: { showWidgetButton: true, logoLight: "", logoDark: "" },
+      whiteLabel: { showWidgetButton: true },
       confirmationStrategy,
     };
   }
@@ -112,14 +112,25 @@ const options = computed((): Web3AuthOptions => {
 
   const { widget, targetId } = formData;
   const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel
-    ? { ...whiteLabel, widgetType: widget, targetId }
-    : { widgetType: widget, targetId };
+    ? {
+        ...whiteLabel,
+        widgetType: widget,
+        targetId,
+        logoLight: whiteLabel.logoLight || "",
+        logoDark: whiteLabel.logoDark || "",
+      }
+    : {
+        widgetType: widget,
+        targetId,
+        logoLight: "",
+        logoDark: "",
+      };
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
-    uiConfig: uiConfig as UIConfig,
+    uiConfig: uiConfig,
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
