@@ -63,17 +63,17 @@ const options = computed((): Web3AuthOptions => {
 
   // Wallet services settings
   let walletServicesConfig: Web3AuthOptions["walletServicesConfig"] = {
-    // walletUrls: {
-    //   production: {
-    //     url: "http://localhost:4050",
-    //   },
-    // },
+    walletUrls: {
+      production: {
+        url: "http://localhost:4050",
+      },
+    },
   };
   if (formData.walletPlugin.enable) {
     const { confirmationStrategy } = formData.walletPlugin;
     walletServicesConfig = {
       ...walletServicesConfig,
-      whiteLabel: { showWidgetButton: true },
+      whiteLabel: { showWidgetButton: true, logoLight: "", logoDark: "" },
       confirmationStrategy,
     };
   }

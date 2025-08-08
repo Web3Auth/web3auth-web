@@ -38,7 +38,7 @@ export type AuthLoginParams = LoginParams & {
 
 export type WalletServicesConfig = Omit<
   WsEmbedParams,
-  "buildEnv" | "enableLogging" | "chainId" | "chains" | "confirmationStrategy" | "accountAbstractionConfig"
+  "buildEnv" | "enableLogging" | "chainId" | "chains" | "confirmationStrategy" | "accountAbstractionConfig" | "whiteLabel"
 > & {
   /**
    * Determines how to show confirmation screens
@@ -53,6 +53,11 @@ export type WalletServicesConfig = Omit<
    */
   confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
   modalZIndex?: number;
+
+  /**
+   * WhiteLabel options for web3auth
+   */
+  whiteLabel?: NonNullable<WsEmbedParams["whiteLabel"]> & Required<Pick<NonNullable<WsEmbedParams["whiteLabel"]>, "logoLight" | "logoDark">>;
 };
 
 export interface UIConfig extends WhiteLabelData {

@@ -143,15 +143,16 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           const wsSupportedChains = chains.filter(
             (x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA
           );
+          const wsEmbedWhiteLabel = {
+            ...this.authOptions.whiteLabel,
+            ...this.wsSettings.whiteLabel,
+          };
           this.wsEmbedInstancePromise = this.wsEmbedInstance
             .init({
               ...this.wsSettings,
               chains: wsSupportedChains as ProviderConfig[],
               chainId,
-              whiteLabel: {
-                ...this.authOptions.whiteLabel,
-                ...this.wsSettings.whiteLabel,
-              },
+              whiteLabel: { ...wsEmbedWhiteLabel, logoLight: wsEmbedWhiteLabel.logoLight || "", logoDark: wsEmbedWhiteLabel.logoDark || "" },
             })
             .then(() => {
               this.wsEmbedInstancePromise = null;
@@ -616,7 +617,7 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
       whiteLabel,
-      accountAbstractionConfig: coreOptions.accountAbstractionConfig,
+      accountAbstractionConfig: coreOptions.accountAbstractionConfig as WalletServicesSettings["accountAbstractionConfig"],
       enableLogging: coreOptions.enableLogging,
     };
 
