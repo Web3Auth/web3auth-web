@@ -43,7 +43,16 @@ export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
   /**
    * Config for configuring modal ui display properties
    */
-  uiConfig?: Omit<UIConfig, "connectorListener">;
+  uiConfig: Omit<UIConfig, "connectorListener" | "logoLight" | "logoDark"> & {
+    /**
+     * App logo to use in light mode
+     */
+    logoLight: string;
+    /**
+     * App logo to use in dark mode
+     */
+    logoDark: string;
+  };
 
   /**
    * Config for configuring modal ui display properties
@@ -62,7 +71,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     super(options, initialState);
     this.options = { ...options };
 
-    if (!this.options.uiConfig) this.options.uiConfig = {};
+    if (!this.options.uiConfig) this.options.uiConfig = { logoLight: "", logoDark: "" };
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
 
     log.info("modalConfig", this.modalConfig);
@@ -209,9 +218,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});
     if (!this.options.uiConfig.defaultLanguage) this.options.uiConfig.defaultLanguage = getUserLanguage(this.options.uiConfig.defaultLanguage);
     if (!this.options.uiConfig.mode) this.options.uiConfig.mode = "light";
-    this.options.uiConfig = deepmerge(projectConfig.loginModal || {}, this.options.uiConfig, {
+    const uiConfig = deepmerge.all<UIConfig>([projectConfig.loginModal || {}, this.options.uiConfig], {
       arrayMerge: (_, sourceArray) => sourceArray,
     });
+    this.options.uiConfig = {
+      ...uiConfig,
+      logoLight: uiConfig.logoLight || "",
+      logoDark: uiConfig.logoDark || "",
+    };
 
     // merge login methods order from project config and user config, with user config taking precedence
     const defaultAuthConnections = projectConfig.embeddedWalletAuth.filter((x) => x.isDefault).map((x) => x.authConnection);
