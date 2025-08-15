@@ -58,7 +58,7 @@ import {
 } from "./base";
 import { cookieStorage } from "./base/cookie";
 import { deserialize } from "./base/deserialize";
-import { authConnector, type AuthConnectorType, WalletServicesSettings } from "./connectors/auth-connector";
+import { authConnector, type AuthConnectorType } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
@@ -607,10 +607,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       buttonPosition: portfolioWidgetPosition,
       defaultPortfolio,
     };
-    const whiteLabel: WalletServicesSettings["whiteLabel"] = deepmerge.all([
-      projectConfigWhiteLabel,
-      this.coreOptions.walletServicesConfig?.whiteLabel || {},
-    ]);
+    const whiteLabel = deepmerge.all([projectConfigWhiteLabel, this.coreOptions.walletServicesConfig?.whiteLabel || {}]);
+
     const confirmationStrategy =
       this.coreOptions.walletServicesConfig?.confirmationStrategy ??
       (enableConfirmationModal ? CONFIRMATION_STRATEGY.MODAL : CONFIRMATION_STRATEGY.AUTO_APPROVE);
@@ -618,11 +616,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.coreOptions.walletServicesConfig = {
       ...this.coreOptions.walletServicesConfig,
       confirmationStrategy,
-      whiteLabel: {
-        ...whiteLabel,
-        logoLight: whiteLabel?.logoLight || "",
-        logoDark: whiteLabel?.logoDark || "",
-      },
+      whiteLabel,
       enableKeyExport: isKeyExportEnabled,
     };
   }

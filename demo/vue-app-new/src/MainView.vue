@@ -112,25 +112,14 @@ const options = computed((): Web3AuthOptions => {
 
   const { widget, targetId } = formData;
   const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel
-    ? {
-        ...whiteLabel,
-        widgetType: widget,
-        targetId,
-        logoLight: whiteLabel.logoLight || "",
-        logoDark: whiteLabel.logoDark || "",
-      }
-    : {
-        widgetType: widget,
-        targetId,
-        logoLight: "",
-        logoDark: "",
-      };
+    ? { ...whiteLabel, widgetType: widget, targetId }
+    : { widgetType: widget, targetId };
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {
     clientId: clientIds[formData.network],
     web3AuthNetwork: formData.network,
-    uiConfig: uiConfig,
+    uiConfig,
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
     // TODO: Add more options
