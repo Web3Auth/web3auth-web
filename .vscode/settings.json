@@ -17,5 +17,6 @@
       "changeProcessCWD": true
     }
   ],
-  "cSpell.words": ["Bowser", "dont", "fallbacker", "JRPC", "mertasan", "Passwordless", "qrcode", "Solana", "toruslabs"]
+  "cSpell.words": ["Bowser", "dont", "fallbacker", "JRPC", "mertasan", "Passwordless", "qrcode", "Solana", "toruslabs"],
+  "postman.settings.dotenv-detection-notification-visibility": false
 }
