@@ -44,7 +44,7 @@ function imgExists(url: string): Promise<boolean> {
 /**
  * Extracts an icon for the site from the DOM
  */
-export async function getSiteIcon(window: Window): Promise<string | null> {
+export async function getSiteIcon(window: Window): Promise<string | undefined> {
   const { document } = window;
 
   // Use the site's favicon if it exists
@@ -59,7 +59,7 @@ export async function getSiteIcon(window: Window): Promise<string | null> {
     return icon.href;
   }
 
-  return null;
+  return undefined;
 }
 
 export function parseToken<T>(token: string): { header: { alg: string; typ: string; kid?: string }; payload: T } {

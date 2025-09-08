@@ -84,7 +84,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     const appMetadata: MetaMaskSDKOptions["dappMetadata"] = {
       name: getSiteName(window) || "web3auth",
       url: window.location.origin || "https://web3auth.io",
-      iconUrl,
+      iconUrl: iconUrl ?? undefined,
     };
 
     // initialize the MetaMask SDK
