@@ -11,7 +11,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.80.7",
     "@web3auth/modal": "../../packages/modal",
-    "next": "14.1.0",
+    "next": "14.2.32",
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "wagmi": "^2.15.6"
