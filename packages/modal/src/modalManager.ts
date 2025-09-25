@@ -375,7 +375,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           showOnModal: true,
         };
       }
-      embedWalletConfigMap.set(groupedAuthConnectionId || authConnectionId, authConnectionConfig);
+      const id = this.getCombinedConnectionId(authConnectionId, groupedAuthConnectionId);
+      embedWalletConfigMap.set(id, authConnectionConfig);
     }
 
     const dashboardConnectorConfig = {
@@ -397,13 +398,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
       // only throw error if one of them is defined in the config.
       if (groupedAuthConnectionId || authConnectionId) {
-        if (!embedWalletConfigMap.has(groupedAuthConnectionId || authConnectionId))
+        const id = this.getCombinedConnectionId(authConnectionId, groupedAuthConnectionId);
+        if (!embedWalletConfigMap.has(id))
           throw WalletInitializationError.invalidParams(
             `Invalid auth connection config, authConnection: ${key}. Missing AuthConnectionConfig from the dashboard.`
           );
 
-        const configFromDashboard = embedWalletConfigMap.get(groupedAuthConnectionId || authConnectionId);
+        const configFromDashboard = embedWalletConfigMap.get(id);
         this.modalConfig.connectors[WALLET_CONNECTORS.AUTH].loginMethods[key as AUTH_CONNECTION_TYPE] = {
+          ...userConfig,
           authConnection: configFromDashboard.authConnection,
           authConnectionId: configFromDashboard.authConnectionId,
           groupedAuthConnectionId: configFromDashboard.groupedAuthConnectionId,
@@ -656,4 +659,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   private getChainNamespaces = (): ChainNamespaceType[] => {
     return [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])];
   };
+
+  private getCombinedConnectionId(authConnectionId: string, groupedAuthConnectionId: string): string {
+    let id = authConnectionId;
+    if (groupedAuthConnectionId) {
+      id = `${groupedAuthConnectionId}_${authConnectionId}`;
+    }
+    return id;
+  }
 }
