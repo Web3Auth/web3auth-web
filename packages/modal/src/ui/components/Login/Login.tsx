@@ -94,7 +94,7 @@ function Login(props: LoginProps) {
 
   useEffect(() => {
     const maxOptions = Object.keys(socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
-      return socialLoginsConfig.loginMethods[loginMethodKey as AUTH_CONNECTION_TYPE].showOnModal;
+      return socialLoginsConfig.loginMethods[loginMethodKey as AUTH_CONNECTION_TYPE].showOnModal && !restrictedLoginMethods.includes(loginMethodKey);
     });
 
     const visibleRows: rowType[] = [];
@@ -552,6 +552,7 @@ function Login(props: LoginProps) {
       passwordless: passwordlessLoginSection,
       externalWallets: externalWalletSection,
     };
+    debugger;
     const sectionVisibility = {
       social: areSocialLoginsVisible,
       passwordless: showPasswordLessInput,

@@ -1,4 +1,4 @@
-import { AUTH_CONNECTION, BUILD_ENV, WEB3AUTH_NETWORK } from "@web3auth/auth";
+import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, BUILD_ENV, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
@@ -97,7 +97,9 @@ function Widget(props: WidgetProps) {
     if (Object.keys(modalState.socialLoginsConfig?.loginMethods || {}).length === 0) return false;
 
     const isAnySocialLoginVisible = Object.entries(modalState.socialLoginsConfig?.loginMethods || {}).some(
-      ([k, v]) => k !== AUTH_CONNECTION.EMAIL_PASSWORDLESS && v.showOnModal !== false
+      ([k, v]) =>
+        !([AUTH_CONNECTION.EMAIL_PASSWORDLESS, AUTH_CONNECTION.SMS_PASSWORDLESS] as AUTH_CONNECTION_TYPE[]).includes(k as AUTH_CONNECTION_TYPE) &&
+        v.showOnModal !== false
     );
     return isAnySocialLoginVisible;
   }, [modalState]);
