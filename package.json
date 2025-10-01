@@ -80,7 +80,6 @@
     "packages/modal"
   ],
   "overrides": {
-    "ox": "0.6.9",
     "react": "19.1.1",
     "react-dom": "19.1.1"
   }

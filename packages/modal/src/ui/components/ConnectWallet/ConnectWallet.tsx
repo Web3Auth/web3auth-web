@@ -259,13 +259,15 @@ function ConnectWallet(props: ConnectWalletProps) {
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
-          <ConnectWalletChainFilter
-            isDark={isDark}
-            isLoading={isLoading}
-            selectedChain={selectedChain}
-            setSelectedChain={handleChainFilterChange}
-            chainNamespace={chainNamespace}
-          />
+          {chainNamespace.length > 1 && (
+            <ConnectWalletChainFilter
+              isDark={isDark}
+              isLoading={isLoading}
+              selectedChain={selectedChain}
+              setSelectedChain={handleChainFilterChange}
+              chainNamespace={chainNamespace}
+            />
+          )}
           {/* Search Input */}
           <ConnectWalletSearch
             totalExternalWalletCount={totalExternalWalletsCount}
