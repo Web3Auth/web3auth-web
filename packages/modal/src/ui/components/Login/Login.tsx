@@ -8,7 +8,7 @@ import {
   WALLET_CONNECTORS,
   WalletLoginError,
 } from "@web3auth/no-modal";
-import { MouseEvent as ReactMouseEvent, useContext, useEffect, useMemo, useRef, useState } from "react";
+import { MouseEvent as ReactMouseEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
@@ -72,7 +72,7 @@ function Login(props: LoginProps) {
   const [countryFlag, setCountryFlag] = useState<string>("");
   const [passwordlessErrorMessage, setPasswordlessErrorMessage] = useState<string>("");
   const [otpErrorMessage, setOtpErrorMessage] = useState<string>("");
-  const [expand, setExpand] = useState(false);
+  const [expandSocialLogins, setExpandSocialLogins] = useState(false);
   const [canShowMore, setCanShowMore] = useState(false);
   const [visibleRow, setVisibleRow] = useState<rowType[]>([]);
   const [otherRow, setOtherRow] = useState<rowType[]>([]);
@@ -86,8 +86,8 @@ function Login(props: LoginProps) {
   const [captchaError, setCaptchaError] = useState<string>("");
   const captchaRef = useRef<HCaptcha>(null);
 
-  const handleExpand = () => {
-    setExpand((prev) => !prev);
+  const handleSocialLoginExpand = () => {
+    setExpandSocialLogins((prev) => !prev);
     setIsPasswordLessCtaClicked(false);
     handleSocialLoginHeight();
   };
@@ -305,16 +305,6 @@ function Login(props: LoginProps) {
     if (isSmsPasswordLessLoginVisible) getLocation();
   }, [isSmsPasswordLessLoginVisible]);
 
-  const handleConnectWallet = (e: ReactMouseEvent<HTMLButtonElement>) => {
-    analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_LIST_EXPANDED, {
-      total_external_wallets: totalExternalWallets,
-      installed_external_wallets: installedExternalWallets.length,
-    });
-    setIsPasswordLessCtaClicked(false);
-    e.preventDefault();
-    if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(true);
-  };
-
   const handleOtpComplete = async (otp: string) => {
     setOtpLoading(true);
     if (otpErrorMessage) setOtpErrorMessage("");
@@ -399,6 +389,25 @@ function Login(props: LoginProps) {
     return installedExternalWalletConfig.filter((wallet) => wallet.name === WALLET_CONNECTORS.METAMASK);
   }, [installedExternalWalletConfig, showInstalledExternalWallets]);
 
+  const handleConnectWallet = useCallback(
+    (e?: ReactMouseEvent<HTMLButtonElement>) => {
+      analytics?.track(ANALYTICS_EVENTS.EXTERNAL_WALLET_LIST_EXPANDED, {
+        total_external_wallets: totalExternalWallets,
+        installed_external_wallets: installedExternalWallets.length,
+      });
+      setIsPasswordLessCtaClicked(false);
+      e?.preventDefault();
+      if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(true);
+    },
+    [analytics, handleExternalWalletBtnClick, installedExternalWallets.length, totalExternalWallets]
+  );
+
+  useEffect(() => {
+    if (showExternalWalletButton && !areSocialLoginsVisible && !showPasswordLessInput) {
+      handleConnectWallet();
+    }
+  }, [showExternalWalletButton, areSocialLoginsVisible, showPasswordLessInput, handleConnectWallet]);
+
   if (showOtpFlow) {
     return (
       <LoginOtp
@@ -423,7 +432,7 @@ function Login(props: LoginProps) {
         canShowMore={canShowMore}
         handleSocialLoginClick={handleSocialLoginClick}
         socialLoginsConfig={socialLoginsConfig}
-        handleExpandSocialLogins={handleExpand}
+        handleExpandSocialLogins={handleSocialLoginExpand}
         buttonRadius={buttonRadius}
       />
     );
@@ -552,7 +561,6 @@ function Login(props: LoginProps) {
       passwordless: passwordlessLoginSection,
       externalWallets: externalWalletSection,
     };
-    debugger;
     const sectionVisibility = {
       social: areSocialLoginsVisible,
       passwordless: showPasswordLessInput,
@@ -592,7 +600,7 @@ function Login(props: LoginProps) {
     return sections;
   };
 
-  const expandedView = () => socialLoginSection(otherRow);
+  const socialLoginExpandedView = () => socialLoginSection(otherRow);
 
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-2">
@@ -644,10 +652,10 @@ function Login(props: LoginProps) {
       {!showCaptcha && (
         <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
           {/* DEFAULT VIEW */}
-          {!expand && defaultView()}
+          {!expandSocialLogins && defaultView()}
 
           {/* EXPANDED VIEW */}
-          {expand && expandedView()}
+          {expandSocialLogins && socialLoginExpandedView()}
         </div>
       )}
     </div>
