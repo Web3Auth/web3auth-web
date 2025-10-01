@@ -98,6 +98,10 @@ function Root(props: RootProps) {
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(flag);
   };
 
+  const isExternalWalletModeOnly = useMemo(() => {
+    return !showPasswordLessInput && !areSocialLoginsVisible;
+  }, [areSocialLoginsVisible, showPasswordLessInput]);
+
   // Wallet Details
   const mobileInstallLinks = useMemo<JSX.Element[]>(() => {
     if (deviceDetails.platform === "desktop") return [];
@@ -502,6 +506,7 @@ function Root(props: RootProps) {
                         chainNamespace={chainNamespaces}
                         buttonRadius={buttonRadiusType}
                         handleWalletDetailsHeight={handleWalletDetailsHeight}
+                        isExternalWalletModeOnly={isExternalWalletModeOnly}
                         onBackClick={onBackClick}
                         handleExternalWalletClick={preHandleExternalWalletClick}
                       />

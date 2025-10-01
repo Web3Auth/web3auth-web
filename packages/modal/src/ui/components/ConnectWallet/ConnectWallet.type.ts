@@ -14,6 +14,7 @@ export interface ConnectWalletProps {
   deviceDetails: { platform: platform; browser: browser; os: os };
   chainNamespace: ChainNamespaceType[];
   buttonRadius: ButtonRadiusType;
+  isExternalWalletModeOnly: boolean;
   onBackClick?: (flag: boolean) => void;
   handleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;
   handleWalletDetailsHeight: () => void;
