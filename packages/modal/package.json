@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "10.3.1",
+  "version": "10.3.2",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/ui",
