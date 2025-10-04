@@ -25,6 +25,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     deviceDetails,
     buttonRadius = "pill",
     chainNamespace,
+    isExternalWalletModeOnly,
     onBackClick,
     handleExternalWalletClick,
     handleWalletDetailsHeight,
@@ -235,10 +236,18 @@ function ConnectWallet(props: ConnectWalletProps) {
     return walletConnectUri;
   }, [metamaskConnectUri, selectedButton, selectedWallet, walletConnectUri]);
 
+  const disableBackButton = useMemo(() => {
+    // If wallet is selected, show the back button
+    if (selectedWallet) return false;
+    // Otherwise, if external wallet mode only, login screen is skipped so back button is not needed
+    if (isExternalWalletModeOnly) return true;
+    return false;
+  }, [selectedWallet, isExternalWalletModeOnly]);
+
   return (
     <div className="w3a--relative w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
       {/* Header */}
-      <ConnectWalletHeader onBackClick={handleBack} currentPage={currentPage} selectedButton={selectedButton} />
+      <ConnectWalletHeader disableBackButton={disableBackButton} onBackClick={handleBack} currentPage={currentPage} selectedButton={selectedButton} />
       {/* Body */}
       {selectedWallet ? (
         <ConnectWalletQrCode
@@ -250,13 +259,15 @@ function ConnectWallet(props: ConnectWalletProps) {
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
-          <ConnectWalletChainFilter
-            isDark={isDark}
-            isLoading={isLoading}
-            selectedChain={selectedChain}
-            setSelectedChain={handleChainFilterChange}
-            chainNamespace={chainNamespace}
-          />
+          {chainNamespace.length > 1 && (
+            <ConnectWalletChainFilter
+              isDark={isDark}
+              isLoading={isLoading}
+              selectedChain={selectedChain}
+              setSelectedChain={handleChainFilterChange}
+              chainNamespace={chainNamespace}
+            />
+          )}
           {/* Search Input */}
           <ConnectWalletSearch
             totalExternalWalletCount={totalExternalWalletsCount}
