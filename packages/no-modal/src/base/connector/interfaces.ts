@@ -95,6 +95,7 @@ export type ConnectorParams = {
 
 export type BaseConnectorLoginParams = {
   chainId: string;
+  getIdentityToken: boolean;
 };
 
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
@@ -103,6 +104,7 @@ export type CONNECTED_EVENT_DATA = {
   connector: WALLET_CONNECTOR_TYPE;
   provider: IProvider;
   reconnected: boolean;
+  identityTokenInfo: IdentityTokenInfo;
 };
 
 export interface IConnectorDataEvent {
