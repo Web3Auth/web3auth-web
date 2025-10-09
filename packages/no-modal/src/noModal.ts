@@ -687,6 +687,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
     const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
     const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
+
+    // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
+    // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
+    if (isBrowser() && chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
+      connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
+    }
+
     if (isMipdEnabled && isBrowser()) {
       // Solana chains
       if (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
@@ -719,7 +726,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
     // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
-    if (isBrowser() && (chainNamespaces.has(CHAIN_NAMESPACES.EIP155) || chainNamespaces.has(CHAIN_NAMESPACES.SOLANA))) {
+    if (isBrowser() && chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
       connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
     }
 

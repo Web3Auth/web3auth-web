@@ -355,6 +355,7 @@ function Login(props: LoginProps) {
       has_wallet_registry_item: !!wallet.walletRegistryItem,
       total_external_wallets: totalExternalWallets,
     });
+    log.info("handleInstalledWalletClick", wallet);
     // for non-injected Metamask on desktop, show QR code to connect
     if (wallet.name === WALLET_CONNECTORS.METAMASK && !wallet.hasInjectedWallet && deviceDetails.platform === "desktop") {
       handleExternalWalletClick({ connector: wallet.name });
