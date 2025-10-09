@@ -64,7 +64,7 @@
     "@toruslabs/eslint-config-react": "^4.1.4",
     "@toruslabs/eslint-config-vue": "^4.1.5",
     "@toruslabs/isomorphic-style-loader": "^5.4.0",
-    "@toruslabs/vue-components": "^8.0.8",
+    "@toruslabs/vue-components": "^8.1.2",
     "@types/react": "^19.1.11",
     "@types/react-dom": "^19.1.8",
     "@wagmi/core": "^2.20.1",
@@ -88,7 +88,7 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^1.12.1",
-    "@toruslabs/base-controllers": "^8.6.1",
+    "@toruslabs/base-controllers": "^8.7.0",
     "@toruslabs/http-helpers": "^8.1.1",
     "@web3auth/auth": "^10.5.0",
     "@web3auth/no-modal": "^10.3.1",
