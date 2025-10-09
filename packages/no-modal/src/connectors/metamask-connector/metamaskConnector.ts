@@ -22,6 +22,7 @@ import {
   type ConnectorParams,
   type CustomChainConfig,
   getCaipChainId,
+  IdentityTokenInfo,
   type IProvider,
   type MetaMaskConnectorData,
   type UserInfo,
@@ -144,12 +145,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
             this.updateConnectorData({ uri } as MetaMaskConnectorData);
           });
         }
-        if (getIdentityToken) {
-          // TODO: implement this
-          // const signature = await this.metamaskSDK.connectAndSign({ msg: "" });
-        } else {
-          await this.metamaskSDK.connect();
-        }
+        await this.metamaskSDK.connect();
       }
 
       this.metamaskProvider = this.metamaskSDK.getProvider() as unknown as IProvider;
@@ -181,10 +177,16 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         });
       }
 
+      let identityTokenInfo: IdentityTokenInfo | undefined;
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
         provider: this.metamaskProvider,
+        identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
       return this.metamaskProvider;
     } catch (error) {
