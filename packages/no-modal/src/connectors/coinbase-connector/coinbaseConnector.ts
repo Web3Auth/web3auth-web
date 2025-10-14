@@ -16,6 +16,7 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
+  IdentityTokenInfo,
   IProvider,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
@@ -81,7 +82,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
         // the connect function could fail silently as well.
         if (!provider) {
           this.rehydrated = false;
@@ -93,7 +94,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Connector is not initialized");
     this.status = CONNECTOR_STATUS.CONNECTING;
@@ -113,10 +114,15 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
         // ready to be connected again
         this.disconnect();
       });
+      let identityTokenInfo: IdentityTokenInfo | undefined;
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.COINBASE,
         reconnected: this.rehydrated,
         provider: this.provider,
+        identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error) {

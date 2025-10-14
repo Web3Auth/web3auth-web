@@ -140,7 +140,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       if (this.connected) {
         this.rehydrated = true;
         try {
-          await this.onConnectHandler({ chain: chainConfig });
+          await this.onConnectHandler({ chain: chainConfig, getIdentityToken: false });
         } catch (error) {
           log.error("wallet auto connect", error);
           this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
@@ -152,7 +152,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  async connect({ chainId }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -196,12 +196,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
       // if already connected
       if (this.connected) {
-        await this.onConnectHandler({ chain: chainConfig });
+        await this.onConnectHandler({ chain: chainConfig, getIdentityToken: false });
         return this.provider;
       }
 
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
-        await this.createNewSession({ chainConfig, trackCompletionEvents });
+        await this.createNewSession({ chainConfig, trackCompletionEvents, getIdentityToken });
       }
 
       return this.provider;
@@ -347,10 +347,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     forceNewSession = false,
     chainConfig,
     trackCompletionEvents,
+    getIdentityToken,
   }: {
     forceNewSession?: boolean;
     chainConfig: CustomChainConfig;
     trackCompletionEvents?: () => void;
+    getIdentityToken?: boolean;
   }): Promise<void> {
     try {
       if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
@@ -389,7 +391,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       const session = await approval();
       this.activeSession = session;
       // Handle the returned session (e.g. update UI to "connected" state).
-      await this.onConnectHandler({ chain: chainConfig, trackCompletionEvents });
+      await this.onConnectHandler({ chain: chainConfig, trackCompletionEvents, getIdentityToken });
       if (qrcodeModal) {
         qrcodeModal.closeModal();
       }
@@ -399,7 +401,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         log.info("current connector status: ", this.status);
         if (this.status === CONNECTOR_STATUS.CONNECTING) {
           log.info("retrying to create new wallet connect session since proposal expired");
-          return this.createNewSession({ forceNewSession: true, chainConfig });
+          return this.createNewSession({ forceNewSession: true, chainConfig, getIdentityToken });
         }
         if (this.status === CONNECTOR_STATUS.READY) {
           log.info("ignoring proposal expired error since some other connector is connected");
@@ -412,7 +414,15 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  private async onConnectHandler({ chain, trackCompletionEvents }: { chain: CustomChainConfig; trackCompletionEvents?: () => void }) {
+  private async onConnectHandler({
+    chain,
+    trackCompletionEvents,
+    getIdentityToken,
+  }: {
+    chain: CustomChainConfig;
+    trackCompletionEvents?: () => void;
+    getIdentityToken?: boolean;
+  }) {
     if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet connect connector is not ready yet");
     this.subscribeEvents();
     if (this.connectorOptions.connectorSettings?.qrcodeModal) {
@@ -428,10 +438,16 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     // track connection events
     if (trackCompletionEvents) trackCompletionEvents();
 
+    let identityTokenInfo: IdentityTokenInfo | undefined;
+    if (getIdentityToken) {
+      identityTokenInfo = await this.getIdentityToken();
+    }
+
     this.emit(CONNECTOR_EVENTS.CONNECTED, {
       connector: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       reconnected: this.rehydrated,
       provider: this.provider,
+      identityTokenInfo,
     } as CONNECTED_EVENT_DATA);
   }
 
