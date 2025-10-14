@@ -1,4 +1,4 @@
-import { ANALYTICS_EVENTS, type ChainNamespaceType, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { ANALYTICS_EVENTS, type ChainNamespaceType, log, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { FormEvent, useContext, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
@@ -80,12 +80,12 @@ function ConnectWallet(props: ConnectWalletProps) {
     ].sort((a, b) => {
       // favor MetaMask over other wallets
       if (a.name === WALLET_CONNECTORS.METAMASK && b.name === WALLET_CONNECTORS.METAMASK) {
-        // favor injected MetaMask over non-injected MetaMask
-        if (a.hasInjectedWallet) return -1;
-        if (b.hasInjectedWallet) return 1;
         // favor installed MetaMask over non-installed MetaMask
         if (a.isInstalled) return -1;
         if (b.isInstalled) return 1;
+        // favor injected MetaMask over non-injected MetaMask
+        if (a.hasInjectedWallet) return -1;
+        if (b.hasInjectedWallet) return 1;
         return 0;
       }
       if (a.name === WALLET_CONNECTORS.METAMASK) return -1;
@@ -175,6 +175,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       has_wallet_registry_item: !!button.walletRegistryItem,
       total_external_wallets: allUniqueButtons.length,
     });
+    log.info("handleWalletClick", button);
 
     // for installed wallets
     if (button.isInstalled) {

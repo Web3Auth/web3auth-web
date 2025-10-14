@@ -22,6 +22,7 @@ import {
   type ConnectorParams,
   type CustomChainConfig,
   getCaipChainId,
+  IdentityTokenInfo,
   type IProvider,
   type MetaMaskConnectorData,
   type UserInfo,
@@ -89,7 +90,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
     // initialize the MetaMask SDK
     const metamaskOptions = deepmerge(this.metamaskOptions || {}, { dappMetadata: appMetadata });
-    this.metamaskSDK = new MetaMaskSDK({ ...metamaskOptions, _source: "web3auth", useDeeplink: metamaskOptions.useDeeplink ?? true });
+    this.metamaskSDK = new MetaMaskSDK({ ...metamaskOptions, _source: "web3auth", preferDesktop: true });
     // Work around: in case there is an existing SDK instance in memory (window.mmsdk exists), it won't initialize the new SDK instance again
     // and return the existing instance instead of undefined (this is an assumption, not sure if it's a bug or feature of the MetaMask SDK)
     const initResult = await this.metamaskSDK.init();
@@ -103,7 +104,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
         if (!provider) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
@@ -114,7 +115,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -176,10 +177,16 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         });
       }
 
+      let identityTokenInfo: IdentityTokenInfo | undefined;
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
         provider: this.metamaskProvider,
+        identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
       return this.metamaskProvider;
     } catch (error) {

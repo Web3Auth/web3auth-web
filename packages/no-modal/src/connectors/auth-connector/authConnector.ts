@@ -24,6 +24,7 @@ import deepmerge from "deepmerge";
 import {
   AuthLoginParams,
   BaseConnector,
+  BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
   cloneDeep,
   CONNECTED_EVENT_DATA,
@@ -37,6 +38,7 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
+  IdentityTokenInfo,
   IProvider,
   log,
   UserInfo,
@@ -185,7 +187,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
-        await this.connect({ chainId: options.chainId });
+        await this.connect({ chainId: options.chainId, getIdentityToken: false });
       } else if (!sessionId && options.autoConnect) {
         // if here, this means that the connector is cached but the sessionId is not available.
         // this can happen if the sessionId has expired.
@@ -197,7 +199,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
-  async connect(params: Partial<AuthLoginParams> & { chainId: string }): Promise<IProvider | null> {
+  async connect(params: Partial<AuthLoginParams> & BaseConnectorLoginParams): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     this.status = CONNECTOR_STATUS.CONNECTING;
     this.emit(CONNECTOR_EVENTS.CONNECTING, { ...params, connector: WALLET_CONNECTORS.AUTH });
@@ -356,7 +358,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     return finalPrivKey;
   }
 
-  private async connectWithProvider(params: Partial<AuthLoginParams> & { chainId: string }): Promise<void> {
+  private async connectWithProvider(params: Partial<AuthLoginParams> & BaseConnectorLoginParams): Promise<void> {
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -374,7 +376,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // always use "other" curve to return token with all keys encoded so wallet service can switch between evm and solana namespace
       this.loginSettings.curve = SUPPORTED_KEY_CURVES.OTHER;
 
-      const loginParams = deepmerge(this.loginSettings, params) as Partial<AuthLoginParams> & { chainId: string };
+      const loginParams = deepmerge(this.loginSettings, params) as Partial<AuthLoginParams> & BaseConnectorLoginParams;
 
       if (params.extraLoginOptions?.id_token) {
         await this.connectWithJwtLogin(loginParams);
@@ -395,11 +397,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           sessionNamespace,
         });
         if (isLoggedIn) {
+          // if getIdentityToken is true, then get the identity token
+          // No need to get the identity token for auth connector as it is already handled
+          let identityTokenInfo: IdentityTokenInfo | undefined;
+          if (params.getIdentityToken) {
+            identityTokenInfo = await this.getIdentityToken();
+          }
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
             connector: WALLET_CONNECTORS.AUTH,
             reconnected: this.rehydrated,
             provider: this.provider,
+            identityTokenInfo,
           } as CONNECTED_EVENT_DATA);
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {

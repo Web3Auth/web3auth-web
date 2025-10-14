@@ -2,6 +2,7 @@ import { Wallet } from "@wallet-standard/base";
 import { StandardConnect, StandardDisconnect } from "@wallet-standard/features";
 
 import {
+  BaseConnectorLoginParams,
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -16,6 +17,7 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
+  IdentityTokenInfo,
   IProvider,
   log,
   normalizeWalletName,
@@ -79,7 +81,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       log.debug("initializing solana injected connector");
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
         if (!provider) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
@@ -90,7 +92,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     }
   }
 
-  async connect({ chainId }: { chainId: string }): Promise<IProvider> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider> {
     try {
       super.checkConnectionRequirements();
       const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -109,7 +111,16 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       if (this.wallet.accounts.length === 0) throw WalletLoginError.connectionError();
 
       this.status = CONNECTOR_STATUS.CONNECTED;
-      this.emit(CONNECTOR_EVENTS.CONNECTED, { connector: this.name, reconnected: this.rehydrated, provider: this.provider } as CONNECTED_EVENT_DATA);
+      let identityTokenInfo: IdentityTokenInfo | undefined;
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
+      this.emit(CONNECTOR_EVENTS.CONNECTED, {
+        connector: this.name,
+        reconnected: this.rehydrated,
+        provider: this.provider,
+        identityTokenInfo,
+      } as CONNECTED_EVENT_DATA);
       return this.provider;
     } catch (error: unknown) {
       // ready again to be connected

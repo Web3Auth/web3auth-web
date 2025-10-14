@@ -1,6 +1,7 @@
 import { type EIP6963ProviderDetail } from "mipd";
 
 import {
+  BaseConnectorLoginParams,
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -16,6 +17,7 @@ import {
   ConnectorNamespaceType,
   ConnectorParams,
   CustomChainConfig,
+  IdentityTokenInfo,
   IProvider,
   log,
   normalizeWalletName,
@@ -68,7 +70,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       log.debug(`initializing ${this.name} injected connector`);
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
         if (!provider) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
@@ -79,7 +81,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId }: { chainId: string }): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
     super.checkConnectionRequirements();
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -106,10 +108,15 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
         }
       };
       this.injectedProvider.on("accountsChanged", accountDisconnectHandler);
+      let identityTokenInfo: IdentityTokenInfo | undefined;
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: this.name,
         reconnected: this.rehydrated,
         provider: this.injectedProvider,
+        identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
       return this.injectedProvider;
     } catch (error) {
