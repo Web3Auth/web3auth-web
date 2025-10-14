@@ -137,6 +137,8 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     this.analytics?.track(ANALYTICS_EVENTS.WALLET_CHECKOUT_CLICKED, {
       is_visible: showCheckoutParams?.show,
       receive_wallet_address_enabled: !!showCheckoutParams?.receiveWalletAddress,
+      // TODO: where is the below?
+      // receive_wallet_address: showCheckoutParams?.receiveWalletAddress,
       token_list: showCheckoutParams?.tokenList,
       fiat_list: showCheckoutParams?.fiatList,
       crypto: showCheckoutParams?.crypto,
