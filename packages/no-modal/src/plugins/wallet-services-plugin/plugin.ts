@@ -119,6 +119,17 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     return this.wsEmbedInstance.showWalletConnectScanner(showWalletConnectParams);
   }
 
+  async showFunding(showFundingParams?: BaseEmbedControllerState["showFunding"]): Promise<void> {
+    if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+
+    // analytics
+    this.analytics?.track(ANALYTICS_EVENTS.WALLET_FUNDING_CLICKED, {
+      is_visible: showFundingParams?.show,
+    });
+
+    return this.wsEmbedInstance.showFunding(showFundingParams);
+  }
+
   async showCheckout(showCheckoutParams?: BaseEmbedControllerState["showCheckout"]): Promise<void> {
     if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
 
@@ -128,9 +139,24 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       receive_wallet_address_enabled: !!showCheckoutParams?.receiveWalletAddress,
       token_list: showCheckoutParams?.tokenList,
       fiat_list: showCheckoutParams?.fiatList,
+      crypto: showCheckoutParams?.crypto,
+      fiat: showCheckoutParams?.fiat,
+      fiat_amount: showCheckoutParams?.fiatAmount,
+      crypto_amount: showCheckoutParams?.cryptoAmount,
     });
 
     return this.wsEmbedInstance.showCheckout(showCheckoutParams);
+  }
+
+  async showReceive(showReceiveParams?: BaseEmbedControllerState["showReceive"]): Promise<void> {
+    if (!this.wsEmbedInstance?.isLoggedIn) throw WalletServicesPluginError.walletPluginNotConnected();
+
+    // analytics
+    this.analytics?.track(ANALYTICS_EVENTS.WALLET_RECEIVE_CLICKED, {
+      is_visible: showReceiveParams?.show,
+    });
+
+    return this.wsEmbedInstance.showReceive(showReceiveParams);
   }
 
   async showWalletUi(showWalletUiParams?: BaseEmbedControllerState["showWalletUi"]): Promise<void> {

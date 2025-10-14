@@ -128,7 +128,9 @@ export const ANALYTICS_EVENTS = {
   // Wallet Plugin
   WALLET_UI_CLICKED: "Wallet UI Clicked",
   WALLET_CONNECT_SCANNER_CLICKED: "Wallet Connect Scanner Clicked",
+  WALLET_FUNDING_CLICKED: "Wallet Funding Clicked",
   WALLET_CHECKOUT_CLICKED: "Wallet Checkout Clicked",
+  WALLET_RECEIVE_CLICKED: "Wallet Receive Clicked",
   WALLET_SWAP_CLICKED: "Wallet Swap Clicked",
 };
 
