@@ -1,7 +1,7 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
-import { WalletServicesPluginError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
+import { WalletServicesPluginError, Web3AuthError } from "../../base";
 import { useWalletServicesPlugin } from "./useWalletServicesPlugin";
 
 export interface IUseReceive {

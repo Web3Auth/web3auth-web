@@ -3,6 +3,8 @@ import { Button, Card } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
 import {
   useCheckout,
+  useFunding,
+  useReceive,
   useEnableMFA,
   useIdentityToken,
   useManageMFA,
@@ -47,6 +49,8 @@ const { switchChain } = useWeb3AuthSwitchChain();
 const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
+const { showFunding, loading: showFundingLoading } = useFunding();
+const { showReceive, loading: showReceiveLoading } = useReceive();
 const { getIdentityToken, loading: getIdentityTokenLoading } = useIdentityToken();
 const { status, address } = useAccount();
 const { signTypedDataAsync } = useSignTypedData();
@@ -399,8 +403,14 @@ const onSwitchChainNamespace = async () => {
           <Button :loading="showWalletConnectScannerLoading" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
             {{ $t("app.buttons.btnShowWalletConnectScanner") }}
           </Button>
+          <Button :loading="showFundingLoading" block size="xs" pill class="mb-2" @click="() => showFunding()">
+            {{ $t("app.buttons.btnShowFunding") }}
+          </Button>
           <Button :loading="showCheckoutLoading" block size="xs" pill class="mb-2" @click="() => showCheckout()">
             {{ $t("app.buttons.btnShowCheckout") }}
+          </Button>
+          <Button :loading="showReceiveLoading" block size="xs" pill class="mb-2" @click="() => showReceive()">
+            {{ $t("app.buttons.btnShowReceive") }}
           </Button>
           <!-- <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
             {{ t("app.buttons.btnSignPersonalMsg") }}
