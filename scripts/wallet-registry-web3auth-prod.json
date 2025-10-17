@@ -27,7 +27,7 @@
         "sdks": ["sign_v1", "sign_v2"]
       }
     },
-    "walletconnect": {
+    "wallet-connect": {
       "chains": [
         "cosmos:cosmoshub-4",
         "cosmos:kava-4",
