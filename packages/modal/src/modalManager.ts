@@ -28,6 +28,7 @@ import {
   sdkVersion,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
+  WALLET_REGISTRY_URL,
   WalletInitializationError,
   type WalletRegistry,
   Web3AuthNoModal,
@@ -35,7 +36,7 @@ import {
 } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 
-import { defaultConnectorsModalConfig, walletRegistryUrl } from "./config";
+import { defaultConnectorsModalConfig } from "./config";
 import { type ConnectorsModalConfig, type IWeb3AuthModal, type ModalConfig } from "./interface";
 import { AUTH_PROVIDERS, AUTH_PROVIDERS_NAMES, capitalizeFirstLetter, getUserLanguage, LOGIN_MODAL_EVENTS, LoginModal, type UIConfig } from "./ui";
 
@@ -284,7 +285,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         aaProvider: this.options.accountAbstractionConfig?.smartAccountType,
         authBuildEnv: this.options.authBuildEnv,
       }),
-      fetchWalletRegistry(walletRegistryUrl),
+      fetchWalletRegistry(WALLET_REGISTRY_URL),
     ]);
 
     // handle project config result

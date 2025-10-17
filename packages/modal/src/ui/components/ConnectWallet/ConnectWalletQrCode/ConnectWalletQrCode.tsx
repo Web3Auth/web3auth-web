@@ -5,13 +5,14 @@ import { QRCode } from "react-qrcode-logo";
 
 import { WALLET_CONNECT_LOGO } from "../../../constants";
 import { RootContext } from "../../../context/RootContext";
+import { TOAST_TYPE } from "../../../interfaces";
 import i18n from "../../../localeImport";
 import Image from "../../Image";
 import { ConnectWalletQrCodeProps } from "./ConnectWalletQrCode.type";
 
 function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   const [t] = useTranslation(undefined, { i18n });
-  const { bodyState, setBodyState } = useContext(RootContext);
+  const { bodyState, setBodyState, setToast } = useContext(RootContext);
   const { qrCodeValue, isDark, selectedButton, logoImage, primaryColor } = props;
 
   const isDesktop = useMemo<boolean>(() => {
@@ -30,7 +31,17 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
     <div className="w3a--contents">
       {qrCodeValue ? (
         <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--rounded-2xl w3a--border w3a--border-app-gray-200 w3a--p-4 dark:w3a--border-app-gray-700">
-          <div className="w3a--relative w3a--flex w3a--size-[300px] w3a--items-center w3a--justify-center w3a--rounded-2xl">
+          <button
+            type="button"
+            className="w3a--relative w3a--flex w3a--size-[300px] w3a--appearance-none w3a--items-center w3a--justify-center w3a--rounded-2xl"
+            onClick={() => {
+              navigator.clipboard.writeText(qrCodeValue);
+              setToast({
+                message: t("modal.external.qr-code-copied-to-clipboard"),
+                type: TOAST_TYPE.SUCCESS,
+              });
+            }}
+          >
             <QRCode
               size={isDesktop ? 300 : 260}
               eyeRadius={5}
@@ -45,7 +56,7 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
               bgColor={isDark ? modalColor : whiteColor}
               fgColor={isDark ? whiteColor : blackColor}
             />
-          </div>
+          </button>
           <p className="w3a--text-center w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
             {t("modal.external.walletconnect-copy")}
           </p>

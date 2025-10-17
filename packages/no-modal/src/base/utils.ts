@@ -7,7 +7,7 @@ import { type Chain } from "viem";
 
 import { type CustomChainConfig } from "./chain/IChainInterface";
 import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
-import { SOLANA_CAIP_CHAIN_MAP } from "./constants";
+import { SOLANA_CAIP_CHAIN_MAP, WALLET_REGISTRY_URL } from "./constants";
 import { type UIConfig, type WalletServicesConfig } from "./core/IWeb3Auth";
 import { Web3AuthError } from "./errors";
 import type { ProjectConfig, WalletRegistry } from "./interfaces";
@@ -41,7 +41,7 @@ export const fetchProjectConfig = async ({
 };
 
 export const fetchWalletRegistry = async (url?: string): Promise<WalletRegistry> => {
-  const res = await get<WalletRegistry>(url || "https://assets.web3auth.io/v1/wallet-registry.json");
+  const res = await get<WalletRegistry>(url || WALLET_REGISTRY_URL);
   return res;
 };
 

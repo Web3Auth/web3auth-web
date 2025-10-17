@@ -13,5 +13,3 @@ export const defaultConnectorsModalConfig: ConnectorsModalConfig = {
     },
   } as Record<WALLET_CONNECTOR_TYPE, ModalConfig>,
 };
-
-export const walletRegistryUrl = "https://assets.web3auth.io/v1/wallet-registry.json";
