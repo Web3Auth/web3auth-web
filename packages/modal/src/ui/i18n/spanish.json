@@ -23,6 +23,7 @@
     "external.install-mobile-app": "Instalar aplicación {{os}}",
     "external.installed": "Instalado",
     "external.no-wallets-found": "No se encontraron billeteras",
+    "external.qr-code-copied-to-clipboard": "URI copiado al portapapeles",
     "external.search-subtext": "Intenta buscar en su lugar",
     "external.search-text": "¿No ves tu billetera?",
     "external.search-wallet": "Buscar a través de {{count}} billeteras...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "Este {{wallet}} billetera soporta varias cadenas. Seleccione la cadena que desea conectar",
     "external.title": "Billetera Externa",
     "external.walletconnect-connect": "Conectar",
-    "external.walletconnect-copy": "Escanee el código QR con una billetera compatible con WalletConnect o haga clic para copiar el enlace",
+    "external.walletconnect-copy": "Escanee el código QR con una billetera compatible con WalletConnect o haga clic en el código QR para copiar el enlace",
     "external.walletconnect-subtitle": "Escanear el código QR con una billetera compatible con WalletConnect",
     "footer.and": "y",
     "footer.by-signing-in": "Al iniciar sesión, acepta nuestros",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "Algo salió mal, código de error: E002",
     "error-invalid-otp": "OTP no válido, intente nuevamente",
     "error-invalid-params": "Parámetros faltantes o no válidos",
+    "error-invalid-test-account": "Cuenta de prueba no válida",
     "error-max-retry-limit-reached": "Has alcanzado el límite para intentos incorrectos. Reinicie el proceso para completar la verificación.",
     "error-new-link-generated-heading": "Nuevo enlace de verificación generado",
     "error-no-mail-generated": "No se generó el correo. Inicie primero el proceso sin contraseña.",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. Límite alcanzado",
     "error-recaptcha-verification-failed": "La verificación de Captcha ha fallado. Por favor, inténtelo de nuevo.",
     "error-sending-sms-failed": "Hubo un error al enviar el SMS. Inténtalo de nuevo.",
-    "error-invalid-test-account": "Cuenta de prueba no válida",
     "something-wrong-error": "Algo salió mal"
   }
 }

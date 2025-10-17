@@ -23,6 +23,7 @@
     "external.install-mobile-app": "Installeer {{os}}-app",
     "external.installed": "Geïnstalleerd",
     "external.no-wallets-found": "Geen portefeuilles gevonden",
+    "external.qr-code-copied-to-clipboard": "URI naar klembord gekopieerd",
     "external.search-subtext": "Probeer in plaats daarvan te zoeken",
     "external.search-text": "Ziet u uw portemonnee niet?",
     "external.search-wallet": "Zoeken door {{count}} portemonnees...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "Deze {{wallet}} portemonnee ondersteunt meerdere ketens. Selecteer welke ketting u wilt verbinden",
     "external.title": "Externe portemonnee",
     "external.walletconnect-connect": "Verbinden",
-    "external.walletconnect-copy": "Scan de QR-code met een WalletConnect-compatibele portemonnee of klik op de QR-code om de link naar je klembord te kopiëren.",
+    "external.walletconnect-copy": "Verbinden met WalletConnect-compatibele portemonnee of klik op de QR-code om de link naar je klembord te kopiëren",
     "external.walletconnect-subtitle": "Scan de QR-code met een WalletConnect-compatibele portemonnee",
     "footer.and": "en",
     "footer.by-signing-in": "Door in te loggen, gaat u akkoord met onze",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "Er is iets misgegaan, foutcode: E002",
     "error-invalid-otp": "Ongeldige OTP, probeer het opnieuw",
     "error-invalid-params": "Ontbrekende of ongeldige parameters",
+    "error-invalid-test-account": "Ongeldig testaccount",
     "error-max-retry-limit-reached": "U heeft de limiet voor verkeerde pogingen bereikt. Start de stroom opnieuw om de verificatie te voltooien.",
     "error-new-link-generated-heading": "Nieuwe verificatielink gegenereerd",
     "error-no-mail-generated": "Geen e-mail gegenereerd. Start eerst de wachtwoordloze flow.",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. Limiet bereikt",
     "error-recaptcha-verification-failed": "Er is iets misgegaan tijdens het verifiëren. Probeer het opnieuw door de pagina te laden.",
     "error-sending-sms-failed": "Er is een fout opgetreden bij het verzenden van een sms. Probeer het opnieuw.",
-    "error-invalid-test-account": "Ongeldig testaccount",
     "something-wrong-error": "Er is iets misgegaan"
   }
 }

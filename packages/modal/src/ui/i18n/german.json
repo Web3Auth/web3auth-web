@@ -23,6 +23,7 @@
     "external.install-mobile-app": "Installieren Sie die {{os}}-App",
     "external.installed": "Installiert",
     "external.no-wallets-found": "Keine Wallets gefunden",
+    "external.qr-code-copied-to-clipboard": "URI in die Zwischenablage kopiert",
     "external.search-subtext": "Versuchen Sie es stattdessen mit der Suche",
     "external.search-text": "Sie sehen Ihr Portemonnaie nicht?",
     "external.search-wallet": "Suche durch {{count}} Geldbörsen...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "Diese {{wallet}}-Brieftasche unterstützt mehrere Ketten. Wählen Sie die Kette aus, mit der Sie verbinden möchten",
     "external.title": "Externe Geldbörse",
     "external.walletconnect-connect": "Verbinden",
-    "external.walletconnect-copy": "Scannen Sie den QR-Code mit einer WalletConnect-kompatiblen Geldbörse oder klicken Sie, um den Link zu kopieren",
+    "external.walletconnect-copy": "Scannen Sie den QR-Code mit einer WalletConnect-kompatiblen Geldbörse oder klicken Sie auf den QR-Code, um den Link zu kopieren",
     "external.walletconnect-subtitle": "Scannen Sie den QR-Code mit einer WalletConnect-kompatiblen Geldbörse",
     "footer.and": "und",
     "footer.by-signing-in": "Durch das Anmelden stimmen Sie unseren",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "Etwas ist schief gelaufen, Fehlercode: E002",
     "error-invalid-otp": "Ungültiges OTP, bitte versuchen Sie es erneut",
     "error-invalid-params": "Fehlende oder ungültige Parameter",
+    "error-invalid-test-account": "Ungültiges Testkonto",
     "error-max-retry-limit-reached": "Sie haben die Grenze für falsche Versuche erreicht. Bitte starten Sie den Fluss erneut neu, um die Überprüfung abzuschließen.",
     "error-new-link-generated-heading": "Neuer Verifizierungslink",
     "error-no-mail-generated": "Keine Mail generiert. Bitte initiieren Sie zuerst den passwortlosen Fluss.",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. Grenze erreicht",
     "error-recaptcha-verification-failed": "Die Captcha-Überprüfung ist fehlgeschlagen. Bitte versuchen Sie es erneut.",
     "error-sending-sms-failed": "Es gab einen Fehler beim Senden einer SMS. Bitte versuche es erneut.",
-    "error-invalid-test-account": "Ungültiges Testkonto",
     "something-wrong-error": "Etwas ist schief gelaufen"
   }
 }

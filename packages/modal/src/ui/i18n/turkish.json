@@ -23,6 +23,7 @@
     "external.install-mobile-app": "{{os}} uygulamasını yükle",
     "external.installed": "Yüklendi",
     "external.no-wallets-found": "Cüzdan bulunamadı",
+    "external.qr-code-copied-to-clipboard": "URI panoya kopyalandı",
     "external.search-subtext": "Bunun yerine aramayı deneyin",
     "external.search-text": "Cüzdanınızı görmüyor musunuz?",
     "external.search-wallet": "{{count}} cüzdan ara...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "Bu {{wallet}} cüzdan birden fazla zincir destekler. İstediğiniz zinciri seçin",
     "external.title": "Harici Cüzdan",
     "external.walletconnect-connect": "Bağla",
-    "external.walletconnect-copy": "WalletConnect destekli bir cüzdanla QR kodu tarayın veya bağlantıyı kopyalayın",
+    "external.walletconnect-copy": "QR kodunu WalletConnect uyumlu bir cüzdanla tarayın veya QR koduna tıklayarak bağlantıyı kopyalayın",
     "external.walletconnect-subtitle": "QR kodunu WalletConnect uyumlu bir cüzdanla tarayın",
     "footer.and": "ve",
     "footer.by-signing-in": "Giriş yapmak, bizimle ilgili şartları kabul ettiğiniz anlamına gelir.",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "Bir şeyler ters gitti, hata kodu: E002",
     "error-invalid-otp": "Hatalı OTP, lütfen tekrar deneyin.",
     "error-invalid-params": "Eksik ya da hatalı parametreler var.",
+    "error-invalid-test-account": "Geçersiz test hesabı",
     "error-max-retry-limit-reached": "Hatalı deneme limitine ulaştınız. Doğrulamayı tamamlamak için lütfen akışı baştan başlatın.",
     "error-new-link-generated-heading": "Yeni doğrulama linki oluşturuldu.",
     "error-no-mail-generated": "E-posta oluşturulmadı. Lütfen önce şifresiz akışı başlatın.",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. Sınır aşıldı",
     "error-recaptcha-verification-failed": "Captcha doğrulama hatası. Lütfen tekrar deneyin.",
     "error-sending-sms-failed": "SMS gönderilirken bir hata oldu. Lütfen tekrar deneyin.",
-    "error-invalid-test-account": "Geçersiz test hesabı",
     "something-wrong-error": "Bir şeyler ters gitti"
   }
 }

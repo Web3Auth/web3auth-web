@@ -21,6 +21,7 @@
     "external.get-wallet": "Obtenir un portefeuille",
     "external.installed": "Installé",
     "external.no-wallets-found": "Aucun portefeuille trouvé",
+    "external.qr-code-copied-to-clipboard": "URI copié dans le presse-papiers",
     "external.search-subtext": "Essayez plutôt de rechercher",
     "external.search-text": "Vous ne voyez pas votre portefeuille ?",
     "external.search-wallet": "Rechercher parmi {{count}} portefeuilles...",
@@ -28,7 +29,7 @@
     "external.select-chain-description": "Cette {{wallet}} portefeuille prend en charge plusieurs chaînes. Sélectionnez la chaîne que vous souhaitez connecter",
     "external.title": "Portefeuille externe",
     "external.walletconnect-connect": "Se connecter",
-    "external.walletconnect-copy": "Scannez le code QR avec un portefeuille compatible WalletConnect ou cliquez pour copier le lien",
+    "external.walletconnect-copy": "Scannez le code QR avec un portefeuille compatible WalletConnect ou cliquez sur le code QR pour copier le lien",
     "external.walletconnect-subtitle": "Scannez le code QR avec un portefeuille compatible WalletConnect",
     "footer.and": "et",
     "footer.by-signing-in": "En vous connectant, vous acceptez nos",
@@ -98,6 +99,7 @@
     "error-invalid-origin": "Quelque chose s'est mal passé, code d'erreur: E002",
     "error-invalid-otp": "OTP non valide, veuillez réessayer",
     "error-invalid-params": "Paramètres manquants ou invalides.",
+    "error-invalid-test-account": "Compte de test non valide",
     "error-max-retry-limit-reached": "Vous avez atteint la limite pour les tentatives erronées. Veuillez redémarrer le flux pour terminer la vérification.",
     "error-new-link-generated-heading": "Nouveau lien de vérification généré",
     "error-no-mail-generated": "Aucun courrier généré. Veuillez d'abord lancer le flux sans mot de passe.",
@@ -106,7 +108,6 @@
     "error-plan-limit-reached": "E411. Limite atteinte",
     "error-recaptcha-verification-failed": "La vérification Captcha a échoué. Veuillez réessayer.",
     "error-sending-sms-failed": "Une erreur s'est produite lors de l'envoi d'un SMS. Veuillez réessayer.",
-    "error-invalid-test-account": "Compte de test non valide",
     "something-wrong-error": "Quelque chose s'est mal passé"
   }
 }

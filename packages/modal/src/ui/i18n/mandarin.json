@@ -23,6 +23,7 @@
     "external.install-mobile-app": "安装{{os}}应用",
     "external.installed": "已安装",
     "external.no-wallets-found": "没有找到钱包",
+    "external.qr-code-copied-to-clipboard": "URI已复制到剪贴板",
     "external.search-subtext": "尝试改为搜索",
     "external.search-text": "没看到你的钱包吗？",
     "external.search-wallet": "搜索{{count}}个钱包...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "这个 {{wallet}} 钱包支持多种链。选择您想要连接的链",
     "external.title": "外部钱包",
     "external.walletconnect-connect": "连接",
-    "external.walletconnect-copy": "使用支持 WalletConnect 的钱包扫描 QR 码或点击复制链接",
+    "external.walletconnect-copy": "使用支持 WalletConnect 的钱包扫描 QR 码或点击 QR 码复制链接",
     "external.walletconnect-subtitle": "使用兼容 WalletConnect 的钱包扫描 QR 码",
     "footer.and": "和",
     "footer.by-signing-in": "登录即表示您同意我们的",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "出问题了, 错误代码: E002",
     "error-invalid-otp": "无效的OTP，请重试",
     "error-invalid-params": "缺失或无效参数",
+    "error-invalid-test-account": "测试账户无效",
     "error-max-retry-limit-reached": "您已经达到了错误的尝试的极限。请再次重新启动流程以完成验证。",
     "error-new-link-generated-heading": "生成的新验证链接",
     "error-no-mail-generated": "没有生成邮件。请先启动无密码流。",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. 限制已达到",
     "error-recaptcha-verification-failed": "Captcha 验证失败。请再试一次。",
     "error-sending-sms-failed": "发送短信的错误。请再试一遍。",
-    "error-invalid-test-account": "测试账户无效",
     "something-wrong-error": "出问题了"
   }
 }

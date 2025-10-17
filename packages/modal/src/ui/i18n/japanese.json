@@ -23,6 +23,7 @@
     "external.install-mobile-app": "{{os}}アプリをインストール",
     "external.installed": "インストール済み",
     "external.no-wallets-found": "ウォレットが見つかりません",
+    "external.qr-code-copied-to-clipboard": "URIがクリップボードにコピーされました",
     "external.search-subtext": "代わりに検索してみてください",
     "external.search-text": "財布が見えませんか？",
     "external.search-wallet": "{{count}} ウォレットを検索...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "この {{wallet}} ウォレットは複数のチェーンをサポートしています。接続したいチェーンを選択してください",
     "external.title": "外部ウォレット",
     "external.walletconnect-connect": "接続する",
-    "external.walletconnect-copy": "WalletConnect がサポートするウォレットで QR コードをスキャンするか、リンクをクリックしてコピーします。",
+    "external.walletconnect-copy": "WalletConnect 対応ウォレットで QR コードをスキャンするか、QR コードをクリックしてリンクをコピーします。",
     "external.walletconnect-subtitle": "WalletConnect対応ウォレットでQRコードをスキャンしてください",
     "footer.and": "および",
     "footer.by-signing-in": "サインインすると、私たちの",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "何かがうまくいかなかった, エラーコード: E002",
     "error-invalid-otp": "無効なOTP、もう一度やり直してください",
     "error-invalid-params": "パラメーターの欠落または無効なパラメーター",
+    "error-invalid-test-account": "無効なテストアカウント",
     "error-max-retry-limit-reached": "間違った試みの制限に達しました。確認を完了するには、フローをもう一度再起動してください。",
     "error-new-link-generated-heading": "新しい検証リンクが生成されました",
     "error-no-mail-generated": "メールが生成されていません。最初にパスワードレスフローを開始してください。",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. 制限に達しました",
     "error-recaptcha-verification-failed": "Captcha 検証に失敗しました。もう一度試してください。",
     "error-sending-sms-failed": "SMSの送信エラーがありました。もう一度やり直してください。",
-    "error-invalid-test-account": "無効なテストアカウント",
     "something-wrong-error": "何かがうまくいかなかった"
   }
 }

@@ -23,6 +23,7 @@
     "external.install-mobile-app": "Instalar aplicativo {{os}}",
     "external.installed": "Instalado",
     "external.no-wallets-found": "Nenhuma carteira encontrada",
+    "external.qr-code-copied-to-clipboard": "URI copiado para a área de transferência",
     "external.search-subtext": "Tente pesquisar",
     "external.search-text": "Não vê sua carteira?",
     "external.search-wallet": "Pesquisar através de {{count}} carteiras...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "Este {{wallet}} carteira suporta várias cadeias. Selecione a cadeia que você gostaria de conectar",
     "external.title": "Carteira Externa",
     "external.walletconnect-connect": "Conectar",
-    "external.walletconnect-copy": "Digitalize o código QR com uma carteira compatível com WalletConnect ou clique para copiar o link",
+    "external.walletconnect-copy": "Digitalize o código QR com uma carteira compatível com WalletConnect ou clique no código QR para copiar o link",
     "external.walletconnect-subtitle": "Digitalize o código QR com uma carteira compatível com WalletConnect",
     "footer.and": "e",
     "footer.by-signing-in": "Ao se conectar, você concorda com nossos",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "Algo deu errado, código de erro: E002",
     "error-invalid-otp": "OTP inválido, por favor tente novamente",
     "error-invalid-params": "Parâmetros ausentes ou inválidos",
+    "error-invalid-test-account": "Conta de teste inválida",
     "error-max-retry-limit-reached": "Você atingiu o limite para tentativas erradas. Reinicie o fluxo novamente para concluir a verificação.",
     "error-new-link-generated-heading": "Novo link de verificação gerado",
     "error-no-mail-generated": "Nenhum correio gerado. Inicie o fluxo sem senha primeiro.",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. Limite atingido",
     "error-recaptcha-verification-failed": "A verificação Captcha falhou. Por favor, tente novamente.",
     "error-sending-sms-failed": "Houve um erro de envio de um SMS. Por favor, tente novamente.",
-    "error-invalid-test-account": "Conta de teste inválida",
     "something-wrong-error": "Algo deu errado"
   }
 }

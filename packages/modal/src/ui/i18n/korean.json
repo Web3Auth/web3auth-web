@@ -23,6 +23,7 @@
     "external.install-mobile-app": "{{os}} 앱 설치",
     "external.installed": "설치 완료",
     "external.no-wallets-found": "지갑을 찾을 수 없습니다.",
+    "external.qr-code-copied-to-clipboard": "URI가 클립 보드에 복사되었습니다.",
     "external.search-subtext": "검색해보세요",
     "external.search-text": "지갑이 보이지 않나요?",
     "external.search-wallet": "{{count}}개의 지갑을 검색 중입니다...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "이 {{wallet}} 지갑은 여러 체인을 지원합니다. 연결하려는 체인을 선택하세요",
     "external.title": "외부 지갑",
     "external.walletconnect-connect": "연결",
-    "external.walletconnect-copy": "WalletConnect 호환 지갑으로 QR 코드를 스캔하거나 링크를 클릭하여 복사하세요.",
+    "external.walletconnect-copy": "WalletConnect 호환 지갑으로 QR 코드를 스캔하거나 QR 코드를 클릭하여 링크를 복사하세요.",
     "external.walletconnect-subtitle": "WalletConnect 호환 지갑으로 QR 코드를 스캔하세요",
     "footer.and": "및",
     "footer.by-signing-in": "로그인하면 우리의",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "문제가 발생했습니다, 오류 코드: E002",
     "error-invalid-otp": "유효하지 않은 OTP입니다. 다시 시도해 주세요.",
     "error-invalid-params": "누락되었거나 유효하지 않은 정보입니다.",
+    "error-invalid-test-account": "잘못된 테스트 계정입니다",
     "error-max-retry-limit-reached": "잘못된 시도 횟수를 초과했습니다. 인증을 완료하려면 절차를 다시 시작해 주세요.",
     "error-new-link-generated-heading": "새 인증 링크가 생성되었습니다.",
     "error-no-mail-generated": "메일이 생성되지 않았습니다. 비밀번호가 없는 절차부터 시작해 주세요.",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. 제한에 도달했습니다",
     "error-recaptcha-verification-failed": "Captcha 인증에 실패했습니다. 다시 시도해 주세요.",
     "error-sending-sms-failed": "SMS 전송 중 오류가 발생했습니다. 다시 시도해 주세요.",
-    "error-invalid-test-account": "잘못된 테스트 계정입니다",
     "something-wrong-error": "문제가 발생했습니다"
   }
 }

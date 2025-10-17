@@ -23,6 +23,7 @@
     "external.install-mobile-app": "Install {{os}} app",
     "external.installed": "Installed",
     "external.no-wallets-found": "No wallets found",
+    "external.qr-code-copied-to-clipboard": "URI copied to clipboard",
     "external.search-subtext": "Try search instead",
     "external.search-text": "Don't see your wallet?",
     "external.search-wallet": "Search through {{count}} wallets...",
@@ -30,7 +31,7 @@
     "external.select-chain-description": "This {{wallet}} wallet supports multiple chains. Select which chain you'd like to connect to",
     "external.title": "External Wallet",
     "external.walletconnect-connect": "Connect",
-    "external.walletconnect-copy": "Scan the QR code with WalletConnect supported wallet or click to copy link",
+    "external.walletconnect-copy": "Scan the QR code with WalletConnect supported wallet or click the QR code to copy link",
     "external.walletconnect-subtitle": "Scan the QR code with a WalletConnect-compatible wallet",
     "footer.and": "and",
     "footer.by-signing-in": "By signing in, you agree to our",
@@ -100,6 +101,7 @@
     "error-invalid-origin": "Something went wrong, error code: E002",
     "error-invalid-otp": "Invalid OTP, please try again",
     "error-invalid-params": "Missing or Invalid Parameters.",
+    "error-invalid-test-account": "Invalid test account",
     "error-max-retry-limit-reached": "You have reached the limit for wrong attempts. Please restart the flow again to complete verification.",
     "error-new-link-generated-heading": "New verification link generated",
     "error-no-mail-generated": "No mail generated. Please initiate the passwordless flow first.",
@@ -108,7 +110,6 @@
     "error-plan-limit-reached": "E411. Limit Reached",
     "error-recaptcha-verification-failed": "Captcha verification failed. Please try again.",
     "error-sending-sms-failed": "There was an error sending an sms. Please try again.",
-    "error-invalid-test-account": "Invalid test account",
     "something-wrong-error": "Something went wrong"
   }
 }
