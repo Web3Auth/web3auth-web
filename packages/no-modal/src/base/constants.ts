@@ -26,3 +26,5 @@ export const SOLANA_CAIP_CHAIN_MAP: Record<string, string> = {
   "0x66": "4uhcVJyU9pJkvQyS88uRDiswHXSCkY3z",
   "0x67": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
 } as const;
+
+export const WALLET_REGISTRY_URL = "https://assets.web3auth.io/v2/wallet-registry.json";

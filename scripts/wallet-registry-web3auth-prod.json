@@ -57,7 +57,7 @@
         "eip155:9001",
         "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
       ],
-      "primaryColor": "#f7f7f9",
+      "primaryColor": "#4084ed",
       "imgExtension": "svg",
       "name": "WalletConnect",
       "walletConnect": {
