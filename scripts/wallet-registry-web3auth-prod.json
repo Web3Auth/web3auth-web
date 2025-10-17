@@ -8,16 +8,12 @@
         "firefox": "ether-metamask",
         "ios": "id1438144202"
       },
-      "chains": ["eip155:1", "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"],
+      "chains": ["eip155:1"],
       "imgExtension": "webp",
       "injected": [
         {
           "injected_id": "isMetaMask",
           "namespace": "eip155"
-        },
-        {
-          "injected_id": "isMetaMask",
-          "namespace": "solana"
         }
       ],
       "mobile": {
@@ -29,6 +25,43 @@
       "primaryColor": "#E2761B",
       "walletConnect": {
         "sdks": ["sign_v1", "sign_v2"]
+      }
+    },
+    "walletconnect": {
+      "chains": [
+        "cosmos:cosmoshub-4",
+        "cosmos:kava-4",
+        "cosmos:thorchain-mainnet-v1",
+        "eip155:1",
+        "eip155:10",
+        "eip155:100",
+        "eip155:108",
+        "eip155:1101",
+        "eip155:128",
+        "eip155:137",
+        "eip155:2020",
+        "eip155:288",
+        "eip155:321",
+        "eip155:324",
+        "eip155:361",
+        "eip155:42161",
+        "eip155:42220",
+        "eip155:43114",
+        "eip155:4689",
+        "eip155:56",
+        "eip155:56288",
+        "eip155:59144",
+        "eip155:60",
+        "eip155:820",
+        "eip155:88",
+        "eip155:9001",
+        "solana:5eykt4UsFv8P8NJdTREpY1vzqKqZKvdp"
+      ],
+      "primaryColor": "#f7f7f9",
+      "imgExtension": "svg",
+      "name": "WalletConnect",
+      "walletConnect": {
+        "sdks": ["sign_v2"]
       }
     },
     "phantom": {
@@ -4809,6 +4842,21 @@
       "walletConnect": {
         "sdks": ["sign_v1", "sign_v2"]
       }
+    },
+    "fordefi": {
+      "app": {
+        "chrome": "hcmehenccjdmfbojapcbcofkgdpbnlle"
+      },
+      "chains": ["eip155:1"],
+      "imgExtension": "jpeg",
+      "injected": [
+        {
+          "injected_id": "isFordefi",
+          "namespace": "eip155"
+        }
+      ],
+      "name": "Fordefi",
+      "primaryColor": "#000000"
     },
     "foxwallet": {
       "app": {

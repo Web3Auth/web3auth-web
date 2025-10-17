@@ -54,7 +54,7 @@ const Toast = () => {
       <div className="w3a--flex w3a--items-center w3a--gap-2">
         {/* TODO: add icon */}
         {/* <img src="" alt="toast-icon" /> */}
-        <p className={toastIconClass[toast.type]}>x</p>
+        {/* <p className={toastIconClass[toast.type]}>x</p> */}
         <p>{toast.message}</p>
       </div>
     </div>
