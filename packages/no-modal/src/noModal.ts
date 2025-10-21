@@ -188,6 +188,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.initCachedConnectorAndChainId();
       this.initUIConfig(projectConfig);
       this.initWalletServicesConfig(projectConfig);
+      this.initSessionTimeConfig(projectConfig);
       this.analytics.setGlobalProperties({ team_id: projectConfig.teamId });
       trackData = this.getInitializationTrackData();
 
@@ -566,6 +567,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       cloneDeep(projectConfig.whitelabel || {}),
       this.coreOptions.uiConfig || {},
     ]);
+  }
+
+  protected initSessionTimeConfig(projectConfig: ProjectConfig) {
+    if (this.coreOptions.sessionTime) return;
+    if (projectConfig.sessionTime) this.coreOptions.sessionTime = projectConfig.sessionTime;
   }
 
   protected initCachedConnectorAndChainId() {
