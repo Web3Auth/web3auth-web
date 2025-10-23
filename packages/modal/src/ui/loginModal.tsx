@@ -31,7 +31,7 @@ import { createRoot } from "react-dom/client";
 
 import { getLoginModalAnalyticsProperties } from "../utils";
 import Widget from "./components/Widget";
-import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR } from "./constants";
+import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR, PAGES } from "./constants";
 import { AnalyticsContext } from "./context/AnalyticsContext";
 import { ThemedContext } from "./context/ThemeContext";
 import {
@@ -421,6 +421,7 @@ export class LoginModal {
           status: MODAL_STATUS.CONNECTED,
           modalVisibility: true,
           postLoadingMessage: "modal.post-loading.connected",
+          currentPage: PAGES.LOGIN,
         });
       } else {
         this.setState({
