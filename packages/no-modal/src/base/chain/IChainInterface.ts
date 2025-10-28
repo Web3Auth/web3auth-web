@@ -11,4 +11,4 @@ export const CONNECTOR_NAMESPACES = {
 export type ConnectorNamespaceType = (typeof CONNECTOR_NAMESPACES)[keyof typeof CONNECTOR_NAMESPACES];
 
 export { CHAIN_NAMESPACES, type ChainNamespaceType };
-export type CustomChainConfig = ProviderConfig;
+export type CustomChainConfig = ProviderConfig & { fallbackRpcTargets?: string[]; fallbackWsTargets?: string[] };

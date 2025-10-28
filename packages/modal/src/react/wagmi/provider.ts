@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, log, WalletInitializationError } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, type CustomChainConfig, log, WalletInitializationError } from "@web3auth/no-modal";
 import { createElement, Fragment, PropsWithChildren, useEffect, useMemo } from "react";
 import { type Chain, defineChain, http, webSocket } from "viem";
 import {
@@ -8,6 +8,7 @@ import {
   createConfig as createWagmiConfig,
   type CreateConfigParameters,
   CreateConnectorFn,
+  fallback,
   useAccountEffect,
   useConfig as useWagmiConfig,
   useReconnect,
@@ -123,6 +124,16 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
   const { config } = props;
   const { web3Auth, isInitialized } = useWeb3Auth();
 
+  const getTransport = (chain: CustomChainConfig) => {
+    const { wsTarget, rpcTarget, fallbackWsTargets = [], fallbackRpcTargets = [] } = chain;
+    const transports = [];
+    if (wsTarget) transports.push(webSocket(wsTarget));
+    if (fallbackWsTargets.length > 0) transports.push(...fallbackWsTargets.map((target) => webSocket(target)));
+    if (rpcTarget) transports.push(http(rpcTarget));
+    if (fallbackRpcTargets.length > 0) transports.push(...fallbackRpcTargets.map((target) => http(target)));
+    return fallback(transports);
+  };
+
   const finalConfig = useMemo(() => {
     web3Auth?.setAnalyticsProperties({ wagmi_enabled: true });
     if (!isInitialized) return defaultWagmiConfig;
@@ -173,7 +184,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
         } else {
           wagmiChains.push(wagmiChain);
         }
-        finalConfig.transports[wagmiChain.id] = chain.wsTarget ? webSocket(chain.wsTarget) : http(chain.rpcTarget);
+        finalConfig.transports[wagmiChain.id] = getTransport(chain);
       });
 
       finalConfig.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
