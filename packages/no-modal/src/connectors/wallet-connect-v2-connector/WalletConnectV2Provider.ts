@@ -11,6 +11,7 @@ import {
   IEthChainSwitchHandlers,
 } from "../../providers/ethereum-provider";
 import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "../../providers/solana-provider";
+import { formatChainId } from "./utils";
 import { getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
 export type WalletConnectV2ProviderConfig = BaseProviderConfig;
@@ -181,14 +182,13 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
       if (event.name === "chainChanged") {
         if (!data) return;
-        const connectedChainId = data as number;
-        const connectedHexChainId = `0x${connectedChainId.toString(16)}`;
-
+        const connectedChainId = data as number | string;
+        const formattedChainId = formatChainId(connectedChainId);
         // Check if chainId changed and trigger event
         const { currentChain } = this;
-        if (connectedHexChainId && currentChain.chainId !== connectedHexChainId) {
+        if (formattedChainId && currentChain.chainId !== formattedChainId) {
           // Handle rpcUrl update
-          await this.setupEngine(connector, connectedHexChainId);
+          await this.setupEngine(connector, formattedChainId);
         }
       }
     });

@@ -12,3 +12,12 @@ export const isChainIdSupported = (chainNamespace: ChainNamespaceType, chainID: 
   const isSupported = supportedNamespaces[chainNamespace].chains?.includes(wcChainNamespace);
   return !!isSupported;
 };
+
+export const formatChainId = (chainId: number | string) => {
+  if (typeof chainId === "number") {
+    return `0x${chainId.toString(16)}`;
+  } else if (typeof chainId === "string") {
+    return chainId.startsWith("0x") ? chainId : `0x${parseInt(chainId, 10).toString(16)}`;
+  }
+  throw new Error(`Invalid chainId: ${chainId}`);
+};
