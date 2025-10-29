@@ -4,7 +4,7 @@ import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils"
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { CustomChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
+import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
 import type { ISolanaProviderHandlers } from "../../providers/solana-provider";
 
@@ -174,25 +174,6 @@ export async function switchChain({
   await sendJrpcRequest<string, { chainId: string }[]>(connector, `eip155:${chainId}`, "wallet_switchEthereumChain", [{ chainId: newChainId }]);
 }
 
-export async function addChain({ connector, chainConfig }: { connector: ISignClient; chainConfig: CustomChainConfig }): Promise<void> {
-  await sendJrpcRequest<
-    string,
-    {
-      chainId: string;
-      chainName: string;
-      rpcUrls: string[];
-      blockExplorerUrls: string[];
-      nativeCurrency: { name: string; symbol: string; decimals: number };
-      iconUrls: string[];
-    }[]
-  >(connector, `eip155:${chainConfig.chainId}`, "wallet_addEthereumChain", [
-    {
-      chainId: chainConfig.chainId,
-      chainName: chainConfig.displayName,
-      rpcUrls: [chainConfig.rpcTarget],
-      blockExplorerUrls: [chainConfig.blockExplorerUrl],
-      nativeCurrency: { name: chainConfig.tickerName, symbol: chainConfig.ticker, decimals: chainConfig.decimals || 18 },
-      iconUrls: [chainConfig.logo],
-    },
-  ]);
+export async function addChain({ connector, chainConfig }: { connector: ISignClient; chainConfig: AddEthereumChainConfig }): Promise<void> {
+  await sendJrpcRequest<string, AddEthereumChainConfig[]>(connector, `eip155:${chainConfig.chainId}`, "wallet_addEthereumChain", [chainConfig]);
 }

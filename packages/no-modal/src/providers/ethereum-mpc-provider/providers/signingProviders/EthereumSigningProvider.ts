@@ -1,7 +1,7 @@
 import { isHexString } from "@ethereumjs/util";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "../../../../base";
+import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "../../../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../providers/base-provider";
 import {
   createEthChainSwitchMiddleware,
@@ -148,7 +148,7 @@ export class EthereumSigningProvider extends BaseProvider<
     await this.setupProvider(this.state.signMethods, params.chainId);
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+  public async addChain(chainConfig: AddEthereumChainConfig): Promise<void> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     if (!this.state.signMethods) {
       throw providerErrors.custom({ message: "sign methods are undefined", code: 4902 });
@@ -159,7 +159,17 @@ export class EthereumSigningProvider extends BaseProvider<
       return;
     }
     // add the chain config to the config
-    this.config.chains.push(chainConfig);
+    this.config.chains.push({
+      chainId: chainConfig.chainId,
+      displayName: chainConfig.chainName,
+      rpcTarget: chainConfig.rpcUrls[0],
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      blockExplorerUrl: chainConfig.blockExplorerUrls[0],
+      logo: chainConfig.iconUrls[0],
+      tickerName: chainConfig.nativeCurrency.name,
+      ticker: chainConfig.nativeCurrency.symbol,
+      decimals: chainConfig.nativeCurrency.decimals,
+    });
   }
 
   protected async lookupNetwork(_: ProviderParams, chainId: string): Promise<string> {
@@ -182,8 +192,8 @@ export class EthereumSigningProvider extends BaseProvider<
         const { chainId } = params;
         await this.switchChain({ chainId });
       },
-      addChain: async (params: { chainConfig: CustomChainConfig }): Promise<void> => {
-        await this.addChain(params.chainConfig);
+      addChain: async (params: AddEthereumChainConfig): Promise<void> => {
+        await this.addChain(params);
       },
     };
     const chainSwitchMiddleware = createEthChainSwitchMiddleware(chainSwitchHandlers);

@@ -3,6 +3,7 @@ import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
 import deepmerge from "deepmerge";
 
 import {
+  AddEthereumChainConfig,
   type Analytics,
   ANALYTICS_EVENTS,
   BaseConnectorLoginParams,
@@ -261,7 +262,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   private async addChain(chainConfig: CustomChainConfig): Promise<void> {
     if (!this.metamaskProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    await this.metamaskProvider.request({
+    await this.metamaskProvider.request<AddEthereumChainConfig[], void>({
       method: "wallet_addEthereumChain",
       params: [
         {

@@ -2,7 +2,7 @@ import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "../../base";
+import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../providers/base-provider";
 import {
   createEthChainSwitchMiddleware,
@@ -72,7 +72,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     this.update({ chainId });
   }
 
-  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+  public async addChain(chainConfig: AddEthereumChainConfig): Promise<void> {
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     await addChain({ connector: this.connector, chainConfig });
@@ -142,8 +142,8 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         const { chainId } = params;
         await this.switchChain({ chainId });
       },
-      addChain: async (params: { chainConfig: CustomChainConfig }): Promise<void> => {
-        await this.addChain(params.chainConfig);
+      addChain: async (params: AddEthereumChainConfig): Promise<void> => {
+        await this.addChain(params);
       },
     };
     const chainSwitchMiddleware = createEthChainSwitchMiddleware(chainSwitchHandlers);

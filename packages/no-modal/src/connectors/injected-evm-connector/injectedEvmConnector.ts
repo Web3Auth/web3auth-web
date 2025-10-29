@@ -1,6 +1,7 @@
 import { type EIP6963ProviderDetail } from "mipd";
 
 import {
+  AddEthereumChainConfig,
   BaseConnectorLoginParams,
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -155,7 +156,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
 
   public async addChain(chainConfig: CustomChainConfig, _init = false): Promise<void> {
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    await this.injectedProvider.request({
+    await this.injectedProvider.request<AddEthereumChainConfig[], void>({
       method: "wallet_addEthereumChain",
       params: [
         {

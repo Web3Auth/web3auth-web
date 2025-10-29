@@ -12,3 +12,12 @@ export type ConnectorNamespaceType = (typeof CONNECTOR_NAMESPACES)[keyof typeof 
 
 export { CHAIN_NAMESPACES, type ChainNamespaceType };
 export type CustomChainConfig = ProviderConfig & { fallbackRpcTargets?: string[]; fallbackWsTargets?: string[] };
+
+export type AddEthereumChainConfig = {
+  chainId: string;
+  chainName: string;
+  rpcUrls: string[];
+  blockExplorerUrls: string[];
+  nativeCurrency: { name: string; symbol: string; decimals: number };
+  iconUrls: string[];
+};

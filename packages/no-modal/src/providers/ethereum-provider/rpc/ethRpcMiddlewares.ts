@@ -8,7 +8,7 @@ import {
   rpcErrors,
 } from "@web3auth/auth";
 
-import { CustomChainConfig } from "../../../base";
+import { AddEthereumChainConfig } from "../../../base";
 import { IEthChainSwitchHandlers, IEthProviderHandlers } from "./interfaces";
 import { createWalletMiddleware } from "./walletMidddleware";
 
@@ -48,7 +48,7 @@ export function createEthChainSwitchMiddleware({ switchChain, addChain }: IEthCh
     res.result = await switchChain(chainParams);
   }
 
-  async function addChainConfig(req: JRPCRequest<{ chainConfig: CustomChainConfig }[]>, res: JRPCResponse<unknown>): Promise<void> {
+  async function addChainConfig(req: JRPCRequest<AddEthereumChainConfig[]>, res: JRPCResponse<unknown>): Promise<void> {
     const chainConfig = req.params?.length ? req.params[0] : undefined;
     if (!chainConfig) throw rpcErrors.invalidParams("Missing chainConfig");
     res.result = await addChain(chainConfig);
