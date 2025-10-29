@@ -12,7 +12,7 @@ import {
 } from "../../providers/ethereum-provider";
 import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "../../providers/solana-provider";
 import { formatChainId } from "./utils";
-import { getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
+import { addChain, getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
 export type WalletConnectV2ProviderConfig = BaseProviderConfig;
 
@@ -70,6 +70,12 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     this.lookupNetwork(this.connector, chainId);
 
     this.update({ chainId });
+  }
+
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (!this.connector)
+      throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
+    await addChain({ connector: this.connector, chainConfig });
   }
 
   // no need to implement this method in wallet connect v2.
@@ -135,6 +141,9 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       switchChain: async (params: { chainId: string }): Promise<void> => {
         const { chainId } = params;
         await this.switchChain({ chainId });
+      },
+      addChain: async (params: { chainConfig: CustomChainConfig }): Promise<void> => {
+        await this.addChain(params.chainConfig);
       },
     };
     const chainSwitchMiddleware = createEthChainSwitchMiddleware(chainSwitchHandlers);

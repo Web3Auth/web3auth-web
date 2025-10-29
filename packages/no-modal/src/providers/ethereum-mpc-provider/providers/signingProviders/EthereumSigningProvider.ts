@@ -148,6 +148,20 @@ export class EthereumSigningProvider extends BaseProvider<
     await this.setupProvider(this.state.signMethods, params.chainId);
   }
 
+  public async addChain(chainConfig: CustomChainConfig): Promise<void> {
+    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
+    if (!this.state.signMethods) {
+      throw providerErrors.custom({ message: "sign methods are undefined", code: 4902 });
+    }
+    // find existing chain config with the same chainId
+    const existingChain = this.config.chains.find((chain) => chain.chainId === chainConfig.chainId);
+    if (existingChain) {
+      return;
+    }
+    // add the chain config to the config
+    this.config.chains.push(chainConfig);
+  }
+
   protected async lookupNetwork(_: ProviderParams, chainId: string): Promise<string> {
     if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     if (!chainId) throw rpcErrors.invalidParams("chainId is required while lookupNetwork");
@@ -167,6 +181,9 @@ export class EthereumSigningProvider extends BaseProvider<
       switchChain: async (params: { chainId: string }): Promise<void> => {
         const { chainId } = params;
         await this.switchChain({ chainId });
+      },
+      addChain: async (params: { chainConfig: CustomChainConfig }): Promise<void> => {
+        await this.addChain(params.chainConfig);
       },
     };
     const chainSwitchMiddleware = createEthChainSwitchMiddleware(chainSwitchHandlers);
