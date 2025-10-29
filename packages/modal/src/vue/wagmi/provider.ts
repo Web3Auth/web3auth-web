@@ -2,8 +2,8 @@ import { Config, Connection, Connector, CreateConfigParameters, CreateConnectorF
 import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig, useReconnect } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
 import { randomId } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, log, WalletInitializationError } from "@web3auth/no-modal";
-import { type Chain, defineChain, http, webSocket } from "viem";
+import { CHAIN_NAMESPACES, type CustomChainConfig, log, WalletInitializationError } from "@web3auth/no-modal";
+import { type Chain, defineChain, fallback, http, webSocket } from "viem";
 import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
 // import type { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn } from "wagmi";
@@ -138,6 +138,16 @@ export const WagmiProvider = defineComponent({
     const finalConfig = shallowRef<Config>(defaultWagmiConfig);
     const configKey = ref<string>(randomId());
 
+    const getTransport = (chain: CustomChainConfig) => {
+      const { wsTarget, rpcTarget, fallbackWsTargets = [], fallbackRpcTargets = [] } = chain;
+      const transports = [];
+      if (wsTarget) transports.push(webSocket(wsTarget));
+      if (fallbackWsTargets.length > 0) transports.push(...fallbackWsTargets.map((target) => webSocket(target)));
+      if (rpcTarget) transports.push(http(rpcTarget));
+      if (fallbackRpcTargets.length > 0) transports.push(...fallbackRpcTargets.map((target) => http(target)));
+      return fallback(transports);
+    };
+
     const defineWagmiConfig = () => {
       const configParams: CreateConfigParameters = {
         ssr: true,
@@ -185,7 +195,7 @@ export const WagmiProvider = defineComponent({
           } else {
             wagmiChains.push(wagmiChain);
           }
-          configParams.transports[wagmiChain.id] = chain.wsTarget ? webSocket(chain.wsTarget) : http(chain.rpcTarget);
+          configParams.transports[wagmiChain.id] = getTransport(chain);
         });
 
         configParams.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
