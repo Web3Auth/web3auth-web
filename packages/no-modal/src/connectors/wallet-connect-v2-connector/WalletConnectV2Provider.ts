@@ -59,10 +59,10 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   public async switchChain({ chainId }: { chainId: string }): Promise<void> {
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
-    const currentChainConfig = this.getChain(chainId);
+    const newChainConfig = this.getChain(chainId);
+    if (!newChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-    const { chainId: currentChainId } = currentChainConfig;
-    const currentNumChainId = parseInt(currentChainId, 16);
+    const currentNumChainId = parseInt(this.state.chainId, 16);
 
     await switchChain({ connector: this.connector, chainId: currentNumChainId, newChainId: chainId });
 
@@ -75,7 +75,9 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   public async addChain(chainConfig: AddEthereumChainConfig): Promise<void> {
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
-    await addChain({ connector: this.connector, chainConfig });
+
+    const currentNumChainId = parseInt(this.state.chainId, 16);
+    await addChain({ connector: this.connector, chainId: currentNumChainId, chainConfig });
   }
 
   // no need to implement this method in wallet connect v2.
