@@ -62,7 +62,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     const newChainConfig = this.getChain(chainId);
     if (!newChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-    const currentNumChainId = parseInt(this.state.chainId, 16);
+    const currentNumChainId = parseInt(this.getCurrentChainId(), 16);
 
     await switchChain({ connector: this.connector, chainId: currentNumChainId, newChainId: chainId });
 
@@ -76,7 +76,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
 
-    const currentNumChainId = parseInt(this.state.chainId, 16);
+    const currentNumChainId = parseInt(this.getCurrentChainId(), 16);
     await addChain({ connector: this.connector, chainId: currentNumChainId, chainConfig });
   }
 
@@ -203,5 +203,15 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         }
       }
     });
+  }
+
+  private getCurrentChainId(): string {
+    const currentChain = this.state.chainId;
+
+    if (!currentChain || currentChain === "loading") {
+      return this.config.chains[0].chainId;
+    }
+
+    return currentChain;
   }
 }

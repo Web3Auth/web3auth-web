@@ -184,7 +184,10 @@ export async function addChain({
   chainId: number;
   chainConfig: AddEthereumChainConfig;
 }): Promise<void> {
-  const formattedChainId = formatChainId(chainId);
+  if (!chainConfig) {
+    throw providerErrors.custom({ message: "Chain config is required", code: 4902 });
+  }
+  const formattedChainId = formatChainId(chainConfig.chainId);
   const formattedChainConfig = {
     ...chainConfig,
     chainId: formattedChainId,
