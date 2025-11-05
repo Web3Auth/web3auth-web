@@ -150,7 +150,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
               container: '!w-[120px]',
             }"
           />
-          <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status.value === CONNECTOR_STATUS.READY }]">
+          <Tag v-bind="{ minWidth: 'inherit' }" :class="['uppercase', { '!bg-blue-400 text-white': status === CONNECTOR_STATUS.READY }]">
             {{ status }}
           </Tag>
           &nbsp;
