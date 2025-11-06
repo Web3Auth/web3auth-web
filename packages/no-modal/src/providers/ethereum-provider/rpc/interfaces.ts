@@ -1,11 +1,14 @@
 import type { JRPCRequest } from "@web3auth/auth";
 import type { TransactionLike, TypedDataDomain, TypedDataField } from "ethers";
+
+import { AddEthereumChainConfig } from "../../../base";
 export interface IEthAccountHandlers {
   updatePrivatekey: (params: { privateKey: string }) => Promise<void>;
 }
 
 export interface IEthChainSwitchHandlers {
   switchChain: (params: { chainId: string }) => Promise<void>;
+  addChain: (params: AddEthereumChainConfig) => Promise<void>;
 }
 
 export type TransactionParams<A = string> = TransactionLike<A> & { input?: string };

@@ -4,9 +4,10 @@ import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils"
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
+import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
 import type { ISolanaProviderHandlers } from "../../providers/solana-provider";
+import { formatChainId } from "./utils";
 
 async function getLastActiveSession(signClient: ISignClient): Promise<SessionTypes.Struct | null> {
   if (signClient.session.length) {
@@ -172,4 +173,24 @@ export async function switchChain({
   newChainId: string;
 }): Promise<void> {
   await sendJrpcRequest<string, { chainId: string }[]>(connector, `eip155:${chainId}`, "wallet_switchEthereumChain", [{ chainId: newChainId }]);
+}
+
+export async function addChain({
+  connector,
+  chainId,
+  chainConfig,
+}: {
+  connector: ISignClient;
+  chainId: number;
+  chainConfig: AddEthereumChainConfig;
+}): Promise<void> {
+  if (!chainConfig) {
+    throw providerErrors.custom({ message: "Chain config is required", code: 4902 });
+  }
+  const formattedChainId = formatChainId(chainConfig.chainId);
+  const formattedChainConfig = {
+    ...chainConfig,
+    chainId: formattedChainId,
+  };
+  await sendJrpcRequest<string, AddEthereumChainConfig[]>(connector, `eip155:${chainId}`, "wallet_addEthereumChain", [formattedChainConfig]);
 }

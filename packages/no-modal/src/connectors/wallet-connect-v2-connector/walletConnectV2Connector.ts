@@ -468,6 +468,16 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       // Session was deleted -> reset the dapp state, clean up from user session, etc.
       this.disconnect({ sessionRemovedByWallet: true });
     });
+
+    this.connector.events.on("session_expire", ({ topic }) => {
+      // Session has expired -> clean up the session
+      log.info("Session expired event received for topic:", topic);
+      if (this.activeSession?.topic === topic) {
+        this.disconnect({ sessionRemovedByWallet: true }).catch((error) => {
+          log.error("Failed to disconnect expired session", error);
+        });
+      }
+    });
   }
 
   private async _getSignedMessage(challenge: string, accounts: string[], chainNamespace: ChainNamespaceType): Promise<string> {

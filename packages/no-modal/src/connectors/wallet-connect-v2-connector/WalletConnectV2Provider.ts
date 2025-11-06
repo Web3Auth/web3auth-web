@@ -2,7 +2,7 @@ import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "../../base";
+import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../providers/base-provider";
 import {
   createEthChainSwitchMiddleware,
@@ -12,7 +12,7 @@ import {
 } from "../../providers/ethereum-provider";
 import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "../../providers/solana-provider";
 import { formatChainId } from "./utils";
-import { getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
+import { addChain, getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
 export type WalletConnectV2ProviderConfig = BaseProviderConfig;
 
@@ -59,10 +59,10 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
   public async switchChain({ chainId }: { chainId: string }): Promise<void> {
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
-    const currentChainConfig = this.getChain(chainId);
+    const newChainConfig = this.getChain(chainId);
+    if (!newChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-    const { chainId: currentChainId } = currentChainConfig;
-    const currentNumChainId = parseInt(currentChainId, 16);
+    const currentNumChainId = parseInt(this.getCurrentChainId(), 16);
 
     await switchChain({ connector: this.connector, chainId: currentNumChainId, newChainId: chainId });
 
@@ -70,6 +70,14 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     this.lookupNetwork(this.connector, chainId);
 
     this.update({ chainId });
+  }
+
+  public async addChain(chainConfig: AddEthereumChainConfig): Promise<void> {
+    if (!this.connector)
+      throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
+
+    const currentNumChainId = parseInt(this.getCurrentChainId(), 16);
+    await addChain({ connector: this.connector, chainId: currentNumChainId, chainConfig });
   }
 
   // no need to implement this method in wallet connect v2.
@@ -136,6 +144,9 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         const { chainId } = params;
         await this.switchChain({ chainId });
       },
+      addChain: async (params: AddEthereumChainConfig): Promise<void> => {
+        await this.addChain(params);
+      },
     };
     const chainSwitchMiddleware = createEthChainSwitchMiddleware(chainSwitchHandlers);
     return chainSwitchMiddleware;
@@ -192,5 +203,15 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
         }
       }
     });
+  }
+
+  private getCurrentChainId(): string {
+    const currentChain = this.state.chainId;
+
+    if (!currentChain || currentChain === "loading") {
+      return this.config.chains[0].chainId;
+    }
+
+    return currentChain;
   }
 }
