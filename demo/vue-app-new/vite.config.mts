@@ -21,6 +21,7 @@ export default defineConfig(({ mode }) => {
         "@": "/src",
         "@wagmi/vue": resolve("./node_modules/@wagmi/vue"),
       },
+      dedupe: ["react", "react-dom"],
     },
     define: {
       global: "globalThis",

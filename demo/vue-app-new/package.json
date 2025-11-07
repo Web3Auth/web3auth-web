@@ -27,7 +27,14 @@
     "@web3auth/ws-embed": "^5.1.0",
     "ethers": "^6.15.0",
     "petite-vue-i18n": "^11.1.12",
-    "vue": "^3.5.22"
+    "vue": "^3.5.22",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0"
+  },
+  "overrides": {
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "use-sync-external-store": "^1.4.0"
   },
   "devDependencies": {
     "@toruslabs/eslint-config-vue": "^4.1.5",
