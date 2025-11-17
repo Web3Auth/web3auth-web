@@ -56,7 +56,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   };
 
   const walletDiscoverySupported = useMemo(() => {
-    const supported = walletRegistry && Object.keys(walletRegistry.default || {}).length > 0 && Object.keys(walletRegistry.others || {}).length > 0;
+    const supported = walletRegistry && (Object.keys(walletRegistry.default || {}).length > 0 || Object.keys(walletRegistry.others || {}).length > 0);
     return supported;
   }, [walletRegistry]);
 
