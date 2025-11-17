@@ -24,10 +24,14 @@ import { WagmiProviderProps } from "./interface";
 
 const WEB3AUTH_CONNECTOR_ID = "web3auth";
 
+function getWeb3authConnector(config: Config) {
+  return config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
+}
+
 // Helper to initialize connectors for the given wallets
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function setupConnector(provider: any, config: Config) {
-  let connector: Connector | CreateConnectorFn = config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
+  let connector: Connector | CreateConnectorFn = getWeb3authConnector(config);
 
   if (connector) return connector;
 
@@ -76,8 +80,15 @@ async function connectWeb3AuthWithWagmi(connector: Connector, config: Config) {
   }));
 }
 
-async function disconnectWeb3AuthFromWagmi(config: Config) {
+function resetConnectorState(config: Config) {
   config._internal.connectors.setState((prev) => prev.filter((c) => c.id !== WEB3AUTH_CONNECTOR_ID));
+  config.connectors.filter((c) => c.id !== WEB3AUTH_CONNECTOR_ID);
+}
+
+async function disconnectWeb3AuthFromWagmi(config: Config) {
+  const connector = getWeb3authConnector(config);
+  await Promise.all([config.storage?.setItem(`${connector?.id}.disconnected`, true), config.storage?.removeItem("injected.connected")]);
+  resetConnectorState(config);
   config.setState((state) => ({
     ...state,
     chainId: state.chainId,
@@ -97,6 +108,13 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
       if (isConnected) await disconnect();
+
+      const connector = getWeb3authConnector(wagmiConfig);
+      // reset wagmi connector state if the provider handles disconnection because of the accountsChanged event
+      // from the connected provider
+      if (connector) {
+        resetConnectorState(wagmiConfig);
+      }
     },
   });
 
@@ -191,7 +209,6 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
       finalConfig.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
     }
 
-    if (!finalConfig.chains) return;
     return createWagmiConfig(finalConfig);
   }, [config, web3Auth, isInitialized]);
 

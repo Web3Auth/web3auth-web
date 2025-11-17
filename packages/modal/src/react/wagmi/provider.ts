@@ -22,10 +22,14 @@ import { WagmiProviderProps } from "./interface";
 
 const WEB3AUTH_CONNECTOR_ID = "web3auth";
 
+function getWeb3authConnector(config: Config) {
+  return config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
+}
+
 // Helper to initialize connectors for the given wallets
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function setupConnector(provider: any, config: Config) {
-  let connector: Connector | CreateConnectorFn = config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
+  let connector: Connector | CreateConnectorFn = getWeb3authConnector(config);
 
   if (connector) return connector;
 
@@ -72,10 +76,6 @@ async function connectWeb3AuthWithWagmi(connector: Connector, config: Config) {
     current: connector.uid,
     status: "connected",
   }));
-}
-
-function getWeb3authConnector(config: Config) {
-  return config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
 }
 
 function resetConnectorState(config: Config) {
