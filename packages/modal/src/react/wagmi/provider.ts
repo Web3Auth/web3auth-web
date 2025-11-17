@@ -74,8 +74,19 @@ async function connectWeb3AuthWithWagmi(connector: Connector, config: Config) {
   }));
 }
 
-async function disconnectWeb3AuthFromWagmi(config: Config) {
+function getWeb3authConnector(config: Config) {
+  return config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
+}
+
+function resetConnectorState(config: Config) {
   config._internal.connectors.setState((prev) => prev.filter((c) => c.id !== WEB3AUTH_CONNECTOR_ID));
+  config.connectors.filter((c) => c.id !== WEB3AUTH_CONNECTOR_ID);
+}
+
+async function disconnectWeb3AuthFromWagmi(config: Config) {
+  const connector = getWeb3authConnector(config);
+  await Promise.all([config.storage?.setItem(`${connector?.id}.disconnected`, true), config.storage?.removeItem("injected.connected")]);
+  resetConnectorState(config);
   config.setState((state) => ({
     ...state,
     chainId: state.chainId,
@@ -95,6 +106,13 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
       if (isConnected) await disconnect();
+
+      const connector = getWeb3authConnector(wagmiConfig);
+      // reset wagmi connector state if the provider handles disconnection because of the accountsChanged event
+      // from the connected provider
+      if (connector) {
+        resetConnectorState(wagmiConfig);
+      }
     },
   });
 
