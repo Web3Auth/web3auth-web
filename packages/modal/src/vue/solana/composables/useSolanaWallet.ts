@@ -1,8 +1,8 @@
 import { Connection } from "@solana/web3.js";
 import { CHAIN_NAMESPACES, SolanaWallet } from "@web3auth/no-modal";
-import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
+import { computed, Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
-import { useWeb3Auth } from "../../composables";
+import { useChain, useWeb3Auth } from "../../composables";
 
 export type IUseSolanaWallet = {
   accounts: Ref<string[] | null>;
@@ -12,12 +12,18 @@ export type IUseSolanaWallet = {
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { provider, web3Auth } = useWeb3Auth();
+  const { chainNamespace } = useChain();
   const accounts = ref<string[]>([]);
   const solanaWallet = shallowRef<SolanaWallet | null>(null);
   const connection = shallowRef<Connection | null>(null);
 
+  const isSolana = computed(() => chainNamespace.value === CHAIN_NAMESPACES.SOLANA);
+
   const setupWallet = async () => {
-    if (!web3Auth.value?.currentChain?.chainNamespace || web3Auth.value.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+    if (!isSolana.value) {
+      return;
+    }
+    if (!provider.value) {
       return;
     }
     solanaWallet.value = new SolanaWallet(provider.value);
@@ -25,7 +31,15 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     if (result?.length > 0) {
       accounts.value = result;
     }
-    connection.value = new Connection(web3Auth.value?.currentChain?.rpcTarget);
+    if (web3Auth.value?.currentChain?.rpcTarget) {
+      connection.value = new Connection(web3Auth.value.currentChain.rpcTarget);
+    }
+  };
+
+  const resetWallet = () => {
+    solanaWallet.value = null;
+    accounts.value = null;
+    connection.value = null;
   };
 
   if (provider.value && !solanaWallet.value) {
@@ -33,16 +47,16 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   }
 
   watch(
-    provider,
-    async (newVal) => {
-      if (!newVal && solanaWallet.value) {
-        solanaWallet.value = null;
-        accounts.value = null;
-        connection.value = null;
+    [provider, chainNamespace],
+    async ([newProvider, newChainNamespace]) => {
+      if (!newProvider || newChainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        if (solanaWallet.value) {
+          resetWallet();
+        }
         return;
       }
 
-      if (newVal && !solanaWallet.value) {
+      if (newProvider && !solanaWallet.value) {
         setupWallet();
       }
     },

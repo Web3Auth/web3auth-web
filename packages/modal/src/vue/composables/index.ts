@@ -1,3 +1,4 @@
+export * from "./useChain";
 export * from "./useCheckout";
 export * from "./useEnableMFA";
 export * from "./useFunding";

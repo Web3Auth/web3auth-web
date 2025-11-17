@@ -2,6 +2,7 @@ import { createContext, createElement, PropsWithChildren, useCallback, useEffect
 
 import {
   ANALYTICS_INTEGRATION_TYPE,
+  ChainNamespaceType,
   CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
@@ -24,6 +25,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     return new Web3AuthNoModal(web3AuthOptions, initialState);
   }, [web3AuthOptions, initialState]);
 
+  const [chainId, setChainId] = useState<string | null>(null);
+  const [chainNamespace, setChainNamespace] = useState<ChainNamespaceType | null>(null);
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -50,6 +53,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
           integration_type: ANALYTICS_INTEGRATION_TYPE.REACT_HOOKS,
         });
         await web3Auth.init({ signal: controller.signal });
+        setChainId(web3Auth.currentChainId);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace);
       } catch (error) {
         setInitError(error as Error);
       } finally {
@@ -63,6 +68,20 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       controller.abort();
     };
   }, [web3Auth]);
+
+  useEffect(() => {
+    const handleChainChange = async (chainId: string) => {
+      setChainId(chainId);
+      setChainNamespace(web3Auth?.currentChain?.chainNamespace);
+    };
+
+    if (provider) {
+      provider.on("chainChanged", handleChainChange);
+      return () => {
+        provider.off("chainChanged", handleChainChange);
+      };
+    }
+  }, [web3Auth, provider]);
 
   useEffect(() => {
     const notReadyListener = () => setStatus(CONNECTOR_STATUS.NOT_READY);
@@ -138,10 +157,25 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       isInitializing,
       initError,
       isMFAEnabled,
+      chainId,
+      chainNamespace,
       getPlugin,
       setIsMFAEnabled,
     };
-  }, [web3Auth, isConnected, isInitialized, provider, status, getPlugin, isInitializing, initError, isMFAEnabled, setIsMFAEnabled]);
+  }, [
+    web3Auth,
+    isConnected,
+    isInitialized,
+    provider,
+    status,
+    getPlugin,
+    isInitializing,
+    initError,
+    isMFAEnabled,
+    setIsMFAEnabled,
+    chainId,
+    chainNamespace,
+  ]);
 
   return createElement(Web3AuthInnerContext.Provider, { value }, children);
 }
