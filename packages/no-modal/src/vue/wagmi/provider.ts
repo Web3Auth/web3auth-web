@@ -21,10 +21,14 @@ import { WagmiProviderProps } from "./interface";
 
 const WEB3AUTH_CONNECTOR_ID = "web3auth";
 
+function getWeb3authConnector(config: Config) {
+  return config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
+}
+
 // Helper to initialize connectors for the given wallets
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function setupConnector(provider: any, config: Config) {
-  let connector: Connector | CreateConnectorFn = config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
+  let connector: Connector | CreateConnectorFn = getWeb3authConnector(config);
 
   if (connector) return connector;
 
@@ -73,8 +77,15 @@ async function connectWeb3AuthWithWagmi(connector: Connector, config: Config) {
   }));
 }
 
-async function disconnectWeb3AuthFromWagmi(config: Config) {
+function resetConnectorState(config: Config) {
   config._internal.connectors.setState((prev) => prev.filter((c) => c.id !== WEB3AUTH_CONNECTOR_ID));
+  config.connectors.filter((c) => c.id !== WEB3AUTH_CONNECTOR_ID);
+}
+
+async function disconnectWeb3AuthFromWagmi(config: Config) {
+  const connector = getWeb3authConnector(config);
+  await Promise.all([config.storage?.setItem(`${connector?.id}.disconnected`, true), config.storage?.removeItem("injected.connected")]);
+  resetConnectorState(config);
   config.setState((state) => ({
     ...state,
     chainId: state.chainId,
@@ -96,6 +107,13 @@ const Web3AuthWagmiProvider = defineComponent({
       onDisconnect: async () => {
         log.info("Disconnected from wagmi");
         if (isConnected.value) await disconnect();
+
+        const connector = getWeb3authConnector(wagmiConfig);
+        // reset wagmi connector state if the provider handles disconnection because of the accountsChanged event
+        // from the connected provider
+        if (connector) {
+          resetConnectorState(wagmiConfig);
+        }
       },
     });
 
@@ -219,9 +237,9 @@ export const WagmiProvider = defineComponent({
 
     watch(
       isInitialized,
-      (newIsInitialized) => {
+      (newIsInitialized: boolean, prevIsInitialized: boolean) => {
         web3Auth.value?.setAnalyticsProperties({ wagmi_enabled: true });
-        if (newIsInitialized && !finalConfig.value) {
+        if (newIsInitialized && !prevIsInitialized) {
           finalConfig.value = defineWagmiConfig();
           hydrateWagmiConfig();
           configKey.value = randomId();
@@ -237,10 +255,8 @@ export const WagmiProvider = defineComponent({
     return { finalConfig, configKey };
   },
   render() {
-    if (!this.finalConfig) return null;
     return h(
       Web3AuthWagmiInnerProvider,
-      // This key is used to remount the provider when the config changes.
       { config: this.finalConfig, key: this.configKey },
       {
         default: () => this.$slots.default?.(),
