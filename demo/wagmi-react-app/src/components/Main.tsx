@@ -1,8 +1,11 @@
+import { CHAIN_NAMESPACES } from "@web3auth/modal";
 import {
+  useChain,
   useCheckout,
   useEnableMFA,
   useIdentityToken,
   useManageMFA,
+  useSwitchChain as useWeb3AuthSwitchChain,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
@@ -10,12 +13,16 @@ import {
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
+import { useSolanaWallet } from "@web3auth/modal/react/solana";
+import { useMemo } from "react";
 import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
-  const { provider, isConnected } = useWeb3Auth();
+  const { provider, isConnected, web3Auth, status } = useWeb3Auth();
+  const { accounts: solanaAccounts } = useSolanaWallet();
+  const { chainNamespace: currentChainNamespace, chainId: currentChainId } = useChain();
   const { loading: connecting, connect, error: connectingError, connectorName, connectTo } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { signMessageAsync, data: signedMessageData } = useSignMessage();
@@ -30,16 +37,36 @@ const Main = () => {
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
   const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
   const { switchChainAsync, chains } = useSwitchChain();
+  const { switchChain: switchWeb3AuthChain } = useWeb3AuthSwitchChain();
+
   const chainId = useChainId();
+
+  const chainNamespaces = useMemo(() => {
+    if (status && web3Auth?.coreOptions?.chains) {
+      return [...new Set(web3Auth.coreOptions.chains.map((x) => x.chainNamespace) || [])];
+    }
+    return [];
+  }, [status, web3Auth]);
+
+  const switchNamespace = (chainNamespace: string) => {
+    const chainId = web3Auth?.coreOptions.chains?.find((x) => x.chainNamespace === chainNamespace)?.chainId;
+    if (chainId) {
+      switchWeb3AuthChain(chainId);
+      return;
+    }
+    throw new Error(`No chain found for the selected namespace: ${chainNamespace}`);
+  };
 
   const loggedInView = (
     <>
       <div className={styles.container}>
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
-          <p>Account Address: {address}</p>
+          <p>Account Address: {currentChainNamespace === CHAIN_NAMESPACES.EIP155 ? address : solanaAccounts?.[0]}</p>
           <p>Account Balance: {balance?.value}</p>
           <p>MFA Enabled: {isMFAEnabled ? "Yes" : "No"}</p>
-          <p>ConnectedChain ID: {chainId}</p>
+          <p>Wagmi ConnectedChain ID: {chainId}</p>
+          <p>Web3Auth ConnectedChain ID: {currentChainId}</p>
+          <p>Web3Auth ConnectedChain Namespace: {currentChainNamespace}</p>
         </div>
 
         {/* User Info */}
@@ -190,6 +217,22 @@ const Main = () => {
               style={{ opacity: chainId === chain.id ? 0.5 : 1 }}
             >
               Switch to {chain.name}
+            </button>
+          ))}
+        </div>
+
+        <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+          <p>Chain Namespace</p>
+
+          {chainNamespaces.map((namespace) => (
+            <button
+              key={namespace}
+              onClick={async () => switchNamespace(namespace)}
+              className={styles.card}
+              disabled={namespace === currentChainNamespace}
+              style={{ opacity: namespace === currentChainNamespace ? 0.5 : 1 }}
+            >
+              Switch to {namespace === CHAIN_NAMESPACES.EIP155 ? "EVM" : "Solana"}
             </button>
           ))}
         </div>

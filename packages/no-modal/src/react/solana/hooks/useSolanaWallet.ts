@@ -3,6 +3,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { SolanaWallet } from "../../../providers/solana-provider";
+import { useChain } from "../../hooks";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
@@ -13,24 +14,27 @@ export type IUseSolanaWallet = {
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { provider, web3Auth } = useWeb3Auth();
+  const { chainNamespace } = useChain();
   const [accounts, setAccounts] = useState<string[] | null>(null);
 
   const solanaWallet = useMemo(() => {
     if (!provider) return null;
+    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
     return new SolanaWallet(provider);
-  }, [provider]);
+  }, [provider, chainNamespace]);
 
   const connection = useMemo(() => {
-    if (!web3Auth || !provider) return null;
+    if (!web3Auth || !provider || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
     return new Connection(web3Auth.currentChain.rpcTarget);
-  }, [web3Auth, provider]);
+  }, [web3Auth, provider, chainNamespace]);
 
   useEffect(() => {
     const init = async () => {
-      if (!solanaWallet) return;
-      if (!web3Auth?.currentChain?.chainNamespace || web3Auth.currentChain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+      if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        setAccounts(null);
         return;
       }
+      if (!solanaWallet) return;
       const accounts = await solanaWallet.getAccounts();
       if (accounts?.length > 0) {
         setAccounts(accounts);
@@ -38,7 +42,7 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     };
 
     if (solanaWallet) init();
-  }, [solanaWallet]);
+  }, [solanaWallet, chainNamespace]);
 
   return { solanaWallet, accounts, connection };
 };
