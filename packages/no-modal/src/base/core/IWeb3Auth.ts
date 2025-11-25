@@ -178,6 +178,11 @@ export interface IWeb3AuthCoreOptions {
    * MFA level for the auth connector
    */
   mfaLevel?: MfaLevelType;
+
+  /**
+   * Initial authentication mode for the auth connector
+   */
+  initialAuthenticationMode?: "connect-only" | "connect-and-sign";
 }
 
 export type LoginParamMap = {
