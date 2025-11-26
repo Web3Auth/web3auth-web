@@ -302,7 +302,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
 
     const initialChain = this.getInitialChainIdForConnector(connector);
-    const finalLoginParams = { ...loginParams, chainId: initialChain.chainId };
+    const finalLoginParams = {
+      ...loginParams,
+      chainId: initialChain.chainId,
+      getIdentityToken: this.coreOptions.initialAuthenticationMode === "connect-and-sign",
+    };
 
     // track connection started event
     const startTime = Date.now();

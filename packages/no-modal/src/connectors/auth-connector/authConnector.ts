@@ -401,7 +401,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           // No need to get the identity token for auth connector as it is already handled
           let identityTokenInfo: IdentityTokenInfo | undefined;
           if (params.getIdentityToken) {
+            this.status = CONNECTOR_STATUS.AUTHORIZING;
+            this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
             identityTokenInfo = await this.getIdentityToken();
+            this.status = CONNECTOR_STATUS.AUTHORIZED;
+            this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH });
           }
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
