@@ -15,6 +15,8 @@ export const CONNECTOR_EVENTS = {
   CONNECTORS_UPDATED: "connectors_updated",
   MFA_ENABLED: "mfa_enabled",
   REHYDRATION_ERROR: "rehydration_error",
+  AUTHORIZED: "authorized",
+  AUTHORIZING: "authorizing",
 } as const;
 
 export const CONNECTOR_CATEGORY = {

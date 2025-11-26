@@ -62,6 +62,8 @@ export interface UIConfig extends WhiteLabelData {
   uxMode?: UX_MODE_TYPE;
 }
 
+export type InitialAuthenticationModeType = "connect-only" | "connect-and-sign";
+
 export interface IWeb3AuthCoreOptions {
   /**
    * Client id for web3auth.
@@ -178,6 +180,12 @@ export interface IWeb3AuthCoreOptions {
    * MFA level for the auth connector
    */
   mfaLevel?: MfaLevelType;
+
+  /**
+   * Initial authentication mode for the auth connector.
+   * @defaultValue "connect-only"
+   */
+  initialAuthenticationMode?: InitialAuthenticationModeType;
 }
 
 export type LoginParamMap = {
