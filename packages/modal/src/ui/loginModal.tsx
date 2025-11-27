@@ -98,6 +98,7 @@ export class LoginModal {
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
     if (!uiConfig.widgetType) this.uiConfig.widgetType = WIDGET_TYPE.MODAL;
+    if (!uiConfig.initialAuthenticationMode) this.uiConfig.initialAuthenticationMode = "connect-only";
 
     if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");
@@ -269,6 +270,7 @@ export class LoginModal {
               handleSocialLoginClick={this.handleSocialLoginClick}
               closeModal={this.closeModal}
               uiConfig={this.uiConfig}
+              initialAuthenticationMode={this.uiConfig.initialAuthenticationMode}
             />
           </AnalyticsContext.Provider>
         </ThemedContext.Provider>
@@ -457,6 +459,12 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, (connectorData: IConnectorDataEvent) => {
       this.handleConnectorData(connectorData);
+    });
+    listener.on(CONNECTOR_EVENTS.AUTHORIZING, () => {
+      this.setState({ status: MODAL_STATUS.AUTHORIZING });
+    });
+    listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
+      this.setState({ status: MODAL_STATUS.AUTHORIZED });
     });
   };
 }

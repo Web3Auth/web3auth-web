@@ -110,15 +110,22 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       };
       this.injectedProvider.on("accountsChanged", accountDisconnectHandler);
       let identityTokenInfo: IdentityTokenInfo | undefined;
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
-      }
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: this.name,
         reconnected: this.rehydrated,
         provider: this.injectedProvider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
+      if (getIdentityToken) {
+        this.status = CONNECTOR_STATUS.AUTHORIZING;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name });
+        identityTokenInfo = await this.getIdentityToken();
+        this.status = CONNECTOR_STATUS.AUTHORIZED;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name });
+      }
+
       return this.injectedProvider;
     } catch (error) {
       // ready again to be connected

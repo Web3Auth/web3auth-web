@@ -377,7 +377,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         cleanup();
         reject(err);
       };
-      this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
+
+      if (finalLoginParams.getIdentityToken) {
+        this.once(CONNECTOR_EVENTS.AUTHORIZED, onConnected);
+      } else {
+        this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
+      }
       this.once(CONNECTOR_EVENTS.ERRORED, onErrored);
       connector.connect(finalLoginParams);
       this.setCurrentChain(initialChain.chainId);
@@ -910,6 +915,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         is_mfa_enabled: isMFAEnabled,
       });
       this.emit(CONNECTOR_EVENTS.MFA_ENABLED, isMFAEnabled);
+    });
+
+    connector.on(CONNECTOR_EVENTS.AUTHORIZING, (data) => {
+      this.status = CONNECTOR_STATUS.AUTHORIZING;
+      this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
+      log.debug("authorizing", this.status, this.connectedConnectorName);
+    });
+    connector.on(CONNECTOR_EVENTS.AUTHORIZED, (data) => {
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
+      log.debug("authorized", this.status, this.connectedConnectorName);
     });
   }
 

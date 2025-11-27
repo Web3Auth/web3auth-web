@@ -13,6 +13,7 @@ import {
   type AuthLoginParams,
   type BaseConnectorConfig,
   type ChainNamespaceType,
+  InitialAuthenticationModeType,
   type LoginMethodConfig,
   type LoginModalConfig,
   type UIConfig as CoreUIConfig,
@@ -76,6 +77,7 @@ export type ModalLoginParams = Pick<
 };
 
 export interface LoginModalProps extends UIConfig {
+  initialAuthenticationMode: InitialAuthenticationModeType;
   chainNamespaces: ChainNamespaceType[];
   walletRegistry: WalletRegistry;
   web3authClientId: string;
@@ -109,6 +111,8 @@ export const MODAL_STATUS = {
   CONNECTED: "connected",
   CONNECTING: "connecting",
   ERRORED: "errored",
+  AUTHORIZING: "authorizing",
+  AUTHORIZED: "authorized",
 } as const;
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 

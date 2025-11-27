@@ -7,6 +7,7 @@ export interface LoaderProps {
   connectorName: string;
   modalStatus: ModalStatusType;
   onClose: () => void;
+  isConnectAndSignAuthenticationMode: boolean;
 }
 
 export type ConnectingStatusType = Pick<LoaderProps, "connectorName" | "appLogo" | "connector">;

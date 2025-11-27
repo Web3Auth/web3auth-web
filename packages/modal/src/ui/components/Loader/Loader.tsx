@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
+import CircularLoader from "../CircularLoader";
 import Image from "../Image";
 import PulseLoader from "../PulseLoader";
 import { ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
@@ -88,13 +89,42 @@ function ErroredStatus(props: ErroredStatusType) {
   );
 }
 
+function AuthorizingStatus() {
+  return (
+    <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-6">
+      <p className="w3a--p-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
+        Verify on MetaMask
+      </p>
+      <div className="w3a--flex w3a--justify-center">
+        <CircularLoader width={95} height={95} thickness={6} arcSizeDeg={100}>
+          <Image
+            imageId={`login-metamask`}
+            hoverImageId={`login-metamask`}
+            fallbackImageId="wallet"
+            height="45"
+            width="45"
+            isButton
+            extension="svg"
+          />
+        </CircularLoader>
+      </div>
+      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
+        We’ve sent a request to your wallet. Verify on your wallet to confirm that you own this wallet.
+      </p>
+      <button className="w3a--w-full w3a--rounded-xl w3a--bg-app-gray-100 w3a--p-2 w3a--py-3 w3a--text-sm w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white">
+        Click here to verify
+      </button>
+    </div>
+  );
+}
+
 /**
  * Loader component
  * @param props - LoaderProps
  * @returns Loader component
  */
 function Loader(props: LoaderProps) {
-  const { connector, connectorName, modalStatus, onClose, appLogo, message } = props;
+  const { connector, connectorName, modalStatus, onClose, appLogo, message, isConnectAndSignAuthenticationMode } = props;
 
   useEffect(() => {
     if (modalStatus === MODAL_STATUS.CONNECTED) {
@@ -102,15 +132,22 @@ function Loader(props: LoaderProps) {
         onClose();
       }, 1000);
     }
-  }, [modalStatus, onClose]);
+    if (isConnectAndSignAuthenticationMode && modalStatus === MODAL_STATUS.AUTHORIZED) {
+      setTimeout(() => {
+        onClose();
+      }, 1000);
+    }
+  }, [modalStatus, onClose, isConnectAndSignAuthenticationMode]);
 
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
 
-      {modalStatus === MODAL_STATUS.CONNECTED && <ConnectedStatus message={message} />}
+      {(modalStatus === MODAL_STATUS.CONNECTED || modalStatus === MODAL_STATUS.AUTHORIZED) && <ConnectedStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
+
+      {modalStatus === MODAL_STATUS.AUTHORIZING && <AuthorizingStatus />}
     </div>
   );
 }

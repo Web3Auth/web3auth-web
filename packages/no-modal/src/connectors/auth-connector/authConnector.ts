@@ -400,13 +400,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           // if getIdentityToken is true, then get the identity token
           // No need to get the identity token for auth connector as it is already handled
           let identityTokenInfo: IdentityTokenInfo | undefined;
-          if (params.getIdentityToken) {
-            this.status = CONNECTOR_STATUS.AUTHORIZING;
-            this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
-            identityTokenInfo = await this.getIdentityToken();
-            this.status = CONNECTOR_STATUS.AUTHORIZED;
-            this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH });
-          }
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
             connector: WALLET_CONNECTORS.AUTH,
@@ -414,6 +407,14 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
             provider: this.provider,
             identityTokenInfo,
           } as CONNECTED_EVENT_DATA);
+
+          if (params.getIdentityToken) {
+            this.status = CONNECTOR_STATUS.AUTHORIZING;
+            this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
+            identityTokenInfo = await this.getIdentityToken();
+            this.status = CONNECTOR_STATUS.AUTHORIZED;
+            this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH });
+          }
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
             if ((accounts as string[]).length === 0 && this.status === CONNECTOR_STATUS.CONNECTED) this.disconnect({ cleanup: false });

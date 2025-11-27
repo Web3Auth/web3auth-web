@@ -9,7 +9,6 @@ import { ExternalButton, mobileOs, MODAL_STATUS, TOAST_TYPE, ToastType } from ".
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
 import BottomSheet from "../BottomSheet";
-import CircularLoader from "../CircularLoader";
 import ConnectWallet from "../ConnectWallet";
 import ConnectWalletChainNamespaceSelect from "../ConnectWallet/ConnectWalletChainNamespaceSelect";
 import ConnectWalletHeader from "../ConnectWallet/ConnectWalletHeader";
@@ -43,6 +42,7 @@ function Root(props: RootProps) {
     preHandleExternalWalletClick,
     uiConfig,
     deviceDetails,
+    isConnectAndSignAuthenticationMode,
   } = props;
 
   const {
@@ -441,6 +441,7 @@ function Root(props: RootProps) {
                 modalStatus={modalState.status}
                 onClose={onCloseLoader}
                 appLogo={appLogo}
+                isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
               />
             ) : (
               <>
@@ -564,41 +565,6 @@ function Root(props: RootProps) {
                 </ul>
               </BottomSheet>
             )}
-
-            {
-              <BottomSheet
-                uiConfig={uiConfig}
-                isShown={true}
-                onClose={() => setBodyState({ ...bodyState, installLinks: { show: false, wallet: null } })}
-                sheetClassName="!w3a--px-8 !w3a--py-4"
-                showCloseButton={false}
-              >
-                <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-6">
-                  <p className="w3a--p-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
-                    Verify on MetaMask
-                  </p>
-                  <div className="w3a--flex w3a--justify-center">
-                    <CircularLoader width={95} height={95} thickness={6} arcSizeDeg={100}>
-                      <Image
-                        imageId={`login-metamask`}
-                        hoverImageId={`login-metamask`}
-                        fallbackImageId="wallet"
-                        height="45"
-                        width="45"
-                        isButton
-                        extension="svg"
-                      />
-                    </CircularLoader>
-                  </div>
-                  <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
-                    We’ve sent a request to your wallet. Verify on your wallet to confirm that you own this wallet.
-                  </p>
-                  <button className="w3a--w-full w3a--rounded-xl w3a--bg-app-gray-100 w3a--p-2 w3a--py-3 w3a--text-sm w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white">
-                    Click here to verify
-                  </button>
-                </div>
-              </BottomSheet>
-            }
           </div>
         </div>
         <Toast />

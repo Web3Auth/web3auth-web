@@ -23,6 +23,7 @@ function Widget(props: WidgetProps) {
     walletRegistry,
     uiConfig,
     deviceDetails,
+    initialAuthenticationMode,
   } = props;
 
   const { widgetType } = uiConfig;
@@ -54,6 +55,8 @@ function Widget(props: WidgetProps) {
     web3authNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
     authBuildEnv: BUILD_ENV.PRODUCTION,
   });
+
+  const isConnectAndSignAuthenticationMode = useMemo(() => initialAuthenticationMode === "connect-and-sign", [initialAuthenticationMode]);
 
   useEffect(() => {
     setModalState((prev) => ({ ...prev, modalVisibility: visible }));
@@ -162,6 +165,13 @@ function Widget(props: WidgetProps) {
         externalWalletsVisibility: false,
       });
     }
+    if (isConnectAndSignAuthenticationMode && modalState.status === MODAL_STATUS.AUTHORIZED) {
+      setModalState({
+        ...modalState,
+        modalVisibility: false,
+        externalWalletsVisibility: false,
+      });
+    }
     if (modalState.status === MODAL_STATUS.ERRORED) {
       setModalState({
         ...modalState,
@@ -223,6 +233,7 @@ function Widget(props: WidgetProps) {
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
             uiConfig={uiConfig}
             deviceDetails={deviceDetails}
+            isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
           />
         )}
       </Modal>
@@ -255,6 +266,7 @@ function Widget(props: WidgetProps) {
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
           uiConfig={uiConfig}
           deviceDetails={deviceDetails}
+          isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
         />
       )}
     </Embed>

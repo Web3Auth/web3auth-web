@@ -24,4 +24,5 @@ export interface RootProps {
   preHandleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;
   setModalState: (state: ModalState) => void;
   onCloseLoader: () => void;
+  isConnectAndSignAuthenticationMode: boolean;
 }
