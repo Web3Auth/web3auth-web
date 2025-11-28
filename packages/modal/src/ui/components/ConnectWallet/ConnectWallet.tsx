@@ -1,5 +1,5 @@
 import { ANALYTICS_EVENTS, type ChainNamespaceType, log, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
-import { FormEvent, useContext, useMemo, useState } from "react";
+import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
@@ -152,6 +152,13 @@ function ConnectWallet(props: ConnectWalletProps) {
     if (isShowAllWallets) return totalExternalWalletsCount;
     return walletDiscoverySupported ? defaultButtons.length : installedWalletButtons.length;
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
+
+  // Automatically show all wallets if there are less than 15 wallets
+  useEffect(() => {
+    if (walletDiscoverySupported && !walletSearch && totalExternalWalletsCount > 0 && totalExternalWalletsCount < 15) {
+      setIsShowAllWallets(true);
+    }
+  }, [walletDiscoverySupported, walletSearch, totalExternalWalletsCount]);
 
   /**
    * Wallet click logic
