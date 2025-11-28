@@ -116,10 +116,10 @@ function ConnectWalletList(props: ConnectWalletListProps) {
     buttonRadius,
   } = props;
 
-  const [showMoreWallets, setShowMoreWallets] = useState(true);
+  const [showMoreWalletsButton, setShowMoreWalletsButton] = useState(true);
 
   const onShowMoreWalletsClick = () => {
-    setShowMoreWallets(false);
+    setShowMoreWalletsButton(false);
     handleMoreWallets();
   };
 
@@ -127,7 +127,7 @@ function ConnectWalletList(props: ConnectWalletListProps) {
     <>
       <ul
         className={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px] w3a--social-container w3a--pr-2.5", {
-          "w3a--h-[328px]": !showMoreWallets,
+          "w3a--h-[328px]": !showMoreWalletsButton,
         })}
       >
         {externalButtons.length === 0 ? (
@@ -143,7 +143,7 @@ function ConnectWalletList(props: ConnectWalletListProps) {
           />
         )}
       </ul>
-      {showMoreWallets && totalExternalWalletsCount > 15 && !isLoading && initialWalletCount < totalExternalWalletsCount && (
+      {showMoreWalletsButton && totalExternalWalletsCount > 15 && !isLoading && initialWalletCount < totalExternalWalletsCount && (
         <MoreWalletsButton
           totalExternalWalletsCount={totalExternalWalletsCount}
           initialWalletCount={initialWalletCount}
