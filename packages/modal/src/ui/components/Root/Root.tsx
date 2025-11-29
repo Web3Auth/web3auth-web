@@ -442,6 +442,7 @@ function Root(props: RootProps) {
                 onClose={onCloseLoader}
                 appLogo={appLogo}
                 isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
+                externalWalletsConfig={modalState.externalWalletsConfig}
               />
             ) : (
               <>

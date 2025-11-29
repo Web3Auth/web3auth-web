@@ -179,9 +179,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       }
 
       let identityTokenInfo: IdentityTokenInfo | undefined;
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
-      }
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.METAMASK,
@@ -189,6 +186,15 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         provider: this.metamaskProvider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
+      if (getIdentityToken) {
+        this.status = CONNECTOR_STATUS.AUTHORIZING;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.METAMASK });
+        identityTokenInfo = await this.getIdentityToken();
+        this.status = CONNECTOR_STATUS.AUTHORIZED;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.METAMASK });
+      }
+
       return this.metamaskProvider;
     } catch (error) {
       // ready again to be connected

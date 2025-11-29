@@ -114,16 +114,24 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
         // ready to be connected again
         this.disconnect();
       });
+
       let identityTokenInfo: IdentityTokenInfo | undefined;
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
-      }
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.COINBASE,
         reconnected: this.rehydrated,
         provider: this.provider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
+      if (getIdentityToken) {
+        this.status = CONNECTOR_STATUS.AUTHORIZING;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.COINBASE });
+        identityTokenInfo = await this.getIdentityToken();
+        this.status = CONNECTOR_STATUS.AUTHORIZED;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.COINBASE });
+      }
+
       return this.provider;
     } catch (error) {
       // ready again to be connected

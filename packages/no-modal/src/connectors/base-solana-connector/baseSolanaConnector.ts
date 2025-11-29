@@ -7,6 +7,7 @@ import {
   clearToken,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
+  CONNECTOR_STATUS_TYPE,
   ConnectorInitOptions,
   getSavedToken,
   IdentityTokenInfo,
@@ -19,7 +20,8 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
-    if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
+    if (!this.provider || !([CONNECTOR_STATUS.CONNECTED, CONNECTOR_STATUS.AUTHORIZING] as CONNECTOR_STATUS_TYPE[]).includes(this.status))
+      throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
     const accounts = await this.provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS });
