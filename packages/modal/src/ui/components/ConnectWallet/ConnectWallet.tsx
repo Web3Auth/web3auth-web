@@ -153,13 +153,14 @@ function ConnectWallet(props: ConnectWalletProps) {
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
 
   // Automatically show all wallets if there are less than or equal to 15 wallets
+  // also resets everytime we search causing no. of wallets to change or select different chain
   useEffect(() => {
     if (walletDiscoverySupported && totalExternalWalletsCount <= 15) {
       setIsShowAllWallets(true);
     } else {
       setIsShowAllWallets(false);
     }
-  }, [walletDiscoverySupported, totalExternalWalletsCount]);
+  }, [walletDiscoverySupported, selectedChain, totalExternalWalletsCount]);
 
   /**
    * Wallet click logic
