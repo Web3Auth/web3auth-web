@@ -1,4 +1,3 @@
-import { useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import i18n from "../../../localeImport";
@@ -114,14 +113,14 @@ function ConnectWalletList(props: ConnectWalletListProps) {
     deviceDetails,
     walletConnectUri,
     buttonRadius,
+    isShowAllWallets,
   } = props;
 
-  const [showMoreWalletsButton, setShowMoreWalletsButton] = useState(true);
-
   const onShowMoreWalletsClick = () => {
-    setShowMoreWalletsButton(false);
     handleMoreWallets();
   };
+
+  const showMoreWalletsButton = !isShowAllWallets;
 
   return (
     <>
@@ -143,7 +142,7 @@ function ConnectWalletList(props: ConnectWalletListProps) {
           />
         )}
       </ul>
-      {showMoreWalletsButton && totalExternalWalletsCount > 15 && !isLoading && initialWalletCount < totalExternalWalletsCount && (
+      {showMoreWalletsButton && !isLoading && initialWalletCount < totalExternalWalletsCount && (
         <MoreWalletsButton
           totalExternalWalletsCount={totalExternalWalletsCount}
           initialWalletCount={initialWalletCount}

@@ -126,7 +126,6 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const handleChainFilterChange = (chain: string) => {
     setSelectedChain(chain);
-    setIsShowAllWallets(false);
   };
 
   const filteredButtons = useMemo(() => {
@@ -153,12 +152,14 @@ function ConnectWallet(props: ConnectWalletProps) {
     return walletDiscoverySupported ? defaultButtons.length : installedWalletButtons.length;
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
 
-  // Automatically show all wallets if there are less than 15 wallets
+  // Automatically show all wallets if there are less than or equal to 15 wallets
   useEffect(() => {
-    if (walletDiscoverySupported && !walletSearch && totalExternalWalletsCount > 0 && totalExternalWalletsCount < 15) {
+    if (walletDiscoverySupported && totalExternalWalletsCount <= 15) {
       setIsShowAllWallets(true);
+    } else {
+      setIsShowAllWallets(false);
     }
-  }, [walletDiscoverySupported, walletSearch, totalExternalWalletsCount]);
+  }, [walletDiscoverySupported, totalExternalWalletsCount]);
 
   /**
    * Wallet click logic
@@ -296,6 +297,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             deviceDetails={deviceDetails}
             walletConnectUri={walletConnectUri}
             buttonRadius={buttonRadius}
+            isShowAllWallets={isShowAllWallets}
           />
         </div>
       )}
