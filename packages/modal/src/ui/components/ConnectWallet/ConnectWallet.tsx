@@ -1,5 +1,5 @@
 import { ANALYTICS_EVENTS, type ChainNamespaceType, log, type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
-import { FormEvent, useContext, useMemo, useState } from "react";
+import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
@@ -126,7 +126,6 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const handleChainFilterChange = (chain: string) => {
     setSelectedChain(chain);
-    setIsShowAllWallets(false);
   };
 
   const filteredButtons = useMemo(() => {
@@ -152,6 +151,16 @@ function ConnectWallet(props: ConnectWalletProps) {
     if (isShowAllWallets) return totalExternalWalletsCount;
     return walletDiscoverySupported ? defaultButtons.length : installedWalletButtons.length;
   }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
+
+  // Automatically show all wallets if there are less than or equal to 15 wallets
+  // also resets everytime we search causing no. of wallets to change or select different chain
+  useEffect(() => {
+    if (walletDiscoverySupported && totalExternalWalletsCount <= 15) {
+      setIsShowAllWallets(true);
+    } else {
+      setIsShowAllWallets(false);
+    }
+  }, [walletDiscoverySupported, selectedChain, totalExternalWalletsCount]);
 
   /**
    * Wallet click logic
@@ -289,6 +298,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             deviceDetails={deviceDetails}
             walletConnectUri={walletConnectUri}
             buttonRadius={buttonRadius}
+            isShowAllWallets={isShowAllWallets}
           />
         </div>
       )}

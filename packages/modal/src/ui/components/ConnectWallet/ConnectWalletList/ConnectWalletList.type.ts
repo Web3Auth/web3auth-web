@@ -11,6 +11,7 @@ export interface ConnectWalletListProps {
   buttonRadius: ButtonRadiusType;
   handleWalletClick: (button: ExternalButton) => void;
   handleMoreWallets: () => void;
+  isShowAllWallets: boolean;
 }
 
 export type WalletsFoundProps = Pick<
