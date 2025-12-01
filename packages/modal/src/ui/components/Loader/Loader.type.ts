@@ -1,9 +1,10 @@
-import { BaseConnectorConfig } from "@web3auth/no-modal";
+import { BaseConnectorConfig, WalletRegistry } from "@web3auth/no-modal";
 
 import type { ModalStatusType } from "../../interfaces";
 
 export interface LoaderProps {
   externalWalletsConfig: Record<string, BaseConnectorConfig>;
+  walletRegistry?: WalletRegistry;
   message?: string;
   appLogo?: string;
   connector: string;
@@ -19,4 +20,4 @@ export type ConnectedStatusType = Pick<LoaderProps, "message">;
 
 export type ErroredStatusType = Pick<LoaderProps, "message">;
 
-export type AuthorizingStatusType = Pick<LoaderProps, "connector" | "externalWalletsConfig">;
+export type AuthorizingStatusType = Pick<LoaderProps, "connector" | "externalWalletsConfig" | "walletRegistry">;

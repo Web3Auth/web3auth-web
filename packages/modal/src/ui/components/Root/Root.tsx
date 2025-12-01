@@ -443,6 +443,7 @@ function Root(props: RootProps) {
                 appLogo={appLogo}
                 isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
                 externalWalletsConfig={modalState.externalWalletsConfig}
+                walletRegistry={walletRegistry}
               />
             ) : (
               <>

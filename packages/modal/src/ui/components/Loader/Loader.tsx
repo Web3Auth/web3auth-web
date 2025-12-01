@@ -90,28 +90,37 @@ function ErroredStatus(props: ErroredStatusType) {
 }
 
 function AuthorizingStatus(props: AuthorizingStatusType) {
-  // const [t] = useTranslation(undefined, { i18n });
-  const { connector, externalWalletsConfig } = props;
+  const [t] = useTranslation(undefined, { i18n });
+  const { connector, externalWalletsConfig, walletRegistry } = props;
 
   // eslint-disable-next-line no-console
   console.log("externalWalletsConfig", externalWalletsConfig);
 
+  const registryItem = walletRegistry?.default?.[connector] || walletRegistry?.others?.[connector];
+  const primaryColor = registryItem?.primaryColor || "";
+
+  // eslint-disable-next-line no-console
+  console.log("registryItem", registryItem);
+
   return (
     <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-between w3a--gap-y-6">
       <p className="w3a--p-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
-        Verify on {externalWalletsConfig[connector].label}
+        {t("modal.loader.authorizing-header", { connector: externalWalletsConfig[connector].label })}
       </p>
       <div className="w3a--flex w3a--justify-center">
-        <CircularLoader width={95} height={95} thickness={6} arcSizeDeg={100}>
+        <CircularLoader width={95} height={95} thickness={6} arcSizeDeg={100} arcColors={primaryColor ? [primaryColor, primaryColor] : undefined}>
           <Image imageId={`login-${connector}`} hoverImageId={`login-${connector}`} height="45" width="45" />
         </CircularLoader>
       </div>
-      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
-        We’ve sent a request to your wallet. Verify on your wallet to confirm that you own this wallet.
-      </p>
-      <button className="w3a--w-full w3a--rounded-xl w3a--bg-app-gray-100 w3a--p-2 w3a--py-3 w3a--text-sm w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white md:w3a--hidden">
-        Click here to verify
-      </button>
+      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{t("modal.loader.authorizing-message")}</p>
+      <a
+        href={"https://www.google.com"}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w3a--w-full w3a--rounded-xl w3a--bg-app-gray-100 w3a--p-2 w3a--py-3 w3a--text-center w3a--text-sm w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white md:w3a--hidden"
+      >
+        {t("modal.loader.authorizing-verify-btn")}
+      </a>
     </div>
   );
 }
@@ -122,7 +131,19 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
  * @returns Loader component
  */
 function Loader(props: LoaderProps) {
-  const { connector, connectorName, modalStatus, onClose, appLogo, message, isConnectAndSignAuthenticationMode, externalWalletsConfig } = props;
+  const {
+    connector,
+    connectorName,
+    modalStatus,
+    onClose,
+    appLogo,
+    message,
+    isConnectAndSignAuthenticationMode,
+    externalWalletsConfig,
+    walletRegistry,
+    walletConnectUri,
+    metamaskConnectUri,
+  } = props;
 
   // eslint-disable-next-line no-console
   console.log("connectorName", connectorName);
@@ -148,7 +169,9 @@ function Loader(props: LoaderProps) {
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
 
-      {modalStatus === MODAL_STATUS.AUTHORIZING && <AuthorizingStatus connector={connector} externalWalletsConfig={externalWalletsConfig} />}
+      {modalStatus === MODAL_STATUS.AUTHORIZING && (
+        <AuthorizingStatus connector={connector} externalWalletsConfig={externalWalletsConfig} walletRegistry={walletRegistry} />
+      )}
     </div>
   );
 }
