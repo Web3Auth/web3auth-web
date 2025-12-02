@@ -162,6 +162,7 @@ export const getWalletServicesAnalyticsProperties = (walletServicesConfig?: Wall
     ws_hide_swap: walletServicesConfig?.whiteLabel?.hideSwap,
     ws_hide_show_all_tokens: walletServicesConfig?.whiteLabel?.hideShowAllTokens,
     ws_hide_wallet_connect: walletServicesConfig?.whiteLabel?.hideWalletConnect,
+    ws_hide_defi_positions_display: walletServicesConfig?.whiteLabel?.hideDefiPositionsDisplay,
     ws_default_portfolio: walletServicesConfig?.whiteLabel?.defaultPortfolio,
   };
 };

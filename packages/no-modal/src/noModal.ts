@@ -597,6 +597,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       enableReceiveButton = true,
       enableShowAllTokensButton = true,
       enableConfirmationModal = false,
+      enableDefiPositionsDisplay = true,
       portfolioWidgetPosition = BUTTON_POSITION.BOTTOM_LEFT,
       defaultPortfolio = "token",
     } = walletUi || {};
@@ -610,6 +611,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       hideSwap: !enableSwapButton,
       hideShowAllTokens: !enableShowAllTokensButton,
       hideWalletConnect: !enableWalletConnect,
+      hideDefiPositionsDisplay: !enableDefiPositionsDisplay,
       buttonPosition: portfolioWidgetPosition,
       defaultPortfolio,
     };
