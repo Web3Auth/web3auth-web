@@ -94,6 +94,7 @@ export interface LoginModalCallbacks {
     loginParams: { chainNamespace: ChainNamespaceType };
   }) => Promise<void>;
   onModalVisibility: (visibility: boolean) => Promise<void>;
+  onMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => Promise<void>;
 }
 
 export const LOGIN_MODAL_EVENTS = {

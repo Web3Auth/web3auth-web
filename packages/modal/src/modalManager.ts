@@ -123,6 +123,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           onSocialLogin: this.onSocialLogin,
           onExternalWalletLogin: this.onExternalWalletLogin,
           onModalVisibility: this.onModalVisibility,
+          onMobileVerifyConnect: this.onMobileVerifyConnect,
         }
       );
       await withAbort(() => this.loginModal.initModal(), signal);
@@ -656,6 +657,15 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         log.debug("this stops wc connector from trying to reconnect once proposal expires");
         wcConnector.status = CONNECTOR_STATUS.READY;
       }
+    }
+  };
+
+  private onMobileVerifyConnect = async (params: { connector: WALLET_CONNECTOR_TYPE }): Promise<void> => {
+    try {
+      const connector = this.getConnector(params.connector);
+      await connector.getIdentityToken();
+    } catch (error) {
+      log.error(`Error while connecting to connector: ${params.connector}`, error);
     }
   };
 

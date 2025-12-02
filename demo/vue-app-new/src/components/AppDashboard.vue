@@ -40,7 +40,7 @@ const props = defineProps<{
   chains: CustomChainConfig[];
 }>();
 
-const { isConnected, provider, web3Auth, isMFAEnabled } = useWeb3Auth();
+const { isConnected, provider, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
@@ -92,7 +92,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
   const chainNamespace = currentChainNamespace.value;
   switch (name) {
     case "dashboard":
-      return isConnected.value;
+      return formData.initialAuthenticationMode === "connect-and-sign" ? isAuthorized.value : isConnected.value;
 
     case "ethServices":
       return chainNamespace === CHAIN_NAMESPACES.EIP155;

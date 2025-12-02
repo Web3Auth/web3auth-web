@@ -7,6 +7,7 @@ import { chainConfigs, defaultLoginMethod, FormData, initWhiteLabel } from "../c
 export const formDataStore = reactive<FormData>({
   // authMode: "",
   connectors: [],
+  initialAuthenticationMode: "connect-only",
   network: process.env.NODE_ENV === "production" ? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET : WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
   chainNamespaces: [CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA],
   chains: [chainConfigs[CHAIN_NAMESPACES.EIP155][0], chainConfigs[CHAIN_NAMESPACES.SOLANA][0]],

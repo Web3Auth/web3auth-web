@@ -267,6 +267,7 @@ export class LoginModal {
               deviceDetails={this.deviceDetails}
               handleShowExternalWallets={this.handleShowExternalWallets}
               handleExternalWalletClick={this.handleExternalWalletClick}
+              handleMobileVerifyConnect={this.handleMobileVerifyConnect}
               handleSocialLoginClick={this.handleSocialLoginClick}
               closeModal={this.closeModal}
               uiConfig={this.uiConfig}
@@ -367,6 +368,14 @@ export class LoginModal {
     const { connector, chainNamespace } = params;
     if (this.callbacks.onExternalWalletLogin) {
       this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
+    }
+  };
+
+  private handleMobileVerifyConnect = (params: { connector: WALLET_CONNECTOR_TYPE }) => {
+    log.info("mobile verify connect clicked", params);
+    const { connector } = params;
+    if (this.callbacks.onMobileVerifyConnect) {
+      this.callbacks.onMobileVerifyConnect({ connector });
     }
   };
 

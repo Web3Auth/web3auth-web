@@ -1,3 +1,4 @@
+import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -91,16 +92,14 @@ function ErroredStatus(props: ErroredStatusType) {
 
 function AuthorizingStatus(props: AuthorizingStatusType) {
   const [t] = useTranslation(undefined, { i18n });
-  const { connector, externalWalletsConfig, walletRegistry } = props;
-
-  // eslint-disable-next-line no-console
-  console.log("externalWalletsConfig", externalWalletsConfig);
+  const { connector, externalWalletsConfig, walletRegistry, handleMobileVerifyConnect } = props;
 
   const registryItem = walletRegistry?.default?.[connector] || walletRegistry?.others?.[connector];
   const primaryColor = registryItem?.primaryColor || "";
 
-  // eslint-disable-next-line no-console
-  console.log("registryItem", registryItem);
+  const handleMobileVerifyConnectClick = () => {
+    handleMobileVerifyConnect({ connector: connector as WALLET_CONNECTOR_TYPE });
+  };
 
   return (
     <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-between w3a--gap-y-6">
@@ -113,14 +112,12 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
         </CircularLoader>
       </div>
       <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{t("modal.loader.authorizing-message")}</p>
-      <a
-        href={"https://www.google.com"}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        onClick={handleMobileVerifyConnectClick}
         className="w3a--w-full w3a--rounded-xl w3a--bg-app-gray-100 w3a--p-2 w3a--py-3 w3a--text-center w3a--text-sm w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white md:w3a--hidden"
       >
         {t("modal.loader.authorizing-verify-btn")}
-      </a>
+      </button>
     </div>
   );
 }
@@ -141,8 +138,7 @@ function Loader(props: LoaderProps) {
     isConnectAndSignAuthenticationMode,
     externalWalletsConfig,
     walletRegistry,
-    walletConnectUri,
-    metamaskConnectUri,
+    handleMobileVerifyConnect,
   } = props;
 
   // eslint-disable-next-line no-console
@@ -170,7 +166,12 @@ function Loader(props: LoaderProps) {
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.AUTHORIZING && (
-        <AuthorizingStatus connector={connector} externalWalletsConfig={externalWalletsConfig} walletRegistry={walletRegistry} />
+        <AuthorizingStatus
+          connector={connector}
+          externalWalletsConfig={externalWalletsConfig}
+          walletRegistry={walletRegistry}
+          handleMobileVerifyConnect={handleMobileVerifyConnect}
+        />
       )}
     </div>
   );

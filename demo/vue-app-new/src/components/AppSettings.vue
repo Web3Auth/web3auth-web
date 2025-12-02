@@ -229,6 +229,18 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             matchParentsWidth
             :show-check-box="true"
           />
+          <Select
+            v-model="formData.initialAuthenticationMode"
+            data-testid="selectInitialAuthenticationMode"
+            :label="$t('app.initialAuthenticationMode')"
+            :aria-label="$t('app.initialAuthenticationMode')"
+            :placeholder="$t('app.initialAuthenticationMode')"
+            :options="[
+              { name: 'Connect Only', value: 'connect-only' },
+              { name: 'Connect and Sign', value: 'connect-and-sign' },
+            ]"
+            matchParentsWidth
+          />
           <Toggle
             v-model="formData.showWalletDiscovery"
             data-testid="showWalletDiscovery"

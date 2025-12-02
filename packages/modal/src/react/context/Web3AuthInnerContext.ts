@@ -34,6 +34,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [web3AuthOptions, initialState]);
 
   const [isConnected, setIsConnected] = useState<boolean>(web3Auth.status === CONNECTOR_STATUS.CONNECTED);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(web3Auth.status === CONNECTOR_STATUS.AUTHORIZED);
   const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(web3Auth.status);
 
   const getPlugin = useCallback(
@@ -97,6 +98,12 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         setProvider(data.provider);
       }
     };
+    const authorizedListener = (_data: { connector: string }) => {
+      setStatus(web3Auth.status);
+      if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+        setIsAuthorized(true);
+      }
+    };
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
       setIsConnected(false);
@@ -125,6 +132,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
       web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
       web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
       web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -137,6 +145,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         web3Auth.off(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
         web3Auth.off(CONNECTOR_EVENTS.READY, readyListener);
         web3Auth.off(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+        web3Auth.off(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
         web3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
         web3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
         web3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -152,6 +161,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     return {
       web3Auth,
       isConnected,
+      isAuthorized,
       isInitialized,
       provider,
       status,
@@ -166,6 +176,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [
     web3Auth,
     isConnected,
+    isAuthorized,
     isMFAEnabled,
     setIsMFAEnabled,
     isInitialized,

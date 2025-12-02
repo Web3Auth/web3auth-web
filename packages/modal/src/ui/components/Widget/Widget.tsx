@@ -15,6 +15,7 @@ function Widget(props: WidgetProps) {
     stateListener,
     handleSocialLoginClick,
     handleExternalWalletClick,
+    handleMobileVerifyConnect,
     handleShowExternalWallets,
     closeModal,
     appLogo,
@@ -234,6 +235,7 @@ function Widget(props: WidgetProps) {
             uiConfig={uiConfig}
             deviceDetails={deviceDetails}
             isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
+            handleMobileVerifyConnect={handleMobileVerifyConnect}
           />
         )}
       </Modal>
@@ -267,6 +269,7 @@ function Widget(props: WidgetProps) {
           uiConfig={uiConfig}
           deviceDetails={deviceDetails}
           isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
+          handleMobileVerifyConnect={handleMobileVerifyConnect}
         />
       )}
     </Embed>

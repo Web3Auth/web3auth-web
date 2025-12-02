@@ -21,6 +21,7 @@ export const Web3AuthProvider = defineComponent({
     const provider = ref<IProvider | null>(null);
     const isMFAEnabled = ref(false);
     const status = ref<CONNECTOR_STATUS_TYPE | null>(null);
+    const isAuthorized = ref(false);
 
     const isInitializing = ref(false);
     const initError = ref<Error | null>(null);
@@ -44,6 +45,7 @@ export const Web3AuthProvider = defineComponent({
           provider.value = null;
           isMFAEnabled.value = false;
           isConnected.value = false;
+          isAuthorized.value = false;
           status.value = null;
         };
 
@@ -113,6 +115,7 @@ export const Web3AuthProvider = defineComponent({
           isConnected.value = false;
           provider.value = null;
           isMFAEnabled.value = false;
+          isAuthorized.value = false;
         };
 
         const connectingListener = () => {
@@ -121,9 +124,12 @@ export const Web3AuthProvider = defineComponent({
 
         const errorListener = () => {
           status.value = web3Auth.value!.status;
-          if (isConnected.value) {
-            isConnected.value = false;
-            provider.value = null;
+        };
+
+        const authorizedListener = () => {
+          status.value = web3Auth.value!.status;
+          if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
+            isAuthorized.value = true;
           }
         };
 
@@ -136,6 +142,7 @@ export const Web3AuthProvider = defineComponent({
           prevWeb3Auth.off(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.READY, readyListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -149,6 +156,7 @@ export const Web3AuthProvider = defineComponent({
           newWeb3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -162,6 +170,7 @@ export const Web3AuthProvider = defineComponent({
     provide<IWeb3AuthInnerContext>(Web3AuthContextKey, {
       web3Auth,
       isConnected,
+      isAuthorized,
       isInitialized,
       provider,
       status,

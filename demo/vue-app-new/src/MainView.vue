@@ -139,7 +139,7 @@ const options = computed((): Web3AuthOptions => {
       connectors: modalParams.value,
       hideWalletDiscovery: !formData.showWalletDiscovery,
     },
-    initialAuthenticationMode: "connect-and-sign",
+    initialAuthenticationMode: formData.initialAuthenticationMode,
   };
 });
 
