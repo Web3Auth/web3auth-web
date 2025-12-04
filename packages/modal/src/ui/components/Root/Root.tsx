@@ -336,26 +336,20 @@ function Root(props: RootProps) {
       .slice(0, displayInstalledExternalWallets ? MAX_TOP_INSTALLED_CONNECTORS : 1);
   }, [installedConnectorButtons, displayInstalledExternalWallets]);
 
-  const totalExternalWallets = useMemo(() => {
-    const uniqueWalletSet = new Set();
-    return allRegistryButtons.concat(installedConnectorButtons).filter((button) => {
-      if (uniqueWalletSet.has(button.name)) return false;
-      uniqueWalletSet.add(button.name);
-      return true;
-    }).length;
-  }, [allRegistryButtons, installedConnectorButtons]);
-
-  const remainingUndisplayedWallets = useMemo(() => {
+  const allExternalWallets = useMemo(() => {
     const uniqueButtonSet = new Set();
-    const uniqueButtons = installedConnectorButtons.concat(allRegistryButtons).filter((button) => {
+    return installedConnectorButtons.concat(allRegistryButtons).filter((button) => {
       if (uniqueButtonSet.has(button.name)) return false;
       uniqueButtonSet.add(button.name);
       return true;
     });
-    return uniqueButtons.filter((button) => {
+  }, [allRegistryButtons, installedConnectorButtons]);
+
+  const remainingUndisplayedWallets = useMemo(() => {
+    return allExternalWallets.filter((button) => {
       return !topInstalledConnectorButtons.includes(button);
     }).length;
-  }, [installedConnectorButtons, allRegistryButtons, topInstalledConnectorButtons]);
+  }, [allExternalWallets, topInstalledConnectorButtons]);
 
   const handleSocialLoginHeight = () => {
     setIsSocialLoginsExpanded((prev) => !prev);
@@ -493,7 +487,7 @@ function Root(props: RootProps) {
                         installedExternalWalletConfig={topInstalledConnectorButtons}
                         isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
                         isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
-                        totalExternalWallets={totalExternalWallets}
+                        totalExternalWallets={allExternalWallets.length}
                         remainingUndisplayedWallets={remainingUndisplayedWallets}
                         logoAlignment={logoAlignment}
                         buttonRadius={buttonRadiusType}
