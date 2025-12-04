@@ -8,7 +8,7 @@ export interface ConnectWalletProps {
   walletConnectUri: string | undefined;
   metamaskConnectUri: string | undefined;
   walletRegistry?: WalletRegistry;
-  allExternalButtons: ExternalButton[];
+  allRegistryButtons: ExternalButton[];
   customConnectorButtons: ExternalButton[];
   connectorVisibilityMap: Record<string, boolean>;
   deviceDetails: { platform: platform; browser: browser; os: os };
