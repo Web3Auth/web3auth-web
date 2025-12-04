@@ -278,7 +278,7 @@ function Root(props: RootProps) {
     [connectorVisibilityMap, chainNamespaces, config, deviceDetails.platform, isWalletConnectConnectorIncluded]
   );
 
-  const allButtons = useMemo(() => {
+  const allRegistryButtons = useMemo(() => {
     return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
   }, [generateWalletButtons, walletRegistry.default, walletRegistry.others]);
 
@@ -303,7 +303,7 @@ function Root(props: RootProps) {
     const metamaskConnectorIdx = installedConnectors.findIndex((x) => x.name === WALLET_CONNECTORS.METAMASK && !x.hasInjectedWallet);
     if (metamaskConnectorIdx !== -1) {
       const metamaskConnector = installedConnectors[metamaskConnectorIdx];
-      let metamaskRegistryButton = allButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
+      let metamaskRegistryButton = allRegistryButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
       if (!metamaskRegistryButton) {
         // use the default metamask registry item if it's not in the registry
         metamaskRegistryButton = generateWalletButtons({
@@ -321,7 +321,7 @@ function Root(props: RootProps) {
 
     // make metamask the first button and limit the number of buttons
     return installedConnectors;
-  }, [allButtons, config, connectorVisibilityMap, generateWalletButtons]);
+  }, [allRegistryButtons, config, connectorVisibilityMap, generateWalletButtons]);
 
   const customConnectorButtons = useMemo(() => {
     return installedConnectorButtons.filter((button) => !button.hasInjectedWallet);
@@ -338,12 +338,12 @@ function Root(props: RootProps) {
 
   const totalExternalWallets = useMemo(() => {
     const uniqueWalletSet = new Set();
-    return allButtons.concat(installedConnectorButtons).filter((button) => {
+    return allRegistryButtons.concat(installedConnectorButtons).filter((button) => {
       if (uniqueWalletSet.has(button.name)) return false;
       uniqueWalletSet.add(button.name);
       return true;
     }).length;
-  }, [allButtons, installedConnectorButtons]);
+  }, [allRegistryButtons, installedConnectorButtons]);
 
   const handleSocialLoginHeight = () => {
     setIsSocialLoginsExpanded((prev) => !prev);
@@ -499,7 +499,7 @@ function Root(props: RootProps) {
                         metamaskConnectUri={modalState.metamaskConnectUri}
                         config={modalState.externalWalletsConfig}
                         walletRegistry={walletRegistry}
-                        allExternalButtons={allButtons}
+                        allRegistryButtons={allRegistryButtons}
                         connectorVisibilityMap={connectorVisibilityMap}
                         customConnectorButtons={customConnectorButtons}
                         deviceDetails={deviceDetails}

@@ -19,7 +19,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     walletConnectUri,
     metamaskConnectUri,
     walletRegistry,
-    allExternalButtons,
+    allRegistryButtons,
     customConnectorButtons,
     connectorVisibilityMap,
     deviceDetails,
@@ -62,21 +62,21 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const allUniqueButtons = useMemo(() => {
     const uniqueButtonSet = new Set();
-    return customConnectorButtons.concat(allExternalButtons).filter((button) => {
+    return customConnectorButtons.concat(allRegistryButtons).filter((button) => {
       if (uniqueButtonSet.has(button.name)) return false;
       uniqueButtonSet.add(button.name);
       return true;
     });
-  }, [allExternalButtons, customConnectorButtons]);
+  }, [allRegistryButtons, customConnectorButtons]);
 
   const defaultButtonKeys = useMemo(() => new Set(Object.keys(walletRegistry.default)), [walletRegistry]);
 
   const defaultButtons = useMemo(() => {
     // display order: default injected buttons > custom adapter buttons > default non-injected buttons
     const buttons = [
-      ...allExternalButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
+      ...allRegistryButtons.filter((button) => button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
       ...customConnectorButtons,
-      ...allExternalButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
+      ...allRegistryButtons.filter((button) => !button.hasInjectedWallet && defaultButtonKeys.has(button.name)),
     ].sort((a, b) => {
       // favor MetaMask over other wallets
       if (a.name === WALLET_CONNECTORS.METAMASK && b.name === WALLET_CONNECTORS.METAMASK) {
@@ -101,7 +101,7 @@ function ConnectWallet(props: ConnectWalletProps) {
         return true;
       })
       .filter((button) => selectedChain === "all" || button.chainNamespaces?.includes(selectedChain as ChainNamespaceType));
-  }, [allExternalButtons, customConnectorButtons, defaultButtonKeys, selectedChain]);
+  }, [allRegistryButtons, customConnectorButtons, defaultButtonKeys, selectedChain]);
 
   const installedWalletButtons = useMemo(() => {
     const visibilityMap = connectorVisibilityMap;
