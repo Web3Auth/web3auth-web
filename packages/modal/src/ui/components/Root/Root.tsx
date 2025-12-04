@@ -345,6 +345,18 @@ function Root(props: RootProps) {
     }).length;
   }, [allRegistryButtons, installedConnectorButtons]);
 
+  const remainingUndisplayedWallets = useMemo(() => {
+    const uniqueButtonSet = new Set();
+    const uniqueButtons = installedConnectorButtons.concat(allRegistryButtons).filter((button) => {
+      if (uniqueButtonSet.has(button.name)) return false;
+      uniqueButtonSet.add(button.name);
+      return true;
+    });
+    return uniqueButtons.filter((button) => {
+      return !topInstalledConnectorButtons.includes(button);
+    }).length;
+  }, [installedConnectorButtons, allRegistryButtons, topInstalledConnectorButtons]);
+
   const handleSocialLoginHeight = () => {
     setIsSocialLoginsExpanded((prev) => !prev);
   };
@@ -482,6 +494,7 @@ function Root(props: RootProps) {
                         isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
                         isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
                         totalExternalWallets={totalExternalWallets}
+                        remainingUndisplayedWallets={remainingUndisplayedWallets}
                         logoAlignment={logoAlignment}
                         buttonRadius={buttonRadiusType}
                         deviceDetails={deviceDetails}

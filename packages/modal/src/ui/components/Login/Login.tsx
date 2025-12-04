@@ -50,6 +50,7 @@ function Login(props: LoginProps) {
     isDark,
     handleSocialLoginClick,
     totalExternalWallets,
+    remainingUndisplayedWallets,
     isEmailPasswordLessLoginVisible,
     isSmsPasswordLessLoginVisible,
     handleExternalWalletBtnClick,
@@ -509,7 +510,7 @@ function Login(props: LoginProps) {
           ))}
 
         {/* EXTERNAL WALLETS DISCOVERY */}
-        {totalExternalWallets > 1 && (
+        {remainingUndisplayedWallets > 0 && (
           <button
             type="button"
             className={cn("w3a--btn !w3a--justify-between w3a--group w3a--relative w3a--overflow-hidden", {
@@ -525,7 +526,7 @@ function Login(props: LoginProps) {
                 id="external-wallet-count"
                 className="w3a--absolute w3a--right-4 w3a--top-1/2 w3a--w-auto -w3a--translate-y-1/2 w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 w3a--transition-all w3a--delay-300 w3a--duration-300 group-hover:w3a--translate-x-6 group-hover:w3a--opacity-0 group-hover:w3a--delay-0 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
               >
-                {totalExternalWallets - 1}
+                {remainingUndisplayedWallets}
               </div>
             )}
             <img
