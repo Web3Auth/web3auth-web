@@ -197,7 +197,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
       const handleVisibility = (visibility: boolean) => {
         // modal is closed but user is not connected to any wallet.
-        if (!visibility && this.status !== CONNECTOR_STATUS.CONNECTED) {
+        if (!visibility && !CONNECTED_STATUSES.includes(this.status)) {
           this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
           this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
           this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);

@@ -101,9 +101,14 @@ export type BaseConnectorLoginParams = {
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
 export type CONNECTED_EVENT_DATA = {
-  connector: WALLET_CONNECTOR_TYPE;
+  connector: WALLET_CONNECTOR_TYPE | string;
   provider: IProvider;
   reconnected: boolean;
+  identityTokenInfo: IdentityTokenInfo;
+};
+
+export type AUTHORIZED_EVENT_DATA = {
+  connector: WALLET_CONNECTOR_TYPE | string;
   identityTokenInfo: IdentityTokenInfo;
 };
 
@@ -114,12 +119,12 @@ export interface IConnectorDataEvent {
 
 export type ConnectorEvents = {
   [CONNECTOR_EVENTS.NOT_READY]: () => void;
-  [CONNECTOR_EVENTS.READY]: (connector: string) => void;
+  [CONNECTOR_EVENTS.READY]: (connector: WALLET_CONNECTOR_TYPE | string) => void;
   [CONNECTOR_EVENTS.CONNECTED]: (data: CONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.DISCONNECTED]: () => void;
-  [CONNECTOR_EVENTS.CONNECTING]: (data: { connector: string }) => void;
-  [CONNECTOR_EVENTS.AUTHORIZING]: (data: { connector: string }) => void;
-  [CONNECTOR_EVENTS.AUTHORIZED]: (data: { connector: string }) => void;
+  [CONNECTOR_EVENTS.CONNECTING]: (data: { connector: WALLET_CONNECTOR_TYPE | string }) => void;
+  [CONNECTOR_EVENTS.AUTHORIZING]: (data: { connector: WALLET_CONNECTOR_TYPE | string }) => void;
+  [CONNECTOR_EVENTS.AUTHORIZED]: (data: AUTHORIZED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError) => void;
   [CONNECTOR_EVENTS.REHYDRATION_ERROR]: (error: Web3AuthError) => void;
   [CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED]: (data: IConnectorDataEvent) => void;

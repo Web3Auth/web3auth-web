@@ -10,6 +10,7 @@ import {
   ANALYTICS_INTEGRATION_TYPE,
   ANALYTICS_SDK_TYPE,
   AuthLoginParams,
+  AUTHORIZED_EVENT_DATA,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
@@ -147,6 +148,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
     return this.aaProvider;
+  }
+
+  get idToken(): string | null {
+    return this.state.idToken || null;
   }
 
   set provider(_: IProvider | null) {
@@ -797,7 +802,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-      const { provider } = data;
+      const { provider, identityTokenInfo } = data;
+
+      if (identityTokenInfo) {
+        this.setState({ idToken: identityTokenInfo.idToken });
+      }
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
@@ -849,7 +858,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
-      this.connectToPlugins(data);
+      this.connectToPlugins({ connector: data.connector as WALLET_CONNECTOR_TYPE });
       this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
     });
 
@@ -930,8 +939,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
       log.debug("authorizing", this.status, this.connectedConnectorName);
     });
-    connector.on(CONNECTOR_EVENTS.AUTHORIZED, (data) => {
+    connector.on(CONNECTOR_EVENTS.AUTHORIZED, (data: AUTHORIZED_EVENT_DATA) => {
       this.status = CONNECTOR_STATUS.AUTHORIZED;
+      this.setState({ idToken: data.identityTokenInfo.idToken });
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
       log.debug("authorized", this.status, this.connectedConnectorName);
     });

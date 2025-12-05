@@ -11,7 +11,7 @@ export interface IUseIdentityToken {
 }
 
 export const useIdentityToken = (): IUseIdentityToken => {
-  const { web3Auth, isConnected } = useWeb3AuthInner();
+  const { web3Auth, isAuthorized } = useWeb3AuthInner();
   const loading = ref(false);
   const error = ref<Web3AuthError | null>(null);
   const token = ref<string | null>(null);
@@ -33,11 +33,19 @@ export const useIdentityToken = (): IUseIdentityToken => {
     }
   };
 
-  watch(isConnected, (newIsConnected) => {
-    if (!newIsConnected && token.value) {
-      token.value = null;
-    }
-  });
+  watch(
+    isAuthorized,
+    (newIsAuthorized) => {
+      if (!web3Auth.value) return;
+      if (!newIsAuthorized && token.value) {
+        token.value = null;
+      }
+      if (newIsAuthorized && !token.value) {
+        token.value = web3Auth.value.idToken;
+      }
+    },
+    { immediate: true }
+  );
 
   return {
     loading,

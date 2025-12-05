@@ -273,7 +273,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   async getIdentityToken(): Promise<{ idToken: string }> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    this.status = CONNECTOR_STATUS.AUTHORIZING;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
     const userInfo = await this.getUserInfo();
+    this.status = CONNECTOR_STATUS.AUTHORIZED;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH, identityTokenInfo: { idToken: userInfo.idToken as string } });
     return { idToken: userInfo.idToken as string };
   }
 
@@ -410,11 +414,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           } as CONNECTED_EVENT_DATA);
 
           if (params.getIdentityToken) {
-            this.status = CONNECTOR_STATUS.AUTHORIZING;
-            this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
             identityTokenInfo = await this.getIdentityToken();
-            this.status = CONNECTOR_STATUS.AUTHORIZED;
-            this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH });
           }
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {

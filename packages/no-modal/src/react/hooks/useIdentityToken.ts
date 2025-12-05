@@ -11,12 +11,12 @@ export interface IUseIdentityToken {
 }
 
 export const useIdentityToken = () => {
-  const { web3Auth, isConnected } = useWeb3AuthInner();
+  const { web3Auth, isConnected, isAuthorized } = useWeb3AuthInner();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
   const [token, setToken] = useState<string | null>(null);
-  // TODO: store the authorized token in state so that we can return it here if already authorized
+
   const getIdentityToken = useCallback(async () => {
     setLoading(true);
     setError(null);
@@ -34,10 +34,14 @@ export const useIdentityToken = () => {
   }, [web3Auth]);
 
   useEffect(() => {
-    if (!isConnected && token) {
+    if (!web3Auth) return;
+    if (!isAuthorized && token) {
       setToken(null);
     }
-  }, [isConnected, token]);
+    if (isAuthorized && !token) {
+      setToken(web3Auth.idToken);
+    }
+  }, [isConnected, isAuthorized, token]);
 
   return { loading, error, token, getIdentityToken };
 };

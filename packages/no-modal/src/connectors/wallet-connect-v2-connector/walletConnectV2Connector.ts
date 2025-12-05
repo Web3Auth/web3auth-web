@@ -268,6 +268,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
     if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
+    this.status = CONNECTOR_STATUS.AUTHORIZING;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
     const { chainId } = this.provider;
     const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -308,6 +310,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         this.coreOptions.web3AuthNetwork
       );
       saveToken(accounts[0] as string, this.name, idToken);
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: { idToken } });
       return { idToken };
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
@@ -447,11 +451,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     } as CONNECTED_EVENT_DATA);
 
     if (getIdentityToken) {
-      this.status = CONNECTOR_STATUS.AUTHORIZING;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
       identityTokenInfo = await this.getIdentityToken();
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
     }
   }
 
