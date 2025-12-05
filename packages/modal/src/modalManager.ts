@@ -191,6 +191,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
       const handleError = (err: unknown) => {
         this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+        this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
         return reject(err);
       };
