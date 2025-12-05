@@ -116,6 +116,7 @@ export const Web3AuthProvider = defineComponent({
           status.value = web3Auth.value!.status;
           if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
             isAuthorized.value = true;
+            isConnected.value = true;
           }
         };
 

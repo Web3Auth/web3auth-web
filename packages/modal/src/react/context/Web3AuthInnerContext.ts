@@ -101,6 +101,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     const authorizedListener = (_data: { connector: string }) => {
       setStatus(web3Auth.status);
       if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+        setIsConnected(true);
         setIsAuthorized(true);
       }
     };

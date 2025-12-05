@@ -34,6 +34,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
 
   const getPlugin = useCallback(
     (name: string) => {
@@ -113,19 +114,30 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     const rehydrationErrorListener = () => {
       setStatus(web3Auth.status);
       setIsConnected(false);
+      setIsAuthorized(false);
       setProvider(null);
+    };
+
+    const authorizedListener = () => {
+      setStatus(web3Auth.status);
+      if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+        setIsConnected(true);
+        setIsAuthorized(true);
+      }
     };
 
     const mfaEnabledListener = (isMFAEnabled: boolean) => {
       if (typeof isMFAEnabled === "boolean") setIsMFAEnabled(isMFAEnabled);
     };
 
+    // TODO: In strict mode, web3auth becomes null and .off throws an error sometimes.
     if (web3Auth) {
       // web3Auth is initialized here.
       setStatus(web3Auth.status);
       web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
       web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
       web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
       web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -143,6 +155,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         web3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
         web3Auth.off(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
         web3Auth.off(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+        web3Auth.off(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
       }
     };
   }, [web3Auth]);
@@ -161,6 +174,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       chainNamespace,
       getPlugin,
       setIsMFAEnabled,
+      isAuthorized,
     };
   }, [
     web3Auth,
@@ -175,6 +189,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     setIsMFAEnabled,
     chainId,
     chainNamespace,
+    isAuthorized,
   ]);
 
   return createElement(Web3AuthInnerContext.Provider, { value }, children);

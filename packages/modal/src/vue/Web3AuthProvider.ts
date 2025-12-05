@@ -129,6 +129,7 @@ export const Web3AuthProvider = defineComponent({
         const authorizedListener = () => {
           status.value = web3Auth.value!.status;
           if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
+            isConnected.value = true;
             isAuthorized.value = true;
           }
         };

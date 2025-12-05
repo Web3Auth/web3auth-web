@@ -16,7 +16,7 @@ export const useIdentityToken = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
   const [token, setToken] = useState<string | null>(null);
-
+  // TODO: store the authorized token in state so that we can return it here if already authorized
   const getIdentityToken = useCallback(async () => {
     setLoading(true);
     setError(null);
