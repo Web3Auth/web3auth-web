@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_STATUS, log } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_STATUS, log } from "@web3auth/modal";
 import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 import {
@@ -19,7 +19,7 @@ import { getChainConfig } from "../utils/chainconfig";
 
 const formData = formDataStore;
 
-const { status, isConnected, isInitialized } = useWeb3Auth();
+const { status, isConnected, isInitialized, isAuthorized } = useWeb3Auth();
 const { connect } = useWeb3AuthConnect();
 
 const chainOptions = computed(() => {
@@ -58,7 +58,7 @@ const connectorOptions = computed(() =>
 );
 
 const isDisplay = (_name: string): boolean => {
-  return !isConnected.value;
+  return formData.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY ? !isConnected.value : !isAuthorized.value;
 };
 
 const isDisabled = (name: string): boolean => {
