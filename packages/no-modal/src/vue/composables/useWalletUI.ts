@@ -1,7 +1,7 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { Ref, ref } from "vue";
 
-import { WalletServicesPluginError, Web3AuthError } from "../../base";
+import { log, WalletServicesPluginError, Web3AuthError } from "../../base";
 import { useWalletServicesPlugin } from "./useWalletServicesPlugin";
 
 export interface IUseWalletUI {
@@ -24,6 +24,7 @@ export const useWalletUI = (): IUseWalletUI => {
 
       await plugin.value.showWalletUi(showWalletUiParams);
     } catch (err) {
+      log.error("Error showing wallet UI", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

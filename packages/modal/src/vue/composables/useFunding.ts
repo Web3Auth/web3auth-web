@@ -1,5 +1,5 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
-import { WalletServicesPluginError, Web3AuthError } from "@web3auth/no-modal";
+import { log, WalletServicesPluginError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
 import { useWalletServicesPlugin } from "./useWalletServicesPlugin";
@@ -24,6 +24,7 @@ export const useFunding = (): IUseFunding => {
 
       await plugin.value.showFunding(showFundingParams);
     } catch (err) {
+      log.error("Error showing funding", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

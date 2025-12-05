@@ -1,5 +1,13 @@
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, BUILD_ENV, WEB3AUTH_NETWORK } from "@web3auth/auth";
-import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
+import {
+  cloneDeep,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
+  CONNECTOR_NAMES,
+  log,
+  WALLET_CONNECTOR_TYPE,
+  WALLET_CONNECTORS,
+  WIDGET_TYPE,
+} from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
 
@@ -15,6 +23,7 @@ function Widget(props: WidgetProps) {
     stateListener,
     handleSocialLoginClick,
     handleExternalWalletClick,
+    handleMobileVerifyConnect,
     handleShowExternalWallets,
     closeModal,
     appLogo,
@@ -23,6 +32,7 @@ function Widget(props: WidgetProps) {
     walletRegistry,
     uiConfig,
     deviceDetails,
+    initialAuthenticationMode,
   } = props;
 
   const { widgetType } = uiConfig;
@@ -54,6 +64,11 @@ function Widget(props: WidgetProps) {
     web3authNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
     authBuildEnv: BUILD_ENV.PRODUCTION,
   });
+
+  const isConnectAndSignAuthenticationMode = useMemo(
+    () => initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+    [initialAuthenticationMode]
+  );
 
   useEffect(() => {
     setModalState((prev) => ({ ...prev, modalVisibility: visible }));
@@ -155,7 +170,14 @@ function Widget(props: WidgetProps) {
   };
 
   const onCloseLoader = () => {
-    if (modalState.status === MODAL_STATUS.CONNECTED) {
+    if (!isConnectAndSignAuthenticationMode && modalState.status === MODAL_STATUS.CONNECTED) {
+      setModalState({
+        ...modalState,
+        modalVisibility: false,
+        externalWalletsVisibility: false,
+      });
+    }
+    if (isConnectAndSignAuthenticationMode && modalState.status === MODAL_STATUS.AUTHORIZED) {
       setModalState({
         ...modalState,
         modalVisibility: false,
@@ -173,7 +195,10 @@ function Widget(props: WidgetProps) {
 
   const showCloseIcon = useMemo(() => {
     return (
-      modalState.status === MODAL_STATUS.INITIALIZED || modalState.status === MODAL_STATUS.CONNECTED || modalState.status === MODAL_STATUS.ERRORED
+      modalState.status === MODAL_STATUS.INITIALIZED ||
+      modalState.status === MODAL_STATUS.CONNECTED ||
+      modalState.status === MODAL_STATUS.ERRORED ||
+      modalState.status === MODAL_STATUS.AUTHORIZED
     );
   }, [modalState.status]);
 
@@ -223,6 +248,8 @@ function Widget(props: WidgetProps) {
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
             uiConfig={uiConfig}
             deviceDetails={deviceDetails}
+            isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
+            handleMobileVerifyConnect={handleMobileVerifyConnect}
           />
         )}
       </Modal>
@@ -255,6 +282,8 @@ function Widget(props: WidgetProps) {
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
           uiConfig={uiConfig}
           deviceDetails={deviceDetails}
+          isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
+          handleMobileVerifyConnect={handleMobileVerifyConnect}
         />
       )}
     </Embed>

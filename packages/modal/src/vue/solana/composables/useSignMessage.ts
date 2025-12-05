@@ -1,4 +1,4 @@
-import { WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import { log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -24,6 +24,7 @@ export const useSignMessage = (): IUseSignMessage => {
       data.value = signature;
       return signature;
     } catch (err) {
+      log.error("Error signing message", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

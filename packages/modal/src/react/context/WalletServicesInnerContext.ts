@@ -1,4 +1,4 @@
-import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS } from "@web3auth/no-modal";
+import { CONNECTED_STATUSES, EVM_PLUGINS, PLUGIN_EVENTS } from "@web3auth/no-modal";
 import { type WalletServicesPluginType } from "@web3auth/no-modal";
 import { Context, createContext, createElement, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 
@@ -26,7 +26,7 @@ export function WalletServicesContextProvider({ children, context }: PropsWithCh
       const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
       setWalletServicesPlugin(plugin);
       // when rehydrating, the connectedListener may be registered after the connected event is emitted, we need to check the status here
-      if (plugin?.status === CONNECTOR_STATUS.CONNECTED) setReady(true);
+      if (CONNECTED_STATUSES.includes(plugin?.status)) setReady(true);
     }
   }, [isConnected, getPlugin, walletServicesPlugin]);
 

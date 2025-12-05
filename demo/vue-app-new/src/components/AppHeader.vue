@@ -3,20 +3,23 @@ import { Button } from "@toruslabs/vue-components";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 import { watch } from "vue";
+import { formDataStore } from "../store/form";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 
 const { log } = console;
 const { t } = useI18n({ useScope: "global" });
 
-const { status, isConnected } = useWeb3Auth();
+const { status, isConnected, isAuthorized } = useWeb3Auth();
 const { disconnect } = useWeb3AuthDisconnect();
+const formData = formDataStore;
 
 const isDisplay = (name: string): boolean => {
   switch (name) {
     case "btnLogout":
-      return isConnected.value;
+      return formData.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN ? isAuthorized.value : isConnected.value;
 
     case "appHeading":
-      return isConnected.value;
+      return formData.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN ? isAuthorized.value : isConnected.value;
 
     default: {
       return false;

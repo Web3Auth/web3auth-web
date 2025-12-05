@@ -179,6 +179,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       }
 
       let identityTokenInfo: IdentityTokenInfo | undefined;
+
       if (getIdentityToken) {
         identityTokenInfo = await this.getIdentityToken();
       }
@@ -189,6 +190,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         provider: this.metamaskProvider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
       return this.metamaskProvider;
     } catch (error) {
       // ready again to be connected
@@ -228,7 +230,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 

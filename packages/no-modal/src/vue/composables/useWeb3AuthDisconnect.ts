@@ -1,6 +1,6 @@
 import { Ref, ref } from "vue";
 
-import { WalletInitializationError, Web3AuthError } from "../../base";
+import { log, WalletInitializationError, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseWeb3AuthDisconnect {
@@ -21,6 +21,7 @@ export const useWeb3AuthDisconnect = (): IUseWeb3AuthDisconnect => {
       loading.value = true;
       await web3Auth.value.logout(options);
     } catch (err) {
+      log.error("Error disconnecting", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

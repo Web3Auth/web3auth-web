@@ -1,4 +1,4 @@
-import { WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import { log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
@@ -21,6 +21,7 @@ export const useSwitchChain = (): IUseSwitchChain => {
       loading.value = true;
       await web3Auth.value.switchChain(chainParams);
     } catch (err) {
+      log.error("Error switching chain", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

@@ -110,15 +110,18 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       };
       this.injectedProvider.on("accountsChanged", accountDisconnectHandler);
       let identityTokenInfo: IdentityTokenInfo | undefined;
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
-      }
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: this.name,
         reconnected: this.rehydrated,
         provider: this.injectedProvider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
+
       return this.injectedProvider;
     } catch (error) {
       // ready again to be connected
@@ -150,7 +153,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 

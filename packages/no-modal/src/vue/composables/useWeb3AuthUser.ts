@@ -1,6 +1,6 @@
 import { Ref, ref, watch } from "vue";
 
-import { type UserInfo, WalletInitializationError, Web3AuthError } from "../../base";
+import { log, type UserInfo, WalletInitializationError, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseWeb3AuthUser {
@@ -26,6 +26,7 @@ export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
       userInfo.value = result;
       return result;
     } catch (err) {
+      log.error("Error getting user info", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

@@ -2,13 +2,14 @@
 
 import "./css/index.css";
 
-import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter } from "@web3auth/auth";
+import { applyWhiteLabelTheme, LANGUAGES, SafeEventEmitter, THEME_MODES } from "@web3auth/auth";
 import {
   type Analytics,
   ANALYTICS_EVENTS,
   type BaseConnectorConfig,
   type ChainNamespaceType,
   CONNECTOR_EVENTS,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   getWhitelabelAnalyticsProperties,
   type IConnectorDataEvent,
   log,
@@ -90,7 +91,7 @@ export class LoginModal {
 
     if (!uiConfig.logoDark) this.uiConfig.logoDark = DEFAULT_LOGO_DARK;
     if (!uiConfig.logoLight) this.uiConfig.logoLight = DEFAULT_LOGO_LIGHT;
-    if (!uiConfig.mode) this.uiConfig.mode = "light";
+    if (!uiConfig.mode) this.uiConfig.mode = THEME_MODES.light;
     if (!uiConfig.modalZIndex) this.uiConfig.modalZIndex = "99998";
     if (typeof uiConfig.displayErrorsOnModal === "undefined") this.uiConfig.displayErrorsOnModal = true;
     if (!uiConfig.appName) this.uiConfig.appName = "Web3Auth";
@@ -98,6 +99,7 @@ export class LoginModal {
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
     if (!uiConfig.widgetType) this.uiConfig.widgetType = WIDGET_TYPE.MODAL;
+    if (!uiConfig.initialAuthenticationMode) this.uiConfig.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY;
 
     if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");
@@ -266,9 +268,11 @@ export class LoginModal {
               deviceDetails={this.deviceDetails}
               handleShowExternalWallets={this.handleShowExternalWallets}
               handleExternalWalletClick={this.handleExternalWalletClick}
+              handleMobileVerifyConnect={this.handleMobileVerifyConnect}
               handleSocialLoginClick={this.handleSocialLoginClick}
               closeModal={this.closeModal}
               uiConfig={this.uiConfig}
+              initialAuthenticationMode={this.uiConfig.initialAuthenticationMode}
             />
           </AnalyticsContext.Provider>
         </ThemedContext.Provider>
@@ -368,6 +372,14 @@ export class LoginModal {
     }
   };
 
+  private handleMobileVerifyConnect = (params: { connector: WALLET_CONNECTOR_TYPE }) => {
+    log.info("mobile verify connect clicked", params);
+    const { connector } = params;
+    if (this.callbacks.onMobileVerifyConnect) {
+      this.callbacks.onMobileVerifyConnect({ connector });
+    }
+  };
+
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { connector, loginParams } = params;
@@ -457,6 +469,12 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, (connectorData: IConnectorDataEvent) => {
       this.handleConnectorData(connectorData);
+    });
+    listener.on(CONNECTOR_EVENTS.AUTHORIZING, () => {
+      this.setState({ status: MODAL_STATUS.AUTHORIZING });
+    });
+    listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
+      this.setState({ status: MODAL_STATUS.AUTHORIZED });
     });
   };
 }

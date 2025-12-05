@@ -9,6 +9,7 @@ export interface IBaseWeb3AuthHookContext {
   isInitializing: boolean;
   initError: unknown;
   isConnected: boolean;
+  isAuthorized: boolean;
   isMFAEnabled: boolean;
   provider: IProvider | null;
   status: CONNECTOR_STATUS_TYPE | null;

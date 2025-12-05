@@ -40,7 +40,7 @@ const ConnectWalletChainNamespaceSelect = (props: ConnectWalletChainNamespaceSel
       </div>
 
       {/* Description */}
-      <p className="w3a--my-6 w3a--text-center w3a--text-sm w3a--text-app-gray-500">
+      <p className="w3a--my-6 w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
         {t("modal.external.select-chain-description", { wallet: wallet.displayName })}
       </p>
 
@@ -55,7 +55,9 @@ const ConnectWalletChainNamespaceSelect = (props: ConnectWalletChainNamespaceSel
             >
               <div className="w3a--flex w3a--items-center">
                 <Image imageId={imageId} hoverImageId={imageId} fallbackImageId="wallet" height="24" width="24" isButton extension="svg" />
-                <p className="w3a--ml-2 w3a--text-left w3a--text-sm first-letter:w3a--capitalize">{displayName}</p>
+                <p className="w3a--ml-2 w3a--text-left w3a--text-sm w3a--text-app-gray-900 first-letter:w3a--capitalize dark:w3a--text-app-gray-200">
+                  {displayName}
+                </p>
               </div>
               <img
                 id="chain-namespace-arrow"

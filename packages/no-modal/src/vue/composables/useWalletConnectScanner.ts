@@ -1,7 +1,7 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { Ref, ref } from "vue";
 
-import { WalletServicesPluginError, Web3AuthError } from "../../base";
+import { log, WalletServicesPluginError, Web3AuthError } from "../../base";
 import { useWalletServicesPlugin } from "./useWalletServicesPlugin";
 
 export interface IUseWalletConnectScanner {
@@ -24,6 +24,7 @@ export const useWalletConnectScanner = (): IUseWalletConnectScanner => {
 
       await plugin.value.showWalletConnectScanner(showWalletConnectScannerParams);
     } catch (err) {
+      log.error("Error showing wallet connect scanner", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

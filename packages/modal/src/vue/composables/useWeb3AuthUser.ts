@@ -1,4 +1,4 @@
-import { type UserInfo, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import { log, type UserInfo, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref, watch } from "vue";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
@@ -26,6 +26,7 @@ export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
       userInfo.value = result;
       return result;
     } catch (err) {
+      log.error("Error getting user info", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

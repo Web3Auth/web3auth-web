@@ -1,5 +1,6 @@
 import { Ref, ref } from "vue";
 
+import { log } from "../../../base";
 import { WalletInitializationError, type Web3AuthError } from "../../../base/errors";
 import { TransactionOrVersionedTransaction } from "../../../providers/solana-provider";
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -26,6 +27,7 @@ export const useSignTransaction = (): IUseSignTransaction => {
       data.value = signedTransaction;
       return signedTransaction;
     } catch (err) {
+      log.error("Error signing transaction", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

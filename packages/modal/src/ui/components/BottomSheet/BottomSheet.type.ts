@@ -5,4 +5,6 @@ export interface BottomSheetProps {
   uiConfig: UIConfig;
   onClose: () => void;
   children: React.ReactNode;
+  sheetClassName?: string;
+  showCloseButton?: boolean;
 }

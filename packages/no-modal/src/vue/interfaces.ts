@@ -14,6 +14,7 @@ export interface Web3AuthProviderProps {
 
 interface IBaseWeb3AuthComposableContext {
   isConnected: Ref<boolean>;
+  isAuthorized: Ref<boolean>;
   provider: Ref<IProvider | null>;
   isInitializing: Ref<boolean>;
   initError: Ref<Error | null>;

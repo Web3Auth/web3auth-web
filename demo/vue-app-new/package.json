@@ -11,47 +11,47 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.98.4",
-    "@tanstack/vue-query": "^5.90.2",
-    "@toruslabs/base-controllers": "^8.7.0",
+    "@tanstack/vue-query": "^5.92.1",
+    "@toruslabs/base-controllers": "^8.10.0",
     "@toruslabs/bs58": "^1.0.0",
-    "@toruslabs/ethereum-controllers": "^8.7.0",
-    "@toruslabs/solana-controllers": "^8.7.0",
+    "@toruslabs/ethereum-controllers": "^8.10.0",
+    "@toruslabs/solana-controllers": "^8.10.0",
     "@toruslabs/tweetnacl-js": "^1.0.4",
     "@toruslabs/vue-components": "^8.1.2",
-    "@toruslabs/vue-icons": "^8.0.2",
+    "@toruslabs/vue-icons": "^8.0.4",
     "@wagmi/vue": "^0.2.11",
-    "@web3auth/auth": "^10.5.0",
+    "@web3auth/auth": "^10.8.0",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/sign-in-with-ethereum": "^5.0.0",
-    "@web3auth/ws-embed": "^5.1.0",
-    "ethers": "^6.15.0",
-    "petite-vue-i18n": "^11.1.12",
-    "vue": "^3.5.22",
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0"
+    "@web3auth/ws-embed": "^5.3.0",
+    "ethers": "^6.16.0",
+    "petite-vue-i18n": "^11.2.2",
+    "vue": "^3.5.25",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1"
   },
   "overrides": {
-    "react": "^19.2.0",
-    "react-dom": "^19.2.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
     "use-sync-external-store": "^1.4.0"
   },
   "devDependencies": {
     "@toruslabs/eslint-config-vue": "^4.1.5",
-    "@vitejs/plugin-vue": "^6.0.1",
-    "autoprefixer": "^10.4.21",
-    "eslint": "^9.36.0",
-    "globals": "^16.4.0",
+    "@vitejs/plugin-vue": "^6.0.2",
+    "autoprefixer": "^10.4.22",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
     "postcss": "^8.5.6",
-    "prettier": "^3.6.2",
+    "prettier": "^3.7.4",
     "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.9.3",
-    "vite": "^7.1.7",
-    "vue-tsc": "^3.1.0"
+    "vite": "^7.2.6",
+    "vue-tsc": "^3.1.5"
   },
   "optionalDependencies": {
-    "@esbuild/linux-x64": "0.25.10"
+    "@esbuild/linux-x64": "0.27.1"
   },
   "lint-staged": {
     "!(*d).{js,ts}": [

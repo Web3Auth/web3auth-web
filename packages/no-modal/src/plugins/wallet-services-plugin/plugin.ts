@@ -5,9 +5,9 @@ import WsEmbed from "@web3auth/ws-embed";
 import {
   type Analytics,
   ANALYTICS_EVENTS,
+  CAN_AUTHORIZE_STATUSES,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CONNECTOR_STATUS,
   EVM_PLUGINS,
   IPlugin,
   IProvider,
@@ -27,7 +27,6 @@ import { type AuthConnectorType } from "../../connectors/auth-connector";
 
 export { BUTTON_POSITION, type BUTTON_POSITION_TYPE, CONFIRMATION_STRATEGY, type CONFIRMATION_STRATEGY_TYPE } from "@web3auth/ws-embed";
 
-// TODO: support project config items here. incl. key export flag, multiple chains
 class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   name = EVM_PLUGINS.WALLET_SERVICES;
 
@@ -92,7 +91,7 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       }
     }
 
-    if (this.web3auth.status !== CONNECTOR_STATUS.CONNECTED) {
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.web3auth.status)) {
       throw WalletServicesPluginError.web3AuthNotConnected();
     } else if (!this.web3auth.provider) {
       throw WalletServicesPluginError.providerRequired();
@@ -137,8 +136,6 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     this.analytics?.track(ANALYTICS_EVENTS.WALLET_CHECKOUT_CLICKED, {
       is_visible: showCheckoutParams?.show,
       receive_wallet_address_enabled: !!showCheckoutParams?.receiveWalletAddress,
-      // TODO: where is the below?
-      // receive_wallet_address: showCheckoutParams?.receiveWalletAddress,
       token_list: showCheckoutParams?.tokenList,
       fiat_list: showCheckoutParams?.fiatList,
       crypto: showCheckoutParams?.crypto,

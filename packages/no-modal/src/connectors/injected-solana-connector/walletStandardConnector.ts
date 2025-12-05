@@ -63,7 +63,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   }
 
   get isWalletConnected(): boolean {
-    return !!(this.status === CONNECTOR_STATUS.CONNECTED && this.wallet.accounts.length > 0);
+    return !!(this.connected && this.wallet.accounts.length > 0);
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
@@ -112,15 +112,18 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
 
       this.status = CONNECTOR_STATUS.CONNECTED;
       let identityTokenInfo: IdentityTokenInfo | undefined;
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
-      }
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: this.name,
         reconnected: this.rehydrated,
         provider: this.provider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
+
       return this.provider;
     } catch (error: unknown) {
       // ready again to be connected
@@ -148,7 +151,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 
