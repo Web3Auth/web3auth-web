@@ -283,6 +283,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       if (existingToken) {
         const isExpired = checkIfTokenIsExpired(existingToken);
         if (!isExpired) {
+          this.status = CONNECTOR_STATUS.AUTHORIZED;
+          this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: { idToken: existingToken } });
           return { idToken: existingToken };
         }
       }
