@@ -8,8 +8,10 @@ import {
   type BaseConnectorConfig,
   type ChainNamespaceType,
   cloneDeep,
+  CONNECTED_STATUSES,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMES,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
@@ -176,7 +178,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async connect(): Promise<IProvider | null> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     // if already connected return provider
-    if (this.connectedConnectorName && this.status === CONNECTOR_STATUS.CONNECTED && this.provider) return this.provider;
+    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.provider) return this.provider;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
       // remove all listeners when promise is resolved or rejected.
@@ -202,7 +204,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         }
       };
 
-      this.once(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+      if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+        this.once(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
+      } else {
+        this.once(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+      }
+
       this.once(CONNECTOR_EVENTS.ERRORED, handleError);
       this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
     });
@@ -651,7 +658,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
       if (
         !visibility &&
-        this.status === CONNECTOR_STATUS.CONNECTED &&
+        CONNECTED_STATUSES.includes(this.status) &&
         (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)
       ) {
         log.debug("this stops wc connector from trying to reconnect once proposal expires");

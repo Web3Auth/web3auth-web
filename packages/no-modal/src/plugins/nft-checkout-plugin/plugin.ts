@@ -1,7 +1,7 @@
 import { SafeEventEmitter, type WhiteLabelData } from "@web3auth/auth";
 
 import {
-  CONNECTOR_STATUS,
+  CONNECTED_STATUSES,
   EVM_PLUGINS,
   IPlugin,
   IWeb3AuthCore,
@@ -62,7 +62,7 @@ class NFTCheckoutPlugin extends SafeEventEmitter implements IPlugin {
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
 
-    if (this.web3auth.status !== CONNECTOR_STATUS.CONNECTED) throw NFTCheckoutPluginError.web3AuthNotConnected();
+    if (!CONNECTED_STATUSES.includes(this.web3auth.status)) throw NFTCheckoutPluginError.web3AuthNotConnected();
     if (!this.web3auth.provider) throw NFTCheckoutPluginError.providerRequired();
 
     const accounts = await this.web3auth.provider.request<never, string[]>({

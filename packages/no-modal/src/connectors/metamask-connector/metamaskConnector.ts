@@ -234,7 +234,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 

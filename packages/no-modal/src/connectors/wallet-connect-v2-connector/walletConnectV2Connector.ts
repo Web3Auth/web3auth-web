@@ -267,7 +267,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   }
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
-    if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
+    if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     const { chainId } = this.provider;
     const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");

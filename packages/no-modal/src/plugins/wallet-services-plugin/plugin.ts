@@ -7,7 +7,7 @@ import {
   ANALYTICS_EVENTS,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CONNECTOR_STATUS,
+  CONNECTED_STATUSES,
   EVM_PLUGINS,
   IPlugin,
   IProvider,
@@ -92,7 +92,7 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       }
     }
 
-    if (this.web3auth.status !== CONNECTOR_STATUS.CONNECTED) {
+    if (!CONNECTED_STATUSES.includes(this.web3auth.status)) {
       throw WalletServicesPluginError.web3AuthNotConnected();
     } else if (!this.web3auth.provider) {
       throw WalletServicesPluginError.providerRequired();

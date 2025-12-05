@@ -3,6 +3,7 @@ import { SafeEventEmitter } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
+import { CONNECTED_STATUSES } from "./connectorStatus";
 import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
   BaseConnectorLoginParams,
@@ -41,8 +42,12 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     this.coreOptions = options.coreOptions;
   }
 
-  get connnected(): boolean {
-    return this.status === CONNECTOR_STATUS.CONNECTED;
+  get connected(): boolean {
+    return CONNECTED_STATUSES.includes(this.status);
+  }
+
+  get canAuthorize(): boolean {
+    return ([CONNECTOR_STATUS.AUTHORIZING, CONNECTOR_STATUS.AUTHORIZED, CONNECTOR_STATUS.CONNECTED] as CONNECTOR_STATUS_TYPE[]).includes(this.status);
   }
 
   public abstract get provider(): IProvider | null;
@@ -53,7 +58,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     if (this.name === WALLET_CONNECTORS.METAMASK && !this.isInjected && this.status === CONNECTOR_STATUS.CONNECTING) return;
 
     if (this.status === CONNECTOR_STATUS.CONNECTING) throw WalletInitializationError.notReady("Already connecting");
-    if (this.status === CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.connectionError("Already connected");
+    if (this.connected) throw WalletLoginError.connectionError("Already connected");
     if (this.status !== CONNECTOR_STATUS.READY)
       throw WalletLoginError.connectionError(
         "Wallet connector is not ready yet, Please wait for init function to resolve before calling connect/connectTo function"
@@ -72,12 +77,12 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     if (this.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN && this.connectorNamespace !== chainConfig.chainNamespace)
       throw WalletInitializationError.invalidParams("Connector doesn't support this chain namespace");
     if (this.status === CONNECTOR_STATUS.NOT_READY) return;
-    if (this.status === CONNECTOR_STATUS.CONNECTED) throw WalletInitializationError.notReady("Already connected");
+    if (this.connected) throw WalletInitializationError.notReady("Already connected");
     if (this.status === CONNECTOR_STATUS.READY) throw WalletInitializationError.notReady("Connector is already initialized");
   }
 
   checkDisconnectionRequirements(): void {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.disconnectionError("Not connected with wallet");
+    if (!this.connected) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
   checkSwitchChainRequirements(params: { chainId: string }, init = false): void {

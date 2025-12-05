@@ -221,7 +221,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   public async enableMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
       const result = await this.authInstance.enableMFA(params);
@@ -237,7 +237,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   public async manageMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
       await this.authInstance.manageMFA(params);
@@ -251,7 +251,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     this.status = CONNECTOR_STATUS.DISCONNECTING;
     await this.authInstance.logout();
@@ -271,13 +271,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   async getIdentityToken(): Promise<{ idToken: string }> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     const userInfo = await this.getUserInfo();
     return { idToken: userInfo.idToken as string };
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     const userInfo = this.authInstance.getUserInfo();
     return userInfo;

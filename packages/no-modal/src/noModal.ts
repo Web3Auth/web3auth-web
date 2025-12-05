@@ -13,6 +13,7 @@ import {
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
+  CONNECTED_STATUSES,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
@@ -104,7 +105,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     this.loadState(initialState);
     if (this.state.idToken && this.coreOptions.ssr) {
-      this.status = CONNECTOR_STATUS.CONNECTED;
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
     }
   }
 
@@ -276,7 +277,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const newChainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
-    if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
+    if (CONNECTED_STATUSES.includes(this.status) && this.connectedConnector) {
       await this.connectedConnector.switchChain(params);
       return;
     }
@@ -356,6 +357,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const cleanup = () => {
         this.off(CONNECTOR_EVENTS.CONNECTED, onConnected);
         this.off(CONNECTOR_EVENTS.ERRORED, onErrored);
+        this.off(CONNECTOR_EVENTS.AUTHORIZED, onConnected);
       };
       const onConnected = async () => {
         // track connection completed event
@@ -391,18 +393,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     await this.connectedConnector.disconnect(options);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     log.debug("Getting user info", this.status, this.connectedConnector?.name);
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.connectedConnector.getUserInfo();
   }
 
   async enableMFA<T>(loginParams?: T): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this connector.`);
 
@@ -421,7 +423,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async manageMFA<T>(loginParams?: T): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this connector.`);
 
@@ -440,7 +442,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (![...CONNECTED_STATUSES, CONNECTOR_STATUS.AUTHORIZING].includes(this.status) || !this.connectedConnector)
+      throw WalletLoginError.notConnectedError(`No wallet is connected`);
 
     const trackData = { connector: this.connectedConnector.name };
     try {

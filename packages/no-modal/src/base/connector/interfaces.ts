@@ -73,7 +73,7 @@ export interface IConnector<T> extends SafeEventEmitter {
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
   connectorData?: unknown;
-  connnected: boolean;
+  connected: boolean;
   isInjected?: boolean;
   icon?: string;
   init(options?: ConnectorInitOptions): Promise<void>;

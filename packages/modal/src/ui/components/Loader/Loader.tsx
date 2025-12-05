@@ -144,24 +144,28 @@ function Loader(props: LoaderProps) {
   // eslint-disable-next-line no-console
   console.log("connectorName", connectorName);
 
+  const isConnectedAccordingToAuthenticationMode = useMemo(
+    () =>
+      (!isConnectAndSignAuthenticationMode && modalStatus === MODAL_STATUS.CONNECTED) ||
+      (isConnectAndSignAuthenticationMode && modalStatus === MODAL_STATUS.AUTHORIZED),
+    [modalStatus, isConnectAndSignAuthenticationMode]
+  );
+
   useEffect(() => {
-    if (modalStatus === MODAL_STATUS.CONNECTED) {
-      setTimeout(() => {
+    if (isConnectedAccordingToAuthenticationMode) {
+      const timeout = setTimeout(() => {
         onClose();
       }, 1000);
+
+      return () => clearTimeout(timeout);
     }
-    if (isConnectAndSignAuthenticationMode && modalStatus === MODAL_STATUS.AUTHORIZED) {
-      setTimeout(() => {
-        onClose();
-      }, 1000);
-    }
-  }, [modalStatus, onClose, isConnectAndSignAuthenticationMode]);
+  }, [isConnectedAccordingToAuthenticationMode, onClose]);
 
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
 
-      {(modalStatus === MODAL_STATUS.CONNECTED || modalStatus === MODAL_STATUS.AUTHORIZED) && <ConnectedStatus message={message} />}
+      {isConnectedAccordingToAuthenticationMode && <ConnectedStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
 

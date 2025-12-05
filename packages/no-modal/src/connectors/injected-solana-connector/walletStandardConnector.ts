@@ -63,7 +63,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   }
 
   get isWalletConnected(): boolean {
-    return !!(this.status === CONNECTOR_STATUS.CONNECTED && this.wallet.accounts.length > 0);
+    return !!(this.connected && this.wallet.accounts.length > 0);
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {

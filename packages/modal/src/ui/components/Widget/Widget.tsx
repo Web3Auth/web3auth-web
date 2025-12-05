@@ -170,7 +170,7 @@ function Widget(props: WidgetProps) {
   };
 
   const onCloseLoader = () => {
-    if (modalState.status === MODAL_STATUS.CONNECTED) {
+    if (!isConnectAndSignAuthenticationMode && modalState.status === MODAL_STATUS.CONNECTED) {
       setModalState({
         ...modalState,
         modalVisibility: false,
@@ -195,7 +195,10 @@ function Widget(props: WidgetProps) {
 
   const showCloseIcon = useMemo(() => {
     return (
-      modalState.status === MODAL_STATUS.INITIALIZED || modalState.status === MODAL_STATUS.CONNECTED || modalState.status === MODAL_STATUS.ERRORED
+      modalState.status === MODAL_STATUS.INITIALIZED ||
+      modalState.status === MODAL_STATUS.CONNECTED ||
+      modalState.status === MODAL_STATUS.ERRORED ||
+      modalState.status === MODAL_STATUS.AUTHORIZED
     );
   }, [modalState.status]);
 
