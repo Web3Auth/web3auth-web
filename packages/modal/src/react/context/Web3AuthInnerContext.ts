@@ -78,7 +78,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     if (provider) {
       provider.on("chainChanged", handleChainChange);
       return () => {
-        provider.off("chainChanged", handleChainChange);
+        if (provider) {
+          provider.off("chainChanged", handleChainChange);
+        }
       };
     }
   }, [web3Auth, provider]);
