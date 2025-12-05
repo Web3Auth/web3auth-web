@@ -14,6 +14,7 @@ import {
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
@@ -305,7 +306,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const finalLoginParams = {
       ...loginParams,
       chainId: initialChain.chainId,
-      getIdentityToken: this.coreOptions.initialAuthenticationMode === "connect-and-sign",
+      getIdentityToken: this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
     };
 
     // track connection started event

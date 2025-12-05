@@ -23,3 +23,8 @@ export const CONNECTOR_CATEGORY = {
   EXTERNAL: "external",
   IN_APP: "in_app",
 } as const;
+
+export const CONNECTOR_INITIAL_AUTHENTICATION_MODE = {
+  CONNECT_ONLY: "connect-only",
+  CONNECT_AND_SIGN: "connect-and-sign",
+} as const;

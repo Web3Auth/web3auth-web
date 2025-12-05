@@ -14,7 +14,7 @@ import {
   useWeb3AuthUser,
   useSwitchChain as useWeb3AuthSwitchChain,
 } from "@web3auth/modal/vue";
-import { type CustomChainConfig, type NFTCheckoutPluginType } from "@web3auth/no-modal";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig, type NFTCheckoutPluginType } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
@@ -92,7 +92,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
   const chainNamespace = currentChainNamespace.value;
   switch (name) {
     case "dashboard":
-      return formData.initialAuthenticationMode === "connect-and-sign" ? isAuthorized.value : isConnected.value;
+      return formData.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN ? isAuthorized.value : isConnected.value;
 
     case "ethServices":
       return chainNamespace === CHAIN_NAMESPACES.EIP155;

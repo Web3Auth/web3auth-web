@@ -1,5 +1,13 @@
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, BUILD_ENV, WEB3AUTH_NETWORK } from "@web3auth/auth";
-import { cloneDeep, CONNECTOR_NAMES, log, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
+import {
+  cloneDeep,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
+  CONNECTOR_NAMES,
+  log,
+  WALLET_CONNECTOR_TYPE,
+  WALLET_CONNECTORS,
+  WIDGET_TYPE,
+} from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
 
@@ -57,7 +65,10 @@ function Widget(props: WidgetProps) {
     authBuildEnv: BUILD_ENV.PRODUCTION,
   });
 
-  const isConnectAndSignAuthenticationMode = useMemo(() => initialAuthenticationMode === "connect-and-sign", [initialAuthenticationMode]);
+  const isConnectAndSignAuthenticationMode = useMemo(
+    () => initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+    [initialAuthenticationMode]
+  );
 
   useEffect(() => {
     setModalState((prev) => ({ ...prev, modalVisibility: visible }));

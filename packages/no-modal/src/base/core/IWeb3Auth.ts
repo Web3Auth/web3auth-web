@@ -14,6 +14,7 @@ import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChain
 import {
   CONNECTED_EVENT_DATA,
   CONNECTOR_EVENTS,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   type CONNECTOR_STATUS_TYPE,
   ConnectorEvents,
   type ConnectorFn,
@@ -62,7 +63,8 @@ export interface UIConfig extends WhiteLabelData {
   uxMode?: UX_MODE_TYPE;
 }
 
-export type InitialAuthenticationModeType = "connect-only" | "connect-and-sign";
+export type ConnectorInitialAuthenticationModeType =
+  (typeof CONNECTOR_INITIAL_AUTHENTICATION_MODE)[keyof typeof CONNECTOR_INITIAL_AUTHENTICATION_MODE];
 
 export interface IWeb3AuthCoreOptions {
   /**
@@ -185,7 +187,7 @@ export interface IWeb3AuthCoreOptions {
    * Initial authentication mode for the auth connector.
    * @defaultValue "connect-only"
    */
-  initialAuthenticationMode?: InitialAuthenticationModeType;
+  initialAuthenticationMode?: ConnectorInitialAuthenticationModeType;
 }
 
 export type LoginParamMap = {

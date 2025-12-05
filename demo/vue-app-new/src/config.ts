@@ -4,7 +4,7 @@ import {
   ChainNamespaceType,
   CONFIRMATION_STRATEGY,
   type CONFIRMATION_STRATEGY_TYPE,
-  InitialAuthenticationModeType,
+  type ConnectorInitialAuthenticationModeType,
   LoginMethodConfig,
   ModalConfig,
   SignTypedDataMessageV4,
@@ -110,7 +110,7 @@ export type FormData = {
     config: WhiteLabelData;
   };
   connectors: string[];
-  initialAuthenticationMode: InitialAuthenticationModeType;
+  initialAuthenticationMode: ConnectorInitialAuthenticationModeType;
   loginProviders: AUTH_CONNECTION_TYPE[];
   showWalletDiscovery: boolean;
   multiInjectedProviderDiscovery: boolean;

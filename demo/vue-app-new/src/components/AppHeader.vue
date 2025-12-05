@@ -4,6 +4,7 @@ import { useWeb3Auth, useWeb3AuthDisconnect } from "@web3auth/modal/vue";
 import { useI18n } from "petite-vue-i18n";
 import { watch } from "vue";
 import { formDataStore } from "../store/form";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 
 const { log } = console;
 const { t } = useI18n({ useScope: "global" });
@@ -15,10 +16,10 @@ const formData = formDataStore;
 const isDisplay = (name: string): boolean => {
   switch (name) {
     case "btnLogout":
-      return formData.initialAuthenticationMode === "connect-and-sign" ? isAuthorized.value : isConnected.value;
+      return formData.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN ? isAuthorized.value : isConnected.value;
 
     case "appHeading":
-      return formData.initialAuthenticationMode === "connect-and-sign" ? isAuthorized.value : isConnected.value;
+      return formData.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN ? isAuthorized.value : isConnected.value;
 
     default: {
       return false;

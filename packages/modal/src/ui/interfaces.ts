@@ -13,7 +13,7 @@ import {
   type AuthLoginParams,
   type BaseConnectorConfig,
   type ChainNamespaceType,
-  InitialAuthenticationModeType,
+  type ConnectorInitialAuthenticationModeType,
   type LoginMethodConfig,
   type LoginModalConfig,
   type UIConfig as CoreUIConfig,
@@ -77,7 +77,7 @@ export type ModalLoginParams = Pick<
 };
 
 export interface LoginModalProps extends UIConfig {
-  initialAuthenticationMode: InitialAuthenticationModeType;
+  initialAuthenticationMode: ConnectorInitialAuthenticationModeType;
   chainNamespaces: ChainNamespaceType[];
   walletRegistry: WalletRegistry;
   web3authClientId: string;
