@@ -63,6 +63,7 @@ export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
   { name: "Portuguese", value: LANGUAGES.pt },
   { name: "Dutch", value: LANGUAGES.nl },
   { name: "Turkish", value: LANGUAGES.tr },
+  { name: "Amharic", value: LANGUAGES.am },
 ];
 
 export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, ModalConfig> = loginProviderOptions.reduce(
