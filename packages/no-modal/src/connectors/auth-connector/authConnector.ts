@@ -28,6 +28,7 @@ import {
   CHAIN_NAMESPACES,
   cloneDeep,
   CONNECTED_EVENT_DATA,
+  CONNECTED_STATUSES,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -417,7 +418,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           }
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
-            if ((accounts as string[]).length === 0 && this.status === CONNECTOR_STATUS.CONNECTED) this.disconnect({ cleanup: false });
+            if ((accounts as string[]).length === 0 && CONNECTED_STATUSES.includes(this.status)) this.disconnect({ cleanup: false });
           });
         }
       }

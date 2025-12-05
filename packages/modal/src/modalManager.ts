@@ -200,6 +200,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         if (!visibility && this.status !== CONNECTOR_STATUS.CONNECTED) {
           this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
           this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
+          this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
           return reject(new Error("User closed the modal"));
         }
       };

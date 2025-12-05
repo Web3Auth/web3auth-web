@@ -102,6 +102,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
       setIsConnected(false);
+      setIsAuthorized(false);
       setProvider(null);
     };
 

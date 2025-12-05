@@ -141,8 +141,6 @@ function Loader(props: LoaderProps) {
     handleMobileVerifyConnect,
   } = props;
 
-  // eslint-disable-next-line no-console
-  console.log("connectorName", connectorName);
 
   const isConnectedAccordingToAuthenticationMode = useMemo(
     () =>

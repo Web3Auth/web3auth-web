@@ -108,6 +108,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
       setIsConnected(false);
+      setIsAuthorized(false);
       setProvider(null);
     };
     const connectingListener = () => {
@@ -120,6 +121,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     const rehydrationErrorListener = () => {
       setStatus(web3Auth.status);
       setIsConnected(false);
+      setIsAuthorized(false);
       setProvider(null);
     };
 
