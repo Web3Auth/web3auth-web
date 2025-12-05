@@ -141,7 +141,6 @@ function Loader(props: LoaderProps) {
     handleMobileVerifyConnect,
   } = props;
 
-
   const isConnectedAccordingToAuthenticationMode = useMemo(
     () =>
       (!isConnectAndSignAuthenticationMode && modalStatus === MODAL_STATUS.CONNECTED) ||

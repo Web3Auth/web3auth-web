@@ -363,22 +363,56 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
     return new Promise((resolve, reject) => {
+      let connectedEventCompleted = false;
+      let authorizedEventReceived = false;
+
       const cleanup = () => {
         this.off(CONNECTOR_EVENTS.CONNECTED, onConnected);
         this.off(CONNECTOR_EVENTS.ERRORED, onErrored);
-        this.off(CONNECTOR_EVENTS.AUTHORIZED, onConnected);
+        this.off(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
       };
+
+      const checkCompletion = async () => {
+        // In CONNECT_AND_SIGN mode, wait for both connected event and authorized event
+        if (finalLoginParams.getIdentityToken) {
+          if (connectedEventCompleted && authorizedEventReceived) {
+            await completeConnection();
+          }
+        } else {
+          // In CONNECT_ONLY mode, just wait for connected event
+          if (connectedEventCompleted) {
+            await completeConnection();
+          }
+        }
+      };
+
+      const completeConnection = async () => {
+        try {
+          // track connection completed event
+          const userInfo = await connector.getUserInfo();
+          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+            ...eventData,
+            is_mfa_enabled: userInfo?.isMfaEnabled,
+            duration: Date.now() - startTime,
+          });
+          cleanup();
+          resolve(this.provider);
+        } catch (error) {
+          cleanup();
+          reject(error);
+        }
+      };
+
       const onConnected = async () => {
-        // track connection completed event
-        const userInfo = await connector.getUserInfo();
-        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
-          ...eventData,
-          is_mfa_enabled: userInfo?.isMfaEnabled,
-          duration: Date.now() - startTime,
-        });
-        cleanup();
-        resolve(this.provider);
+        connectedEventCompleted = true;
+        await checkCompletion();
       };
+
+      const onAuthorized = async () => {
+        authorizedEventReceived = true;
+        await checkCompletion();
+      };
+
       const onErrored = async (err: Web3AuthError) => {
         // track connection failed event
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
@@ -390,10 +424,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         reject(err);
       };
 
+      this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
       if (finalLoginParams.getIdentityToken) {
-        this.once(CONNECTOR_EVENTS.AUTHORIZED, onConnected);
-      } else {
-        this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
+        this.once(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
       }
       this.once(CONNECTOR_EVENTS.ERRORED, onErrored);
       connector.connect(finalLoginParams);
