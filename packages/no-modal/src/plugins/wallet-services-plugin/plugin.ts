@@ -5,9 +5,9 @@ import WsEmbed from "@web3auth/ws-embed";
 import {
   type Analytics,
   ANALYTICS_EVENTS,
+  CAN_AUTHORIZE_STATUSES,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CONNECTED_STATUSES,
   EVM_PLUGINS,
   IPlugin,
   IProvider,
@@ -91,7 +91,7 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
       }
     }
 
-    if (!CONNECTED_STATUSES.includes(this.web3auth.status)) {
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.web3auth.status)) {
       throw WalletServicesPluginError.web3AuthNotConnected();
     } else if (!this.web3auth.provider) {
       throw WalletServicesPluginError.providerRequired();

@@ -3,7 +3,7 @@ import { SafeEventEmitter } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
-import { CONNECTED_STATUSES } from "./connectorStatus";
+import { CAN_AUTHORIZE_STATUSES, CONNECTED_STATUSES } from "./connectorStatus";
 import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
   BaseConnectorLoginParams,
@@ -47,7 +47,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   }
 
   get canAuthorize(): boolean {
-    return ([CONNECTOR_STATUS.AUTHORIZING, CONNECTOR_STATUS.AUTHORIZED, CONNECTOR_STATUS.CONNECTED] as CONNECTOR_STATUS_TYPE[]).includes(this.status);
+    return CAN_AUTHORIZE_STATUSES.includes(this.status);
   }
 
   public abstract get provider(): IProvider | null;

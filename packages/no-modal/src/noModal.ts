@@ -11,6 +11,7 @@ import {
   ANALYTICS_SDK_TYPE,
   AuthLoginParams,
   AUTHORIZED_EVENT_DATA,
+  CAN_AUTHORIZE_STATUSES,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
@@ -441,7 +442,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     log.debug("Getting user info", this.status, this.connectedConnector?.name);
-    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.connectedConnector.getUserInfo();
   }
 
@@ -484,8 +485,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
-    if (![...CONNECTED_STATUSES, CONNECTOR_STATUS.AUTHORIZING].includes(this.status) || !this.connectedConnector)
-      throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
 
     const trackData = { connector: this.connectedConnector.name };
     try {
@@ -891,7 +891,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
-      this.connectToPlugins({ connector: data.connector as WALLET_CONNECTOR_TYPE });
+      this.connectToPlugins({ ...data, connector: data.connector as WALLET_CONNECTOR_TYPE });
       this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
     });
 

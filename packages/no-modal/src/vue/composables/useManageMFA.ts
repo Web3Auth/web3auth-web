@@ -1,6 +1,6 @@
 import { Ref, ref } from "vue";
 
-import { WalletInitializationError, Web3AuthError } from "../../base";
+import { log, WalletInitializationError, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseManageMFA {
@@ -21,6 +21,7 @@ export const useManageMFA = (): IUseManageMFA => {
       loading.value = true;
       await web3Auth.value.manageMFA();
     } catch (err) {
+      log.error("Error managing MFA", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

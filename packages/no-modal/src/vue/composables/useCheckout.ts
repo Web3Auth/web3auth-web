@@ -1,7 +1,7 @@
 import { BaseEmbedControllerState } from "@toruslabs/base-controllers";
 import { Ref, ref } from "vue";
 
-import { WalletServicesPluginError, Web3AuthError } from "../../base";
+import { log, WalletServicesPluginError, Web3AuthError } from "../../base";
 import { useWalletServicesPlugin } from "./useWalletServicesPlugin";
 
 export interface IUseCheckout {
@@ -24,6 +24,7 @@ export const useCheckout = (): IUseCheckout => {
 
       await plugin.value.showCheckout(showCheckoutParams);
     } catch (err) {
+      log.error("Error showing checkout", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

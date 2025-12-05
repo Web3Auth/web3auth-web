@@ -151,7 +151,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.isWalletConnected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 

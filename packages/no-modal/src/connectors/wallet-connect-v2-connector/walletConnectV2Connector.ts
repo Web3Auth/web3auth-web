@@ -242,7 +242,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 
