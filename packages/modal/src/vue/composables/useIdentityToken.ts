@@ -1,4 +1,4 @@
-import { WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import { log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref, watch } from "vue";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
@@ -27,6 +27,7 @@ export const useIdentityToken = (): IUseIdentityToken => {
       }
       return result?.idToken;
     } catch (err) {
+      log.error("Error getting identity token", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

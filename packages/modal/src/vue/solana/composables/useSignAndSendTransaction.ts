@@ -1,4 +1,4 @@
-import { TransactionOrVersionedTransaction, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import { log, TransactionOrVersionedTransaction, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -25,6 +25,7 @@ export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
       data.value = signature;
       return signature;
     } catch (err) {
+      log.error("Error signing and sending transaction", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;

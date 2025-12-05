@@ -4,6 +4,7 @@ import {
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
   type IProvider,
+  log,
   WalletInitializationError,
   Web3AuthContextKey,
 } from "@web3auth/no-modal";
@@ -80,6 +81,7 @@ export const Web3AuthProvider = defineComponent({
             isInitializing.value = true;
             await newWeb3Auth.init({ signal: controller.signal });
           } catch (error) {
+            log.error("Error initializing web3auth", error);
             initError.value = error as Error;
           } finally {
             isInitializing.value = false;
