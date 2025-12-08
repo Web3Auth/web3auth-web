@@ -211,6 +211,7 @@ onBeforeMount(() => {
         formData.smartAccountChains = json.smartAccountChains || [];
         formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
         formData.defaultChainId = json.defaultChainId;
+        formData.initialAuthenticationMode = json.initialAuthenticationMode;
       }
     } catch (error) {}
   }
