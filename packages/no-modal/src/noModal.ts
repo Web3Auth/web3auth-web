@@ -437,6 +437,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.connectedConnector.status === CONNECTOR_STATUS.DISCONNECTING) return;
     await this.connectedConnector.disconnect(options);
   }
 
