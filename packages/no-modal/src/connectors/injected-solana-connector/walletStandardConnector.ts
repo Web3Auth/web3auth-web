@@ -81,7 +81,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       log.debug("initializing solana injected connector");
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
         if (!provider) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");

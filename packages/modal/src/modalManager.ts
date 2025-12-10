@@ -528,7 +528,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
           const autoConnect = super.checkIfAutoConnect(connector);
-          await connector.init({ autoConnect, chainId: initialChain.chainId });
+          await connector.init({
+            autoConnect,
+            chainId: initialChain.chainId,
+            getIdentityToken: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+          });
 
           // note: not adding cachedWallet to modal if it is external wallet.
           // adding it later if no in-app wallets are available.
@@ -574,7 +578,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         try {
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
-          await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: initialChain.chainId });
+          await connector.init({
+            autoConnect: this.cachedConnector === connectorName,
+            chainId: initialChain.chainId,
+            getIdentityToken: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+          });
         } catch (error) {
           log.error(error, "error while initializing connector", connectorName);
         }

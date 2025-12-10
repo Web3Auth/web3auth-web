@@ -140,7 +140,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       if (this.connected) {
         this.rehydrated = true;
         try {
-          await this.onConnectHandler({ chain: chainConfig, getIdentityToken: false });
+          await this.onConnectHandler({ chain: chainConfig, getIdentityToken: options.getIdentityToken });
         } catch (error) {
           log.error("wallet auto connect", error);
           this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
@@ -196,7 +196,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
       // if already connected
       if (this.connected) {
-        await this.onConnectHandler({ chain: chainConfig, getIdentityToken: false });
+        await this.onConnectHandler({ chain: chainConfig, getIdentityToken });
         return this.provider;
       }
 

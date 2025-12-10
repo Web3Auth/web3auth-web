@@ -71,7 +71,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       log.debug(`initializing ${this.name} injected connector`);
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
         if (!provider) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");

@@ -82,7 +82,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
         // the connect function could fail silently as well.
         if (!provider) {
           this.rehydrated = false;

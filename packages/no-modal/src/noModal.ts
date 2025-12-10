@@ -730,7 +730,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     try {
       const initialChain = this.getInitialChainIdForConnector(connector);
       const autoConnect = this.checkIfAutoConnect(connector);
-      await connector.init({ autoConnect, chainId: initialChain.chainId });
+      await connector.init({
+        autoConnect,
+        chainId: initialChain.chainId,
+        getIdentityToken: this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      });
     } catch (e) {
       log.error(e, connector.name);
     }

@@ -188,7 +188,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
-        await this.connect({ chainId: options.chainId, getIdentityToken: false });
+        await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
       } else if (!sessionId && options.autoConnect) {
         // if here, this means that the connector is cached but the sessionId is not available.
         // this can happen if the sessionId has expired.

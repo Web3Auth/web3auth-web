@@ -38,6 +38,10 @@ export interface ConnectorInitOptions {
    * The chainId to connect to
    */
   chainId: string;
+  /**
+   * Whether to get the identity token
+   */
+  getIdentityToken?: boolean;
 }
 
 export type CONNECTOR_STATUS_TYPE = (typeof CONNECTOR_STATUS)[keyof typeof CONNECTOR_STATUS];
