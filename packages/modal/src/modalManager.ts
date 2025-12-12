@@ -8,8 +8,10 @@ import {
   type BaseConnectorConfig,
   type ChainNamespaceType,
   cloneDeep,
+  CONNECTED_STATUSES,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMES,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
@@ -116,12 +118,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           chainNamespaces: this.getChainNamespaces(),
           walletRegistry: filteredWalletRegistry,
           analytics: this.analytics,
+          initialAuthenticationMode: this.options.initialAuthenticationMode,
         },
         {
           onInitExternalWallets: this.onInitExternalWallets,
           onSocialLogin: this.onSocialLogin,
           onExternalWalletLogin: this.onExternalWalletLogin,
           onModalVisibility: this.onModalVisibility,
+          onMobileVerifyConnect: this.onMobileVerifyConnect,
         }
       );
       await withAbort(() => this.loginModal.initModal(), signal);
@@ -174,7 +178,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async connect(): Promise<IProvider | null> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     // if already connected return provider
-    if (this.connectedConnectorName && this.status === CONNECTOR_STATUS.CONNECTED && this.provider) return this.provider;
+    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.provider) return this.provider;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
       // remove all listeners when promise is resolved or rejected.
@@ -187,20 +191,27 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
       const handleError = (err: unknown) => {
         this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+        this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
         return reject(err);
       };
 
       const handleVisibility = (visibility: boolean) => {
         // modal is closed but user is not connected to any wallet.
-        if (!visibility && this.status !== CONNECTOR_STATUS.CONNECTED) {
+        if (!visibility && !CONNECTED_STATUSES.includes(this.status)) {
           this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
           this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
+          this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
           return reject(new Error("User closed the modal"));
         }
       };
 
-      this.once(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+      if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+        this.once(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
+      } else {
+        this.once(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+      }
+
       this.once(CONNECTOR_EVENTS.ERRORED, handleError);
       this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
     });
@@ -517,7 +528,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
           const autoConnect = super.checkIfAutoConnect(connector);
-          await connector.init({ autoConnect, chainId: initialChain.chainId });
+          await connector.init({
+            autoConnect,
+            chainId: initialChain.chainId,
+            getIdentityToken: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+          });
 
           // note: not adding cachedWallet to modal if it is external wallet.
           // adding it later if no in-app wallets are available.
@@ -563,7 +578,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         try {
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
-          await connector.init({ autoConnect: this.cachedConnector === connectorName, chainId: initialChain.chainId });
+          await connector.init({
+            autoConnect: this.cachedConnector === connectorName,
+            chainId: initialChain.chainId,
+            getIdentityToken: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+          });
         } catch (error) {
           log.error(error, "error while initializing connector", connectorName);
         }
@@ -649,12 +668,21 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       }
       if (
         !visibility &&
-        this.status === CONNECTOR_STATUS.CONNECTED &&
+        CONNECTED_STATUSES.includes(this.status) &&
         (walletConnectStatus === CONNECTOR_STATUS.READY || walletConnectStatus === CONNECTOR_STATUS.CONNECTING)
       ) {
         log.debug("this stops wc connector from trying to reconnect once proposal expires");
         wcConnector.status = CONNECTOR_STATUS.READY;
       }
+    }
+  };
+
+  private onMobileVerifyConnect = async (params: { connector: WALLET_CONNECTOR_TYPE }): Promise<void> => {
+    try {
+      const connector = this.getConnector(params.connector);
+      await connector.getIdentityToken();
+    } catch (error) {
+      log.error(`Error while connecting to connector: ${params.connector}`, error);
     }
   };
 

@@ -139,6 +139,7 @@ const options = computed((): Web3AuthOptions => {
       connectors: modalParams.value,
       hideWalletDiscovery: !formData.showWalletDiscovery,
     },
+    initialAuthenticationMode: formData.initialAuthenticationMode,
   };
 });
 
@@ -210,6 +211,7 @@ onBeforeMount(() => {
         formData.smartAccountChains = json.smartAccountChains || [];
         formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
         formData.defaultChainId = json.defaultChainId;
+        formData.initialAuthenticationMode = json.initialAuthenticationMode;
       }
     } catch (error) {}
   }

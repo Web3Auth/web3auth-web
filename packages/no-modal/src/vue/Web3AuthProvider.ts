@@ -6,6 +6,7 @@ import {
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
   type IProvider,
+  log,
   WalletInitializationError,
   Web3AuthContextKey,
 } from "../base";
@@ -27,6 +28,7 @@ export const Web3AuthProvider = defineComponent({
     const isInitialized = ref(false);
 
     const isConnected = ref(false);
+    const isAuthorized = ref(false);
 
     const getPlugin = (name: string) => {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
@@ -44,6 +46,7 @@ export const Web3AuthProvider = defineComponent({
           provider.value = null;
           isMFAEnabled.value = false;
           isConnected.value = false;
+          isAuthorized.value = false;
           status.value = null;
         };
 
@@ -80,6 +83,7 @@ export const Web3AuthProvider = defineComponent({
             isInitializing.value = true;
             await newWeb3Auth.init({ signal: controller.signal });
           } catch (error) {
+            log.error("Error initializing web3auth", error);
             initError.value = error as Error;
           } finally {
             isInitializing.value = false;
@@ -110,11 +114,20 @@ export const Web3AuthProvider = defineComponent({
           }
         };
 
+        const authorizedListener = () => {
+          status.value = web3Auth.value!.status;
+          if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
+            isAuthorized.value = true;
+            isConnected.value = true;
+          }
+        };
+
         const disconnectedListener = () => {
           status.value = web3Auth.value!.status;
           isConnected.value = false;
           provider.value = null;
           isMFAEnabled.value = false;
+          isAuthorized.value = false;
         };
 
         const connectingListener = () => {
@@ -134,6 +147,7 @@ export const Web3AuthProvider = defineComponent({
           prevWeb3Auth.off(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.READY, readyListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+          prevWeb3Auth.off(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           prevWeb3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -147,6 +161,7 @@ export const Web3AuthProvider = defineComponent({
           newWeb3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -168,6 +183,7 @@ export const Web3AuthProvider = defineComponent({
       isMFAEnabled,
       getPlugin,
       setIsMFAEnabled,
+      isAuthorized,
     });
   },
   render() {

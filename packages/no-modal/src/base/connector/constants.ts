@@ -6,6 +6,8 @@ export const CONNECTOR_STATUS = {
   DISCONNECTING: "disconnecting",
   DISCONNECTED: "disconnected",
   ERRORED: "errored",
+  AUTHORIZED: "authorized",
+  AUTHORIZING: "authorizing",
 } as const;
 
 export const CONNECTOR_EVENTS = {
@@ -20,4 +22,9 @@ export const CONNECTOR_EVENTS = {
 export const CONNECTOR_CATEGORY = {
   EXTERNAL: "external",
   IN_APP: "in_app",
+} as const;
+
+export const CONNECTOR_INITIAL_AUTHENTICATION_MODE = {
+  CONNECT_ONLY: "connect-only",
+  CONNECT_AND_SIGN: "connect-and-sign",
 } as const;

@@ -28,6 +28,7 @@ import {
   CHAIN_NAMESPACES,
   cloneDeep,
   CONNECTED_EVENT_DATA,
+  CONNECTED_STATUSES,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -187,7 +188,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
-        await this.connect({ chainId: options.chainId, getIdentityToken: false });
+        await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
       } else if (!sessionId && options.autoConnect) {
         // if here, this means that the connector is cached but the sessionId is not available.
         // this can happen if the sessionId has expired.
@@ -221,7 +222,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   public async enableMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
       const result = await this.authInstance.enableMFA(params);
@@ -237,7 +238,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   public async manageMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
       await this.authInstance.manageMFA(params);
@@ -251,7 +252,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     this.status = CONNECTOR_STATUS.DISCONNECTING;
     await this.authInstance.logout();
@@ -271,13 +272,17 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   async getIdentityToken(): Promise<{ idToken: string }> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    this.status = CONNECTOR_STATUS.AUTHORIZING;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
     const userInfo = await this.getUserInfo();
+    this.status = CONNECTOR_STATUS.AUTHORIZED;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH, identityTokenInfo: { idToken: userInfo.idToken as string } });
     return { idToken: userInfo.idToken as string };
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     const userInfo = this.authInstance.getUserInfo();
     return userInfo;
@@ -400,9 +405,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           // if getIdentityToken is true, then get the identity token
           // No need to get the identity token for auth connector as it is already handled
           let identityTokenInfo: IdentityTokenInfo | undefined;
-          if (params.getIdentityToken) {
-            identityTokenInfo = await this.getIdentityToken();
-          }
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
             connector: WALLET_CONNECTORS.AUTH,
@@ -410,9 +412,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
             provider: this.provider,
             identityTokenInfo,
           } as CONNECTED_EVENT_DATA);
+
+          if (params.getIdentityToken) {
+            identityTokenInfo = await this.getIdentityToken();
+          }
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
-            if ((accounts as string[]).length === 0 && this.status === CONNECTOR_STATUS.CONNECTED) this.disconnect({ cleanup: false });
+            if ((accounts as string[]).length === 0 && CONNECTED_STATUSES.includes(this.status)) this.disconnect({ cleanup: false });
           });
         }
       }

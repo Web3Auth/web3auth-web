@@ -1,4 +1,4 @@
-import type { ChainNamespaceType, WalletRegistry } from "@web3auth/no-modal";
+import type { ChainNamespaceType, WALLET_CONNECTOR_TYPE, WalletRegistry } from "@web3auth/no-modal";
 
 import { browser, ModalState, os, platform, SocialLoginEventType, SocialLoginsConfig, UIConfig } from "../../interfaces";
 
@@ -24,4 +24,6 @@ export interface RootProps {
   preHandleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;
   setModalState: (state: ModalState) => void;
   onCloseLoader: () => void;
+  isConnectAndSignAuthenticationMode: boolean;
+  handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
 }

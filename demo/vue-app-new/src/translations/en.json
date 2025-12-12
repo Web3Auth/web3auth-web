@@ -9,6 +9,7 @@
     "defaultChainId": "Default Chain ID",
     "loginProviders": "Login provider",
     "connectors": "Connectors",
+    "initialAuthenticationMode": "Authentication Mode",
     "showWalletDiscovery": "Show Wallet Discovery",
     "multiInjectedProviderDiscovery": "Multi Injected Provider Discovery",
     "greeting": "Let's configure Web3Auth!",

@@ -11,6 +11,7 @@ import {
   getSavedToken,
   IdentityTokenInfo,
   saveToken,
+  WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
 } from "../../base";
@@ -19,8 +20,11 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
-    if (!this.provider || this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError();
+    if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
+
+    this.status = CONNECTOR_STATUS.AUTHORIZING;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
 
     const accounts = await this.provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
@@ -28,6 +32,8 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
       if (existingToken) {
         const isExpired = checkIfTokenIsExpired(existingToken);
         if (!isExpired) {
+          this.status = CONNECTOR_STATUS.AUTHORIZED;
+          this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken: existingToken } });
           return { idToken: existingToken };
         }
       }
@@ -62,6 +68,8 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         this.coreOptions.web3AuthNetwork
       );
       saveToken(accounts[0] as string, this.name, idToken);
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken } });
       return { idToken };
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");

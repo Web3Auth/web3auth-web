@@ -10,10 +10,14 @@ import {
   ANALYTICS_INTEGRATION_TYPE,
   ANALYTICS_SDK_TYPE,
   AuthLoginParams,
+  AUTHORIZED_EVENT_DATA,
+  CAN_AUTHORIZE_STATUSES,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
+  CONNECTED_STATUSES,
   CONNECTOR_EVENTS,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
@@ -103,7 +107,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     this.loadState(initialState);
     if (this.state.idToken && this.coreOptions.ssr) {
-      this.status = CONNECTOR_STATUS.CONNECTED;
+      // connect-only is the default authentication mode, so we need to set the status to connected if the idToken is present and ssr is enabled
+      this.status =
+        this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN
+          ? CONNECTOR_STATUS.AUTHORIZED
+          : CONNECTOR_STATUS.CONNECTED;
     }
   }
 
@@ -141,6 +149,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
     return this.aaProvider;
+  }
+
+  get idToken(): string | null {
+    return this.state.idToken || null;
   }
 
   set provider(_: IProvider | null) {
@@ -275,7 +287,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const newChainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
-    if (this.status === CONNECTOR_STATUS.CONNECTED && this.connectedConnector) {
+    if (CONNECTED_STATUSES.includes(this.status) && this.connectedConnector) {
       await this.connectedConnector.switchChain(params);
       return;
     }
@@ -302,7 +314,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletInitializationError.notFound(`Please add wallet connector for ${connectorName} wallet, before connecting`);
 
     const initialChain = this.getInitialChainIdForConnector(connector);
-    const finalLoginParams = { ...loginParams, chainId: initialChain.chainId };
+    const finalLoginParams = {
+      ...loginParams,
+      chainId: initialChain.chainId,
+      getIdentityToken: this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+    };
 
     // track connection started event
     const startTime = Date.now();
@@ -348,21 +364,56 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
     return new Promise((resolve, reject) => {
+      let connectedEventCompleted = false;
+      let authorizedEventReceived = false;
+
       const cleanup = () => {
         this.off(CONNECTOR_EVENTS.CONNECTED, onConnected);
         this.off(CONNECTOR_EVENTS.ERRORED, onErrored);
+        this.off(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
       };
+
+      const checkCompletion = async () => {
+        // In CONNECT_AND_SIGN mode, wait for both connected event and authorized event
+        if (finalLoginParams.getIdentityToken) {
+          if (connectedEventCompleted && authorizedEventReceived) {
+            await completeConnection();
+          }
+        } else {
+          // In CONNECT_ONLY mode, just wait for connected event
+          if (connectedEventCompleted) {
+            await completeConnection();
+          }
+        }
+      };
+
+      const completeConnection = async () => {
+        try {
+          // track connection completed event
+          const userInfo = await connector.getUserInfo();
+          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+            ...eventData,
+            is_mfa_enabled: userInfo?.isMfaEnabled,
+            duration: Date.now() - startTime,
+          });
+          cleanup();
+          resolve(this.provider);
+        } catch (error) {
+          cleanup();
+          reject(error);
+        }
+      };
+
       const onConnected = async () => {
-        // track connection completed event
-        const userInfo = await connector.getUserInfo();
-        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
-          ...eventData,
-          is_mfa_enabled: userInfo?.isMfaEnabled,
-          duration: Date.now() - startTime,
-        });
-        cleanup();
-        resolve(this.provider);
+        connectedEventCompleted = true;
+        await checkCompletion();
       };
+
+      const onAuthorized = async () => {
+        authorizedEventReceived = true;
+        await checkCompletion();
+      };
+
       const onErrored = async (err: Web3AuthError) => {
         // track connection failed event
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
@@ -373,7 +424,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         cleanup();
         reject(err);
       };
+
       this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
+      if (finalLoginParams.getIdentityToken) {
+        this.once(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
+      }
       this.once(CONNECTOR_EVENTS.ERRORED, onErrored);
       connector.connect(finalLoginParams);
       this.setCurrentChain(initialChain.chainId);
@@ -381,18 +436,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.connectedConnector.status === CONNECTOR_STATUS.DISCONNECTING) return;
     await this.connectedConnector.disconnect(options);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
     log.debug("Getting user info", this.status, this.connectedConnector?.name);
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     return this.connectedConnector.getUserInfo();
   }
 
   async enableMFA<T>(loginParams?: T): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this connector.`);
 
@@ -411,7 +467,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async manageMFA<T>(loginParams?: T): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this connector.`);
 
@@ -430,7 +486,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
 
     const trackData = { connector: this.connectedConnector.name };
     try {
@@ -676,7 +732,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     try {
       const initialChain = this.getInitialChainIdForConnector(connector);
       const autoConnect = this.checkIfAutoConnect(connector);
-      await connector.init({ autoConnect, chainId: initialChain.chainId });
+      await connector.init({
+        autoConnect,
+        chainId: initialChain.chainId,
+        getIdentityToken: this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      });
     } catch (e) {
       log.error(e, connector.name);
     }
@@ -776,7 +836,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-      const { provider } = data;
+      const { provider, identityTokenInfo } = data;
+
+      if (identityTokenInfo) {
+        this.setState({ idToken: identityTokenInfo.idToken });
+      }
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
@@ -828,7 +892,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
-      this.connectToPlugins(data);
+      this.connectToPlugins({ ...data, connector: data.connector as WALLET_CONNECTOR_TYPE });
       this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
     });
 
@@ -902,6 +966,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         is_mfa_enabled: isMFAEnabled,
       });
       this.emit(CONNECTOR_EVENTS.MFA_ENABLED, isMFAEnabled);
+    });
+
+    connector.on(CONNECTOR_EVENTS.AUTHORIZING, (data) => {
+      this.status = CONNECTOR_STATUS.AUTHORIZING;
+      this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
+      log.debug("authorizing", this.status, this.connectedConnectorName);
+    });
+    connector.on(CONNECTOR_EVENTS.AUTHORIZED, (data: AUTHORIZED_EVENT_DATA) => {
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      this.setState({ idToken: data.identityTokenInfo.idToken });
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
+      log.debug("authorized", this.status, this.connectedConnectorName);
     });
   }
 

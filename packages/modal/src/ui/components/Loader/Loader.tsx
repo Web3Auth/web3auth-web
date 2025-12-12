@@ -1,11 +1,13 @@
+import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
+import CircularLoader from "../CircularLoader";
 import Image from "../Image";
 import PulseLoader from "../PulseLoader";
-import { ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
+import { AuthorizingStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
 
 /**
  * ConnectingStatus component
@@ -88,29 +90,90 @@ function ErroredStatus(props: ErroredStatusType) {
   );
 }
 
+function AuthorizingStatus(props: AuthorizingStatusType) {
+  const [t] = useTranslation(undefined, { i18n });
+  const { connector, externalWalletsConfig, walletRegistry, handleMobileVerifyConnect } = props;
+
+  const registryItem = walletRegistry?.default?.[connector] || walletRegistry?.others?.[connector];
+  const primaryColor = registryItem?.primaryColor || "";
+
+  const handleMobileVerifyConnectClick = () => {
+    handleMobileVerifyConnect({ connector: connector as WALLET_CONNECTOR_TYPE });
+  };
+
+  return (
+    <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-between w3a--gap-y-6">
+      <p className="w3a--p-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
+        {t("modal.loader.authorizing-header", { connector: externalWalletsConfig[connector].label })}
+      </p>
+      <div className="w3a--flex w3a--justify-center">
+        <CircularLoader width={95} height={95} thickness={6} arcSizeDeg={100} arcColors={primaryColor ? [primaryColor, primaryColor] : undefined}>
+          <Image imageId={`login-${connector}`} hoverImageId={`login-${connector}`} height="45" width="45" />
+        </CircularLoader>
+      </div>
+      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{t("modal.loader.authorizing-message")}</p>
+      <button
+        onClick={handleMobileVerifyConnectClick}
+        className="w3a--w-full w3a--rounded-xl w3a--bg-app-gray-100 w3a--p-2 w3a--py-3 w3a--text-center w3a--text-sm w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white md:w3a--hidden"
+      >
+        {t("modal.loader.authorizing-verify-btn")}
+      </button>
+    </div>
+  );
+}
+
 /**
  * Loader component
  * @param props - LoaderProps
  * @returns Loader component
  */
 function Loader(props: LoaderProps) {
-  const { connector, connectorName, modalStatus, onClose, appLogo, message } = props;
+  const {
+    connector,
+    connectorName,
+    modalStatus,
+    onClose,
+    appLogo,
+    message,
+    isConnectAndSignAuthenticationMode,
+    externalWalletsConfig,
+    walletRegistry,
+    handleMobileVerifyConnect,
+  } = props;
+
+  const isConnectedAccordingToAuthenticationMode = useMemo(
+    () =>
+      (!isConnectAndSignAuthenticationMode && modalStatus === MODAL_STATUS.CONNECTED) ||
+      (isConnectAndSignAuthenticationMode && modalStatus === MODAL_STATUS.AUTHORIZED),
+    [modalStatus, isConnectAndSignAuthenticationMode]
+  );
 
   useEffect(() => {
-    if (modalStatus === MODAL_STATUS.CONNECTED) {
-      setTimeout(() => {
+    if (isConnectedAccordingToAuthenticationMode) {
+      const timeout = setTimeout(() => {
         onClose();
       }, 1000);
+
+      return () => clearTimeout(timeout);
     }
-  }, [modalStatus, onClose]);
+  }, [isConnectedAccordingToAuthenticationMode, onClose]);
 
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
 
-      {modalStatus === MODAL_STATUS.CONNECTED && <ConnectedStatus message={message} />}
+      {isConnectedAccordingToAuthenticationMode && <ConnectedStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
+
+      {modalStatus === MODAL_STATUS.AUTHORIZING && (
+        <AuthorizingStatus
+          connector={connector}
+          externalWalletsConfig={externalWalletsConfig}
+          walletRegistry={walletRegistry}
+          handleMobileVerifyConnect={handleMobileVerifyConnect}
+        />
+      )}
     </div>
   );
 }

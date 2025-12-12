@@ -25,6 +25,7 @@ function Root(props: RootProps) {
     setModalState,
     modalState,
     handleExternalWalletBtnClick,
+    handleMobileVerifyConnect,
     chainNamespaces,
     walletRegistry,
     appLogo,
@@ -42,6 +43,7 @@ function Root(props: RootProps) {
     preHandleExternalWalletClick,
     uiConfig,
     deviceDetails,
+    isConnectAndSignAuthenticationMode,
   } = props;
 
   const {
@@ -446,6 +448,10 @@ function Root(props: RootProps) {
                 modalStatus={modalState.status}
                 onClose={onCloseLoader}
                 appLogo={appLogo}
+                isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
+                externalWalletsConfig={modalState.externalWalletsConfig}
+                walletRegistry={walletRegistry}
+                handleMobileVerifyConnect={handleMobileVerifyConnect}
               />
             ) : (
               <>

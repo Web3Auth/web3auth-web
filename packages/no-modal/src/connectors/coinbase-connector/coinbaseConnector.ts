@@ -82,7 +82,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
         // the connect function could fail silently as well.
         if (!provider) {
           this.rehydrated = false;
@@ -114,16 +114,20 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
         // ready to be connected again
         this.disconnect();
       });
+
       let identityTokenInfo: IdentityTokenInfo | undefined;
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
-      }
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.COINBASE,
         reconnected: this.rehydrated,
         provider: this.provider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
+
       return this.provider;
     } catch (error) {
       // ready again to be connected
@@ -150,7 +154,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 

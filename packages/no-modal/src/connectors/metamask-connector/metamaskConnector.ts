@@ -105,7 +105,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: false });
+        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
         if (!provider) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
@@ -179,6 +179,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       }
 
       let identityTokenInfo: IdentityTokenInfo | undefined;
+
       if (getIdentityToken) {
         identityTokenInfo = await this.getIdentityToken();
       }
@@ -189,6 +190,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         provider: this.metamaskProvider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
       return this.metamaskProvider;
     } catch (error) {
       // ready again to be connected
@@ -228,7 +230,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     return {};
   }
 
