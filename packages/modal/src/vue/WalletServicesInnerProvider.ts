@@ -28,7 +28,7 @@ export const WalletServicesInnerProvider = defineComponent({
     watch(isConnected, (newIsConnected) => {
       if (newIsConnected) {
         const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
-        if (!walletServicesPlugin.value) walletServicesPlugin.value = plugin;
+        walletServicesPlugin.value = plugin;
         // when rehydrating, the connectedListener may be registered after the connected event is emitted, we need to check the status here
         if (walletServicesPlugin.value?.status === CONNECTOR_STATUS.CONNECTED) ready.value = true;
       }
