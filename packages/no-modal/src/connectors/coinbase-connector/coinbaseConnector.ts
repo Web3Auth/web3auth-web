@@ -1,4 +1,5 @@
 import type { AppMetadata, Preference, ProviderInterface } from "@coinbase/wallet-sdk";
+import type { ProviderRpcError } from "@coinbase/wallet-sdk/dist/core/provider/interface";
 
 import {
   BaseConnectorLoginParams,
@@ -68,7 +69,6 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
     const { createCoinbaseWalletSDK } = await import("@coinbase/wallet-sdk");
-
     const coinbaseInstance = createCoinbaseWalletSDK({
       ...this.coinbaseOptions,
       preference: { options: this.coinbaseOptions.options || "smartWalletOnly" },
@@ -160,7 +160,31 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    await this.coinbaseProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
+    try {
+      await this.coinbaseProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
+    } catch (switchError: unknown) {
+      // 4902 indicates that the client does not recognize the Harmony One network
+      if ((switchError as ProviderRpcError).code === 4902) {
+        const chainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
+        if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+        await this.coinbaseProvider.request({
+          method: "wallet_addEthereumChain",
+          params: [
+            {
+              chainId: chainConfig.chainId,
+              rpcUrls: [chainConfig.rpcTarget],
+              chainName: chainConfig.displayName,
+              nativeCurrency: { name: chainConfig.tickerName, symbol: chainConfig.ticker, decimals: chainConfig.decimals || 18 },
+              blockExplorerUrls: [chainConfig.blockExplorerUrl],
+              iconUrls: [chainConfig.logo],
+            },
+          ],
+        });
+        return;
+      }
+
+      throw switchError;
+    }
   }
 
   public async enableMFA(): Promise<void> {

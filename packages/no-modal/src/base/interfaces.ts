@@ -53,8 +53,9 @@ export interface WalletUiConfig {
   enableSendButton?: boolean;
   enableSwapButton?: boolean;
   enableReceiveButton?: boolean;
+  enableDefiPositionsDisplay?: boolean;
   portfolioWidgetPosition?: BUTTON_POSITION_TYPE;
-  defaultPortfolio?: "token" | "nft";
+  defaultPortfolio?: "token" | "nft" | "defi";
 }
 
 export type ModalSignInMethodType = (typeof MODAL_SIGN_IN_METHODS)[keyof typeof MODAL_SIGN_IN_METHODS];

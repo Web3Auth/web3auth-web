@@ -32,6 +32,7 @@ export interface LoginProps {
   isEmailPasswordLessLoginVisible: boolean;
   isSmsPasswordLessLoginVisible: boolean;
   totalExternalWallets: number;
+  remainingUndisplayedWallets: number;
   logoAlignment?: LogoAlignmentType;
   buttonRadius?: ButtonRadiusType;
   deviceDetails: { platform: platform; browser: browser; os: os };

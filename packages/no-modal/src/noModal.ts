@@ -653,6 +653,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       enableReceiveButton = true,
       enableShowAllTokensButton = true,
       enableConfirmationModal = false,
+      enableDefiPositionsDisplay = true,
       portfolioWidgetPosition = BUTTON_POSITION.BOTTOM_LEFT,
       defaultPortfolio = "token",
     } = walletUi || {};
@@ -666,6 +667,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       hideSwap: !enableSwapButton,
       hideShowAllTokens: !enableShowAllTokensButton,
       hideWalletConnect: !enableWalletConnect,
+      hideDefiPositionsDisplay: !enableDefiPositionsDisplay,
       buttonPosition: portfolioWidgetPosition,
       defaultPortfolio,
     };
@@ -754,9 +756,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
     const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
 
-    // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
-    // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
-    if (isBrowser() && chainNamespaces.has(CHAIN_NAMESPACES.EIP155) && !chainNamespaces.has(CHAIN_NAMESPACES.SOLANA)) {
+    // prioritize using MM connector over injected connector for EVM chains
+    if (isBrowser() && chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
+      // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
       connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
     }
 
@@ -788,12 +790,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         });
         connectorFns.push(...evmMipd.getProviders().map(injectedEvmConnector));
       }
-    }
-
-    // it's safe to add it here as if there is a MetaMask injected provider, this won't override it
-    // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
-    if (isBrowser() && (chainNamespaces.has(CHAIN_NAMESPACES.SOLANA) || chainNamespaces.has(CHAIN_NAMESPACES.EIP155))) {
-      connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
     }
 
     // add WalletConnectV2 connector if external wallets are enabled

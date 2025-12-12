@@ -280,7 +280,7 @@ function Root(props: RootProps) {
     [connectorVisibilityMap, chainNamespaces, config, deviceDetails.platform, isWalletConnectConnectorIncluded]
   );
 
-  const allButtons = useMemo(() => {
+  const allRegistryButtons = useMemo(() => {
     return [...generateWalletButtons(walletRegistry.default), ...generateWalletButtons(walletRegistry.others)];
   }, [generateWalletButtons, walletRegistry.default, walletRegistry.others]);
 
@@ -305,7 +305,7 @@ function Root(props: RootProps) {
     const metamaskConnectorIdx = installedConnectors.findIndex((x) => x.name === WALLET_CONNECTORS.METAMASK && !x.hasInjectedWallet);
     if (metamaskConnectorIdx !== -1) {
       const metamaskConnector = installedConnectors[metamaskConnectorIdx];
-      let metamaskRegistryButton = allButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
+      let metamaskRegistryButton = allRegistryButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
       if (!metamaskRegistryButton) {
         // use the default metamask registry item if it's not in the registry
         metamaskRegistryButton = generateWalletButtons({
@@ -323,7 +323,7 @@ function Root(props: RootProps) {
 
     // make metamask the first button and limit the number of buttons
     return installedConnectors;
-  }, [allButtons, config, connectorVisibilityMap, generateWalletButtons]);
+  }, [allRegistryButtons, config, connectorVisibilityMap, generateWalletButtons]);
 
   const customConnectorButtons = useMemo(() => {
     return installedConnectorButtons.filter((button) => !button.hasInjectedWallet);
@@ -338,14 +338,20 @@ function Root(props: RootProps) {
       .slice(0, displayInstalledExternalWallets ? MAX_TOP_INSTALLED_CONNECTORS : 1);
   }, [installedConnectorButtons, displayInstalledExternalWallets]);
 
-  const totalExternalWallets = useMemo(() => {
-    const uniqueWalletSet = new Set();
-    return allButtons.concat(installedConnectorButtons).filter((button) => {
-      if (uniqueWalletSet.has(button.name)) return false;
-      uniqueWalletSet.add(button.name);
+  const allExternalWallets = useMemo(() => {
+    const uniqueButtonSet = new Set();
+    return installedConnectorButtons.concat(allRegistryButtons).filter((button) => {
+      if (uniqueButtonSet.has(button.name)) return false;
+      uniqueButtonSet.add(button.name);
       return true;
+    });
+  }, [allRegistryButtons, installedConnectorButtons]);
+
+  const remainingUndisplayedWallets = useMemo(() => {
+    return allExternalWallets.filter((button) => {
+      return !topInstalledConnectorButtons.includes(button);
     }).length;
-  }, [allButtons, installedConnectorButtons]);
+  }, [allExternalWallets, topInstalledConnectorButtons]);
 
   const handleSocialLoginHeight = () => {
     setIsSocialLoginsExpanded((prev) => !prev);
@@ -487,7 +493,8 @@ function Root(props: RootProps) {
                         installedExternalWalletConfig={topInstalledConnectorButtons}
                         isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
                         isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
-                        totalExternalWallets={totalExternalWallets}
+                        totalExternalWallets={allExternalWallets.length}
+                        remainingUndisplayedWallets={remainingUndisplayedWallets}
                         logoAlignment={logoAlignment}
                         buttonRadius={buttonRadiusType}
                         deviceDetails={deviceDetails}
@@ -505,7 +512,7 @@ function Root(props: RootProps) {
                         metamaskConnectUri={modalState.metamaskConnectUri}
                         config={modalState.externalWalletsConfig}
                         walletRegistry={walletRegistry}
-                        allExternalButtons={allButtons}
+                        allRegistryButtons={allRegistryButtons}
                         connectorVisibilityMap={connectorVisibilityMap}
                         customConnectorButtons={customConnectorButtons}
                         deviceDetails={deviceDetails}
