@@ -69,9 +69,6 @@ const isDisabled = (name: string): boolean => {
     case "walletServicePlugin":
       return !formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) && !formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA);
 
-    case "nftCheckoutPlugin":
-      return !formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155);
-
     case "btnConnect":
       return !isInitialized.value;
 
@@ -171,9 +168,6 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             Wallet Plugin
           </Tab>
           <Tab v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
-            NFT Checkout Plugin
-          </Tab>
-          <Tab v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)" variant="underline" :active="isActiveTab(5)" @click="onTabChange(5)">
             Account Abstraction Provider
           </Tab>
         </Tabs>
@@ -446,17 +440,6 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
           />
         </Card>
         <Card v-if="isActiveTab(4)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
-          <Toggle
-            v-model="formData.nftCheckoutPlugin.enable"
-            :disabled="isDisabled('nftCheckoutPlugin')"
-            :show-label="true"
-            :size="'small'"
-            :label-disabled="$t('app.nftCheckoutPlugin.title')"
-            :label-enabled="$t('app.nftCheckoutPlugin.title')"
-            class="mb-2"
-          />
-        </Card>
-        <Card v-if="isActiveTab(5)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
           <Toggle
             v-model="formData.useAccountAbstractionProvider"
             data-testid="accountAbstractionProvider"

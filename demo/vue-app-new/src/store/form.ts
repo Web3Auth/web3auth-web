@@ -24,9 +24,6 @@ export const formDataStore = reactive<FormData>({
     enable: false,
     confirmationStrategy: "modal",
   },
-  nftCheckoutPlugin: {
-    enable: false,
-  },
   useAccountAbstractionProvider: false,
   useAAWithExternalWallet: true,
   smartAccountType: "metamask", // default smart account type to safe
