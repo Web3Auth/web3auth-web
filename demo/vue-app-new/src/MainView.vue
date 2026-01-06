@@ -4,7 +4,6 @@ import {
   CHAIN_NAMESPACES,
   type ConnectorFn,
   type CustomChainConfig,
-  nftCheckoutPlugin,
   type PluginFn,
   storageAvailable,
   type UIConfig,
@@ -25,7 +24,7 @@ import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { clientIds, NFT_CHECKOUT_CLIENT_ID } from "./config";
+import { clientIds } from "./config";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
 import { SmartAccountType } from "@toruslabs/ethereum-controllers";
@@ -81,9 +80,6 @@ const options = computed((): Web3AuthOptions => {
   // Plugins
   const plugins: PluginFn[] = [];
   if (formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155) || formData.chainNamespaces.includes(CHAIN_NAMESPACES.SOLANA)) {
-    if (formData.nftCheckoutPlugin.enable && formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)) {
-      plugins.push(nftCheckoutPlugin({ clientId: NFT_CHECKOUT_CLIENT_ID }));
-    }
     if (formData.walletPlugin.enable) {
       plugins.push(walletServicesPlugin());
     }
@@ -205,7 +201,6 @@ onBeforeMount(() => {
         formData.network = json.network;
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
-        formData.nftCheckoutPlugin = json.nftCheckoutPlugin || {};
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
         formData.smartAccountChains = json.smartAccountChains || [];

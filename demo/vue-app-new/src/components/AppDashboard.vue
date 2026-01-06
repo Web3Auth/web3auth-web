@@ -14,7 +14,7 @@ import {
   useWeb3AuthUser,
   useSwitchChain as useWeb3AuthSwitchChain,
 } from "@web3auth/modal/vue";
-import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig, type NFTCheckoutPluginType } from "@web3auth/no-modal";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
@@ -24,7 +24,6 @@ import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana
 import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
-import { NFT_CHECKOUT_CONTRACT_ID } from "../config";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey, signAllTransactions } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
@@ -88,7 +87,7 @@ watch(
   }
 );
 
-const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletServices" | "nftCheckoutServices"): boolean => {
+const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletServices"): boolean => {
   const chainNamespace = currentChainNamespace.value;
   switch (name) {
     case "dashboard":
@@ -105,9 +104,6 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
         (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) &&
         web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH
       );
-
-    case "nftCheckoutServices":
-      return chainNamespace === CHAIN_NAMESPACES.EIP155 && formData.nftCheckoutPlugin.enable;
 
     default: {
       return false;
@@ -152,16 +148,6 @@ watch(
   },
   { immediate: true }
 );
-
-// NFT Checkout
-const showPaidMintNFTCheckout = async () => {
-  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPluginType;
-  nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.PAID_MINT });
-};
-const showFreeMintNFTCheckout = async () => {
-  const nftCheckoutPlugin = web3Auth.value?.getPlugin(WALLET_PLUGINS.NFT_CHECKOUT) as NFTCheckoutPluginType;
-  nftCheckoutPlugin.show({ contractId: NFT_CHECKOUT_CONTRACT_ID.FREE_MINT });
-};
 
 // Ethereum Provider
 const onGetUserInfo = async () => {
@@ -426,17 +412,6 @@ const onSwitchChainNamespace = async () => {
           <Button v-if="isDisplay('solServices')" block size="xs" pill class="mb-2" @click="onWalletSignSolanaVersionedTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button> -->
-        </Card>
-
-        <!-- NFT Checkout -->
-        <Card v-if="isDisplay('nftCheckoutServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
-          <div class="mb-2 text-xl font-bold leading-tight text-left">NFT Checkout Service</div>
-          <Button block size="xs" pill class="mb-2" @click="showFreeMintNFTCheckout">
-            {{ $t("app.buttons.btnShowFreeMintNFTCheckout") }}
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="showPaidMintNFTCheckout">
-            {{ $t("app.buttons.btnShowPaidMintNFTCheckout") }}
-          </Button>
         </Card>
 
         <!-- EVM -->
