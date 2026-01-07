@@ -591,7 +591,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // update connector config
       if (
         (
-          [CONNECTOR_STATUS.NOT_READY, CONNECTOR_STATUS.READY, CONNECTOR_STATUS.CONNECTING, CONNECTOR_STATUS.CONNECTED] as CONNECTOR_STATUS_TYPE[]
+          [
+            CONNECTOR_STATUS.NOT_READY,
+            CONNECTOR_STATUS.READY,
+            CONNECTOR_STATUS.CONNECTING,
+            CONNECTOR_STATUS.CONNECTED,
+            CONNECTOR_STATUS.AUTHORIZING,
+            CONNECTOR_STATUS.AUTHORIZED,
+          ] as CONNECTOR_STATUS_TYPE[]
         ).includes(connector.status)
       ) {
         const connectorModalConfig = this.modalConfig.connectors[connectorName];
