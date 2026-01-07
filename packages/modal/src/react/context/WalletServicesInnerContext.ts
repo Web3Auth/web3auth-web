@@ -53,9 +53,9 @@ export function WalletServicesContextProvider({ children, context }: PropsWithCh
 
     return () => {
       if (walletServicesPlugin) {
-        walletServicesPlugin.off(PLUGIN_EVENTS.CONNECTED, connectedListener);
-        walletServicesPlugin.off(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
-        walletServicesPlugin.off(PLUGIN_EVENTS.CONNECTING, connectingListener);
+        walletServicesPlugin.removeListener(PLUGIN_EVENTS.CONNECTED, connectedListener);
+        walletServicesPlugin.removeListener(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
+        walletServicesPlugin.removeListener(PLUGIN_EVENTS.CONNECTING, connectingListener);
       }
     };
   }, [walletServicesPlugin]);

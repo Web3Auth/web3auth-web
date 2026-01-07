@@ -79,7 +79,7 @@ watch(
     currentChainId.value = web3Auth.value?.currentChain?.chainId;
     provider.value.on("chainChanged", chainChangedListener);
     onCleanup(() => {
-      provider.value?.off("chainChanged", chainChangedListener);
+      provider.value?.removeListener("chainChanged", chainChangedListener);
     });
   },
   {

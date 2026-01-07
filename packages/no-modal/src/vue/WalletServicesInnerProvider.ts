@@ -49,9 +49,9 @@ export const WalletServicesInnerProvider = defineComponent({
 
       // unregister previous listeners
       if (prevWalletServicesPlugin && newWalletServicesPlugin !== prevWalletServicesPlugin) {
-        prevWalletServicesPlugin.off(PLUGIN_EVENTS.CONNECTED, connectedListener);
-        prevWalletServicesPlugin.off(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
-        prevWalletServicesPlugin.off(PLUGIN_EVENTS.CONNECTING, connectingListener);
+        prevWalletServicesPlugin.removeListener(PLUGIN_EVENTS.CONNECTED, connectedListener);
+        prevWalletServicesPlugin.removeListener(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
+        prevWalletServicesPlugin.removeListener(PLUGIN_EVENTS.CONNECTING, connectingListener);
       }
 
       if (newWalletServicesPlugin && newWalletServicesPlugin !== prevWalletServicesPlugin) {

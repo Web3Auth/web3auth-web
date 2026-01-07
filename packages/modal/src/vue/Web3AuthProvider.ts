@@ -142,15 +142,15 @@ export const Web3AuthProvider = defineComponent({
 
         // unregister previous listeners
         if (prevWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
-          prevWeb3Auth.off(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
-          prevWeb3Auth.off(CONNECTOR_EVENTS.READY, readyListener);
-          prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTED, connectedListener);
-          prevWeb3Auth.off(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
-          prevWeb3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
-          prevWeb3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
-          prevWeb3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
-          prevWeb3Auth.off(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
-          prevWeb3Auth.off(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.ERRORED, errorListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
         }
 
         if (newWeb3Auth && newWeb3Auth !== prevWeb3Auth) {

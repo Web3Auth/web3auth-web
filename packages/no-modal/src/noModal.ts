@@ -368,9 +368,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       let authorizedEventReceived = false;
 
       const cleanup = () => {
-        this.off(CONNECTOR_EVENTS.CONNECTED, onConnected);
-        this.off(CONNECTOR_EVENTS.ERRORED, onErrored);
-        this.off(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
+        this.removeListener(CONNECTOR_EVENTS.CONNECTED, onConnected);
+        this.removeListener(CONNECTOR_EVENTS.ERRORED, onErrored);
+        this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
       };
 
       const checkCompletion = async () => {

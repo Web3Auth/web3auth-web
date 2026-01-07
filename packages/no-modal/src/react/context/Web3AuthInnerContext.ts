@@ -80,7 +80,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       provider.on("chainChanged", handleChainChange);
       return () => {
         if (provider) {
-          provider.off("chainChanged", handleChainChange);
+          provider.removeListener("chainChanged", handleChainChange);
         }
       };
     }
@@ -150,15 +150,15 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
 
     return () => {
       if (web3Auth) {
-        web3Auth.off(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
-        web3Auth.off(CONNECTOR_EVENTS.READY, readyListener);
-        web3Auth.off(CONNECTOR_EVENTS.CONNECTED, connectedListener);
-        web3Auth.off(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
-        web3Auth.off(CONNECTOR_EVENTS.CONNECTING, connectingListener);
-        web3Auth.off(CONNECTOR_EVENTS.ERRORED, errorListener);
-        web3Auth.off(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
-        web3Auth.off(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
-        web3Auth.off(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.ERRORED, errorListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
       }
     };
   }, [web3Auth]);
