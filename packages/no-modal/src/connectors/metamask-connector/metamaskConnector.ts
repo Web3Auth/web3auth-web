@@ -1,4 +1,4 @@
-import { createMetamaskConnectEVM, type MetamaskConnectEVM } from "@metamask/connect-evm";
+import { createMetamaskConnectEVM, type EIP1193Provider, type MetamaskConnectEVM } from "@metamask/connect-evm";
 import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
 
 import {
@@ -28,8 +28,74 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
+
+// Simple JSON-RPC types for provider compatibility
+type JRPCRequest<T> = { id?: number; jsonrpc?: string; method: string; params?: T };
+type JRPCResponse<U> = { id: number; jsonrpc: "2.0"; result?: U; error?: unknown };
+type SendCallBack<T> = (error: Error | null, response: T) => void;
 import { BaseEvmConnector } from "../base-evm-connector";
 import { getSiteName } from "../utils";
+
+/**
+ * Wraps an EIP1193Provider to be compatible with Web3Auth's IProvider interface.
+ * Uses a Proxy to forward all calls to the original provider while adding missing methods.
+ */
+function wrapProvider(provider: EIP1193Provider): IProvider {
+  // Create sendAsync function
+  const sendAsync = <T, U>(req: JRPCRequest<T>, callback?: SendCallBack<JRPCResponse<U>>): Promise<JRPCResponse<U>> | void => {
+    const promise = provider
+      .request({ method: req.method, params: req.params as unknown[] })
+      .then((result) => ({ id: req.id || 1, jsonrpc: "2.0" as const, result }) as JRPCResponse<U>)
+      .catch((error) => ({ id: req.id || 1, jsonrpc: "2.0" as const, error }) as JRPCResponse<U>);
+
+    if (callback) {
+      promise.then((response) => callback(null, response)).catch((error) => callback(error, null as unknown as JRPCResponse<U>));
+      return;
+    }
+    return promise;
+  };
+
+  // Create send function
+  const send = <T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void => {
+    sendAsync(req, callback);
+  };
+
+  // Use a Proxy to intercept property access and add missing properties
+  const wrappedProvider = new Proxy(provider, {
+    get(target, prop) {
+      // Add chainId getter
+      if (prop === "chainId") {
+        return target.selectedChainId || "0x1";
+      }
+      // Add sendAsync method
+      if (prop === "sendAsync") {
+        return sendAsync;
+      }
+      // Add send method
+      if (prop === "send") {
+        return send;
+      }
+      // Forward all other property access to the original provider
+      const value = Reflect.get(target, prop, target);
+      // Bind methods to the original target to preserve `this` context
+      if (typeof value === "function") {
+        return value.bind(target);
+      }
+      return value;
+    },
+    set(target, prop, value) {
+      return Reflect.set(target, prop, value);
+    },
+    has(target, prop) {
+      if (prop === "chainId" || prop === "sendAsync" || prop === "send") {
+        return true;
+      }
+      return Reflect.has(target, prop);
+    },
+  });
+
+  return wrappedProvider as unknown as IProvider;
+}
 
 /**
  * Configuration options for the MetaMask connector using @metamask/connect-evm
@@ -175,8 +241,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       throw WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error);
     }
 
-    // Note: isInjected detection is not available in the new SDK
-    // The new SDK handles extension vs mobile detection internally
+    // TODO need to figure this out
     this.isInjected = false;
 
     this.status = CONNECTOR_STATUS.READY;
@@ -232,11 +297,11 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         });
       }
 
-      // Get the provider from the SDK
-      const provider = instance.getProvider() as unknown as IProvider;
-      if (!provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
+      // Get the provider from the SDK and wrap it for IProvider compatibility
+      const rawProvider = instance.getProvider();
+      if (!rawProvider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
 
-      this.metamaskProvider = provider;
+      this.metamaskProvider = wrapProvider(rawProvider);
 
       // Switch chain if not connected to the right chain
       const currentChainId = instance.getChainId();
