@@ -742,7 +742,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  protected async loadConnectors({ projectConfig, modalMode }: { projectConfig: ProjectConfig; modalMode?: boolean }) {
+  protected async loadConnectors({ projectConfig }: { projectConfig: ProjectConfig; modalMode?: boolean }) {
     // always add auth connector
     const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
     const config = {
@@ -758,8 +758,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // prioritize using MM connector over injected connector for EVM chains
     if (isBrowser() && chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
-      // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
-      connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
+      // Note: The new @metamask/connect-evm SDK handles its own UI internally
+      connectorFns.push(metaMaskConnector());
     }
 
     if (isMipdEnabled && isBrowser()) {
