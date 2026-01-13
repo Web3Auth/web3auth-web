@@ -18,7 +18,7 @@ import {
   UX_MODE,
   version,
 } from "@web3auth/auth";
-import { type default as WsEmbed } from "@web3auth/ws-embed";
+import { type default as WsEmbed, WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
@@ -82,7 +82,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     this.authOptions = params.connectorSettings;
     this.loginSettings = params.loginSettings || { authConnection: "" };
-    this.wsSettings = params.walletServicesSettings || {};
+    this.wsSettings = params.walletServicesSettings || { loginMode: WS_EMBED_LOGIN_MODE.PLUGIN };
     this.authConnectionConfig = params.authConnectionConfig || [];
   }
 
@@ -149,6 +149,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           this.wsEmbedInstancePromise = this.wsEmbedInstance
             .init({
               ...this.wsSettings,
+              loginMode: WS_EMBED_LOGIN_MODE.PLUGIN,
               chains: wsSupportedChains as ProviderConfig[],
               chainId,
               whiteLabel: {
