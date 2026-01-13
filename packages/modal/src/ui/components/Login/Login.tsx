@@ -77,6 +77,7 @@ function Login(props: LoginProps) {
   const [canShowMore, setCanShowMore] = useState(false);
   const [visibleRow, setVisibleRow] = useState<rowType[]>([]);
   const [otherRow, setOtherRow] = useState<rowType[]>([]);
+  const [mainOptionsRow, setMainOptionsRow] = useState<rowType[]>([]);
   const [isPasswordLessCtaClicked, setIsPasswordLessCtaClicked] = useState(false);
   const [showOtpFlow, setShowOtpFlow] = useState(false);
   const [authConnection, setAuthConnection] = useState<AUTH_CONNECTION_TYPE | undefined>(undefined);
@@ -100,6 +101,7 @@ function Login(props: LoginProps) {
 
     const visibleRows: rowType[] = [];
     const otherRows: rowType[] = [];
+    const mainOptionsRows: rowType[] = [];
 
     const loginMethodsOrder = (socialLoginsConfig.loginMethodsOrder || []).reduce(
       (acc, method, index) => {
@@ -140,39 +142,22 @@ function Login(props: LoginProps) {
       const order = index + 1;
 
       const isPrimaryBtn = socialLoginsConfig?.uiConfig?.primaryButton === "socialLogin" && order === 1;
+      const isMainOption = connectorConfig.mainOption;
 
       const loginOptionLength = loginOptions.length;
       const moreThanFour = loginOptionLength >= 4;
 
       const lengthCheck = moreThanFour ? order > 0 && order <= loginOptionLength : order > 0 && order < 4;
 
-      if (lengthCheck) {
-        visibleRows.push({
-          method,
-          isDark,
-          isPrimaryBtn,
-          name,
-          connector: socialLoginsConfig.connector,
-          loginParams: {
-            authConnection: connectorConfig.authConnection || (method as AUTH_CONNECTION_TYPE),
-            authConnectionId: connectorConfig.authConnectionId,
-            groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
-            extraLoginOptions: connectorConfig.extraLoginOptions,
-            name,
-            login_hint: "",
-          },
-          order,
-        });
-      }
-
-      otherRows.push({
+      const rows = {
+        description: connectorConfig.description || "",
         method,
         isDark,
         isPrimaryBtn,
         name: name === "Twitter" ? "X" : name,
         connector: socialLoginsConfig.connector,
         loginParams: {
-          authConnection: method as AUTH_CONNECTION_TYPE,
+          authConnection: connectorConfig.authConnection || (method as AUTH_CONNECTION_TYPE),
           authConnectionId: connectorConfig.authConnectionId,
           groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
           extraLoginOptions: connectorConfig.extraLoginOptions,
@@ -180,11 +165,20 @@ function Login(props: LoginProps) {
           login_hint: "",
         },
         order,
-      });
+      };
+
+      if (isMainOption) {
+        mainOptionsRows.push(rows);
+      } else if (lengthCheck) {
+        visibleRows.push(rows);
+      }
+
+      otherRows.push(rows);
     });
 
     setVisibleRow(visibleRows);
     setOtherRow(otherRows);
+    setMainOptionsRow(mainOptionsRows);
     setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
   }, [socialLoginsConfig, isDark, buttonRadius]);
 
@@ -432,6 +426,7 @@ function Login(props: LoginProps) {
         isDark={isDark}
         visibleRow={visibleRow}
         canShowMore={canShowMore}
+        mainOptionsRow={mainOptionsRow}
         handleSocialLoginClick={handleSocialLoginClick}
         socialLoginsConfig={socialLoginsConfig}
         handleExpandSocialLogins={handleSocialLoginExpand}

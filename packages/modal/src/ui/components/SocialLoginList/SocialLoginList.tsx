@@ -28,7 +28,7 @@ function getProviderIcon(method: string, isDark: boolean, extension: string) {
 }
 
 function SocialLoginList(props: SocialLoginListProps) {
-  const { visibleRow, otherRow, isDark, canShowMore, handleSocialLoginClick, handleExpandSocialLogins, buttonRadius } = props;
+  const { visibleRow, otherRow, mainOptionsRow, isDark, canShowMore, handleSocialLoginClick, handleExpandSocialLogins, buttonRadius } = props;
 
   const getGridRowFromVisibleLogin = () => {
     if (visibleRow.length === 1) {
@@ -45,6 +45,25 @@ function SocialLoginList(props: SocialLoginListProps) {
   if (visibleRow.length !== 0 && otherRow?.length === 0) {
     return (
       <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+        <div className="w3a--grid w3a--w-full w3a--gap-y-2">
+          {mainOptionsRow.map((row) => (
+            <Button
+              type={BUTTON_TYPE.SOCIAL}
+              key={row.method}
+              props={{
+                showText: true,
+                text: row.description,
+                method: row.method,
+                isDark,
+                isPrimaryBtn: false,
+                btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11 w3a--group",
+                children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
+                onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
+                buttonRadius,
+              }}
+            />
+          ))}
+        </div>
         <div className={cn("w3a--grid w3a--w-full w3a--gap-x-2", getGridRowFromVisibleLogin())}>
           {visibleRow
             .filter((_, index) => (visibleRow.length === 4 ? index <= 3 : index < 3))

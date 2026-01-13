@@ -27,8 +27,8 @@ function SocialLoginButton(props: ButtonSocialProps) {
       })}
     >
       {showIcon && getProviderIcon(method, isDark, isPrimaryBtn)}
-      {showText && <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{text}</p>}
       {children}
+      {showText && <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{text}</p>}
     </button>
   );
 }
