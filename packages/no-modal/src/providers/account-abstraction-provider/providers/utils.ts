@@ -48,7 +48,6 @@ export function getProviderHandlers({
     processTransaction: async (txParams: TransactionParams & { gas?: string }): Promise<string> => {
       if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
       const { to, value, data } = txParams;
-      // @ts-expect-error viem types are too deep
       const userOperationParams: SendUserOperationParameters = {
         account: smartAccount,
         calls: [
