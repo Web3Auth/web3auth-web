@@ -22,7 +22,7 @@
     "lerna": "^9.0.3",
     "lint-staged": "^16.2.7",
     "mocha": "^11.7.5",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.0",
     "rimraf": "^6.1.2",
     "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
