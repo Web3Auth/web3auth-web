@@ -6,7 +6,6 @@ import {
   type CustomChainConfig,
   type PluginFn,
   storageAvailable,
-  type UIConfig,
   WALLET_CONNECTORS,
   walletServicesPlugin,
   type AccountAbstractionMultiChainConfig,
@@ -20,7 +19,7 @@ import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { type AUTH_CONNECTION_TYPE, BUILD_ENV } from "@web3auth/auth";
+import { BUILD_ENV } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -28,6 +27,7 @@ import { clientIds } from "./config";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
 import { SmartAccountType } from "@toruslabs/ethereum-controllers";
+import { WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 
 const formData = formDataStore;
 
@@ -62,6 +62,7 @@ const options = computed((): Web3AuthOptions => {
 
   // Wallet services settings
   let walletServicesConfig: Web3AuthOptions["walletServicesConfig"] = {
+    loginMode: WS_EMBED_LOGIN_MODE.PLUGIN,
     // walletUrls: {
     //   production: {
     //     url: "http://localhost:4050",
@@ -74,6 +75,7 @@ const options = computed((): Web3AuthOptions => {
       ...walletServicesConfig,
       whiteLabel: { showWidgetButton: true },
       confirmationStrategy,
+      loginMode: WS_EMBED_LOGIN_MODE.PLUGIN,
     };
   }
 
