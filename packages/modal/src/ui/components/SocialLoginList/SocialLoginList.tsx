@@ -42,7 +42,7 @@ function SocialLoginList(props: SocialLoginListProps) {
     }
   };
 
-  if (visibleRow.length !== 0 && otherRow?.length === 0) {
+  if ((visibleRow.length !== 0 || mainOptionsRow.length !== 0) && otherRow?.length === 0) {
     return (
       <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
         <div className="w3a--grid w3a--w-full w3a--gap-y-2">
