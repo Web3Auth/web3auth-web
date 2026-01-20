@@ -1,4 +1,5 @@
 export * from "./auth-connector";
+export * from "./base-account-connector";
 export * from "./base-evm-connector";
 export * from "./base-solana-connector";
 export * from "./injected-evm-connector";

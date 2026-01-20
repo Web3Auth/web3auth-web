@@ -865,7 +865,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const isAaSupportedForCurrentChain =
         this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
         accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
-      if (isAaSupportedForCurrentChain && (data.connector === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
+      // Skip AA wrapping for Base Account connector as it's already a smart account provider
+      const shouldApplyAA =
+        data.connector === WALLET_CONNECTORS.AUTH ||
+        (this.coreOptions.useAAWithExternalWallet && data.connector !== WALLET_CONNECTORS.BASE_ACCOUNT);
+      if (isAaSupportedForCurrentChain && shouldApplyAA) {
         const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
         // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
         const eoaProvider: IProvider = data.connector === WALLET_CONNECTORS.AUTH ? await toEoaProvider(provider) : provider;

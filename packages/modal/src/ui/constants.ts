@@ -17,6 +17,8 @@ export const DEFAULT_LOGO_DARK = "https://images.web3auth.io/web3auth-logo-w-lig
 
 export const WALLET_CONNECT_LOGO = "https://images.web3auth.io/login-wallet-connect.svg";
 
+export const BASE_ACCOUNT_LOGO = "https://images.web3auth.io/login-base-account.svg";
+
 export const DEFAULT_PRIMARY_COLOR = "#0364FF";
 export const DEFAULT_ON_PRIMARY_COLOR = "#FFFFFF";
 
