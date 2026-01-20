@@ -1,4 +1,5 @@
-import { createMetamaskConnectEVM, type MetamaskConnectEVM } from "@metamask/connect-evm";
+/* eslint-disable no-console */
+import { createEVMClient, type MetamaskConnectEVM } from "@metamask/connect-evm";
 import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
 
 import {
@@ -30,6 +31,14 @@ import {
 } from "../../base";
 import { BaseEvmConnector } from "../base-evm-connector";
 import { getSiteName } from "../utils";
+
+
+// connect-monorepo changes
+// packages/connect-evm/src/connect.ts
+// +
+// +  get state(): SDKState {
+// +    return this.#core.state;
+// +  }
 
 /**
  * Configuration options for the MetaMask connector using @metamask/connect-evm
@@ -152,7 +161,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     const appUrl = this.connectorSettings?.dapp?.url || window.location.origin || "https://web3auth.io";
 
     // Initialize the MetaMask Connect EVM SDK
-    this.metamaskPromise = createMetamaskConnectEVM({
+    console.log("ignoring supportedNetworks and using default", { supportedNetworks });
+    this.metamaskPromise = createEVMClient({
       dapp: {
         name: appName,
         url: appUrl,
@@ -164,13 +174,23 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         disconnect: this.handleDisconnect,
       },
       api: {
-        supportedNetworks,
+        supportedNetworks: {
+          // Fallback public RPC endpoints if no Infura key is provided
+          // "eip155:1": "https://eth.llamarpc.com",
+          "eip155:1": "https://mainnet.infura.io/v3/de3198afe5f44ee99d155c9843001539",
+          "eip155:5": "https://goerli.infura.io/v3/demo",
+          "eip155:11155111": "https://sepolia.infura.io/v3/demo",
+          "eip155:137": "https://polygon-rpc.com",
+        },
       },
       debug: this.connectorSettings?.debug,
     });
 
     try {
       this.metamaskInstance = await this.metamaskPromise;
+      // TODO: Remove this hack
+      // Hack to ensure the ConnectEvm instance has fully resumed the connection
+      await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (error) {
       throw WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error);
     }
@@ -178,20 +198,44 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     // TODO need to figure this out
     this.isInjected = false;
 
-    this.status = CONNECTOR_STATUS.READY;
-    this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
+    if (this.metamaskInstance.state === "connected") {
+      this.status = CONNECTOR_STATUS.CONNECTED;
+      let identityTokenInfo: IdentityTokenInfo | undefined;
 
-    try {
-      if (options.autoConnect) {
-        this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken ?? false });
-        if (!provider) {
-          this.rehydrated = false;
-          throw WalletLoginError.connectionError("Failed to rehydrate.");
-        }
+      if (options.getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
       }
-    } catch (error) {
-      this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
+      this.rehydrated = true;
+
+      const provider = this.metamaskInstance.getProvider() as unknown as IProvider;
+      if (!provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
+
+      this.metamaskProvider = provider;
+
+      this.emit(CONNECTOR_EVENTS.CONNECTED, {
+        connector: WALLET_CONNECTORS.METAMASK,
+        reconnected: this.rehydrated,
+        provider: this.metamaskProvider,
+        identityTokenInfo,
+      } as CONNECTED_EVENT_DATA);
+    } else if (this.metamaskInstance.state === "loaded") {
+      this.status = CONNECTOR_STATUS.READY;
+      this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
+    } else if (this.metamaskInstance.state === "pending") {
+      // 'pending' implies that a transport failed to resume the connection
+      // if (options.autoConnect) {
+      //   this.rehydrated = false;
+      //   this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, new Error("Failed to resume existing MetaMask Connect session.") as Web3AuthError);
+      // } else {
+      this.status = CONNECTOR_STATUS.READY;
+      this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
+      // }
+    } else {
+      // 'connecting' is not a possible state at this point
+      // 'disconnected' is not a possible state at this point
+      // Something unexpected happened
+      this.status = CONNECTOR_STATUS.ERRORED;
+      this.emit(CONNECTOR_EVENTS.ERRORED, new Error("Failed to initialize MetaMask Connect.") as Web3AuthError);
     }
   }
 

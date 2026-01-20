@@ -71,7 +71,7 @@ export const walletSendEth = async (provider: WalletServicesPluginType["provider
     const txRes = await signer.sendTransaction({
       from: account,
       to: account,
-      value: parseEther("0.01"),
+      value: parseEther("0.0001"),
     });
     // check for big int before logging to not break the stringify
     uiConsole("txRes", txRes.toJSON());
@@ -92,7 +92,7 @@ export const walletSignTransaction = async (provider: WalletServicesPluginType["
     const serializedTx = await signer.signTransaction({
       from: account,
       to: account,
-      value: parseEther("0.01"),
+      value: parseEther("0.0001"),
     });
 
     uiConsole("serialized user operation", serializedTx);

@@ -14,7 +14,7 @@ export const sendEth = async (provider: IProvider, uiConsole: (name: string, val
     const txRes = await signer.sendTransaction({
       from: account,
       to: account,
-      value: parseEther("0.01"),
+      value: parseEther("0.0001"),
     });
     // check for big int before logging to not break the stringify
     uiConsole("txRes", txRes.toJSON());
@@ -133,7 +133,7 @@ export const signTransaction = async (provider: IProvider, uiConsole: (name: str
     const serializedTx = await signer.signTransaction({
       from: account,
       to: account,
-      value: parseEther("0.01"),
+      value: parseEther("0.0001"),
     });
     if (formDataStore.useAccountAbstractionProvider) {
       // serialized user operation can't be parsed like transaction
