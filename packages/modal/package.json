@@ -82,7 +82,7 @@
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.17",
     "url-loader": "^4.1.1",
-    "viem": "^2.44.2",
+    "viem": "^2.44.4",
     "vue": "^3.5.26",
     "wagmi": "^3.3.4"
   },
