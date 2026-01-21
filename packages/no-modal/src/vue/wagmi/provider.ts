@@ -101,7 +101,7 @@ const Web3AuthWagmiProvider = defineComponent({
     const { isConnected, provider } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
-    const { mutate } = useReconnect();
+    const { mutate: reconnect } = useReconnect();
 
     useConnectionEffect({
       onDisconnect: async () => {
@@ -127,7 +127,7 @@ const Web3AuthWagmiProvider = defineComponent({
           }
 
           await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-          mutate();
+          reconnect();
         } else if (!newIsConnected) {
           if (wagmiConfig.state.status === "connected") {
             await disconnectWeb3AuthFromWagmi(wagmiConfig);

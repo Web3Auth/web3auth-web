@@ -10,7 +10,7 @@ const Main = () => {
   const { connect, loading: connecting, error: connectingError, connectorName } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { isConnected: isWagmiConnected } = useConnection();
-  const { signMessageAsync, data: signedMessageData } = useSignMessage();
+  const { mutateAsync: signMessageAsync, data: signedMessageData } = useSignMessage();
 
   const loggedInView = (
     <>

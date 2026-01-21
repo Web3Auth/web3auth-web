@@ -102,7 +102,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   const { isConnected, provider } = useWeb3Auth();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
-  const { mutate } = useReconnect();
+  const { mutate: reconnect } = useReconnect();
 
   useConnectionEffect({
     onDisconnect: async () => {
@@ -127,14 +127,14 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
 
         await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-        mutate();
+        reconnect();
       } else if (!isConnected) {
         if (wagmiConfig.state.status === "connected") {
           await disconnectWeb3AuthFromWagmi(wagmiConfig);
         }
       }
     })();
-  }, [isConnected, wagmiConfig, provider, mutate]);
+  }, [isConnected, wagmiConfig, provider, reconnect]);
 
   return createElement(Fragment, null, children);
 }
