@@ -18,7 +18,7 @@ import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
-import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
+import { useConnection, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
 
 import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
 import { ProviderConfig } from "@toruslabs/base-controllers";
@@ -51,7 +51,7 @@ const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { showFunding, loading: showFundingLoading } = useFunding();
 const { showReceive, loading: showReceiveLoading } = useReceive();
 const { getIdentityToken, loading: getIdentityTokenLoading } = useIdentityToken();
-const { status, address } = useAccount();
+const { status, address } = useConnection();
 const { signTypedDataAsync } = useSignTypedData();
 const { signMessageAsync } = useSignMessage();
 const wagmiChainId = useChainId();

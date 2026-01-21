@@ -9,8 +9,8 @@ import {
   CreateConnectorFn,
   fallback,
   http,
-  useAccountEffect,
   useConfig as useWagmiConfig,
+  useConnectionEffect,
   useReconnect,
   WagmiProvider as WagmiProviderBase,
   webSocket,
@@ -102,9 +102,9 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   const { isConnected, provider } = useWeb3Auth();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
-  const { reconnect } = useReconnect();
+  const { mutate } = useReconnect();
 
-  useAccountEffect({
+  useConnectionEffect({
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
       if (isConnected) await disconnect();
@@ -127,14 +127,14 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
 
         await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-        reconnect();
+        mutate();
       } else if (!isConnected) {
         if (wagmiConfig.state.status === "connected") {
           await disconnectWeb3AuthFromWagmi(wagmiConfig);
         }
       }
     })();
-  }, [isConnected, wagmiConfig, provider, reconnect]);
+  }, [isConnected, wagmiConfig, provider, mutate]);
 
   return createElement(Fragment, null, children);
 }

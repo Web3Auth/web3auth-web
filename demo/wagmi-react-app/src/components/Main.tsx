@@ -15,7 +15,7 @@ import {
 } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useMemo } from "react";
-import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
+import { useBalance, useChainId, useChains, useConnection, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
@@ -26,7 +26,7 @@ const Main = () => {
   const { loading: connecting, connect, error: connectingError, connectorName, connectTo } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
   const { signMessageAsync, data: signedMessageData } = useSignMessage();
-  const { address, isConnected: isWagmiConnected } = useAccount();
+  const { address, isConnected: isWagmiConnected } = useConnection();
   const { userInfo, isMFAEnabled } = useWeb3AuthUser();
   const { data: balance } = useBalance({ address });
   const { signTypedData, data: signedTypedDataData } = useSignTypedData();
@@ -36,7 +36,8 @@ const Main = () => {
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
   const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
-  const { switchChainAsync, chains } = useSwitchChain();
+  const { mutateAsync: switchChainAsync } = useSwitchChain();
+  const chains = useChains();
   const { switchChain: switchWeb3AuthChain } = useWeb3AuthSwitchChain();
 
   const chainId = useChainId();

@@ -96,12 +96,12 @@
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
     "@types/react": "^19.2.8",
-    "@wagmi/core": "^2.20.1",
-    "@wagmi/vue": "^0.2.2",
+    "@wagmi/core": "^3.2.2",
+    "@wagmi/vue": "^0.4.11",
     "react": "^19.2.3",
     "viem": "^2.44.2",
     "vue": "^3.x",
-    "wagmi": "^2.16.6"
+    "wagmi": "^3.3.4"
   },
   "exports": {
     ".": {
