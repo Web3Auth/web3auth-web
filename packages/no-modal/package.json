@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
     "react": ">=18",
-    "viem": ">=2.29",
+    "viem": ">=2.44",
     "vue": "^3.x"
   },
   "peerDependenciesMeta": {
