@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev --turbopack",
+    "dev": "next dev --webpack",
     "build": "next build",
     "start": "next start",
     "lint": "eslint ."
@@ -11,7 +11,7 @@
   "dependencies": {
     "@tanstack/react-query": "^5.80.7",
     "@web3auth/modal": "../../packages/modal",
-    "next": "15.5.9",
+    "next": "16.1.4",
     "react": "19.2.3",
     "react-dom": "19.2.3",
     "wagmi": "^3.3.4"
@@ -23,7 +23,7 @@
     "@types/react-dom": "19.2.3",
     "@wagmi/core": "^3.2.2",
     "eslint": "^9",
-    "eslint-config-next": "15.5.9",
+    "eslint-config-next": "16.1.4",
     "typescript": "5.9.3"
   },
   "overrides": {
