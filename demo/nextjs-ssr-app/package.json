@@ -11,19 +11,23 @@
   "dependencies": {
     "@tanstack/react-query": "^5.80.7",
     "@web3auth/modal": "../../packages/modal",
-    "next": "14.2.32",
-    "react": "18.2.0",
-    "react-dom": "18.2.0",
+    "next": "14.2.35",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "wagmi": "^3.3.4"
   },
   "devDependencies": {
     "@types/elliptic": "^6.4.18",
     "@types/node": "20.4.1",
-    "@types/react": "19.1.8",
-    "@types/react-dom": "19.1.6",
+    "@types/react": "18.3.27",
+    "@types/react-dom": "18.3.7",
     "@wagmi/core": "^3.2.2",
     "eslint": "8.44.0",
-    "eslint-config-next": "13.4.9",
+    "eslint-config-next": "14.2.35",
     "typescript": "5.9.3"
+  },
+  "overrides": {
+    "@types/react": "18.3.27",
+    "@types/react-dom": "18.3.7"
   }
 }
