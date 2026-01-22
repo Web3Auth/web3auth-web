@@ -32,7 +32,6 @@ import {
 import { BaseEvmConnector } from "../base-evm-connector";
 import { getSiteName } from "../utils";
 
-
 // connect-monorepo changes
 // packages/connect-evm/src/connect.ts
 // +
@@ -198,7 +197,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     // TODO need to figure this out
     this.isInjected = false;
 
-    if (this.metamaskInstance.state === "connected") {
+    if (this.metamaskInstance.status === "connected") {
       this.status = CONNECTOR_STATUS.CONNECTED;
       let identityTokenInfo: IdentityTokenInfo | undefined;
 
@@ -218,10 +217,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         provider: this.metamaskProvider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
-    } else if (this.metamaskInstance.state === "loaded") {
+    } else if (this.metamaskInstance.status === "loaded") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
-    } else if (this.metamaskInstance.state === "pending") {
+    } else if (this.metamaskInstance.status === "pending") {
       // 'pending' implies that a transport failed to resume the connection
       // if (options.autoConnect) {
       //   this.rehydrated = false;
