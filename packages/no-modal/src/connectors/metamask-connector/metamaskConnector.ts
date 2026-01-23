@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { createEVMClient, type MetamaskConnectEVM } from "@metamask/connect-evm";
 import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
 
@@ -31,13 +30,6 @@ import {
 } from "../../base";
 import { BaseEvmConnector } from "../base-evm-connector";
 import { getSiteName } from "../utils";
-
-// connect-monorepo changes
-// packages/connect-evm/src/connect.ts
-// +
-// +  get state(): SDKState {
-// +    return this.#core.state;
-// +  }
 
 /**
  * Configuration options for the MetaMask connector using @metamask/connect-evm
@@ -160,7 +152,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     const appUrl = this.connectorSettings?.dapp?.url || window.location.origin || "https://web3auth.io";
 
     // Initialize the MetaMask Connect EVM SDK
-    console.log("ignoring supportedNetworks and using default", { supportedNetworks });
     this.metamaskPromise = createEVMClient({
       dapp: {
         name: appName,
