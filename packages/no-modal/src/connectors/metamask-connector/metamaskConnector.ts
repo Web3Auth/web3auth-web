@@ -301,16 +301,16 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
       let identityTokenInfo: IdentityTokenInfo | undefined;
 
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
-      }
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connector: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
         provider: this.metamaskProvider,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
+      if (getIdentityToken) {
+        identityTokenInfo = await this.getIdentityToken();
+      }
 
       return this.metamaskProvider;
     } catch (error) {
