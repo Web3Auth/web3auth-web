@@ -91,7 +91,7 @@ function Widget(props: WidgetProps) {
     setModalState((prevState) => ({
       ...prevState,
       detailedLoaderConnector: connector,
-      detailedLoaderAdapterName: CONNECTOR_NAMES[connector as WALLET_CONNECTOR_TYPE],
+      detailedLoaderConnectorName: CONNECTOR_NAMES[connector as WALLET_CONNECTOR_TYPE],
     }));
 
     // Call the passed-in handler with the params

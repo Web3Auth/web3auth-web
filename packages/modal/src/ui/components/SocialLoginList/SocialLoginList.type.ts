@@ -4,6 +4,7 @@ export interface SocialLoginListProps {
   isDark: boolean;
   visibleRow: rowType[];
   canShowMore: boolean;
+  mainOptionsRow: rowType[];
   socialLoginsConfig: SocialLoginsConfig;
   otherRow?: rowType[];
   handleSocialLoginClick: (params: SocialLoginEventType) => void;

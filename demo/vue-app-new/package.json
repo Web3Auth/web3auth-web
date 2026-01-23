@@ -11,47 +11,47 @@
   },
   "dependencies": {
     "@solana/web3.js": "^1.98.4",
-    "@tanstack/vue-query": "^5.92.1",
-    "@toruslabs/base-controllers": "^8.10.0",
+    "@tanstack/vue-query": "^5.92.6",
+    "@toruslabs/base-controllers": "^8.15.0",
     "@toruslabs/bs58": "^1.0.0",
-    "@toruslabs/ethereum-controllers": "^8.10.0",
-    "@toruslabs/solana-controllers": "^8.10.0",
+    "@toruslabs/ethereum-controllers": "^8.15.0",
+    "@toruslabs/solana-controllers": "^8.15.0",
     "@toruslabs/tweetnacl-js": "^1.0.4",
     "@toruslabs/vue-components": "^8.1.2",
     "@toruslabs/vue-icons": "^8.0.4",
-    "@wagmi/vue": "^0.2.11",
+    "@wagmi/vue": "^0.4.11",
     "@web3auth/auth": "^10.8.0",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/sign-in-with-ethereum": "^5.0.0",
-    "@web3auth/ws-embed": "^5.3.0",
+    "@web3auth/ws-embed": "^5.5.0",
     "ethers": "^6.16.0",
-    "petite-vue-i18n": "^11.2.2",
-    "vue": "^3.5.25",
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1"
+    "petite-vue-i18n": "^11.2.8",
+    "vue": "^3.5.26",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
   },
   "overrides": {
-    "react": "^19.2.1",
-    "react-dom": "^19.2.1",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3",
     "use-sync-external-store": "^1.4.0"
   },
   "devDependencies": {
     "@toruslabs/eslint-config-vue": "^4.1.5",
-    "@vitejs/plugin-vue": "^6.0.2",
-    "autoprefixer": "^10.4.22",
-    "eslint": "^9.39.1",
-    "globals": "^16.5.0",
+    "@vitejs/plugin-vue": "^6.0.3",
+    "autoprefixer": "^10.4.23",
+    "eslint": "^9.39.2",
+    "globals": "^17.0.0",
     "postcss": "^8.5.6",
-    "prettier": "^3.7.4",
+    "prettier": "^3.8.0",
     "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.9.3",
-    "vite": "^7.2.6",
-    "vue-tsc": "^3.1.5"
+    "vite": "^7.3.1",
+    "vue-tsc": "^3.2.2"
   },
   "optionalDependencies": {
-    "@esbuild/linux-x64": "0.27.1"
+    "@esbuild/linux-x64": "0.27.2"
   },
   "lint-staged": {
     "!(*d).{js,ts}": [

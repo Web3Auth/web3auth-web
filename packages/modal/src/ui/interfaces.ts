@@ -166,6 +166,7 @@ export type browser = "chrome" | "firefox" | "edge" | "safari" | "brave";
 export type mobileOs = "ios" | "android";
 
 export type rowType = {
+  description: string;
   method: string;
   isDark: boolean;
   isPrimaryBtn: boolean;
@@ -180,6 +181,7 @@ export type rowType = {
     extraLoginOptions?: ExtraLoginOptions;
   };
   order: number;
+  mainOption?: boolean;
 };
 
 export type PasswordlessHandlerParams = {
