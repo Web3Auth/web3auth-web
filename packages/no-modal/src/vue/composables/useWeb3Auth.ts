@@ -4,7 +4,8 @@ import { useWeb3AuthInner } from "./useWeb3AuthInner";
 export type IWeb3AuthNoModalContext = Omit<IWeb3AuthInnerContext, "isMFAEnabled" | "setIsMFAEnabled">;
 
 export const useWeb3Auth = (): IWeb3AuthNoModalContext => {
-  const { initError, isConnected, isInitialized, isInitializing, isAuthorized, provider, status, web3Auth, getPlugin } = useWeb3AuthInner();
+  const { initError, isConnected, isInitialized, isInitializing, isAuthorized, provider, status, web3Auth, getPlugin, chainId, chainNamespace } =
+    useWeb3AuthInner();
   return {
     initError,
     isConnected,
@@ -14,6 +15,8 @@ export const useWeb3Auth = (): IWeb3AuthNoModalContext => {
     provider,
     status,
     web3Auth,
+    chainId,
+    chainNamespace,
     getPlugin,
   };
 };

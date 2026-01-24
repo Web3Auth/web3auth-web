@@ -2,6 +2,7 @@ import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "v
 
 import {
   ANALYTICS_INTEGRATION_TYPE,
+  type ChainNamespaceType,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
@@ -22,6 +23,8 @@ export const Web3AuthProvider = defineComponent({
     const provider = ref<IProvider | null>(null);
     const isMFAEnabled = ref(false);
     const status = ref<CONNECTOR_STATUS_TYPE | null>(null);
+    const chainId = ref<string | null>(null);
+    const chainNamespace = ref<ChainNamespaceType | null>(null);
 
     const isInitializing = ref(false);
     const initError = ref<Error | null>(null);
@@ -48,6 +51,8 @@ export const Web3AuthProvider = defineComponent({
           isConnected.value = false;
           isAuthorized.value = false;
           status.value = null;
+          chainId.value = null;
+          chainNamespace.value = null;
         };
 
         onInvalidate(() => {
@@ -111,6 +116,8 @@ export const Web3AuthProvider = defineComponent({
             if (!isInitialized.value) isInitialized.value = true;
             isConnected.value = true;
             provider.value = newWeb3Auth.provider;
+            chainId.value = web3Auth.value!.currentChainId;
+            chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
           }
         };
 
@@ -172,6 +179,27 @@ export const Web3AuthProvider = defineComponent({
       { immediate: true }
     );
 
+    // Listen for chain changes on the provider
+    watch(
+      provider,
+      (newProvider, prevProvider) => {
+        const handleChainChange = (newChainId: string) => {
+          chainId.value = newChainId;
+          chainNamespace.value = web3Auth.value?.currentChain?.chainNamespace ?? null;
+        };
+
+        // unregister previous listener
+        if (prevProvider && newProvider !== prevProvider) {
+          prevProvider.removeListener("chainChanged", handleChainChange);
+        }
+
+        if (newProvider && newProvider !== prevProvider) {
+          newProvider.on("chainChanged", handleChainChange);
+        }
+      },
+      { immediate: true }
+    );
+
     provide<IWeb3AuthInnerContext>(Web3AuthContextKey, {
       web3Auth,
       isConnected,
@@ -181,6 +209,8 @@ export const Web3AuthProvider = defineComponent({
       isInitializing,
       initError,
       isMFAEnabled,
+      chainId,
+      chainNamespace,
       getPlugin,
       setIsMFAEnabled,
       isAuthorized,
