@@ -25,7 +25,7 @@ import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
-import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey, signAllTransactions } from "../services/solHandlers";
+import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 
@@ -59,7 +59,7 @@ const balance = useBalance({
   address: address,
 });
 
-const { accounts: solanaAccounts, rpc } = useSolanaWallet();
+const { accounts: solanaAccounts, rpc, solanaWallet } = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -246,9 +246,9 @@ const onSignAndSendTransaction = async () => {
   const pubKey = solanaAccounts.value[0];
 
   const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.01);
-  const serializedTx = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
+  const transaction = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
 
-  const data = await signAndSendTransaction(serializedTx);
+  const data = await signAndSendTransaction(transaction);
   printToConsole("result", data);
 };
 
@@ -258,9 +258,9 @@ const onSignSolTransaction = async () => {
   const pubKey = solanaAccounts.value[0];
 
   const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.01);
-  const serializedTx = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
+  const transaction = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
 
-  const result = await signSolTransaction(serializedTx);
+  const result = await signSolTransaction(transaction);
   printToConsole("result", result);
 };
 
@@ -270,11 +270,24 @@ const onSignSolMessage = async () => {
 };
 
 const onGetSolBalance = async () => {
-  await getSolBalance(provider.value as IProvider, printToConsole);
+  if (!rpc.value) throw new Error("No RPC connection");
+  if (!solanaAccounts.value) throw new Error("No account connected");
+  await getSolBalance(rpc.value, solanaAccounts.value[0], printToConsole);
 };
 
 const onSignAllTransactions = async () => {
-  await signAllTransactions(provider.value as IProvider, printToConsole);
+  if (!rpc.value) throw new Error("No RPC connection");
+  if (!solanaAccounts.value) throw new Error("No account connected");
+  if (!solanaWallet.value) throw new Error("No Solana wallet");
+
+  const account = solanaAccounts.value[0];
+  const instruction = generateSolTransferInstruction(account, account, 0.1);
+  const tx1 = await generateLegacyTransaction(rpc.value, account, [instruction]);
+  const tx2 = await generateLegacyTransaction(rpc.value, account, [instruction]);
+  const tx3 = await generateLegacyTransaction(rpc.value, account, [instruction]);
+
+  const signedTransactions = await solanaWallet.value.signAllTransactions([tx1, tx2, tx3]);
+  printToConsole("signed transactions", { signedTransactions });
 };
 
 // Common
