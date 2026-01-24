@@ -20,7 +20,7 @@ import { useI18n } from "petite-vue-i18n";
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
 import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
 
-import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { generateLegacyTransaction, generateSolTransferInstruction } from "../utils/solana";
 import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
@@ -59,7 +59,7 @@ const balance = useBalance({
   address: address,
 });
 
-const { accounts: solanaAccounts, connection } = useSolanaWallet();
+const { accounts: solanaAccounts, rpc } = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -242,45 +242,25 @@ const onGetSolPrivateKey = async () => {
 
 const onSignAndSendTransaction = async () => {
   if (!solanaAccounts.value) throw new Error("No account connected");
-  if (!connection.value) throw new Error("No connection");
-  const block = await connection.value?.getLatestBlockhash("finalized");
+  if (!rpc.value) throw new Error("No RPC connection");
   const pubKey = solanaAccounts.value[0];
 
-  const transactionInstruction = SystemProgram.transfer({
-    fromPubkey: new PublicKey(pubKey),
-    toPubkey: new PublicKey(pubKey),
-    lamports: 0.01 * LAMPORTS_PER_SOL,
-  });
+  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.01);
+  const serializedTx = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
 
-  const transaction = new Transaction({
-    blockhash: block.blockhash,
-    lastValidBlockHeight: block.lastValidBlockHeight,
-    feePayer: new PublicKey(pubKey),
-  }).add(transactionInstruction);
-
-  const data = await signAndSendTransaction(transaction);
+  const data = await signAndSendTransaction(serializedTx);
   printToConsole("result", data);
 };
 
 const onSignSolTransaction = async () => {
   if (!solanaAccounts.value) throw new Error("No account connected");
-  if (!connection.value) throw new Error("No connection");
-  const block = await connection.value?.getLatestBlockhash("finalized");
+  if (!rpc.value) throw new Error("No RPC connection");
   const pubKey = solanaAccounts.value[0];
 
-  const transactionInstruction = SystemProgram.transfer({
-    fromPubkey: new PublicKey(pubKey),
-    toPubkey: new PublicKey(pubKey),
-    lamports: 0.01 * LAMPORTS_PER_SOL,
-  });
+  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.01);
+  const serializedTx = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
 
-  const transaction = new Transaction({
-    blockhash: block.blockhash,
-    lastValidBlockHeight: block.lastValidBlockHeight,
-    feePayer: new PublicKey(pubKey),
-  }).add(transactionInstruction);
-
-  const result = await signSolTransaction(transaction);
+  const result = await signSolTransaction(serializedTx);
   printToConsole("result", result);
 };
 
