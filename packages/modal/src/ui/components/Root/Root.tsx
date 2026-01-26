@@ -371,12 +371,12 @@ function Root(props: RootProps) {
 
     // Wallet Details Screen
     if (isWalletDetailsExpanded) {
-      return isPrivacyPolicyOrTncLink ? "640px" : "588px";
+      return isPrivacyPolicyOrTncLink ? "680px" : "628px";
     }
 
     // MetaMask QR Code Screen
     if (bodyState.metamaskQrCode?.show) {
-      return isPrivacyPolicyOrTncLink ? "640px" : "588px";
+      return isPrivacyPolicyOrTncLink ? "680px" : "628px";
     }
 
     // Connect Wallet Screen
