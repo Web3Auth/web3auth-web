@@ -149,6 +149,11 @@ function Loader(props: LoaderProps) {
     [modalStatus, isConnectAndSignAuthenticationMode]
   );
 
+  // Check if connector is an external wallet
+  const isExternalWallet = useMemo(() => {
+    return connector && externalWalletsConfig && connector in externalWalletsConfig;
+  }, [connector, externalWalletsConfig]);
+
   useEffect(() => {
     if (isConnectedAccordingToAuthenticationMode) {
       // If hideSuccessScreen is true, skip success screen entirely (delay = 0)
