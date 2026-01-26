@@ -83,29 +83,29 @@ const truncateAddress = (addr: string) => {
 </script>
 
 <template>
-  <div class="flex flex-col gap-3">
+  <div class="grid grid-cols-1 gap-2">
     <!-- Connect Button -->
     <div v-if="!isConnected">
-      <p class="text-sm text-gray-600 dark:text-gray-400 mb-3">
+      <p class="text-sm text-app-gray-500 dark:text-app-gray-400 mb-3">
         Test external wallet connection (isolated instance with AUTH hidden).
       </p>
-      <Button @click="connect">Connect External Wallet Only</Button>
+      <Button block size="xs" pill @click="connect">Connect External Wallet Only</Button>
     </div>
 
     <!-- Dashboard after connection -->
-    <div v-else class="flex flex-col gap-4">
-      <Card class="p-4" :shadow="false">
-        <div class="text-lg font-bold mb-3">Connected Wallet</div>
+    <div v-else class="grid grid-cols-1 gap-2">
+      <Card class="px-4 py-4" :shadow="false">
+        <div class="mb-2 text-xl font-bold leading-tight text-left text-app-gray-900 dark:text-app-white">Connected Wallet</div>
         <div class="grid grid-cols-2 gap-2 text-sm">
-          <div class="text-gray-500">Connector:</div>
-          <div class="font-medium">{{ connectorName }}</div>
-          <div class="text-gray-500">Address:</div>
-          <div class="font-medium font-mono">{{ truncateAddress(address) }}</div>
-          <div class="text-gray-500">Balance:</div>
-          <div class="font-medium">{{ balance }}</div>
+          <div class="text-app-gray-500 dark:text-app-gray-400">Connector:</div>
+          <div class="font-medium text-app-gray-900 dark:text-app-white">{{ connectorName }}</div>
+          <div class="text-app-gray-500 dark:text-app-gray-400">Address:</div>
+          <div class="font-medium font-mono text-app-gray-900 dark:text-app-white">{{ truncateAddress(address) }}</div>
+          <div class="text-app-gray-500 dark:text-app-gray-400">Balance:</div>
+          <div class="font-medium text-app-gray-900 dark:text-app-white">{{ balance }}</div>
         </div>
       </Card>
-      <Button variant="tertiary" @click="disconnect">Disconnect</Button>
+      <Button block size="xs" pill variant="tertiary" @click="disconnect">Disconnect</Button>
     </div>
   </div>
 </template>
