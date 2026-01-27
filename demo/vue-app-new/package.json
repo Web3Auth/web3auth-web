@@ -10,10 +10,10 @@
     "lint": "eslint --cache --fix"
   },
   "dependencies": {
-    "@solana/web3.js": "^1.98.4",
+    "@solana/kit": "^5.4.0",
+    "@solana-program/system": "^0.10.0",
     "@tanstack/vue-query": "^5.92.6",
     "@toruslabs/base-controllers": "^8.15.0",
-    "@toruslabs/bs58": "^1.0.0",
     "@toruslabs/ethereum-controllers": "^8.15.0",
     "@toruslabs/solana-controllers": "^8.15.0",
     "@toruslabs/tweetnacl-js": "^1.0.4",

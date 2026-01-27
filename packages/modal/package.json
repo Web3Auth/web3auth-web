@@ -45,7 +45,7 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
-    "@solana/web3.js": ">=1.98",
+    "@solana/kit": ">=5.0",
     "react": ">=18",
     "react-dom": ">=18",
     "viem": ">=2.23",
@@ -58,7 +58,7 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-url": "^8.0.2",
-    "@solana/web3.js": "^1.98.4",
+    "@solana/kit": "^5.4.0",
     "@svgr/rollup": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
     "@toruslabs/eslint-config-react": "^4.1.4",

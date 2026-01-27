@@ -1,18 +1,21 @@
-import { bs58 } from "@toruslabs/bs58";
+import { getBase58Decoder } from "@solana/kit";
 import { JRPCRequest, rpcErrors } from "@web3auth/auth";
 
 import { IBaseWalletProvider } from "../../../interface";
 import { ISolanaProviderHandlers } from "../../../rpc";
 
+// Base58 decoder: bytes → base58 string
+const base58Decoder = getBase58Decoder();
+
 export const getBaseProviderHandlers = (injectedProvider: IBaseWalletProvider): ISolanaProviderHandlers => {
   const providerHandlers: ISolanaProviderHandlers = {
     requestAccounts: async () => {
-      return injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : [];
+      return injectedProvider.publicKey ? [base58Decoder.decode(injectedProvider.publicKey.toBytes())] : [];
     },
     getPublicKey: async () => {
-      return injectedProvider.publicKey ? bs58.encode(injectedProvider.publicKey.toBytes()) : "";
+      return injectedProvider.publicKey ? base58Decoder.decode(injectedProvider.publicKey.toBytes()) : "";
     },
-    getAccounts: async () => (injectedProvider.publicKey ? [bs58.encode(injectedProvider.publicKey.toBytes())] : []),
+    getAccounts: async () => (injectedProvider.publicKey ? [base58Decoder.decode(injectedProvider.publicKey.toBytes())] : []),
     getPrivateKey: async () => {
       throw rpcErrors.methodNotSupported();
     },
