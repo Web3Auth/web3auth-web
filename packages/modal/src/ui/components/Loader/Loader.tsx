@@ -148,15 +148,22 @@ function Loader(props: LoaderProps) {
     [modalStatus, isConnectAndSignAuthenticationMode]
   );
 
+  // Check if connector is an external wallet
+  const isExternalWallet = useMemo(() => {
+    return connector && externalWalletsConfig && connector in externalWalletsConfig;
+  }, [connector, externalWalletsConfig]);
+
   useEffect(() => {
     if (isConnectedAccordingToAuthenticationMode) {
+      // Skip success screen for external wallets, show for 1 second for social logins
+      const delay = isExternalWallet ? 0 : 1000;
       const timeout = setTimeout(() => {
         onClose();
-      }, 1000);
+      }, delay);
 
       return () => clearTimeout(timeout);
     }
-  }, [isConnectedAccordingToAuthenticationMode, onClose]);
+  }, [isConnectedAccordingToAuthenticationMode, isExternalWallet, onClose]);
 
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">

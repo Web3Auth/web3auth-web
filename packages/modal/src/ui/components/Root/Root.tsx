@@ -505,25 +505,27 @@ function Root(props: RootProps) {
                       />
                     )}
                     {/* Connect Wallet Screen */}
-                    {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
-                      <ConnectWallet
-                        isDark={isDark}
-                        walletConnectUri={modalState.walletConnectUri}
-                        metamaskConnectUri={modalState.metamaskConnectUri}
-                        config={modalState.externalWalletsConfig}
-                        walletRegistry={walletRegistry}
-                        allRegistryButtons={allRegistryButtons}
-                        connectorVisibilityMap={connectorVisibilityMap}
-                        customConnectorButtons={customConnectorButtons}
-                        deviceDetails={deviceDetails}
-                        chainNamespace={chainNamespaces}
-                        buttonRadius={buttonRadiusType}
-                        handleWalletDetailsHeight={handleWalletDetailsHeight}
-                        isExternalWalletModeOnly={isExternalWalletModeOnly}
-                        onBackClick={onBackClick}
-                        handleExternalWalletClick={preHandleExternalWalletClick}
-                      />
-                    )}
+                    {modalState.currentPage === PAGES.CONNECT_WALLET &&
+                      (!showExternalWalletPage || isExternalWalletModeOnly) &&
+                      modalState.status === MODAL_STATUS.INITIALIZED && (
+                        <ConnectWallet
+                          isDark={isDark}
+                          walletConnectUri={modalState.walletConnectUri}
+                          metamaskConnectUri={modalState.metamaskConnectUri}
+                          config={modalState.externalWalletsConfig}
+                          walletRegistry={walletRegistry}
+                          allRegistryButtons={allRegistryButtons}
+                          connectorVisibilityMap={connectorVisibilityMap}
+                          customConnectorButtons={customConnectorButtons}
+                          deviceDetails={deviceDetails}
+                          chainNamespace={chainNamespaces}
+                          buttonRadius={buttonRadiusType}
+                          handleWalletDetailsHeight={handleWalletDetailsHeight}
+                          isExternalWalletModeOnly={isExternalWalletModeOnly}
+                          onBackClick={onBackClick}
+                          handleExternalWalletClick={preHandleExternalWalletClick}
+                        />
+                      )}
                   </>
                 )}
               </>

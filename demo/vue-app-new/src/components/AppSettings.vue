@@ -16,6 +16,7 @@ import {
 } from "../config";
 import { formDataStore } from "../store/form";
 import { getChainConfig } from "../utils/chainconfig";
+import ExternalWalletOnlyTest from "./ExternalWalletOnlyTest.vue";
 
 const formData = formDataStore;
 
@@ -170,6 +171,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
           <Tab v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
             Account Abstraction Provider
           </Tab>
+          <Tab variant="underline" :active="isActiveTab(5)" @click="onTabChange(5)">External Wallet Only</Tab>
         </Tabs>
         <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
           <Select
@@ -501,7 +503,10 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             />
           </Card>
         </Card>
-        <div class="flex justify-center mt-5">
+        <Card v-if="isActiveTab(5)" class="px-4 py-4" :shadow="false">
+          <ExternalWalletOnlyTest />
+        </Card>
+        <div v-if="!isActiveTab(5)" class="flex justify-center mt-5">
           <Button
             v-if="formData.widget === 'modal'"
             :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
