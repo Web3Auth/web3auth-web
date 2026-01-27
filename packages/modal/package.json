@@ -48,7 +48,7 @@
     "@solana/web3.js": ">=1.98",
     "react": ">=18",
     "react-dom": ">=18",
-    "viem": ">=2.23",
+    "viem": ">=2.45",
     "vue": ">=3.x"
   },
   "devDependencies": {
@@ -67,8 +67,8 @@
     "@toruslabs/vue-components": "^8.1.2",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
-    "@wagmi/core": "^2.20.1",
-    "@wagmi/vue": "^0.2.2",
+    "@wagmi/core": "^3.3.1",
+    "@wagmi/vue": "^0.4.14",
     "autoprefixer": "^10.4.23",
     "css-loader": "^7.1.2",
     "live-server": "^1.2.2",
@@ -82,9 +82,9 @@
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.17",
     "url-loader": "^4.1.1",
-    "viem": "^2.44.2",
+    "viem": "^2.45.0",
     "vue": "^3.5.26",
-    "wagmi": "^2.16.6"
+    "wagmi": "^3.4.1"
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^2.0.1",
