@@ -1,4 +1,4 @@
-import { getBase58Decoder, getTransactionDecoder } from "@solana/kit";
+import { getBase58Decoder, getBase64Decoder, getBase64Encoder, getTransactionDecoder } from "@solana/kit";
 import {
   SolanaSignAndSendTransaction,
   type SolanaSignAndSendTransactionFeature,
@@ -16,27 +16,11 @@ import { BaseInjectedProvider } from "./base/baseInjectedProvider";
 import { getBaseProviderHandlers } from "./base/providerHandlers";
 import { getSolanaChainByChainConfig } from "./utils";
 
-// Base58 decoder: bytes → base58 string
+// Codecs for encoding/decoding
 const base58Decoder = getBase58Decoder();
+const base64Encoder = getBase64Encoder();
+const base64Decoder = getBase64Decoder();
 const transactionDecoder = getTransactionDecoder();
-
-// Helper functions for base64 encoding/decoding
-function base64ToBytes(base64: string): Uint8Array {
-  const binaryString = atob(base64);
-  const bytes = new Uint8Array(binaryString.length);
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = binaryString.charCodeAt(i);
-  }
-  return bytes;
-}
-
-function bytesToBase64(bytes: Uint8Array): string {
-  let binaryString = "";
-  for (let i = 0; i < bytes.length; i++) {
-    binaryString += String.fromCharCode(bytes[i]);
-  }
-  return btoa(binaryString);
-}
 
 export type WalletStandard = WalletWithFeatures<
   StandardConnectFeature &
@@ -76,8 +60,8 @@ export class WalletStandardProvider extends BaseInjectedProvider<WalletStandard>
      */
     const signTransaction = async (transaction: string): Promise<string> => {
       const account = currentAccount();
-      // Decode base64 string to bytes
-      const transactionBytes = base64ToBytes(transaction);
+      // Convert base64 string to bytes using @solana/kit codec
+      const transactionBytes = new Uint8Array(base64Encoder.encode(transaction));
       const output = await wallet.features[SolanaSignTransaction].signTransaction({
         account,
         transaction: transactionBytes,
@@ -99,14 +83,14 @@ export class WalletStandardProvider extends BaseInjectedProvider<WalletStandard>
     const signAllTransactions = async (transactions: string[]): Promise<string[]> => {
       const account = currentAccount();
       return Promise.all(
-        transactions.map(async (transaction) => {
-          const transactionBytes = base64ToBytes(transaction);
+        transactions.map(async (tx) => {
+          const transactionBytes = new Uint8Array(base64Encoder.encode(tx));
           const output = await wallet.features[SolanaSignTransaction].signTransaction({
             account,
             transaction: transactionBytes,
             chain: chainIdentifier,
           });
-          return bytesToBase64(output[0].signedTransaction);
+          return base64Decoder.decode(output[0].signedTransaction);
         })
       );
     };
@@ -118,7 +102,7 @@ export class WalletStandardProvider extends BaseInjectedProvider<WalletStandard>
      */
     const signAndSendTransaction = async (transaction: string): Promise<string> => {
       const account = currentAccount();
-      const transactionBytes = base64ToBytes(transaction);
+      const transactionBytes = new Uint8Array(base64Encoder.encode(transaction));
       const output = await wallet.features[SolanaSignAndSendTransaction].signAndSendTransaction({
         account,
         transaction: transactionBytes,
