@@ -5,4 +5,5 @@ export interface ConnectWalletHeaderProps {
   onBackClick: () => void;
   currentPage: string;
   selectedButton: ExternalButton;
+  hideBackButton?: boolean;
 }

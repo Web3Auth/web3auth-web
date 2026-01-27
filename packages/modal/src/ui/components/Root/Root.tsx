@@ -469,6 +469,7 @@ function Root(props: RootProps) {
                       selectedButton={bodyState.metamaskQrCode.wallet}
                       primaryColor={bodyState.metamaskQrCode.wallet.walletRegistryItem?.primaryColor}
                       logoImage={`https://images.web3auth.io/login-${bodyState.metamaskQrCode.wallet.name}.${bodyState.metamaskQrCode.wallet.imgExtension}`}
+                      platform={deviceDetails.platform}
                     />
                   </div>
                 ) : (
@@ -522,6 +523,7 @@ function Root(props: RootProps) {
                         isExternalWalletModeOnly={isExternalWalletModeOnly}
                         onBackClick={onBackClick}
                         handleExternalWalletClick={preHandleExternalWalletClick}
+                        disableBackButton={bodyState.installLinks?.show || bodyState.multiChainSelector?.show}
                       />
                     )}
                   </>
