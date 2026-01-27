@@ -16,8 +16,11 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   const { qrCodeValue, isDark, selectedButton, logoImage, primaryColor, platform } = props;
 
   const showGetWalletComponent = useMemo(() => {
-    const appKeys = Object.keys(selectedButton?.walletRegistryItem?.app || {});
-    return appKeys.length > 0 && (platform === "desktop" ? appKeys.includes("browser") : appKeys.includes("ios") || appKeys.includes("android"));
+    const app = selectedButton?.walletRegistryItem?.app || {};
+    const desktopKeys = ["browser", "chrome", "firefox", "edge"] as const;
+    const mobileKeys = ["ios", "android"] as const;
+    const targetKeys = platform === "desktop" ? desktopKeys : mobileKeys;
+    return targetKeys.some((key) => Boolean(app[key]));
   }, [platform, selectedButton?.walletRegistryItem?.app]);
 
   const isDesktop = useMemo<boolean>(() => {

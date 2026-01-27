@@ -15,14 +15,11 @@ function BottomSheet({ isShown, onClose, children, uiConfig, sheetClassName, sho
     <>
       {/* Backdrop */}
       <div
-        className={cn(
-          "w3a--bottom-sheet-bg w3a--fixed w3a--left-0 w3a--top-0 w3a--size-full w3a--transition-opacity w3a--duration-300 w3a--pointer-events-none",
-          {
-            "w3a--rounded-[30px]": borderRadiusType === "large",
-            "w3a--rounded-2xl": borderRadiusType === "medium",
-            "w3a--rounded-none": borderRadiusType === "small",
-          }
-        )}
+        className={cn("w3a--bottom-sheet-bg w3a--fixed w3a--left-0 w3a--top-0 w3a--size-full w3a--transition-opacity w3a--duration-300", {
+          "w3a--rounded-[30px]": borderRadiusType === "large",
+          "w3a--rounded-2xl": borderRadiusType === "medium",
+          "w3a--rounded-none": borderRadiusType === "small",
+        })}
         onClick={handleClose}
         aria-hidden="true"
         role="button"
