@@ -7,8 +7,8 @@
     "@web3auth/modal": "file:../../packages/modal",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
-    "viem": "^2.44.2",
-    "wagmi": "^3.3.4"
+    "viem": "^2.45.0",
+    "wagmi": "^3.4.1"
   },
   "scripts": {
     "start": "vite",

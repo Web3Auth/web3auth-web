@@ -11,7 +11,7 @@
     "ethers": "^6.13.4",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "wagmi": "^3.3.4"
+    "wagmi": "^3.4.1"
   },
   "scripts": {
     "start": "vite",

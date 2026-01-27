@@ -35,7 +35,7 @@
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
     "react": ">=18",
-    "viem": ">=2.44",
+    "viem": ">=2.45",
     "vue": "^3.x"
   },
   "peerDependenciesMeta": {
@@ -86,7 +86,7 @@
     "jwt-decode": "^4.0.0",
     "loglevel": "^1.9.2",
     "mipd": "^0.0.7",
-    "permissionless": "^0.3.3",
+    "permissionless": "^0.3.4",
     "ripple-keypairs": "^1.3.1",
     "ts-custom-error": "^3.3.1",
     "xrpl": "^2.14.0"
@@ -96,12 +96,12 @@
     "@types/elliptic": "6.4.18",
     "@types/json-rpc-random-id": "^1.0.3",
     "@types/react": "^19.2.8",
-    "@wagmi/core": "^3.2.2",
-    "@wagmi/vue": "^0.4.11",
+    "@wagmi/core": "^3.3.1",
+    "@wagmi/vue": "^0.4.14",
     "react": "^19.2.3",
-    "viem": "^2.44.4",
+    "viem": "^2.45.0",
     "vue": "^3.x",
-    "wagmi": "^3.3.4"
+    "wagmi": "^3.4.1"
   },
   "exports": {
     ".": {
