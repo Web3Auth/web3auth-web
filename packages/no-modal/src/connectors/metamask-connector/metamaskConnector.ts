@@ -178,9 +178,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
     try {
       this.metamaskInstance = await this.metamaskPromise;
-      // TODO: Remove this hack
-      // Hack to ensure the ConnectEvm instance has fully resumed the connection
-      await new Promise((resolve) => setTimeout(resolve, 2000));
     } catch (error) {
       throw WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error);
     }
