@@ -5,28 +5,29 @@ import i18n from "../../../localeImport";
 import { ConnectWalletHeaderProps } from "./ConnectWalletHeader.type";
 
 function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
-  const { disableBackButton, onBackClick, currentPage, selectedButton } = props;
+  const { hideBackButton, disableBackButton, onBackClick, currentPage, selectedButton } = props;
   const [t] = useTranslation(undefined, { i18n });
 
   const handleBack = () => {
-    if (onBackClick) {
+    if (onBackClick && !disableBackButton) {
       onBackClick();
     }
   };
 
   return (
     <div className="w3a--flex w3a--items-center w3a--justify-between">
-      {!disableBackButton ? (
+      {!hideBackButton ? (
         <button
           type="button"
           className="w3a--z-20 w3a--flex w3a--size-5 w3a--cursor-pointer w3a--items-center w3a--justify-center w3a--rounded-full"
           onClick={handleBack}
+          disabled={disableBackButton}
         >
           <svg
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 20 20"
-            className="w3a--text-app-gray-500 hover:w3a--text-app-gray-900 dark:w3a--text-app-gray-200 dark:hover:w3a--text-app-white"
+            className={`w3a--text-app-gray-500 dark:w3a--text-app-gray-200 ${disableBackButton ? "w3a--cursor-not-allowed w3a--opacity-50" : "hover:w3a--text-app-gray-900 dark:hover:w3a--text-app-white"}`}
           >
             <path
               fill="currentColor"
