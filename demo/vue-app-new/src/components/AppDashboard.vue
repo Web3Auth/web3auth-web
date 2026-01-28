@@ -28,6 +28,7 @@ import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as sig
 import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
+import { generateKeyPair, generateKeyPairSigner } from "@solana/kit";
 
 const supportedNetworks = { ...SUPPORTED_NETWORKS, ...SOLANA_SUPPORTED_NETWORKS } as Record<string, ProviderConfig>;
 
@@ -245,7 +246,7 @@ const onSignAndSendTransaction = async () => {
   if (!rpc.value) throw new Error("No RPC connection");
   const pubKey = solanaAccounts.value[0];
 
-  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.01);
+  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.0001);
   const transaction = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
 
   const data = await signAndSendTransaction(transaction);
@@ -257,7 +258,7 @@ const onSignSolTransaction = async () => {
   if (!rpc.value) throw new Error("No RPC connection");
   const pubKey = solanaAccounts.value[0];
 
-  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.01);
+  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.0000001);
   const transaction = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
 
   const result = await signSolTransaction(transaction);
@@ -281,7 +282,7 @@ const onSignAllTransactions = async () => {
   if (!solanaWallet.value) throw new Error("No Solana wallet");
 
   const account = solanaAccounts.value[0];
-  const instruction = generateSolTransferInstruction(account, account, 0.1);
+  const instruction = generateSolTransferInstruction(account, account, 0.0001);
   const tx1 = await generateLegacyTransaction(rpc.value, account, [instruction]);
   const tx2 = await generateLegacyTransaction(rpc.value, account, [instruction]);
   const tx3 = await generateLegacyTransaction(rpc.value, account, [instruction]);

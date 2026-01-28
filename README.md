@@ -8,7 +8,14 @@ Web3Auth is where passwordless auth meets non-custodial key infrastructure for W
 
 ## 📖 Documentation
 
-Checkout the official [Web3Auth Documentation](https://web3auth.io/docs) and [SDK Reference](https://web3auth.io/docs/sdk/web/) to get started!
+| Document | Description |
+|----------|-------------|
+| [Official Docs](https://web3auth.io/docs) | Complete Web3Auth documentation |
+| [SDK Reference](https://web3auth.io/docs/sdk/web/) | API reference and guides |
+| [docs/project-overview-pdr.md](./docs/project-overview-pdr.md) | Project overview and requirements |
+| [docs/codebase-summary.md](./docs/codebase-summary.md) | Codebase structure and file organization |
+| [docs/code-standards.md](./docs/code-standards.md) | Coding standards and conventions |
+| [docs/system-architecture.md](./docs/system-architecture.md) | System architecture and design |
 
 ## 💡 Features
 
@@ -16,117 +23,78 @@ Checkout the official [Web3Auth Documentation](https://web3auth.io/docs) and [SD
 - Fully decentralized, non-custodial key infrastructure
 - End to end Whitelabelable solution
 - Threshold Cryptography based Key Reconstruction
-- Multi Factor Authentication Setup & Recovery (Includes password, backup phrase, device factor editing/deletion etc)
+- Multi Factor Authentication Setup & Recovery
 - Support for Email and Mobile Passwordless Login
 - Support for connecting to multiple wallets
 - DApp Active Session Management
 
-  ...and a lot more
+## 📦 Packages
 
-## 🎯 Web3Auth Modal SDK
-
-[Web3Auth Plug and Play Modal SDK `@web3auth/modal`](https://web3auth.io/docs/sdk/web/web3auth/) provides a simple and easy to use SDK that will give you a simple modular way of implementing Web3Auth directly within your application. You can use the pre-configured Web3Auth Modal UI and whitelabel it according to your needs.
+| Package | Version | Description |
+|---------|---------|-------------|
+| `@web3auth/modal` | [![npm](https://img.shields.io/npm/v/@web3auth/modal)](https://www.npmjs.com/package/@web3auth/modal) | Full SDK with pre-built modal UI |
+| `@web3auth/no-modal` | [![npm](https://img.shields.io/npm/v/@web3auth/no-modal)](https://www.npmjs.com/package/@web3auth/no-modal) | Core SDK without UI (headless) |
 
 ## ⚡ Quick Start
 
 ### Installation
 
-```shell
-npm install --save @web3auth/modal
+```bash
+npm install @web3auth/modal
 ```
 
 ### Prerequisites
 
-Before you start, make sure you have registered on the [Web3Auth Dashboard](https://dashboard.web3auth.io/) and have set up your project. Use the Client ID of the project to start your integration.
+1. Register on the [Web3Auth Dashboard](https://dashboard.web3auth.io/)
+2. Create a project and obtain your `clientId`
+3. Configure authentication methods in the dashboard
 
 ### React Integration
 
-Web3Auth provides React Hooks for seamless integration with React applications.
-
-#### 1. Create Configuration
-
 ```tsx
-// web3authContext.tsx
+// 1. Configuration (web3authContext.tsx)
 import { type Web3AuthContextConfig } from "@web3auth/modal/react";
 import { WEB3AUTH_NETWORK, type Web3AuthOptions } from "@web3auth/modal";
 
 const web3AuthOptions: Web3AuthOptions = {
-  clientId: "YOUR_CLIENT_ID", // Get your Client ID from Web3Auth Dashboard
-  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET, // or WEB3AUTH_NETWORK.SAPPHIRE_DEVNET
+  clientId: "YOUR_CLIENT_ID",
+  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
 };
 
-const web3AuthContextConfig: Web3AuthContextConfig = {
-  web3AuthOptions,
-};
+export const web3AuthContextConfig: Web3AuthContextConfig = { web3AuthOptions };
 
-export default web3AuthContextConfig;
-```
-
-#### 2. Setup Provider
-
-```tsx
-// main.tsx or index.tsx
-import ReactDOM from "react-dom/client";
+// 2. Provider Setup (main.tsx)
 import { Web3AuthProvider } from "@web3auth/modal/react";
-import web3AuthContextConfig from "./web3authContext";
-import App from "./App";
+import { web3AuthContextConfig } from "./web3authContext";
 
-ReactDOM.createRoot(document.getElementById("root") as HTMLElement).render(
+ReactDOM.createRoot(document.getElementById("root")).render(
   <Web3AuthProvider config={web3AuthContextConfig}>
     <App />
   </Web3AuthProvider>
 );
-```
 
-#### 3. Use Web3Auth Hooks
+// 3. Use Hooks (App.tsx)
+import { useWeb3AuthConnect, useWeb3AuthUser } from "@web3auth/modal/react";
 
-```tsx
-// App.tsx
-import { useWeb3AuthConnect } from "@web3auth/modal/react";
-
-function ConnectButton() {
-  const { connect, loading, isConnected, error } = useWeb3AuthConnect();
+function App() {
+  const { connect, isConnected } = useWeb3AuthConnect();
+  const { user } = useWeb3AuthUser();
 
   return (
-    <button onClick={() => connect()} disabled={loading || isConnected}>
-      {loading ? "Connecting..." : isConnected ? "Connected" : "Connect"}
+    <button onClick={() => connect()}>
+      {isConnected ? `Hello ${user?.name}` : "Connect"}
     </button>
-    {error && <div>{error.message}</div>}
   );
 }
 ```
 
 ### Vue Integration
 
-Web3Auth provides Vue Composables for seamless integration with Vue applications.
-
-#### 1. Create Configuration
-
-```ts
-// web3authContext.ts
-import { type Web3AuthContextConfig } from "@web3auth/modal/vue";
-import { WEB3AUTH_NETWORK, type Web3AuthOptions } from "@web3auth/modal";
-
-const web3AuthOptions: Web3AuthOptions = {
-  clientId: "YOUR_CLIENT_ID", // Get your Client ID from Web3Auth Dashboard
-  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET, // or WEB3AUTH_NETWORK.SAPPHIRE_DEVNET
-};
-
-const web3AuthContextConfig: Web3AuthContextConfig = {
-  web3AuthOptions,
-};
-
-export default web3AuthContextConfig;
-```
-
-#### 2. Setup Provider
-
-```html
+```vue
 <!-- App.vue -->
 <script setup lang="ts">
-import Home from "./Home.vue";
 import { Web3AuthProvider } from "@web3auth/modal/vue";
-import web3AuthContextConfig from "./web3authContext";
+import { web3AuthContextConfig } from "./web3authContext";
 </script>
 
 <template>
@@ -136,117 +104,182 @@ import web3AuthContextConfig from "./web3authContext";
 </template>
 ```
 
-#### 3. Use Web3Auth Composables
-
-```html
+```vue
 <!-- Home.vue -->
 <script setup lang="ts">
-  import { useWeb3AuthConnect } from "@web3auth/modal/vue";
-
-  const { connect, loading, isConnected, error } = useWeb3AuthConnect();
+import { useWeb3AuthConnect } from "@web3auth/modal/vue";
+const { connect, loading, isConnected } = useWeb3AuthConnect();
 </script>
 
 <template>
   <button @click="connect" :disabled="loading || isConnected">
-    <span v-if="loading">Connecting...</span>
-    <span v-else-if="isConnected">Connected</span>
-    <span v-else>Connect</span>
+    {{ loading ? "Connecting..." : isConnected ? "Connected" : "Connect" }}
   </button>
-  <div v-if="error">{{ error.message }}</div>
 </template>
 ```
 
-### JavaScript Integration
-
-For vanilla JavaScript or other frameworks, use the standard Web3Auth Modal SDK.
-
-#### 1. Initialize Web3Auth
+### Vanilla JavaScript
 
 ```javascript
 import { Web3Auth, WEB3AUTH_NETWORK } from "@web3auth/modal";
 
 const web3auth = new Web3Auth({
-  clientId: "YOUR_CLIENT_ID", // Get your Client ID from Web3Auth Dashboard
-  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET, // or WEB3AUTH_NETWORK.SAPPHIRE_DEVNET
+  clientId: "YOUR_CLIENT_ID",
+  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
 });
 
-// Initialize the SDK
 await web3auth.init();
-```
-
-#### 2. Login User
-
-```javascript
-// Login
 await web3auth.connect();
 
-// Get user info
 const user = await web3auth.getUserInfo();
-
-// Logout
-await web3auth.logout();
+console.log(user);
 ```
 
 ## 🔧 Advanced Configuration
 
-The Web3Auth Modal SDK offers a rich set of advanced configuration options:
+```typescript
+const web3AuthOptions: Web3AuthOptions = {
+  clientId: "YOUR_CLIENT_ID",
+  web3AuthNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
+  
+  // Chain configuration
+  chains: [{
+    chainNamespace: "eip155",
+    chainId: "0x1",
+    rpcTarget: "https://rpc.ankr.com/eth",
+    displayName: "Ethereum Mainnet",
+    ticker: "ETH",
+    tickerName: "Ethereum",
+  }],
+  
+  // Account Abstraction (ERC-4337)
+  accountAbstractionConfig: {
+    smartAccountType: "safe",
+    chains: [{
+      chainId: "0x1",
+      bundlerConfig: { url: "https://bundler.example.com" },
+    }],
+  },
+  
+  // UI Customization
+  uiConfig: {
+    mode: "dark",
+    logoLight: "https://example.com/logo-light.png",
+    logoDark: "https://example.com/logo-dark.png",
+    primaryColor: "#00a8ff",
+  },
+};
+```
 
-- **Smart Accounts**: Configure account abstraction parameters
-- **Custom Authentication**: Define authentication methods
-- **Whitelabeling & UI Customization**: Personalize the modal's appearance
-- **Multi-Factor Authentication (MFA)**: Set up and manage MFA
-- **Wallet Services**: Integrate additional wallet services
+## 🏗️ Project Structure
+
+```
+web3auth-web/
+├── packages/
+│   ├── modal/          # @web3auth/modal - Full SDK with UI
+│   │   ├── src/
+│   │   │   ├── react/  # React hooks
+│   │   │   ├── vue/    # Vue composables
+│   │   │   └── ui/     # Modal components
+│   │   └── dist/
+│   └── no-modal/       # @web3auth/no-modal - Core SDK
+│       ├── src/
+│       │   ├── connectors/  # Wallet connectors
+│       │   ├── providers/   # Blockchain providers
+│       │   ├── react/       # React hooks
+│       │   └── vue/         # Vue composables
+│       └── dist/
+├── demo/               # Example applications
+└── docs/               # Documentation
+```
+
+## 🛠️ Development
+
+### Requirements
+
+- Node.js ≥20.x
+- npm ≥9.x
+
+### Setup
+
+```bash
+# Install dependencies
+npm install
+
+# Build all packages
+npm run build
+
+# Run in development mode
+npm run dev
+
+# Run tests
+npm run test
+
+# Lint code
+npm run lint
+```
+
+### Monorepo Commands
+
+```bash
+# Clean all builds
+npm run clean
+
+# Publish packages
+npm run publish:lerna
+```
+
+## 🧳 Bundling
+
+This module is distributed in 3 formats:
+
+| Format | File | Usage |
+|--------|------|-------|
+| ESM | `dist/lib.esm/` | Modern bundlers (Vite, webpack 5+) |
+| CJS | `dist/lib.cjs/` | Node.js, older bundlers |
+| UMD | `dist/*.umd.min.js` | Direct browser usage |
+
+### CDN Usage
+
+```html
+<!-- jsDelivr -->
+<script src="https://cdn.jsdelivr.net/npm/@web3auth/modal"></script>
+
+<!-- unpkg -->
+<script src="https://unpkg.com/@web3auth/modal"></script>
+```
 
 ## ⏪ Requirements
 
 - All packages require a peer dependency of `@babel/runtime`
-- Node 18+
-
-## 🧳 Bundling
-
-This module is distributed in 4 formats
-
-- `esm` build `dist/package.esm.js` in es6 format
-- `commonjs` build `dist/package.cjs.js` in es5 format
-- `umd` build `dist/package.umd.min.js` in es5 format without polyfilling corejs minified
-
-By default, the appropriate format is used for your specified usecase
-You can use a different format (if you know what you're doing) by referencing the correct file
-
-The cjs build is not polyfilled with core-js.
-It is upto the user to polyfill based on the browserlist they target
-
-### Directly in Browser
-
-CDN's serve the non-core-js polyfilled version by default. You can use a different
-
-Please replace package and version with the appropriate package name
-
-#### `jsdeliver`
-
-```js
-<script src="https://cdn.jsdelivr.net/npm/@web3auth/PACKAGE@VERSION"></script>
-```
-
-#### `unpkg`
-
-```js
-<script src="https://unpkg.com/@web3auth/PACKAGE@VERSION"></script>
-```
+- Node 20+ for development
+- React 18+ or Vue 3+ for framework integrations
 
 ## 🩹 Examples
 
-Check out the examples for your preferred blockchain and platform on our [examples page](https://web3auth.io/docs/examples).
+Check out the [demo/](./demo/) directory:
+
+| Example | Description |
+|---------|-------------|
+| `nextjs-ssr-app` | Next.js with SSR |
+| `react-app-no-modal` | React without modal UI |
+| `vite-react-app-sfa` | Vite + React with SFA |
+| `vite-react-app-solana` | Vite + React for Solana |
+| `vue-app-new` | Vue 3 application |
+| `wagmi-react-app` | React with Wagmi |
+
+More examples at [Web3Auth Examples Repository](https://github.com/Web3Auth/web3auth-examples/).
 
 ## 🌐 Demo
 
-Checkout the [Web3Auth Demo](https://demo.web3auth.io) to see how Web3Auth can be used in your application.
+Try the [Web3Auth Demo](https://demo.web3auth.io) to see Web3Auth in action.
 
-For more detailed examples, visit our [Web3Auth Examples repository](https://github.com/Web3Auth/web3auth-examples/). This repository contains a comprehensive collection of sample projects to help you get started with your Web3Auth integration.
+## 💬 Support
 
-## 💬 Troubleshooting and Support
+- [Community Portal](https://community.web3auth.io/) - Ask questions and get help
+- [Troubleshooting Guide](https://web3auth.io/docs/troubleshooting) - Common issues and solutions
+- [Pricing](https://web3auth.io/pricing.html) - Priority support plans
 
-- Have a look at our [Community Portal](https://community.web3auth.io/) to see if anyone has any questions or issues you might be having. Feel free to create new topics and we'll help you out as soon as possible.
-- Checkout our [Troubleshooting Documentation Page](https://web3auth.io/docs/troubleshooting) to know the common issues and solutions.
-- For Priority Support, please have a look at our [Pricing Page](https://web3auth.io/pricing.html) for the plan that suits your needs.
+## 📄 License
 
+[ISC](./LICENSE)
