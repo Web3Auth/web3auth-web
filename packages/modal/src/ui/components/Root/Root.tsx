@@ -44,14 +44,7 @@ function Root(props: RootProps) {
 
   const { chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
 
-  const {
-    logoAlignment = "center",
-    buttonRadiusType = "pill",
-    privacyPolicy = "",
-    tncLink = "",
-    displayInstalledExternalWallets = true,
-    displayExternalWalletsCount = true,
-  } = uiConfig;
+  const { buttonRadiusType, privacyPolicy = "", tncLink = "", displayInstalledExternalWallets = true } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
   const { isDark } = useContext(ThemedContext);
@@ -479,8 +472,6 @@ function Root(props: RootProps) {
                         isDark={isDark}
                         showPasswordLessInput={showPasswordLessInput}
                         showExternalWalletButton={showExternalWalletButton}
-                        showExternalWalletCount={displayExternalWalletsCount}
-                        showInstalledExternalWallets={displayInstalledExternalWallets}
                         socialLoginsConfig={socialLoginsConfig}
                         areSocialLoginsVisible={areSocialLoginsVisible}
                         isEmailPrimary={isEmailPrimary}
@@ -490,8 +481,6 @@ function Root(props: RootProps) {
                         isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
                         totalExternalWallets={allExternalWallets.length}
                         remainingUndisplayedWallets={remainingUndisplayedWallets}
-                        logoAlignment={logoAlignment}
-                        buttonRadius={buttonRadiusType}
                         handleSocialLoginClick={handleSocialLoginClick}
                         handleExternalWalletBtnClick={onExternalWalletBtnClick}
                         handleSocialLoginHeight={handleSocialLoginHeight}
@@ -508,7 +497,6 @@ function Root(props: RootProps) {
                         allRegistryButtons={allRegistryButtons}
                         connectorVisibilityMap={connectorVisibilityMap}
                         customConnectorButtons={customConnectorButtons}
-                        buttonRadius={buttonRadiusType}
                         handleWalletDetailsHeight={handleWalletDetailsHeight}
                         isExternalWalletModeOnly={isExternalWalletModeOnly}
                         onBackClick={onBackClick}

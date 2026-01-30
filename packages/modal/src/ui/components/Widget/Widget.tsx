@@ -213,7 +213,14 @@ function Widget(props: WidgetProps) {
 
   if (widgetType === WIDGET_TYPE.MODAL) {
     return (
-      <Modal open={modalState.modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon} onClose={onCloseModal}>
+      <Modal
+        open={modalState.modalVisibility}
+        placement="center"
+        padding={false}
+        showCloseIcon={showCloseIcon}
+        onClose={onCloseModal}
+        borderRadius={uiConfig.borderRadiusType}
+      >
         {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
         {modalState.modalVisibility && (
           <Root

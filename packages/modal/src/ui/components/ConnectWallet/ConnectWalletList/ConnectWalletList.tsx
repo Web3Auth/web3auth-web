@@ -1,5 +1,6 @@
 import { useTranslation } from "react-i18next";
 
+import { useWidget } from "../../../context/WidgetContext";
 import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
 import Button, { BUTTON_TYPE } from "../../Button";
@@ -16,7 +17,9 @@ function NoWalletsFound() {
 }
 
 function WalletsFound(props: WalletsFoundProps) {
-  const { externalButtons, isLoading, handleWalletClick, deviceDetails, walletConnectUri, buttonRadius } = props;
+  const { externalButtons, isLoading, handleWalletClick, walletConnectUri } = props;
+  const { deviceDetails, uiConfig } = useWidget();
+  const { buttonRadiusType: buttonRadius } = uiConfig;
 
   if (isLoading) {
     return (
@@ -56,7 +59,9 @@ function WalletsFound(props: WalletsFoundProps) {
 }
 
 function MoreWalletsButton(props: MoreWalletsButtonProps) {
-  const { totalExternalWalletsCount, initialWalletCount, handleMoreWallets, isLoading, isDark, buttonRadius } = props;
+  const { totalExternalWalletsCount, initialWalletCount, handleMoreWallets, isLoading, isDark } = props;
+  const { uiConfig } = useWidget();
+  const { buttonRadiusType: buttonRadius } = uiConfig;
   const [t] = useTranslation(undefined, { i18n });
   const onMoreWalletsClick = () => {
     if (handleMoreWallets) {
@@ -110,9 +115,7 @@ function ConnectWalletList(props: ConnectWalletListProps) {
     handleWalletClick,
     handleMoreWallets,
     isDark,
-    deviceDetails,
     walletConnectUri,
-    buttonRadius,
     isShowAllWallets,
   } = props;
 
@@ -136,9 +139,7 @@ function ConnectWalletList(props: ConnectWalletListProps) {
             externalButtons={externalButtons}
             isLoading={isLoading}
             handleWalletClick={handleWalletClick}
-            deviceDetails={deviceDetails}
             walletConnectUri={walletConnectUri}
-            buttonRadius={buttonRadius}
           />
         )}
       </ul>
@@ -149,7 +150,6 @@ function ConnectWalletList(props: ConnectWalletListProps) {
           handleMoreWallets={onShowMoreWalletsClick}
           isLoading={isLoading}
           isDark={isDark}
-          buttonRadius={buttonRadius}
         />
       )}
     </>

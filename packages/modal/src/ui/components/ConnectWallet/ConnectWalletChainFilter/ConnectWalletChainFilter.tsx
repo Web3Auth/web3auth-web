@@ -2,17 +2,19 @@ import { CHAIN_NAMESPACES } from "@web3auth/no-modal";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useWidget } from "../../../context/WidgetContext";
 import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
 import { ConnectWalletChainFilterProps } from "./ConnectWalletChainFilter.type";
 
 function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
-  const { isDark, isLoading, selectedChain, setSelectedChain, chainNamespace } = props;
+  const { isDark, isLoading, selectedChain, setSelectedChain } = props;
+  const { chainNamespaces } = useWidget();
   const [t] = useTranslation(undefined, { i18n });
 
   const chains = useMemo(() => {
     const chains = [{ id: "all", name: "modal.allChains", icon: "" }];
-    for (const chain of chainNamespace) {
+    for (const chain of chainNamespaces) {
       if (chain === CHAIN_NAMESPACES.EIP155 || chain === CHAIN_NAMESPACES.SOLANA) {
         chains.push({
           id: chain,
@@ -22,7 +24,11 @@ function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
       }
     }
     return chains;
-  }, [chainNamespace]);
+  }, [chainNamespaces]);
+
+  if (chainNamespaces.length === 0) {
+    return null;
+  }
 
   if (isLoading) {
     return (

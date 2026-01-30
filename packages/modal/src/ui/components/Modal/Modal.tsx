@@ -1,6 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
 
-import { useWidget } from "../../context/WidgetContext";
 import { cn } from "../../utils";
 import { ModalProps } from "./Modal.type";
 
@@ -10,13 +9,19 @@ import { ModalProps } from "./Modal.type";
  * @returns Modal component
  */
 function Modal(props: ModalProps) {
-  const { children, open, onClose, placement = "center", padding = true, shadow = true, border = false, showCloseIcon = true } = props;
+  const {
+    children,
+    open,
+    onClose,
+    placement = "center",
+    padding = true,
+    shadow = true,
+    border = false,
+    showCloseIcon = true,
+    borderRadius = "large",
+  } = props;
 
   const [isOpen, setIsOpen] = useState<boolean>(false);
-
-  const { uiConfig } = useWidget();
-
-  const { borderRadiusType: borderRadius = "large" } = uiConfig;
 
   useEffect(() => {
     if (open) {

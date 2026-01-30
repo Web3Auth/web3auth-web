@@ -58,16 +58,18 @@ function Login(props: LoginProps) {
     areSocialLoginsVisible,
     showPasswordLessInput,
     showExternalWalletButton,
-    showExternalWalletCount,
-    showInstalledExternalWallets,
-    logoAlignment = "center",
-    buttonRadius = "pill",
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
-  const { appLogo, deviceDetails } = useWidget();
+  const { appLogo, deviceDetails, uiConfig } = useWidget();
+  const {
+    buttonRadiusType: buttonRadius = "pill",
+    logoAlignment = "center",
+    displayInstalledExternalWallets: showInstalledExternalWallets,
+    displayExternalWalletsCount: showExternalWalletCount,
+  } = uiConfig;
 
   const [countryCode, setCountryCode] = useState<string>("");
   const [countryFlag, setCountryFlag] = useState<string>("");
