@@ -12,6 +12,7 @@ import deepmerge from "deepmerge";
 import { useEffect, useMemo, useState } from "react";
 
 import { PAGES } from "../../constants";
+import { useWidget } from "../../context/WidgetContext";
 import { type ExternalWalletEventType, MODAL_STATUS, ModalState, type SocialLoginEventType } from "../../interfaces";
 import Embed from "../Embed";
 import Modal from "../Modal";
@@ -19,21 +20,22 @@ import Root from "../Root";
 import { WidgetProps } from "./Widget.type";
 
 function Widget(props: WidgetProps) {
+  const { stateListener } = props;
+
   const {
-    stateListener,
-    handleSocialLoginClick,
-    handleExternalWalletClick,
-    handleMobileVerifyConnect,
-    handleShowExternalWallets,
-    closeModal,
-    appLogo,
     appName,
+    appLogo,
     chainNamespaces,
     walletRegistry,
     uiConfig,
     deviceDetails,
     initialAuthenticationMode,
-  } = props;
+    handleSocialLoginClick,
+    handleExternalWalletClick,
+    handleMobileVerifyConnect,
+    handleShowExternalWallets,
+    closeModal,
+  } = useWidget();
 
   const { widgetType } = uiConfig;
 

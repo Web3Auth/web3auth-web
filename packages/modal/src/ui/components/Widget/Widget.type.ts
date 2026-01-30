@@ -1,20 +1,7 @@
 import { SafeEventEmitter } from "@web3auth/auth";
-import { ChainNamespaceType, ConnectorInitialAuthenticationModeType, WALLET_CONNECTOR_TYPE, WalletRegistry } from "@web3auth/no-modal";
 
-import { browser, ExternalWalletEventType, os, platform, SocialLoginEventType, StateEmitterEvents, UIConfig } from "../../interfaces";
+import { StateEmitterEvents } from "../../interfaces";
 
 export interface WidgetProps {
   stateListener: SafeEventEmitter<StateEmitterEvents>;
-  appLogo?: string;
-  appName?: string;
-  chainNamespaces: ChainNamespaceType[];
-  walletRegistry?: WalletRegistry;
-  uiConfig: UIConfig;
-  initialAuthenticationMode: ConnectorInitialAuthenticationModeType;
-  deviceDetails: { platform: platform; browser: browser; os: os };
-  handleSocialLoginClick: (params: SocialLoginEventType) => void;
-  handleExternalWalletClick: (params: ExternalWalletEventType) => void;
-  handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
-  handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
-  closeModal: () => void;
 }
