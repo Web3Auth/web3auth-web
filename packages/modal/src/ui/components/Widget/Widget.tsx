@@ -20,10 +20,22 @@ import Root from "../Root";
 import { WidgetProps } from "./Widget.type";
 
 function Widget(props: WidgetProps) {
-  const { stateListener, handleSocialLoginClick, handleExternalWalletClick, handleMobileVerifyConnect, handleShowExternalWallets, closeModal } =
-    props;
+  const { stateListener } = props;
 
-  const { appName, appLogo, chainNamespaces, walletRegistry, uiConfig, deviceDetails, initialAuthenticationMode } = useWidget();
+  const {
+    appName,
+    appLogo,
+    chainNamespaces,
+    walletRegistry,
+    uiConfig,
+    deviceDetails,
+    initialAuthenticationMode,
+    handleSocialLoginClick,
+    handleExternalWalletClick,
+    handleMobileVerifyConnect,
+    handleShowExternalWallets,
+    closeModal,
+  } = useWidget();
 
   const { widgetType } = uiConfig;
 

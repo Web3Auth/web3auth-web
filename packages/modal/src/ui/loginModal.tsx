@@ -268,15 +268,13 @@ export class LoginModal {
               deviceDetails={this.deviceDetails}
               uiConfig={this.uiConfig}
               initialAuthenticationMode={this.uiConfig.initialAuthenticationMode}
+              handleShowExternalWallets={this.handleShowExternalWallets}
+              handleExternalWalletClick={this.handleExternalWalletClick}
+              handleMobileVerifyConnect={this.handleMobileVerifyConnect}
+              handleSocialLoginClick={this.handleSocialLoginClick}
+              closeModal={this.closeModal}
             >
-              <Widget
-                stateListener={this.stateEmitter}
-                handleShowExternalWallets={this.handleShowExternalWallets}
-                handleExternalWalletClick={this.handleExternalWalletClick}
-                handleMobileVerifyConnect={this.handleMobileVerifyConnect}
-                handleSocialLoginClick={this.handleSocialLoginClick}
-                closeModal={this.closeModal}
-              />
+              <Widget stateListener={this.stateEmitter} />
             </WidgetProvider>
           </AnalyticsContext.Provider>
         </ThemedContext.Provider>
