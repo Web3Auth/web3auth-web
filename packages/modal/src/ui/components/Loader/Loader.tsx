@@ -2,7 +2,6 @@ import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { useWidget } from "../../context/WidgetContext";
 import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
 import CircularLoader from "../CircularLoader";
@@ -93,8 +92,7 @@ function ErroredStatus(props: ErroredStatusType) {
 
 function AuthorizingStatus(props: AuthorizingStatusType) {
   const [t] = useTranslation(undefined, { i18n });
-  const { walletRegistry } = useWidget();
-  const { connector, externalWalletsConfig, handleMobileVerifyConnect } = props;
+  const { connector, externalWalletsConfig, walletRegistry, handleMobileVerifyConnect } = props;
 
   const registryItem = walletRegistry?.default?.[connector] || walletRegistry?.others?.[connector];
   const primaryColor = registryItem?.primaryColor || "";
@@ -135,13 +133,13 @@ function Loader(props: LoaderProps) {
     connectorName,
     modalStatus,
     onClose,
+    appLogo,
     message,
     isConnectAndSignAuthenticationMode,
     externalWalletsConfig,
+    walletRegistry,
     handleMobileVerifyConnect,
   } = props;
-
-  const { appLogo } = useWidget();
 
   const isConnectedAccordingToAuthenticationMode = useMemo(
     () =>
@@ -172,6 +170,7 @@ function Loader(props: LoaderProps) {
         <AuthorizingStatus
           connector={connector}
           externalWalletsConfig={externalWalletsConfig}
+          walletRegistry={walletRegistry}
           handleMobileVerifyConnect={handleMobileVerifyConnect}
         />
       )}

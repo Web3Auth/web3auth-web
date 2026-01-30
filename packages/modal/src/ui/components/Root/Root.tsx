@@ -42,7 +42,7 @@ function Root(props: RootProps) {
     isConnectAndSignAuthenticationMode,
   } = props;
 
-  const { chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
+  const { appLogo, chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
 
   const { buttonRadiusType, privacyPolicy = "", tncLink = "", displayInstalledExternalWallets = true } = uiConfig;
 
@@ -438,8 +438,10 @@ function Root(props: RootProps) {
                 connectorName={modalState.detailedLoaderConnectorName}
                 modalStatus={modalState.status}
                 onClose={onCloseLoader}
+                appLogo={appLogo}
                 isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
                 externalWalletsConfig={modalState.externalWalletsConfig}
+                walletRegistry={walletRegistry}
                 handleMobileVerifyConnect={handleMobileVerifyConnect}
               />
             ) : (
@@ -514,6 +516,7 @@ function Root(props: RootProps) {
             {/* Multi Chain Selector */}
             {bodyState.multiChainSelector?.show && (
               <BottomSheet
+                borderRadiusType={uiConfig.borderRadiusType}
                 isShown={bodyState.multiChainSelector.show}
                 onClose={() => setBodyState({ ...bodyState, multiChainSelector: { show: false, wallet: null } })}
               >
@@ -531,6 +534,7 @@ function Root(props: RootProps) {
             {/* Wallet Install Links */}
             {bodyState.installLinks?.show && (
               <BottomSheet
+                borderRadiusType={uiConfig.borderRadiusType}
                 isShown={bodyState.installLinks.show}
                 onClose={() => setBodyState({ ...bodyState, installLinks: { show: false, wallet: null } })}
               >

@@ -1,13 +1,10 @@
-import { useWidget } from "../../context/WidgetContext";
 import { cn } from "../../utils";
 import { BottomSheetProps } from "./BottomSheet.type";
 /**
  * BottomSheet component
  * @returns BottomSheet component
  */
-function BottomSheet({ isShown, onClose, children, sheetClassName, showCloseButton = true }: BottomSheetProps) {
-  const { uiConfig } = useWidget();
-  const { borderRadiusType = "large" } = uiConfig;
+function BottomSheet({ isShown, onClose, children, sheetClassName, showCloseButton = true, borderRadiusType = "large" }: BottomSheetProps) {
   return (
     <>
       {/* Backdrop */}
