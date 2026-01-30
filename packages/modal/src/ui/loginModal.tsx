@@ -35,6 +35,7 @@ import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR, PAGES } from "./constants";
 import { AnalyticsContext } from "./context/AnalyticsContext";
 import { ThemedContext } from "./context/ThemeContext";
+import { WidgetProvider } from "./context/WidgetContext";
 import {
   browser,
   ExternalWalletEventType,
@@ -259,21 +260,24 @@ export class LoginModal {
       root.render(
         <ThemedContext.Provider value={darkState}>
           <AnalyticsContext.Provider value={{ analytics: this.analytics }}>
-            <Widget
-              stateListener={this.stateEmitter}
+            <WidgetProvider
               appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
               appName={this.uiConfig.appName}
               chainNamespaces={this.chainNamespaces}
               walletRegistry={this.walletRegistry}
               deviceDetails={this.deviceDetails}
-              handleShowExternalWallets={this.handleShowExternalWallets}
-              handleExternalWalletClick={this.handleExternalWalletClick}
-              handleMobileVerifyConnect={this.handleMobileVerifyConnect}
-              handleSocialLoginClick={this.handleSocialLoginClick}
-              closeModal={this.closeModal}
               uiConfig={this.uiConfig}
               initialAuthenticationMode={this.uiConfig.initialAuthenticationMode}
-            />
+            >
+              <Widget
+                stateListener={this.stateEmitter}
+                handleShowExternalWallets={this.handleShowExternalWallets}
+                handleExternalWalletClick={this.handleExternalWalletClick}
+                handleMobileVerifyConnect={this.handleMobileVerifyConnect}
+                handleSocialLoginClick={this.handleSocialLoginClick}
+                closeModal={this.closeModal}
+              />
+            </WidgetProvider>
           </AnalyticsContext.Provider>
         </ThemedContext.Provider>
       );
