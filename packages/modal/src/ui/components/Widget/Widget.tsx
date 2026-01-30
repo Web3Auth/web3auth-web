@@ -23,12 +23,7 @@ function Widget(props: WidgetProps) {
   const { stateListener } = props;
 
   const {
-    appName,
-    appLogo,
-    chainNamespaces,
-    walletRegistry,
     uiConfig,
-    deviceDetails,
     initialAuthenticationMode,
     handleSocialLoginClick,
     handleExternalWalletClick,
@@ -218,21 +213,10 @@ function Widget(props: WidgetProps) {
 
   if (widgetType === WIDGET_TYPE.MODAL) {
     return (
-      <Modal
-        open={modalState.modalVisibility}
-        placement="center"
-        padding={false}
-        showCloseIcon={showCloseIcon}
-        onClose={onCloseModal}
-        borderRadius={uiConfig.borderRadiusType}
-      >
+      <Modal open={modalState.modalVisibility} placement="center" padding={false} showCloseIcon={showCloseIcon} onClose={onCloseModal}>
         {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
         {modalState.modalVisibility && (
           <Root
-            appLogo={appLogo}
-            appName={appName}
-            chainNamespaces={chainNamespaces}
-            walletRegistry={walletRegistry}
             showPasswordLessInput={showPasswordLessInput}
             showExternalWalletButton={showExternalWalletButton}
             handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
@@ -248,8 +232,6 @@ function Widget(props: WidgetProps) {
             onCloseLoader={onCloseLoader}
             isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
-            uiConfig={uiConfig}
-            deviceDetails={deviceDetails}
             isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
             handleMobileVerifyConnect={handleMobileVerifyConnect}
           />
@@ -263,10 +245,6 @@ function Widget(props: WidgetProps) {
       {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
       {modalState.modalVisibility && (
         <Root
-          chainNamespaces={chainNamespaces}
-          walletRegistry={walletRegistry}
-          appLogo={appLogo}
-          appName={appName}
           showPasswordLessInput={showPasswordLessInput}
           showExternalWalletButton={showExternalWalletButton}
           handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
@@ -282,8 +260,6 @@ function Widget(props: WidgetProps) {
           onCloseLoader={onCloseLoader}
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
-          uiConfig={uiConfig}
-          deviceDetails={deviceDetails}
           isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
           handleMobileVerifyConnect={handleMobileVerifyConnect}
         />

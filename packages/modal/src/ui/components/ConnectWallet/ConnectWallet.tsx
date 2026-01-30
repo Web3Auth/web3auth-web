@@ -4,6 +4,7 @@ import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
 import { RootContext } from "../../context/RootContext";
+import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton } from "../../interfaces";
 import { ConnectWalletProps } from "./ConnectWallet.type";
 import ConnectWalletChainFilter from "./ConnectWalletChainFilter";
@@ -18,13 +19,10 @@ function ConnectWallet(props: ConnectWalletProps) {
     config,
     walletConnectUri,
     metamaskConnectUri,
-    walletRegistry,
     allRegistryButtons,
     customConnectorButtons,
     connectorVisibilityMap,
-    deviceDetails,
     buttonRadius = "pill",
-    chainNamespace,
     isExternalWalletModeOnly,
     onBackClick,
     handleExternalWalletClick,
@@ -33,6 +31,7 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
+  const { walletRegistry, deviceDetails, chainNamespaces: chainNamespace } = useWidget();
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = useState(false);

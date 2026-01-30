@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
+import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton, mobileOs, MODAL_STATUS, TOAST_TYPE, ToastType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
@@ -26,9 +27,6 @@ function Root(props: RootProps) {
     modalState,
     handleExternalWalletBtnClick,
     handleMobileVerifyConnect,
-    chainNamespaces,
-    walletRegistry,
-    appLogo,
     onCloseLoader,
     handleSocialLoginClick,
     showPasswordLessInput,
@@ -41,10 +39,10 @@ function Root(props: RootProps) {
     isEmailPasswordLessLoginVisible,
     isSmsPasswordLessLoginVisible,
     preHandleExternalWalletClick,
-    uiConfig,
-    deviceDetails,
     isConnectAndSignAuthenticationMode,
   } = props;
+
+  const { chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
 
   const {
     logoAlignment = "center",
@@ -447,10 +445,8 @@ function Root(props: RootProps) {
                 connectorName={modalState.detailedLoaderConnectorName}
                 modalStatus={modalState.status}
                 onClose={onCloseLoader}
-                appLogo={appLogo}
                 isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
                 externalWalletsConfig={modalState.externalWalletsConfig}
-                walletRegistry={walletRegistry}
                 handleMobileVerifyConnect={handleMobileVerifyConnect}
               />
             ) : (
@@ -481,7 +477,6 @@ function Root(props: RootProps) {
                         authBuildEnv={modalState.authBuildEnv}
                         isModalVisible={modalState.modalVisibility}
                         isDark={isDark}
-                        appLogo={appLogo}
                         showPasswordLessInput={showPasswordLessInput}
                         showExternalWalletButton={showExternalWalletButton}
                         showExternalWalletCount={displayExternalWalletsCount}
@@ -497,7 +492,6 @@ function Root(props: RootProps) {
                         remainingUndisplayedWallets={remainingUndisplayedWallets}
                         logoAlignment={logoAlignment}
                         buttonRadius={buttonRadiusType}
-                        deviceDetails={deviceDetails}
                         handleSocialLoginClick={handleSocialLoginClick}
                         handleExternalWalletBtnClick={onExternalWalletBtnClick}
                         handleSocialLoginHeight={handleSocialLoginHeight}
@@ -511,12 +505,9 @@ function Root(props: RootProps) {
                         walletConnectUri={modalState.walletConnectUri}
                         metamaskConnectUri={modalState.metamaskConnectUri}
                         config={modalState.externalWalletsConfig}
-                        walletRegistry={walletRegistry}
                         allRegistryButtons={allRegistryButtons}
                         connectorVisibilityMap={connectorVisibilityMap}
                         customConnectorButtons={customConnectorButtons}
-                        deviceDetails={deviceDetails}
-                        chainNamespace={chainNamespaces}
                         buttonRadius={buttonRadiusType}
                         handleWalletDetailsHeight={handleWalletDetailsHeight}
                         isExternalWalletModeOnly={isExternalWalletModeOnly}
@@ -535,7 +526,6 @@ function Root(props: RootProps) {
             {/* Multi Chain Selector */}
             {bodyState.multiChainSelector?.show && (
               <BottomSheet
-                uiConfig={uiConfig}
                 isShown={bodyState.multiChainSelector.show}
                 onClose={() => setBodyState({ ...bodyState, multiChainSelector: { show: false, wallet: null } })}
               >
@@ -553,7 +543,6 @@ function Root(props: RootProps) {
             {/* Wallet Install Links */}
             {bodyState.installLinks?.show && (
               <BottomSheet
-                uiConfig={uiConfig}
                 isShown={bodyState.installLinks.show}
                 onClose={() => setBodyState({ ...bodyState, installLinks: { show: false, wallet: null } })}
               >
