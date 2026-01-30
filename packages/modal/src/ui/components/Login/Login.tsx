@@ -67,8 +67,8 @@ function Login(props: LoginProps) {
   const {
     buttonRadiusType: buttonRadius = "pill",
     logoAlignment = "center",
-    displayInstalledExternalWallets: showInstalledExternalWallets,
-    displayExternalWalletsCount: showExternalWalletCount,
+    displayInstalledExternalWallets: showInstalledExternalWallets = true,
+    displayExternalWalletsCount: showExternalWalletCount = true,
   } = uiConfig;
 
   const [countryCode, setCountryCode] = useState<string>("");

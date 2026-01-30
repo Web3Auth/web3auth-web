@@ -26,7 +26,7 @@ function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
     return chains;
   }, [chainNamespaces]);
 
-  if (chainNamespaces.length === 0) {
+  if (chainNamespaces.length > 1) {
     return null;
   }
 
