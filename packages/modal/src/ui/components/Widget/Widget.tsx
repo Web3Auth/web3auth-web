@@ -1,27 +1,17 @@
-import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, BUILD_ENV, WEB3AUTH_NETWORK } from "@web3auth/auth";
-import {
-  cloneDeep,
-  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
-  CONNECTOR_NAMES,
-  log,
-  WALLET_CONNECTOR_TYPE,
-  WALLET_CONNECTORS,
-  WIDGET_TYPE,
-} from "@web3auth/no-modal";
-import deepmerge from "deepmerge";
-import { useEffect, useMemo, useState } from "react";
+import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_NAMES, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
+import { useEffect, useMemo } from "react";
 
 import { PAGES } from "../../constants";
+import { ModalStateProvider, useModalState } from "../../context/ModalStateContext";
 import { useWidget } from "../../context/WidgetContext";
-import { type ExternalWalletEventType, MODAL_STATUS, ModalState, type SocialLoginEventType } from "../../interfaces";
+import { type ExternalWalletEventType, MODAL_STATUS, type SocialLoginEventType } from "../../interfaces";
 import Embed from "../Embed";
 import Modal from "../Modal";
 import Root from "../Root";
 import { WidgetProps } from "./Widget.type";
 
-function Widget(props: WidgetProps) {
-  const { stateListener } = props;
-
+function WidgetContent() {
   const {
     uiConfig,
     initialAuthenticationMode,
@@ -32,56 +22,14 @@ function Widget(props: WidgetProps) {
     closeModal,
   } = useWidget();
 
+  const { modalState, setModalState } = useModalState();
+
   const { widgetType } = uiConfig;
-
-  const visible = useMemo(() => widgetType === WIDGET_TYPE.EMBED, [widgetType]);
-
-  const [modalState, setModalState] = useState<ModalState>({
-    externalWalletsVisibility: false,
-    status: MODAL_STATUS.INITIALIZED,
-    hasExternalWallets: false,
-    externalWalletsInitialized: false,
-    modalVisibility: false,
-    modalVisibilityDelayed: false,
-    postLoadingMessage: "",
-    walletConnectUri: "",
-    metamaskConnectUri: "",
-    socialLoginsConfig: {
-      loginMethods: {},
-      loginMethodsOrder: [],
-      connector: "" as WALLET_CONNECTOR_TYPE,
-      uiConfig: {},
-    },
-    externalWalletsConfig: {},
-    showExternalWalletsOnly: false,
-    currentPage: PAGES.LOGIN,
-    detailedLoaderConnector: "",
-    detailedLoaderConnectorName: "",
-    web3authClientId: "",
-    web3authNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-    authBuildEnv: BUILD_ENV.PRODUCTION,
-  });
 
   const isConnectAndSignAuthenticationMode = useMemo(
     () => initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
     [initialAuthenticationMode]
   );
-
-  useEffect(() => {
-    setModalState((prev) => ({ ...prev, modalVisibility: visible }));
-  }, [visible]);
-
-  useEffect(() => {
-    stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
-      log.debug("state updated", newModalState);
-
-      setModalState((prevState) => {
-        const mergedState = cloneDeep(deepmerge(prevState, newModalState, { arrayMerge: (_prevState, newState) => newState }));
-        return mergedState;
-      });
-    });
-    stateListener.emit("MOUNTED");
-  }, [stateListener]);
 
   const preHandleExternalWalletClick = (params: ExternalWalletEventType) => {
     const { connector } = params;
@@ -233,9 +181,7 @@ function Widget(props: WidgetProps) {
             isExternalPrimary={isExternalPrimary}
             showExternalWalletPage={showExternalWalletPage}
             handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-            modalState={modalState}
             preHandleExternalWalletClick={preHandleExternalWalletClick}
-            setModalState={setModalState}
             onCloseLoader={onCloseLoader}
             isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
             isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
@@ -261,9 +207,7 @@ function Widget(props: WidgetProps) {
           isExternalPrimary={isExternalPrimary}
           showExternalWalletPage={showExternalWalletPage}
           handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-          modalState={modalState}
           preHandleExternalWalletClick={preHandleExternalWalletClick}
-          setModalState={setModalState}
           onCloseLoader={onCloseLoader}
           isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
           isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
@@ -272,6 +216,20 @@ function Widget(props: WidgetProps) {
         />
       )}
     </Embed>
+  );
+}
+
+function Widget(props: WidgetProps) {
+  const { stateListener } = props;
+  const { uiConfig } = useWidget();
+  const { widgetType } = uiConfig;
+
+  const initialVisibility = useMemo(() => widgetType === WIDGET_TYPE.EMBED, [widgetType]);
+
+  return (
+    <ModalStateProvider stateListener={stateListener} initialVisibility={initialVisibility}>
+      <WidgetContent />
+    </ModalStateProvider>
   );
 }
 

@@ -3,6 +3,7 @@ import { JSX, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
+import { useModalState } from "../../context/ModalStateContext";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
 import { useWidget } from "../../context/WidgetContext";
@@ -23,8 +24,6 @@ import { RootProps } from "./Root.type";
 
 function Root(props: RootProps) {
   const {
-    setModalState,
-    modalState,
     handleExternalWalletBtnClick,
     handleMobileVerifyConnect,
     onCloseLoader,
@@ -42,6 +41,7 @@ function Root(props: RootProps) {
     isConnectAndSignAuthenticationMode,
   } = props;
 
+  const { modalState, setModalState } = useModalState();
   const { appLogo, chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
 
   const { buttonRadiusType, privacyPolicy = "", tncLink = "", displayInstalledExternalWallets = true } = uiConfig;
