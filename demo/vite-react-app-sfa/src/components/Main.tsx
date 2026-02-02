@@ -1,7 +1,7 @@
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
 import { WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from "@web3auth/no-modal/react";
-import { useAccount, useSignMessage } from "wagmi";
+import { useConnection, useSignMessage } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
@@ -9,8 +9,8 @@ const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
   const { connect, loading: connecting, error: connectingError, connectorName } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
-  const { isConnected: isWagmiConnected } = useAccount();
-  const { signMessageAsync, data: signedMessageData } = useSignMessage();
+  const { isConnected: isWagmiConnected } = useConnection();
+  const { mutateAsync: signMessageAsync, data: signedMessageData } = useSignMessage();
 
   const loggedInView = (
     <>
