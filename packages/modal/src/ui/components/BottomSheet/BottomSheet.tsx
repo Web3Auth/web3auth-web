@@ -6,6 +6,11 @@ import { BottomSheetProps } from "./BottomSheet.type";
  */
 function BottomSheet({ isShown, onClose, children, uiConfig, sheetClassName, showCloseButton = true }: BottomSheetProps) {
   const { borderRadiusType = "large" } = uiConfig;
+
+  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    if (onClose) onClose();
+  };
   return (
     <>
       {/* Backdrop */}
@@ -15,14 +20,14 @@ function BottomSheet({ isShown, onClose, children, uiConfig, sheetClassName, sho
           "w3a--rounded-2xl": borderRadiusType === "medium",
           "w3a--rounded-none": borderRadiusType === "small",
         })}
-        onClick={onClose}
+        onClick={handleClose}
         aria-hidden="true"
         role="button"
       />
       {/* Bottom Sheet */}
       <div
         className={cn(
-          `w3a--fixed w3a--bottom-2 w3a--left-2 w3a--mx-auto w3a--flex w3a--w-[96%] w3a--flex-col 
+          `w3a--fixed w3a--bottom-2 w3a--left-2 w3a--mx-auto w3a--flex w3a--w-[96%] w3a--flex-col
       w3a--gap-y-2 w3a--border w3a--border-app-gray-100 w3a--bg-app-white w3a--p-4 w3a--shadow-lg w3a--transition-transform w3a--duration-500 
       w3a--ease-out dark:w3a--border-app-gray-600 dark:w3a--bg-app-dark-surface-main
       ${isShown ? "w3a--translate-y-0 w3a--delay-700" : "w3a--translate-y-full"}`,
