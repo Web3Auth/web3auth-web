@@ -1,4 +1,3 @@
-import { BUILD_ENV, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import { cloneDeep, log, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
 import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
@@ -24,15 +23,26 @@ type ModalStateProviderProps = {
 };
 
 const initialModalState: ModalState = {
-  externalWalletsVisibility: false,
+  // UI State
   status: MODAL_STATUS.INITIALIZED,
-  hasExternalWallets: false,
-  externalWalletsInitialized: false,
   modalVisibility: false,
   modalVisibilityDelayed: false,
+  externalWalletsVisibility: false,
+  currentPage: PAGES.LOGIN,
+
+  // Loading State
   postLoadingMessage: "",
+  detailedLoaderConnector: "",
+  detailedLoaderConnectorName: "",
+
+  // External Wallets State
+  hasExternalWallets: false,
+  externalWalletsInitialized: false,
+  showExternalWalletsOnly: false,
   walletConnectUri: "",
   metamaskConnectUri: "",
+
+  // Config State
   socialLoginsConfig: {
     loginMethods: {},
     loginMethodsOrder: [],
@@ -40,13 +50,6 @@ const initialModalState: ModalState = {
     uiConfig: {},
   },
   externalWalletsConfig: {},
-  showExternalWalletsOnly: false,
-  currentPage: PAGES.LOGIN,
-  detailedLoaderConnector: "",
-  detailedLoaderConnectorName: "",
-  web3authClientId: "",
-  web3authNetwork: WEB3AUTH_NETWORK.SAPPHIRE_MAINNET,
-  authBuildEnv: BUILD_ENV.PRODUCTION,
 };
 
 const ModalStateContext = createContext<ModalStateContextType | undefined>(undefined);

@@ -1,11 +1,10 @@
 import type { ChainNamespaceType, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 
-import { SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
+import { SocialLoginEventType } from "../../interfaces";
 
 export interface RootProps {
   showPasswordLessInput: boolean;
   showExternalWalletButton: boolean;
-  socialLoginsConfig: SocialLoginsConfig;
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
   isExternalPrimary: boolean;

@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
+import { useModalState } from "../../context/ModalStateContext";
 import { RootContext } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
 import type { PasswordlessHandler } from "../../handlers/AbstractHandler";
@@ -40,12 +41,7 @@ const restrictedLoginMethods: string[] = [
 function Login(props: LoginProps) {
   // TODO: add appName, isEmailPrimary, isExternalPrimary
   const {
-    web3authClientId,
-    web3authNetwork,
-    authBuildEnv,
-    isModalVisible,
     handleSocialLoginHeight,
-    socialLoginsConfig,
     installedExternalWalletConfig,
     isDark,
     handleSocialLoginClick,
@@ -64,11 +60,16 @@ function Login(props: LoginProps) {
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
   const { appLogo, deviceDetails, uiConfig } = useWidget();
+  const { modalState } = useModalState();
+  const { modalVisibility: isModalVisible, socialLoginsConfig } = modalState;
   const {
     buttonRadiusType: buttonRadius = "pill",
     logoAlignment = "center",
     displayInstalledExternalWallets: showInstalledExternalWallets = true,
     displayExternalWalletsCount: showExternalWalletCount = true,
+    web3authClientId,
+    web3authNetwork,
+    authBuildEnv,
   } = uiConfig;
 
   const [countryCode, setCountryCode] = useState<string>("");

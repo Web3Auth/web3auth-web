@@ -175,7 +175,6 @@ function WidgetContent() {
             showPasswordLessInput={showPasswordLessInput}
             showExternalWalletButton={showExternalWalletButton}
             handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-            socialLoginsConfig={modalState.socialLoginsConfig}
             areSocialLoginsVisible={areSocialLoginsVisible}
             isEmailPrimary={isEmailPrimary}
             isExternalPrimary={isExternalPrimary}
@@ -201,7 +200,6 @@ function WidgetContent() {
           showPasswordLessInput={showPasswordLessInput}
           showExternalWalletButton={showExternalWalletButton}
           handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-          socialLoginsConfig={modalState.socialLoginsConfig}
           areSocialLoginsVisible={areSocialLoginsVisible}
           isEmailPrimary={isEmailPrimary}
           isExternalPrimary={isExternalPrimary}

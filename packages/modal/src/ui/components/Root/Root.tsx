@@ -30,7 +30,6 @@ function Root(props: RootProps) {
     handleSocialLoginClick,
     showPasswordLessInput,
     showExternalWalletButton,
-    socialLoginsConfig,
     areSocialLoginsVisible,
     isEmailPrimary,
     isExternalPrimary,
@@ -467,14 +466,9 @@ function Root(props: RootProps) {
                     {/* Login Screen */}
                     {modalState.currentPage === PAGES.LOGIN && showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
                       <Login
-                        web3authClientId={modalState.web3authClientId}
-                        web3authNetwork={modalState.web3authNetwork}
-                        authBuildEnv={modalState.authBuildEnv}
-                        isModalVisible={modalState.modalVisibility}
                         isDark={isDark}
                         showPasswordLessInput={showPasswordLessInput}
                         showExternalWalletButton={showExternalWalletButton}
-                        socialLoginsConfig={socialLoginsConfig}
                         areSocialLoginsVisible={areSocialLoginsVisible}
                         isEmailPrimary={isEmailPrimary}
                         isExternalPrimary={isExternalPrimary}
