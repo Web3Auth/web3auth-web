@@ -36,6 +36,7 @@
       "logoLight": "Light Logo",
       "logoDark": "Dark Logo",
       "useLogoLoader": "Use Logo Loader",
+      "hideSuccessScreen": "Hide Success Screen",
       "primaryColor": "Primary Color",
       "onPrimaryColor": "On Primary Color"
     },

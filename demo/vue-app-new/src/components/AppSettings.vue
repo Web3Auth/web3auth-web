@@ -282,6 +282,15 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :label-enabled="$t('app.whiteLabel.useLogoLoader')"
             :disabled="isDisabled('whiteLabelSettings')"
           />
+          <Toggle
+            id="hideSuccessScreen"
+            v-model="formData.whiteLabel.hideSuccessScreen"
+            :show-label="true"
+            :size="'small'"
+            :label-disabled="$t('app.whiteLabel.hideSuccessScreen')"
+            :label-enabled="$t('app.whiteLabel.hideSuccessScreen')"
+            :disabled="isDisabled('whiteLabelSettings')"
+          />
           <TextField
             v-model="formData.whiteLabel.config.appName"
             :label="$t('app.whiteLabel.appName')"
