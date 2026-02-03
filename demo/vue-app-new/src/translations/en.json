@@ -12,6 +12,7 @@
     "initialAuthenticationMode": "Authentication Mode",
     "showWalletDiscovery": "Show Wallet Discovery",
     "multiInjectedProviderDiscovery": "Multi Injected Provider Discovery",
+    "externalWalletOnly": "External Wallet Only (Hide Social Login)",
     "greeting": "Let's configure Web3Auth!",
     "enableWalletServicePlugin": "Enable Wallet Service Plugin",
     "walletPlugin": {
