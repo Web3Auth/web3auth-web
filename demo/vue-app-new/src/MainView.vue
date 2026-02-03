@@ -108,11 +108,11 @@ const options = computed((): Web3AuthOptions => {
     }
   }
 
-  const { widget, targetId } = formData;
+  const { widget, targetId, externalWalletOnly } = formData;
   const { hideSuccessScreen } = formData.whiteLabel;
   const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel
-    ? { ...whiteLabel, widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" })}
-    : { widgetType: widget, targetId, hideSuccessScreen };
+    ? { ...whiteLabel, widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) }
+    : { widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) };
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {
