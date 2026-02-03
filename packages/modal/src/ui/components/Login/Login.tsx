@@ -39,7 +39,6 @@ const restrictedLoginMethods: string[] = [
 ];
 
 function Login(props: LoginProps) {
-  // TODO: add appName, isEmailPrimary, isExternalPrimary
   const {
     handleSocialLoginHeight,
     installedExternalWalletConfig,
@@ -47,20 +46,23 @@ function Login(props: LoginProps) {
     handleSocialLoginClick,
     totalExternalWallets,
     remainingUndisplayedWallets,
-    isEmailPasswordLessLoginVisible,
-    isSmsPasswordLessLoginVisible,
     handleExternalWalletBtnClick,
     handleExternalWalletClick,
-    areSocialLoginsVisible,
-    showPasswordLessInput,
-    showExternalWalletButton,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
   const { appLogo, deviceDetails, uiConfig } = useWidget();
-  const { modalState } = useModalState();
+  // TODO: add appName, isEmailPrimary, isExternalPrimary
+  const {
+    modalState,
+    areSocialLoginsVisible,
+    isEmailPasswordLessLoginVisible,
+    isSmsPasswordLessLoginVisible,
+    showPasswordLessInput,
+    showExternalWalletButton,
+  } = useModalState();
   const { modalVisibility: isModalVisible, socialLoginsConfig } = modalState;
   const {
     buttonRadiusType: buttonRadius = "pill",

@@ -3,6 +3,7 @@ import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
+import { useModalState } from "../../context/ModalStateContext";
 import { RootContext } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton } from "../../interfaces";
@@ -16,13 +17,9 @@ import ConnectWalletSearch from "./ConnectWalletSearch";
 function ConnectWallet(props: ConnectWalletProps) {
   const {
     isDark,
-    config,
-    walletConnectUri,
-    metamaskConnectUri,
     allRegistryButtons,
     customConnectorButtons,
     connectorVisibilityMap,
-    isExternalWalletModeOnly,
     onBackClick,
     handleExternalWalletClick,
     handleWalletDetailsHeight,
@@ -31,6 +28,8 @@ function ConnectWallet(props: ConnectWalletProps) {
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
   const { walletRegistry, deviceDetails } = useWidget();
+  const { showPasswordLessInput, areSocialLoginsVisible, modalState } = useModalState();
+  const { externalWalletsConfig: config, walletConnectUri, metamaskConnectUri } = modalState;
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = useState(false);
@@ -52,6 +51,10 @@ function ConnectWallet(props: ConnectWalletProps) {
       handleWalletDetailsHeight();
     }
   };
+
+  const isExternalWalletModeOnly = useMemo(() => {
+    return !showPasswordLessInput && !areSocialLoginsVisible;
+  }, [areSocialLoginsVisible, showPasswordLessInput]);
 
   const walletDiscoverySupported = useMemo(() => {
     const supported = walletRegistry && (Object.keys(walletRegistry.default || {}).length > 0 || Object.keys(walletRegistry.others || {}).length > 0);

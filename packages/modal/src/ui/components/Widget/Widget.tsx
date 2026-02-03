@@ -1,4 +1,3 @@
-import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_NAMES, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
 import { useEffect, useMemo } from "react";
 
@@ -50,49 +49,6 @@ function WidgetContent() {
     });
     handleSocialLoginClick(params);
   };
-
-  // Memo for checking if social logins are visible
-  const areSocialLoginsVisible = useMemo(() => {
-    if (modalState.showExternalWalletsOnly) return false;
-    if (Object.keys(modalState.socialLoginsConfig?.loginMethods || {}).length === 0) return false;
-
-    const isAnySocialLoginVisible = Object.entries(modalState.socialLoginsConfig?.loginMethods || {}).some(
-      ([k, v]) =>
-        !([AUTH_CONNECTION.EMAIL_PASSWORDLESS, AUTH_CONNECTION.SMS_PASSWORDLESS] as AUTH_CONNECTION_TYPE[]).includes(k as AUTH_CONNECTION_TYPE) &&
-        v.showOnModal !== false
-    );
-    return isAnySocialLoginVisible;
-  }, [modalState]);
-
-  // Memo for checking if email passwordless login is visible
-  const isEmailPasswordLessLoginVisible = useMemo(() => {
-    return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS]?.showOnModal;
-  }, [modalState.socialLoginsConfig]);
-
-  // Memo for checking if SMS passwordless login is visible
-  const isSmsPasswordLessLoginVisible = useMemo(() => {
-    return modalState.socialLoginsConfig?.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS]?.showOnModal;
-  }, [modalState.socialLoginsConfig]);
-
-  const isEmailPrimary = useMemo(() => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "emailLogin", [modalState.socialLoginsConfig]);
-  const isExternalPrimary = useMemo(
-    () => modalState.socialLoginsConfig?.uiConfig?.primaryButton === "externalLogin",
-    [modalState.socialLoginsConfig]
-  );
-  const showPasswordLessInput = useMemo(
-    () => isEmailPasswordLessLoginVisible || isSmsPasswordLessLoginVisible,
-    [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible]
-  );
-  const showExternalWalletButton = useMemo(
-    () => modalState.hasExternalWallets || !!modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK],
-    [modalState]
-  );
-  const showExternalWalletPage = useMemo(
-    () =>
-      (areSocialLoginsVisible || showPasswordLessInput || !!modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]) &&
-      !modalState.externalWalletsVisibility,
-    [areSocialLoginsVisible, showPasswordLessInput, modalState]
-  );
 
   const handleExternalWalletBtnClick = (flag: boolean) => {
     setModalState((prevState) => {
@@ -172,18 +128,10 @@ function WidgetContent() {
         {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
         {modalState.modalVisibility && (
           <Root
-            showPasswordLessInput={showPasswordLessInput}
-            showExternalWalletButton={showExternalWalletButton}
             handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-            areSocialLoginsVisible={areSocialLoginsVisible}
-            isEmailPrimary={isEmailPrimary}
-            isExternalPrimary={isExternalPrimary}
-            showExternalWalletPage={showExternalWalletPage}
             handleExternalWalletBtnClick={handleExternalWalletBtnClick}
             preHandleExternalWalletClick={preHandleExternalWalletClick}
             onCloseLoader={onCloseLoader}
-            isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
-            isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
             isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
             handleMobileVerifyConnect={handleMobileVerifyConnect}
           />
@@ -197,18 +145,10 @@ function WidgetContent() {
       {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
       {modalState.modalVisibility && (
         <Root
-          showPasswordLessInput={showPasswordLessInput}
-          showExternalWalletButton={showExternalWalletButton}
           handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-          areSocialLoginsVisible={areSocialLoginsVisible}
-          isEmailPrimary={isEmailPrimary}
-          isExternalPrimary={isExternalPrimary}
-          showExternalWalletPage={showExternalWalletPage}
           handleExternalWalletBtnClick={handleExternalWalletBtnClick}
           preHandleExternalWalletClick={preHandleExternalWalletClick}
           onCloseLoader={onCloseLoader}
-          isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
-          isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
           isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
           handleMobileVerifyConnect={handleMobileVerifyConnect}
         />
