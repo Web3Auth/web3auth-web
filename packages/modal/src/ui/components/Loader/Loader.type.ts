@@ -13,6 +13,7 @@ export interface LoaderProps {
   onClose: () => void;
   isConnectAndSignAuthenticationMode: boolean;
   handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
+  hideSuccessScreen?: boolean;
 }
 
 export type ConnectingStatusType = Pick<LoaderProps, "connectorName" | "appLogo" | "connector">;

@@ -53,6 +53,7 @@ function Root(props: RootProps) {
     tncLink = "",
     displayInstalledExternalWallets = true,
     displayExternalWalletsCount = true,
+    hideSuccessScreen = false,
   } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -452,6 +453,7 @@ function Root(props: RootProps) {
                 externalWalletsConfig={modalState.externalWalletsConfig}
                 walletRegistry={walletRegistry}
                 handleMobileVerifyConnect={handleMobileVerifyConnect}
+                hideSuccessScreen={hideSuccessScreen}
               />
             ) : (
               <>
@@ -506,26 +508,28 @@ function Root(props: RootProps) {
                       />
                     )}
                     {/* Connect Wallet Screen */}
-                    {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
-                      <ConnectWallet
-                        isDark={isDark}
-                        walletConnectUri={modalState.walletConnectUri}
-                        metamaskConnectUri={modalState.metamaskConnectUri}
-                        config={modalState.externalWalletsConfig}
-                        walletRegistry={walletRegistry}
-                        allRegistryButtons={allRegistryButtons}
-                        connectorVisibilityMap={connectorVisibilityMap}
-                        customConnectorButtons={customConnectorButtons}
-                        deviceDetails={deviceDetails}
-                        chainNamespace={chainNamespaces}
-                        buttonRadius={buttonRadiusType}
-                        handleWalletDetailsHeight={handleWalletDetailsHeight}
-                        isExternalWalletModeOnly={isExternalWalletModeOnly}
-                        onBackClick={onBackClick}
-                        handleExternalWalletClick={preHandleExternalWalletClick}
-                        disableBackButton={bodyState.installLinks?.show || bodyState.multiChainSelector?.show}
-                      />
-                    )}
+                    {modalState.currentPage === PAGES.CONNECT_WALLET &&
+                      (!showExternalWalletPage || isExternalWalletModeOnly) &&
+                      modalState.status === MODAL_STATUS.INITIALIZED && (
+                        <ConnectWallet
+                          isDark={isDark}
+                          walletConnectUri={modalState.walletConnectUri}
+                          metamaskConnectUri={modalState.metamaskConnectUri}
+                          config={modalState.externalWalletsConfig}
+                          walletRegistry={walletRegistry}
+                          allRegistryButtons={allRegistryButtons}
+                          connectorVisibilityMap={connectorVisibilityMap}
+                          customConnectorButtons={customConnectorButtons}
+                          deviceDetails={deviceDetails}
+                          chainNamespace={chainNamespaces}
+                          buttonRadius={buttonRadiusType}
+                          handleWalletDetailsHeight={handleWalletDetailsHeight}
+                          isExternalWalletModeOnly={isExternalWalletModeOnly}
+                          onBackClick={onBackClick}
+                          handleExternalWalletClick={preHandleExternalWalletClick}
+                          disableBackButton={bodyState.installLinks?.show || bodyState.multiChainSelector?.show}
+                        />
+                      )}
                   </>
                 )}
               </>

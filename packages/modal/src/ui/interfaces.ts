@@ -66,6 +66,15 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
    */
   primaryButton?: "externalLogin" | "socialLogin" | "emailLogin";
 
+  /**
+   * Whether to hide the success screen after login.
+   * When true, the modal will close immediately after successful login.
+   * When false, a success screen will be shown briefly (1 second for social logins).
+   *
+   * @defaultValue `false`
+   */
+  hideSuccessScreen?: boolean;
+
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 }
 
