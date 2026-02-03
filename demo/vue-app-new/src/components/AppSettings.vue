@@ -3,6 +3,7 @@ import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@torusl
 import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_STATUS, log } from "@web3auth/modal";
 import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
+import { getChainConfig } from "../utils/chainconfig";
 import {
   chainConfigs,
   chainNamespaceOptions,
@@ -15,7 +16,6 @@ import {
   SmartAccountOptions,
 } from "../config";
 import { formDataStore } from "../store/form";
-import { getChainConfig } from "../utils/chainconfig";
 
 const formData = formDataStore;
 
@@ -251,6 +251,15 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :size="'small'"
             :label-disabled="$t('app.multiInjectedProviderDiscovery')"
             :label-enabled="$t('app.multiInjectedProviderDiscovery')"
+            class="mb-2"
+          />
+          <Toggle
+            v-model="formData.externalWalletOnly"
+            data-testid="externalWalletOnly"
+            :show-label="true"
+            :size="'small'"
+            :label-disabled="$t('app.externalWalletOnly')"
+            :label-enabled="$t('app.externalWalletOnly')"
             class="mb-2"
           />
         </Card>
