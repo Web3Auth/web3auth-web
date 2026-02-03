@@ -108,11 +108,11 @@ const options = computed((): Web3AuthOptions => {
     }
   }
 
-  const { widget, targetId } = formData;
+  const { widget, targetId, externalWalletOnly } = formData;
   const { hideSuccessScreen } = formData.whiteLabel;
   const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel
-    ? { ...whiteLabel, widgetType: widget, targetId, hideSuccessScreen }
-    : { widgetType: widget, targetId, hideSuccessScreen };
+    ? { ...whiteLabel, widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) }
+    : { widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) };
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {
@@ -175,6 +175,7 @@ const modalParams = computed(() => {
     [WALLET_CONNECTORS.AUTH]: {
       label: "auth",
       loginMethods: loginMethodsConfig.value,
+      showOnModal: !formData.externalWalletOnly,
     },
   } as ConnectorsModalConfig["connectors"];
   return modalConfig;
@@ -210,6 +211,7 @@ onBeforeMount(() => {
         formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
         formData.defaultChainId = json.defaultChainId;
         formData.initialAuthenticationMode = json.initialAuthenticationMode;
+        formData.externalWalletOnly = json.externalWalletOnly || false;
       }
     } catch (error) {}
   }

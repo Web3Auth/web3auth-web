@@ -1,8 +1,17 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_STATUS, log } from "@web3auth/modal";
+import {
+  CHAIN_NAMESPACES,
+  ChainNamespaceType,
+  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
+  CONNECTOR_STATUS,
+  log,
+  Web3Auth,
+  WALLET_CONNECTORS,
+} from "@web3auth/modal";
 import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
+import { getChainConfig } from "../utils/chainconfig";
 import {
   chainConfigs,
   chainNamespaceOptions,
@@ -15,13 +24,37 @@ import {
   SmartAccountOptions,
 } from "../config";
 import { formDataStore } from "../store/form";
-import { getChainConfig } from "../utils/chainconfig";
-import ExternalWalletOnlyTest from "./ExternalWalletOnlyTest.vue";
 
 const formData = formDataStore;
 
 const { status, isConnected, isInitialized, isAuthorized } = useWeb3Auth();
 const { connect } = useWeb3AuthConnect();
+
+const showLogin = async () => {
+  if (formData.externalWalletOnly) {
+    // Create a new Web3Auth instance for external wallet only mode to avoid race condition
+    const web3auth = new Web3Auth({
+      clientId: clientIds[formData.network],
+      web3AuthNetwork: formData.network,
+      modalConfig: {
+        connectors: {
+          [WALLET_CONNECTORS.AUTH]: {
+            label: "Auth",
+            showOnModal: false,
+          },
+        },
+      },
+      uiConfig: {
+        primaryButton: "externalLogin",
+      },
+    });
+
+    await web3auth.init();
+    await web3auth.connect();
+  } else {
+    await connect();
+  }
+};
 
 const chainOptions = computed(() => {
   const allChains: { name: string; value: string }[] = [];
@@ -171,7 +204,6 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
           <Tab v-if="formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155)" variant="underline" :active="isActiveTab(4)" @click="onTabChange(4)">
             Account Abstraction Provider
           </Tab>
-          <Tab variant="underline" :active="isActiveTab(5)" @click="onTabChange(5)">External Wallet Only</Tab>
         </Tabs>
         <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
           <Select
@@ -253,6 +285,15 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :size="'small'"
             :label-disabled="$t('app.multiInjectedProviderDiscovery')"
             :label-enabled="$t('app.multiInjectedProviderDiscovery')"
+            class="mb-2"
+          />
+          <Toggle
+            v-model="formData.externalWalletOnly"
+            data-testid="externalWalletOnly"
+            :show-label="true"
+            :size="'small'"
+            :label-disabled="$t('app.externalWalletOnly')"
+            :label-enabled="$t('app.externalWalletOnly')"
             class="mb-2"
           />
         </Card>
@@ -512,10 +553,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             />
           </Card>
         </Card>
-        <Card v-if="isActiveTab(5)" class="px-4 py-4" :shadow="false">
-          <ExternalWalletOnlyTest />
-        </Card>
-        <div v-if="!isActiveTab(5)" class="flex justify-center mt-5">
+        <div class="flex justify-center mt-5">
           <Button
             v-if="formData.widget === 'modal'"
             :class="['w-full !h-auto group py-3 rounded-full flex items-center justify-center']"
@@ -525,7 +563,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             size="md"
             pill
             :disabled="isDisabled('btnConnect')"
-            @click="connect"
+            @click="showLogin"
           >
             Connect
           </Button>
