@@ -1,14 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import {
-  CHAIN_NAMESPACES,
-  ChainNamespaceType,
-  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
-  CONNECTOR_STATUS,
-  log,
-  Web3Auth,
-  WALLET_CONNECTORS,
-} from "@web3auth/modal";
+import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_STATUS, log } from "@web3auth/modal";
 import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 import { getChainConfig } from "../utils/chainconfig";
@@ -29,32 +21,6 @@ const formData = formDataStore;
 
 const { status, isConnected, isInitialized, isAuthorized } = useWeb3Auth();
 const { connect } = useWeb3AuthConnect();
-
-const showLogin = async () => {
-  if (formData.externalWalletOnly) {
-    // Create a new Web3Auth instance for external wallet only mode to avoid race condition
-    const web3auth = new Web3Auth({
-      clientId: clientIds[formData.network],
-      web3AuthNetwork: formData.network,
-      modalConfig: {
-        connectors: {
-          [WALLET_CONNECTORS.AUTH]: {
-            label: "Auth",
-            showOnModal: false,
-          },
-        },
-      },
-      uiConfig: {
-        primaryButton: "externalLogin",
-      },
-    });
-
-    await web3auth.init();
-    await web3auth.connect();
-  } else {
-    await connect();
-  }
-};
 
 const chainOptions = computed(() => {
   const allChains: { name: string; value: string }[] = [];
@@ -554,7 +520,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             size="md"
             pill
             :disabled="isDisabled('btnConnect')"
-            @click="showLogin"
+            @click="connect"
           >
             Connect
           </Button>
