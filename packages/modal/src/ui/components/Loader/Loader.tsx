@@ -166,7 +166,7 @@ function Loader(props: LoaderProps) {
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
 
-      {isConnectedAccordingToAuthenticationMode && <ConnectedStatus message={message} />}
+      {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
 
