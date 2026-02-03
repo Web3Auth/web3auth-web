@@ -527,6 +527,7 @@ function Root(props: RootProps) {
                           isExternalWalletModeOnly={isExternalWalletModeOnly}
                           onBackClick={onBackClick}
                           handleExternalWalletClick={preHandleExternalWalletClick}
+                          disableBackButton={bodyState.installLinks?.show || bodyState.multiChainSelector?.show}
                         />
                       )}
                   </>
