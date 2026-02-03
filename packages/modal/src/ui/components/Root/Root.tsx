@@ -53,6 +53,7 @@ function Root(props: RootProps) {
     tncLink = "",
     displayInstalledExternalWallets = true,
     displayExternalWalletsCount = true,
+    hideSuccessScreen = false,
   } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
@@ -452,6 +453,7 @@ function Root(props: RootProps) {
                 externalWalletsConfig={modalState.externalWalletsConfig}
                 walletRegistry={walletRegistry}
                 handleMobileVerifyConnect={handleMobileVerifyConnect}
+                hideSuccessScreen={hideSuccessScreen}
               />
             ) : (
               <>
