@@ -109,6 +109,7 @@ export type FormData = {
   whiteLabel: {
     enable: boolean;
     config: WhiteLabelData;
+    hideSuccessScreen: boolean;
   };
   connectors: string[];
   initialAuthenticationMode: ConnectorInitialAuthenticationModeType;

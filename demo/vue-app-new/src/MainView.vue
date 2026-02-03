@@ -109,9 +109,10 @@ const options = computed((): Web3AuthOptions => {
   }
 
   const { widget, targetId } = formData;
+  const { hideSuccessScreen } = formData.whiteLabel;
   const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel
-    ? { ...whiteLabel, widgetType: widget, targetId }
-    : { widgetType: widget, targetId };
+    ? { ...whiteLabel, widgetType: widget, targetId, hideSuccessScreen }
+    : { widgetType: widget, targetId, hideSuccessScreen };
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {

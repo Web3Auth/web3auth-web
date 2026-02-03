@@ -15,6 +15,7 @@ export const formDataStore = reactive<FormData>({
   whiteLabel: {
     enable: false,
     config: initWhiteLabel,
+    hideSuccessScreen: false,
   },
   loginProviders: [],
   showWalletDiscovery: true,
