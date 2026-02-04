@@ -102,7 +102,7 @@ export const ModalStateProvider: React.FC<ModalStateProviderProps> = ({ children
         v.showOnModal !== false
     );
     return isAnySocialLoginVisible;
-  }, [modalState]);
+  }, [modalState.showExternalWalletsOnly, modalState.socialLoginsConfig]);
 
   // Memo for checking if email passwordless login is visible
   const isEmailPasswordLessLoginVisible = useMemo(() => {
@@ -121,14 +121,15 @@ export const ModalStateProvider: React.FC<ModalStateProviderProps> = ({ children
 
   const showExternalWalletButton = useMemo(
     () => modalState.hasExternalWallets || !!modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK],
-    [modalState]
+    [modalState.hasExternalWallets, modalState.externalWalletsConfig]
   );
 
+  // TODO: rename this to be correct and refactor the logic
   const showExternalWalletPage = useMemo(
     () =>
       (areSocialLoginsVisible || showPasswordLessInput || !!modalState.externalWalletsConfig[WALLET_CONNECTORS.METAMASK]) &&
       !modalState.externalWalletsVisibility,
-    [areSocialLoginsVisible, showPasswordLessInput, modalState]
+    [areSocialLoginsVisible, showPasswordLessInput, modalState.externalWalletsVisibility, modalState.externalWalletsConfig]
   );
 
   const value = useMemo(
