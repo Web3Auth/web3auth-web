@@ -65,10 +65,10 @@ function Login(props: LoginProps) {
   const { analytics } = useContext(AnalyticsContext);
   const { appLogo, deviceDetails, uiConfig } = useWidget();
   const {
-    buttonRadiusType: buttonRadius = "pill",
-    logoAlignment = "center",
-    displayInstalledExternalWallets: showInstalledExternalWallets = true,
-    displayExternalWalletsCount: showExternalWalletCount = true,
+    buttonRadiusType: buttonRadius,
+    logoAlignment,
+    displayInstalledExternalWallets: showInstalledExternalWallets,
+    displayExternalWalletsCount: showExternalWalletCount,
   } = uiConfig;
 
   const [countryCode, setCountryCode] = useState<string>("");
