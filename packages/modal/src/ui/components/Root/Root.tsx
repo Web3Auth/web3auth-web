@@ -34,7 +34,7 @@ function Root(props: RootProps) {
   const { modalState, setModalState, showExternalWalletPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
   const { isDark, appLogo, chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
 
-  const { buttonRadiusType, privacyPolicy = "", tncLink = "", displayInstalledExternalWallets = true, hideSuccessScreen = false } = uiConfig;
+  const { buttonRadiusType, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
 
