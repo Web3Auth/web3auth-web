@@ -1,8 +1,8 @@
 import cn from "classnames";
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
-import { ThemedContext } from "../../../context/ThemeContext";
+import { useWidget } from "../../../context/WidgetContext";
 import i18n from "../../../localeImport";
 import { formatIOSMobile, getIcons } from "../../../utils";
 import Image from "../../Image";
@@ -12,7 +12,7 @@ function ButtonWallet(props: ButtonWalletProps) {
   const [t] = useTranslation(undefined, { i18n });
   const { deviceDetails, button, walletConnectUri, onClick, label, buttonRadius } = props;
 
-  const isDark = useContext(ThemedContext);
+  const { isDark } = useWidget();
 
   const isLink = useMemo(
     () => deviceDetails.platform !== "desktop" && button.href && button.hasWalletConnect && !button.isInstalled,

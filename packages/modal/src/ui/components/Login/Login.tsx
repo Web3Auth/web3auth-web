@@ -42,7 +42,6 @@ function Login(props: LoginProps) {
   const {
     handleSocialLoginHeight,
     installedExternalWalletConfig,
-    isDark,
     handleSocialLoginClick,
     totalExternalWallets,
     remainingUndisplayedWallets,
@@ -53,7 +52,7 @@ function Login(props: LoginProps) {
   const [t] = useTranslation(undefined, { i18n });
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
-  const { appLogo, deviceDetails, uiConfig } = useWidget();
+  const { appLogo, deviceDetails, uiConfig, isDark } = useWidget();
   // TODO: add appName, isEmailPrimary, isExternalPrimary
   const {
     modalState,

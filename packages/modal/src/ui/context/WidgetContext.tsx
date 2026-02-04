@@ -4,6 +4,7 @@ import React, { createContext, useContext, useMemo } from "react";
 import { browser, ExternalWalletEventType, LoginModalProps, os, platform, SocialLoginEventType } from "../interfaces";
 
 type WidgetContextType = {
+  isDark: boolean;
   appLogo?: string;
   appName: string;
   chainNamespaces: ChainNamespaceType[];
@@ -20,6 +21,7 @@ type WidgetContextType = {
 
 type WidgetProviderProps = {
   children: React.ReactNode;
+  isDark: boolean;
   appLogo?: string;
   appName: string;
   chainNamespaces: ChainNamespaceType[];
@@ -38,6 +40,7 @@ const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
 export const WidgetProvider: React.FC<WidgetProviderProps> = ({
   children,
+  isDark,
   appLogo,
   appName,
   chainNamespaces,
@@ -61,6 +64,7 @@ export const WidgetProvider: React.FC<WidgetProviderProps> = ({
   return (
     <WidgetContext.Provider
       value={{
+        isDark,
         appLogo,
         appName,
         chainNamespaces,

@@ -1,11 +1,10 @@
 import { WALLET_CONNECTORS, type WalletRegistryItem } from "@web3auth/no-modal";
-import { JSX, useCallback, useContext, useMemo, useState } from "react";
+import { JSX, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
 import { useModalState } from "../../context/ModalStateContext";
 import { BodyState, RootContext } from "../../context/RootContext";
-import { ThemedContext } from "../../context/ThemeContext";
 import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton, mobileOs, MODAL_STATUS, TOAST_TYPE, ToastType } from "../../interfaces";
 import i18n from "../../localeImport";
@@ -33,12 +32,11 @@ function Root(props: RootProps) {
   } = props;
 
   const { modalState, setModalState, showExternalWalletPage } = useModalState();
-  const { appLogo, chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
+  const { isDark, appLogo, chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
 
   const { buttonRadiusType, privacyPolicy = "", tncLink = "", displayInstalledExternalWallets = true } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
-  const { isDark } = useContext(ThemedContext);
 
   const [bodyState, setBodyState] = useState<BodyState>({
     metamaskQrCode: {
@@ -454,7 +452,6 @@ function Root(props: RootProps) {
                     {/* Login Screen */}
                     {modalState.currentPage === PAGES.LOGIN && showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
                       <Login
-                        isDark={isDark}
                         installedExternalWalletConfig={topInstalledConnectorButtons}
                         totalExternalWallets={allExternalWallets.length}
                         remainingUndisplayedWallets={remainingUndisplayedWallets}
@@ -467,7 +464,6 @@ function Root(props: RootProps) {
                     {/* Connect Wallet Screen */}
                     {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
                       <ConnectWallet
-                        isDark={isDark}
                         allRegistryButtons={allRegistryButtons}
                         connectorVisibilityMap={connectorVisibilityMap}
                         customConnectorButtons={customConnectorButtons}
