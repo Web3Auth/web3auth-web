@@ -29,6 +29,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     onBackClick,
     handleExternalWalletClick,
     handleWalletDetailsHeight,
+    disableBackButton,
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
@@ -246,7 +247,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     return walletConnectUri;
   }, [metamaskConnectUri, selectedButton, selectedWallet, walletConnectUri]);
 
-  const disableBackButton = useMemo(() => {
+  const hideBackButton = useMemo(() => {
     // If wallet is selected, show the back button
     if (selectedWallet) return false;
     // Otherwise, if external wallet mode only, login screen is skipped so back button is not needed
@@ -257,7 +258,13 @@ function ConnectWallet(props: ConnectWalletProps) {
   return (
     <div className="w3a--relative w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
       {/* Header */}
-      <ConnectWalletHeader disableBackButton={disableBackButton} onBackClick={handleBack} currentPage={currentPage} selectedButton={selectedButton} />
+      <ConnectWalletHeader
+        hideBackButton={hideBackButton}
+        disableBackButton={disableBackButton}
+        onBackClick={handleBack}
+        currentPage={currentPage}
+        selectedButton={selectedButton}
+      />
       {/* Body */}
       {selectedWallet ? (
         <ConnectWalletQrCode
@@ -266,6 +273,7 @@ function ConnectWallet(props: ConnectWalletProps) {
           selectedButton={selectedButton}
           primaryColor={selectedButton.walletRegistryItem?.primaryColor}
           logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
+          platform={deviceDetails.platform}
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">

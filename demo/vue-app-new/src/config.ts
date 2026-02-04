@@ -109,12 +109,14 @@ export type FormData = {
   whiteLabel: {
     enable: boolean;
     config: WhiteLabelData;
+    hideSuccessScreen: boolean;
   };
   connectors: string[];
   initialAuthenticationMode: ConnectorInitialAuthenticationModeType;
   loginProviders: AUTH_CONNECTION_TYPE[];
   showWalletDiscovery: boolean;
   multiInjectedProviderDiscovery: boolean;
+  externalWalletOnly: boolean;
   loginMethods: LoginMethodConfig;
   walletPlugin: {
     enable: boolean;
