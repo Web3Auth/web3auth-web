@@ -11,4 +11,5 @@ export interface ConnectWalletProps {
   handleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;
   handleWalletDetailsHeight: () => void;
   disableBackButton?: boolean;
+  isExternalWalletModeOnly?: boolean;
 }

@@ -24,12 +24,13 @@ function ConnectWallet(props: ConnectWalletProps) {
     handleExternalWalletClick,
     handleWalletDetailsHeight,
     disableBackButton,
+    isExternalWalletModeOnly,
   } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
   const { walletRegistry, deviceDetails } = useWidget();
-  const { showPasswordLessInput, areSocialLoginsVisible, modalState } = useModalState();
+  const { modalState } = useModalState();
   const { externalWalletsConfig: config, walletConnectUri, metamaskConnectUri } = modalState;
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
@@ -52,10 +53,6 @@ function ConnectWallet(props: ConnectWalletProps) {
       handleWalletDetailsHeight();
     }
   };
-
-  const isExternalWalletModeOnly = useMemo(() => {
-    return !showPasswordLessInput && !areSocialLoginsVisible;
-  }, [areSocialLoginsVisible, showPasswordLessInput]);
 
   const walletDiscoverySupported = useMemo(() => {
     const supported = walletRegistry && (Object.keys(walletRegistry.default || {}).length > 0 || Object.keys(walletRegistry.others || {}).length > 0);
