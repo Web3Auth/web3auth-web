@@ -40,7 +40,7 @@ const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
 export const WidgetProvider: React.FC<WidgetProviderProps> = ({
   children,
-  isDark,
+  isDark = true,
   appLogo,
   appName,
   chainNamespaces,
