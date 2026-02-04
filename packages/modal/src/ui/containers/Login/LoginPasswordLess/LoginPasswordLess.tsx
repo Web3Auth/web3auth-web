@@ -1,9 +1,9 @@
 import { FormEvent, KeyboardEvent, MouseEvent as ReactMouseEvent, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import PulseLoader from "../../../components/PulseLoader";
 import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
-import PulseLoader from "../../PulseLoader";
 import { LoginPasswordLessProps } from "./LoginPasswordLess.type";
 
 function LoginPasswordLess(props: LoginPasswordLessProps) {

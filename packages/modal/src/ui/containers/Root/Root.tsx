@@ -2,6 +2,11 @@ import { WALLET_CONNECTORS, type WalletRegistryItem } from "@web3auth/no-modal";
 import { JSX, useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import BottomSheet from "../../components/BottomSheet";
+import Footer from "../../components/Footer/Footer";
+import Image from "../../components/Image";
+import Loader from "../../components/Loader";
+import Toast from "../../components/Toast";
 import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
 import { useModalState } from "../../context/ModalStateContext";
 import { BodyState, RootContext } from "../../context/RootContext";
@@ -9,16 +14,11 @@ import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton, mobileOs, MODAL_STATUS, TOAST_TYPE, ToastType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
-import BottomSheet from "../BottomSheet";
 import ConnectWallet from "../ConnectWallet";
 import ConnectWalletChainNamespaceSelect from "../ConnectWallet/ConnectWalletChainNamespaceSelect";
 import ConnectWalletHeader from "../ConnectWallet/ConnectWalletHeader";
 import ConnectWalletQrCode from "../ConnectWallet/ConnectWalletQrCode";
-import Footer from "../Footer/Footer";
-import Image from "../Image";
-import Loader from "../Loader";
 import Login from "../Login";
-import Toast from "../Toast";
 import { RootProps } from "./Root.type";
 
 function Root(props: RootProps) {
