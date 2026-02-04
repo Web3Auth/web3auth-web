@@ -1,9 +1,9 @@
 import { useTranslation } from "react-i18next";
 
+import Button, { BUTTON_TYPE } from "../../../components/Button";
 import { useWidget } from "../../../context/WidgetContext";
 import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
-import Button, { BUTTON_TYPE } from "../../../components/Button";
 import { ConnectWalletListProps, MoreWalletsButtonProps, WalletsFoundProps } from "./ConnectWalletList.type";
 
 function NoWalletsFound() {

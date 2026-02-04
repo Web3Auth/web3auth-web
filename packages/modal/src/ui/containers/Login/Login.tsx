@@ -11,6 +11,8 @@ import {
 import { MouseEvent as ReactMouseEvent, useCallback, useContext, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import Image from "../../components/Image";
+import SocialLoginList from "../../components/SocialLoginList/SocialLoginList";
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
@@ -23,8 +25,6 @@ import { isTestAccountPattern } from "../../helper/testAccounts";
 import type { ExternalButton, rowType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getIcons, getUserCountry, validatePhoneNumber } from "../../utils";
-import Image from "../../components/Image";
-import SocialLoginList from "../../components/SocialLoginList/SocialLoginList";
 import { LoginProps } from "./Login.type";
 import LoginOtp from "./LoginOtp";
 import LoginPasswordLess from "./LoginPasswordLess";

@@ -1,8 +1,8 @@
 import { useTranslation } from "react-i18next";
 
+import Image from "../../../components/Image";
 import i18n from "../../../localeImport";
 import { getIcons } from "../../../utils";
-import Image from "../../../components/Image";
 import { ConnectWalletChainNamespaceSelectProps } from "./ConnectWalletChainNamespaceSelect.type";
 
 const ConnectWalletChainNamespaceSelect = (props: ConnectWalletChainNamespaceSelectProps) => {

@@ -1,12 +1,12 @@
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_NAMES, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS, WIDGET_TYPE } from "@web3auth/no-modal";
 import { useEffect, useMemo } from "react";
 
+import Modal from "../../components/Modal";
 import { PAGES } from "../../constants";
 import { ModalStateProvider, useModalState } from "../../context/ModalStateContext";
 import { useWidget } from "../../context/WidgetContext";
 import { type ExternalWalletEventType, MODAL_STATUS, type SocialLoginEventType } from "../../interfaces";
 import Embed from "../Embed";
-import Modal from "../../components/Modal";
 import Root from "../Root";
 import { WidgetProps } from "./Widget.type";
 
