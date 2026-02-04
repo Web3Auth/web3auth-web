@@ -1,9 +1,11 @@
+import { type ReactNode } from "react";
+
 import { BorderRadiusType } from "../../interfaces";
 
 export interface BottomSheetProps {
   isShown: boolean;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   sheetClassName?: string;
   showCloseButton?: boolean;
   borderRadiusType?: BorderRadiusType;
