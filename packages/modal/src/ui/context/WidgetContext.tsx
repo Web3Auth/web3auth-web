@@ -1,5 +1,5 @@
 import { ChainNamespaceType, ConnectorInitialAuthenticationModeType, WALLET_CONNECTOR_TYPE, WalletRegistry } from "@web3auth/no-modal";
-import React, { createContext, useContext, useMemo } from "react";
+import React, { createContext, useContext } from "react";
 
 import { browser, ExternalWalletEventType, LoginModalProps, os, platform, SocialLoginEventType } from "../interfaces";
 
@@ -43,7 +43,7 @@ export const WidgetProvider: React.FC<WidgetProviderProps> = ({
   chainNamespaces,
   walletRegistry,
   deviceDetails,
-  uiConfig: uiConfigProps,
+  uiConfig,
   initialAuthenticationMode,
   handleSocialLoginClick,
   handleExternalWalletClick,
@@ -51,13 +51,6 @@ export const WidgetProvider: React.FC<WidgetProviderProps> = ({
   handleShowExternalWallets,
   closeModal,
 }) => {
-  const uiConfig = useMemo<LoginModalProps>(() => {
-    return {
-      buttonRadiusType: "pill",
-      ...uiConfigProps,
-    };
-  }, [uiConfigProps]);
-
   return (
     <WidgetContext.Provider
       value={{

@@ -101,6 +101,13 @@ export class LoginModal {
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
     if (!uiConfig.widgetType) this.uiConfig.widgetType = WIDGET_TYPE.MODAL;
     if (!uiConfig.initialAuthenticationMode) this.uiConfig.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY;
+    if (!uiConfig.buttonRadiusType) this.uiConfig.buttonRadiusType = "pill";
+    if (!uiConfig.logoAlignment) this.uiConfig.logoAlignment = "center";
+    if (typeof uiConfig.displayInstalledExternalWallets === "undefined") this.uiConfig.displayInstalledExternalWallets = true;
+    if (typeof uiConfig.displayExternalWalletsCount === "undefined") this.uiConfig.displayExternalWalletsCount = true;
+    if (typeof uiConfig.hideSuccessScreen === "undefined") this.uiConfig.hideSuccessScreen = false;
+    if (!uiConfig.privacyPolicy) this.uiConfig.privacyPolicy = "";
+    if (!uiConfig.tncLink) this.uiConfig.tncLink = "";
 
     if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");
