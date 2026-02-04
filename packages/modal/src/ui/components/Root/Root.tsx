@@ -3,6 +3,7 @@ import { JSX, useCallback, useContext, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
+import { useModalState } from "../../context/ModalStateContext";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
 import { useWidget } from "../../context/WidgetContext";
@@ -23,25 +24,15 @@ import { RootProps } from "./Root.type";
 
 function Root(props: RootProps) {
   const {
-    setModalState,
-    modalState,
     handleExternalWalletBtnClick,
     handleMobileVerifyConnect,
     onCloseLoader,
     handleSocialLoginClick,
-    showPasswordLessInput,
-    showExternalWalletButton,
-    socialLoginsConfig,
-    areSocialLoginsVisible,
-    isEmailPrimary,
-    isExternalPrimary,
-    showExternalWalletPage,
-    isEmailPasswordLessLoginVisible,
-    isSmsPasswordLessLoginVisible,
     preHandleExternalWalletClick,
     isConnectAndSignAuthenticationMode,
   } = props;
 
+  const { modalState, setModalState, showExternalWalletPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
   const { appLogo, chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
 
   const { buttonRadiusType, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen } = uiConfig;
@@ -90,10 +81,6 @@ function Root(props: RootProps) {
     });
     if (handleExternalWalletBtnClick) handleExternalWalletBtnClick(flag);
   };
-
-  const isExternalWalletModeOnly = useMemo(() => {
-    return !showPasswordLessInput && !areSocialLoginsVisible;
-  }, [areSocialLoginsVisible, showPasswordLessInput]);
 
   // Wallet Details
   const mobileInstallLinks = useMemo<JSX.Element[]>(() => {
@@ -344,6 +331,10 @@ function Root(props: RootProps) {
     }).length;
   }, [allExternalWallets, topInstalledConnectorButtons]);
 
+  const isExternalWalletModeOnly = useMemo(() => {
+    return !showPasswordLessInput && !areSocialLoginsVisible;
+  }, [areSocialLoginsVisible, showPasswordLessInput]);
+
   const handleSocialLoginHeight = () => {
     setIsSocialLoginsExpanded((prev) => !prev);
   };
@@ -469,20 +460,8 @@ function Root(props: RootProps) {
                     {/* Login Screen */}
                     {modalState.currentPage === PAGES.LOGIN && showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
                       <Login
-                        web3authClientId={modalState.web3authClientId}
-                        web3authNetwork={modalState.web3authNetwork}
-                        authBuildEnv={modalState.authBuildEnv}
-                        isModalVisible={modalState.modalVisibility}
                         isDark={isDark}
-                        showPasswordLessInput={showPasswordLessInput}
-                        showExternalWalletButton={showExternalWalletButton}
-                        socialLoginsConfig={socialLoginsConfig}
-                        areSocialLoginsVisible={areSocialLoginsVisible}
-                        isEmailPrimary={isEmailPrimary}
-                        isExternalPrimary={isExternalPrimary}
                         installedExternalWalletConfig={topInstalledConnectorButtons}
-                        isEmailPasswordLessLoginVisible={isEmailPasswordLessLoginVisible}
-                        isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
                         totalExternalWallets={allExternalWallets.length}
                         remainingUndisplayedWallets={remainingUndisplayedWallets}
                         handleSocialLoginClick={handleSocialLoginClick}
@@ -497,9 +476,6 @@ function Root(props: RootProps) {
                       modalState.status === MODAL_STATUS.INITIALIZED && (
                         <ConnectWallet
                           isDark={isDark}
-                          walletConnectUri={modalState.walletConnectUri}
-                          metamaskConnectUri={modalState.metamaskConnectUri}
-                          config={modalState.externalWalletsConfig}
                           allRegistryButtons={allRegistryButtons}
                           connectorVisibilityMap={connectorVisibilityMap}
                           customConnectorButtons={customConnectorButtons}

@@ -1,5 +1,5 @@
 import { ChainNamespaceType, ConnectorInitialAuthenticationModeType, WALLET_CONNECTOR_TYPE, WalletRegistry } from "@web3auth/no-modal";
-import React, { createContext, useContext } from "react";
+import { createContext, type FC, type ReactNode, useContext } from "react";
 
 import { browser, ExternalWalletEventType, LoginModalProps, os, platform, SocialLoginEventType } from "../interfaces";
 
@@ -19,7 +19,7 @@ type WidgetContextType = {
 };
 
 type WidgetProviderProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   appLogo?: string;
   appName: string;
   chainNamespaces: ChainNamespaceType[];
@@ -36,7 +36,7 @@ type WidgetProviderProps = {
 
 const WidgetContext = createContext<WidgetContextType | undefined>(undefined);
 
-export const WidgetProvider: React.FC<WidgetProviderProps> = ({
+export const WidgetProvider: FC<WidgetProviderProps> = ({
   children,
   appLogo,
   appName,

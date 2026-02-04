@@ -127,24 +127,28 @@ export const MODAL_STATUS = {
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 
 export interface ModalState {
+  // UI State - changes frequently during user interaction
   status: ModalStatusType;
-  externalWalletsInitialized: boolean;
-  hasExternalWallets: boolean;
-  externalWalletsVisibility: boolean;
   modalVisibility: boolean;
   modalVisibilityDelayed: boolean;
+  externalWalletsVisibility: boolean;
+  currentPage?: string;
+
+  // Loading State - changes during async operations
   postLoadingMessage: string;
-  walletConnectUri: string;
-  metamaskConnectUri: string;
-  socialLoginsConfig: SocialLoginsConfig;
-  externalWalletsConfig: Record<string, BaseConnectorConfig>;
   detailedLoaderConnector: string;
   detailedLoaderConnectorName: string;
+
+  // External Wallets State - wallet-specific, changes less often
+  hasExternalWallets: boolean;
+  externalWalletsInitialized: boolean;
   showExternalWalletsOnly: boolean;
-  currentPage?: string;
-  web3authClientId: string;
-  web3authNetwork: WEB3AUTH_NETWORK_TYPE;
-  authBuildEnv: BUILD_ENV_TYPE;
+  walletConnectUri: string;
+  metamaskConnectUri: string;
+
+  // Config State - set during initialization, rarely changes
+  socialLoginsConfig: SocialLoginsConfig;
+  externalWalletsConfig: Record<string, BaseConnectorConfig>;
 }
 
 export type SocialLoginEventType = { connector: WALLET_CONNECTOR_TYPE; loginParams: ModalLoginParams };

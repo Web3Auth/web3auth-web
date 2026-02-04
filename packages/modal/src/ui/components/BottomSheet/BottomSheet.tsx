@@ -1,3 +1,5 @@
+import { type MouseEvent } from "react";
+
 import { cn } from "../../utils";
 import { BottomSheetProps } from "./BottomSheet.type";
 /**
@@ -5,7 +7,7 @@ import { BottomSheetProps } from "./BottomSheet.type";
  * @returns BottomSheet component
  */
 function BottomSheet({ isShown, onClose, children, sheetClassName, showCloseButton = true, borderRadiusType = "large" }: BottomSheetProps) {
-  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleClose = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (onClose) onClose();
   };

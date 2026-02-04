@@ -14,6 +14,7 @@ import { useTranslation } from "react-i18next";
 import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
+import { useModalState } from "../../context/ModalStateContext";
 import { RootContext } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
 import type { PasswordlessHandler } from "../../handlers/AbstractHandler";
@@ -38,37 +39,39 @@ const restrictedLoginMethods: string[] = [
 ];
 
 function Login(props: LoginProps) {
-  // TODO: add appName, isEmailPrimary, isExternalPrimary
   const {
-    web3authClientId,
-    web3authNetwork,
-    authBuildEnv,
-    isModalVisible,
     handleSocialLoginHeight,
-    socialLoginsConfig,
     installedExternalWalletConfig,
     isDark,
     handleSocialLoginClick,
     totalExternalWallets,
     remainingUndisplayedWallets,
-    isEmailPasswordLessLoginVisible,
-    isSmsPasswordLessLoginVisible,
     handleExternalWalletBtnClick,
     handleExternalWalletClick,
-    areSocialLoginsVisible,
-    showPasswordLessInput,
-    showExternalWalletButton,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
   const { appLogo, deviceDetails, uiConfig } = useWidget();
+  // TODO: add appName, isEmailPrimary, isExternalPrimary
+  const {
+    modalState,
+    areSocialLoginsVisible,
+    isEmailPasswordLessLoginVisible,
+    isSmsPasswordLessLoginVisible,
+    showPasswordLessInput,
+    showExternalWalletButton,
+  } = useModalState();
+  const { modalVisibility: isModalVisible, socialLoginsConfig } = modalState;
   const {
     buttonRadiusType: buttonRadius,
     logoAlignment,
     displayInstalledExternalWallets: showInstalledExternalWallets,
     displayExternalWalletsCount: showExternalWalletCount,
+    web3authClientId,
+    web3authNetwork,
+    authBuildEnv,
   } = uiConfig;
 
   const [countryCode, setCountryCode] = useState<string>("");
