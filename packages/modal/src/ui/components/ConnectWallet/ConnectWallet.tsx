@@ -4,6 +4,7 @@ import { FormEvent, useContext, useEffect, useMemo, useState } from "react";
 import { CONNECT_WALLET_PAGES } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
 import { RootContext } from "../../context/RootContext";
+import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton } from "../../interfaces";
 import { ConnectWalletProps } from "./ConnectWallet.type";
 import ConnectWalletChainFilter from "./ConnectWalletChainFilter";
@@ -18,13 +19,9 @@ function ConnectWallet(props: ConnectWalletProps) {
     config,
     walletConnectUri,
     metamaskConnectUri,
-    walletRegistry,
     allRegistryButtons,
     customConnectorButtons,
     connectorVisibilityMap,
-    deviceDetails,
-    buttonRadius = "pill",
-    chainNamespace,
     isExternalWalletModeOnly,
     onBackClick,
     handleExternalWalletClick,
@@ -34,6 +31,7 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
+  const { walletRegistry, deviceDetails } = useWidget();
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = useState(false);
@@ -277,22 +275,13 @@ function ConnectWallet(props: ConnectWalletProps) {
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
-          {chainNamespace.length > 1 && (
-            <ConnectWalletChainFilter
-              isDark={isDark}
-              isLoading={isLoading}
-              selectedChain={selectedChain}
-              setSelectedChain={handleChainFilterChange}
-              chainNamespace={chainNamespace}
-            />
-          )}
+          <ConnectWalletChainFilter isDark={isDark} isLoading={isLoading} selectedChain={selectedChain} setSelectedChain={handleChainFilterChange} />
           {/* Search Input */}
           <ConnectWalletSearch
             totalExternalWalletCount={totalExternalWalletsCount}
             isLoading={isLoading}
             walletSearch={walletSearch}
             handleWalletSearch={handleWalletSearch}
-            buttonRadius={buttonRadius}
           />
           {/* Wallet List */}
           <ConnectWalletList
@@ -303,9 +292,7 @@ function ConnectWallet(props: ConnectWalletProps) {
             handleWalletClick={handleWalletClick}
             handleMoreWallets={handleMoreWallets}
             isDark={isDark}
-            deviceDetails={deviceDetails}
             walletConnectUri={walletConnectUri}
-            buttonRadius={buttonRadius}
             isShowAllWallets={isShowAllWallets}
           />
         </div>

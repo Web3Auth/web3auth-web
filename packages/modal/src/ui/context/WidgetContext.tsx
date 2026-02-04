@@ -1,7 +1,7 @@
 import { ChainNamespaceType, ConnectorInitialAuthenticationModeType, WALLET_CONNECTOR_TYPE, WalletRegistry } from "@web3auth/no-modal";
 import React, { createContext, useContext } from "react";
 
-import { browser, ExternalWalletEventType, os, platform, SocialLoginEventType, UIConfig } from "../interfaces";
+import { browser, ExternalWalletEventType, LoginModalProps, os, platform, SocialLoginEventType } from "../interfaces";
 
 type WidgetContextType = {
   appLogo?: string;
@@ -9,7 +9,7 @@ type WidgetContextType = {
   chainNamespaces: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
   deviceDetails: { platform: platform; browser: browser; os: os };
-  uiConfig: UIConfig;
+  uiConfig: LoginModalProps;
   initialAuthenticationMode: ConnectorInitialAuthenticationModeType;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
@@ -25,7 +25,7 @@ type WidgetProviderProps = {
   chainNamespaces: ChainNamespaceType[];
   walletRegistry?: WalletRegistry;
   deviceDetails: { platform: platform; browser: browser; os: os };
-  uiConfig: UIConfig;
+  uiConfig: LoginModalProps;
   initialAuthenticationMode: ConnectorInitialAuthenticationModeType;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;

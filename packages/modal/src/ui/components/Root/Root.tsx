@@ -5,6 +5,7 @@ import { useTranslation } from "react-i18next";
 import { CONNECT_WALLET_PAGES, DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
 import { BodyState, RootContext } from "../../context/RootContext";
 import { ThemedContext } from "../../context/ThemeContext";
+import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton, mobileOs, MODAL_STATUS, TOAST_TYPE, ToastType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
@@ -26,9 +27,6 @@ function Root(props: RootProps) {
     modalState,
     handleExternalWalletBtnClick,
     handleMobileVerifyConnect,
-    chainNamespaces,
-    walletRegistry,
-    appLogo,
     onCloseLoader,
     handleSocialLoginClick,
     showPasswordLessInput,
@@ -41,20 +39,12 @@ function Root(props: RootProps) {
     isEmailPasswordLessLoginVisible,
     isSmsPasswordLessLoginVisible,
     preHandleExternalWalletClick,
-    uiConfig,
-    deviceDetails,
     isConnectAndSignAuthenticationMode,
   } = props;
 
-  const {
-    logoAlignment = "center",
-    buttonRadiusType = "pill",
-    privacyPolicy = "",
-    tncLink = "",
-    displayInstalledExternalWallets = true,
-    displayExternalWalletsCount = true,
-    hideSuccessScreen = false,
-  } = uiConfig;
+  const { appLogo, chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
+
+  const { buttonRadiusType, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
   const { isDark } = useContext(ThemedContext);
@@ -484,11 +474,8 @@ function Root(props: RootProps) {
                         authBuildEnv={modalState.authBuildEnv}
                         isModalVisible={modalState.modalVisibility}
                         isDark={isDark}
-                        appLogo={appLogo}
                         showPasswordLessInput={showPasswordLessInput}
                         showExternalWalletButton={showExternalWalletButton}
-                        showExternalWalletCount={displayExternalWalletsCount}
-                        showInstalledExternalWallets={displayInstalledExternalWallets}
                         socialLoginsConfig={socialLoginsConfig}
                         areSocialLoginsVisible={areSocialLoginsVisible}
                         isEmailPrimary={isEmailPrimary}
@@ -498,9 +485,6 @@ function Root(props: RootProps) {
                         isSmsPasswordLessLoginVisible={isSmsPasswordLessLoginVisible}
                         totalExternalWallets={allExternalWallets.length}
                         remainingUndisplayedWallets={remainingUndisplayedWallets}
-                        logoAlignment={logoAlignment}
-                        buttonRadius={buttonRadiusType}
-                        deviceDetails={deviceDetails}
                         handleSocialLoginClick={handleSocialLoginClick}
                         handleExternalWalletBtnClick={onExternalWalletBtnClick}
                         handleSocialLoginHeight={handleSocialLoginHeight}
@@ -516,13 +500,9 @@ function Root(props: RootProps) {
                           walletConnectUri={modalState.walletConnectUri}
                           metamaskConnectUri={modalState.metamaskConnectUri}
                           config={modalState.externalWalletsConfig}
-                          walletRegistry={walletRegistry}
                           allRegistryButtons={allRegistryButtons}
                           connectorVisibilityMap={connectorVisibilityMap}
                           customConnectorButtons={customConnectorButtons}
-                          deviceDetails={deviceDetails}
-                          chainNamespace={chainNamespaces}
-                          buttonRadius={buttonRadiusType}
                           handleWalletDetailsHeight={handleWalletDetailsHeight}
                           isExternalWalletModeOnly={isExternalWalletModeOnly}
                           onBackClick={onBackClick}
@@ -541,7 +521,7 @@ function Root(props: RootProps) {
             {/* Multi Chain Selector */}
             {bodyState.multiChainSelector?.show && (
               <BottomSheet
-                uiConfig={uiConfig}
+                borderRadiusType={uiConfig.borderRadiusType}
                 isShown={bodyState.multiChainSelector.show}
                 onClose={() => setBodyState({ ...bodyState, multiChainSelector: { show: false, wallet: null } })}
               >
@@ -559,7 +539,7 @@ function Root(props: RootProps) {
             {/* Wallet Install Links */}
             {bodyState.installLinks?.show && (
               <BottomSheet
-                uiConfig={uiConfig}
+                borderRadiusType={uiConfig.borderRadiusType}
                 isShown={bodyState.installLinks.show}
                 onClose={() => setBodyState({ ...bodyState, installLinks: { show: false, wallet: null } })}
               >

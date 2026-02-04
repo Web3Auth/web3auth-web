@@ -1,16 +1,6 @@
 import { BUILD_ENV_TYPE, WEB3AUTH_NETWORK_TYPE } from "@web3auth/auth";
 
-import type {
-  browser,
-  ButtonRadiusType,
-  ExternalButton,
-  ExternalWalletEventType,
-  LogoAlignmentType,
-  os,
-  platform,
-  SocialLoginEventType,
-  SocialLoginsConfig,
-} from "../../interfaces";
+import type { ExternalButton, ExternalWalletEventType, SocialLoginEventType, SocialLoginsConfig } from "../../interfaces";
 
 export interface LoginProps {
   web3authClientId: string;
@@ -22,8 +12,6 @@ export interface LoginProps {
   appName?: string;
   showPasswordLessInput: boolean;
   showExternalWalletButton: boolean;
-  showExternalWalletCount: boolean;
-  showInstalledExternalWallets: boolean;
   socialLoginsConfig: SocialLoginsConfig;
   installedExternalWalletConfig: ExternalButton[];
   areSocialLoginsVisible: boolean;
@@ -33,9 +21,6 @@ export interface LoginProps {
   isSmsPasswordLessLoginVisible: boolean;
   totalExternalWallets: number;
   remainingUndisplayedWallets: number;
-  logoAlignment?: LogoAlignmentType;
-  buttonRadius?: ButtonRadiusType;
-  deviceDetails: { platform: platform; browser: browser; os: os };
   handleExternalWalletBtnClick?: (flag: boolean) => void;
   handleSocialLoginClick: (params: SocialLoginEventType) => void;
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;

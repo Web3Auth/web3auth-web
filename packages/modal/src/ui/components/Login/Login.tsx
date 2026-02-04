@@ -15,6 +15,7 @@ import { capitalizeFirstLetter, CAPTCHA_SITE_KEY } from "../../config";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT } from "../../constants";
 import { AnalyticsContext } from "../../context/AnalyticsContext";
 import { RootContext } from "../../context/RootContext";
+import { useWidget } from "../../context/WidgetContext";
 import type { PasswordlessHandler } from "../../handlers/AbstractHandler";
 import { createPasswordlessHandler } from "../../handlers/factory";
 import { isTestAccountPattern } from "../../helper/testAccounts";
@@ -42,7 +43,6 @@ function Login(props: LoginProps) {
     web3authClientId,
     web3authNetwork,
     authBuildEnv,
-    appLogo,
     isModalVisible,
     handleSocialLoginHeight,
     socialLoginsConfig,
@@ -58,16 +58,18 @@ function Login(props: LoginProps) {
     areSocialLoginsVisible,
     showPasswordLessInput,
     showExternalWalletButton,
-    showExternalWalletCount,
-    showInstalledExternalWallets,
-    logoAlignment = "center",
-    buttonRadius = "pill",
-    deviceDetails,
   } = props;
 
   const [t] = useTranslation(undefined, { i18n });
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
+  const { appLogo, deviceDetails, uiConfig } = useWidget();
+  const {
+    buttonRadiusType: buttonRadius,
+    logoAlignment,
+    displayInstalledExternalWallets: showInstalledExternalWallets,
+    displayExternalWalletsCount: showExternalWalletCount,
+  } = uiConfig;
 
   const [countryCode, setCountryCode] = useState<string>("");
   const [countryFlag, setCountryFlag] = useState<string>("");

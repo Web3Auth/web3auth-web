@@ -1,12 +1,15 @@
 import { FormEvent, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useWidget } from "../../../context/WidgetContext";
 import i18n from "../../../localeImport";
 import { cn } from "../../../utils";
 import { ConnectWalletSearchProps } from "./ConnectWalletSearch.type";
 
 function ConnectWalletSearch(props: ConnectWalletSearchProps) {
-  const { totalExternalWalletCount, isLoading, walletSearch, handleWalletSearch, buttonRadius } = props;
+  const { totalExternalWalletCount, isLoading, walletSearch, handleWalletSearch } = props;
+  const { uiConfig } = useWidget();
+  const { buttonRadiusType: buttonRadius } = uiConfig;
 
   const [isInputFocused, setIsInputFocused] = useState(false);
   const [t] = useTranslation(undefined, { i18n });
