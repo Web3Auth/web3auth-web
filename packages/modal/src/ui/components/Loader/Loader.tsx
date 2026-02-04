@@ -139,6 +139,7 @@ function Loader(props: LoaderProps) {
     externalWalletsConfig,
     walletRegistry,
     handleMobileVerifyConnect,
+    hideSuccessScreen = false,
   } = props;
 
   const isConnectedAccordingToAuthenticationMode = useMemo(
@@ -150,19 +151,22 @@ function Loader(props: LoaderProps) {
 
   useEffect(() => {
     if (isConnectedAccordingToAuthenticationMode) {
+      // If hideSuccessScreen is true, skip success screen entirely (delay = 0)
+      // Otherwise, show success screen for 1 second for all login types
+      const delay = hideSuccessScreen ? 0 : 1000;
       const timeout = setTimeout(() => {
         onClose();
-      }, 1000);
+      }, delay);
 
       return () => clearTimeout(timeout);
     }
-  }, [isConnectedAccordingToAuthenticationMode, onClose]);
+  }, [isConnectedAccordingToAuthenticationMode, hideSuccessScreen, onClose]);
 
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
       {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
 
-      {isConnectedAccordingToAuthenticationMode && <ConnectedStatus message={message} />}
+      {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
 
