@@ -1,7 +1,7 @@
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import { cloneDeep, log, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
-import React, { createContext, type Dispatch, type SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, type Dispatch, type SetStateAction, useContext, useEffect, useMemo, useState } from "react";
 
 import { PAGES } from "../constants";
 import { MODAL_STATUS, ModalState, StateEmitterEvents } from "../interfaces";
@@ -14,7 +14,6 @@ type StateListener = {
 type ModalStateContextType = {
   modalState: ModalState;
   setModalState: Dispatch<SetStateAction<ModalState>>;
-  updateModalState: (newState: Partial<ModalState>) => void;
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
   isExternalPrimary: boolean;
@@ -69,22 +68,17 @@ export const ModalStateProvider: React.FC<ModalStateProviderProps> = ({ children
     modalVisibility: initialVisibility,
   });
 
-  // Helper function for partial updates with deep merge
-  const updateModalState = useCallback((newState: Partial<ModalState>) => {
-    setModalState((prevState) => {
-      const mergedState = cloneDeep(deepmerge(prevState, newState, { arrayMerge: (_prevState, newState) => newState }));
-      return mergedState;
-    });
-  }, []);
-
   // Listen for external state updates
   useEffect(() => {
     stateListener.on("STATE_UPDATED", (newModalState: Partial<ModalState>) => {
       log.debug("state updated", newModalState);
-      updateModalState(newModalState);
+      setModalState((prevState) => {
+        const mergedState = cloneDeep(deepmerge(prevState, newModalState, { arrayMerge: (_prevState, newState) => newState }));
+        return mergedState;
+      });
     });
     stateListener.emit("MOUNTED");
-  }, [stateListener, updateModalState]);
+  }, [stateListener]);
 
   // Update visibility when initialVisibility changes
   useEffect(() => {
@@ -141,7 +135,6 @@ export const ModalStateProvider: React.FC<ModalStateProviderProps> = ({ children
     () => ({
       modalState,
       setModalState,
-      updateModalState,
       areSocialLoginsVisible,
       isEmailPrimary,
       isExternalPrimary,
@@ -153,7 +146,6 @@ export const ModalStateProvider: React.FC<ModalStateProviderProps> = ({ children
     }),
     [
       modalState,
-      updateModalState,
       isEmailPrimary,
       isExternalPrimary,
       areSocialLoginsVisible,
