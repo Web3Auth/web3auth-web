@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useWidget } from "../../../context/WidgetContext";
 import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
-import Button, { BUTTON_TYPE } from "../../Button";
+import Button, { BUTTON_TYPE } from "../../../components/Button";
 import { ConnectWalletListProps, MoreWalletsButtonProps, WalletsFoundProps } from "./ConnectWalletList.type";
 
 function NoWalletsFound() {

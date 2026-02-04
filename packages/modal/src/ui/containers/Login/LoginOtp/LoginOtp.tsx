@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 
 import i18n from "../../../localeImport";
 import { getIcons } from "../../../utils";
-import Otp from "../../Otp";
+import Otp from "../../../components/Otp";
 import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
 
 /**

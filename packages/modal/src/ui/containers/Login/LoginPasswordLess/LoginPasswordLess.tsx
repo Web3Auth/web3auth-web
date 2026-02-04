@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 
 import i18n from "../../../localeImport";
 import { cn, getIcons } from "../../../utils";
-import PulseLoader from "../../PulseLoader";
+import PulseLoader from "../../../components/PulseLoader";
 import { LoginPasswordLessProps } from "./LoginPasswordLess.type";
 
 function LoginPasswordLess(props: LoginPasswordLessProps) {

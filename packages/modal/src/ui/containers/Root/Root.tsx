@@ -9,16 +9,16 @@ import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton, mobileOs, MODAL_STATUS, TOAST_TYPE, ToastType } from "../../interfaces";
 import i18n from "../../localeImport";
 import { cn, getBrowserExtensionUrl, getBrowserName, getIcons, getMobileInstallLink, getOsName } from "../../utils";
-import BottomSheet from "../BottomSheet";
+import BottomSheet from "../../components/BottomSheet";
+import Footer from "../../components/Footer/Footer";
+import Image from "../../components/Image";
+import Loader from "../../components/Loader";
+import Toast from "../../components/Toast";
 import ConnectWallet from "../ConnectWallet";
 import ConnectWalletChainNamespaceSelect from "../ConnectWallet/ConnectWalletChainNamespaceSelect";
 import ConnectWalletHeader from "../ConnectWallet/ConnectWalletHeader";
 import ConnectWalletQrCode from "../ConnectWallet/ConnectWalletQrCode";
-import Footer from "../Footer/Footer";
-import Image from "../Image";
-import Loader from "../Loader";
 import Login from "../Login";
-import Toast from "../Toast";
 import { RootProps } from "./Root.type";
 
 function Root(props: RootProps) {

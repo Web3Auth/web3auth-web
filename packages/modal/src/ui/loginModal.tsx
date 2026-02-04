@@ -31,7 +31,7 @@ import Bowser from "bowser";
 import { createRoot } from "react-dom/client";
 
 import { getLoginModalAnalyticsProperties } from "../utils";
-import Widget from "./components/Widget";
+import Widget from "./containers/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR, PAGES } from "./constants";
 import { AnalyticsContext } from "./context/AnalyticsContext";
 import { WidgetProvider } from "./context/WidgetContext";

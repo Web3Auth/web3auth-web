@@ -7,7 +7,7 @@ import { WALLET_CONNECT_LOGO } from "../../../constants";
 import { RootContext } from "../../../context/RootContext";
 import { TOAST_TYPE } from "../../../interfaces";
 import i18n from "../../../localeImport";
-import Image from "../../Image";
+import Image from "../../../components/Image";
 import { ConnectWalletQrCodeProps } from "./ConnectWalletQrCode.type";
 
 function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {

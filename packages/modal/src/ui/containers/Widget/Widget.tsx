@@ -6,7 +6,7 @@ import { ModalStateProvider, useModalState } from "../../context/ModalStateConte
 import { useWidget } from "../../context/WidgetContext";
 import { type ExternalWalletEventType, MODAL_STATUS, type SocialLoginEventType } from "../../interfaces";
 import Embed from "../Embed";
-import Modal from "../Modal";
+import Modal from "../../components/Modal";
 import Root from "../Root";
 import { WidgetProps } from "./Widget.type";
 
