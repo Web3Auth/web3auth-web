@@ -64,10 +64,10 @@ function Login(props: LoginProps) {
   } = useModalState();
   const { modalVisibility: isModalVisible, socialLoginsConfig } = modalState;
   const {
-    buttonRadiusType: buttonRadius = "pill",
-    logoAlignment = "center",
-    displayInstalledExternalWallets: showInstalledExternalWallets = true,
-    displayExternalWalletsCount: showExternalWalletCount = true,
+    buttonRadiusType: buttonRadius,
+    logoAlignment,
+    displayInstalledExternalWallets: showInstalledExternalWallets,
+    displayExternalWalletsCount: showExternalWalletCount,
     web3authClientId,
     web3authNetwork,
     authBuildEnv,
