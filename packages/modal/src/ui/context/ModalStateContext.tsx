@@ -1,7 +1,7 @@
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import { cloneDeep, log, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import React, { createContext, type Dispatch, type SetStateAction, useCallback, useContext, useEffect, useMemo, useState } from "react";
 
 import { PAGES } from "../constants";
 import { MODAL_STATUS, ModalState, StateEmitterEvents } from "../interfaces";
@@ -13,7 +13,7 @@ type StateListener = {
 
 type ModalStateContextType = {
   modalState: ModalState;
-  setModalState: React.Dispatch<React.SetStateAction<ModalState>>;
+  setModalState: Dispatch<SetStateAction<ModalState>>;
   updateModalState: (newState: Partial<ModalState>) => void;
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
