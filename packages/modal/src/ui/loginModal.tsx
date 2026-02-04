@@ -103,9 +103,9 @@ export class LoginModal {
     if (!uiConfig.initialAuthenticationMode) this.uiConfig.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY;
     if (!uiConfig.buttonRadiusType) this.uiConfig.buttonRadiusType = "pill";
     if (!uiConfig.logoAlignment) this.uiConfig.logoAlignment = "center";
-    if (!uiConfig.displayInstalledExternalWallets) this.uiConfig.displayInstalledExternalWallets = true;
-    if (!uiConfig.displayExternalWalletsCount) this.uiConfig.displayExternalWalletsCount = true;
-    if (!uiConfig.hideSuccessScreen) this.uiConfig.hideSuccessScreen = false;
+    if (typeof uiConfig.displayInstalledExternalWallets === "undefined") this.uiConfig.displayInstalledExternalWallets = true;
+    if (typeof uiConfig.displayExternalWalletsCount === "undefined") this.uiConfig.displayExternalWalletsCount = true;
+    if (typeof uiConfig.hideSuccessScreen === "undefined") this.uiConfig.hideSuccessScreen = false;
     if (!uiConfig.privacyPolicy) this.uiConfig.privacyPolicy = "";
     if (!uiConfig.tncLink) this.uiConfig.tncLink = "";
 
