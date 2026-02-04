@@ -8,8 +8,16 @@ function Button(props: ButtonProps) {
   const SocialButtonProps = buttonProps as ButtonSocialProps;
   const WalletButtonProps = buttonProps as ButtonWalletProps;
 
-  const { text, showIcon, showText, method, isDark, isPrimaryBtn, onClick, children, btnStyle, buttonRadius } = SocialButtonProps;
-  const { label, onClick: walletOnClick, button, deviceDetails, walletConnectUri, buttonRadius: walletButtonRadius } = WalletButtonProps;
+  const { isDark: socialButtonIsDark, text, showIcon, showText, method, isPrimaryBtn, onClick, children, btnStyle, buttonRadius } = SocialButtonProps;
+  const {
+    isDark: walletButtonIsDark,
+    label,
+    onClick: walletOnClick,
+    button,
+    deviceDetails,
+    walletConnectUri,
+    buttonRadius: walletButtonRadius,
+  } = WalletButtonProps;
 
   return (
     <>
@@ -19,7 +27,7 @@ function Button(props: ButtonProps) {
           showIcon={showIcon}
           showText={showText}
           method={method}
-          isDark={isDark}
+          isDark={socialButtonIsDark}
           isPrimaryBtn={isPrimaryBtn}
           onClick={onClick}
           btnStyle={btnStyle}
@@ -30,6 +38,7 @@ function Button(props: ButtonProps) {
       )}
       {type === BUTTON_TYPE.WALLET && (
         <ButtonWallet
+          isDark={walletButtonIsDark}
           label={label}
           walletConnectUri={walletConnectUri}
           onClick={walletOnClick}

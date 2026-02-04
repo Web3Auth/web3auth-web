@@ -34,7 +34,6 @@ import { getLoginModalAnalyticsProperties } from "../utils";
 import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR, PAGES } from "./constants";
 import { AnalyticsContext } from "./context/AnalyticsContext";
-import { ThemedContext } from "./context/ThemeContext";
 import { WidgetProvider } from "./context/WidgetContext";
 import {
   browser,
@@ -262,26 +261,25 @@ export class LoginModal {
 
       const root = createRoot(container);
       root.render(
-        <ThemedContext.Provider value={darkState}>
-          <AnalyticsContext.Provider value={{ analytics: this.analytics }}>
-            <WidgetProvider
-              appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
-              appName={this.uiConfig.appName}
-              chainNamespaces={this.chainNamespaces}
-              walletRegistry={this.walletRegistry}
-              deviceDetails={this.deviceDetails}
-              uiConfig={this.uiConfig}
-              initialAuthenticationMode={this.uiConfig.initialAuthenticationMode}
-              handleShowExternalWallets={this.handleShowExternalWallets}
-              handleExternalWalletClick={this.handleExternalWalletClick}
-              handleMobileVerifyConnect={this.handleMobileVerifyConnect}
-              handleSocialLoginClick={this.handleSocialLoginClick}
-              closeModal={this.closeModal}
-            >
-              <Widget stateListener={this.stateEmitter} />
-            </WidgetProvider>
-          </AnalyticsContext.Provider>
-        </ThemedContext.Provider>
+        <AnalyticsContext.Provider value={{ analytics: this.analytics }}>
+          <WidgetProvider
+            isDark={darkState.isDark}
+            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
+            appName={this.uiConfig.appName}
+            chainNamespaces={this.chainNamespaces}
+            walletRegistry={this.walletRegistry}
+            deviceDetails={this.deviceDetails}
+            uiConfig={this.uiConfig}
+            initialAuthenticationMode={this.uiConfig.initialAuthenticationMode}
+            handleShowExternalWallets={this.handleShowExternalWallets}
+            handleExternalWalletClick={this.handleExternalWalletClick}
+            handleMobileVerifyConnect={this.handleMobileVerifyConnect}
+            handleSocialLoginClick={this.handleSocialLoginClick}
+            closeModal={this.closeModal}
+          >
+            <Widget stateListener={this.stateEmitter} />
+          </WidgetProvider>
+        </AnalyticsContext.Provider>
       );
 
       const isDefaultColors = this.uiConfig?.theme?.primary === DEFAULT_PRIMARY_COLOR && this.uiConfig.theme?.onPrimary === DEFAULT_ON_PRIMARY_COLOR;

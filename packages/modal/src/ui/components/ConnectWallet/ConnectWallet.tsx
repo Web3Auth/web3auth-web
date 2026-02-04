@@ -16,7 +16,6 @@ import ConnectWalletSearch from "./ConnectWalletSearch";
 
 function ConnectWallet(props: ConnectWalletProps) {
   const {
-    isDark,
     allRegistryButtons,
     customConnectorButtons,
     connectorVisibilityMap,
@@ -29,7 +28,7 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
-  const { walletRegistry, deviceDetails } = useWidget();
+  const { walletRegistry, deviceDetails, isDark } = useWidget();
   const { modalState } = useModalState();
   const { externalWalletsConfig: config, walletConnectUri, metamaskConnectUri } = modalState;
 

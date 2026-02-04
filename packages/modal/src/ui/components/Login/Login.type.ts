@@ -1,9 +1,6 @@
 import type { ExternalButton, ExternalWalletEventType, SocialLoginEventType } from "../../interfaces";
 
 export interface LoginProps {
-  isDark: boolean;
-  appLogo?: string;
-  appName?: string;
   installedExternalWalletConfig: ExternalButton[];
   totalExternalWallets: number;
   remainingUndisplayedWallets: number;

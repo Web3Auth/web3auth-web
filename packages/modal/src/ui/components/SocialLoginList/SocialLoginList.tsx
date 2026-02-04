@@ -89,6 +89,7 @@ function SocialLoginList(props: SocialLoginListProps) {
             <Button
               type={BUTTON_TYPE.SOCIAL}
               props={{
+                isDark,
                 showIcon: false,
                 onClick: handleExpandSocialLogins,
                 btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11",

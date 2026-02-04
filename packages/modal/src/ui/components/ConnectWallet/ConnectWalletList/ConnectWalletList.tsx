@@ -18,7 +18,7 @@ function NoWalletsFound() {
 
 function WalletsFound(props: WalletsFoundProps) {
   const { externalButtons, isLoading, handleWalletClick, walletConnectUri } = props;
-  const { deviceDetails, uiConfig } = useWidget();
+  const { deviceDetails, uiConfig, isDark } = useWidget();
   const { buttonRadiusType: buttonRadius } = uiConfig;
 
   if (isLoading) {
@@ -45,6 +45,7 @@ function WalletsFound(props: WalletsFoundProps) {
           key={button.name}
           type={BUTTON_TYPE.WALLET}
           props={{
+            isDark,
             label: button.displayName,
             onClick: () => handleWalletClick(button),
             button,
