@@ -1,7 +1,7 @@
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE } from "@web3auth/auth";
 import { cloneDeep, log, WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import deepmerge from "deepmerge";
-import React, { createContext, type Dispatch, type SetStateAction, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, type Dispatch, type FC, type ReactNode, type SetStateAction, useContext, useEffect, useMemo, useState } from "react";
 
 import { PAGES } from "../constants";
 import { MODAL_STATUS, ModalState, StateEmitterEvents } from "../interfaces";
@@ -25,7 +25,7 @@ type ModalStateContextType = {
 };
 
 type ModalStateProviderProps = {
-  children: React.ReactNode;
+  children: ReactNode;
   stateListener: StateListener;
   initialVisibility?: boolean;
 };
@@ -62,7 +62,7 @@ const initialModalState: ModalState = {
 
 const ModalStateContext = createContext<ModalStateContextType | undefined>(undefined);
 
-export const ModalStateProvider: React.FC<ModalStateProviderProps> = ({ children, stateListener, initialVisibility = false }) => {
+export const ModalStateProvider: FC<ModalStateProviderProps> = ({ children, stateListener, initialVisibility = false }) => {
   const [modalState, setModalState] = useState<ModalState>({
     ...initialModalState,
     modalVisibility: initialVisibility,
