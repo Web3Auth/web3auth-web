@@ -44,7 +44,7 @@ function Root(props: RootProps) {
 
   const { appLogo, chainNamespaces, walletRegistry, deviceDetails, uiConfig } = useWidget();
 
-  const { buttonRadiusType, privacyPolicy = "", tncLink = "", displayInstalledExternalWallets = true } = uiConfig;
+  const { buttonRadiusType, privacyPolicy = "", tncLink = "", displayInstalledExternalWallets = true, hideSuccessScreen = false } = uiConfig;
 
   const [t] = useTranslation(undefined, { i18n });
   const { isDark } = useContext(ThemedContext);
@@ -443,6 +443,7 @@ function Root(props: RootProps) {
                 externalWalletsConfig={modalState.externalWalletsConfig}
                 walletRegistry={walletRegistry}
                 handleMobileVerifyConnect={handleMobileVerifyConnect}
+                hideSuccessScreen={hideSuccessScreen}
               />
             ) : (
               <>
@@ -460,6 +461,7 @@ function Root(props: RootProps) {
                       selectedButton={bodyState.metamaskQrCode.wallet}
                       primaryColor={bodyState.metamaskQrCode.wallet.walletRegistryItem?.primaryColor}
                       logoImage={`https://images.web3auth.io/login-${bodyState.metamaskQrCode.wallet.name}.${bodyState.metamaskQrCode.wallet.imgExtension}`}
+                      platform={deviceDetails.platform}
                     />
                   </div>
                 ) : (
@@ -490,21 +492,24 @@ function Root(props: RootProps) {
                       />
                     )}
                     {/* Connect Wallet Screen */}
-                    {modalState.currentPage === PAGES.CONNECT_WALLET && !showExternalWalletPage && modalState.status === MODAL_STATUS.INITIALIZED && (
-                      <ConnectWallet
-                        isDark={isDark}
-                        walletConnectUri={modalState.walletConnectUri}
-                        metamaskConnectUri={modalState.metamaskConnectUri}
-                        config={modalState.externalWalletsConfig}
-                        allRegistryButtons={allRegistryButtons}
-                        connectorVisibilityMap={connectorVisibilityMap}
-                        customConnectorButtons={customConnectorButtons}
-                        handleWalletDetailsHeight={handleWalletDetailsHeight}
-                        isExternalWalletModeOnly={isExternalWalletModeOnly}
-                        onBackClick={onBackClick}
-                        handleExternalWalletClick={preHandleExternalWalletClick}
-                      />
-                    )}
+                    {modalState.currentPage === PAGES.CONNECT_WALLET &&
+                      (!showExternalWalletPage || isExternalWalletModeOnly) &&
+                      modalState.status === MODAL_STATUS.INITIALIZED && (
+                        <ConnectWallet
+                          isDark={isDark}
+                          walletConnectUri={modalState.walletConnectUri}
+                          metamaskConnectUri={modalState.metamaskConnectUri}
+                          config={modalState.externalWalletsConfig}
+                          allRegistryButtons={allRegistryButtons}
+                          connectorVisibilityMap={connectorVisibilityMap}
+                          customConnectorButtons={customConnectorButtons}
+                          handleWalletDetailsHeight={handleWalletDetailsHeight}
+                          isExternalWalletModeOnly={isExternalWalletModeOnly}
+                          onBackClick={onBackClick}
+                          handleExternalWalletClick={preHandleExternalWalletClick}
+                          disableBackButton={bodyState.installLinks?.show || bodyState.multiChainSelector?.show}
+                        />
+                      )}
                   </>
                 )}
               </>
