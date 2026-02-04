@@ -1,6 +1,7 @@
 import { browser, ButtonRadiusType, ExternalButton, os, platform } from "../../../interfaces";
 
 export interface ButtonWalletProps {
+  isDark: boolean;
   label: string;
   onClick?: () => void;
   button?: ExternalButton;
