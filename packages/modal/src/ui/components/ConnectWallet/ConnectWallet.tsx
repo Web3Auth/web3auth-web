@@ -15,13 +15,21 @@ import ConnectWalletQrCode from "./ConnectWalletQrCode";
 import ConnectWalletSearch from "./ConnectWalletSearch";
 
 function ConnectWallet(props: ConnectWalletProps) {
-  const { allRegistryButtons, customConnectorButtons, connectorVisibilityMap, onBackClick, handleExternalWalletClick, handleWalletDetailsHeight } =
-    props;
+  const {
+    allRegistryButtons,
+    customConnectorButtons,
+    connectorVisibilityMap,
+    onBackClick,
+    handleExternalWalletClick,
+    handleWalletDetailsHeight,
+    disableBackButton,
+    isExternalWalletModeOnly,
+  } = props;
 
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
   const { walletRegistry, deviceDetails, isDark } = useWidget();
-  const { showPasswordLessInput, areSocialLoginsVisible, modalState } = useModalState();
+  const { modalState } = useModalState();
   const { externalWalletsConfig: config, walletConnectUri, metamaskConnectUri } = modalState;
 
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
@@ -44,10 +52,6 @@ function ConnectWallet(props: ConnectWalletProps) {
       handleWalletDetailsHeight();
     }
   };
-
-  const isExternalWalletModeOnly = useMemo(() => {
-    return !showPasswordLessInput && !areSocialLoginsVisible;
-  }, [areSocialLoginsVisible, showPasswordLessInput]);
 
   const walletDiscoverySupported = useMemo(() => {
     const supported = walletRegistry && (Object.keys(walletRegistry.default || {}).length > 0 || Object.keys(walletRegistry.others || {}).length > 0);
@@ -240,7 +244,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     return walletConnectUri;
   }, [metamaskConnectUri, selectedButton, selectedWallet, walletConnectUri]);
 
-  const disableBackButton = useMemo(() => {
+  const hideBackButton = useMemo(() => {
     // If wallet is selected, show the back button
     if (selectedWallet) return false;
     // Otherwise, if external wallet mode only, login screen is skipped so back button is not needed
@@ -251,7 +255,13 @@ function ConnectWallet(props: ConnectWalletProps) {
   return (
     <div className="w3a--relative w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
       {/* Header */}
-      <ConnectWalletHeader disableBackButton={disableBackButton} onBackClick={handleBack} currentPage={currentPage} selectedButton={selectedButton} />
+      <ConnectWalletHeader
+        hideBackButton={hideBackButton}
+        disableBackButton={disableBackButton}
+        onBackClick={handleBack}
+        currentPage={currentPage}
+        selectedButton={selectedButton}
+      />
       {/* Body */}
       {selectedWallet ? (
         <ConnectWalletQrCode
@@ -260,6 +270,7 @@ function ConnectWallet(props: ConnectWalletProps) {
           selectedButton={selectedButton}
           primaryColor={selectedButton.walletRegistryItem?.primaryColor}
           logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
+          platform={deviceDetails.platform}
         />
       ) : (
         <div className="w3a--flex w3a--flex-col w3a--gap-y-2">

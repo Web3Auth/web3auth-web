@@ -1,4 +1,4 @@
-import { type ExternalButton } from "../../../interfaces";
+import { type ExternalButton, platform } from "../../../interfaces";
 
 export interface ConnectWalletQrCodeProps {
   qrCodeValue: string;
@@ -6,4 +6,5 @@ export interface ConnectWalletQrCodeProps {
   selectedButton: ExternalButton;
   logoImage?: string;
   primaryColor?: string;
+  platform: platform;
 }

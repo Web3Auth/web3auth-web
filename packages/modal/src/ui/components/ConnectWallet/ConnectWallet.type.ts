@@ -9,4 +9,6 @@ export interface ConnectWalletProps {
   onBackClick?: (flag: boolean) => void;
   handleExternalWalletClick: (params: { connector: string; chainNamespace?: ChainNamespaceType }) => void;
   handleWalletDetailsHeight: () => void;
+  disableBackButton?: boolean;
+  isExternalWalletModeOnly?: boolean;
 }
