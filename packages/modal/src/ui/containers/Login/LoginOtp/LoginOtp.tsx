@@ -2,9 +2,9 @@ import { AUTH_CONNECTION } from "@web3auth/auth";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import Otp from "../../../components/Otp";
 import i18n from "../../../localeImport";
 import { getIcons } from "../../../utils";
-import Otp from "../../../components/Otp";
 import { LoginOtpProps, OtpInputProps } from "./LoginOtp.type";
 
 /**
