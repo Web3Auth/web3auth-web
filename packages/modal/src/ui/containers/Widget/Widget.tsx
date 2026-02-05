@@ -108,6 +108,17 @@ function WidgetContent() {
     }
   }, [modalState, handleExternalWalletClick]);
 
+  const rootElement = (
+    <Root
+      handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
+      handleExternalWalletBtnClick={handleExternalWalletBtnClick}
+      preHandleExternalWalletClick={preHandleExternalWalletClick}
+      onCloseLoader={onCloseLoader}
+      isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
+      handleMobileVerifyConnect={handleMobileVerifyConnect}
+    />
+  );
+
   if (widgetType === WIDGET_TYPE.MODAL) {
     return (
       <Modal
@@ -119,16 +130,7 @@ function WidgetContent() {
         borderRadius={uiConfig.borderRadiusType}
       >
         {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
-        {modalState.modalVisibility && (
-          <Root
-            handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-            handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-            preHandleExternalWalletClick={preHandleExternalWalletClick}
-            onCloseLoader={onCloseLoader}
-            isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
-            handleMobileVerifyConnect={handleMobileVerifyConnect}
-          />
-        )}
+        {modalState.modalVisibility && rootElement}
       </Modal>
     );
   }
@@ -136,16 +138,7 @@ function WidgetContent() {
   return (
     <Embed open={modalState.modalVisibility} padding={false} onClose={onCloseModal} borderRadius={uiConfig.borderRadiusType}>
       {/* This is to prevent the root from being mounted when the modal is not open. This results in the loader and modal state being updated again and again. */}
-      {modalState.modalVisibility && (
-        <Root
-          handleSocialLoginClick={(params: SocialLoginEventType) => preHandleSocialWalletClick(params)}
-          handleExternalWalletBtnClick={handleExternalWalletBtnClick}
-          preHandleExternalWalletClick={preHandleExternalWalletClick}
-          onCloseLoader={onCloseLoader}
-          isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
-          handleMobileVerifyConnect={handleMobileVerifyConnect}
-        />
-      )}
+      {modalState.modalVisibility && rootElement}
     </Embed>
   );
 }
