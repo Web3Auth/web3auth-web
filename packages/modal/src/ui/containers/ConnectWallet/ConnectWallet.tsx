@@ -28,7 +28,8 @@ function ConnectWallet(props: ConnectWalletProps) {
 
   const { bodyState, setBodyState } = useContext(RootContext);
   const { analytics } = useContext(AnalyticsContext);
-  const { walletRegistry, deviceDetails, isDark } = useWidget();
+  const { deviceDetails, isDark, uiConfig } = useWidget();
+  const { walletRegistry } = uiConfig;
   const { modalState } = useModalState();
   const { externalWalletsConfig: config, walletConnectUri, metamaskConnectUri } = modalState;
 

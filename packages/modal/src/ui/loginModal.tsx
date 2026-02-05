@@ -7,7 +7,6 @@ import {
   type Analytics,
   ANALYTICS_EVENTS,
   type BaseConnectorConfig,
-  type ChainNamespaceType,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   getWhitelabelAnalyticsProperties,
@@ -22,7 +21,6 @@ import {
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
   WalletInitializationError,
-  type WalletRegistry,
   type Web3AuthError,
   type Web3AuthNoModalEvents,
   WIDGET_TYPE,
@@ -76,10 +74,6 @@ export class LoginModal {
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
-  private chainNamespaces: ChainNamespaceType[];
-
-  private walletRegistry: WalletRegistry;
-
   private callbacks: LoginModalCallbacks;
 
   private externalWalletsConfig: Record<string, BaseConnectorConfig>;
@@ -114,8 +108,6 @@ export class LoginModal {
     }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
-    this.chainNamespaces = uiConfig.chainNamespaces;
-    this.walletRegistry = uiConfig.walletRegistry;
     this.callbacks = callbacks;
     this.analytics = uiConfig.analytics;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
@@ -136,8 +128,6 @@ export class LoginModal {
   }
 
   initModal = async (): Promise<void> => {
-    const darkState = { isDark: this.isDark };
-
     const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
 
     // Load new language resource
@@ -253,7 +243,7 @@ export class LoginModal {
 
       const container = document.getElementById("w3a-parent-container");
 
-      if (darkState.isDark) {
+      if (this.isDark) {
         container.classList.add("w3a--dark");
       } else {
         container.classList.remove("w3a--dark");
@@ -263,14 +253,9 @@ export class LoginModal {
       root.render(
         <AnalyticsContext.Provider value={{ analytics: this.analytics }}>
           <WidgetProvider
-            isDark={darkState.isDark}
-            appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
-            appName={this.uiConfig.appName}
-            chainNamespaces={this.chainNamespaces}
-            walletRegistry={this.walletRegistry}
+            isDark={this.isDark}
             deviceDetails={this.deviceDetails}
             uiConfig={this.uiConfig}
-            initialAuthenticationMode={this.uiConfig.initialAuthenticationMode}
             handleShowExternalWallets={this.handleShowExternalWallets}
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleMobileVerifyConnect={this.handleMobileVerifyConnect}
@@ -334,8 +319,8 @@ export class LoginModal {
       modalVisibility: true,
     });
     this.analytics?.track(ANALYTICS_EVENTS.LOGIN_MODAL_OPENED, {
-      chain_namespaces: this.chainNamespaces,
-      wallet_registry_count: Object.keys(this.walletRegistry?.default).length + Object.keys(this.walletRegistry?.others).length,
+      chain_namespaces: this.uiConfig.chainNamespaces,
+      wallet_registry_count: Object.keys(this.uiConfig.walletRegistry?.default).length + Object.keys(this.uiConfig.walletRegistry?.others).length,
       external_wallet_connectors: Object.keys(this.externalWalletsConfig || {}),
       ...getWhitelabelAnalyticsProperties(this.uiConfig),
       ...getLoginModalAnalyticsProperties(this.uiConfig),
