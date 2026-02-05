@@ -9,7 +9,8 @@ import { ConnectWalletChainFilterProps } from "./ConnectWalletChainFilter.type";
 
 function ConnectWalletChainFilter(props: ConnectWalletChainFilterProps) {
   const { isDark, isLoading, selectedChain, setSelectedChain } = props;
-  const { chainNamespaces } = useWidget();
+  const { uiConfig } = useWidget();
+  const { chainNamespaces } = uiConfig;
   const [t] = useTranslation(undefined, { i18n });
 
   const chains = useMemo(() => {

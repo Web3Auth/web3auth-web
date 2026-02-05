@@ -11,19 +11,12 @@ import Root from "../Root";
 import { WidgetProps } from "./Widget.type";
 
 function WidgetContent() {
-  const {
-    uiConfig,
-    initialAuthenticationMode,
-    handleSocialLoginClick,
-    handleExternalWalletClick,
-    handleMobileVerifyConnect,
-    handleShowExternalWallets,
-    closeModal,
-  } = useWidget();
+  const { uiConfig, handleSocialLoginClick, handleExternalWalletClick, handleMobileVerifyConnect, handleShowExternalWallets, closeModal } =
+    useWidget();
 
   const { modalState, setModalState } = useModalState();
 
-  const { widgetType } = uiConfig;
+  const { widgetType, initialAuthenticationMode } = uiConfig;
 
   const isConnectAndSignAuthenticationMode = useMemo(
     () => initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
