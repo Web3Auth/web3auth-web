@@ -1,5 +1,5 @@
 import { BaseConfig, BaseController, BaseState, createEventEmitterProxy } from "@toruslabs/base-controllers";
-import { JRPCRequest, JRPCResponse, ProviderEvents, rpcErrors, SendCallBack } from "@web3auth/auth";
+import { JRPCRequest, JRPCResponse, providerErrors, ProviderEvents, rpcErrors, SendCallBack } from "@web3auth/auth";
 
 import {
   CustomChainConfig,
@@ -54,10 +54,17 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   }
 
   get currentChain(): CustomChainConfig {
-    return this.config.chains.find((chain) => chain.chainId === this.state.chainId);
+    const currentChain = this.config.chains.find((chain) => chain.chainId === this.state.chainId);
+    if (!currentChain) {
+      throw providerErrors.custom({ message: "Chain not found", code: 4902 });
+    }
+    return currentChain;
   }
 
-  get provider(): SafeEventEmitterProvider<ProviderEvents> | null {
+  get provider(): SafeEventEmitterProvider<ProviderEvents> {
+    if (!this._providerEngineProxy) {
+      throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
+    }
     return this._providerEngineProxy;
   }
 
@@ -101,7 +108,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   sendAsync<T, U>(req: JRPCRequest<T>, callback?: SendCallBack<JRPCResponse<U>>): void | Promise<JRPCResponse<U>> {
     if (callback) return this.send(req, callback);
-    return this.request(req);
+    return this.request(req) as Promise<JRPCResponse<U>>;
   }
 
   send<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void {
@@ -158,12 +165,19 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
     }
   }
 
-  protected getProviderEngineProxy(): SafeEventEmitterProvider | null {
+  protected getProviderEngineProxy(): SafeEventEmitterProvider {
+    if (!this._providerEngineProxy) {
+      throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
+    }
     return this._providerEngineProxy;
   }
 
   protected getChain(chainId: string): CustomChainConfig {
-    return this.config.chains.find((chain) => chain.chainId === chainId);
+    const chain = this.config.chains.find((chain) => chain.chainId === chainId);
+    if (!chain) {
+      throw providerErrors.custom({ message: "Chain not found", code: 4902 });
+    }
+    return chain;
   }
 
   abstract setupProvider(provider: P, chainId: string): Promise<void>;

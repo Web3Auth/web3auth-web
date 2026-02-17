@@ -130,7 +130,7 @@ async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<
   return serialized;
 }
 
-function validateVersion(version: string, allowedVersions: string[]) {
+function validateVersion(version: string, allowedVersions?: string[]) {
   if (!Object.keys(SignTypedDataVersion).includes(version)) {
     throw new Error(`Invalid version: '${version}'`);
   } else if (allowedVersions && !allowedVersions.includes(version)) {
@@ -198,7 +198,7 @@ export function getProviderHandlers({
         method: "eth_sendRawTransaction",
         params: [serializedTxn],
       });
-      return txHash;
+      return txHash as string;
     },
     processSignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
@@ -227,7 +227,7 @@ export function getProviderHandlers({
           code: 4902,
         });
       const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
-      await validateTypedSignMessageDataV4(msgParams, chainId);
+      await validateTypedSignMessageDataV4(msgParams, chainId as string);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V4);
       return sig;
