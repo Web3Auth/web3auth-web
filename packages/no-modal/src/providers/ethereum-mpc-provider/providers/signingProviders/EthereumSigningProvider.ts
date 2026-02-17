@@ -10,6 +10,7 @@ import {
   IEthChainSwitchHandlers,
   TransactionFormatter,
 } from "../../../ethereum-provider";
+import { createEip7702Middleware } from "../../../ethereum-provider/rpc/eip7702Middleware";
 import { createEthAccountMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { IAccountHandlers } from "../../rpc/interfaces";
 import { getProviderHandlers } from "./signingUtils";
@@ -90,12 +91,18 @@ export class EthereumSigningProvider extends BaseProvider<
       getPublic,
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
     });
+
     const ethMiddleware = createEthMiddleware(providerHandlers);
+    const eip7702Middleware = createEip7702Middleware({
+      getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
+      processTransaction: providerHandlers.processTransaction,
+    });
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();
     // Not a partial anymore because of checks in ctor
     const { networkMiddleware } = createEthJsonRpcClient(chain);
     engine.push(ethMiddleware);
+    engine.push(eip7702Middleware);
     engine.push(chainSwitchMiddleware);
     engine.push(this.getAccountMiddleware());
     engine.push(networkMiddleware);

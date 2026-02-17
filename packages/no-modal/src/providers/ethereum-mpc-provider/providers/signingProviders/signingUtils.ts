@@ -1,7 +1,7 @@
-import { intToBytes, isHexString, PrefixedHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
+import { addHexPrefix, intToBytes, isHexString, PrefixedHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { concatSig } from "@toruslabs/base-controllers";
-import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@web3auth/auth";
-import { hashMessage, Signature } from "ethers";
+import { JRPCRequest, providerErrors, rpcErrors, SafeEventEmitterProvider } from "@web3auth/auth";
+import { Authorization, hashAuthorization, hashMessage, Signature } from "ethers";
 import { hashTypedData, hexToBytes, validateTypedData } from "viem";
 
 import { log } from "../../../../base";
@@ -15,13 +15,70 @@ import {
   validateTypedSignMessageDataV4,
 } from "../../../ethereum-provider";
 
+/**
+ * Signs EIP-7702 authorization entries from the transaction params using the MPC sign function.
+ * Extracts authorizationList from txParams, computes keccak256(0x05 || rlp([chainId, address, nonce]))
+ * for each unsigned authorization and signs the hash.
+ * Returns updated txParams with signed ethers-compatible Authorization objects ready for Transaction.from().
+ */
+async function signAuthorizationList(
+  txParams: TransactionParams & { gas?: string },
+  sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>
+): Promise<TransactionParams & { gas?: string }> {
+  const { authorizationList, nonce } = txParams;
+  if (!nonce) {
+    throw rpcErrors.invalidRequest({
+      message: "Nonce is required",
+    });
+  }
+
+  if (!authorizationList || authorizationList.length === 0) {
+    return txParams;
+  }
+
+  const authorizationSignatures = await Promise.all(
+    authorizationList.map((authorization: Authorization) => {
+      const authorizationNonce = authorization.nonce ? Number(authorization.nonce) : nonce + 1;
+
+      // EIP-7702 authorization hash: keccak256(0x05 || rlp([chainId, address, nonce]))
+      const authorizationHash = hashAuthorization({
+        ...authorization,
+        nonce: BigInt(authorizationNonce ?? 0),
+        address: addHexPrefix(authorization.address),
+        chainId: BigInt(authorization.chainId),
+      });
+
+      return sign(Buffer.from(stripHexPrefix(authorizationHash), "hex"));
+    })
+  );
+
+  const signedAuthorizations = authorizationSignatures.map((signature, index) => {
+    const { v, r, s } = signature;
+    const yParity: 0 | 1 = v - 27 === 0 ? 1 : 0;
+    return {
+      ...authorizationList[index],
+      signature: Signature.from({
+        yParity,
+        r: `0x${r.toString("hex")}`,
+        s: `0x${s.toString("hex")}`,
+      }),
+    };
+  });
+
+  return { ...txParams, authorizationList: signedAuthorizations };
+}
+
 async function signTx(
   txParams: TransactionParams & { gas?: string },
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>,
   txFormatter: TransactionFormatter
 ): Promise<PrefixedHexString> {
   const { Transaction } = await import("ethers");
-  const finalTxParams = await txFormatter.formatTransaction(txParams);
+  const formattedTxParams = await txFormatter.formatTransaction(txParams);
+
+  // Sign EIP-7702 authorization list if present
+  const finalTxParams = await signAuthorizationList(formattedTxParams, sign);
+
   const ethTx = Transaction.from({
     ...finalTxParams,
     from: undefined, // from is already calculated inside Transaction.from and is not allowed to be passed in

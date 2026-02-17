@@ -62,7 +62,7 @@
     "@toruslabs/bs58": "^1.0.0",
     "@toruslabs/constants": "^15.0.0",
     "@toruslabs/eccrypto": "^6.2.0",
-    "@toruslabs/ethereum-controllers": "^8.15.0",
+    "@toruslabs/ethereum-controllers": "^8.17.0",
     "@toruslabs/http-helpers": "^8.1.1",
     "@toruslabs/loglevel-sentry": "^8.1.0",
     "@toruslabs/secure-pub-sub": "3.0.2",
