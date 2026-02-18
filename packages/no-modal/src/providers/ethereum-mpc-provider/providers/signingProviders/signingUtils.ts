@@ -37,37 +37,37 @@ async function signAuthorizationList(
     });
   }
 
-  const authorizationSignatures = await Promise.all(
-    authorizationList.map((authorization: Authorization) => {
-      const authorizationNonce = authorization.nonce ?? Number(nonce) + 1;
+  const signedAuthorizationLists: Authorization[] = [];
 
-      // EIP-7702 authorization hash: keccak256(0x05 || rlp([chainId, address, nonce]))
-      const authorizationHash = hashAuthorization({
-        ...authorization,
-        nonce: BigInt(authorizationNonce ?? 0),
-        address: addHexPrefix(authorization.address),
-        chainId: BigInt(authorization.chainId),
-      });
+  for (const authorization of authorizationList) {
+    const authorizationNonce = authorization.nonce ?? BigInt(Number(nonce) + 1);
+    const address = addHexPrefix(authorization.address);
+    const chainId = authorization.chainId;
 
-      return sign(Buffer.from(stripHexPrefix(authorizationHash), "hex"));
-    })
-  );
+    // EIP-7702 authorization hash: keccak256(0x05 || rlp([chainId, address, nonce]))
+    const authorizationHash = hashAuthorization({
+      nonce: authorizationNonce,
+      address,
+      chainId,
+    });
 
-  const signedAuthorizations = authorizationSignatures.map((signature, index) => {
-    const { v, r, s } = signature;
+    const { v, r, s } = await sign(Buffer.from(stripHexPrefix(authorizationHash), "hex"));
     // mpc-core-kit workaround: v may be 0/1 or 27/28, normalize to 0/1
     const yParity: 0 | 1 = (v > 1 ? v - 27 : v) as 0 | 1;
-    return {
-      ...authorizationList[index],
+
+    signedAuthorizationLists.push({
+      address,
+      chainId,
+      nonce: authorizationNonce,
       signature: Signature.from({
         yParity,
         r: `0x${r.toString("hex")}`,
         s: `0x${s.toString("hex")}`,
       }),
-    };
-  });
+    });
+  }
 
-  return { ...txParams, authorizationList: signedAuthorizations };
+  return { ...txParams, authorizationList: signedAuthorizationLists };
 }
 
 async function signTx(

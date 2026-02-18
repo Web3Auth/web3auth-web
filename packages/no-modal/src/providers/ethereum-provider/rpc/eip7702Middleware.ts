@@ -17,7 +17,7 @@ import {
   rpcErrors,
   SafeEventEmitterProvider,
 } from "@web3auth/auth";
-import { Signature } from "ethers";
+import { type Authorization, Signature } from "ethers";
 
 import type { TransactionParams } from "./interfaces";
 
@@ -112,7 +112,10 @@ export function createEip7702Middleware({ getProviderEngineProxy, processTransac
       yParity: 0,
     });
 
-    // Build the setCode (type 4) transaction with authorization list
+    // Build the setCode (type 4) transaction with authorization list.
+    // nonce is intentionally omitted so that signAuthorizationList's
+    // nullish-coalescing fallback (authorization.nonce ?? Number(nonce) + 1) computes
+    // the correct authorization nonce from the transaction nonce.
     const txParams: TransactionParams = {
       from: account,
       to: account, // setCode transactions target the sender
@@ -123,9 +126,8 @@ export function createEip7702Middleware({ getProviderEngineProxy, processTransac
         {
           address: delegationTarget,
           chainId: BigInt(chainId),
-          nonce: BigInt(0), // Will be filled by the signing process
           signature: dummyAuthorizationSignature,
-        },
+        } as Authorization,
       ],
     };
 
