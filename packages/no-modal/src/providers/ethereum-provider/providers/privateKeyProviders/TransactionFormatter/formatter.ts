@@ -142,7 +142,15 @@ export class TransactionFormatter {
       clonedTxParams.gasPrice = defaultGasPrice as never;
     }
 
-    clonedTxParams.type = Number.parseInt(this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY, 16);
+    // Preserve EIP-7702 (type 4) if explicitly set by the caller;
+    // EIP-7702 uses the same gas model as EIP-1559 so the fields above are already correct.
+    const isEip7702 =
+      clonedTxParams.type === Number.parseInt(TRANSACTION_ENVELOPE_TYPES.SET_CODE, 16) &&
+      clonedTxParams.authorizationList &&
+      clonedTxParams.authorizationList.length > 0;
+    if (!isEip7702) {
+      clonedTxParams.type = Number.parseInt(this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY, 16);
+    }
     clonedTxParams.chainId = this.chainConfig.chainId as PrefixedHexString;
     return clonedTxParams;
   }

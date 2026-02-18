@@ -26,19 +26,20 @@ async function signAuthorizationList(
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>
 ): Promise<TransactionParams & { gas?: string }> {
   const { authorizationList, nonce } = txParams;
-  if (!nonce) {
-    throw rpcErrors.invalidRequest({
-      message: "Nonce is required",
-    });
-  }
 
   if (!authorizationList || authorizationList.length === 0) {
     return txParams;
   }
 
+  if (nonce === null || nonce === undefined) {
+    throw rpcErrors.invalidRequest({
+      message: "Nonce is required",
+    });
+  }
+
   const authorizationSignatures = await Promise.all(
     authorizationList.map((authorization: Authorization) => {
-      const authorizationNonce = authorization.nonce ? Number(authorization.nonce) : nonce + 1;
+      const authorizationNonce = authorization.nonce ?? Number(nonce) + 1;
 
       // EIP-7702 authorization hash: keccak256(0x05 || rlp([chainId, address, nonce]))
       const authorizationHash = hashAuthorization({
@@ -54,7 +55,8 @@ async function signAuthorizationList(
 
   const signedAuthorizations = authorizationSignatures.map((signature, index) => {
     const { v, r, s } = signature;
-    const yParity: 0 | 1 = v - 27 === 0 ? 1 : 0;
+    // mpc-core-kit workaround: v may be 0/1 or 27/28, normalize to 0/1
+    const yParity: 0 | 1 = (v > 1 ? v - 27 : v) as 0 | 1;
     return {
       ...authorizationList[index],
       signature: Signature.from({

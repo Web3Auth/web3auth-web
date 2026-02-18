@@ -6,6 +6,7 @@ export const TRANSACTION_ENVELOPE_TYPES: Record<string, PrefixedHexString> = {
   LEGACY: "0x0",
   ACCESS_LIST: "0x1",
   FEE_MARKET: "0x2",
+  SET_CODE: "0x4",
 };
 
 export const TRANSACTION_TYPES = {
