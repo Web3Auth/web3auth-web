@@ -1,7 +1,8 @@
 import { addHexPrefix, PrefixedHexString, stripHexPrefix } from "@ethereumjs/util";
+import { DUMMY_AUTHORIZATION_SIGNATURE, TransactionParams as ControllerTransactionParams } from "@toruslabs/ethereum-controllers";
 import { Block } from "@web3auth/auth";
 import { BigNumber } from "bignumber.js";
-import { AddressLike } from "ethers";
+import { AddressLike, Signature } from "ethers";
 
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "../../../../../base";
 import { TransactionParams } from "../../../rpc/interfaces";
@@ -27,6 +28,32 @@ export class TransactionFormatter {
 
   get providerProxy() {
     return this.getProviderEngineProxy();
+  }
+
+  /**
+   * Converts transaction params from the `@toruslabs/ethereum-controllers` format
+   * to the local ethers-based `TransactionParams` format.
+   *
+   * Handles converting string-typed fields (`type`, `nonce`) to numbers and
+   * re-mapping the authorization list from separate `r`/`s`/`yParity` hex fields
+   * to ethers `Signature` objects.
+   */
+  static formatControllerTransactionParams(txParams: ControllerTransactionParams): TransactionParams {
+    return {
+      ...txParams,
+      type: txParams.type != null ? Number(txParams.type) : undefined,
+      nonce: txParams.nonce != null ? Number(txParams.nonce) : undefined,
+      authorizationList: txParams.authorizationList?.map(({ address, chainId, nonce, r, s, yParity }) => ({
+        address,
+        chainId: BigInt(chainId),
+        nonce: nonce != null ? BigInt(nonce) : BigInt(0),
+        signature: Signature.from({
+          r: r ?? DUMMY_AUTHORIZATION_SIGNATURE,
+          s: s ?? DUMMY_AUTHORIZATION_SIGNATURE,
+          yParity: (yParity ? Number(yParity) : 0) as 0 | 1,
+        }),
+      })),
+    };
   }
 
   async init(): Promise<void> {

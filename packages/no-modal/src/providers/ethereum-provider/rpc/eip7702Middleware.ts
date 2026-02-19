@@ -1,5 +1,5 @@
-import { zeroAddress } from "@ethereumjs/util";
 import {
+  DUMMY_AUTHORIZATION_SIGNATURE,
   EIP_7702_METHODS,
   type Eip7702Params,
   type Eip7702WalletGetUpgradeStatusResponse,
@@ -88,12 +88,6 @@ export function createEip7702Middleware({ getProviderEngineProxy, processTransac
       return;
     }
 
-    const dummyAuthorizationSignature = Signature.from({
-      r: zeroAddress(),
-      s: zeroAddress(),
-      yParity: 0,
-    });
-
     // Build the setCode (type 4) transaction with authorization list.
     // nonce is intentionally omitted so that signAuthorizationList's
     // nullish-coalescing fallback (authorization.nonce ?? Number(nonce) + 1) computes
@@ -108,7 +102,11 @@ export function createEip7702Middleware({ getProviderEngineProxy, processTransac
         {
           address: delegationTarget,
           chainId: BigInt(chainId),
-          signature: dummyAuthorizationSignature,
+          signature: Signature.from({
+            r: DUMMY_AUTHORIZATION_SIGNATURE,
+            s: DUMMY_AUTHORIZATION_SIGNATURE,
+            yParity: 0,
+          }),
         } as Authorization,
       ],
     };

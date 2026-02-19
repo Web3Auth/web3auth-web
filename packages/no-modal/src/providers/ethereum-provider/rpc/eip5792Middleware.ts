@@ -23,8 +23,8 @@ import {
   rpcErrors,
   SafeEventEmitterProvider,
 } from "@web3auth/auth";
-import { Signature } from "ethers";
 
+import { TransactionFormatter } from "../providers/privateKeyProviders/TransactionFormatter/formatter";
 import { createGetEthCode } from "./ethRpcMiddlewares";
 import { TransactionParams } from "./interfaces";
 
@@ -70,18 +70,7 @@ export function createEip5792Middleware({
 
     const context: WalletSendCallsContext = {
       processTransaction: (txParams, req) => {
-        const formattedTxParams: TransactionParams = {
-          ...txParams,
-          type: txParams.type != null ? Number(txParams.type) : undefined,
-          nonce: txParams.nonce != null ? Number(txParams.nonce) : undefined,
-          authorizationList: txParams.authorizationList?.map(({ address, chainId, nonce, r, s, yParity }) => ({
-            address,
-            chainId: BigInt(chainId),
-            nonce: nonce != null ? BigInt(nonce) : BigInt(0),
-            signature: Signature.from({ r: r ?? "0x0", s: s ?? "0x0", yParity: (yParity ? Number(yParity) : 0) as 0 | 1 }),
-          })),
-        };
-        return processTransactionHandler(formattedTxParams, req);
+        return processTransactionHandler(TransactionFormatter.formatControllerTransactionParams(txParams), req);
       },
       processTransactionBatch,
     };
