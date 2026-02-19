@@ -4,7 +4,6 @@ import {
   type Eip7702Params,
   type Eip7702WalletGetUpgradeStatusResponse,
   getDelegationAddress,
-  type GetEthCodeFn,
   getIsEip7702UpgradeSupported,
   MetaMask_EIP7702_Stateless_Delegator,
 } from "@toruslabs/ethereum-controllers";
@@ -19,29 +18,12 @@ import {
 } from "@web3auth/auth";
 import { type Authorization, Signature } from "ethers";
 
+import { createGetEthCode } from "./ethRpcMiddlewares";
 import type { TransactionParams } from "./interfaces";
 
 export interface IEip7702MiddlewareOptions {
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
   processTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
-}
-
-/**
- * Creates a `getEthCode` function that uses the provider engine proxy to call `eth_getCode`.
- * Implements the `GetEthCodeFn` type from `@toruslabs/ethereum-controllers`.
- */
-export function createGetEthCode(getProviderEngineProxy: () => SafeEventEmitterProvider | null): GetEthCodeFn {
-  return async (address: `0x${string}`, _chainId: `0x${string}`): Promise<`0x${string}`> => {
-    const provider = getProviderEngineProxy();
-    if (!provider) {
-      throw rpcErrors.internal({ message: "Provider is not initialized" });
-    }
-    const code = await provider.request<[string, string], string>({
-      method: "eth_getCode",
-      params: [address, "latest"],
-    });
-    return (code || "0x") as `0x${string}`;
-  };
 }
 
 /**

@@ -4,6 +4,7 @@ import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErro
 import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "../../../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../providers/base-provider";
 import {
+  createEip5792Middleware,
   createEthChainSwitchMiddleware,
   createEthJsonRpcClient,
   createEthMiddleware,
@@ -65,10 +66,12 @@ export class EthereumSigningProvider extends BaseProvider<
   };
 
   public async enable(): Promise<string[]> {
+    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     if (!this.state.signMethods)
       throw providerErrors.custom({ message: "signMethods are not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.signMethods, this.chainId);
-    return this._providerEngineProxy.request({ method: "eth_accounts" });
+    const accounts = await this._providerEngineProxy.request({ method: "eth_accounts" });
+    return accounts as string[];
   }
 
   public async setupProvider(
@@ -97,12 +100,17 @@ export class EthereumSigningProvider extends BaseProvider<
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
       processTransaction: providerHandlers.processTransaction,
     });
+    const eip5792Middleware = createEip5792Middleware({
+      getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
+      processTransaction: providerHandlers.processTransaction,
+    });
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();
     // Not a partial anymore because of checks in ctor
     const { networkMiddleware } = createEthJsonRpcClient(chain);
     engine.push(ethMiddleware);
     engine.push(eip7702Middleware);
+    engine.push(eip5792Middleware);
     engine.push(chainSwitchMiddleware);
     engine.push(this.getAccountMiddleware());
     engine.push(networkMiddleware);

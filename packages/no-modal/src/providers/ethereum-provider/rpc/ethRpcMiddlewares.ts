@@ -1,3 +1,4 @@
+import { type GetEthCodeFn } from "@toruslabs/ethereum-controllers";
 import {
   createAsyncMiddleware,
   createScaffoldMiddleware,
@@ -6,11 +7,30 @@ import {
   JRPCResponse,
   mergeMiddleware,
   rpcErrors,
+  SafeEventEmitterProvider,
 } from "@web3auth/auth";
 
 import { AddEthereumChainConfig } from "../../../base";
 import { IEthChainSwitchHandlers, IEthProviderHandlers } from "./interfaces";
 import { createWalletMiddleware } from "./walletMidddleware";
+
+/**
+ * Creates a `getEthCode` function that uses the provider engine proxy to call `eth_getCode`.
+ * Implements the `GetEthCodeFn` type from `@toruslabs/ethereum-controllers`.
+ */
+export function createGetEthCode(getProviderEngineProxy: () => SafeEventEmitterProvider | null): GetEthCodeFn {
+  return async (address: `0x${string}`, _chainId: `0x${string}`): Promise<`0x${string}`> => {
+    const provider = getProviderEngineProxy();
+    if (!provider) {
+      throw rpcErrors.internal({ message: "Provider is not initialized" });
+    }
+    const code = await provider.request<[string, string], string>({
+      method: "eth_getCode",
+      params: [address, "latest"],
+    });
+    return (code || "0x") as `0x${string}`;
+  };
+}
 
 export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRPCMiddleware<unknown, unknown> {
   const {
