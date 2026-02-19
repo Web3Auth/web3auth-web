@@ -103,6 +103,7 @@ export class EthereumSigningProvider extends BaseProvider<
     const eip5792Middleware = createEip5792Middleware({
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
       processTransaction: providerHandlers.processTransaction,
+      processTransactionBatch: providerHandlers.processBatchTransactions,
     });
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();

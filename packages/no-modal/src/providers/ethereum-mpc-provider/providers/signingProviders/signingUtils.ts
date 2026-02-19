@@ -1,5 +1,12 @@
 import { addHexPrefix, intToBytes, isHexString, PrefixedHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { concatSig } from "@toruslabs/base-controllers";
+import {
+  DUMMY_AUTHORIZATION_SIGNATURE,
+  type Eip5792SendCallsParams,
+  generateBatchId,
+  generateEIP7702BatchTransaction,
+  type TransactionBatchRequest,
+} from "@toruslabs/ethereum-controllers";
 import { JRPCRequest, providerErrors, rpcErrors, SafeEventEmitterProvider } from "@web3auth/auth";
 import { Authorization, hashAuthorization, hashMessage, Signature } from "ethers";
 import { hashTypedData, hexToBytes, validateTypedData } from "viem";
@@ -172,7 +179,9 @@ export function getProviderHandlers({
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
   getPublic: () => Promise<Buffer>;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
-}): IEthProviderHandlers {
+}): IEthProviderHandlers & {
+  processBatchTransactions: (batchRequest: TransactionBatchRequest, req: JRPCRequest<Eip5792SendCallsParams>) => Promise<string>;
+} {
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => {
       const pubKey = await getPublic();
@@ -233,6 +242,92 @@ export function getProviderHandlers({
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V4);
       return sig;
+    },
+
+    /**
+     * Processes a batch of transactions for EIP-5792 `wallet_sendCalls`.
+     *
+     * For a single call, it is unwrapped and sent as a normal transaction.
+     * For multiple calls, they are encoded into a single EIP-7821 `execute` call
+     * targeting the sender's own address (via a delegated EIP-7702 contract).
+     *
+     * If the account has not yet been upgraded to an EIP-7702 delegate, the
+     * transaction is sent as a type-4 (SET_CODE) tx with an authorization list
+     * so that the upgrade and batch execute happen atomically.
+     *
+     * @param batchRequest - The batch request containing transactions and optional upgrade info.
+     * @param req - The original JRPC request with EIP-5792 send calls parameters.
+     * @returns The batch ID identifying this batch of calls.
+     */
+    processBatchTransactions: async (batchRequest: TransactionBatchRequest, req: JRPCRequest<Eip5792SendCallsParams>): Promise<string> => {
+      const providerEngineProxy = getProviderEngineProxy();
+      if (!providerEngineProxy)
+        throw providerErrors.custom({
+          message: "Provider is not initialized",
+          code: 4902,
+        });
+
+      const sendCallsParams = Array.isArray(req.params) ? req.params[0] : req.params;
+      if (!sendCallsParams) {
+        throw rpcErrors.invalidParams("Missing send calls parameters");
+      }
+
+      const { from, chainId } = sendCallsParams;
+      const { transactions, requiredEip7702Upgrade, eip7702UpgradeContractAddress } = batchRequest;
+      const batchId = batchRequest.batchId ?? generateBatchId();
+
+      let txParams: TransactionParams & { gas?: string };
+
+      if (transactions.length === 1) {
+        // Single transaction: unwrap and process as a normal transaction
+        txParams = {
+          from,
+          to: transactions[0].params.to,
+          value: transactions[0].params.value || "0x0",
+          data: transactions[0].params.data || "0x",
+          chainId,
+        };
+      } else {
+        // Multiple transactions: encode as a single EIP-7821 batch execute call
+        const nestedTxParams = transactions.map((tx) => tx.params);
+        const batchTransaction = generateEIP7702BatchTransaction(from as `0x${string}`, nestedTxParams);
+
+        txParams = {
+          from,
+          to: batchTransaction.to,
+          data: batchTransaction.data,
+          value: batchTransaction.value || "0x0",
+        };
+
+        if (requiredEip7702Upgrade) {
+          if (!eip7702UpgradeContractAddress) {
+            throw rpcErrors.invalidParams("Delegation address is required for EIP-7702 upgrade");
+          }
+          // Send as type-4 (SET_CODE) transaction with authorization list
+          // so the EIP-7702 upgrade and batch execute happen atomically.
+          txParams.type = 4;
+          txParams.authorizationList = [
+            {
+              address: eip7702UpgradeContractAddress,
+              chainId: BigInt(chainId),
+              signature: Signature.from({
+                r: DUMMY_AUTHORIZATION_SIGNATURE,
+                s: DUMMY_AUTHORIZATION_SIGNATURE,
+                yParity: 0,
+              }),
+            } as Authorization,
+          ];
+        }
+      }
+
+      // Sign and broadcast the transaction
+      const serializedTxn = await signTx(txParams, sign, txFormatter);
+      await providerEngineProxy.request<string[], string>({
+        method: "eth_sendRawTransaction",
+        params: [serializedTxn],
+      });
+
+      return batchId;
     },
   };
 }
