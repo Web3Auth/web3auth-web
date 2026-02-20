@@ -178,6 +178,17 @@ export class TransactionFormatter {
     if (!isEip7702) {
       clonedTxParams.type = Number.parseInt(this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY, 16);
     }
+
+    // Format the authorization list: assign nonces to authorization objects that don't have one.
+    // Each missing nonce is set to mainNonce + 1 + index, incrementing for each authorization.
+    if (clonedTxParams.authorizationList && clonedTxParams.authorizationList.length > 0 && clonedTxParams.nonce != null) {
+      const txNonce = Number(clonedTxParams.nonce);
+      clonedTxParams.authorizationList = clonedTxParams.authorizationList.map((auth, index) => ({
+        ...auth,
+        nonce: auth.nonce !== null && auth.nonce !== undefined ? auth.nonce : BigInt(txNonce + 1 + index),
+      }));
+    }
+
     clonedTxParams.chainId = this.chainConfig.chainId as PrefixedHexString;
     return clonedTxParams;
   }

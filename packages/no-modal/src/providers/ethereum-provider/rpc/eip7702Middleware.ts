@@ -33,7 +33,6 @@ export type SignAuthorizationHashFn = (authorizationHash: string) => Promise<{ v
  * For each authorization with a dummy (placeholder) signature, it computes the
  * EIP-7702 authorization hash (keccak256(0x05 || rlp([chainId, address, nonce])))
  * and delegates actual signing to the provided `signHash` callback.
- * Already-signed authorizations are kept as-is.
  *
  * @param txParams - Transaction params containing an optional `authorizationList`.
  * @param signHash - Callback that signs a hex-encoded authorization hash and returns v, r, s.
@@ -55,7 +54,7 @@ export async function signAuthorizationList(
     // Normalize authorization fields before hashing
     const address = getAddress(authorization.address);
     const chainId = BigInt(authorization.chainId);
-    const authorizationNonce = authorization.nonce != null ? BigInt(authorization.nonce) : nonce != null ? BigInt(Number(nonce) + 1) : undefined;
+    const authorizationNonce = authorization.nonce !== null && authorization.nonce !== undefined ? authorization.nonce : BigInt(nonce + 1);
     if (authorizationNonce === undefined) {
       throw rpcErrors.invalidRequest({ message: "Nonce is required for signing EIP-7702 authorization" });
     }
@@ -132,7 +131,7 @@ export function createEIP7702BatchTransaction(
       }
       // Send as type-4 (SET_CODE) transaction with authorization list
       // so the EIP-7702 upgrade and batch execute happen atomically.
-      txParams.type = 4;
+      txParams.type = Number.parseInt(TRANSACTION_ENVELOPE_TYPES.SET_CODE, 16);
       txParams.authorizationList = [
         {
           address: eip7702UpgradeContractAddress,
@@ -142,7 +141,7 @@ export function createEIP7702BatchTransaction(
             s: DUMMY_AUTHORIZATION_SIGNATURE,
             yParity: 0,
           }),
-        } as Authorization,
+        } as Authorization, // nonce is intentionally omitted here, the nonce will be computed in later middlewares
       ];
     }
   }
@@ -236,7 +235,7 @@ export function createEip7702Middleware({ getProviderEngineProxy, processTransac
             s: DUMMY_AUTHORIZATION_SIGNATURE,
             yParity: 0,
           }),
-        } as Authorization,
+        } as Authorization, // nonce is intentionally omitted here, the nonce will be computed in later middlewares
       ],
     };
 

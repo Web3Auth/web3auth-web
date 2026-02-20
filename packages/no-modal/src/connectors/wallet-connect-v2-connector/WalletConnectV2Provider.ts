@@ -121,6 +121,9 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
       processTransaction: providerHandlers.processTransaction,
       processTransactionBatch: providerHandlers.processBatchTransactions,
+      eip5792Config: {
+        getSupportedChains: this.getSupportedChains.bind(this),
+      },
     });
     const chainSwitchMiddleware = this.getEthChainSwitchMiddleware();
     const engine = new JRPCEngine();
@@ -226,5 +229,9 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     }
 
     return currentChain;
+  }
+
+  private getSupportedChains(): `0x${string}`[] {
+    return this.config.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155).map((c) => c.chainId as `0x${string}`);
   }
 }

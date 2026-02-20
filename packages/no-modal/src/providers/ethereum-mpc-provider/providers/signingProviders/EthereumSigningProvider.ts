@@ -104,6 +104,9 @@ export class EthereumSigningProvider extends BaseProvider<
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
       processTransaction: providerHandlers.processTransaction,
       processTransactionBatch: providerHandlers.processBatchTransactions,
+      eip5792Config: {
+        getSupportedChains: this.getSupportedChains.bind(this),
+      },
     });
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();
@@ -228,5 +231,9 @@ export class EthereumSigningProvider extends BaseProvider<
       },
     };
     return createEthAccountMiddleware(accountHandlers);
+  }
+
+  private getSupportedChains(): `0x${string}`[] {
+    return this.config.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155).map((c) => c.chainId as `0x${string}`);
   }
 }

@@ -3,11 +3,10 @@ import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import { Signature } from "ethers";
 
 import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
-import { createEIP7702BatchTransaction, signAuthorizationList } from "../../providers/ethereum-provider";
+import { createEIP7702BatchTransaction } from "../../providers/ethereum-provider";
 import type { ISolanaProviderHandlers } from "../../providers/solana-provider";
 import { formatChainId } from "./utils";
 
@@ -92,18 +91,7 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
     },
     processTransaction,
     processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      // Sign EIP-7702 authorization list if present (replaces dummy signatures with real ones)
-      const txParamsWithSignedAuthorization = await signAuthorizationList(txParams, async (authorizationHash) => {
-        const signatureHex = await sendJrpcRequest<string, string[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_SIGN, [
-          txParams.from,
-          authorizationHash,
-        ]);
-        const sig = Signature.from(signatureHex);
-        return { v: sig.yParity, r: sig.r, s: sig.s };
-      });
-      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, "eth_signTransaction", [
-        txParamsWithSignedAuthorization,
-      ]);
+      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, "eth_signTransaction", [txParams]);
       return methodRes;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
