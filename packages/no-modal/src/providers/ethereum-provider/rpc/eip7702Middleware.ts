@@ -42,7 +42,7 @@ export async function signAuthorizationList(
   txParams: TransactionParams & { gas?: string },
   signHash: SignAuthorizationHashFn
 ): Promise<TransactionParams & { gas?: string }> {
-  const { authorizationList, nonce } = txParams;
+  const { authorizationList } = txParams;
 
   if (!authorizationList || authorizationList.length === 0) {
     return txParams;
@@ -54,14 +54,11 @@ export async function signAuthorizationList(
     // Normalize authorization fields before hashing
     const address = getAddress(authorization.address);
     const chainId = BigInt(authorization.chainId);
-    const authorizationNonce = authorization.nonce !== null && authorization.nonce !== undefined ? authorization.nonce : BigInt(nonce + 1);
-    if (authorizationNonce === undefined) {
-      throw rpcErrors.invalidRequest({ message: "Nonce is required for signing EIP-7702 authorization" });
-    }
+    const nonce = authorization.nonce;
 
     // EIP-7702 authorization hash: keccak256(0x05 || rlp([chainId, address, nonce]))
     const authorizationHash = hashAuthorization({
-      nonce: authorizationNonce,
+      nonce,
       address,
       chainId,
     });
@@ -73,7 +70,7 @@ export async function signAuthorizationList(
     signedAuthorizationList.push({
       address,
       chainId,
-      nonce: authorizationNonce,
+      nonce,
       signature: Signature.from({ yParity, r, s }),
     });
   }
