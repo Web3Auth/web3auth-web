@@ -3,9 +3,11 @@ import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
+import { Signature } from "ethers";
 
 import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
+import { createEIP7702BatchTransaction, signAuthorizationList } from "../../providers/ethereum-provider";
 import type { ISolanaProviderHandlers } from "../../providers/solana-provider";
 import { formatChainId } from "./utils";
 
@@ -71,6 +73,13 @@ export async function getAccounts(signClient: ISignClient): Promise<string[]> {
 }
 
 export function getEthProviderHandlers({ connector, chainId }: { connector: ISignClient; chainId: number }): IEthProviderHandlers {
+  const processTransaction = async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
+    const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_TRANSACTION, [
+      txParams,
+    ]);
+    return methodRes;
+  };
+
   return {
     getPrivateKey: async () => {
       throw rpcErrors.methodNotSupported();
@@ -81,14 +90,20 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
     getAccounts: async (_: JRPCRequest<unknown>) => {
       return getAccounts(connector);
     },
-    processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_TRANSACTION, [
-        txParams,
-      ]);
-      return methodRes;
-    },
+    processTransaction,
     processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, "eth_signTransaction", [txParams]);
+      // Sign EIP-7702 authorization list if present (replaces dummy signatures with real ones)
+      const txParamsWithSignedAuthorization = await signAuthorizationList(txParams, async (authorizationHash) => {
+        const signatureHex = await sendJrpcRequest<string, string[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_SIGN, [
+          txParams.from,
+          authorizationHash,
+        ]);
+        const sig = Signature.from(signatureHex);
+        return { v: sig.yParity, r: sig.r, s: sig.s };
+      });
+      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, "eth_signTransaction", [
+        txParamsWithSignedAuthorization,
+      ]);
       return methodRes;
     },
     processEthSignMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
@@ -111,6 +126,18 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
         msgParams.data,
       ]);
       return methodRes;
+    },
+    processBatchTransactions: async (batchRequest, req) => {
+      const sendCallsParams = Array.isArray(req.params) ? req.params[0] : req.params;
+      if (!sendCallsParams) {
+        throw rpcErrors.invalidParams("Missing send calls parameters");
+      }
+
+      const { txParams, batchId } = createEIP7702BatchTransaction(batchRequest, sendCallsParams);
+
+      // Send the transaction through WalletConnect
+      await processTransaction(txParams, req);
+      return batchId;
     },
   };
 }

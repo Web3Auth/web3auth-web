@@ -1,81 +1,22 @@
-import { addHexPrefix, intToBytes, isHexString, PrefixedHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
+import { intToBytes, isHexString, PrefixedHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { concatSig } from "@toruslabs/base-controllers";
-import {
-  DUMMY_AUTHORIZATION_SIGNATURE,
-  type Eip5792SendCallsParams,
-  generateBatchId,
-  generateEIP7702BatchTransaction,
-  type TransactionBatchRequest,
-} from "@toruslabs/ethereum-controllers";
+import { type Eip5792SendCallsParams, type TransactionBatchRequest } from "@toruslabs/ethereum-controllers";
 import { JRPCRequest, providerErrors, rpcErrors, SafeEventEmitterProvider } from "@web3auth/auth";
-import { Authorization, hashAuthorization, hashMessage, Signature } from "ethers";
+import { hashMessage, Signature } from "ethers";
 import { hashTypedData, hexToBytes, validateTypedData } from "viem";
 
 import { log } from "../../../../base";
 import {
+  createEIP7702BatchTransaction,
   IEthProviderHandlers,
   MessageParams,
+  signAuthorizationList,
   SignTypedDataVersion,
   TransactionFormatter,
   TransactionParams,
   TypedMessageParams,
   validateTypedSignMessageDataV4,
 } from "../../../ethereum-provider";
-
-/**
- * Signs EIP-7702 authorization entries from the transaction params using the MPC sign function.
- * Extracts authorizationList from txParams, computes keccak256(0x05 || rlp([chainId, address, nonce]))
- * for each unsigned authorization and signs the hash.
- * Returns updated txParams with signed ethers-compatible Authorization objects ready for Transaction.from().
- */
-async function signAuthorizationList(
-  txParams: TransactionParams & { gas?: string },
-  sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>
-): Promise<TransactionParams & { gas?: string }> {
-  const { authorizationList, nonce } = txParams;
-
-  if (!authorizationList || authorizationList.length === 0) {
-    return txParams;
-  }
-
-  if (nonce === null || nonce === undefined) {
-    throw rpcErrors.invalidRequest({
-      message: "Nonce is required",
-    });
-  }
-
-  const signedAuthorizationLists: Authorization[] = [];
-
-  for (const authorization of authorizationList) {
-    const authorizationNonce = authorization.nonce ?? BigInt(Number(nonce) + 1);
-    const address = addHexPrefix(authorization.address);
-    const chainId = authorization.chainId;
-
-    // EIP-7702 authorization hash: keccak256(0x05 || rlp([chainId, address, nonce]))
-    const authorizationHash = hashAuthorization({
-      nonce: authorizationNonce,
-      address,
-      chainId,
-    });
-
-    const { v, r, s } = await sign(Buffer.from(stripHexPrefix(authorizationHash), "hex"));
-    // mpc-core-kit workaround: v may be 0/1 or 27/28, normalize to 0/1
-    const yParity: 0 | 1 = (v > 1 ? v - 27 : v) as 0 | 1;
-
-    signedAuthorizationLists.push({
-      address,
-      chainId,
-      nonce: authorizationNonce,
-      signature: Signature.from({
-        yParity,
-        r: `0x${r.toString("hex")}`,
-        s: `0x${s.toString("hex")}`,
-      }),
-    });
-  }
-
-  return { ...txParams, authorizationList: signedAuthorizationLists };
-}
 
 async function signTx(
   txParams: TransactionParams & { gas?: string },
@@ -86,7 +27,10 @@ async function signTx(
   const formattedTxParams = await txFormatter.formatTransaction(txParams);
 
   // Sign EIP-7702 authorization list if present
-  const finalTxParams = await signAuthorizationList(formattedTxParams, sign);
+  const finalTxParams = await signAuthorizationList(formattedTxParams, async (authorizationHash) => {
+    const { v, r, s } = await sign(Buffer.from(stripHexPrefix(authorizationHash), "hex"));
+    return { v, r: `0x${r.toString("hex")}`, s: `0x${s.toString("hex")}` };
+  });
 
   const ethTx = Transaction.from({
     ...finalTxParams,
@@ -179,9 +123,7 @@ export function getProviderHandlers({
   sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<{ v: number; r: Buffer; s: Buffer }>;
   getPublic: () => Promise<Buffer>;
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
-}): IEthProviderHandlers & {
-  processBatchTransactions: (batchRequest: TransactionBatchRequest, req: JRPCRequest<Eip5792SendCallsParams>) => Promise<string>;
-} {
+}): IEthProviderHandlers {
   return {
     getAccounts: async (_: JRPCRequest<unknown>) => {
       const pubKey = await getPublic();
@@ -272,53 +214,7 @@ export function getProviderHandlers({
         throw rpcErrors.invalidParams("Missing send calls parameters");
       }
 
-      const { from, chainId } = sendCallsParams;
-      const { transactions, requiredEip7702Upgrade, eip7702UpgradeContractAddress } = batchRequest;
-      const batchId = batchRequest.batchId ?? generateBatchId();
-
-      let txParams: TransactionParams & { gas?: string };
-
-      if (transactions.length === 1) {
-        // Single transaction: unwrap and process as a normal transaction
-        txParams = {
-          from,
-          to: transactions[0].params.to,
-          value: transactions[0].params.value || "0x0",
-          data: transactions[0].params.data || "0x",
-          chainId,
-        };
-      } else {
-        // Multiple transactions: encode as a single EIP-7821 batch execute call
-        const nestedTxParams = transactions.map((tx) => tx.params);
-        const batchTransaction = generateEIP7702BatchTransaction(from as `0x${string}`, nestedTxParams);
-
-        txParams = {
-          from,
-          to: batchTransaction.to,
-          data: batchTransaction.data,
-          value: batchTransaction.value || "0x0",
-        };
-
-        if (requiredEip7702Upgrade) {
-          if (!eip7702UpgradeContractAddress) {
-            throw rpcErrors.invalidParams("Delegation address is required for EIP-7702 upgrade");
-          }
-          // Send as type-4 (SET_CODE) transaction with authorization list
-          // so the EIP-7702 upgrade and batch execute happen atomically.
-          txParams.type = 4;
-          txParams.authorizationList = [
-            {
-              address: eip7702UpgradeContractAddress,
-              chainId: BigInt(chainId),
-              signature: Signature.from({
-                r: DUMMY_AUTHORIZATION_SIGNATURE,
-                s: DUMMY_AUTHORIZATION_SIGNATURE,
-                yParity: 0,
-              }),
-            } as Authorization,
-          ];
-        }
-      }
+      const { txParams, batchId } = createEIP7702BatchTransaction(batchRequest, sendCallsParams);
 
       // Sign and broadcast the transaction
       const serializedTxn = await signTx(txParams, sign, txFormatter);

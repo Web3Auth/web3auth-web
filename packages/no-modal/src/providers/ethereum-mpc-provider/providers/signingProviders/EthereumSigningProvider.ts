@@ -5,13 +5,13 @@ import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, WalletInit
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../providers/base-provider";
 import {
   createEip5792Middleware,
+  createEip7702Middleware,
   createEthChainSwitchMiddleware,
   createEthJsonRpcClient,
   createEthMiddleware,
   IEthChainSwitchHandlers,
   TransactionFormatter,
 } from "../../../ethereum-provider";
-import { createEip7702Middleware } from "../../../ethereum-provider/rpc/eip7702Middleware";
 import { createEthAccountMiddleware } from "../../rpc/ethRpcMiddlewares";
 import { IAccountHandlers } from "../../rpc/interfaces";
 import { getProviderHandlers } from "./signingUtils";

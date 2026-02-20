@@ -1,11 +1,15 @@
 import {
   DUMMY_AUTHORIZATION_SIGNATURE,
   EIP_7702_METHODS,
+  type Eip5792SendCallsParams,
   type Eip7702Params,
   type Eip7702WalletGetUpgradeStatusResponse,
+  generateBatchId,
+  generateEIP7702BatchTransaction,
   getDelegationAddress,
   getIsEip7702UpgradeSupported,
   MetaMask_EIP7702_Stateless_Delegator,
+  type TransactionBatchRequest,
 } from "@toruslabs/ethereum-controllers";
 import {
   createAsyncMiddleware,
@@ -16,10 +20,135 @@ import {
   rpcErrors,
   SafeEventEmitterProvider,
 } from "@web3auth/auth";
-import { type Authorization, Signature } from "ethers";
+import { type Authorization, getAddress, hashAuthorization, Signature } from "ethers";
 
+import { TRANSACTION_ENVELOPE_TYPES } from "../providers";
 import { createGetEthCode } from "./ethRpcMiddlewares";
 import type { TransactionParams } from "./interfaces";
+
+export type SignAuthorizationHashFn = (authorizationHash: string) => Promise<{ v: number; r: string; s: string }>;
+
+/**
+ * Signs EIP-7702 authorization entries in a transaction's authorizationList.
+ * For each authorization with a dummy (placeholder) signature, it computes the
+ * EIP-7702 authorization hash (keccak256(0x05 || rlp([chainId, address, nonce])))
+ * and delegates actual signing to the provided `signHash` callback.
+ * Already-signed authorizations are kept as-is.
+ *
+ * @param txParams - Transaction params containing an optional `authorizationList`.
+ * @param signHash - Callback that signs a hex-encoded authorization hash and returns v, r, s.
+ * @returns Updated txParams with signed Authorization objects.
+ */
+export async function signAuthorizationList(
+  txParams: TransactionParams & { gas?: string },
+  signHash: SignAuthorizationHashFn
+): Promise<TransactionParams & { gas?: string }> {
+  const { authorizationList, nonce } = txParams;
+
+  if (!authorizationList || authorizationList.length === 0) {
+    return txParams;
+  }
+
+  const signedAuthorizationList: Authorization[] = [];
+
+  for (const authorization of authorizationList) {
+    // Normalize authorization fields before hashing
+    const address = getAddress(authorization.address);
+    const chainId = BigInt(authorization.chainId);
+    const authorizationNonce = authorization.nonce != null ? BigInt(authorization.nonce) : nonce != null ? BigInt(Number(nonce) + 1) : undefined;
+    if (authorizationNonce === undefined) {
+      throw rpcErrors.invalidRequest({ message: "Nonce is required for signing EIP-7702 authorization" });
+    }
+
+    // EIP-7702 authorization hash: keccak256(0x05 || rlp([chainId, address, nonce]))
+    const authorizationHash = hashAuthorization({
+      nonce: authorizationNonce,
+      address,
+      chainId,
+    });
+
+    const { v, r, s } = await signHash(authorizationHash);
+    // Normalize v: may be 0/1 or 27/28, convert to yParity 0/1
+    const yParity: 0 | 1 = (v > 1 ? v - 27 : v) as 0 | 1;
+
+    signedAuthorizationList.push({
+      address,
+      chainId,
+      nonce: authorizationNonce,
+      signature: Signature.from({ yParity, r, s }),
+    });
+  }
+
+  return { ...txParams, authorizationList: signedAuthorizationList };
+}
+
+/**
+ * Builds a transaction from a batch request (EIP-5792 `wallet_sendCalls`).
+ *
+ * - Single call: unwrapped into a normal transaction.
+ * - Multiple calls: encoded into a single EIP-7821 batch execute call.
+ * - If an EIP-7702 upgrade is required, the transaction is built as a type-4
+ *   (SET_CODE) tx with an unsigned authorization list so the upgrade and
+ *   batch execute happen atomically.
+ *
+ * @param batchRequest - The batch request containing transactions and optional upgrade info.
+ * @param sendCallsParams - The EIP-5792 send calls parameters (from, chainId, etc.).
+ * @returns The built txParams and the batchId.
+ */
+export function createEIP7702BatchTransaction(
+  batchRequest: TransactionBatchRequest,
+  sendCallsParams: Eip5792SendCallsParams
+): { txParams: TransactionParams & { gas?: string }; batchId: string } {
+  const { from, chainId } = sendCallsParams;
+  const { transactions, requiredEip7702Upgrade, eip7702UpgradeContractAddress } = batchRequest;
+  const batchId = batchRequest.batchId ?? generateBatchId();
+
+  let txParams: TransactionParams & { gas?: string };
+
+  if (transactions.length === 1) {
+    // Single transaction: unwrap and process as a normal transaction
+    txParams = {
+      from,
+      to: transactions[0].params.to,
+      value: transactions[0].params.value || "0x0",
+      data: transactions[0].params.data || "0x",
+      chainId,
+    };
+  } else {
+    // Multiple transactions: encode as a single EIP-7821 batch execute call
+    const nestedTxParams = transactions.map((tx) => tx.params);
+    const batchTransaction = generateEIP7702BatchTransaction(from as `0x${string}`, nestedTxParams);
+
+    txParams = {
+      from,
+      to: batchTransaction.to,
+      data: batchTransaction.data,
+      value: batchTransaction.value || "0x0",
+    };
+
+    if (requiredEip7702Upgrade) {
+      if (!eip7702UpgradeContractAddress) {
+        throw rpcErrors.invalidParams("Delegation address is required for EIP-7702 upgrade");
+      }
+      // Send as type-4 (SET_CODE) transaction with authorization list
+      // so the EIP-7702 upgrade and batch execute happen atomically.
+      txParams.type = 4;
+      txParams.authorizationList = [
+        {
+          address: eip7702UpgradeContractAddress,
+          chainId: BigInt(chainId),
+          signature: Signature.from({
+            r: DUMMY_AUTHORIZATION_SIGNATURE,
+            s: DUMMY_AUTHORIZATION_SIGNATURE,
+            yParity: 0,
+          }),
+        } as Authorization,
+      ];
+    }
+  }
+
+  return { txParams, batchId };
+}
 
 export interface IEip7702MiddlewareOptions {
   getProviderEngineProxy: () => SafeEventEmitterProvider | null;
@@ -97,7 +226,7 @@ export function createEip7702Middleware({ getProviderEngineProxy, processTransac
       to: account, // setCode transactions target the sender
       data: "0x",
       value: "0x0",
-      type: 4,
+      type: Number.parseInt(TRANSACTION_ENVELOPE_TYPES.SET_CODE, 16),
       authorizationList: [
         {
           address: delegationTarget,

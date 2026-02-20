@@ -5,6 +5,8 @@ import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "
 import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../providers/base-provider";
 import {
+  createEip5792Middleware,
+  createEip7702Middleware,
   createEthChainSwitchMiddleware,
   createEthJsonRpcClient,
   createEthMiddleware,
@@ -111,10 +113,21 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       accounts: jrpcRes || [],
     });
     const ethMiddleware = createEthMiddleware(providerHandlers);
+    const eip7702Middleware = createEip7702Middleware({
+      getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
+      processTransaction: providerHandlers.processTransaction,
+    });
+    const eip5792Middleware = createEip5792Middleware({
+      getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
+      processTransaction: providerHandlers.processTransaction,
+      processTransactionBatch: providerHandlers.processBatchTransactions,
+    });
     const chainSwitchMiddleware = this.getEthChainSwitchMiddleware();
     const engine = new JRPCEngine();
     const { networkMiddleware } = createEthJsonRpcClient(chain);
     engine.push(ethMiddleware);
+    engine.push(eip7702Middleware);
+    engine.push(eip5792Middleware);
     engine.push(chainSwitchMiddleware);
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
