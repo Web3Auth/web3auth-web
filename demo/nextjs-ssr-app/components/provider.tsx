@@ -15,6 +15,28 @@ const web3authConfig: Web3AuthContextConfig = {
     web3AuthNetwork: "sapphire_devnet",
     clientId: clientId,
     ssr: true,
+    chains: [
+      {
+        chainNamespace: "eip155",
+        chainId: "0xaa36a7", // Sepolia – supports EIP-7702
+        rpcTarget: "https://sepolia.infura.io/v3/4efda295156d477f959dcef8ebc33c5f",
+        displayName: "Ethereum Sepolia",
+        ticker: "ETH",
+        tickerName: "Ethereum",
+        blockExplorerUrl: "https://sepolia.etherscan.io",
+        logo: "https://icons.llamao.fi/icons/chains/rsz_ethereum.jpg",
+      },
+    ],
+    defaultChainId: "0xaa36a7",
+    walletServicesConfig: {
+      confirmationStrategy: "modal",
+      loginMode: "plugin",
+      walletUrls: {
+        production: {
+          url: "http://localhost:4050",
+        },
+      },
+    },
   },
 };
 
