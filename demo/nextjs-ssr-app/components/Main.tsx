@@ -12,8 +12,7 @@ import {
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
-import { useState } from "react";
-import { useAccount, useBalance, useChainId, useSendTransaction, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
+import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
@@ -26,7 +25,6 @@ const Main = () => {
   const { userInfo, isMFAEnabled } = useWeb3AuthUser();
   const { data: balance } = useBalance({ address });
   const { signTypedData, data: signedTypedDataData } = useSignTypedData();
-  const { sendTransaction, data: txHash, isPending: isSendingTx, error: sendTxError } = useSendTransaction();
   const { enableMFA, loading: isEnableMFALoading, error: enableMFAError } = useEnableMFA();
   const { manageMFA, loading: isManageMFALoading, error: manageMFAError } = useManageMFA();
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
@@ -34,122 +32,7 @@ const Main = () => {
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
   const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
 
-  // ─── EIP-7702 / EIP-5792 State ──────────────────────────────────────
-  const [eipResult, setEipResult] = useState<string>("");
-  const [lastBatchId, setLastBatchId] = useState<string | null>(null);
-  const [eipLoading, setEipLoading] = useState<string | null>(null);
-
   console.log("isConnected", isConnected, balance);
-
-  // ─── EIP-7702 Handlers ──────────────────────────────────────────────
-
-  const getAccountUpgradeStatus = async () => {
-    if (!provider || !address) return;
-    setEipLoading("upgradeStatus");
-    try {
-      const currentChainId = "0x" + chainId.toString(16);
-      const result = await provider.request({
-        method: "wallet_getAccountUpgradeStatus",
-        params: [{ account: address, chainId: currentChainId }],
-      });
-      setEipResult(JSON.stringify(result, null, 2));
-    } catch (error: any) {
-      setEipResult(JSON.stringify({ error: error?.message || error }, null, 2));
-    } finally {
-      setEipLoading(null);
-    }
-  };
-
-  const upgradeAccount = async () => {
-    if (!provider || !address) return;
-    setEipLoading("upgrade");
-    try {
-      const currentChainId = "0x" + chainId.toString(16);
-      const result = await provider.request({
-        method: "wallet_upgradeAccount",
-        params: [{ account: address, chainId: currentChainId }],
-      });
-      setEipResult(JSON.stringify(result, null, 2));
-    } catch (error: any) {
-      setEipResult(JSON.stringify({ error: error?.message || error }, null, 2));
-    } finally {
-      setEipLoading(null);
-    }
-  };
-
-  // ─── EIP-5792 Handlers ──────────────────────────────────────────────
-
-  const getCapabilities = async () => {
-    if (!provider || !address) return;
-    setEipLoading("capabilities");
-    try {
-      const currentChainId = "0x" + chainId.toString(16);
-      const result = await provider.request({
-        method: "wallet_getCapabilities",
-        params: [address, [currentChainId]],
-      });
-      setEipResult(JSON.stringify(result, null, 2));
-    } catch (error: any) {
-      setEipResult(JSON.stringify({ error: error?.message || error }, null, 2));
-    } finally {
-      setEipLoading(null);
-    }
-  };
-
-  const sendBatchCalls = async () => {
-    if (!provider || !address) return;
-    setEipLoading("sendBatch");
-    try {
-      const currentChainId = "0x" + chainId.toString(16);
-      // Two simple self-transfers as a batch
-      const batchId = await provider.request({
-        method: "wallet_sendCalls",
-        params: [
-          {
-            version: "2.0",
-            chainId: currentChainId,
-            from: address,
-            calls: [
-              {
-                to: address,
-                value: "0x0",
-                data: "0x",
-              },
-              {
-                to: address,
-                value: "0x0",
-                data: "0x",
-              },
-            ],
-          },
-        ],
-      });
-      if (batchId && typeof batchId === "string") {
-        setLastBatchId(batchId);
-      }
-      setEipResult(JSON.stringify({ batchId }, null, 2));
-    } catch (error: any) {
-      setEipResult(JSON.stringify({ error: error?.message || error }, null, 2));
-    } finally {
-      setEipLoading(null);
-    }
-  };
-
-  const getCallsStatus = async () => {
-    if (!provider || !lastBatchId) return;
-    setEipLoading("callsStatus");
-    try {
-      const result = await provider.request({
-        method: "wallet_getCallsStatus",
-        params: [lastBatchId],
-      });
-      setEipResult(JSON.stringify(result, null, 2));
-    } catch (error: any) {
-      setEipResult(JSON.stringify({ error: error?.message || error }, null, 2));
-    } finally {
-      setEipLoading(null);
-    }
-  };
 
   const loggedInView = (
     <>
@@ -294,84 +177,7 @@ const Main = () => {
             Sign Typed Data
           </button>
           {signedTypedDataData && <textarea disabled rows={5} value={signedTypedDataData} style={{ width: "100%" }} />}
-
-          {/* Send Zero Transaction */}
-          <button
-            onClick={() => sendTransaction({ to: address!, value: BigInt(0) })}
-            className="card"
-            disabled={isSendingTx || !address}
-          >
-            {isSendingTx ? "Sending..." : "Send Zero Transaction"}
-          </button>
-          {txHash && <textarea disabled rows={2} value={`Tx Hash: ${txHash}`} style={{ width: "100%" }} />}
-          {sendTxError && <p style={{ color: "red" }}>Error: {sendTxError.message}</p>}
         </div>
-
-        {/* ── EIP-7702 Section ─────────────────────────────────────── */}
-        <div style={{ marginTop: "24px", marginBottom: "16px", borderTop: "2px solid #8b5cf6", paddingTop: "16px" }}>
-          <p style={{ color: "#8b5cf6", fontWeight: "bold" }}>EIP-7702 (Account Upgrade)</p>
-          <button
-            onClick={getAccountUpgradeStatus}
-            className="card"
-            style={{ borderColor: "#8b5cf6", color: "#8b5cf6" }}
-            disabled={eipLoading === "upgradeStatus"}
-          >
-            {eipLoading === "upgradeStatus" ? "Checking..." : "Get Upgrade Status"}
-          </button>
-          <button
-            onClick={upgradeAccount}
-            className="card"
-            style={{ borderColor: "#8b5cf6", color: "#8b5cf6" }}
-            disabled={eipLoading === "upgrade"}
-          >
-            {eipLoading === "upgrade" ? "Upgrading..." : "Upgrade Account (EIP-7702)"}
-          </button>
-        </div>
-
-        {/* ── EIP-5792 Section ─────────────────────────────────────── */}
-        <div style={{ marginTop: "24px", marginBottom: "16px", borderTop: "2px solid #10b981", paddingTop: "16px" }}>
-          <p style={{ color: "#10b981", fontWeight: "bold" }}>EIP-5792 (Batch Calls)</p>
-          <button
-            onClick={getCapabilities}
-            className="card"
-            style={{ borderColor: "#10b981", color: "#10b981" }}
-            disabled={eipLoading === "capabilities"}
-          >
-            {eipLoading === "capabilities" ? "Fetching..." : "Get Capabilities"}
-          </button>
-          <button
-            onClick={sendBatchCalls}
-            className="card"
-            style={{ borderColor: "#10b981", color: "#10b981" }}
-            disabled={eipLoading === "sendBatch"}
-          >
-            {eipLoading === "sendBatch" ? "Sending..." : "Send Batch Calls (wallet_sendCalls)"}
-          </button>
-          <button
-            onClick={getCallsStatus}
-            className="card"
-            style={{
-              borderColor: lastBatchId ? "#10b981" : "#ccc",
-              color: lastBatchId ? "#10b981" : "#ccc",
-            }}
-            disabled={!lastBatchId || eipLoading === "callsStatus"}
-          >
-            {eipLoading === "callsStatus" ? "Fetching..." : "Get Calls Status"}
-          </button>
-          {lastBatchId && (
-            <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
-              Last Batch ID: <code>{lastBatchId}</code>
-            </p>
-          )}
-        </div>
-
-        {/* EIP Result Console */}
-        {eipResult && (
-          <div style={{ marginTop: "8px", marginBottom: "16px" }}>
-            <p style={{ fontWeight: "bold" }}>EIP-7702 / 5792 Result:</p>
-            <textarea disabled rows={8} value={eipResult} style={{ width: "100%", fontFamily: "monospace", fontSize: "0.9rem" }} />
-          </div>
-        )}
 
         {/* Switch Chain */}
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>

@@ -15,16 +15,6 @@ const web3authConfig: Web3AuthContextConfig = {
     web3AuthNetwork: "sapphire_devnet",
     clientId: clientId,
     ssr: true,
-    defaultChainId: "0xaa36a7",
-    walletServicesConfig: {
-      confirmationStrategy: "modal",
-      loginMode: "plugin",
-      // walletUrls: {
-      //   production: {
-      //     url: "http://localhost:4050",
-      //   },
-      // },
-    },
   },
 };
 

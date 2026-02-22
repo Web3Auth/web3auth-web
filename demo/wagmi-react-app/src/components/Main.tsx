@@ -14,8 +14,18 @@ import {
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
-import { useMemo } from "react";
-import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
+import { useEffect, useMemo, useState } from "react";
+import {
+  useAccount,
+  useBalance,
+  useCallsStatus,
+  useCapabilities,
+  useChainId,
+  useSendCalls,
+  useSignMessage,
+  useSignTypedData,
+  useSwitchChain,
+} from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
@@ -40,6 +50,39 @@ const Main = () => {
   const { switchChain: switchWeb3AuthChain } = useWeb3AuthSwitchChain();
 
   const chainId = useChainId();
+  const [lastBatchId, setLastBatchId] = useState<string | null>(null);
+
+  const {
+    data: capabilitiesData,
+    error: capabilitiesError,
+    isFetching: isCapabilitiesFetching,
+    refetch: refetchCapabilities,
+  } = useCapabilities({
+    account: address,
+    query: {
+      enabled: false,
+    },
+  });
+
+  const { sendCalls, data: sendCallsData, error: sendCallsError, isPending: isSendCallsPending } = useSendCalls();
+
+  const {
+    data: callsStatusData,
+    error: callsStatusError,
+    isFetching: isCallsStatusFetching,
+    refetch: refetchCallsStatus,
+  } = useCallsStatus({
+    id: (lastBatchId || "0x0") as `0x${string}`,
+    query: {
+      enabled: false,
+    },
+  });
+
+  useEffect(() => {
+    if (sendCallsData?.id) {
+      setLastBatchId(sendCallsData.id);
+    }
+  }, [sendCallsData]);
 
   const chainNamespaces = useMemo(() => {
     if (status && web3Auth?.coreOptions?.chains) {
@@ -55,6 +98,22 @@ const Main = () => {
       return;
     }
     throw new Error(`No chain found for the selected namespace: ${chainNamespace}`);
+  };
+
+  const sendBatchCalls = async () => {
+    if (!address) return;
+    sendCalls({
+      calls: [
+        { to: address, value: 0n },
+        { to: address, value: 0n },
+      ],
+      chainId,
+    });
+  };
+
+  const getCallsStatus = async () => {
+    if (!lastBatchId) return;
+    await refetchCallsStatus();
   };
 
   const loggedInView = (
@@ -220,6 +279,78 @@ const Main = () => {
             </button>
           ))}
         </div>
+
+        {currentChainNamespace === CHAIN_NAMESPACES.EIP155 && (
+          <>
+            <div style={{ marginTop: "24px", marginBottom: "16px", borderTop: "2px solid #8b5cf6", paddingTop: "16px" }}>
+              <p style={{ color: "#8b5cf6", fontWeight: "bold" }}>EIP-7702 / EIP-5792 (wagmi hooks)</p>
+              <p style={{ marginTop: 0 }}>
+                Uses <code>useSendCalls</code>, <code>useCapabilities</code>, and <code>useCallsStatus</code>.
+              </p>
+            </div>
+
+            <div style={{ marginTop: "24px", marginBottom: "16px", borderTop: "2px solid #10b981", paddingTop: "16px" }}>
+              <p style={{ color: "#10b981", fontWeight: "bold" }}>EIP-5792 (Batch Calls)</p>
+              <button
+                onClick={() => refetchCapabilities()}
+                className={styles.card}
+                style={{ borderColor: "#10b981", color: "#10b981" }}
+                disabled={isCapabilitiesFetching}
+              >
+                {isCapabilitiesFetching ? "Fetching..." : "Get Capabilities"}
+              </button>
+              <button
+                onClick={sendBatchCalls}
+                className={styles.card}
+                style={{ borderColor: "#10b981", color: "#10b981" }}
+                disabled={isSendCallsPending || !address}
+              >
+                {isSendCallsPending ? "Sending..." : "Send Batch Calls (useSendCalls)"}
+              </button>
+              <button
+                onClick={getCallsStatus}
+                className={styles.card}
+                style={{
+                  borderColor: lastBatchId ? "#10b981" : "#ccc",
+                  color: lastBatchId ? "#10b981" : "#ccc",
+                }}
+                disabled={!lastBatchId || isCallsStatusFetching}
+              >
+                {isCallsStatusFetching ? "Fetching..." : "Get Calls Status"}
+              </button>
+              {lastBatchId && (
+                <p style={{ fontSize: "0.85rem", color: "#666", marginTop: "0.5rem" }}>
+                  Last Batch ID: <code>{lastBatchId}</code>
+                </p>
+              )}
+            </div>
+
+            {(capabilitiesData || callsStatusData || capabilitiesError || sendCallsError || callsStatusError) && (
+              <div style={{ marginTop: "8px", marginBottom: "16px" }}>
+                <p style={{ fontWeight: "bold" }}>EIP-7702 / 5792 Result:</p>
+                <textarea
+                  disabled
+                  rows={8}
+                  value={JSON.stringify(
+                    {
+                      capabilities: capabilitiesData,
+                      batchId: lastBatchId,
+                      callsStatus: callsStatusData,
+                      errors: {
+                        capabilities: capabilitiesError?.message,
+                        sendCalls: sendCallsError?.message,
+                        callsStatus: callsStatusError?.message,
+                      },
+                    },
+                    null,
+                    2
+                  )}
+                  style={{ width: "100%", fontFamily: "monospace", fontSize: "0.9rem" }}
+                />
+              </div>
+            )}
+          </>
+        )}
 
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
           <p>Chain Namespace</p>
