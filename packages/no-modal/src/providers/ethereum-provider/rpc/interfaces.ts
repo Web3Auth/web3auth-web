@@ -1,4 +1,3 @@
-import type { Eip5792SendCallsParams, TransactionBatchRequest } from "@toruslabs/ethereum-controllers";
 import type { JRPCRequest } from "@web3auth/auth";
 import type { TransactionLike, TypedDataDomain, TypedDataField } from "ethers";
 
@@ -54,7 +53,6 @@ export interface WalletMiddlewareOptions {
   processTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
   processSignTransaction?: (txParams: TransactionParams, req: JRPCRequest<unknown>) => Promise<string>;
   processTypedMessageV4?: (msgParams: TypedMessageParams, req: JRPCRequest<unknown>) => Promise<string>;
-  processBatchTransactions?: (batchRequest: TransactionBatchRequest, req: JRPCRequest<Eip5792SendCallsParams>) => Promise<string>;
 }
 
 export type IEthProviderHandlers = WalletMiddlewareOptions;

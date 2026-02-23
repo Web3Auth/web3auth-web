@@ -1,16 +1,13 @@
 import { intToBytes, isHexString, PrefixedHexString, publicToAddress, stripHexPrefix, toBytes } from "@ethereumjs/util";
 import { concatSig } from "@toruslabs/base-controllers";
-import { type Eip5792SendCallsParams, type TransactionBatchRequest } from "@toruslabs/ethereum-controllers";
-import { JRPCRequest, providerErrors, rpcErrors, SafeEventEmitterProvider } from "@web3auth/auth";
+import { JRPCRequest, providerErrors, SafeEventEmitterProvider } from "@web3auth/auth";
 import { hashMessage, Signature } from "ethers";
 import { hashTypedData, hexToBytes, validateTypedData } from "viem";
 
 import { log } from "../../../../base";
 import {
-  createEIP7702BatchTransaction,
   IEthProviderHandlers,
   MessageParams,
-  signAuthorizationList,
   SignTypedDataVersion,
   TransactionFormatter,
   TransactionParams,
@@ -24,14 +21,7 @@ async function signTx(
   txFormatter: TransactionFormatter
 ): Promise<PrefixedHexString> {
   const { Transaction } = await import("ethers");
-  const formattedTxParams = await txFormatter.formatTransaction(txParams);
-
-  // Sign EIP-7702 authorization list if present
-  const finalTxParams = await signAuthorizationList(formattedTxParams, async (authorizationHash) => {
-    const { v, r, s } = await sign(Buffer.from(stripHexPrefix(authorizationHash), "hex"));
-    return { v, r: `0x${r.toString("hex")}`, s: `0x${s.toString("hex")}` };
-  });
-
+  const finalTxParams = await txFormatter.formatTransaction(txParams);
   const ethTx = Transaction.from({
     ...finalTxParams,
     from: undefined, // from is already calculated inside Transaction.from and is not allowed to be passed in
@@ -83,7 +73,7 @@ async function personalSign(sign: (msgHash: Buffer, rawMsg?: Buffer) => Promise<
   return serialized;
 }
 
-function validateVersion(version: string, allowedVersions?: string[]) {
+function validateVersion(version: string, allowedVersions: string[]) {
   if (!Object.keys(SignTypedDataVersion).includes(version)) {
     throw new Error(`Invalid version: '${version}'`);
   } else if (allowedVersions && !allowedVersions.includes(version)) {
@@ -151,7 +141,7 @@ export function getProviderHandlers({
         method: "eth_sendRawTransaction",
         params: [serializedTxn],
       });
-      return txHash as string;
+      return txHash;
     },
     processSignTransaction: async (txParams: TransactionParams & { gas?: string }, _: JRPCRequest<unknown>): Promise<string> => {
       const providerEngineProxy = getProviderEngineProxy();
@@ -180,50 +170,10 @@ export function getProviderHandlers({
           code: 4902,
         });
       const chainId = await providerEngineProxy.request<unknown, string>({ method: "eth_chainId" });
-      await validateTypedSignMessageDataV4(msgParams, chainId as string);
+      await validateTypedSignMessageDataV4(msgParams, chainId);
       const data = typeof msgParams.data === "string" ? JSON.parse(msgParams.data) : msgParams.data;
       const sig = signTypedData(sign, data, SignTypedDataVersion.V4);
       return sig;
-    },
-
-    /**
-     * Processes a batch of transactions for EIP-5792 `wallet_sendCalls`.
-     *
-     * For a single call, it is unwrapped and sent as a normal transaction.
-     * For multiple calls, they are encoded into a single EIP-7821 `execute` call
-     * targeting the sender's own address (via a delegated EIP-7702 contract).
-     *
-     * If the account has not yet been upgraded to an EIP-7702 delegate, the
-     * transaction is sent as a type-4 (SET_CODE) tx with an authorization list
-     * so that the upgrade and batch execute happen atomically.
-     *
-     * @param batchRequest - The batch request containing transactions and optional upgrade info.
-     * @param req - The original JRPC request with EIP-5792 send calls parameters.
-     * @returns The batch ID identifying this batch of calls.
-     */
-    processBatchTransactions: async (batchRequest: TransactionBatchRequest, req: JRPCRequest<Eip5792SendCallsParams>): Promise<string> => {
-      const providerEngineProxy = getProviderEngineProxy();
-      if (!providerEngineProxy)
-        throw providerErrors.custom({
-          message: "Provider is not initialized",
-          code: 4902,
-        });
-
-      const sendCallsParams = Array.isArray(req.params) ? req.params[0] : req.params;
-      if (!sendCallsParams) {
-        throw rpcErrors.invalidParams("Missing send calls parameters");
-      }
-
-      const { txParams, batchId } = createEIP7702BatchTransaction(batchRequest, sendCallsParams);
-
-      // Sign and broadcast the transaction
-      const serializedTxn = await signTx(txParams, sign, txFormatter);
-      await providerEngineProxy.request<string[], string>({
-        method: "eth_sendRawTransaction",
-        params: [serializedTxn],
-      });
-
-      return batchId;
     },
   };
 }

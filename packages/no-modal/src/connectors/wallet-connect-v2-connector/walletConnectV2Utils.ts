@@ -6,7 +6,6 @@ import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
-import { createEIP7702BatchTransaction } from "../../providers/ethereum-provider";
 import type { ISolanaProviderHandlers } from "../../providers/solana-provider";
 import { formatChainId } from "./utils";
 
@@ -72,13 +71,6 @@ export async function getAccounts(signClient: ISignClient): Promise<string[]> {
 }
 
 export function getEthProviderHandlers({ connector, chainId }: { connector: ISignClient; chainId: number }): IEthProviderHandlers {
-  const processTransaction = async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
-    const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_TRANSACTION, [
-      txParams,
-    ]);
-    return methodRes;
-  };
-
   return {
     getPrivateKey: async () => {
       throw rpcErrors.methodNotSupported();
@@ -89,7 +81,12 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
     getAccounts: async (_: JRPCRequest<unknown>) => {
       return getAccounts(connector);
     },
-    processTransaction,
+    processTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
+      const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, EVM_METHOD_TYPES.ETH_TRANSACTION, [
+        txParams,
+      ]);
+      return methodRes;
+    },
     processSignTransaction: async (txParams: TransactionParams, _: JRPCRequest<unknown>): Promise<string> => {
       const methodRes = await sendJrpcRequest<string, TransactionParams[]>(connector, `eip155:${chainId}`, "eth_signTransaction", [txParams]);
       return methodRes;
@@ -114,18 +111,6 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
         msgParams.data,
       ]);
       return methodRes;
-    },
-    processBatchTransactions: async (batchRequest, req) => {
-      const sendCallsParams = Array.isArray(req.params) ? req.params[0] : req.params;
-      if (!sendCallsParams) {
-        throw rpcErrors.invalidParams("Missing send calls parameters");
-      }
-
-      const { txParams, batchId } = createEIP7702BatchTransaction(batchRequest, sendCallsParams);
-
-      // Send the transaction through WalletConnect
-      await processTransaction(txParams, req);
-      return batchId;
     },
   };
 }

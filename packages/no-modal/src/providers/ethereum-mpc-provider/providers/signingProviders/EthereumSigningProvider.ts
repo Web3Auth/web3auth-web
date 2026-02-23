@@ -4,8 +4,6 @@ import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine, rpcErro
 import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "../../../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../providers/base-provider";
 import {
-  createEip5792Middleware,
-  createEip7702Middleware,
   createEthChainSwitchMiddleware,
   createEthJsonRpcClient,
   createEthMiddleware,
@@ -66,12 +64,10 @@ export class EthereumSigningProvider extends BaseProvider<
   };
 
   public async enable(): Promise<string[]> {
-    if (!this._providerEngineProxy) throw providerErrors.custom({ message: "Provider is not initialized", code: 4902 });
     if (!this.state.signMethods)
       throw providerErrors.custom({ message: "signMethods are not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.signMethods, this.chainId);
-    const accounts = await this._providerEngineProxy.request({ method: "eth_accounts" });
-    return accounts as string[];
+    return this._providerEngineProxy.request({ method: "eth_accounts" });
   }
 
   public async setupProvider(
@@ -94,27 +90,12 @@ export class EthereumSigningProvider extends BaseProvider<
       getPublic,
       getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
     });
-
     const ethMiddleware = createEthMiddleware(providerHandlers);
-    const eip7702Middleware = createEip7702Middleware({
-      getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
-      processTransaction: providerHandlers.processTransaction,
-    });
-    const eip5792Middleware = createEip5792Middleware({
-      getProviderEngineProxy: this.getProviderEngineProxy.bind(this),
-      processTransaction: providerHandlers.processTransaction,
-      processTransactionBatch: providerHandlers.processBatchTransactions,
-      eip5792Config: {
-        getSupportedChains: this.getSupportedChains.bind(this),
-      },
-    });
     const chainSwitchMiddleware = this.getChainSwitchMiddleware();
     const engine = new JRPCEngine();
     // Not a partial anymore because of checks in ctor
     const { networkMiddleware } = createEthJsonRpcClient(chain);
     engine.push(ethMiddleware);
-    engine.push(eip7702Middleware);
-    engine.push(eip5792Middleware);
     engine.push(chainSwitchMiddleware);
     engine.push(this.getAccountMiddleware());
     engine.push(networkMiddleware);
@@ -231,9 +212,5 @@ export class EthereumSigningProvider extends BaseProvider<
       },
     };
     return createEthAccountMiddleware(accountHandlers);
-  }
-
-  private getSupportedChains(): `0x${string}`[] {
-    return this.config.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155).map((c) => c.chainId as `0x${string}`);
   }
 }

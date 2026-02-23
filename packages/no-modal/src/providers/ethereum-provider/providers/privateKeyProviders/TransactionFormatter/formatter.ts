@@ -1,8 +1,7 @@
 import { addHexPrefix, PrefixedHexString, stripHexPrefix } from "@ethereumjs/util";
-import { DUMMY_AUTHORIZATION_SIGNATURE, TransactionParams as ControllerTransactionParams } from "@toruslabs/ethereum-controllers";
 import { Block } from "@web3auth/auth";
 import { BigNumber } from "bignumber.js";
-import { AddressLike, Signature } from "ethers";
+import { AddressLike } from "ethers";
 
 import { CustomChainConfig, log, SafeEventEmitterProvider } from "../../../../../base";
 import { TransactionParams } from "../../../rpc/interfaces";
@@ -28,32 +27,6 @@ export class TransactionFormatter {
 
   get providerProxy() {
     return this.getProviderEngineProxy();
-  }
-
-  /**
-   * Converts transaction params from the `@toruslabs/ethereum-controllers` format
-   * to the local ethers-based `TransactionParams` format.
-   *
-   * Handles converting string-typed fields (`type`, `nonce`) to numbers and
-   * re-mapping the authorization list from separate `r`/`s`/`yParity` hex fields
-   * to ethers `Signature` objects.
-   */
-  static formatControllerTransactionParams(txParams: ControllerTransactionParams): TransactionParams {
-    return {
-      ...txParams,
-      type: txParams.type != null ? Number(txParams.type) : undefined,
-      nonce: txParams.nonce != null ? Number(txParams.nonce) : undefined,
-      authorizationList: txParams.authorizationList?.map(({ address, chainId, nonce, r, s, yParity }) => ({
-        address,
-        chainId: BigInt(chainId),
-        nonce: nonce != null ? BigInt(nonce) : BigInt(0),
-        signature: Signature.from({
-          r: r ?? DUMMY_AUTHORIZATION_SIGNATURE,
-          s: s ?? DUMMY_AUTHORIZATION_SIGNATURE,
-          yParity: (yParity ? Number(yParity) : 0) as 0 | 1,
-        }),
-      })),
-    };
   }
 
   async init(): Promise<void> {
@@ -169,26 +142,7 @@ export class TransactionFormatter {
       clonedTxParams.gasPrice = defaultGasPrice as never;
     }
 
-    // Preserve EIP-7702 (type 4) if explicitly set by the caller;
-    // EIP-7702 uses the same gas model as EIP-1559 so the fields above are already correct.
-    const isEip7702 =
-      clonedTxParams.type === Number.parseInt(TRANSACTION_ENVELOPE_TYPES.SET_CODE, 16) &&
-      clonedTxParams.authorizationList &&
-      clonedTxParams.authorizationList.length > 0;
-    if (!isEip7702) {
-      clonedTxParams.type = Number.parseInt(this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY, 16);
-    }
-
-    // Format the authorization list: assign nonces to authorization objects that don't have one.
-    // Each missing nonce is set to mainNonce + 1 + index, incrementing for each authorization.
-    if (clonedTxParams.authorizationList && clonedTxParams.authorizationList.length > 0 && clonedTxParams.nonce != null) {
-      const txNonce = Number(clonedTxParams.nonce);
-      clonedTxParams.authorizationList = clonedTxParams.authorizationList.map((auth, index) => ({
-        ...auth,
-        nonce: auth.nonce !== null && auth.nonce !== undefined ? auth.nonce : BigInt(txNonce + 1 + index),
-      }));
-    }
-
+    clonedTxParams.type = Number.parseInt(this.isEIP1559Compatible ? TRANSACTION_ENVELOPE_TYPES.FEE_MARKET : TRANSACTION_ENVELOPE_TYPES.LEGACY, 16);
     clonedTxParams.chainId = this.chainConfig.chainId as PrefixedHexString;
     return clonedTxParams;
   }
