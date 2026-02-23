@@ -1,5 +1,7 @@
+import { type ReactNode } from "react";
+
 export interface LoginHintProps {
-  children: React.ReactNode;
+  children: ReactNode;
   content: string;
   isDark?: boolean;
   hideHint?: boolean;

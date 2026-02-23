@@ -1,6 +1,6 @@
-import { useContext, useMemo } from "react";
+import { useMemo } from "react";
 
-import { ThemedContext } from "../../context/ThemeContext";
+import { useWidget } from "../../context/WidgetContext";
 import { cn } from "../../utils";
 import { ImageProps } from "./Image.type";
 
@@ -24,7 +24,7 @@ export default function Image(props: ImageProps) {
     fallbackImageId,
   } = props;
 
-  const { isDark } = useContext(ThemedContext);
+  const { isDark } = useWidget();
 
   const imgName = useMemo(() => (isDark && darkImageId ? darkImageId : imageId), [isDark, darkImageId, imageId]);
   const hoverImgName = useMemo(() => (isDark && darkHoverImageId ? darkHoverImageId : hoverImageId), [isDark, darkHoverImageId, hoverImageId]);

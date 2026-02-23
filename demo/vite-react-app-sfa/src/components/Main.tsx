@@ -1,16 +1,16 @@
 import { CredentialResponse, GoogleLogin } from "@react-oauth/google";
-import { WALLET_CONNECTORS } from "@web3auth/no-modal";
-import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from "@web3auth/no-modal/react";
-import { useAccount, useSignMessage } from "wagmi";
+import { WALLET_CONNECTORS } from "@web3auth/modal";
+import { useWeb3Auth, useWeb3AuthConnect, useWeb3AuthDisconnect } from "@web3auth/modal/react";
+import { useConnection, useSignMessage } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
-  const { connect, loading: connecting, error: connectingError, connectorName } = useWeb3AuthConnect();
+  const { connect, connectTo, loading: connecting, error: connectingError } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
-  const { isConnected: isWagmiConnected } = useAccount();
-  const { signMessageAsync, data: signedMessageData } = useSignMessage();
+  const { isConnected: isWagmiConnected } = useConnection();
+  const { mutateAsync: signMessageAsync, data: signedMessageData } = useSignMessage();
 
   const loggedInView = (
     <>
@@ -41,9 +41,9 @@ const Main = () => {
       return;
     }
 
-    await connect(WALLET_CONNECTORS.AUTH, {
+    await connectTo(WALLET_CONNECTORS.AUTH, {
       authConnection: "custom",
-      authConnectionId: "w3a-sfa-web-google",
+      authConnectionId: "w3-sfa-web-google-devnet",
       idToken: idToken,
       extraLoginOptions: {
         userIdField: "email",
@@ -52,12 +52,16 @@ const Main = () => {
     });
   };
 
+  const w3aLogin = () => {
+    connect();
+  };
+
   const unloggedInView = (
     <>
       {connecting ? (
         <p>Connecting...</p>
       ) : (
-        <div className="flex justify-center mb-2">
+        <div className="mb-2 flex justify-center">
           <GoogleLogin
             logo_alignment="left"
             locale="en"
@@ -68,6 +72,7 @@ const Main = () => {
             shape="pill"
             width={window.innerWidth < 640 ? "276px" : "332px"}
           />
+          <button onClick={w3aLogin} className={styles.card}></button>
         </div>
       )}
       {connectingError && <p>Error: {connectingError.message}</p>}
