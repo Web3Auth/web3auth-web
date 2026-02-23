@@ -18,6 +18,7 @@ import {
 import { injected } from "wagmi/connectors";
 
 import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletInitializationError } from "../../base";
+import { createGuardedRawProvider } from "../../utils";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../hooks";
 import { defaultWagmiConfig } from "./constants";
 import { WagmiProviderProps } from "./interface";
@@ -31,7 +32,7 @@ function getWeb3authConnector(config: Config) {
 // Helper to initialize connectors for the given wallets
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 async function setupConnector(provider: any, config: Config) {
-  let connector: Connector | CreateConnectorFn = getWeb3authConnector(config);
+  let connector: Connector | CreateConnectorFn | undefined = getWeb3authConnector(config);
 
   if (connector) return connector;
 
@@ -121,7 +122,9 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     (async () => {
       if (isConnected && provider) {
-        const connector = await setupConnector(provider, wagmiConfig);
+        // Create a guarded provider to handle EIP-7702 and EIP-5792 method not found errors.
+        const guardedProvider = createGuardedRawProvider(provider);
+        const connector = await setupConnector(guardedProvider, wagmiConfig);
         if (!connector) {
           throw new Error("Failed to setup connector");
         }

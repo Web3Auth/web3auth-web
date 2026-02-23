@@ -67,6 +67,7 @@ import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
+import { createGuardedRawProvider } from "./utils";
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
@@ -893,7 +894,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
       this.connectToPlugins({ ...data, connector: data.connector as WALLET_CONNECTOR_TYPE });
-      this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
+      this.emit(CONNECTOR_EVENTS.CONNECTED, {
+        ...data,
+        provider: createGuardedRawProvider(data.provider as IProvider),
+        loginMode: this.loginMode,
+      });
     });
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {

@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, type CustomChainConfig, log, WalletInitializationError } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, createGuardedRawProvider, type CustomChainConfig, log, WalletInitializationError } from "@web3auth/no-modal";
 import { createElement, Fragment, PropsWithChildren, useEffect, useMemo } from "react";
 import { type Chain, defineChain, http, webSocket } from "viem";
 import {
@@ -119,7 +119,8 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     (async () => {
       if (isConnected && provider) {
-        const connector = await setupConnector(provider, wagmiConfig);
+        const guardedProvider = createGuardedRawProvider(provider);
+        const connector = await setupConnector(guardedProvider, wagmiConfig);
         if (!connector) {
           log.error("Failed to setup react wagmi connector");
           throw new Error("Failed to setup connector");

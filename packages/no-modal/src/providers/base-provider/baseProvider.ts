@@ -10,6 +10,7 @@ import {
   WalletInitializationError,
   WalletProviderError,
 } from "../../base";
+import { getRpcErrorFromResponse, handleEIP7702Or5792MethodNotFoundError } from "../../utils";
 import { BaseProviderEvents } from "./interfaces";
 import { EIP1193_EVENTS } from "./utils";
 
@@ -100,7 +101,16 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
       });
     }
 
-    return this.provider?.request(args);
+    try {
+      const response = await this.provider?.request(args);
+      const responseError = getRpcErrorFromResponse(response);
+      if (responseError) {
+        handleEIP7702Or5792MethodNotFoundError(method, responseError);
+      }
+      return response as Maybe<R>;
+    } catch (error: unknown) {
+      handleEIP7702Or5792MethodNotFoundError(method, error);
+    }
   }
 
   sendAsync<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void;

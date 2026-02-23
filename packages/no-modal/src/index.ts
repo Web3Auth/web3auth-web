@@ -3,3 +3,4 @@ export * from "./connectors";
 export * from "./noModal";
 export * from "./plugins";
 export * from "./providers";
+export { createGuardedRawProvider } from "./utils";
