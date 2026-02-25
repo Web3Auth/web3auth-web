@@ -1,10 +1,15 @@
 import { bs58 as base58 } from "@toruslabs/bs58";
-import { EIP_5792_METHODS, Eip5792GetCapabilitiesParams, Eip5792SendCallsParams } from "@toruslabs/ethereum-controllers";
+import {
+  EIP_5792_METHODS,
+  Eip5792GetCapabilitiesParams,
+  Eip5792SendCallsParams,
+  Eip5792ShowCallsStatusParams,
+} from "@toruslabs/ethereum-controllers";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import { GetCapabilitiesReturnType, isHex, SendCallsReturnType, WalletGetCallsStatusReturnType } from "viem";
+import type { GetCapabilitiesReturnType, SendCallsReturnType, WalletGetCallsStatusReturnType } from "viem";
 
 import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
@@ -137,10 +142,6 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
     },
     // EIP-5792: wallet_getCallsStatus
     processGetCallsStatus: async (batchId: string) => {
-      if (!isHex(batchId)) {
-        throw rpcErrors.invalidParams("Invalid batchId");
-      }
-
       const results = await sendJrpcRequest<WalletGetCallsStatusReturnType, string[]>(
         connector,
         `eip155:${chainId}`,
@@ -148,6 +149,10 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
         [batchId]
       );
       return results;
+    },
+    // EIP-5792: wallet_showCallsStatus
+    processShowCallsStatus: async (batchId: Eip5792ShowCallsStatusParams) => {
+      await sendJrpcRequest<void, string[]>(connector, `eip155:${chainId}`, EIP_5792_METHODS.WALLET_SHOW_CALLS_STATUS, [batchId]);
     },
   };
 }

@@ -1,7 +1,7 @@
-import { Eip5792GetCapabilitiesParams, Eip5792SendCallsParams } from "@toruslabs/ethereum-controllers";
+import { Eip5792GetCapabilitiesParams, Eip5792SendCallsParams, Eip5792ShowCallsStatusParams } from "@toruslabs/ethereum-controllers";
 import type { JRPCRequest } from "@web3auth/auth";
 import type { TransactionLike, TypedDataDomain, TypedDataField } from "ethers";
-import { GetCapabilitiesReturnType, SendCallsReturnType, WalletGetCallsStatusReturnType } from "viem";
+import type { GetCapabilitiesReturnType, SendCallsReturnType, WalletGetCallsStatusReturnType } from "viem";
 
 import { AddEthereumChainConfig } from "../../../base";
 export interface IEthAccountHandlers {
@@ -60,6 +60,7 @@ export interface WalletMiddlewareOptions {
   processGetCapabilities?: (req: Eip5792GetCapabilitiesParams) => Promise<GetCapabilitiesReturnType>;
   processSendCalls?: (params: Eip5792SendCallsParams) => Promise<SendCallsReturnType>;
   processGetCallsStatus?: (batchId: string) => Promise<WalletGetCallsStatusReturnType>;
+  processShowCallsStatus?: (batchId: Eip5792ShowCallsStatusParams) => Promise<void>;
 }
 
 export type IEthProviderHandlers = WalletMiddlewareOptions;

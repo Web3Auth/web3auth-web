@@ -254,11 +254,11 @@ const Main = () => {
                 {
                   calls: [
                     {
-                      to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" as `0x${string}`,
+                      to: address as `0x${string}`,
                       value: parseEther("0.0001"),
                     },
                     {
-                      to: "0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045" as `0x${string}`,
+                      to: address as `0x${string}`,
                       value: parseEther("0.0002"),
                     },
                   ],
