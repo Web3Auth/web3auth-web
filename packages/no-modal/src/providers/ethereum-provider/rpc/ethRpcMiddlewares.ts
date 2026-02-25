@@ -22,12 +22,14 @@ export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRP
     processEthSignMessage,
     processTypedMessageV4,
     processPersonalMessage,
+    processGetCapabilities,
+    processSendCalls,
+    processGetCallsStatus,
   } = providerHandlers;
   const ethMiddleware = mergeMiddleware([
     createScaffoldMiddleware({
       eth_syncing: false,
     }),
-    // TODO: Add 5792/7702 method support . Test with uniswap wallet
     createWalletMiddleware({
       getAccounts,
       getPrivateKey,
@@ -37,6 +39,9 @@ export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRP
       processSignTransaction,
       processTypedMessageV4,
       processPersonalMessage,
+      processGetCapabilities,
+      processSendCalls,
+      processGetCallsStatus,
     }) as JRPCMiddleware<unknown, unknown>,
   ]);
   return ethMiddleware;
