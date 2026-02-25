@@ -220,10 +220,12 @@ export const WagmiProvider = defineComponent({
           } else {
             wagmiChains.push(wagmiChain);
           }
-          configParams.transports[wagmiChain.id] = getTransport(chain);
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          configParams.transports[wagmiChain.id] = getTransport(chain) as any;
         });
 
-        configParams.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        configParams.chains = [wagmiChains[0], ...wagmiChains.slice(1)] as any;
       }
 
       return createWagmiConfig(configParams);
