@@ -1,4 +1,4 @@
-import { Eip5792GetCapabilitiesParams, Eip5792SendCallsParams, SUPPORTED_EIP_5792_VERSIONS } from "@toruslabs/ethereum-controllers";
+import type { Eip5792GetCapabilitiesParams, Eip5792SendCallsParams } from "@toruslabs/ethereum-controllers";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
 import { isHex, toHex } from "viem";
 
@@ -226,10 +226,8 @@ export function createWalletMiddleware({
       throw rpcErrors.invalidParams("Missing or invalid params for wallet_sendCalls");
     }
 
-    if (!params.version || !SUPPORTED_EIP_5792_VERSIONS.includes(params.version)) {
-      throw rpcErrors.invalidParams(
-        `Invalid version: expected one of ${SUPPORTED_EIP_5792_VERSIONS.join(", ")}, got "${params.version || "undefined"}"`
-      );
+    if (!params.version || typeof params.version !== "string") {
+      throw rpcErrors.invalidParams(`Invalid version: expected string, got "${params.version || "undefined"}"`);
     }
 
     if (!params.chainId) {
