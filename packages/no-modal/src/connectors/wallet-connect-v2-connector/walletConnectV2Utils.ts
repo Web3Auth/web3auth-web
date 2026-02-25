@@ -112,6 +112,7 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
       ]);
       return methodRes;
     },
+    // TODO: Add 5792/7702 method support . Test with uniswap wallet
   };
 }
 

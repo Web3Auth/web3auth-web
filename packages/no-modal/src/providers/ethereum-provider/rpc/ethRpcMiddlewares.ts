@@ -27,6 +27,7 @@ export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRP
     createScaffoldMiddleware({
       eth_syncing: false,
     }),
+    // TODO: Add 5792/7702 method support . Test with uniswap wallet
     createWalletMiddleware({
       getAccounts,
       getPrivateKey,

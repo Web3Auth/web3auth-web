@@ -180,6 +180,8 @@ export function createWalletMiddleware({
     res.result = await getPublicKey(req);
   }
 
+  // TODO: Add 5792/7702 method support . Test with uniswap wallet
+
   return createScaffoldMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
