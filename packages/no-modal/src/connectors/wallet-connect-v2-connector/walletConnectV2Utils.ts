@@ -1,8 +1,15 @@
 import { bs58 as base58 } from "@toruslabs/bs58";
+import {
+  EIP_5792_METHODS,
+  Eip5792GetCapabilitiesParams,
+  Eip5792SendCallsParams,
+  Eip5792ShowCallsStatusParams,
+} from "@toruslabs/ethereum-controllers";
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
+import type { GetCapabilitiesReturnType, SendCallsReturnType, WalletGetCallsStatusReturnType } from "viem";
 
 import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
@@ -111,6 +118,41 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
         msgParams.data,
       ]);
       return methodRes;
+    },
+
+    // EIP-5792: wallet_getCapabilities
+    processGetCapabilities: async (params: Eip5792GetCapabilitiesParams) => {
+      const capabilities = await sendJrpcRequest<GetCapabilitiesReturnType, unknown>(
+        connector,
+        `eip155:${chainId}`,
+        EIP_5792_METHODS.WALLET_GET_CAPABILITIES,
+        params
+      );
+      return capabilities;
+    },
+    // EIP-5792: wallet_sendCalls
+    processSendCalls: async (params: Eip5792SendCallsParams) => {
+      const results = await sendJrpcRequest<SendCallsReturnType, [Eip5792SendCallsParams]>(
+        connector,
+        `eip155:${chainId}`,
+        EIP_5792_METHODS.WALLET_SEND_CALLS,
+        [params]
+      );
+      return results;
+    },
+    // EIP-5792: wallet_getCallsStatus
+    processGetCallsStatus: async (batchId: string) => {
+      const results = await sendJrpcRequest<WalletGetCallsStatusReturnType, string[]>(
+        connector,
+        `eip155:${chainId}`,
+        EIP_5792_METHODS.WALLET_GET_CALLS_STATUS,
+        [batchId]
+      );
+      return results;
+    },
+    // EIP-5792: wallet_showCallsStatus
+    processShowCallsStatus: async (batchId: Eip5792ShowCallsStatusParams) => {
+      await sendJrpcRequest<void, string[]>(connector, `eip155:${chainId}`, EIP_5792_METHODS.WALLET_SHOW_CALLS_STATUS, [batchId]);
     },
   };
 }

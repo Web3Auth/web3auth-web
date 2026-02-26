@@ -22,6 +22,10 @@ export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRP
     processEthSignMessage,
     processTypedMessageV4,
     processPersonalMessage,
+    processGetCapabilities,
+    processSendCalls,
+    processGetCallsStatus,
+    processShowCallsStatus,
   } = providerHandlers;
   const ethMiddleware = mergeMiddleware([
     createScaffoldMiddleware({
@@ -36,6 +40,10 @@ export function createEthMiddleware(providerHandlers: IEthProviderHandlers): JRP
       processSignTransaction,
       processTypedMessageV4,
       processPersonalMessage,
+      processGetCapabilities,
+      processSendCalls,
+      processGetCallsStatus,
+      processShowCallsStatus,
     }) as JRPCMiddleware<unknown, unknown>,
   ]);
   return ethMiddleware;

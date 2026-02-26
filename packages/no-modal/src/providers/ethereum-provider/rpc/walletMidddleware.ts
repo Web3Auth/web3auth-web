@@ -1,4 +1,6 @@
+import type { Eip5792GetCapabilitiesParams, Eip5792SendCallsParams } from "@toruslabs/ethereum-controllers";
 import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
+import { isHex, toHex } from "viem";
 
 import type { MessageParams, TransactionParams, TypedMessageParams, WalletMiddlewareOptions } from "./interfaces";
 
@@ -11,6 +13,10 @@ export function createWalletMiddleware({
   processTransaction,
   processSignTransaction,
   processTypedMessageV4,
+  processGetCapabilities,
+  processSendCalls,
+  processGetCallsStatus,
+  processShowCallsStatus,
 }: WalletMiddlewareOptions): JRPCMiddleware<string, unknown> {
   if (!getAccounts) {
     throw new Error("opts.getAccounts is required");
@@ -180,6 +186,98 @@ export function createWalletMiddleware({
     res.result = await getPublicKey(req);
   }
 
+  async function getWalletCapabilitiesMiddleware(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!processGetCapabilities) {
+      throw rpcErrors.methodNotSupported();
+    }
+
+    if (!Array.isArray(req.params) || req.params.length === 0) {
+      throw rpcErrors.invalidParams("Invalid parameters");
+    }
+
+    const account = req.params[0] as string;
+    if (!isHex(account)) {
+      throw rpcErrors.invalidParams("Invalid account address");
+    }
+
+    let chainIds = req.params[1] || []; // if empty array is provided, the wallet will return capabilities for all supported chains
+    if (!Array.isArray(chainIds)) {
+      throw rpcErrors.invalidParams(`Invalid params, received: ${chainIds}. expected: Array`);
+    }
+
+    // format chain ids
+    chainIds = chainIds.map((chainId) => (isHex(chainId) ? chainId : toHex(chainId)));
+
+    const getCapabilitiesParams: Eip5792GetCapabilitiesParams = [
+      account, // account address
+      chainIds, // [`0xstring`, `0xstring`, ...]
+    ];
+
+    res.result = await processGetCapabilities(getCapabilitiesParams);
+  }
+
+  async function walletSendCallsMiddleware(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!processSendCalls) {
+      throw rpcErrors.methodNotSupported();
+    }
+
+    const params = Array.isArray(req.params) ? req.params[0] : req.params;
+    if (!params || typeof params !== "object") {
+      throw rpcErrors.invalidParams("Missing or invalid params for wallet_sendCalls");
+    }
+
+    if (!params.version || typeof params.version !== "string") {
+      throw rpcErrors.invalidParams(`Invalid version: expected string, got "${params.version || "undefined"}"`);
+    }
+
+    if (!params.chainId) {
+      throw rpcErrors.invalidParams("Missing required field: chainId");
+    }
+
+    if (!Array.isArray(params.calls) || params.calls.length === 0) {
+      throw rpcErrors.invalidParams("calls must be a non-empty array");
+    }
+
+    const from = params.from as string | undefined;
+    if (from) {
+      await validateAndNormalizeKeyholder(from, req);
+    }
+
+    const walletSendCallsParams: Eip5792SendCallsParams = {
+      ...params,
+      chainId: isHex(params.chainId) ? params.chainId : toHex(params.chainId),
+    };
+
+    res.result = await processSendCalls(walletSendCallsParams);
+  }
+
+  async function walletBatchCallStatusMiddleware(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!processGetCallsStatus) {
+      throw rpcErrors.methodNotSupported();
+    }
+
+    const batchId = Array.isArray(req.params) ? req.params[0] : (req.params as string);
+    if (!batchId || typeof batchId !== "string") {
+      throw rpcErrors.invalidParams("Missing or invalid batchId");
+    }
+
+    res.result = await processGetCallsStatus(batchId);
+  }
+
+  async function walletShowCallsStatusMiddleware(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+    if (!processShowCallsStatus) {
+      throw rpcErrors.methodNotSupported();
+    }
+
+    const batchId = Array.isArray(req.params) ? req.params[0] : (req.params as string);
+    if (!batchId || typeof batchId !== "string") {
+      throw rpcErrors.invalidParams("Missing or invalid batchId");
+    }
+
+    await processShowCallsStatus(batchId);
+    res.result = true;
+  }
+
   return createScaffoldMiddleware({
     // account lookups
     eth_accounts: createAsyncMiddleware(lookupAccounts),
@@ -195,5 +293,10 @@ export function createWalletMiddleware({
     eth_sign: createAsyncMiddleware(ethSign),
     eth_signTypedData_v4: createAsyncMiddleware(signTypedDataV4),
     personal_sign: createAsyncMiddleware(personalSign),
+    // EIP-5792
+    wallet_getCapabilities: createAsyncMiddleware(getWalletCapabilitiesMiddleware),
+    wallet_sendCalls: createAsyncMiddleware(walletSendCallsMiddleware),
+    wallet_getCallsStatus: createAsyncMiddleware(walletBatchCallStatusMiddleware),
+    wallet_showCallsStatus: createAsyncMiddleware(walletShowCallsStatusMiddleware),
   });
 }

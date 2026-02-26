@@ -14,8 +14,20 @@ import {
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
-import { useMemo } from "react";
-import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
+import { useMemo, useState } from "react";
+import { parseEther } from "viem";
+import {
+  useAccount,
+  useBalance,
+  useCallsStatus,
+  useCapabilities,
+  useChainId,
+  useSendCalls,
+  useShowCallsStatus,
+  useSignMessage,
+  useSignTypedData,
+  useSwitchChain,
+} from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
@@ -40,6 +52,24 @@ const Main = () => {
   const { switchChain: switchWeb3AuthChain } = useWeb3AuthSwitchChain();
 
   const chainId = useChainId();
+
+  // EIP-5792: Wallet Capabilities
+  const { data: capabilities, isLoading: isCapabilitiesLoading, error: capabilitiesError, refetch: refetchCapabilities } = useCapabilities();
+
+  // EIP-5792: Send Batch Calls
+  const { sendCalls, data: sendCallsId, isPending: isSendCallsPending, error: sendCallsError } = useSendCalls();
+
+  // EIP-5792: Calls Status
+  const [trackedCallsId, setTrackedCallsId] = useState<string | undefined>();
+  const {
+    data: callsStatus,
+    isLoading: isCallsStatusLoading,
+    error: callsStatusError,
+    refetch: refetchCallsStatus,
+  } = useCallsStatus({ id: trackedCallsId as string, query: { enabled: !!trackedCallsId } });
+
+  // EIP-5792: Show Calls Status in Wallet UI
+  const { showCallsStatus, isPending: isShowCallsStatusPending, error: showCallsStatusError } = useShowCallsStatus();
 
   const chainNamespaces = useMemo(() => {
     if (status && web3Auth?.coreOptions?.chains) {
@@ -204,6 +234,71 @@ const Main = () => {
           </button>
           {signedTypedDataData && <textarea disabled rows={5} value={signedTypedDataData} style={{ width: "100%" }} />}
         </div>
+
+        {/* EIP-5792: Wallet Capabilities */}
+        <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+          <p>EIP-5792: Wallet Capabilities</p>
+          <button onClick={() => refetchCapabilities()} className={styles.card} disabled={isCapabilitiesLoading}>
+            {isCapabilitiesLoading ? "Fetching..." : "Get Capabilities"}
+          </button>
+          {capabilities && <textarea disabled rows={6} value={JSON.stringify(capabilities, null, 2)} style={{ width: "100%" }} />}
+          {capabilitiesError && <p>Error: {capabilitiesError.message}</p>}
+        </div>
+
+        {/* EIP-5792: Send Batch Calls */}
+        <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+          <p>EIP-5792: Send Batch Calls</p>
+          <button
+            onClick={() => {
+              sendCalls(
+                {
+                  calls: [
+                    {
+                      to: address as `0x${string}`,
+                      value: parseEther("0.0001"),
+                    },
+                    {
+                      to: address as `0x${string}`,
+                      value: parseEther("0.0002"),
+                    },
+                  ],
+                },
+                {
+                  onSuccess: (result) => setTrackedCallsId(result.id),
+                }
+              );
+            }}
+            className={styles.card}
+            disabled={isSendCallsPending}
+          >
+            {isSendCallsPending ? "Sending..." : "Send Batch Calls"}
+          </button>
+          {sendCallsId && <p>Calls ID: {sendCallsId.id}</p>}
+          {sendCallsError && <p>Error: {sendCallsError.message}</p>}
+        </div>
+
+        {/* EIP-5792: Calls Status */}
+        {trackedCallsId && (
+          <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+            <p>EIP-5792: Calls Status</p>
+            <button onClick={() => refetchCallsStatus()} className={styles.card} disabled={isCallsStatusLoading}>
+              {isCallsStatusLoading ? "Fetching..." : "Refresh Calls Status"}
+            </button>
+            {callsStatus && <textarea disabled rows={6} value={JSON.stringify(callsStatus, null, 2)} style={{ width: "100%" }} />}
+            {callsStatusError && <p>Error: {callsStatusError.message}</p>}
+          </div>
+        )}
+
+        {/* EIP-5792: Show Calls Status in Wallet */}
+        {trackedCallsId && (
+          <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+            <p>EIP-5792: Show Calls Status</p>
+            <button onClick={() => showCallsStatus({ id: trackedCallsId })} className={styles.card} disabled={isShowCallsStatusPending}>
+              {isShowCallsStatusPending ? "Opening..." : "Show Calls Status in Wallet"}
+            </button>
+            {showCallsStatusError && <p>Error: {showCallsStatusError.message}</p>}
+          </div>
+        )}
 
         {/* Chain Actions */}
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
