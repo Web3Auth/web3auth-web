@@ -180,7 +180,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
           rpcUrls: {
             default: {
               http: [chain.rpcTarget],
-              ...(chain.wsTarget ? { webSocket: [chain.wsTarget] } : {}),
+              webSocket: [chain.wsTarget],
             },
           },
           blockExplorers: chain.blockExplorerUrl
