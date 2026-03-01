@@ -1,9 +1,10 @@
-import { useContext, useEffect } from "react";
+import { useEffect } from "react";
 
-import { RootContext } from "../../context/RootContext";
+import { useToast } from "../../context/RootContext";
 import { TOAST_TYPE } from "../../interfaces";
+
 const Toast = () => {
-  const { toast, setToast } = useContext(RootContext);
+  const { toast, setToast } = useToast();
 
   useEffect(() => {
     if (toast.message) {

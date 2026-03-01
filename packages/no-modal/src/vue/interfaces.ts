@@ -1,6 +1,6 @@
 import { Ref, ShallowRef } from "vue";
 
-import type { CONNECTOR_STATUS_TYPE, IPlugin, IProvider, IWeb3AuthCoreOptions } from "../base";
+import type { ChainNamespaceType, CONNECTOR_STATUS_TYPE, IPlugin, IProvider, IWeb3AuthCoreOptions } from "../base";
 import type { Web3AuthNoModal } from "../noModal";
 import { WalletServicesPluginType } from "../plugins/wallet-services-plugin";
 
@@ -21,6 +21,8 @@ interface IBaseWeb3AuthComposableContext {
   isInitialized: Ref<boolean>;
   status: Ref<CONNECTOR_STATUS_TYPE | null>;
   isMFAEnabled: Ref<boolean>;
+  chainId: Ref<string | null>;
+  chainNamespace: Ref<ChainNamespaceType | null>;
   getPlugin: (pluginName: string) => IPlugin | null;
   setIsMFAEnabled: (isMfaEnabled: boolean) => void;
 }

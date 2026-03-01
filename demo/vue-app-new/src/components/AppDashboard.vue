@@ -18,7 +18,7 @@ import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
-import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
+import { useConnection, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
 
 import { generateLegacyTransaction, generateSolTransferInstruction } from "../utils/solana";
 import { ProviderConfig } from "@toruslabs/base-controllers";
@@ -44,7 +44,7 @@ const { isConnected, provider, web3Auth, isMFAEnabled, isAuthorized } = useWeb3A
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
-const { switchChainAsync } = useWagmiSwitchChain();
+const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
 const { switchChain } = useWeb3AuthSwitchChain();
 const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
@@ -52,9 +52,9 @@ const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { showFunding, loading: showFundingLoading } = useFunding();
 const { showReceive, loading: showReceiveLoading } = useReceive();
 const { getIdentityToken, loading: getIdentityTokenLoading } = useIdentityToken();
-const { status, address } = useAccount();
-const { signTypedDataAsync } = useSignTypedData();
-const { signMessageAsync } = useSignMessage();
+const { status, address } = useConnection();
+const { mutateAsync: signTypedDataAsync } = useSignTypedData();
+const { mutateAsync: signMessageAsync } = useSignMessage();
 const wagmiChainId = useChainId();
 const balance = useBalance({
   address: address,

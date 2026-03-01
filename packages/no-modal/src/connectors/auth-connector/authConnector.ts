@@ -391,6 +391,17 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       }
     }
 
+    // if useSFAKey is true and privKey is available but coreKitKey is not available, throw an error
+    if (this.coreOptions.useSFAKey && this.authInstance?.privKey && !this.authInstance?.coreKitKey) {
+      // If the user is already logged in, logout and throw an error
+      if (this.authInstance.sessionId) {
+        await this.authInstance.logout();
+      }
+      throw WalletLoginError.sfaKeyNotFound(
+        "This typically occurs when the authentication method used does not provide SFA keys (e.g., default auth connection)."
+      );
+    }
+
     // setup WS embed if chainNamespace is EIP155 or SOLANA
     if (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       // wait for ws embed instance to be ready.

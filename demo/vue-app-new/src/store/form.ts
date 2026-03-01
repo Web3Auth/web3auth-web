@@ -15,10 +15,12 @@ export const formDataStore = reactive<FormData>({
   whiteLabel: {
     enable: false,
     config: initWhiteLabel,
+    hideSuccessScreen: false,
   },
   loginProviders: [],
   showWalletDiscovery: true,
   multiInjectedProviderDiscovery: true,
+  externalWalletOnly: false,
   loginMethods: defaultLoginMethod,
   walletPlugin: {
     enable: false,
