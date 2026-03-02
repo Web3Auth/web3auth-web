@@ -28,7 +28,6 @@ import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as sig
 import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
-import { generateKeyPair, generateKeyPairSigner } from "@solana/kit";
 
 const supportedNetworks = { ...SUPPORTED_NETWORKS, ...SOLANA_SUPPORTED_NETWORKS } as Record<string, ProviderConfig>;
 

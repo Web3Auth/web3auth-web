@@ -143,15 +143,15 @@ const options = computed((): Web3AuthOptions => {
 });
 
 const loginMethodsConfig = computed(() => {
-  // const customConfig = {
-  //   email_passwordless: {
-  //     authConnectionId: `w3a-custom-email-${formData.network.replace("_", "-")}`,
-  //   },
-  //   sms_passwordless: {
-  //     authConnectionId: `w3a-custom-sms-${formData.network.replace("_", "-")}`,
-  //   },
-  // };
-  // if (formData.loginProviders.length === 0) return customConfig;
+  const customConfig = {
+    email_passwordless: {
+      authConnectionId: `w3a-custom-email-${formData.network.replace("_", "-")}`,
+    },
+    sms_passwordless: {
+      authConnectionId: `w3a-custom-sms-${formData.network.replace("_", "-")}`,
+    },
+  };
+  if (formData.loginProviders.length === 0) return customConfig;
 
   // only show login methods that are configured
   const config = formData.loginProviders.reduce((acc, provider) => {
@@ -159,12 +159,12 @@ const loginMethodsConfig = computed(() => {
     return acc;
   }, {} as LoginMethodConfig);
 
-  // if (config.email_passwordless) {
-  //   config.email_passwordless.authConnectionId = `w3a-custom-email-${formData.network.replace("_", "-")}`;
-  // }
-  // if (config.sms_passwordless) {
-  //   config.sms_passwordless.authConnectionId = `w3a-custom-sms-${formData.network.replace("_", "-")}`;
-  // }
+  if (config.email_passwordless) {
+    config.email_passwordless.authConnectionId = `w3a-custom-email-${formData.network.replace("_", "-")}`;
+  }
+  if (config.sms_passwordless) {
+    config.sms_passwordless.authConnectionId = `w3a-custom-sms-${formData.network.replace("_", "-")}`;
+  }
 
   const loginMethods: LoginMethodConfig = JSON.parse(JSON.stringify(config));
   return loginMethods;
