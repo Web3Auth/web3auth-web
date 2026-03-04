@@ -39,6 +39,7 @@ export interface MetaMaskConnectorSettings {
   dapp?: {
     name?: string;
     url?: string;
+    iconUrl?: string;
   };
   /** Enable debug logging for the MetaMask SDK */
   debug?: boolean;
@@ -147,12 +148,14 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     // Detect app metadata
     const appName = getSiteName(window) || this.connectorSettings?.dapp?.name || "web3auth";
     const appUrl = this.connectorSettings?.dapp?.url || window.location.origin || "https://web3auth.io";
+    const appIconUrl = this.connectorSettings?.dapp?.iconUrl;
 
     // Initialize the MetaMask Connect EVM SDK
     this.metamaskPromise = createEVMClient({
       dapp: {
         name: appName,
         url: appUrl,
+        ...(appIconUrl && { iconUrl: appIconUrl }),
       },
       eventHandlers: {
         accountsChanged: this.handleAccountsChanged,
