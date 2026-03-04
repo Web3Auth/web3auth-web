@@ -43,6 +43,12 @@ export interface MetaMaskConnectorSettings {
   };
   /** Enable debug logging for the MetaMask SDK */
   debug?: boolean;
+  /** UI settings for the MetaMask connector */
+  ui?: {
+    preferExtension?: boolean;
+    showInstallModal?: boolean;
+    headless?: boolean;
+  };
 }
 
 export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
@@ -166,6 +172,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       api: {
         supportedNetworks,
       },
+      ui: {
+        preferExtension: this.connectorSettings?.ui?.preferExtension ?? true,
+        showInstallModal: this.connectorSettings?.ui?.showInstallModal,
+        headless: this.connectorSettings?.ui?.headless,
       },
       debug: this.connectorSettings?.debug,
     });
