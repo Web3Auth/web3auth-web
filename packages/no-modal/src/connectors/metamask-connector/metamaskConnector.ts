@@ -186,8 +186,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       },
       ui: {
         preferExtension: this.connectorSettings?.ui?.preferExtension ?? true,
-        showInstallModal: this.connectorSettings?.ui?.showInstallModal,
-        headless: this.connectorSettings?.ui?.headless,
+        showInstallModal: this.connectorSettings?.ui?.showInstallModal ?? false,
+        headless: this.connectorSettings?.ui?.headless ?? true,
       },
       debug: this.connectorSettings?.debug,
     });
