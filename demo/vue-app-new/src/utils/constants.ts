@@ -8,8 +8,9 @@ const TESTNET_RPC = import.meta.env.VITE_APP_SOLANA_TESTNET_RPC;
 const DEVNET_RPC = import.meta.env.VITE_APP_SOLANA_DEVNET_RPC;
 
 function rpcUrlToWsUrl(rpcUrl: string) {
-  if (!rpcUrl) throw new Error("Please configure https endpoint for solana rpc");
-  return rpcUrl.replace("https://", "wss://");
+  // if (!rpcUrl) throw new Error("Please configure https endpoint for solana rpc");
+  // return rpcUrl.replace("https://", "wss://");
+  return rpcUrl;
 }
 
 export const SOLANA_SUPPORTED_NETWORKS = {
