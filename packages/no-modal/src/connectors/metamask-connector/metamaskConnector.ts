@@ -1,4 +1,4 @@
-import { createEVMClient, type MetamaskConnectEVM } from "@metamask/connect-evm";
+import { createEVMClient, EIP1193Provider, Hex, type MetamaskConnectEVM } from "@metamask/connect-evm";
 import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
 
 import {
@@ -107,6 +107,18 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   /**
+   * Sets up event listeners on the MetaMask instance
+   */
+  private setupEventListeners(provider: EIP1193Provider): void {
+    // Listen for QR code URI to display (for mobile wallet connection)
+    provider.on("display_uri", (uri: unknown) => {
+      if (typeof uri === "string" && uri) {
+        this.updateConnectorData({ uri });
+      }
+    });
+  }
+
+  /**
    * Handles accounts changed events from the MetaMask provider
    */
   private handleAccountsChanged = (accounts: string[]): void => {
@@ -182,6 +194,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
     try {
       this.metamaskInstance = await this.metamaskPromise;
+      const provider = this.metamaskInstance.getProvider();
+      this.setupEventListeners(provider);
     } catch (error) {
       throw WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error);
     }
@@ -222,8 +236,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
       // }
     } else {
-      // 'connecting' is not a possible state at this point
-      // 'disconnected' is not a possible state at this point
       // Something unexpected happened
       this.status = CONNECTOR_STATUS.ERRORED;
       this.emit(CONNECTOR_EVENTS.ERRORED, new Error("Failed to initialize MetaMask Connect.") as Web3AuthError);
