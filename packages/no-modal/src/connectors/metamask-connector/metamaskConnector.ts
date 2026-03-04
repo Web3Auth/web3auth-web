@@ -141,10 +141,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     // Build supported networks in CAIP-2 format (eip155:chainId -> rpcUrl)
     const supportedNetworks: Record<string, string> = {};
     for (const chain of this.coreOptions.chains) {
-      // Convert hex chainId (0x1) to number for CAIP-2 format (eip155:1)
-      const numericChainId = parseInt(chain.chainId, 16);
-      const caipChainId = `eip155:${numericChainId}`;
-      supportedNetworks[caipChainId] = chain.rpcTarget;
+      supportedNetworks[chain.chainId] = chain.rpcTarget;
     }
 
     // Detect app metadata
@@ -164,14 +161,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         disconnect: this.handleDisconnect,
       },
       api: {
-        supportedNetworks: {
-          // Fallback public RPC endpoints if no Infura key is provided
-          // "eip155:1": "https://eth.llamarpc.com",
-          "eip155:1": "https://mainnet.infura.io/v3/de3198afe5f44ee99d155c9843001539",
-          "eip155:5": "https://goerli.infura.io/v3/demo",
-          "eip155:11155111": "https://sepolia.infura.io/v3/demo",
-          "eip155:137": "https://polygon-rpc.com",
-        },
+        supportedNetworks,
+      },
       },
       debug: this.connectorSettings?.debug,
     });
@@ -234,9 +225,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-    // Convert hex chainIds to numeric for the new SDK
-    const chainIds = this.coreOptions.chains.map((c) => parseInt(c.chainId, 16));
-    const targetChainId = parseInt(chainId, 16);
+    const chainIds = this.coreOptions.chains.map((c) => c.chainId) as Hex[];
 
     // Skip tracking for rehydration since only new connections are tracked
     const shouldTrack = !this.rehydrated;
@@ -270,9 +259,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
       // Switch chain if not connected to the right chain
       const currentChainId = instance.getChainId();
-      const currentChainIdNumeric = currentChainId ? parseInt(currentChainId, 16) : undefined;
 
-      if (currentChainIdNumeric !== targetChainId) {
+      if (currentChainId !== chainId) {
         await this.switchChain(chainConfig, true);
       }
 
@@ -354,8 +342,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       (x) => x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
     );
 
-    const chainId = parseInt(params.chainId, 16);
-
     // Build chain configuration for the new SDK
     // The new SDK handles adding the chain automatically if needed
     const chainConfiguration = chainConfig
@@ -374,7 +360,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       : undefined;
 
     // The new SDK's switchChain handles both switching and adding chains automatically
-    await instance.switchChain({ chainId, chainConfiguration });
+    await instance.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
   }
 
   public async enableMFA(): Promise<void> {
