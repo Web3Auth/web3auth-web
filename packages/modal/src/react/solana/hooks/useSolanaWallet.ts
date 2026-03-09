@@ -1,4 +1,4 @@
-import { Connection } from "@solana/web3.js";
+import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import { CHAIN_NAMESPACES, SolanaWallet } from "@web3auth/no-modal";
 import { useEffect, useMemo, useState } from "react";
 
@@ -8,7 +8,15 @@ import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 export type IUseSolanaWallet = {
   accounts: string[] | null;
   solanaWallet: SolanaWallet | null;
-  connection: Connection | null;
+  /**
+   * Solana RPC client for making RPC calls.
+   * @example
+   * ```typescript
+   * const { value: balance } = await rpc.getBalance(address("...")).send();
+   * const { value: latestBlockhash } = await rpc.getLatestBlockhash().send();
+   * ```
+   */
+  rpc: Rpc<SolanaRpcApi> | null;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
@@ -22,9 +30,9 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     return new SolanaWallet(provider);
   }, [provider, chainNamespace]);
 
-  const connection = useMemo(() => {
+  const rpc = useMemo(() => {
     if (!web3Auth || !provider || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
-    return new Connection(web3Auth.currentChain.rpcTarget);
+    return createSolanaRpc(web3Auth.currentChain.rpcTarget);
   }, [web3Auth, provider, chainNamespace]);
 
   useEffect(() => {
@@ -34,14 +42,14 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
         return;
       }
       if (!solanaWallet) return;
-      const accounts = await solanaWallet.getAccounts();
-      if (accounts?.length > 0) {
-        setAccounts(accounts);
+      const accts = await solanaWallet.getAccounts();
+      if (accts?.length > 0) {
+        setAccounts(accts);
       }
     };
 
     if (solanaWallet) init();
   }, [solanaWallet, chainNamespace]);
 
-  return { solanaWallet, accounts, connection };
+  return { solanaWallet, accounts, rpc };
 };

@@ -1,4 +1,5 @@
-import { log, TransactionOrVersionedTransaction, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import type { Transaction } from "@solana/kit";
+import { log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -7,7 +8,12 @@ export type IUseSignTransaction = {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
   data: Ref<string | null>;
-  signTransaction: (transaction: TransactionOrVersionedTransaction) => Promise<string>;
+  /**
+   * Signs a transaction and returns the signature
+   * @param transaction - Compiled transaction from \@solana/kit
+   * @returns The signature of the transaction encoded in base58
+   */
+  signTransaction: (transaction: Transaction) => Promise<string>;
 };
 
 export const useSignTransaction = (): IUseSignTransaction => {
@@ -16,7 +22,7 @@ export const useSignTransaction = (): IUseSignTransaction => {
   const error = ref<Web3AuthError | null>(null);
   const data = ref<string | null>(null);
 
-  const signTransaction = async (transaction: TransactionOrVersionedTransaction) => {
+  const signTransaction = async (transaction: Transaction) => {
     loading.value = true;
     error.value = null;
     try {
