@@ -1,9 +1,30 @@
-import { VersionedTransaction } from "@solana/web3.js";
+import { getBase64EncodedWireTransaction, type Transaction } from "@solana/kit";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import { IProvider, RequestArguments } from "../../base";
-import { ISolanaWallet, type TransactionOrVersionedTransaction } from "./interface";
+import { ISolanaWallet } from "./interface";
 
+/**
+ * SolanaWallet provides methods to interact with Solana blockchain.
+ * Transactions should be compiled using \@solana/kit before being passed to signing methods.
+ *
+ * @example
+ * ```typescript
+ * import { compileTransaction, createTransactionMessage, ... } from "\@solana/kit";
+ *
+ * // Build and compile transaction using \@solana/kit
+ * const message = pipe(
+ *   createTransactionMessage({ version: 0 }),
+ *   (m) => setTransactionMessageFeePayer(address, m),
+ *   (m) => setTransactionMessageLifetimeUsingBlockhash(blockhash, m),
+ *   (m) => appendTransactionMessageInstruction(instruction, m)
+ * );
+ * const transaction = compileTransaction(message);
+ *
+ * // Sign with SolanaWallet
+ * const signature = await solanaWallet.signAndSendTransaction(transaction);
+ * ```
+ */
 export class SolanaWallet implements ISolanaWallet {
   public provider: IProvider;
 
@@ -25,44 +46,52 @@ export class SolanaWallet implements ISolanaWallet {
     return accounts;
   }
 
-  public async signAndSendTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<string> {
+  /**
+   * Signs and sends a transaction to the network
+   * @param transaction - Compiled transaction from \@solana/kit
+   * @returns The signature of the transaction encoded in base58
+   */
+  public async signAndSendTransaction(transaction: Transaction): Promise<string> {
+    const serialized = getBase64EncodedWireTransaction(transaction);
     const signature = await this.provider.request<{ message: string }, string>({
       method: SOLANA_METHOD_TYPES.SEND_TRANSACTION,
-      params: { message: this.serializeTransaction(transaction) },
+      params: { message: serialized },
     });
     return signature;
   }
 
   /**
    * Signs a transaction and returns the signature
-   * @param transaction - The transaction to sign
+   * @param transaction - Compiled transaction from \@solana/kit
    * @returns The signature of the transaction encoded in base58
    */
-  public async signTransaction<T extends TransactionOrVersionedTransaction>(transaction: T): Promise<string> {
+  public async signTransaction(transaction: Transaction): Promise<string> {
+    const serialized = getBase64EncodedWireTransaction(transaction);
     const signature = await this.provider.request<{ message: string }, string>({
       method: SOLANA_METHOD_TYPES.SIGN_TRANSACTION,
-      params: { message: this.serializeTransaction(transaction) },
+      params: { message: serialized },
     });
     return signature;
   }
 
   /**
-   * Signs multiple transactions and returns the serialized transactions
-   * @param transactions - The transactions to sign
-   * @returns The serialized transactions encoded in base64
+   * Signs multiple transactions and returns the signed transactions
+   * @param transactions - Array of compiled transactions from \@solana/kit
+   * @returns The signed transactions encoded in base64
    */
-  public async signAllTransactions<T extends TransactionOrVersionedTransaction>(transactions: T[]): Promise<string[]> {
-    const serializedTransactions = transactions.map((tx) => this.serializeTransaction(tx));
+  public async signAllTransactions(transactions: Transaction[]): Promise<string[]> {
+    const serialized = transactions.map((tx) => getBase64EncodedWireTransaction(tx));
     const signedTransactions = await this.provider.request<{ message: string[] }, string[]>({
       method: SOLANA_METHOD_TYPES.SIGN_ALL_TRANSACTIONS,
-      params: { message: serializedTransactions },
+      params: { message: serialized },
     });
     return signedTransactions;
   }
 
   /**
    * Signs a message and returns the signature
-   * @param message - The message to sign
+   * @param message - The message to sign (UTF-8 string)
+   * @param pubKey - The public key of the signer (base58 address)
    * @returns The signature of the message encoded in base58
    */
   public async signMessage(message: string, pubKey: string): Promise<string> {
@@ -76,12 +105,5 @@ export class SolanaWallet implements ISolanaWallet {
   public async request<T, U>(args: RequestArguments<T>): Promise<U> {
     const result = await this.provider.request<T, U>(args);
     return result as U;
-  }
-
-  private serializeTransaction(transaction: TransactionOrVersionedTransaction): string {
-    if (transaction instanceof VersionedTransaction) {
-      return Buffer.from(transaction.serialize()).toString("base64");
-    }
-    return Buffer.from(transaction.serialize({ requireAllSignatures: false })).toString("base64");
   }
 }

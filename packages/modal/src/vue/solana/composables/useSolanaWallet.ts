@@ -1,4 +1,4 @@
-import { Connection } from "@solana/web3.js";
+import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import { CHAIN_NAMESPACES, SolanaWallet } from "@web3auth/no-modal";
 import { computed, Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
@@ -7,15 +7,23 @@ import { useChain, useWeb3Auth } from "../../composables";
 export type IUseSolanaWallet = {
   accounts: Ref<string[] | null>;
   solanaWallet: ShallowRef<SolanaWallet | null>;
-  connection: ShallowRef<Connection | null>;
+  /**
+   * Solana RPC client for making RPC calls.
+   * @example
+   * ```typescript
+   * const { value: balance } = await rpc.value.getBalance(address("...")).send();
+   * const { value: latestBlockhash } = await rpc.value.getLatestBlockhash().send();
+   * ```
+   */
+  rpc: ShallowRef<Rpc<SolanaRpcApi> | null>;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { provider, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
-  const accounts = ref<string[]>([]);
+  const accounts = ref<string[] | null>(null);
   const solanaWallet = shallowRef<SolanaWallet | null>(null);
-  const connection = shallowRef<Connection | null>(null);
+  const rpc = shallowRef<Rpc<SolanaRpcApi> | null>(null);
 
   const isSolana = computed(() => chainNamespace.value === CHAIN_NAMESPACES.SOLANA);
 
@@ -32,14 +40,14 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
       accounts.value = result;
     }
     if (web3Auth.value?.currentChain?.rpcTarget) {
-      connection.value = new Connection(web3Auth.value.currentChain.rpcTarget);
+      rpc.value = createSolanaRpc(web3Auth.value.currentChain.rpcTarget);
     }
   };
 
   const resetWallet = () => {
     solanaWallet.value = null;
     accounts.value = null;
-    connection.value = null;
+    rpc.value = null;
   };
 
   if (provider.value && !solanaWallet.value) {
@@ -63,5 +71,5 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     { immediate: true }
   );
 
-  return { solanaWallet, accounts, connection };
+  return { solanaWallet, accounts, rpc };
 };
