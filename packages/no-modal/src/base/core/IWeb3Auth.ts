@@ -155,7 +155,7 @@ export interface IWeb3AuthCoreOptions {
   walletServicesConfig?: WalletServicesConfig;
 
   /**
-   * Private key provider for xrpl, mpc cases
+   * Private key provider for xrpl cases
    */
   privateKeyProvider?: IBaseProvider<string>;
 
