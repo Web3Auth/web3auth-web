@@ -147,11 +147,6 @@
       "import": "./dist/lib.esm/providers/xrpl-provider/index.js",
       "require": "./dist/lib.cjs/providers/xrpl-provider/index.js",
       "types": "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
-    },
-    "./providers/ethereum-mpc-provider": {
-      "import": "./dist/lib.esm/providers/ethereum-mpc-provider/index.js",
-      "require": "./dist/lib.cjs/providers/ethereum-mpc-provider/index.js",
-      "types": "./dist/lib.cjs/types/providers/ethereum-mpc-provider/index.d.ts"
     }
   },
   "typesVersions": {
@@ -176,9 +171,6 @@
       ],
       "providers/xrpl-provider": [
         "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
-      ],
-      "providers/ethereum-mpc-provider": [
-        "./dist/lib.cjs/types/providers/ethereum-mpc-provider/index.d.ts"
       ]
     }
   },
