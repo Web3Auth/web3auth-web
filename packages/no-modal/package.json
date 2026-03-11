@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "10.14.1",
+  "version": "10.15.0",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -58,10 +58,10 @@
     "@segment/analytics-next": "^1.81.1",
     "@solana/kit": "^6.1.0",
     "@solana/wallet-standard-features": "^1.3.0",
-    "@toruslabs/base-controllers": "^8.15.0",
+    "@toruslabs/base-controllers": "^8.17.0",
     "@toruslabs/constants": "^15.0.0",
     "@toruslabs/eccrypto": "^6.2.0",
-    "@toruslabs/ethereum-controllers": "^8.15.0",
+    "@toruslabs/ethereum-controllers": "^8.17.0",
     "@toruslabs/http-helpers": "^8.1.1",
     "@toruslabs/loglevel-sentry": "^8.1.0",
     "@toruslabs/secure-pub-sub": "3.0.2",
