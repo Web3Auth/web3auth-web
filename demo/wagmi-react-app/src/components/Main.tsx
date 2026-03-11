@@ -264,6 +264,7 @@ const Main = () => {
                       value: parseEther("0.0002"),
                     },
                   ],
+                  version: "2.0",
                 },
                 {
                   onSuccess: (result) => setTrackedCallsId(result.id),
