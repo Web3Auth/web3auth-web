@@ -1,4 +1,4 @@
-import { safeatob } from "@web3auth/auth";
+import { base64toJSON } from "@web3auth/auth";
 
 /**
  * Extracts a name for the site from the DOM
@@ -65,7 +65,7 @@ export async function getSiteIcon(window: Window): Promise<string | undefined> {
 export function parseToken<T>(token: string): { header: { alg: string; typ: string; kid?: string }; payload: T } {
   const [header, payload] = token.split(".");
   return {
-    header: JSON.parse(safeatob(header)),
-    payload: JSON.parse(safeatob(payload)) as T,
+    header: base64toJSON(header),
+    payload: base64toJSON(payload) as T,
   };
 }

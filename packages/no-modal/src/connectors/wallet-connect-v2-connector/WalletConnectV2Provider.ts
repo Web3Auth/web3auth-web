@@ -1,6 +1,6 @@
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
-import { JRPCEngine, JRPCMiddleware, providerErrors, providerFromEngine } from "@web3auth/auth";
+import { JRPCEngineV2, providerErrors, providerFromEngineV2 } from "@web3auth/auth";
 
 import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../providers/base-provider";
@@ -112,12 +112,11 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     });
     const ethMiddleware = createEthMiddleware(providerHandlers);
     const chainSwitchMiddleware = this.getEthChainSwitchMiddleware();
-    const engine = new JRPCEngine();
     const { networkMiddleware } = createEthJsonRpcClient(chain);
-    engine.push(ethMiddleware);
-    engine.push(chainSwitchMiddleware);
-    engine.push(networkMiddleware);
-    const provider = providerFromEngine(engine);
+    const engine = JRPCEngineV2.create({
+      middleware: [ethMiddleware, chainSwitchMiddleware, networkMiddleware],
+    });
+    const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
   }
 
@@ -130,15 +129,15 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       accounts: jrpcRes || [],
     });
     const solMiddleware = createSolanaMiddleware(providerHandlers);
-    const engine = new JRPCEngine();
     const { networkMiddleware } = createSolJsonRpcClient(chain);
-    engine.push(solMiddleware);
-    engine.push(networkMiddleware);
-    const provider = providerFromEngine(engine);
+    const engine = JRPCEngineV2.create({
+      middleware: [solMiddleware, networkMiddleware],
+    });
+    const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
   }
 
-  private getEthChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
+  private getEthChainSwitchMiddleware(): ReturnType<typeof createEthChainSwitchMiddleware> {
     const chainSwitchHandlers: IEthChainSwitchHandlers = {
       switchChain: async (params: { chainId: string }): Promise<void> => {
         const { chainId } = params;

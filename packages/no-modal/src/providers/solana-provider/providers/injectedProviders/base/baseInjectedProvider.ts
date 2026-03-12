@@ -1,9 +1,9 @@
-import { JRPCEngine, JRPCMiddleware, providerFromEngine } from "@web3auth/auth";
+import { JRPCEngineV2, providerFromEngineV2 } from "@web3auth/auth";
 
 import { WalletLoginError } from "../../../../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../../providers/base-provider";
 import { ISolanaProviderHandlers } from "../../../rpc";
-import { createConfigMiddleware } from "../../../rpc/JrpcClient";
+import { createSolanaJsonRpcClient } from "../../../rpc/JrpcClient";
 import { createSolanaMiddleware } from "../../../rpc/solanaRpcMiddlewares";
 
 export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderConfig, BaseProviderState, P> {
@@ -16,22 +16,19 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
   }
 
   public async setupProvider(injectedProvider: P, chainId: string): Promise<void> {
-    const engine = new JRPCEngine();
     const chain = this.getChain(chainId);
-
     const providerHandlers = this.getProviderHandlers(injectedProvider);
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
-    engine.push(solanaMiddleware);
+    const { networkMiddleware } = createSolanaJsonRpcClient(chain);
 
-    const configMiddleware = createConfigMiddleware(chain);
-    engine.push(configMiddleware);
+    // TODO: verify this
+    // const injectedProviderProxy = this.getInjectedProviderProxy(injectedProvider);
 
-    const injectedProviderProxy = this.getInjectedProviderProxy(injectedProvider);
-    if (injectedProviderProxy) {
-      engine.push(injectedProviderProxy);
-    }
+    const engine = JRPCEngineV2.create({
+      middleware: [solanaMiddleware, networkMiddleware],
+    });
 
-    const provider = providerFromEngine(engine);
+    const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
     await this.lookupNetwork(injectedProvider, chainId);
   }
@@ -41,10 +38,6 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
       chainId,
     });
     return chainId || "";
-  }
-
-  protected getInjectedProviderProxy(_: P): JRPCMiddleware<unknown, unknown> {
-    return undefined;
   }
 
   protected abstract getProviderHandlers(injectedProvider: P): ISolanaProviderHandlers;

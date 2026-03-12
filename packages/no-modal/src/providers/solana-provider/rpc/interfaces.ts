@@ -1,9 +1,5 @@
 import { JRPCRequest } from "@web3auth/auth";
 
-export interface ISolanaChainSwitchHandlers {
-  switchSolanaChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
-}
-
 export interface ISolanaProviderHandlers {
   requestAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;
   getAccounts: (req: JRPCRequest<unknown>) => Promise<string[]>;

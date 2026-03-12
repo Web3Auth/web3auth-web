@@ -88,9 +88,9 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^2.0.1",
-    "@toruslabs/base-controllers": "^8.15.0",
-    "@toruslabs/http-helpers": "^8.1.1",
-    "@web3auth/auth": "^10.8.0",
+    "@toruslabs/base-controllers": "^9.2.0",
+    "@toruslabs/http-helpers": "^9.0.0",
+    "@web3auth/auth": "^11.3.0",
     "@web3auth/no-modal": "^10.14.1",
     "bowser": "^2.13.1",
     "classnames": "^2.5.1",
