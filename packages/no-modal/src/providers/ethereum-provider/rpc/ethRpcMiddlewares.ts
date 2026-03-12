@@ -1,4 +1,4 @@
-import { createScaffoldMiddlewareV2, JRPCEngineV2, type MiddlewareConstraint, rpcErrors } from "@web3auth/auth";
+import { createScaffoldMiddlewareV2, JRPCEngineV2, JRPCRequest, type MiddlewareConstraint, type MiddlewareParams, rpcErrors } from "@web3auth/auth";
 
 import type { AddEthereumChainConfig } from "../../../base";
 import type { IEthChainSwitchHandlers, IEthProviderHandlers } from "./interfaces";
@@ -12,21 +12,24 @@ export function createEthMiddleware(providerHandlers: IEthProviderHandlers): Mid
 }
 
 export function createEthChainSwitchMiddleware({ switchChain, addChain }: IEthChainSwitchHandlers): MiddlewareConstraint {
-  type ScaffoldParams = { request: { method: string; params?: unknown }; next: (r?: unknown) => Promise<unknown> };
+  async function walletSwitchEthereumChainHandler(params: MiddlewareParams<JRPCRequest<{ chainId: string }[]>>): Promise<null> {
+    const request = params.request;
+    const chainParams = request.params?.length ? request.params[0] : undefined;
+    if (!chainParams) throw rpcErrors.invalidParams("Missing chainId");
+    await switchChain(chainParams);
+    return null;
+  }
+
+  async function walletAddEthereumChainHandler(params: MiddlewareParams<JRPCRequest<AddEthereumChainConfig[]>>): Promise<null> {
+    const request = params.request;
+    const chainConfig = request.params?.length ? request.params[0] : undefined;
+    if (!chainConfig) throw rpcErrors.invalidParams("Missing chainConfig");
+    await addChain(chainConfig);
+    return null;
+  }
+
   return createScaffoldMiddlewareV2({
-    wallet_switchEthereumChain: async (params: ScaffoldParams) => {
-      const request = params.request as { params?: { chainId: string }[] };
-      const chainParams = request.params?.length ? request.params[0] : undefined;
-      if (!chainParams) throw rpcErrors.invalidParams("Missing chainId");
-      await switchChain(chainParams);
-      return null;
-    },
-    wallet_addEthereumChain: async (params: ScaffoldParams) => {
-      const request = params.request as { params?: AddEthereumChainConfig[] };
-      const chainConfig = request.params?.length ? request.params[0] : undefined;
-      if (!chainConfig) throw rpcErrors.invalidParams("Missing chainConfig");
-      await addChain(chainConfig);
-      return null;
-    },
-  } as Parameters<typeof createScaffoldMiddlewareV2>[0]);
+    wallet_switchEthereumChain: walletSwitchEthereumChainHandler,
+    wallet_addEthereumChain: walletAddEthereumChainHandler,
+  });
 }

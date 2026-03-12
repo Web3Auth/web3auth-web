@@ -1,5 +1,13 @@
 import { randomId } from "@toruslabs/base-controllers";
-import { createScaffoldMiddlewareV2, JRPCEngineV2, type JRPCRequest, type MiddlewareConstraint, rpcErrors } from "@web3auth/auth";
+import {
+  createScaffoldMiddlewareV2,
+  JRPCEngineV2,
+  type JRPCRequest,
+  type Json,
+  type MiddlewareConstraint,
+  type MiddlewareParams,
+  rpcErrors,
+} from "@web3auth/auth";
 import type { SubmitResponse, Transaction } from "xrpl";
 
 export const RPC_METHODS = {
@@ -33,24 +41,30 @@ function createRequestIdNormalizerMiddleware(): MiddlewareConstraint {
   };
 }
 
-type ScaffoldParams = { request: JRPCRequest<unknown>; next: (r?: unknown) => Promise<unknown> };
-
 export function createXRPLMiddleware(providerHandlers: IXrplProviderHandlers): MiddlewareConstraint {
   const { getAccounts, submitTransaction, signTransaction, signMessage, getKeyPair, getPublicKey } = providerHandlers;
 
   const scaffold = createScaffoldMiddlewareV2({
-    [RPC_METHODS.GET_ACCOUNTS]: async (params: ScaffoldParams) => {
+    [RPC_METHODS.GET_ACCOUNTS]: (params: MiddlewareParams<JRPCRequest<unknown>>) => {
       if (!getAccounts) throw new Error("WalletMiddleware - opts.getAccounts not provided");
       return getAccounts(params.request);
     },
-    [RPC_METHODS.SIGN_TRANSACTION]: async (params: ScaffoldParams) =>
-      signTransaction(params.request as JRPCRequest<{ transaction: Transaction; multisign: string | boolean }>),
-    [RPC_METHODS.SUBMIT_TRANSACTION]: async (params: ScaffoldParams) =>
-      submitTransaction(params.request as JRPCRequest<{ transaction: Transaction }>),
-    [RPC_METHODS.SIGN_MESSAGE]: async (params: ScaffoldParams) => signMessage(params.request as JRPCRequest<{ message: string }>),
-    [RPC_METHODS.GET_KEY_PAIR]: async (params: ScaffoldParams) => getKeyPair(params.request),
-    [RPC_METHODS.GET_PUBLIC_KEY]: async (params: ScaffoldParams) => getPublicKey(params.request),
-  } as Parameters<typeof createScaffoldMiddlewareV2>[0]);
+    [RPC_METHODS.SIGN_TRANSACTION]: (params: MiddlewareParams<JRPCRequest<{ transaction: Transaction; multisign: string | boolean }>>) => {
+      return signTransaction(params.request);
+    },
+    [RPC_METHODS.SUBMIT_TRANSACTION]: (params: MiddlewareParams<JRPCRequest<{ transaction: Transaction }>>): Promise<Readonly<Json>> => {
+      return submitTransaction(params.request) as unknown as Promise<Readonly<Json>>;
+    },
+    [RPC_METHODS.SIGN_MESSAGE]: (params: MiddlewareParams<JRPCRequest<{ message: string }>>) => {
+      return signMessage(params.request);
+    },
+    [RPC_METHODS.GET_KEY_PAIR]: (params: MiddlewareParams<JRPCRequest<unknown>>) => {
+      return getKeyPair(params.request);
+    },
+    [RPC_METHODS.GET_PUBLIC_KEY]: (params: MiddlewareParams<JRPCRequest<unknown>>) => {
+      return getPublicKey(params.request);
+    },
+  });
 
   const engine = JRPCEngineV2.create({
     middleware: [createRequestIdNormalizerMiddleware(), scaffold],
@@ -63,13 +77,15 @@ export interface IXrplChainSwitchHandlers {
 }
 
 export function creatXrplChainSwitchMiddleware({ switchChain }: IXrplChainSwitchHandlers): MiddlewareConstraint {
+  async function switchChainHandler(params: MiddlewareParams<JRPCRequest<{ chainId: string }>>): Promise<undefined> {
+    const req = params.request;
+    if (!req.params) throw rpcErrors.invalidParams("Missing request params");
+    if (!req.params.chainId) throw rpcErrors.invalidParams("Missing chainId");
+    await switchChain(req);
+    return undefined;
+  }
+
   return createScaffoldMiddlewareV2({
-    [RPC_METHODS.SWITCH_CHAIN]: async (params: ScaffoldParams) => {
-      const req = params.request as JRPCRequest<{ chainId: string }>;
-      if (!req.params) throw rpcErrors.invalidParams("Missing request params");
-      if (!req.params.chainId) throw rpcErrors.invalidParams("Missing chainId");
-      await switchChain(req);
-      return undefined;
-    },
-  } as Parameters<typeof createScaffoldMiddlewareV2>[0]);
+    [RPC_METHODS.SWITCH_CHAIN]: switchChainHandler,
+  });
 }
