@@ -1,43 +1,29 @@
 import { createFetchMiddleware } from "@toruslabs/base-controllers";
-import { Block, JRPCEngineEndCallback, JRPCEngineNextCallback, JRPCMiddleware, JRPCRequest, JRPCResponse, mergeMiddleware } from "@web3auth/auth";
+import { JRPCEngineV2, JRPCRequest, type MiddlewareConstraint, MiddlewareParams } from "@web3auth/auth";
 
-import { CustomChainConfig } from "../../../base";
+import type { CustomChainConfig } from "../../../base";
 
-export function createSolanaChainIdMiddleware(chainId: string): JRPCMiddleware<unknown, string> {
-  return (req: JRPCRequest<unknown>, res: JRPCResponse<string>, next: JRPCEngineNextCallback, end: JRPCEngineEndCallback) => {
-    if (req.method === "solana_chainId") {
-      res.result = chainId;
-      return end();
-    }
-    return next();
+function createSolanaChainIdMiddleware(chainId: string): MiddlewareConstraint {
+  return ({ request, next }: MiddlewareParams<JRPCRequest<unknown>>) => {
+    if (request.method === "solana_chainId") return chainId;
+    return next(request);
   };
 }
 
-export function createSolanaProviderConfigMiddleware(providerConfig: CustomChainConfig): JRPCMiddleware<unknown, CustomChainConfig> {
-  return (req: JRPCRequest<unknown>, res: JRPCResponse<CustomChainConfig>, next: JRPCEngineNextCallback, end: JRPCEngineEndCallback) => {
-    if (req.method === "solana_provider_config") {
-      res.result = providerConfig;
-      return end();
-    }
-    return next();
+function createSolanaProviderConfigMiddleware(providerConfig: CustomChainConfig): MiddlewareConstraint {
+  return ({ request, next }: MiddlewareParams<JRPCRequest<unknown>>) => {
+    if (request.method === "solana_provider_config") return providerConfig;
+    return next(request);
   };
-}
-
-export function createConfigMiddleware(providerConfig: CustomChainConfig): JRPCMiddleware<unknown, unknown> {
-  const { chainId } = providerConfig;
-
-  return mergeMiddleware([
-    createSolanaChainIdMiddleware(chainId) as JRPCMiddleware<unknown, unknown>,
-    createSolanaProviderConfigMiddleware(providerConfig) as JRPCMiddleware<unknown, unknown>,
-  ]);
 }
 
 export function createSolanaJsonRpcClient(providerConfig: CustomChainConfig): {
-  networkMiddleware: JRPCMiddleware<unknown, unknown>;
-  fetchMiddleware: JRPCMiddleware<string[], Block>;
+  networkMiddleware: MiddlewareConstraint;
 } {
-  const { rpcTarget } = providerConfig;
-  const fetchMiddleware = createFetchMiddleware({ rpcTarget });
-  const networkMiddleware = mergeMiddleware([createConfigMiddleware(providerConfig), fetchMiddleware as JRPCMiddleware<unknown, unknown>]);
-  return { networkMiddleware, fetchMiddleware };
+  const { chainId, rpcTarget } = providerConfig;
+  const engine = JRPCEngineV2.create({
+    middleware: [createSolanaChainIdMiddleware(chainId), createSolanaProviderConfigMiddleware(providerConfig), createFetchMiddleware({ rpcTarget })],
+  });
+  const networkMiddleware = engine.asMiddleware();
+  return { networkMiddleware };
 }

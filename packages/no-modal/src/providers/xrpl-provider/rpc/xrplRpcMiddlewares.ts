@@ -1,5 +1,13 @@
 import { randomId } from "@toruslabs/base-controllers";
-import { createAsyncMiddleware, JRPCMiddleware, JRPCRequest, mergeMiddleware } from "@web3auth/auth";
+import {
+  createScaffoldMiddlewareV2,
+  JRPCEngineV2,
+  type JRPCRequest,
+  type Json,
+  type MiddlewareConstraint,
+  type MiddlewareParams,
+  rpcErrors,
+} from "@web3auth/auth";
 import type { SubmitResponse, Transaction } from "xrpl";
 
 export const RPC_METHODS = {
@@ -25,69 +33,55 @@ export interface IXrplProviderHandlers {
   signMessage: (req: JRPCRequest<{ message: string }>) => Promise<{ signature: string }>;
 }
 
-export function createGetAccountsMiddleware({
-  getAccounts,
-}: {
-  getAccounts: IXrplProviderHandlers["getAccounts"];
-}): JRPCMiddleware<unknown, unknown> {
-  return createAsyncMiddleware(async (request, response, next) => {
-    const { method } = request;
-
-    // hack to override big ids from fetch middleware which are not supported in xrpl servers
-    // TODO: fix this for xrpl controllers.
-    request.id = randomId();
-
-    if (method !== RPC_METHODS.GET_ACCOUNTS) return next();
-
-    if (!getAccounts) throw new Error("WalletMiddleware - opts.getAccounts not provided");
-    // This calls from the prefs controller
-    const accounts = await getAccounts(request);
-    response.result = accounts;
-    return undefined;
-  });
+/** Normalizes request.id for XRPL servers that don't support large IDs from fetch middleware. */
+function createRequestIdNormalizerMiddleware(): MiddlewareConstraint {
+  return ({ request, next }: MiddlewareParams<JRPCRequest<unknown>>) => {
+    (request as { id?: string }).id = randomId();
+    return next(request);
+  };
 }
 
-export function createGenericJRPCMiddleware<T, U>(targetMethod: string, handler: (req: JRPCRequest<T>) => Promise<U>): JRPCMiddleware<T, unknown> {
-  return createAsyncMiddleware<T, unknown>(async (request, response, next) => {
-    const { method } = request;
-    if (method !== targetMethod) return next();
-
-    if (!handler) throw new Error(`WalletMiddleware - ${targetMethod} not provided`);
-
-    const result = await handler(request);
-
-    response.result = result;
-    return undefined;
-  });
-}
-
-export function createXRPLMiddleware(providerHandlers: IXrplProviderHandlers): JRPCMiddleware<unknown, unknown> {
+export function createXRPLMiddleware(providerHandlers: IXrplProviderHandlers): MiddlewareConstraint {
   const { getAccounts, submitTransaction, signTransaction, signMessage, getKeyPair, getPublicKey } = providerHandlers;
 
-  return mergeMiddleware([
-    createGetAccountsMiddleware({ getAccounts }),
-    createGenericJRPCMiddleware<{ transaction: Transaction; multisign: string | boolean }, { tx_blob: string; hash: string }>(
-      RPC_METHODS.SIGN_TRANSACTION,
-      signTransaction
-    ) as JRPCMiddleware<unknown, unknown>,
-    createGenericJRPCMiddleware<{ transaction: Transaction }, SubmitResponse>(RPC_METHODS.SUBMIT_TRANSACTION, submitTransaction) as JRPCMiddleware<
-      unknown,
-      unknown
-    >,
-    createGenericJRPCMiddleware<{ message: string }, { signature: string }>(RPC_METHODS.SIGN_MESSAGE, signMessage) as JRPCMiddleware<
-      unknown,
-      unknown
-    >,
-    createGenericJRPCMiddleware<void, KeyPair>(RPC_METHODS.GET_KEY_PAIR, getKeyPair) as JRPCMiddleware<unknown, unknown>,
-    createGenericJRPCMiddleware<void, string>(RPC_METHODS.GET_PUBLIC_KEY, getPublicKey) as JRPCMiddleware<unknown, unknown>,
-  ]);
+  const scaffold = createScaffoldMiddlewareV2({
+    [RPC_METHODS.GET_ACCOUNTS]: (params: MiddlewareParams<JRPCRequest<unknown>>) => {
+      if (!getAccounts) throw new Error("WalletMiddleware - opts.getAccounts not provided");
+      return getAccounts(params.request);
+    },
+    [RPC_METHODS.SIGN_TRANSACTION]: (params: MiddlewareParams<JRPCRequest<{ transaction: Transaction; multisign: string | boolean }>>) => {
+      return signTransaction(params.request);
+    },
+    [RPC_METHODS.SUBMIT_TRANSACTION]: (params: MiddlewareParams<JRPCRequest<{ transaction: Transaction }>>): Promise<Readonly<Json>> => {
+      return submitTransaction(params.request) as unknown as Promise<Readonly<Json>>;
+    },
+    [RPC_METHODS.SIGN_MESSAGE]: (params: MiddlewareParams<JRPCRequest<{ message: string }>>) => {
+      return signMessage(params.request);
+    },
+    [RPC_METHODS.GET_KEY_PAIR]: (params: MiddlewareParams<JRPCRequest<unknown>>) => {
+      return getKeyPair(params.request);
+    },
+    [RPC_METHODS.GET_PUBLIC_KEY]: (params: MiddlewareParams<JRPCRequest<unknown>>) => {
+      return getPublicKey(params.request);
+    },
+  });
+
+  const engine = JRPCEngineV2.create({
+    middleware: [createRequestIdNormalizerMiddleware(), scaffold],
+  });
+  return engine.asMiddleware();
 }
 
-export interface IXrplChainSwitchHandlers {
-  switchChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
-}
-export function creatXrplChainSwitchMiddleware({ switchChain }: IXrplChainSwitchHandlers): JRPCMiddleware<unknown, unknown> {
-  return mergeMiddleware([
-    createGenericJRPCMiddleware<{ chainId: string }, void>(RPC_METHODS.SWITCH_CHAIN, switchChain) as JRPCMiddleware<unknown, unknown>,
-  ]);
+export function creatXrplChainSwitchMiddleware(switchChain: (parrams: { chainId: string }) => Promise<void>): MiddlewareConstraint {
+  async function switchChainHandler(params: MiddlewareParams<JRPCRequest<{ chainId: string }>>): Promise<undefined> {
+    const req = params.request;
+    if (!req.params) throw rpcErrors.invalidParams("Missing request params");
+    if (!req.params.chainId) throw rpcErrors.invalidParams("Missing chainId");
+    await switchChain({ chainId: req.params.chainId });
+    return undefined;
+  }
+
+  return createScaffoldMiddlewareV2({
+    [RPC_METHODS.SWITCH_CHAIN]: switchChainHandler,
+  });
 }
