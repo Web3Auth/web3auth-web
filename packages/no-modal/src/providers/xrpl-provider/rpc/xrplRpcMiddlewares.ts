@@ -35,7 +35,7 @@ export interface IXrplProviderHandlers {
 
 /** Normalizes request.id for XRPL servers that don't support large IDs from fetch middleware. */
 function createRequestIdNormalizerMiddleware(): MiddlewareConstraint {
-  return ({ request, next }) => {
+  return ({ request, next }: MiddlewareParams<JRPCRequest<unknown>>) => {
     (request as { id?: string }).id = randomId();
     return next(request);
   };
@@ -72,16 +72,12 @@ export function createXRPLMiddleware(providerHandlers: IXrplProviderHandlers): M
   return engine.asMiddleware();
 }
 
-export interface IXrplChainSwitchHandlers {
-  switchChain: (req: JRPCRequest<{ chainId: string }>) => Promise<void>;
-}
-
-export function creatXrplChainSwitchMiddleware({ switchChain }: IXrplChainSwitchHandlers): MiddlewareConstraint {
+export function creatXrplChainSwitchMiddleware(switchChain: (parrams: { chainId: string }) => Promise<void>): MiddlewareConstraint {
   async function switchChainHandler(params: MiddlewareParams<JRPCRequest<{ chainId: string }>>): Promise<undefined> {
     const req = params.request;
     if (!req.params) throw rpcErrors.invalidParams("Missing request params");
     if (!req.params.chainId) throw rpcErrors.invalidParams("Missing chainId");
-    await switchChain(req);
+    await switchChain({ chainId: req.params.chainId });
     return undefined;
   }
 

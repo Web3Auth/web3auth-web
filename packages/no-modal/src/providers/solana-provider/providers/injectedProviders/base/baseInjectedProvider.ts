@@ -21,9 +21,6 @@ export abstract class BaseInjectedProvider<P> extends BaseProvider<BaseProviderC
     const solanaMiddleware = createSolanaMiddleware(providerHandlers);
     const { networkMiddleware } = createSolanaJsonRpcClient(chain);
 
-    // TODO: verify this
-    // const injectedProviderProxy = this.getInjectedProviderProxy(injectedProvider);
-
     const engine = JRPCEngineV2.create({
       middleware: [solanaMiddleware, networkMiddleware],
     });

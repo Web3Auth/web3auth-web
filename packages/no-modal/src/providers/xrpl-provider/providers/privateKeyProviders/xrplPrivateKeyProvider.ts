@@ -50,13 +50,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     });
     const xrplWalletMiddleware = createXRPLMiddleware(providerHandlers);
     const { networkMiddleware } = createXrplJsonRpcClient(chain);
-    const chainSwitchMiddleware = creatXrplChainSwitchMiddleware({
-      switchChain: async (req) => {
-        if (!req.params) throw rpcErrors.invalidParams("Missing request params");
-        if (!req.params.chainId) throw rpcErrors.invalidParams("Missing chainId");
-        await this.switchChain(req.params);
-      },
-    });
+    const chainSwitchMiddleware = creatXrplChainSwitchMiddleware((params) => this.switchChain(params));
     const engine = JRPCEngineV2.create({
       middleware: [chainSwitchMiddleware, xrplWalletMiddleware, networkMiddleware],
     });

@@ -1,6 +1,6 @@
 import type { ISignClient, SignClientTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
-import { JRPCEngineV2, providerErrors, providerFromEngineV2 } from "@web3auth/auth";
+import { JRPCEngineV2, MiddlewareConstraint, providerErrors, providerFromEngineV2 } from "@web3auth/auth";
 
 import { AddEthereumChainConfig, CHAIN_NAMESPACES, CustomChainConfig, log, WalletLoginError } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../providers/base-provider";
@@ -137,7 +137,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     this.updateProviderEngineProxy(provider);
   }
 
-  private getEthChainSwitchMiddleware(): ReturnType<typeof createEthChainSwitchMiddleware> {
+  private getEthChainSwitchMiddleware(): MiddlewareConstraint {
     const chainSwitchHandlers: IEthChainSwitchHandlers = {
       switchChain: async (params: { chainId: string }): Promise<void> => {
         const { chainId } = params;
