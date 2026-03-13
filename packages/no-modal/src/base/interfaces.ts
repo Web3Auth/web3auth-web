@@ -3,7 +3,7 @@ import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
 import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
-import { LOGIN_MODE, MODAL_SIGN_IN_METHODS, SMART_ACCOUNT_WALLET_SCOPE, WIDGET_TYPE } from "./constants";
+import { LOGIN_MODE, MODAL_SIGN_IN_METHODS, SMART_ACCOUNT_EIP_STANDARD, SMART_ACCOUNT_WALLET_SCOPE, WIDGET_TYPE } from "./constants";
 import { WALLET_CONNECTOR_TYPE } from "./wallet";
 
 export interface WhitelistResponse {
@@ -28,7 +28,10 @@ export interface ExternalWalletsConfig {
 
 export type SmartAccountWalletScope = (typeof SMART_ACCOUNT_WALLET_SCOPE)[keyof typeof SMART_ACCOUNT_WALLET_SCOPE];
 
+export type SmartAccountEipStandardType = (typeof SMART_ACCOUNT_EIP_STANDARD)[keyof typeof SMART_ACCOUNT_EIP_STANDARD];
+
 export interface SmartAccountsConfig {
+  smartAccountEipStandard: SmartAccountEipStandardType | undefined;
   smartAccountType: SmartAccountType;
   walletScope: SmartAccountWalletScope;
   chains: {
