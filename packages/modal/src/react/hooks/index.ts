@@ -14,3 +14,5 @@ export * from "./useWeb3Auth";
 export * from "./useWeb3AuthConnect";
 export * from "./useWeb3AuthDisconnect";
 export * from "./useWeb3AuthUser";
+export * from "./useX402Auth";
+export * from "./useX402Fetch";

@@ -19,7 +19,7 @@ export interface IUseX402FetchReturnValues {
   x402Fetch: typeof fetch | null;
 }
 
-export const usX402Fetch = ({ walletClient, jwt, method }: IUseX402FetchParams): IUseX402FetchReturnValues => {
+export const useX402Fetch = ({ walletClient, jwt, method }: IUseX402FetchParams): IUseX402FetchReturnValues => {
   const [results, setResults] = useState<MethodExecutionResult[]>([]);
   const [isExecuting, setIsExecuting] = useState(false);
   const [executionError, setExecutionError] = useState<string | null>(null);
