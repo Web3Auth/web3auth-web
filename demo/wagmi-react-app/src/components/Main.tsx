@@ -17,11 +17,12 @@ import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useMemo, useState } from "react";
 import { parseEther } from "viem";
 import {
-  useAccount,
   useBalance,
   useCallsStatus,
   useCapabilities,
   useChainId,
+  useChains,
+  useConnection,
   useSendCalls,
   useShowCallsStatus,
   useSignMessage,
@@ -30,6 +31,7 @@ import {
 } from "wagmi";
 
 import styles from "../styles/Home.module.css";
+import X402 from "./X402";
 
 const Main = () => {
   const { provider, isConnected, web3Auth, status } = useWeb3Auth();
@@ -331,6 +333,9 @@ const Main = () => {
             </button>
           ))}
         </div>
+
+        {/* X402 Payment Protocol */}
+        <X402 />
 
         {/* Disconnect */}
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
