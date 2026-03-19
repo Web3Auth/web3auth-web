@@ -5,24 +5,24 @@ import { useChainId, useSwitchChain, useWalletClient } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
-const SIMPLE_FETCH_DEMO_URL = "http://localhost:4021/weather";
+const SIMPLE_FETCH_DEMO_URL = "http://localhost:4021/weather-plain";
 const SIMPLE_FETCH_DEMO_OPTIONS: RequestInit = {
   method: "GET",
   headers: { "Content-Type": "application/json" },
 };
 
 const SimpleX402FetchDemo = () => {
-  const { wrapFetchWithPayment } = useX402Fetch();
+  const { fetchWithPayment } = useX402Fetch();
 
   const [data, setData] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  const fetchWithPayment = useCallback(async () => {
+  const executeFetchWithPayment = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     try {
-      const response = (await wrapFetchWithPayment({ url: SIMPLE_FETCH_DEMO_URL, options: SIMPLE_FETCH_DEMO_OPTIONS })) as Response;
+      const response = (await fetchWithPayment({ url: SIMPLE_FETCH_DEMO_URL, options: SIMPLE_FETCH_DEMO_OPTIONS })) as Response;
       const contentType = response.headers.get("Content-Type") ?? "";
 
       let parsed: unknown;
@@ -48,7 +48,7 @@ const SimpleX402FetchDemo = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [wrapFetchWithPayment]);
+  }, [fetchWithPayment]);
 
   return (
     <div
@@ -64,7 +64,7 @@ const SimpleX402FetchDemo = () => {
         Uses <code>useX402Fetch</code> — no auth step required. The hook handles the x402 payment signing automatically using the connected wallet.
       </p>
 
-      <button onClick={fetchWithPayment} className={styles.card} disabled={isLoading}>
+      <button onClick={executeFetchWithPayment} className={styles.card} disabled={isLoading}>
         {isLoading ? "Fetching..." : "Fetch Weather Data"}
       </button>
 
