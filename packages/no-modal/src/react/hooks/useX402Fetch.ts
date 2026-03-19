@@ -1,97 +1,75 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { WalletClient } from "viem";
+import { useCallback, useMemo, useState } from "react";
+import { useWalletClient } from "wagmi";
 
-import { createX402Fetch, executeX402Method, Method, MethodExecutionResult } from "../../base";
+import { createEvmX402Fetch } from "../../base/x402/x402";
 
 export interface IUseX402FetchParams {
-  walletClient: WalletClient;
-  jwt: string;
-  method: Method;
+  /** The URL to send the payment-gated request to. */
+  url: string;
+  /** Optional fetch init options (method, headers, body, etc.). */
+  options?: RequestInit;
 }
 
 export interface IUseX402FetchReturnValues {
-  execute: () => Promise<MethodExecutionResult>;
-  results: MethodExecutionResult[];
-  lastResult: MethodExecutionResult | null;
-  isExecuting: boolean;
-  executionError: string | null;
-  clearResults: () => void;
-  x402Fetch: typeof fetch | null;
+  /** Parsed response body, or raw text when JSON parsing fails. */
+  data: unknown;
+  /** Error message if the last request failed. */
+  error: string | null;
+  /** True while the request is in flight. */
+  isLoading: boolean;
+  /** Trigger the payment-gated fetch. Resolves with the parsed response body. */
+  fetch: () => Promise<unknown>;
 }
 
-export const useX402Fetch = ({ walletClient, jwt, method }: IUseX402FetchParams): IUseX402FetchReturnValues => {
-  const [results, setResults] = useState<MethodExecutionResult[]>([]);
-  const [isExecuting, setIsExecuting] = useState(false);
-  const [executionError, setExecutionError] = useState<string | null>(null);
+export const useX402Fetch = ({ url, options }: IUseX402FetchParams): IUseX402FetchReturnValues => {
+  const { data: walletClient } = useWalletClient();
+
+  const [data, setData] = useState<unknown>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const x402Fetch = useMemo(() => {
-    if (!jwt) {
-      return null;
-    }
+    if (!walletClient?.account?.address) return null;
+    return createEvmX402Fetch(walletClient);
+  }, [walletClient]);
 
-    return createX402Fetch(walletClient, jwt);
-  }, [walletClient, jwt]);
-
-  const execute = useCallback(async () => {
+  const fetchUrl = useCallback(async (): Promise<unknown> => {
     if (!x402Fetch) {
-      throw new Error("Wallet is not authenticated for X402.");
+      throw new Error("Connect a wallet before making a request.");
     }
 
-    setIsExecuting(true);
-    setExecutionError(null);
+    setIsLoading(true);
+    setError(null);
 
     try {
-      const result = await executeX402Method(x402Fetch, jwt, method);
-      setResults((current) => [result, ...current]);
+      const response = await x402Fetch(url, options);
+      const text = await response.text();
 
-      if (!result.ok) {
-        setExecutionError(result.error ?? `Request failed with status ${result.status}`);
+      let parsed: unknown = text;
+      try {
+        parsed = JSON.parse(text);
+      } catch {
+        // not JSON — keep raw text
       }
 
-      return result;
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to execute x402 request.";
+      if (!response.ok) {
+        const message =
+          parsed && typeof parsed === "object" && "error" in parsed
+            ? String((parsed as { error: unknown }).error)
+            : `Request failed with status ${response.status}`;
+        setError(message);
+      }
 
-      setExecutionError(errorMessage);
-
-      const errorResult: MethodExecutionResult = {
-        id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
-        methodId: method.id,
-        methodName: method.name,
-        network: method.network,
-        networkDisplay: method.networkDisplay,
-        protocol: method.protocol,
-        requestedAt: new Date().toISOString(),
-        status: 0,
-        ok: false,
-        data: null,
-        error: errorMessage,
-        paymentResponse: undefined,
-      };
-      setResults((current) => [errorResult, ...current]);
-
-      return errorResult;
+      setData(parsed);
+      return parsed;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Request failed.";
+      setError(message);
+      throw err;
+    } finally {
+      setIsLoading(false);
     }
-  }, [x402Fetch, jwt, method]);
+  }, [x402Fetch, url, options]);
 
-  // Clear results and errors when wallet/session changes
-  useEffect(() => {
-    setResults([]);
-    setExecutionError(null);
-  }, [jwt]);
-
-  const clearResults = useCallback(() => {
-    setResults([]);
-    setExecutionError(null);
-  }, []);
-
-  return {
-    x402Fetch,
-    results,
-    lastResult: results[0] ?? null,
-    isExecuting,
-    executionError,
-    execute,
-    clearResults,
-  };
+  return { data, error, isLoading, fetch: fetchUrl };
 };
