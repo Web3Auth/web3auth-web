@@ -93,7 +93,8 @@
     "siwe": "^3.0.0",
     "ts-custom-error": "^3.3.1",
     "xrpl": "^2.14.0",
-    "wagmi": "^3.4.1"
+    "wagmi": "^3.4.1",
+    "@wagmi/vue": "^0.4.14"
   },
   "devDependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",
