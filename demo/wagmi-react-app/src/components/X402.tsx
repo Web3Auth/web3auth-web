@@ -1,4 +1,5 @@
 import { useX402Fetch } from "@web3auth/modal/react";
+import { useCallback, useState } from "react";
 import { baseSepolia } from "viem/chains";
 import { useChainId, useSwitchChain, useWalletClient } from "wagmi";
 
@@ -11,10 +12,43 @@ const SIMPLE_FETCH_DEMO_OPTIONS: RequestInit = {
 };
 
 const SimpleX402FetchDemo = () => {
-  const { data, error, isLoading, fetch } = useX402Fetch({
-    url: SIMPLE_FETCH_DEMO_URL,
-    options: SIMPLE_FETCH_DEMO_OPTIONS,
-  });
+  const { wrapFetchWithPayment } = useX402Fetch();
+
+  const [data, setData] = useState<unknown>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchWithPayment = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = (await wrapFetchWithPayment({ url: SIMPLE_FETCH_DEMO_URL, options: SIMPLE_FETCH_DEMO_OPTIONS })) as Response;
+      const contentType = response.headers.get("Content-Type") ?? "";
+
+      let parsed: unknown;
+      if (contentType.includes("application/json")) {
+        parsed = await response.json();
+      } else if (contentType.startsWith("text/")) {
+        parsed = await response.text();
+      } else {
+        parsed = await response.blob();
+      }
+
+      if (!response.ok) {
+        const message =
+          parsed && typeof parsed === "object" && "error" in parsed
+            ? String((parsed as { error: unknown }).error)
+            : `Request failed with status ${response.status}`;
+        setError(message);
+      }
+
+      setData(parsed);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Request failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [wrapFetchWithPayment]);
 
   return (
     <div
@@ -30,7 +64,7 @@ const SimpleX402FetchDemo = () => {
         Uses <code>useX402Fetch</code> — no auth step required. The hook handles the x402 payment signing automatically using the connected wallet.
       </p>
 
-      <button onClick={() => fetch()} className={styles.card} disabled={isLoading}>
+      <button onClick={fetchWithPayment} className={styles.card} disabled={isLoading}>
         {isLoading ? "Fetching..." : "Fetch Weather Data"}
       </button>
 
@@ -42,7 +76,7 @@ const SimpleX402FetchDemo = () => {
           <textarea
             readOnly
             rows={4}
-            value={JSON.stringify(data, null, 2)}
+            value={typeof data === "string" ? data : JSON.stringify(data, null, 2)}
             style={{ width: "100%", fontFamily: "monospace", fontSize: "12px", boxSizing: "border-box" }}
           />
         </div>
