@@ -1,5 +1,5 @@
 import { useConnectorClient } from "@wagmi/vue";
-import { WalletClient } from "viem";
+import { createWalletClient, custom, WalletClient } from "viem";
 
 import { createEvmX402Fetch, X402ChainMismatchError } from "../../base/x402/x402";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
@@ -36,9 +36,15 @@ export const useX402Fetch = (): IUseX402FetchReturnValues => {
 
     // useConnectorClient returns viem Client. Reference: https://wagmi.sh/vue/api/composables/useConnectorClient
     const client = connectorClient.value as WalletClient | undefined;
-    if (!client || !client.account?.address) throw new Error("Wallet not connected");
+    if (!client || !client.account?.address || !client.chain) throw new Error("Wallet not connected");
 
-    const fetchWithX402Payment = createEvmX402Fetch(client);
+    const x402CompatibleClient = createWalletClient({
+      account: client.account,
+      chain: client.chain,
+      transport: custom(provider.value),
+    });
+
+    const fetchWithX402Payment = createEvmX402Fetch(x402CompatibleClient);
     return fetchWithX402Payment(url, options);
   };
 

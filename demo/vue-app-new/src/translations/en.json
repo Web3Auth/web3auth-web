@@ -81,6 +81,15 @@
       "btnSignTypedData_v4": "Sign Typed Data v4",
       "btnSignPersonalMsg": "Sign Personal Message"
     },
+    "x402": {
+      "title": "X402 Payment Protocol",
+      "description": "Uses useX402Fetch — signs a micro-payment with your wallet automatically.",
+      "notOnBaseSepolia": "The x402 test server runs on Base Sepolia. Switch first to use it.",
+      "btnSwitchToBaseSepolia": "Switch to Base Sepolia",
+      "btnFetchWeather": "Fetch Weather (x402)",
+      "chainMismatch": "Payment requires chain {chainId}. Switch your wallet and retry.",
+      "btnSwitchAndRetry": "Switch to chain {chainId} & retry"
+    },
     "widget": {
       "title": "Widget",
       "embed": "Embed",

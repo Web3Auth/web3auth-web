@@ -14,6 +14,7 @@ import {
   useWeb3AuthUser,
   useSwitchChain as useWeb3AuthSwitchChain,
 } from "@web3auth/modal/vue";
+import { useX402Fetch, X402ChainMismatchError } from "@web3auth/modal/vue/wagmi";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
@@ -59,7 +60,61 @@ const balance = useBalance({
   address: address,
 });
 
-const { accounts: solanaAccounts, connection } = useSolanaWallet();
+const { accounts: solanaAccounts, rpc, solanaWallet } = useSolanaWallet();
+
+// ── X402 ─────────────────────────────────────────────────────────────────────
+const BASE_SEPOLIA_CHAIN_ID = 84532; // eip155:84532 — required by the x402 test server
+
+const { fetchWithPayment } = useX402Fetch();
+const x402Loading = ref(false);
+const x402SwitchLoading = ref(false);
+const x402RequiredChainId = ref<number | null>(null);
+
+const isOnBaseSepolia = computed(() => wagmiChainId.value === BASE_SEPOLIA_CHAIN_ID);
+
+const X402_URL = "http://localhost:4021/weather";
+
+const onSwitchToBaseSepolia = async () => {
+  x402SwitchLoading.value = true;
+  try {
+    await switchChainAsync({ chainId: BASE_SEPOLIA_CHAIN_ID });
+  } catch (error) {
+    console.error("Failed to switch to Base Sepolia.", error);
+    printToConsole("X402 Error", "Failed to switch to Base Sepolia.");
+  } finally {
+    x402SwitchLoading.value = false;
+  }
+};
+
+const onX402FetchWeather = async () => {
+  x402Loading.value = true;
+  x402RequiredChainId.value = null;
+  try {
+    const response = await fetchWithPayment({ url: X402_URL, options: { method: "GET" } });
+    const contentType = response.headers.get("Content-Type") ?? "";
+    const data = contentType.includes("application/json") ? await response.json() : await response.text();
+    printToConsole("X402 Weather Data", data);
+  } catch (err) {
+    if (err instanceof X402ChainMismatchError) {
+      x402RequiredChainId.value = err.requiredChainId;
+    } else {
+      printToConsole("X402 Error", err instanceof Error ? err.message : "Request failed");
+    }
+  } finally {
+    x402Loading.value = false;
+  }
+};
+
+const onX402SwitchAndRetry = async () => {
+  if (!x402RequiredChainId.value) return;
+  try {
+    await switchChainAsync({ chainId: x402RequiredChainId.value });
+    x402RequiredChainId.value = null;
+    await onX402FetchWeather();
+  } catch {
+    printToConsole("X402 Error", "Failed to switch network. Please switch manually and retry.");
+  }
+};
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -446,6 +501,33 @@ const onSwitchChainNamespace = async () => {
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
           <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+
+          <!-- X402 Payment Protocol -->
+          <div class="mt-3 border border-gray-200 rounded-xl px-3 py-3">
+            <p class="text-sm font-semibold mb-1">{{ t("app.x402.title") }}</p>
+            <p class="text-xs text-gray-500 mb-2">{{ t("app.x402.description") }}</p>
+
+            <!-- Switch to Base Sepolia shortcut -->
+            <div v-if="!isOnBaseSepolia" class="mb-2 rounded-lg border border-blue-200 bg-blue-50 px-3 py-2">
+              <p class="text-xs text-blue-700 mb-1">{{ t("app.x402.notOnBaseSepolia") }}</p>
+              <Button :loading="x402SwitchLoading" size="xs" pill block variant="tertiary" @click="onSwitchToBaseSepolia">
+                {{ t("app.x402.btnSwitchToBaseSepolia") }}
+              </Button>
+            </div>
+
+            <Button :loading="x402Loading" block size="xs" pill class="mb-2" @click="onX402FetchWeather">
+              {{ t("app.x402.btnFetchWeather") }}
+            </Button>
+
+            <div v-if="x402RequiredChainId" class="mt-2 rounded-lg border border-yellow-400 bg-yellow-50 px-3 py-2">
+              <p class="text-xs text-yellow-800 mb-1">
+                {{ t("app.x402.chainMismatch", { chainId: x402RequiredChainId }) }}
+              </p>
+              <Button size="xs" pill block @click="onX402SwitchAndRetry">
+                {{ t("app.x402.btnSwitchAndRetry", { chainId: x402RequiredChainId }) }}
+              </Button>
+            </div>
+          </div>
         </Card>
 
         <!-- SOLANA -->
