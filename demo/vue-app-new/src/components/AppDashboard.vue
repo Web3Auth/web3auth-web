@@ -14,8 +14,8 @@ import {
   useWeb3AuthUser,
   useSwitchChain as useWeb3AuthSwitchChain,
 } from "@web3auth/modal/vue";
-import { useX402Fetch, X402ChainMismatchError } from "@web3auth/modal/vue/wagmi";
-import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
+import { useX402Fetch } from "@web3auth/modal/vue";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, X402ChainMismatchError, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
@@ -359,6 +359,27 @@ const canSwitchChain = computed(() => {
   return Boolean(newChain);
 });
 
+const SOLANA_MAINNET_CHAIN_ID = "0x65";
+const SOLANA_DEVNET_CHAIN_ID = "0x67";
+
+const isOnSolanaDevnet = computed(() => currentChainId.value === SOLANA_DEVNET_CHAIN_ID);
+
+const canSwitchSolanaNetwork = computed(() => {
+  if (currentChainNamespace.value !== CHAIN_NAMESPACES.SOLANA) return false;
+  const targetChainId = isOnSolanaDevnet.value ? SOLANA_MAINNET_CHAIN_ID : SOLANA_DEVNET_CHAIN_ID;
+  return props.chains.some((c) => c.chainId === targetChainId);
+});
+
+const onSwitchSolanaNetwork = async () => {
+  const targetChainId = isOnSolanaDevnet.value ? SOLANA_MAINNET_CHAIN_ID : SOLANA_DEVNET_CHAIN_ID;
+  try {
+    await switchChain({ chainId: targetChainId });
+    printToConsole("switchedChain", { chainId: targetChainId });
+  } catch (error) {
+    printToConsole("switchedChain error", error);
+  }
+};
+
 const canSwitchChainNamespace = computed(() => {
   const currentNamespace = currentChainNamespace.value;
   if (currentNamespace !== CHAIN_NAMESPACES.EIP155 && currentNamespace !== CHAIN_NAMESPACES.SOLANA) return false;
@@ -534,7 +555,9 @@ const onSwitchChainNamespace = async () => {
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
-          <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+          <Button v-if="canSwitchSolanaNetwork" block size="xs" pill class="mb-2" @click="onSwitchSolanaNetwork">
+            {{ isOnSolanaDevnet ? t("app.buttons.btnSwitchToSolanaMainnet") : t("app.buttons.btnSwitchToSolanaDevnet") }}
+          </Button>
           <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">
             {{ t("app.buttons.btnSwitchChainNamespace") }} to EVM
           </Button>
@@ -550,6 +573,15 @@ const onSwitchChainNamespace = async () => {
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
           <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+
+          <!-- X402 Payment Protocol (Solana) -->
+          <div class="mt-3 border border-gray-200 rounded-xl px-3 py-3">
+            <p class="text-sm font-semibold mb-1">{{ t("app.x402.title") }}</p>
+            <p class="text-xs text-gray-500 mb-2">{{ t("app.x402.solanaDescription") }}</p>
+            <Button :loading="x402Loading" block size="xs" pill class="mb-2" @click="onX402FetchWeather">
+              {{ t("app.x402.btnFetchWeather") }}
+            </Button>
+          </div>
         </Card>
       </Card>
       <Card

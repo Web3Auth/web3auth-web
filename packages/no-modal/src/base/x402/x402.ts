@@ -1,5 +1,7 @@
+import { Address, address, getBase58Encoder, SignatureBytes, SignatureDictionary, Transaction } from "@solana/kit";
 import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
+import { ClientSvmSigner, ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
 import { WalletClient } from "viem";
 
 export const EVM_CAIP2_WILDCARD = "eip155:*";
@@ -81,6 +83,63 @@ export class X402ChainMismatchError extends Error {
     this.requiredChainId = requiredChainId;
     this.currentChainId = currentChainId;
   }
+}
+
+/**
+ * Minimal Solana wallet interface required for x402 payment signing.
+ * Satisfied by web3auth's `SolanaWallet` class.
+ */
+export interface ISolanaX402Wallet {
+  getAccounts(): Promise<string[]>;
+  signTransaction(transaction: Transaction): Promise<string>;
+}
+
+/**
+ * Builds a `@x402/svm`-compatible `TransactionPartialSigner` from a web3auth
+ * Solana provider.
+ *
+ * The web3auth `signTransaction` call returns the signer's Ed25519 signature
+ * encoded in base58 (64 bytes). We decode it back to bytes and slot it into
+ * the signature dictionary that `@solana/kit`'s partial-signing helpers expect.
+ */
+function createSvmSigner(wallet: ISolanaX402Wallet, walletAddress: string): ClientSvmSigner {
+  const base58Encoder = getBase58Encoder();
+  const signerAddress = address(walletAddress);
+
+  const clientSvmSigner = toClientSvmSigner({
+    address: signerAddress,
+    signTransactions: async (transactions: readonly Transaction[]): Promise<readonly SignatureDictionary[]> => {
+      const signatureDictionaries = await Promise.all(
+        transactions.map(async (tx) => {
+          const signatureBase58 = await wallet.signTransaction(tx);
+          return { [signerAddress]: base58Encoder.encode(signatureBase58) } as Readonly<Record<Address, SignatureBytes>>;
+        })
+      );
+      // eslint-disable-next-line no-console
+      console.log("signatureDictionaries", signatureDictionaries);
+      return signatureDictionaries;
+    },
+  });
+  return clientSvmSigner;
+}
+
+/**
+ * Creates a payment-aware fetch function for a connected Solana wallet.
+ * Registers the exact SVM payment scheme and applies the body-shim so that
+ * servers returning v2 payment requirements in the response body are handled
+ * transparently.
+ *
+ * @param wallet - Connected Solana wallet (must have an account)
+ * @param walletAddress - The wallet's public key as a base58 address string
+ * @param rpcUrl - Optional custom Solana RPC URL (defaults to public cluster endpoints)
+ * @returns A fetch-compatible function that handles x402 payment flows
+ */
+export function createSolanaX402Fetch(wallet: ISolanaX402Wallet, walletAddress: string, rpcUrl?: string): typeof fetch {
+  if (!walletAddress) throw new Error("Wallet address is unavailable.");
+
+  const svmSigner = createSvmSigner(wallet, walletAddress);
+  const client = new x402Client().register(SOLANA_CAIP2_WILDCARD, new ExactSvmScheme(svmSigner, rpcUrl ? { rpcUrl } : undefined));
+  return wrapFetchWithPayment(withX402BodyShim(fetch), client);
 }
 
 /**

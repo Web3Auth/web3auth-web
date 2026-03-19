@@ -4,6 +4,8 @@ import "dotenv/config";
 import { HTTPFacilitatorClient } from "@x402/core/server";
 import { ExactEvmScheme } from "@x402/evm/exact/server";
 import { paymentMiddleware, x402ResourceServer } from "@x402/express";
+import { SOLANA_DEVNET_CAIP2 } from "@x402/svm";
+import { ExactSvmScheme } from "@x402/svm/exact/server";
 import cors from "cors";
 import express from "express";
 type Network = `${string}:${string}`;
@@ -21,14 +23,22 @@ const evmAddress = process.env.EVM_ADDRESS ?? "0x6C89E6616568D32888aC52b8b4F86c1
 if (!evmAddress) {
   throw new Error("EVM_ADDRESS is required");
 }
+const solanaAddress = process.env.SVM_ADDRESS ?? "";
+if (!solanaAddress) {
+  throw new Error("SVM_ADDRESS is required");
+}
 const facilitatorUrl = process.env.FACILITATOR_URL ?? "https://x402.org/facilitator";
 const evmNetwork = (process.env.EVM_NETWORK ?? "eip155:84532") as Network; // Base Sepolia
+const svmNetwork = (process.env.SVM_NETWORK ?? SOLANA_DEVNET_CAIP2) as Network;
 
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
 
-const resourceServer = new x402ResourceServer(facilitatorClient).register(evmNetwork, new ExactEvmScheme());
+const resourceServer = new x402ResourceServer(facilitatorClient)
+  .register(evmNetwork, new ExactEvmScheme())
+  .register(svmNetwork, new ExactSvmScheme());
 
 const evmScheme = new ExactEvmScheme();
+const svmScheme = new ExactSvmScheme();
 
 // ---------------------------------------------------------------------------
 // Payment middleware — configure which routes require payment and how much
@@ -44,6 +54,12 @@ app.use(
             network: evmNetwork,
             payTo: evmAddress,
           },
+          {
+            scheme: "exact" as const,
+            price: "$0.001",
+            network: svmNetwork,
+            payTo: solanaAddress,
+          },
         ],
         description: "Real-time weather data (temperature & conditions)",
         mimeType: "application/json",
@@ -56,6 +72,12 @@ app.use(
             price: "$0.01",
             network: evmNetwork,
             payTo: evmAddress,
+          },
+          {
+            scheme: "exact" as const,
+            price: "$0.01",
+            network: svmNetwork,
+            payTo: solanaAddress,
           },
         ],
         description: "Premium analytics dataset",
@@ -77,7 +99,28 @@ app.get("/weather-plain", async (req, res) => {
   const hasPayment = req.headers["payment-signature"] ?? req.headers["x-payment"];
 
   if (!hasPayment) {
-    const assetAmount = await evmScheme.parsePrice(WEATHER_PLAIN_PRICE, evmNetwork);
+    const evmAssetAmount = await evmScheme.parsePrice(WEATHER_PLAIN_PRICE, evmNetwork);
+    const accepts: object[] = [
+      {
+        scheme: "exact",
+        network: evmNetwork,
+        ...evmAssetAmount,
+        payTo: evmAddress,
+        maxTimeoutSeconds: 300,
+      },
+    ];
+
+    if (solanaAddress) {
+      const svmAssetAmount = await svmScheme.parsePrice(WEATHER_PLAIN_PRICE, svmNetwork);
+      accepts.push({
+        scheme: "exact",
+        network: svmNetwork,
+        ...svmAssetAmount,
+        payTo: solanaAddress,
+        maxTimeoutSeconds: 300,
+      });
+    }
+
     res.status(402).json({
       x402Version: 2,
       error: "Payment required",
@@ -86,15 +129,7 @@ app.get("/weather-plain", async (req, res) => {
         description: "Real-time weather data (payment requirements in response body)",
         mimeType: "application/json",
       },
-      accepts: [
-        {
-          scheme: "exact",
-          network: evmNetwork,
-          ...assetAmount,
-          payTo: evmAddress,
-          maxTimeoutSeconds: 300,
-        },
-      ],
+      accepts,
     });
     return;
   }
@@ -143,6 +178,7 @@ app.get("/", (_req, res) => {
     facilitator: facilitatorUrl,
     networks: {
       evm: evmNetwork,
+      solana: svmNetwork,
     },
   });
 });
@@ -195,6 +231,7 @@ app.listen(Number(PORT), () => {
   console.log(`    GET http://localhost:${PORT}/premium-data → $0.01`);
   console.log(`    GET http://localhost:${PORT}/weather-plain → $0.001 (requirements in body)`);
   console.log(`\n  Networks:`);
-  console.log(`    EVM  : ${evmNetwork}`);
+  console.log(`    EVM    : ${evmNetwork}`);
+  console.log(`    Solana : ${svmNetwork}${solanaAddress ? "" : " (no SOLANA_ADDRESS set — Solana payments disabled)"}`);
   console.log(`\n  Facilitator: ${facilitatorUrl}\n`);
 });

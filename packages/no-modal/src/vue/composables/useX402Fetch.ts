@@ -1,7 +1,9 @@
 import { useConnectorClient } from "@wagmi/vue";
 import { createWalletClient, custom, WalletClient } from "viem";
 
-import { createEvmX402Fetch, X402ChainMismatchError } from "../../base/x402/x402";
+import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
+import { createEvmX402Fetch, createSolanaX402Fetch } from "../../base/x402/x402";
+import { useSolanaWallet } from "../solana/composables/useSolanaWallet";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseX402FetchParams {
@@ -16,22 +18,33 @@ export interface IUseX402FetchReturnValues {
   fetchWithPayment: (params: IUseX402FetchParams) => Promise<Response>;
 }
 
-export { X402ChainMismatchError };
-
 /**
- * Wagmi-integrated x402 fetch composable.
+ * Wagmi/Solana-integrated x402 fetch composable.
  *
- * Mirrors the React `useX402Fetch` hook: the connected wallet client is sourced
- * internally via `useConnectorClient` (the `@wagmi/vue` equivalent of wagmi React's
- * `useWalletClient`) so callers do not need to pass it manually.
+ * Automatically selects the correct payment path based on the currently connected
+ * chain namespace:
+ *  - **Solana** – uses `createSolanaX402Fetch` backed by the web3auth Solana wallet.
+ *  - **EVM** – uses `createEvmX402Fetch` backed by the wagmi connector client
+ *    (the `@wagmi/vue` equivalent of wagmi React's `useWalletClient`).
+ *
+ * Callers do not need to pass a wallet client manually; it is sourced internally.
  */
 export const useX402Fetch = (): IUseX402FetchReturnValues => {
-  const { provider, chainId } = useWeb3AuthInner();
+  const { provider, chainId, chainNamespace } = useWeb3AuthInner();
   // useConnectorClient is the @wagmi/vue counterpart of useWalletClient in wagmi (React).
   // Both return a viem Client<Transport, Chain, Account> extended with wallet actions — i.e. a WalletClient.
   const { data: connectorClient } = useConnectorClient();
+  const { solanaWallet, accounts } = useSolanaWallet();
 
   const fetchWithPayment = async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
+    // ── Solana path ──────────────────────────────────────────────────────────
+    if (chainNamespace.value === CHAIN_NAMESPACES.SOLANA) {
+      if (!solanaWallet.value || !accounts.value?.[0]) throw new Error("Solana wallet not connected");
+      const fetchFn = createSolanaX402Fetch(solanaWallet.value, accounts.value[0]);
+      return fetchFn(url, options);
+    }
+
+    // ── EVM path (wagmi) ──────────────────────────────────────────────────────
     if (!provider.value || !chainId.value) throw new Error("Provider or chainId not found");
 
     // useConnectorClient returns viem Client. Reference: https://wagmi.sh/vue/api/composables/useConnectorClient
