@@ -64,6 +64,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   constructor(options: Web3AuthOptions, initialState?: IWeb3AuthState) {
     super(options, initialState);
     this.options = { ...options };
+    if (!this.options.initialAuthenticationMode) {
+      this.options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+    }
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
