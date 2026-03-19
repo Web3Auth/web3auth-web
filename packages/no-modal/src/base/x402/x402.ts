@@ -67,10 +67,31 @@ export function withX402BodyShim(baseFetch: typeof fetch): typeof fetch {
 }
 
 /**
+ * Thrown when a payment's EIP-712 domain requires a chain that differs from the
+ * wallet's currently active chain. Callers can catch this error and prompt the user
+ * to switch networks before retrying the request.
+ */
+export class X402ChainMismatchError extends Error {
+  readonly requiredChainId: number;
+  readonly currentChainId: number | undefined;
+
+  constructor(requiredChainId: number, currentChainId?: number) {
+    super(`Payment requires chain ${requiredChainId} but wallet is on chain ${currentChainId ?? "unknown"}. Please switch networks and try again.`);
+    this.name = "X402ChainMismatchError";
+    this.requiredChainId = requiredChainId;
+    this.currentChainId = currentChainId;
+  }
+}
+
+/**
  * Creates a payment-aware fetch function for a connected EVM wallet.
  * Registers the exact EVM payment scheme and applies the body-shim so that
  * servers returning v2 payment requirements in the response body are handled
  * transparently.
+ *
+ * If the payment requires a different chain than the wallet's active chain,
+ * an `X402ChainMismatchError` is thrown with `requiredChainId` and `currentChainId`
+ * so the caller can prompt the user to switch networks and retry.
  *
  * @param walletClient - Connected viem WalletClient (must have an account)
  * @returns A fetch-compatible function that handles x402 payment flows
@@ -83,6 +104,14 @@ export function createEvmX402Fetch(walletClient: WalletClient): typeof fetch {
     address,
     signTypedData: async (params) => {
       const { domain, types, primaryType, message } = params;
+
+      const requiredChainId = typeof domain?.chainId === "number" ? domain.chainId : undefined;
+      const currentChainId = walletClient.chain?.id;
+
+      if (requiredChainId !== undefined && requiredChainId !== currentChainId) {
+        throw new X402ChainMismatchError(requiredChainId, currentChainId);
+      }
+
       return walletClient.signTypedData({
         account: address,
         domain,

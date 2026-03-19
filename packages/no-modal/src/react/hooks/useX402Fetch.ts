@@ -18,12 +18,14 @@ export interface IUseX402FetchReturnValues {
 export const useX402Fetch = (): IUseX402FetchReturnValues => {
   const { data: walletClient } = useWalletClient();
 
-  const fetchWithPayment = useCallback(async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
-    if (!walletClient?.account?.address) return null;
-    const fetchWithX402Payment = createEvmX402Fetch(walletClient);
-
-    return fetchWithX402Payment(url, options);
-  }, []);
+  const fetchWithPayment = useCallback(
+    async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
+      if (!walletClient?.account?.address) return null;
+      const fetchWithX402Payment = createEvmX402Fetch(walletClient);
+      return fetchWithX402Payment(url, options);
+    },
+    [walletClient]
+  );
 
   return { fetchWithPayment };
 };
