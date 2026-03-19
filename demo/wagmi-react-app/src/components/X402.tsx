@@ -1,21 +1,55 @@
-import { useX402Fetch } from "@web3auth/modal/react";
+import { CHAIN_NAMESPACES } from "@web3auth/modal";
+import { useChain, useX402Fetch } from "@web3auth/modal/react";
+import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useCallback, useState } from "react";
 import { useSwitchChain, useWalletClient } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
-const SIMPLE_FETCH_DEMO_URL = "http://localhost:4021/weather-plain";
-const SIMPLE_FETCH_DEMO_OPTIONS: RequestInit = {
-  method: "GET",
-  headers: { "Content-Type": "application/json" },
-};
+const X402_URL = "http://localhost:4021/weather";
+const FETCH_OPTIONS: RequestInit = { method: "GET", headers: { "Content-Type": "application/json" } };
 
 /** Duck-type check for X402ChainMismatchError — avoids a build-time import of the class. */
 function isChainMismatchError(err: unknown): err is { requiredChainId: number; currentChainId?: number; message: string } {
   return typeof err === "object" && err !== null && "requiredChainId" in err;
 }
 
-const SimpleX402FetchDemo = () => {
+// ─── Shared response renderer ────────────────────────────────────────────────
+
+interface FetchResultProps {
+  data: unknown;
+  error: string | null;
+}
+
+const FetchResult = ({ data, error }: FetchResultProps) => (
+  <>
+    {error && <p style={{ color: "red", fontSize: "13px", marginTop: "8px" }}>Error: {error}</p>}
+    {data !== null && (
+      <div style={{ marginTop: "10px" }}>
+        <p style={{ fontSize: "12px", color: "#555", margin: "0 0 4px" }}>Response</p>
+        <textarea
+          readOnly
+          rows={4}
+          value={typeof data === "string" ? data : JSON.stringify(data, null, 2)}
+          style={{ width: "100%", fontFamily: "monospace", fontSize: "12px", boxSizing: "border-box" }}
+        />
+      </div>
+    )}
+  </>
+);
+
+// ─── Shared fetch helper ──────────────────────────────────────────────────────
+
+async function parseResponse(response: Response): Promise<unknown> {
+  const contentType = response.headers.get("Content-Type") ?? "";
+  if (contentType.includes("application/json")) return response.json();
+  if (contentType.startsWith("text/")) return response.text();
+  return response.blob();
+}
+
+// ─── EVM demo (with chain-mismatch handling) ──────────────────────────────────
+
+const EvmX402FetchDemo = () => {
   const { fetchWithPayment } = useX402Fetch();
   const { mutateAsync: switchChainAsync, isPending: isSwitching } = useSwitchChain();
 
@@ -24,23 +58,13 @@ const SimpleX402FetchDemo = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [requiredChainId, setRequiredChainId] = useState<number | null>(null);
 
-  const executeFetchWithPayment = useCallback(async () => {
+  const execute = useCallback(async () => {
     setIsLoading(true);
     setError(null);
     setRequiredChainId(null);
     try {
-      const response = (await fetchWithPayment({ url: SIMPLE_FETCH_DEMO_URL, options: SIMPLE_FETCH_DEMO_OPTIONS })) as Response;
-      const contentType = response.headers.get("Content-Type") ?? "";
-
-      let parsed: unknown;
-      if (contentType.includes("application/json")) {
-        parsed = await response.json();
-      } else if (contentType.startsWith("text/")) {
-        parsed = await response.text();
-      } else {
-        parsed = await response.blob();
-      }
-
+      const response = (await fetchWithPayment({ url: X402_URL, options: FETCH_OPTIONS })) as Response;
+      const parsed = await parseResponse(response);
       if (!response.ok) {
         const message =
           parsed && typeof parsed === "object" && "error" in parsed
@@ -48,7 +72,6 @@ const SimpleX402FetchDemo = () => {
             : `Request failed with status ${response.status}`;
         setError(message);
       }
-
       setData(parsed);
     } catch (err) {
       if (isChainMismatchError(err)) {
@@ -66,27 +89,20 @@ const SimpleX402FetchDemo = () => {
     try {
       await switchChainAsync({ chainId: requiredChainId });
       setRequiredChainId(null);
-      await executeFetchWithPayment();
+      await execute();
     } catch {
       setError("Failed to switch network. Please switch manually and try again.");
     }
-  }, [requiredChainId, switchChainAsync, executeFetchWithPayment]);
+  }, [requiredChainId, switchChainAsync, execute]);
 
   return (
-    <div
-      style={{
-        border: "1px solid #ddd",
-        borderRadius: "8px",
-        padding: "12px",
-        marginTop: "16px",
-      }}
-    >
-      <p style={{ margin: "0 0 4px", fontWeight: "500" }}>Simple X402 Fetch</p>
+    <div style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "12px", marginTop: "8px" }}>
+      <p style={{ margin: "0 0 4px", fontWeight: "500" }}>EVM — Fetch Weather (x402)</p>
       <p style={{ fontSize: "13px", color: "#555", margin: "0 0 10px" }}>
-        Uses <code>useX402Fetch</code> — the hook handles x402 payment signing automatically using the connected wallet.
+        Uses <code>useX402Fetch</code> — signs a micro-payment with your EVM wallet automatically.
       </p>
 
-      <button onClick={executeFetchWithPayment} className={styles.card} disabled={isLoading || isSwitching}>
+      <button onClick={execute} className={styles.card} disabled={isLoading || isSwitching}>
         {isLoading ? "Fetching..." : "Fetch Weather Data"}
       </button>
 
@@ -109,27 +125,68 @@ const SimpleX402FetchDemo = () => {
         </div>
       )}
 
-      {error && <p style={{ color: "red", fontSize: "13px", marginTop: "8px" }}>Error: {error}</p>}
-
-      {data !== null && (
-        <div style={{ marginTop: "10px" }}>
-          <p style={{ fontSize: "12px", color: "#555", margin: "0 0 4px" }}>Response</p>
-          <textarea
-            readOnly
-            rows={4}
-            value={typeof data === "string" ? data : JSON.stringify(data, null, 2)}
-            style={{ width: "100%", fontFamily: "monospace", fontSize: "12px", boxSizing: "border-box" }}
-          />
-        </div>
-      )}
+      <FetchResult data={data} error={error} />
     </div>
   );
 };
 
-const X402 = () => {
-  const { data: walletClient } = useWalletClient();
+// ─── Solana demo (no chain-switching) ─────────────────────────────────────────
 
-  if (!walletClient) {
+const SolanaX402FetchDemo = () => {
+  const { fetchWithPayment } = useX402Fetch();
+
+  const [data, setData] = useState<unknown>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const execute = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+    try {
+      const response = (await fetchWithPayment({ url: X402_URL, options: FETCH_OPTIONS })) as Response;
+      const parsed = await parseResponse(response);
+      if (!response.ok) {
+        const message =
+          parsed && typeof parsed === "object" && "error" in parsed
+            ? String((parsed as { error: unknown }).error)
+            : `Request failed with status ${response.status}`;
+        setError(message);
+      }
+      setData(parsed);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Request failed.");
+    } finally {
+      setIsLoading(false);
+    }
+  }, [fetchWithPayment]);
+
+  return (
+    <div style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "12px", marginTop: "8px" }}>
+      <p style={{ margin: "0 0 4px", fontWeight: "500" }}>Solana — Fetch Weather (x402)</p>
+      <p style={{ fontSize: "13px", color: "#555", margin: "0 0 10px" }}>
+        Uses <code>useX402Fetch</code> — pays with your Solana wallet (USDC on devnet) automatically.
+      </p>
+
+      <button onClick={execute} className={styles.card} disabled={isLoading}>
+        {isLoading ? "Fetching..." : "Fetch Weather Data"}
+      </button>
+
+      <FetchResult data={data} error={error} />
+    </div>
+  );
+};
+
+// ─── Container ────────────────────────────────────────────────────────────────
+
+const X402 = () => {
+  const { chainNamespace } = useChain();
+  const { data: walletClient } = useWalletClient();
+  const { accounts: solanaAccounts } = useSolanaWallet();
+
+  const isEvmConnected = Boolean(walletClient);
+  const isSolanaConnected = chainNamespace === CHAIN_NAMESPACES.SOLANA && Boolean(solanaAccounts?.[0]);
+
+  if (!isEvmConnected && !isSolanaConnected) {
     return (
       <div style={{ marginTop: "16px", marginBottom: "16px" }}>
         <p style={{ fontWeight: "bold" }}>X402 Payment Protocol</p>
@@ -141,7 +198,7 @@ const X402 = () => {
   return (
     <div style={{ marginTop: "16px", marginBottom: "16px" }}>
       <p style={{ fontWeight: "bold" }}>X402 Payment Protocol</p>
-      <SimpleX402FetchDemo />
+      {chainNamespace === CHAIN_NAMESPACES.SOLANA ? <SolanaX402FetchDemo /> : <EvmX402FetchDemo />}
     </div>
   );
 };

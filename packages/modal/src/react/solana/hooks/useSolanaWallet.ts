@@ -2,7 +2,7 @@ import { Connection } from "@solana/web3.js";
 import { CHAIN_NAMESPACES, SolanaWallet } from "@web3auth/no-modal";
 import { useEffect, useMemo, useState } from "react";
 
-import { useChain } from "../../hooks";
+import { useChain } from "../../hooks/useChain";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
