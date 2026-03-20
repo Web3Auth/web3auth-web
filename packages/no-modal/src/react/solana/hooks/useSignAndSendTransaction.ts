@@ -1,9 +1,14 @@
-import type { Transaction } from "@solana/kit";
+import { getTransactionEncoder, type Transaction } from "@solana/kit";
+import type { SolanaSignAndSendTransactionFeature } from "@solana/wallet-standard-features";
+import { SolanaSignAndSendTransaction } from "@solana/wallet-standard-features";
 import { useCallback, useState } from "react";
 
 import { Web3AuthError } from "../../../base";
 import { WalletInitializationError } from "../../../base/errors";
+import { encodeBase58 } from "../../../utils/encoding";
 import { useSolanaWallet } from "./useSolanaWallet";
+
+const transactionEncoder = getTransactionEncoder();
 
 export type IUseSignAndSendTransaction = {
   loading: boolean;
@@ -18,7 +23,7 @@ export type IUseSignAndSendTransaction = {
 };
 
 export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
-  const { solanaWallet } = useSolanaWallet();
+  const { wallet } = useSolanaWallet();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
   const [data, setData] = useState<string | null>(null);
@@ -28,8 +33,18 @@ export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
       setLoading(true);
       setError(null);
       try {
-        if (!solanaWallet) throw WalletInitializationError.notReady();
-        const signature = await solanaWallet.signAndSendTransaction(transaction);
+        if (!wallet) throw WalletInitializationError.notReady();
+        const feature = wallet.features[SolanaSignAndSendTransaction] as
+          | SolanaSignAndSendTransactionFeature[typeof SolanaSignAndSendTransaction]
+          | undefined;
+        if (!feature) throw WalletInitializationError.notReady();
+        const account = wallet.accounts[0];
+        const chain = wallet.chains[0];
+        if (!account || !chain) throw WalletInitializationError.notReady();
+
+        const wire = new Uint8Array(transactionEncoder.encode(transaction));
+        const [out] = await feature.signAndSendTransaction({ account, transaction: wire, chain });
+        const signature = encodeBase58(new Uint8Array(out.signature));
         setData(signature);
         return signature;
       } catch (err) {
@@ -38,7 +53,7 @@ export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
         setLoading(false);
       }
     },
-    [solanaWallet]
+    [wallet]
   );
 
   return { loading, error, data, signAndSendTransaction };

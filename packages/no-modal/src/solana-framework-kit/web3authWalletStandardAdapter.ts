@@ -1,17 +1,17 @@
 /**
- * Web3Auth Wallet Standard adapter: wraps Web3Auth's Solana provider (IProvider + SolanaWallet)
- * so it can be used as a Wallet Standard wallet for @solana/client (Framework Kit).
+ * Web3Auth Wallet Standard adapter: wraps Web3Auth's Solana IProvider RPC
+ * so it can be used as a Wallet Standard wallet for Solana Framework Kit (`@solana/client`).
  */
-import { getTransactionDecoder, getTransactionEncoder } from "@solana/kit";
+import { getBase64EncodedWireTransaction, getTransactionDecoder, getTransactionEncoder } from "@solana/kit";
 import type { SolanaSignAndSendTransactionInput, SolanaSignMessageInput, SolanaSignTransactionInput } from "@solana/wallet-standard-features";
 import { SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction } from "@solana/wallet-standard-features";
 import type { IdentifierArray, IdentifierString, Wallet, WalletAccount } from "@wallet-standard/base";
 import { StandardConnect, StandardDisconnect } from "@wallet-standard/features";
+import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import type { IProvider } from "../base";
 import type { CustomChainConfig } from "../base/chain/IChainInterface";
 import { getSolanaChainByChainConfig } from "../providers/solana-provider/providers/injectedProviders/utils";
-import { SolanaWallet } from "../providers/solana-provider/solanaWallet";
 import { decodeBase58 } from "../utils/encoding";
 
 const transactionDecoder = getTransactionDecoder();
@@ -42,7 +42,6 @@ function makeAccount(address: string, chain: IdentifierString): WalletAccount {
  */
 export function createWeb3AuthWalletStandardWallet(options: Web3AuthWalletStandardWalletOptions): Wallet {
   const { provider, chainConfig } = options;
-  const solanaWallet = new SolanaWallet(provider);
   const chain = getSolanaChainByChainConfig(chainConfig);
 
   let accounts: WalletAccount[] = [];
@@ -56,7 +55,9 @@ export function createWeb3AuthWalletStandardWallet(options: Web3AuthWalletStanda
       [StandardConnect]: {
         version: "1.0.0",
         connect: async () => {
-          const addresses = await solanaWallet.getAccounts();
+          const addresses = await provider.request<never, string[]>({
+            method: SOLANA_METHOD_TYPES.GET_ACCOUNTS,
+          });
           accounts = addresses.map((addr) => makeAccount(addr, chain));
           return { accounts };
         },
@@ -73,7 +74,10 @@ export function createWeb3AuthWalletStandardWallet(options: Web3AuthWalletStanda
           const results = await Promise.all(
             inputs.map(async (input) => {
               const message = new TextDecoder().decode(input.message);
-              const sig = await solanaWallet.signMessage(message, input.account.address);
+              const sig = await provider.request<{ data: string; from: string }, string>({
+                method: SOLANA_METHOD_TYPES.SIGN_MESSAGE,
+                params: { data: message, from: input.account.address },
+              });
               const signature = decodeBase58(sig);
               return {
                 signedMessage: input.message,
@@ -91,7 +95,10 @@ export function createWeb3AuthWalletStandardWallet(options: Web3AuthWalletStanda
           const results = await Promise.all(
             inputs.map(async (input) => {
               const decodedTx = transactionDecoder.decode(input.transaction);
-              const signature = await solanaWallet.signTransaction(decodedTx);
+              const signature = await provider.request<{ message: string }, string>({
+                method: SOLANA_METHOD_TYPES.SIGN_TRANSACTION,
+                params: { message: getBase64EncodedWireTransaction(decodedTx) },
+              });
               const sigBytes = decodeBase58(signature);
               const keys = Object.keys(decodedTx.signatures) as (keyof typeof decodedTx.signatures)[];
               const firstKey = keys[0];
@@ -111,7 +118,10 @@ export function createWeb3AuthWalletStandardWallet(options: Web3AuthWalletStanda
           const results = await Promise.all(
             inputs.map(async (input) => {
               const decodedTx = transactionDecoder.decode(input.transaction);
-              const signature = await solanaWallet.signAndSendTransaction(decodedTx);
+              const signature = await provider.request<{ message: string }, string>({
+                method: SOLANA_METHOD_TYPES.SEND_TRANSACTION,
+                params: { message: getBase64EncodedWireTransaction(decodedTx) },
+              });
               const sigBytes = decodeBase58(signature);
               return { signature: sigBytes };
             })
