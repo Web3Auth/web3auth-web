@@ -2,9 +2,10 @@ import { address, getBase58Encoder, SignatureDictionary, Transaction } from "@so
 import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
 import { ClientSvmSigner, ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
-import { WalletClient } from "viem";
+import { Address, createWalletClient, custom, type WalletClient } from "viem";
 
 import { SolanaWallet } from "../../providers";
+import { IProvider } from "../connector";
 
 export const EVM_CAIP2_WILDCARD = "eip155:*";
 export const SOLANA_CAIP2_WILDCARD = "solana:*";
@@ -46,6 +47,20 @@ async function normalizePaymentRequiredResponse(response: Response): Promise<Res
     statusText: response.statusText,
     headers: response.headers,
   });
+}
+
+export async function getEvmAddress(provider: IProvider): Promise<Address | null> {
+  const accounts = (await provider.request({ method: "eth_accounts" })) as string[] | null;
+  return (accounts?.[0] as Address | undefined) ?? null;
+}
+
+export function createProviderBackedEvmSigner(provider: IProvider, address: Address): WalletClient {
+  const walletClient = createWalletClient({
+    account: address,
+    transport: custom(provider),
+  });
+
+  return walletClient;
 }
 
 /**
@@ -117,12 +132,12 @@ export function createSolanaX402Fetch(wallet: SolanaWallet, walletAddress: strin
 }
 
 /**
- * Creates a payment-aware fetch function for a connected EVM wallet.
+ * Creates a payment-aware fetch function for an EVM typed-data signer.
  * Registers the exact EVM payment scheme and applies the body-shim so that
  * servers returning v2 payment requirements in the response body are handled
  * transparently.
  *
- * @param walletClient - Connected viem WalletClient (must have an account)
+ * @param signer - Minimal signer with an address and EIP-712 signTypedData implementation
  * @returns A fetch-compatible function that handles x402 payment flows
  */
 export function createEvmX402Fetch(walletClient: WalletClient): typeof fetch {
@@ -134,13 +149,7 @@ export function createEvmX402Fetch(walletClient: WalletClient): typeof fetch {
     signTypedData: async (params) => {
       const { domain, types, primaryType, message } = params;
 
-      return walletClient.signTypedData({
-        account: address,
-        domain,
-        types,
-        primaryType,
-        message,
-      });
+      return walletClient.signTypedData({ account: address, domain, types, primaryType, message });
     },
   });
 

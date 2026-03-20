@@ -49,8 +49,7 @@
     "react": ">=18",
     "react-dom": ">=18",
     "viem": ">=2.45",
-    "vue": ">=3.x",
-    "wagmi": "^3.4.1"
+    "vue": ">=3.x"
   },
   "devDependencies": {
     "@babel/preset-react": "^7.28.5",

@@ -40,6 +40,7 @@ The server listens on `http://localhost:4021` by default — the same port hardc
 | Variable          | Required | Default                        | Description                                |
 | ----------------- | -------- | ------------------------------ | ------------------------------------------ |
 | `EVM_ADDRESS`     | ✅       | —                              | Wallet address that receives USDC payments |
+| `SVM_ADDRESS`     | ✅       | —                              | Wallet address that receives on solana     |
 | `FACILITATOR_URL` | ❌       | `https://x402.org/facilitator` | x402 facilitator endpoint                  |
 | `PORT`            | ❌       | `4021`                         | HTTP listen port                           |
 

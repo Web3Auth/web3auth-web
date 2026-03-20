@@ -38,8 +38,7 @@ const FetchResult = ({ data, error }: FetchResultProps) => (
 async function parseResponse(response: Response): Promise<unknown> {
   const contentType = response.headers.get("Content-Type") ?? "";
   if (contentType.includes("application/json")) return response.json();
-  if (contentType.startsWith("text/")) return response.text();
-  return response.blob();
+  return response.text();
 }
 
 // ─── EVM demo (with chain-mismatch handling) ──────────────────────────────────
@@ -54,6 +53,7 @@ const EvmX402FetchDemo = () => {
   const execute = useCallback(async () => {
     setIsLoading(true);
     setError(null);
+    setData(null);
     try {
       const response = (await fetchWithPayment({ url: X402_URL, options: FETCH_OPTIONS })) as Response;
       const parsed = await parseResponse(response);
@@ -67,6 +67,7 @@ const EvmX402FetchDemo = () => {
       setData(parsed);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Request failed.");
+      setData(null);
     } finally {
       setIsLoading(false);
     }

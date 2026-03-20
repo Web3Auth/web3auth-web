@@ -1,9 +1,15 @@
-import { useConnectorClient } from "@wagmi/vue";
-import { createWalletClient, custom, WalletClient } from "viem";
-import { computed } from "vue";
+import type { Address } from "viem";
+import { computed, type MaybeRefOrGetter, ref, toValue, watch } from "vue";
 
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
-import { createEvmX402Fetch, createSolanaX402Fetch, IUseX402FetchParams, IUseX402FetchReturnValues } from "../../base/x402";
+import {
+  createEvmX402Fetch,
+  createProviderBackedEvmSigner,
+  createSolanaX402Fetch,
+  getEvmAddress,
+  type IUseX402FetchParams,
+  type IUseX402FetchReturnValues,
+} from "../../base/x402";
 import { useSolanaWallet } from "../solana/composables/useSolanaWallet";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
@@ -11,35 +17,67 @@ export { createEvmX402Fetch, createSolanaX402Fetch };
 export type { IUseX402FetchParams, IUseX402FetchReturnValues };
 
 /**
- * Wagmi/Solana-integrated x402 fetch composable.
+ * Web3Auth-integrated x402 fetch composable.
  *
  * Automatically selects the correct payment path based on the currently connected
  * chain namespace:
  *  - **Solana** – uses `createSolanaX402Fetch` backed by the web3auth Solana wallet.
- *  - **EVM** – uses `createEvmX402Fetch` backed by the wagmi connector client
- *    (the `@wagmi/vue` equivalent of wagmi React's `useWalletClient`).
+ *  - **EVM** – uses `createEvmX402Fetch` backed by the web3auth EIP-1193 provider.
  *
- * Callers do not need to pass a wallet client manually; it is sourced internally.
+ * Callers do not need to pass a signer manually; it is sourced internally.
+ * When `address` is provided, it takes precedence over the provider's active account.
  */
-export const useX402Fetch = (): IUseX402FetchReturnValues => {
-  const { provider, chainId, chainNamespace } = useWeb3AuthInner();
-  // useConnectorClient is the @wagmi/vue counterpart of useWalletClient in wagmi (React).
-  // Both return a viem Client<Transport, Chain, Account> extended with wallet actions — i.e. a WalletClient.
-  const { data: connectorClient } = useConnectorClient();
+export const useX402Fetch = (address?: MaybeRefOrGetter<Address | undefined>): IUseX402FetchReturnValues => {
+  const { provider, chainNamespace } = useWeb3AuthInner();
   const { solanaWallet, accounts } = useSolanaWallet();
+  const providedAddress = computed(() => toValue(address) ?? null);
+  const providerAddress = ref<Address | null>(null);
+  const evmAddress = computed(() => providedAddress.value ?? providerAddress.value);
+
+  watch(
+    [provider, chainNamespace, providedAddress],
+    ([nextProvider, nextChainNamespace, nextProvidedAddress], _, onInvalidate) => {
+      let active = true;
+
+      if (!nextProvider || nextChainNamespace !== CHAIN_NAMESPACES.EIP155) {
+        providerAddress.value = null;
+        return;
+      }
+
+      if (nextProvidedAddress) {
+        providerAddress.value = null;
+        return;
+      }
+
+      const handleAccountsChanged = (nextAccounts: string[]) => {
+        if (active) {
+          providerAddress.value = (nextAccounts[0] as Address | undefined) ?? null;
+        }
+      };
+
+      nextProvider.on("accountsChanged", handleAccountsChanged);
+
+      void (async () => {
+        try {
+          const nextAddress = await getEvmAddress(nextProvider);
+          if (active) providerAddress.value = nextAddress;
+        } catch {
+          if (active) providerAddress.value = null;
+        }
+      })();
+
+      onInvalidate(() => {
+        active = false;
+        nextProvider.removeListener("accountsChanged", handleAccountsChanged);
+      });
+    },
+    { immediate: true }
+  );
 
   const evmX402Fetch = computed(() => {
-    if (!provider.value || !chainId.value) return null;
-    const client = connectorClient.value as WalletClient | undefined;
-    if (!client || !client.account?.address || !client.chain) return null;
-
-    const x402CompatibleClient = createWalletClient({
-      account: client.account,
-      chain: client.chain,
-      transport: custom(provider.value),
-    });
-
-    return createEvmX402Fetch(x402CompatibleClient);
+    if (!provider.value || !evmAddress.value) return null;
+    const evmSigner = createProviderBackedEvmSigner(provider.value, evmAddress.value);
+    return createEvmX402Fetch(evmSigner);
   });
 
   const solanaX402Fetch = computed(() => {
@@ -51,7 +89,10 @@ export const useX402Fetch = (): IUseX402FetchReturnValues => {
     if (chainNamespace.value === CHAIN_NAMESPACES.SOLANA) {
       return solanaX402Fetch.value;
     }
-    return evmX402Fetch.value;
+    if (chainNamespace.value === CHAIN_NAMESPACES.EIP155) {
+      return evmX402Fetch.value;
+    }
+    return null;
   });
 
   const fetchWithPayment = async ({ url, options }: IUseX402FetchParams): Promise<Response> => {

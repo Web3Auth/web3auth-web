@@ -72,7 +72,6 @@ const BASE_SEPOLIA_CHAIN_ID = 84532; // eip155:84532 — required by the x402 te
 const { fetchWithPayment } = useX402Fetch();
 const x402Loading = ref(false);
 const x402SwitchLoading = ref(false);
-const x402RequiredChainId = ref<number | null>(null);
 
 const isOnBaseSepolia = computed(() => wagmiChainId.value === BASE_SEPOLIA_CHAIN_ID);
 
@@ -92,7 +91,6 @@ const onSwitchToBaseSepolia = async () => {
 
 const onX402FetchWeather = async () => {
   x402Loading.value = true;
-  x402RequiredChainId.value = null;
   try {
     const response = await fetchWithPayment({ url: X402_URL, options: { method: "GET" } });
     const contentType = response.headers.get("Content-Type") ?? "";
@@ -105,16 +103,6 @@ const onX402FetchWeather = async () => {
   }
 };
 
-const onX402SwitchAndRetry = async () => {
-  if (!x402RequiredChainId.value) return;
-  try {
-    await switchChainAsync({ chainId: x402RequiredChainId.value });
-    x402RequiredChainId.value = null;
-    await onX402FetchWeather();
-  } catch {
-    printToConsole("X402 Error", "Failed to switch network. Please switch manually and retry.");
-  }
-};
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -541,15 +529,6 @@ const onSwitchChainNamespace = async () => {
             <Button :loading="x402Loading" block size="xs" pill class="mb-2" @click="onX402FetchWeather">
               {{ t("app.x402.btnFetchWeather") }}
             </Button>
-
-            <div v-if="x402RequiredChainId" class="mt-2 rounded-lg border border-yellow-400 bg-yellow-50 px-3 py-2">
-              <p class="text-xs text-yellow-800 mb-1">
-                {{ t("app.x402.chainMismatch", { chainId: x402RequiredChainId }) }}
-              </p>
-              <Button size="xs" pill block @click="onX402SwitchAndRetry">
-                {{ t("app.x402.btnSwitchAndRetry", { chainId: x402RequiredChainId }) }}
-              </Button>
-            </div>
           </div>
         </Card>
 
