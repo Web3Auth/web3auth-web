@@ -6,7 +6,7 @@ import { useSwitchChain, useWalletClient } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
-const X402_URL = "http://localhost:4021/weather";
+const X402_URL = import.meta.env.VITE_APP_X402_TEST_CONTENT_URL;
 const FETCH_OPTIONS: RequestInit = { method: "GET", headers: { "Content-Type": "application/json" } };
 
 // ─── Shared response renderer ────────────────────────────────────────────────
