@@ -15,7 +15,7 @@ import {
   useSwitchChain as useWeb3AuthSwitchChain,
 } from "@web3auth/modal/vue";
 import { useX402Fetch } from "@web3auth/modal/vue";
-import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, X402ChainMismatchError, type CustomChainConfig } from "@web3auth/no-modal";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
@@ -76,7 +76,7 @@ const x402RequiredChainId = ref<number | null>(null);
 
 const isOnBaseSepolia = computed(() => wagmiChainId.value === BASE_SEPOLIA_CHAIN_ID);
 
-const X402_URL = "http://localhost:4021/weather";
+const X402_URL = import.meta.env.VITE_APP_X402_TEST_CONTENT_URL;
 
 const onSwitchToBaseSepolia = async () => {
   x402SwitchLoading.value = true;
@@ -99,11 +99,7 @@ const onX402FetchWeather = async () => {
     const data = contentType.includes("application/json") ? await response.json() : await response.text();
     printToConsole("X402 Weather Data", data);
   } catch (err) {
-    if (err instanceof X402ChainMismatchError) {
-      x402RequiredChainId.value = err.requiredChainId;
-    } else {
-      printToConsole("X402 Error", err instanceof Error ? err.message : "Request failed");
-    }
+    printToConsole("X402 Error", err instanceof Error ? err.message : JSON.stringify(err, null, 2));
   } finally {
     x402Loading.value = false;
   }
@@ -459,7 +455,14 @@ const onSwitchChainNamespace = async () => {
           <Button :loading="resolveLoading(showWalletUILoading)" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
             {{ $t("app.buttons.btnShowWalletUI") }}
           </Button>
-          <Button :loading="resolveLoading(showWalletConnectScannerLoading)" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
+          <Button
+            :loading="resolveLoading(showWalletConnectScannerLoading)"
+            block
+            size="xs"
+            pill
+            class="mb-2"
+            @click="() => showWalletConnectScanner()"
+          >
             {{ $t("app.buttons.btnShowWalletConnectScanner") }}
           </Button>
           <Button :loading="resolveLoading(showFundingLoading)" block size="xs" pill class="mb-2" @click="() => showFunding()">
@@ -518,7 +521,9 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button :loading="resolveLoading(getIdentityTokenLoading)" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="resolveLoading(getIdentityTokenLoading)" block size="xs" pill class="mb-2" @click="ongetIdentityToken">
+            Get id token
+          </Button>
 
           <!-- X402 Payment Protocol -->
           <div class="mt-3 border border-gray-200 rounded-xl px-3 py-3">
@@ -569,7 +574,9 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
-          <Button :loading="resolveLoading(getIdentityTokenLoading)" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="resolveLoading(getIdentityTokenLoading)" block size="xs" pill class="mb-2" @click="ongetIdentityToken">
+            Get id token
+          </Button>
 
           <!-- X402 Payment Protocol (Solana) -->
           <div class="mt-3 border border-gray-200 rounded-xl px-3 py-3">

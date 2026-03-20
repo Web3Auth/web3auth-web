@@ -9,11 +9,6 @@ import styles from "../styles/Home.module.css";
 const X402_URL = "http://localhost:4021/weather";
 const FETCH_OPTIONS: RequestInit = { method: "GET", headers: { "Content-Type": "application/json" } };
 
-/** Duck-type check for X402ChainMismatchError — avoids a build-time import of the class. */
-function isChainMismatchError(err: unknown): err is { requiredChainId: number; currentChainId?: number; message: string } {
-  return typeof err === "object" && err !== null && "requiredChainId" in err;
-}
-
 // ─── Shared response renderer ────────────────────────────────────────────────
 
 interface FetchResultProps {
@@ -74,11 +69,7 @@ const EvmX402FetchDemo = () => {
       }
       setData(parsed);
     } catch (err) {
-      if (isChainMismatchError(err)) {
-        setRequiredChainId(err.requiredChainId);
-      } else {
-        setError(err instanceof Error ? err.message : "Request failed.");
-      }
+      setError(err instanceof Error ? err.message : "Request failed.");
     } finally {
       setIsLoading(false);
     }

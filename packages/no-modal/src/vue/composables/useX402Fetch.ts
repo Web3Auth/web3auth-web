@@ -1,12 +1,13 @@
 import { useConnectorClient } from "@wagmi/vue";
 import { createWalletClient, custom, WalletClient } from "viem";
+import { computed } from "vue";
 
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
-import { createEvmX402Fetch, createSolanaX402Fetch, IUseX402FetchParams, IUseX402FetchReturnValues, X402ChainMismatchError } from "../../base/x402";
+import { createEvmX402Fetch, createSolanaX402Fetch, IUseX402FetchParams, IUseX402FetchReturnValues } from "../../base/x402";
 import { useSolanaWallet } from "../solana/composables/useSolanaWallet";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export { createEvmX402Fetch, createSolanaX402Fetch, X402ChainMismatchError };
+export { createEvmX402Fetch, createSolanaX402Fetch };
 export type { IUseX402FetchParams, IUseX402FetchReturnValues };
 
 /**
@@ -27,18 +28,8 @@ export const useX402Fetch = (): IUseX402FetchReturnValues => {
   const { data: connectorClient } = useConnectorClient();
   const { solanaWallet, accounts } = useSolanaWallet();
 
-  const fetchWithPayment = async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
-    // ── Solana path ──────────────────────────────────────────────────────────
-    if (chainNamespace.value === CHAIN_NAMESPACES.SOLANA) {
-      if (!solanaWallet.value || !accounts.value?.[0]) throw new Error("Solana wallet not connected");
-      const fetchFn = createSolanaX402Fetch(solanaWallet.value, accounts.value[0]);
-      return fetchFn(url, options);
-    }
-
-    // ── EVM path (wagmi) ──────────────────────────────────────────────────────
+  const evmX402Fetch = computed(() => {
     if (!provider.value || !chainId.value) throw new Error("Provider or chainId not found");
-
-    // useConnectorClient returns viem Client. Reference: https://wagmi.sh/vue/api/composables/useConnectorClient
     const client = connectorClient.value as WalletClient | undefined;
     if (!client || !client.account?.address || !client.chain) throw new Error("Wallet not connected");
 
@@ -48,8 +39,24 @@ export const useX402Fetch = (): IUseX402FetchReturnValues => {
       transport: custom(provider.value),
     });
 
-    const fetchWithX402Payment = createEvmX402Fetch(x402CompatibleClient);
-    return fetchWithX402Payment(url, options);
+    return createEvmX402Fetch(x402CompatibleClient);
+  });
+
+  const solanaX402Fetch = computed(() => {
+    if (!solanaWallet.value || !accounts.value?.[0]) throw new Error("Solana wallet not connected");
+    return createSolanaX402Fetch(solanaWallet.value, accounts.value[0]);
+  });
+
+  const x402Fetch = computed(() => {
+    if (chainNamespace.value === CHAIN_NAMESPACES.SOLANA) {
+      return solanaX402Fetch.value;
+    }
+    return evmX402Fetch.value;
+  });
+
+  const fetchWithPayment = async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
+    const x402FetchFn = x402Fetch.value;
+    return x402FetchFn(url, options);
   };
 
   return { fetchWithPayment };
