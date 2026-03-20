@@ -35,6 +35,9 @@
     "@coinbase/wallet-sdk": {
       "optional": true
     },
+    "@solana/react-hooks": {
+      "optional": true
+    },
     "viem": {
       "optional": true
     },
@@ -46,6 +49,7 @@
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
     "@solana/kit": ">=6.1.0",
+    "@solana/react-hooks": "^1.4.0",
     "react": ">=18",
     "react-dom": ">=18",
     "viem": ">=2.45",
