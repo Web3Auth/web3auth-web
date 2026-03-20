@@ -1,5 +1,5 @@
 import type { SolanaClient } from "@solana/client";
-import { defineComponent, h, provide, ref, watch } from "vue";
+import { defineComponent, Fragment, h, provide, ref, watch } from "vue";
 
 import { log } from "../../base";
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
@@ -12,9 +12,9 @@ import { SOLANA_CLIENT_KEY } from "./constants";
  * When user is connected via Web3Auth and current chain is Solana, creates a Framework Kit client
  * with Web3Auth as the wallet connector and connects it (same pattern as Wagmi provider).
  */
-const Web3AuthSolanaProvider = defineComponent({
-  name: "Web3AuthSolanaProvider",
-  setup() {
+export const SolanaProvider = defineComponent({
+  name: "SolanaProvider",
+  setup(_, { slots }) {
     const { isConnected, provider, web3Auth } = useWeb3Auth();
     const { chainNamespace } = useChain();
     const clientRef = ref<SolanaClient | null>(null);
@@ -56,15 +56,7 @@ const Web3AuthSolanaProvider = defineComponent({
       },
       { immediate: true }
     );
-  },
-  render() {
-    return h(this.$slots.default ?? "");
-  },
-});
 
-export const SolanaProvider = defineComponent({
-  name: "SolanaProvider",
-  setup(_, { slots }) {
-    return () => h(Web3AuthSolanaProvider, {}, slots.default?.());
+    return () => h(Fragment, null, slots.default?.() ?? []);
   },
 });

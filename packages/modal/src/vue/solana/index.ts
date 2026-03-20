@@ -1,1 +1,1 @@
-export * from "./composables";
+export * from "@web3auth/no-modal/vue/solana";
