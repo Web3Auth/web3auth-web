@@ -1,10 +1,12 @@
-import { UIConfig } from "../../interfaces";
+import { type ReactNode } from "react";
+
+import { BorderRadiusType } from "../../interfaces";
 
 export interface BottomSheetProps {
   isShown: boolean;
-  uiConfig: UIConfig;
   onClose: () => void;
-  children: React.ReactNode;
+  children: ReactNode;
   sheetClassName?: string;
   showCloseButton?: boolean;
+  borderRadiusType?: BorderRadiusType;
 }

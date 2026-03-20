@@ -64,6 +64,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   constructor(options: Web3AuthOptions, initialState?: IWeb3AuthState) {
     super(options, initialState);
     this.options = { ...options };
+    if (!this.options.initialAuthenticationMode) {
+      this.options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+    }
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
@@ -539,7 +542,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (connector.type === CONNECTOR_CATEGORY.IN_APP) {
             log.info("connectorInitResults", connectorName);
             const loginMethods = this.modalConfig.connectors[connectorName]?.loginMethods || {};
-            this.loginModal.addSocialLogins(connectorName, loginMethods, this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS, {
+            this.loginModal.addSocialLogins(loginMethods, this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS, {
               ...this.options.uiConfig,
               loginGridCol: this.options.uiConfig?.loginGridCol || 3,
               primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
@@ -626,11 +629,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     );
   };
 
-  private onSocialLogin = async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: AuthLoginParams }): Promise<void> => {
+  private onSocialLogin = async (params: { loginParams: AuthLoginParams }): Promise<void> => {
     try {
       await this.connectTo(WALLET_CONNECTORS.AUTH, params.loginParams, LOGIN_MODE.MODAL);
     } catch (error) {
-      log.error(`Error while connecting to connector: ${params.connector}`, error);
+      log.error("Error while connecting via social login (AUTH)", error);
     }
   };
 

@@ -26,7 +26,6 @@ export const baseConfig = {
     // re-exports from no-modal sdk.
     "./src/connectors/coinbase-connector/index.ts",
     "./src/providers/xrpl-provider/index.ts",
-    "./src/providers/ethereum-mpc-provider/index.ts",
   ],
   plugins: [
     replace({

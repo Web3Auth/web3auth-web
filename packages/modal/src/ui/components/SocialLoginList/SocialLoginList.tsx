@@ -58,7 +58,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                 isPrimaryBtn: false,
                 btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11 w3a--group",
                 children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
-                onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
+                onClick: () => handleSocialLoginClick({ loginParams: row.loginParams }),
                 buttonRadius,
               }}
             />
@@ -79,7 +79,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                     isPrimaryBtn: false,
                     btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11 w3a--group",
                     children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
-                    onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
+                    onClick: () => handleSocialLoginClick({ loginParams: row.loginParams }),
                     buttonRadius,
                   }}
                 />
@@ -89,6 +89,7 @@ function SocialLoginList(props: SocialLoginListProps) {
             <Button
               type={BUTTON_TYPE.SOCIAL}
               props={{
+                isDark,
                 showIcon: false,
                 onClick: handleExpandSocialLogins,
                 btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11",
@@ -118,7 +119,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                 method: row.method,
                 isDark,
                 isPrimaryBtn: false,
-                onClick: () => handleSocialLoginClick({ connector: row.connector, loginParams: row.loginParams }),
+                onClick: () => handleSocialLoginClick({ loginParams: row.loginParams }),
                 btnStyle: "w3a--group w3a--relative w3a--overflow-hidden w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-11",
                 buttonRadius,
                 children: (

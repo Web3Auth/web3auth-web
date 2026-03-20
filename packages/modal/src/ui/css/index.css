@@ -21,9 +21,7 @@
 
   .w3a-modal-container {
     overflow: hidden;
-    transition-property: max-height;
-    transition-duration: 0.15s;
-    transition-timing-function: ease-out;
+    transition: height 0.3s ease-out;
     position: relative;
   }
 

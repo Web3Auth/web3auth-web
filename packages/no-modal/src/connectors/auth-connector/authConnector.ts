@@ -129,7 +129,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     // making it async here to initialize provider.
     const authInstancePromise = this.authInstance.init();
 
-    // Use this for xrpl, mpc cases
+    // Use this for xrpl cases
     if (this.coreOptions.privateKeyProvider) {
       this.privateKeyProvider = this.coreOptions.privateKeyProvider;
     } else {

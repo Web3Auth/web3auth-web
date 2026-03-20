@@ -97,7 +97,7 @@ export interface LoginModalProps extends UIConfig {
 
 export interface LoginModalCallbacks {
   onInitExternalWallets: (params: { externalWalletsInitialized: boolean }) => Promise<void>;
-  onSocialLogin: (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: ModalLoginParams }) => Promise<void>;
+  onSocialLogin: (params: { loginParams: ModalLoginParams }) => Promise<void>;
   onExternalWalletLogin: (params: {
     connector: WALLET_CONNECTOR_TYPE | string;
     loginParams: { chainNamespace: ChainNamespaceType };
@@ -112,7 +112,6 @@ export const LOGIN_MODAL_EVENTS = {
 export type SocialLoginsConfig = {
   loginMethodsOrder: string[];
   loginMethods: LoginMethodConfig;
-  connector: WALLET_CONNECTOR_TYPE;
   uiConfig: Omit<UIConfig, "connectorListener">;
 };
 
@@ -127,27 +126,30 @@ export const MODAL_STATUS = {
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 
 export interface ModalState {
+  // UI State - changes frequently during user interaction
   status: ModalStatusType;
-  externalWalletsInitialized: boolean;
-  hasExternalWallets: boolean;
-  externalWalletsVisibility: boolean;
   modalVisibility: boolean;
-  modalVisibilityDelayed: boolean;
+  externalWalletsVisibility: boolean;
+  currentPage?: string;
+
+  // Loading State - changes during async operations
   postLoadingMessage: string;
-  walletConnectUri: string;
-  metamaskConnectUri: string;
-  socialLoginsConfig: SocialLoginsConfig;
-  externalWalletsConfig: Record<string, BaseConnectorConfig>;
   detailedLoaderConnector: string;
   detailedLoaderConnectorName: string;
+
+  // External Wallets State - wallet-specific, changes less often
+  hasExternalWallets: boolean;
+  externalWalletsInitialized: boolean;
   showExternalWalletsOnly: boolean;
-  currentPage?: string;
-  web3authClientId: string;
-  web3authNetwork: WEB3AUTH_NETWORK_TYPE;
-  authBuildEnv: BUILD_ENV_TYPE;
+  walletConnectUri: string;
+  metamaskConnectUri: string;
+
+  // Config State - set during initialization, rarely changes
+  socialLoginsConfig: SocialLoginsConfig;
+  externalWalletsConfig: Record<string, BaseConnectorConfig>;
 }
 
-export type SocialLoginEventType = { connector: WALLET_CONNECTOR_TYPE; loginParams: ModalLoginParams };
+export type SocialLoginEventType = { loginParams: ModalLoginParams };
 export type ExternalWalletEventType = { connector: WALLET_CONNECTOR_TYPE | string; chainNamespace?: ChainNamespaceType };
 
 export type StateEmitterEvents = {
@@ -180,7 +182,6 @@ export type rowType = {
   isDark: boolean;
   isPrimaryBtn: boolean;
   name: string;
-  connector: SocialLoginsConfig["connector"];
   loginParams: {
     authConnection: AUTH_CONNECTION_TYPE;
     name: string;

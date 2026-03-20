@@ -19,14 +19,14 @@ import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, X402ChainMismatchError, type Cus
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
-import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
+import { useConnection, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
 
-import { LAMPORTS_PER_SOL, PublicKey, SystemProgram, Transaction } from "@solana/web3.js";
+import { generateLegacyTransaction, generateSolTransferInstruction } from "../utils/solana";
 import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
-import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey, signAllTransactions } from "../services/solHandlers";
+import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 
@@ -44,7 +44,7 @@ const { isConnected, provider, web3Auth, isMFAEnabled, isAuthorized } = useWeb3A
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
-const { switchChainAsync } = useWagmiSwitchChain();
+const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
 const { switchChain } = useWeb3AuthSwitchChain();
 const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
@@ -52,9 +52,9 @@ const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { showFunding, loading: showFundingLoading } = useFunding();
 const { showReceive, loading: showReceiveLoading } = useReceive();
 const { getIdentityToken, loading: getIdentityTokenLoading } = useIdentityToken();
-const { status, address } = useAccount();
-const { signTypedDataAsync } = useSignTypedData();
-const { signMessageAsync } = useSignMessage();
+const { status, address } = useConnection();
+const { mutateAsync: signTypedDataAsync } = useSignTypedData();
+const { mutateAsync: signMessageAsync } = useSignMessage();
 const wagmiChainId = useChainId();
 const balance = useBalance({
   address: address,
@@ -297,21 +297,11 @@ const onGetSolPrivateKey = async () => {
 
 const onSignAndSendTransaction = async () => {
   if (!solanaAccounts.value) throw new Error("No account connected");
-  if (!connection.value) throw new Error("No connection");
-  const block = await connection.value?.getLatestBlockhash("finalized");
+  if (!rpc.value) throw new Error("No RPC connection");
   const pubKey = solanaAccounts.value[0];
 
-  const transactionInstruction = SystemProgram.transfer({
-    fromPubkey: new PublicKey(pubKey),
-    toPubkey: new PublicKey(pubKey),
-    lamports: 0.01 * LAMPORTS_PER_SOL,
-  });
-
-  const transaction = new Transaction({
-    blockhash: block.blockhash,
-    lastValidBlockHeight: block.lastValidBlockHeight,
-    feePayer: new PublicKey(pubKey),
-  }).add(transactionInstruction);
+  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.0001);
+  const transaction = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
 
   const data = await signAndSendTransaction(transaction);
   printToConsole("result", data);
@@ -319,21 +309,11 @@ const onSignAndSendTransaction = async () => {
 
 const onSignSolTransaction = async () => {
   if (!solanaAccounts.value) throw new Error("No account connected");
-  if (!connection.value) throw new Error("No connection");
-  const block = await connection.value?.getLatestBlockhash("finalized");
+  if (!rpc.value) throw new Error("No RPC connection");
   const pubKey = solanaAccounts.value[0];
 
-  const transactionInstruction = SystemProgram.transfer({
-    fromPubkey: new PublicKey(pubKey),
-    toPubkey: new PublicKey(pubKey),
-    lamports: 0.01 * LAMPORTS_PER_SOL,
-  });
-
-  const transaction = new Transaction({
-    blockhash: block.blockhash,
-    lastValidBlockHeight: block.lastValidBlockHeight,
-    feePayer: new PublicKey(pubKey),
-  }).add(transactionInstruction);
+  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.0000001);
+  const transaction = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
 
   const result = await signSolTransaction(transaction);
   printToConsole("result", result);
@@ -345,11 +325,24 @@ const onSignSolMessage = async () => {
 };
 
 const onGetSolBalance = async () => {
-  await getSolBalance(provider.value as IProvider, printToConsole);
+  if (!rpc.value) throw new Error("No RPC connection");
+  if (!solanaAccounts.value) throw new Error("No account connected");
+  await getSolBalance(rpc.value, solanaAccounts.value[0], printToConsole);
 };
 
 const onSignAllTransactions = async () => {
-  await signAllTransactions(provider.value as IProvider, printToConsole);
+  if (!rpc.value) throw new Error("No RPC connection");
+  if (!solanaAccounts.value) throw new Error("No account connected");
+  if (!solanaWallet.value) throw new Error("No Solana wallet");
+
+  const account = solanaAccounts.value[0];
+  const instruction = generateSolTransferInstruction(account, account, 0.0001);
+  const tx1 = await generateLegacyTransaction(rpc.value, account, [instruction]);
+  const tx2 = await generateLegacyTransaction(rpc.value, account, [instruction]);
+  const tx3 = await generateLegacyTransaction(rpc.value, account, [instruction]);
+
+  const signedTransactions = await solanaWallet.value.signAllTransactions([tx1, tx2, tx3]);
+  printToConsole("signed transactions", { signedTransactions });
 };
 
 // Common

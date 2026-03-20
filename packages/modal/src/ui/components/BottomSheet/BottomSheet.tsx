@@ -1,13 +1,13 @@
+import { type MouseEvent } from "react";
+
 import { cn } from "../../utils";
 import { BottomSheetProps } from "./BottomSheet.type";
 /**
  * BottomSheet component
  * @returns BottomSheet component
  */
-function BottomSheet({ isShown, onClose, children, uiConfig, sheetClassName, showCloseButton = true }: BottomSheetProps) {
-  const { borderRadiusType = "large" } = uiConfig;
-
-  const handleClose = (e: React.MouseEvent<HTMLDivElement>) => {
+function BottomSheet({ isShown, onClose, children, sheetClassName, showCloseButton = true, borderRadiusType = "large" }: BottomSheetProps) {
+  const handleClose = (e: MouseEvent<HTMLDivElement>) => {
     e.stopPropagation();
     if (onClose) onClose();
   };

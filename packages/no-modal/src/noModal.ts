@@ -99,6 +99,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
     if (!options.storageType) options.storageType = "local";
+    if (!options.initialAuthenticationMode) options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
 
     this.coreOptions = options;
     this.storage = this.getStorageMethod();

@@ -45,10 +45,10 @@
   "peerDependencies": {
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
-    "@solana/web3.js": ">=1.98",
+    "@solana/kit": ">=6.1.0",
     "react": ">=18",
     "react-dom": ">=18",
-    "viem": ">=2.23",
+    "viem": ">=2.45",
     "vue": ">=3.x"
   },
   "devDependencies": {
@@ -58,7 +58,7 @@
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-url": "^8.0.2",
-    "@solana/web3.js": "^1.98.4",
+    "@solana/kit": "^6.1.0",
     "@svgr/rollup": "^8.1.0",
     "@svgr/webpack": "^8.1.0",
     "@toruslabs/eslint-config-react": "^4.1.4",
@@ -67,8 +67,8 @@
     "@toruslabs/vue-components": "^8.1.2",
     "@types/react": "^19.2.8",
     "@types/react-dom": "^19.2.3",
-    "@wagmi/core": "^2.20.1",
-    "@wagmi/vue": "^0.2.2",
+    "@wagmi/core": "^3.3.1",
+    "@wagmi/vue": "^0.4.14",
     "autoprefixer": "^10.4.23",
     "css-loader": "^7.1.2",
     "live-server": "^1.2.2",
@@ -82,9 +82,9 @@
     "style-loader": "^4.0.0",
     "tailwindcss": "^3.4.17",
     "url-loader": "^4.1.1",
-    "viem": "^2.44.2",
+    "viem": "^2.45.0",
     "vue": "^3.5.26",
-    "wagmi": "^2.16.6"
+    "wagmi": "^3.4.1"
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^2.0.1",
@@ -98,8 +98,8 @@
     "color": "^5.0.3",
     "copy-to-clipboard": "^3.3.3",
     "deepmerge": "^4.3.1",
-    "i18next": "^25.7.4",
-    "react-i18next": "^16.5.3",
+    "i18next": "^25.8.17",
+    "react-i18next": "^16.5.6",
     "react-qrcode-logo": "^4.0.0",
     "tailwind-merge": "^3.4.0",
     "wagmi": "^3.4.1"
@@ -149,11 +149,6 @@
       "import": "./dist/lib.esm/packages/modal/src/providers/xrpl-provider/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/providers/xrpl-provider/index.js",
       "types": "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
-    },
-    "./providers/ethereum-mpc-provider": {
-      "import": "./dist/lib.esm/packages/modal/src/providers/ethereum-mpc-provider/index.js",
-      "require": "./dist/lib.cjs/packages/modal/src/providers/ethereum-mpc-provider/index.js",
-      "types": "./dist/lib.cjs/types/providers/ethereum-mpc-provider/index.d.ts"
     }
   },
   "typesVersions": {
@@ -181,9 +176,6 @@
       ],
       "providers/xrpl-provider": [
         "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
-      ],
-      "providers/ethereum-mpc-provider": [
-        "./dist/lib.cjs/types/providers/ethereum-mpc-provider/index.d.ts"
       ]
     }
   },

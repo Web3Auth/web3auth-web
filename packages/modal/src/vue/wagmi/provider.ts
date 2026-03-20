@@ -1,5 +1,5 @@
 import { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn, hydrate } from "@wagmi/core";
-import { configKey, createConfig as createWagmiConfig, useAccountEffect, useConfig as useWagmiConfig, useReconnect } from "@wagmi/vue";
+import { configKey, createConfig as createWagmiConfig, useConnectionEffect, useConfig as useWagmiConfig, useReconnect } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
 import { randomId } from "@web3auth/auth";
 import { CHAIN_NAMESPACES, type CustomChainConfig, log, WalletInitializationError } from "@web3auth/no-modal";
@@ -93,9 +93,9 @@ const Web3AuthWagmiProvider = defineComponent({
     const { isConnected, provider } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
-    const { reconnect } = useReconnect();
+    const { mutate: reconnect } = useReconnect();
 
-    useAccountEffect({
+    useConnectionEffect({
       onDisconnect: async () => {
         log.info("Disconnected from wagmi");
         if (isConnected.value) await disconnect();
