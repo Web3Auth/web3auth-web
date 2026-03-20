@@ -93,6 +93,9 @@ const onX402FetchWeather = async () => {
   x402Loading.value = true;
   try {
     const response = await fetchWithPayment({ url: X402_URL, options: { method: "GET" } });
+    if (!response.ok) {
+      throw new Error("Failed to fetch weather data");
+    }
     const contentType = response.headers.get("Content-Type") ?? "";
     const data = contentType.includes("application/json") ? await response.json() : await response.text();
     printToConsole("X402 Weather Data", data);

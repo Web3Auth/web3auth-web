@@ -55,7 +55,7 @@ export const useX402Fetch = (address?: Address): IUseX402FetchReturnValues => {
 
     provider.on("accountsChanged", handleAccountsChanged);
 
-    (async () => {
+    void (async () => {
       try {
         const nextAddress = await getEvmAddress(provider);
         if (!cancelled) setProviderAddress(nextAddress);

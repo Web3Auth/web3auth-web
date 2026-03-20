@@ -96,7 +96,7 @@ export const useX402Fetch = (address?: MaybeRefOrGetter<Address | undefined>): I
   });
 
   const fetchWithPayment = async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
-    const x402FetchFn = x402Fetch?.value;
+    const x402FetchFn = x402Fetch.value;
 
     if (!x402FetchFn) throw new Error("Wallet not connected");
     return x402FetchFn(url, options);

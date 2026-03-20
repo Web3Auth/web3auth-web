@@ -36,9 +36,7 @@
     "@coinbase/wallet-sdk": "^4.3.x",
     "react": ">=18",
     "viem": ">=2.45",
-    "vue": "^3.x",
-    "wagmi": "^3.4.1",
-    "@wagmi/vue": "^0.4.14"
+    "vue": "^3.x"
   },
   "peerDependenciesMeta": {
     "@coinbase/wallet-sdk": {

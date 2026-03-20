@@ -33,12 +33,10 @@ const svmNetwork = (process.env.SVM_NETWORK ?? SOLANA_DEVNET_CAIP2) as Network;
 
 const facilitatorClient = new HTTPFacilitatorClient({ url: facilitatorUrl });
 
-const resourceServer = new x402ResourceServer(facilitatorClient)
-  .register(evmNetwork, new ExactEvmScheme())
-  .register(svmNetwork, new ExactSvmScheme());
-
 const evmScheme = new ExactEvmScheme();
 const svmScheme = new ExactSvmScheme();
+
+const resourceServer = new x402ResourceServer(facilitatorClient).register(evmNetwork, evmScheme).register(svmNetwork, svmScheme);
 
 // ---------------------------------------------------------------------------
 // Payment middleware — configure which routes require payment and how much
