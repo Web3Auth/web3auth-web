@@ -1,8 +1,11 @@
 import { Address, address, getBase58Encoder, SignatureBytes, SignatureDictionary, Transaction } from "@solana/kit";
+import { VersionedMessage, VersionedTransaction } from "@solana/web3.js";
 import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
 import { ClientSvmSigner, ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
 import { WalletClient } from "viem";
+
+import { SolanaWallet } from "../../providers";
 
 export const EVM_CAIP2_WILDCARD = "eip155:*";
 export const SOLANA_CAIP2_WILDCARD = "solana:*";
@@ -86,15 +89,6 @@ export class X402ChainMismatchError extends Error {
 }
 
 /**
- * Minimal Solana wallet interface required for x402 payment signing.
- * Satisfied by web3auth's `SolanaWallet` class.
- */
-export interface ISolanaX402Wallet {
-  getAccounts(): Promise<string[]>;
-  signTransaction(transaction: Transaction): Promise<string>;
-}
-
-/**
  * Builds a `@x402/svm`-compatible `TransactionPartialSigner` from a web3auth
  * Solana provider.
  *
@@ -102,7 +96,7 @@ export interface ISolanaX402Wallet {
  * encoded in base58 (64 bytes). We decode it back to bytes and slot it into
  * the signature dictionary that `@solana/kit`'s partial-signing helpers expect.
  */
-function createSvmSigner(wallet: ISolanaX402Wallet, walletAddress: string): ClientSvmSigner {
+function createSvmSigner(wallet: SolanaWallet, walletAddress: string): ClientSvmSigner {
   const base58Encoder = getBase58Encoder();
   const signerAddress = address(walletAddress);
 
@@ -111,7 +105,8 @@ function createSvmSigner(wallet: ISolanaX402Wallet, walletAddress: string): Clie
     signTransactions: async (transactions: readonly Transaction[]): Promise<readonly SignatureDictionary[]> => {
       const signatureDictionaries = await Promise.all(
         transactions.map(async (tx) => {
-          const signatureBase58 = await wallet.signTransaction(tx);
+          const versionedTx = new VersionedTransaction(VersionedMessage.deserialize(Buffer.from(tx.messageBytes)));
+          const signatureBase58 = await wallet.signTransaction(versionedTx);
           return { [signerAddress]: base58Encoder.encode(signatureBase58) } as Readonly<Record<Address, SignatureBytes>>;
         })
       );
@@ -134,7 +129,7 @@ function createSvmSigner(wallet: ISolanaX402Wallet, walletAddress: string): Clie
  * @param rpcUrl - Optional custom Solana RPC URL (defaults to public cluster endpoints)
  * @returns A fetch-compatible function that handles x402 payment flows
  */
-export function createSolanaX402Fetch(wallet: ISolanaX402Wallet, walletAddress: string, rpcUrl?: string): typeof fetch {
+export function createSolanaX402Fetch(wallet: SolanaWallet, walletAddress: string, rpcUrl?: string): typeof fetch {
   if (!walletAddress) throw new Error("Wallet address is unavailable.");
 
   const svmSigner = createSvmSigner(wallet, walletAddress);

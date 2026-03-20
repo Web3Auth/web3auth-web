@@ -2,12 +2,11 @@ import { useCallback } from "react";
 import { useWalletClient } from "wagmi";
 
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
-import { createEvmX402Fetch, createSolanaX402Fetch, ISolanaX402Wallet, X402ChainMismatchError } from "../../base/x402/x402";
+import { createEvmX402Fetch, createSolanaX402Fetch, X402ChainMismatchError } from "../../base/x402/x402";
 import { useSolanaWallet } from "../solana/hooks/useSolanaWallet";
 import { useChain } from "./useChain";
 
 export { createEvmX402Fetch, createSolanaX402Fetch, X402ChainMismatchError };
-export type { ISolanaX402Wallet };
 
 export interface IUseX402FetchParams {
   /** The URL to send the payment-gated request to. */
