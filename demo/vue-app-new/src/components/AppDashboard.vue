@@ -59,7 +59,7 @@ const balance = useBalance({
   address: address,
 });
 
-const { accounts: solanaAccounts, rpc, solanaWallet } = useSolanaWallet();
+const { accounts: solanaAccounts, rpc } = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -275,21 +275,6 @@ const onGetSolBalance = async () => {
   await getSolBalance(rpc.value, solanaAccounts.value[0], printToConsole);
 };
 
-const onSignAllTransactions = async () => {
-  if (!rpc.value) throw new Error("No RPC connection");
-  if (!solanaAccounts.value) throw new Error("No account connected");
-  if (!solanaWallet.value) throw new Error("No Solana wallet");
-
-  const account = solanaAccounts.value[0];
-  const instruction = generateSolTransferInstruction(account, account, 0.0001);
-  const tx1 = await generateLegacyTransaction(rpc.value, account, [instruction]);
-  const tx2 = await generateLegacyTransaction(rpc.value, account, [instruction]);
-  const tx3 = await generateLegacyTransaction(rpc.value, account, [instruction]);
-
-  const signedTransactions = await solanaWallet.value.signAllTransactions([tx1, tx2, tx3]);
-  printToConsole("signed transactions", { signedTransactions });
-};
-
 // Common
 const canSwitchChain = computed(() => {
   const currentNamespace = currentChainNamespace.value;
@@ -456,9 +441,6 @@ const onSwitchChainNamespace = async () => {
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
-            {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
           <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
         </Card>

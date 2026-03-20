@@ -1,4 +1,3 @@
-import { getBase58Decoder } from "@solana/kit";
 import {
   EIP_5792_METHODS,
   Eip5792GetCapabilitiesParams,
@@ -14,10 +13,8 @@ import type { GetCapabilitiesReturnType, SendCallsReturnType, WalletGetCallsStat
 import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
 import type { ISolanaProviderHandlers } from "../../providers/solana-provider";
+import { encodeBase58 } from "../../utils/encoding";
 import { formatChainId } from "./utils";
-
-// Base58 decoder: bytes → base58 string
-const base58Decoder = getBase58Decoder();
 
 async function getLastActiveSession(signClient: ISignClient): Promise<SessionTypes.Struct | null> {
   if (signClient.session.length) {
@@ -186,7 +183,7 @@ export function getSolProviderHandlers({ connector, chainId }: { connector: ISig
     signMessage: async (req: JRPCRequest<{ data: string }>): Promise<string> => {
       // Encode message to bytes, then to base58 string for WalletConnect
       const messageBytes = new TextEncoder().encode(req.params.data);
-      const base58Message = base58Decoder.decode(messageBytes);
+      const base58Message = encodeBase58(messageBytes);
       const methodRes = await sendJrpcRequest<{ signature: string }, { message: string }>(
         connector,
         `solana:${SOLANA_CAIP_CHAIN_MAP[chainId]}`,

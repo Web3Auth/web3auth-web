@@ -15,6 +15,7 @@ import {
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
+import { SolanaProvider } from "@web3auth/modal/vue/solana";
 import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
@@ -243,13 +244,15 @@ const configs = computed<Web3AuthContextConfig>(() => {
 <template>
   <Web3AuthProvider :config="configs">
     <WagmiProvider>
-      <AppHeader />
-      <div class="flex flex-col items-center justify-center">
-        <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-          <AppSettings />
-          <AppDashboard :chains="options.chains || []" />
-        </main>
-      </div>
+      <SolanaProvider>
+        <AppHeader />
+        <div class="flex flex-col items-center justify-center">
+          <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+            <AppSettings />
+            <AppDashboard :chains="options.chains || []" />
+          </main>
+        </div>
+      </SolanaProvider>
     </WagmiProvider>
   </Web3AuthProvider>
 </template>

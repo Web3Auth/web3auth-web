@@ -1,76 +1,74 @@
+import type { SolanaClient } from "@solana/client";
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
-import { computed, Ref, ref, ShallowRef, shallowRef, watch } from "vue";
+import { computed, onScopeDispose, Ref, ref, shallowRef, watch } from "vue";
 
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
-import { SolanaWallet } from "../../../providers/solana-provider/solanaWallet";
 import { useChain, useWeb3Auth } from "../../composables";
+import { useSolanaClient } from "./useSolanaClient";
 
+/** Public API: only accounts, client, rpc. Signing is via useSignTransaction / useSignMessage / useSignAndSendTransaction. */
 export type IUseSolanaWallet = {
+  /** Connected account addresses (base58). From Framework Kit session when available. */
   accounts: Ref<string[] | null>;
-  solanaWallet: ShallowRef<SolanaWallet | null>;
+  /** Solana Framework Kit client for actions (fetchBalance, etc.) and watchers. */
+  client: Ref<SolanaClient | null>;
   /**
-   * Solana RPC client for making RPC calls.
-   * @example
-   * ```typescript
-   * const { value: balance } = await rpc.value.getBalance(address("...")).send();
-   * const { value: latestBlockhash } = await rpc.value.getLatestBlockhash().send();
-   * ```
+   * Solana RPC for building transactions (e.g. getLatestBlockhash). From \@solana/kit for compatibility.
    */
-  rpc: ShallowRef<Rpc<SolanaRpcApi> | null>;
+  rpc: Ref<Rpc<SolanaRpcApi> | null>;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
-  const { provider, web3Auth } = useWeb3Auth();
+  const solanaClientRef = useSolanaClient();
+  const { web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
+
   const accounts = ref<string[] | null>(null);
-  const solanaWallet = shallowRef<SolanaWallet | null>(null);
   const rpc = shallowRef<Rpc<SolanaRpcApi> | null>(null);
 
   const isSolana = computed(() => chainNamespace.value === CHAIN_NAMESPACES.SOLANA);
 
-  const setupWallet = async () => {
-    if (!isSolana.value) {
-      return;
-    }
-    if (!provider.value) {
-      return;
-    }
-    solanaWallet.value = new SolanaWallet(provider.value);
-    const result = await solanaWallet.value.getAccounts();
-    if (result?.length > 0) {
-      accounts.value = result;
-    }
-    if (web3Auth.value?.currentChain?.rpcTarget) {
-      rpc.value = createSolanaRpc(web3Auth.value.currentChain.rpcTarget);
-    }
-  };
-
-  const resetWallet = () => {
-    solanaWallet.value = null;
-    accounts.value = null;
-    rpc.value = null;
-  };
-
-  if (provider.value && !solanaWallet.value) {
-    setupWallet();
-  }
-
   watch(
-    [provider, chainNamespace],
-    async ([newProvider, newChainNamespace]) => {
-      if (!newProvider || newChainNamespace !== CHAIN_NAMESPACES.SOLANA) {
-        if (solanaWallet.value) {
-          resetWallet();
-        }
+    [solanaClientRef, isSolana],
+    ([_, isSol]) => {
+      if (!isSol || !web3Auth.value?.currentChain?.rpcTarget) {
+        rpc.value = null;
         return;
       }
-
-      if (newProvider && !solanaWallet.value) {
-        setupWallet();
-      }
+      rpc.value = createSolanaRpc(web3Auth.value.currentChain.rpcTarget);
     },
     { immediate: true }
   );
 
-  return { solanaWallet, accounts, rpc };
+  watch(
+    solanaClientRef,
+    (client) => {
+      if (!client) {
+        accounts.value = null;
+        return;
+      }
+
+      const update = () => {
+        const state = client.store.getState();
+        const wallet = state.wallet;
+        if (wallet.status === "connected" && wallet.session) {
+          const addr = wallet.session.account.address;
+          accounts.value = [addr];
+        } else {
+          accounts.value = null;
+        }
+      };
+
+      update();
+      const unsub = client.store.subscribe(update);
+      onScopeDispose(() => unsub());
+    },
+    { immediate: true }
+  );
+
+  return {
+    accounts,
+    client: solanaClientRef,
+    rpc,
+  };
 };

@@ -1,4 +1,4 @@
-import { getBase58Decoder, getBase64Decoder, getBase64Encoder, getTransactionDecoder } from "@solana/kit";
+import { getBase64Decoder, getBase64Encoder, getTransactionDecoder } from "@solana/kit";
 import {
   SolanaSignAndSendTransaction,
   type SolanaSignAndSendTransactionFeature,
@@ -11,13 +11,13 @@ import { type WalletWithFeatures } from "@wallet-standard/base";
 import { type StandardConnectFeature, type StandardDisconnectFeature, type StandardEventsFeature } from "@wallet-standard/features";
 
 import { WalletLoginError } from "../../../../base";
+import { encodeBase58 } from "../../../../utils/encoding";
 import { type ISolanaProviderHandlers } from "../../rpc";
 import { BaseInjectedProvider } from "./base/baseInjectedProvider";
 import { getBaseProviderHandlers } from "./base/providerHandlers";
 import { getSolanaChainByChainConfig } from "./utils";
 
 // Codecs for encoding/decoding
-const base58Decoder = getBase58Decoder();
 const base64Encoder = getBase64Encoder();
 const base64Decoder = getBase64Decoder();
 const transactionDecoder = getTransactionDecoder();
@@ -50,7 +50,7 @@ export class WalletStandardProvider extends BaseInjectedProvider<WalletStandard>
       const account = currentAccount();
       const uint8ArrayMessage = new TextEncoder().encode(message);
       const signature = await wallet.features[SolanaSignMessage].signMessage({ account, message: uint8ArrayMessage });
-      return base58Decoder.decode(signature[0].signature);
+      return encodeBase58(signature[0].signature);
     };
 
     /**
@@ -72,7 +72,7 @@ export class WalletStandardProvider extends BaseInjectedProvider<WalletStandard>
       // The signatures field is a record, get the first value
       const signatureEntries = Object.values(decodedTx.signatures);
       if (signatureEntries.length === 0) throw new Error("No signatures found");
-      return base58Decoder.decode(signatureEntries[0] as Uint8Array);
+      return encodeBase58(signatureEntries[0] as Uint8Array);
     };
 
     /**
@@ -108,7 +108,7 @@ export class WalletStandardProvider extends BaseInjectedProvider<WalletStandard>
         transaction: transactionBytes,
         chain: chainIdentifier,
       });
-      return base58Decoder.decode(output[0].signature);
+      return encodeBase58(output[0].signature);
     };
 
     return getBaseProviderHandlers({
