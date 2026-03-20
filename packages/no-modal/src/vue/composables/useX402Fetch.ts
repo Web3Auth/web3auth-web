@@ -2,21 +2,12 @@ import { useConnectorClient } from "@wagmi/vue";
 import { createWalletClient, custom, WalletClient } from "viem";
 
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
-import { createEvmX402Fetch, createSolanaX402Fetch } from "../../base/x402/x402";
+import { createEvmX402Fetch, createSolanaX402Fetch, IUseX402FetchParams, IUseX402FetchReturnValues, X402ChainMismatchError } from "../../base/x402";
 import { useSolanaWallet } from "../solana/composables/useSolanaWallet";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export interface IUseX402FetchParams {
-  /** The URL to send the payment-gated request to. */
-  url: string;
-  /** Optional fetch init options (method, headers, body, etc.). */
-  options?: RequestInit;
-}
-
-export interface IUseX402FetchReturnValues {
-  /** Trigger the payment-gated fetch. Resolves with the raw `Response` — callers are responsible for reading and parsing the body. */
-  fetchWithPayment: (params: IUseX402FetchParams) => Promise<Response>;
-}
+export { createEvmX402Fetch, createSolanaX402Fetch, X402ChainMismatchError };
+export type { IUseX402FetchParams, IUseX402FetchReturnValues };
 
 /**
  * Wagmi/Solana-integrated x402 fetch composable.

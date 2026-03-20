@@ -23,7 +23,7 @@ const evmAddress = process.env.EVM_ADDRESS ?? "0x6C89E6616568D32888aC52b8b4F86c1
 if (!evmAddress) {
   throw new Error("EVM_ADDRESS is required");
 }
-const solanaAddress = process.env.SVM_ADDRESS ?? "";
+const solanaAddress = process.env.SVM_ADDRESS;
 if (!solanaAddress) {
   throw new Error("SVM_ADDRESS is required");
 }

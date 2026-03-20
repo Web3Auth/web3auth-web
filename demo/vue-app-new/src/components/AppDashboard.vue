@@ -62,6 +62,10 @@ const balance = useBalance({
 
 const { accounts: solanaAccounts, rpc, solanaWallet } = useSolanaWallet();
 
+const resolveLoading = (loading: { value: boolean } | boolean): boolean => {
+  return typeof loading === "boolean" ? loading : loading.value;
+};
+
 // ── X402 ─────────────────────────────────────────────────────────────────────
 const BASE_SEPOLIA_CHAIN_ID = 84532; // eip155:84532 — required by the x402 test server
 
@@ -427,7 +431,7 @@ const onSwitchChainNamespace = async () => {
           </Button>
         </div>
         <div class="mb-2">
-          <Button :loading="userInfoLoading" block size="xs" pill @click="onGetUserInfo">
+          <Button :loading="resolveLoading(userInfoLoading)" block size="xs" pill @click="onGetUserInfo">
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
 
@@ -452,19 +456,19 @@ const onSwitchChainNamespace = async () => {
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
-          <Button :loading="showWalletUILoading" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
+          <Button :loading="resolveLoading(showWalletUILoading)" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
             {{ $t("app.buttons.btnShowWalletUI") }}
           </Button>
-          <Button :loading="showWalletConnectScannerLoading" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
+          <Button :loading="resolveLoading(showWalletConnectScannerLoading)" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
             {{ $t("app.buttons.btnShowWalletConnectScanner") }}
           </Button>
-          <Button :loading="showFundingLoading" block size="xs" pill class="mb-2" @click="() => showFunding()">
+          <Button :loading="resolveLoading(showFundingLoading)" block size="xs" pill class="mb-2" @click="() => showFunding()">
             {{ $t("app.buttons.btnShowFunding") }}
           </Button>
-          <Button :loading="showCheckoutLoading" block size="xs" pill class="mb-2" @click="() => showCheckout()">
+          <Button :loading="resolveLoading(showCheckoutLoading)" block size="xs" pill class="mb-2" @click="() => showCheckout()">
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
-          <Button :loading="showReceiveLoading" block size="xs" pill class="mb-2" @click="() => showReceive()">
+          <Button :loading="resolveLoading(showReceiveLoading)" block size="xs" pill class="mb-2" @click="() => showReceive()">
             {{ $t("app.buttons.btnShowReceive") }}
           </Button>
           <!-- <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
@@ -514,7 +518,7 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="resolveLoading(getIdentityTokenLoading)" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
 
           <!-- X402 Payment Protocol -->
           <div class="mt-3 border border-gray-200 rounded-xl px-3 py-3">
@@ -565,7 +569,7 @@ const onSwitchChainNamespace = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
             {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
-          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="resolveLoading(getIdentityTokenLoading)" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
 
           <!-- X402 Payment Protocol (Solana) -->
           <div class="mt-3 border border-gray-200 rounded-xl px-3 py-3">

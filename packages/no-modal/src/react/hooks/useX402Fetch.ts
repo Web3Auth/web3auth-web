@@ -1,24 +1,13 @@
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useWalletClient } from "wagmi";
 
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
-import { createEvmX402Fetch, createSolanaX402Fetch, X402ChainMismatchError } from "../../base/x402/x402";
+import { createEvmX402Fetch, createSolanaX402Fetch, IUseX402FetchParams, IUseX402FetchReturnValues, X402ChainMismatchError } from "../../base/x402";
 import { useSolanaWallet } from "../solana/hooks/useSolanaWallet";
 import { useChain } from "./useChain";
 
 export { createEvmX402Fetch, createSolanaX402Fetch, X402ChainMismatchError };
-
-export interface IUseX402FetchParams {
-  /** The URL to send the payment-gated request to. */
-  url: string;
-  /** Optional fetch init options (method, headers, body, etc.). */
-  options?: RequestInit;
-}
-
-export interface IUseX402FetchReturnValues {
-  /** Trigger the payment-gated fetch. Resolves with the raw `Response` — callers are responsible for reading and parsing the body. */
-  fetchWithPayment: (params: IUseX402FetchParams) => Promise<Response>;
-}
+export type { IUseX402FetchParams, IUseX402FetchReturnValues };
 
 /**
  * Wagmi/Solana-integrated x402 fetch hook.
@@ -35,21 +24,27 @@ export const useX402Fetch = (): IUseX402FetchReturnValues => {
   const { data: walletClient } = useWalletClient();
   const { solanaWallet, accounts } = useSolanaWallet();
 
+  const solanaX402Fetch = useMemo(() => {
+    if (!solanaWallet || !accounts?.[0]) throw new Error("Solana wallet not connected");
+    return createSolanaX402Fetch(solanaWallet, accounts[0]);
+  }, [solanaWallet, accounts]);
+
+  const evmX402Fetch = useMemo(() => {
+    if (!walletClient?.account?.address) throw new Error("EVM wallet not connected");
+    return createEvmX402Fetch(walletClient);
+  }, [walletClient]);
+
   const fetchWithPayment = useCallback(
     async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
       // ── Solana path ────────────────────────────────────────────────────────
       if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        if (!solanaWallet || !accounts?.[0]) throw new Error("Solana wallet not connected");
-        const fetchFn = createSolanaX402Fetch(solanaWallet, accounts[0]);
-        return fetchFn(url, options);
+        return solanaX402Fetch(url, options);
       }
 
       // ── EVM path (wagmi) ───────────────────────────────────────────────────
-      if (!walletClient?.account?.address) return null;
-      const fetchWithX402Payment = createEvmX402Fetch(walletClient);
-      return fetchWithX402Payment(url, options);
+      return evmX402Fetch(url, options);
     },
-    [chainNamespace, walletClient, solanaWallet, accounts]
+    [chainNamespace, solanaX402Fetch, evmX402Fetch]
   );
 
   return { fetchWithPayment };

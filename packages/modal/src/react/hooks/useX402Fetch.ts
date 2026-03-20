@@ -1,4 +1,5 @@
 import { CHAIN_NAMESPACES } from "@web3auth/no-modal";
+import type { IUseX402FetchParams, IUseX402FetchReturnValues } from "@web3auth/no-modal/react";
 import { createEvmX402Fetch, createSolanaX402Fetch, X402ChainMismatchError } from "@web3auth/no-modal/react";
 import { useCallback } from "react";
 import { useWalletClient } from "wagmi";
@@ -6,9 +7,8 @@ import { useWalletClient } from "wagmi";
 import { useSolanaWallet } from "../solana/hooks/useSolanaWallet";
 import { useChain } from "./useChain";
 
-export type { IUseX402FetchParams, IUseX402FetchReturnValues } from "@web3auth/no-modal/react";
 export { X402ChainMismatchError };
-
+export type { IUseX402FetchParams, IUseX402FetchReturnValues };
 /**
  * Wagmi/Solana-integrated x402 fetch hook (modal context).
  *

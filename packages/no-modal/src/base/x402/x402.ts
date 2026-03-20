@@ -1,5 +1,4 @@
-import { Address, address, getBase58Encoder, SignatureBytes, SignatureDictionary, Transaction } from "@solana/kit";
-import { VersionedMessage, VersionedTransaction } from "@solana/web3.js";
+import { address, getBase58Encoder, SignatureDictionary, Transaction } from "@solana/kit";
 import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
 import { ClientSvmSigner, ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
@@ -105,9 +104,8 @@ function createSvmSigner(wallet: SolanaWallet, walletAddress: string): ClientSvm
     signTransactions: async (transactions: readonly Transaction[]): Promise<readonly SignatureDictionary[]> => {
       const signatureDictionaries = await Promise.all(
         transactions.map(async (tx) => {
-          const versionedTx = new VersionedTransaction(VersionedMessage.deserialize(Buffer.from(tx.messageBytes)));
-          const signatureBase58 = await wallet.signTransaction(versionedTx);
-          return { [signerAddress]: base58Encoder.encode(signatureBase58) } as Readonly<Record<Address, SignatureBytes>>;
+          const signatureBase58 = await wallet.signTransaction(tx);
+          return { [signerAddress]: base58Encoder.encode(signatureBase58) } as SignatureDictionary;
         })
       );
       // eslint-disable-next-line no-console
