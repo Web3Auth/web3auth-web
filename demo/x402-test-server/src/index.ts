@@ -96,7 +96,7 @@ app.use(
 const WEATHER_PLAIN_PRICE = "$0.001";
 
 app.get("/weather-plain", async (req, res) => {
-  const hasPayment = req.headers["payment-signature"] ?? req.headers["x-payment"];
+  const hasPayment = req.headers["x-payment"] ?? req.headers["payment-signature"];
 
   if (!hasPayment) {
     const evmAssetAmount = await evmScheme.parsePrice(WEATHER_PLAIN_PRICE, evmNetwork);

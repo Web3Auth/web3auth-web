@@ -29,9 +29,9 @@ export const useX402Fetch = (): IUseX402FetchReturnValues => {
   const { solanaWallet, accounts } = useSolanaWallet();
 
   const evmX402Fetch = computed(() => {
-    if (!provider.value || !chainId.value) throw new Error("Provider or chainId not found");
+    if (!provider.value || !chainId.value) return null;
     const client = connectorClient.value as WalletClient | undefined;
-    if (!client || !client.account?.address || !client.chain) throw new Error("Wallet not connected");
+    if (!client || !client.account?.address || !client.chain) return null;
 
     const x402CompatibleClient = createWalletClient({
       account: client.account,
@@ -43,7 +43,7 @@ export const useX402Fetch = (): IUseX402FetchReturnValues => {
   });
 
   const solanaX402Fetch = computed(() => {
-    if (!solanaWallet.value || !accounts.value?.[0]) throw new Error("Solana wallet not connected");
+    if (!solanaWallet.value || !accounts.value?.[0]) return null;
     return createSolanaX402Fetch(solanaWallet.value, accounts.value[0]);
   });
 
@@ -55,7 +55,9 @@ export const useX402Fetch = (): IUseX402FetchReturnValues => {
   });
 
   const fetchWithPayment = async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
-    const x402FetchFn = x402Fetch.value;
+    const x402FetchFn = x402Fetch?.value;
+
+    if (!x402FetchFn) throw new Error("Wallet not connected");
     return x402FetchFn(url, options);
   };
 

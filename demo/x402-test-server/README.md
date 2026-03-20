@@ -4,12 +4,12 @@ A minimal Express server that demonstrates the [x402 payment protocol](https://x
 
 ## Endpoints
 
-| Method | Path            | Price       | Description                                    |
-| ------ | --------------- | ----------- | ---------------------------------------------- |
-| GET    | `/health`       | Free        | Health check — always returns 200              |
-| GET    | `/weather-plain`| $0.001 USDC | Plain-text weather (used by the wagmi demo UI) |
-| GET    | `/weather`      | $0.001 USDC | JSON weather report                            |
-| GET    | `/premium-data` | $0.010 USDC | Higher-priced premium JSON dataset             |
+| Method | Path             | Price       | Description                                    |
+| ------ | ---------------- | ----------- | ---------------------------------------------- |
+| GET    | `/health`        | Free        | Health check — always returns 200              |
+| GET    | `/weather-plain` | $0.001 USDC | Plain-text weather (used by the wagmi demo UI) |
+| GET    | `/weather`       | $0.001 USDC | JSON weather report                            |
+| GET    | `/premium-data`  | $0.010 USDC | Higher-priced premium JSON dataset             |
 
 All paid endpoints require payment on **Base Sepolia** (`eip155:84532`).
 
@@ -37,11 +37,11 @@ The server listens on `http://localhost:4021` by default — the same port hardc
 
 ## Environment variables
 
-| Variable          | Required | Default                         | Description                              |
-| ----------------- | -------- | ------------------------------- | ---------------------------------------- |
-| `EVM_ADDRESS`     | ✅       | —                               | Wallet address that receives USDC payments |
-| `FACILITATOR_URL` | ❌       | `https://facilitator.x402.org`  | x402 facilitator endpoint                |
-| `PORT`            | ❌       | `4021`                          | HTTP listen port                         |
+| Variable          | Required | Default                        | Description                                |
+| ----------------- | -------- | ------------------------------ | ------------------------------------------ |
+| `EVM_ADDRESS`     | ✅       | —                              | Wallet address that receives USDC payments |
+| `FACILITATOR_URL` | ❌       | `https://x402.org/facilitator` | x402 facilitator endpoint                  |
+| `PORT`            | ❌       | `4021`                         | HTTP listen port                           |
 
 ## How it works
 

@@ -2,7 +2,7 @@ import { CHAIN_NAMESPACES } from "@web3auth/modal";
 import { useChain, useX402Fetch } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useCallback, useState } from "react";
-import { useSwitchChain, useWalletClient } from "wagmi";
+import { useWalletClient } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
@@ -46,17 +46,14 @@ async function parseResponse(response: Response): Promise<unknown> {
 
 const EvmX402FetchDemo = () => {
   const { fetchWithPayment } = useX402Fetch();
-  const { mutateAsync: switchChainAsync, isPending: isSwitching } = useSwitchChain();
 
   const [data, setData] = useState<unknown>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [requiredChainId, setRequiredChainId] = useState<number | null>(null);
 
   const execute = useCallback(async () => {
     setIsLoading(true);
     setError(null);
-    setRequiredChainId(null);
     try {
       const response = (await fetchWithPayment({ url: X402_URL, options: FETCH_OPTIONS })) as Response;
       const parsed = await parseResponse(response);
@@ -75,17 +72,6 @@ const EvmX402FetchDemo = () => {
     }
   }, [fetchWithPayment]);
 
-  const handleSwitchAndRetry = useCallback(async () => {
-    if (!requiredChainId) return;
-    try {
-      await switchChainAsync({ chainId: requiredChainId });
-      setRequiredChainId(null);
-      await execute();
-    } catch {
-      setError("Failed to switch network. Please switch manually and try again.");
-    }
-  }, [requiredChainId, switchChainAsync, execute]);
-
   return (
     <div style={{ border: "1px solid #ddd", borderRadius: "8px", padding: "12px", marginTop: "8px" }}>
       <p style={{ margin: "0 0 4px", fontWeight: "500" }}>EVM — Fetch Weather (x402)</p>
@@ -93,28 +79,9 @@ const EvmX402FetchDemo = () => {
         Uses <code>useX402Fetch</code> — signs a micro-payment with your EVM wallet automatically.
       </p>
 
-      <button onClick={execute} className={styles.card} disabled={isLoading || isSwitching}>
+      <button onClick={execute} className={styles.card} disabled={isLoading}>
         {isLoading ? "Fetching..." : "Fetch Weather Data"}
       </button>
-
-      {requiredChainId && (
-        <div
-          style={{
-            marginTop: "10px",
-            padding: "10px 12px",
-            border: "1px solid #f0a500",
-            borderRadius: "8px",
-            backgroundColor: "#fffbf0",
-          }}
-        >
-          <p style={{ margin: "0 0 8px", fontSize: "13px", color: "#7a5500" }}>
-            This payment requires <strong>chain {requiredChainId}</strong>. Switch your wallet to that network and retry.
-          </p>
-          <button className={styles.card} disabled={isSwitching} onClick={handleSwitchAndRetry}>
-            {isSwitching ? "Switching..." : `Switch to chain ${requiredChainId} & retry`}
-          </button>
-        </div>
-      )}
 
       <FetchResult data={data} error={error} />
     </div>
