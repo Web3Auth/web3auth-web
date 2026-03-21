@@ -16,6 +16,7 @@ import {
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
@@ -82,6 +83,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected plugins: Record<string, IPlugin> = {};
 
+  private currentConnection: Connection | null = null;
+
   private storage: IStorage;
 
   private state: IWeb3AuthState = {
@@ -125,10 +128,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get provider(): IProvider | null {
-    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.commonJRPCProvider) {
-      return this.commonJRPCProvider;
-    }
-    return null;
+    return this.currentConnection?.provider ?? null;
+  }
+
+  get connection(): Connection | null {
+    return this.currentConnection;
   }
 
   get connectedConnectorName(): WALLET_CONNECTOR_TYPE | null {
@@ -307,7 +311,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connectorName: T,
     loginParams?: LoginParamMap[T],
     loginMode?: LoginModeType
-  ): Promise<IProvider | null> {
+  ): Promise<Connection | null> {
     this.loginMode = loginMode || "no-modal";
     const connector = this.getConnector(connectorName, (loginParams as { chainNamespace?: ChainNamespaceType })?.chainNamespace);
     if (!connector || !this.commonJRPCProvider)
@@ -397,7 +401,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
             duration: Date.now() - startTime,
           });
           cleanup();
-          resolve(this.provider);
+          resolve(this.connection);
         } catch (error) {
           cleanup();
           reject(error);
@@ -858,6 +862,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
+      const isSolanaOnly = connector.connectorNamespace === CONNECTOR_NAMESPACES.SOLANA;
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
 
       // setup AA provider if AA is enabled
@@ -886,9 +891,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
-      this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
+      if (!isSolanaOnly) {
+        this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
+      }
+
       this.setState({ connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connector);
+
+      this.currentConnection = {
+        provider: isSolanaOnly ? null : this.commonJRPCProvider,
+        ethereumProvider: isSolanaOnly ? null : this.commonJRPCProvider,
+        solanaWallet: connector.solanaWallet,
+        connectorName: data.connector,
+      };
 
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
@@ -897,6 +912,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
+      this.currentConnection = null;
       // re-setup commonJRPCProvider
       this.commonJRPCProvider.removeAllListeners();
       this.setupCommonJRPCProvider();
