@@ -1,3 +1,4 @@
+import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
@@ -51,6 +52,10 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   }
 
   public abstract get provider(): IProvider | null;
+
+  get solanaWallet(): Wallet | null {
+    return null;
+  }
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing Wallet Connect or Metamask Connect session on calling connect again.

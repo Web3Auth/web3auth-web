@@ -13,6 +13,7 @@ import { type WsEmbedParams } from "@web3auth/ws-embed";
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   CONNECTED_EVENT_DATA,
+  type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   type CONNECTOR_STATUS_TYPE,
@@ -220,7 +221,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
    * Connect to a specific wallet connector
    * @param walletName - Key of the wallet connector to use.
    */
-  connectTo<T extends WALLET_CONNECTOR_TYPE>(walletName: T, loginParams?: LoginParamMap[T]): Promise<IProvider | null>;
+  connectTo<T extends WALLET_CONNECTOR_TYPE>(walletName: T, loginParams?: LoginParamMap[T]): Promise<Connection | null>;
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
   cleanup(): Promise<void>;

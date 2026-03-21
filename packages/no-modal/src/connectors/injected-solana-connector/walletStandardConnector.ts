@@ -62,6 +62,10 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     return null;
   }
 
+  get solanaWallet(): WalletStandard | null {
+    return this.wallet;
+  }
+
   get isWalletConnected(): boolean {
     return !!(this.connected && this.wallet.accounts.length > 0);
   }

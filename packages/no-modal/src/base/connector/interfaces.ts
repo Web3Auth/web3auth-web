@@ -1,3 +1,4 @@
+import type { Wallet } from "@wallet-standard/base";
 import {
   AUTH_CONNECTION_TYPE,
   AuthUserInfo,
@@ -70,12 +71,20 @@ export interface IBaseProvider<T> extends IProvider {
   setKeyExportFlag(flag: boolean): void;
 }
 
+export interface Connection {
+  readonly provider: IProvider | null;
+  readonly ethereumProvider: IProvider | null;
+  readonly solanaWallet: Wallet | null;
+  readonly connectorName: string;
+}
+
 export interface IConnector<T> extends SafeEventEmitter {
   connectorNamespace: ConnectorNamespaceType;
   type: CONNECTOR_CATEGORY_TYPE;
   name: WALLET_CONNECTOR_TYPE | string;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
+  readonly solanaWallet: Wallet | null;
   connectorData?: unknown;
   connected: boolean;
   isInjected?: boolean;
