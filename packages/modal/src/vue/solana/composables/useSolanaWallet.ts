@@ -19,7 +19,8 @@ export type IUseSolanaWallet = {
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
-  const { provider, web3Auth } = useWeb3Auth();
+  const { connection, web3Auth } = useWeb3Auth();
+  const provider = computed(() => connection.value?.ethereumProvider ?? null);
   const { chainNamespace } = useChain();
   const accounts = ref<string[] | null>(null);
   const solanaWallet = shallowRef<SolanaWallet | null>(null);

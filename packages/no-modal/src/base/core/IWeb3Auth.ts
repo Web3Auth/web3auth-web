@@ -203,6 +203,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
+  connection: Connection | null;
   provider: IProvider | null;
   init(options?: { signal?: AbortSignal }): Promise<void>;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;

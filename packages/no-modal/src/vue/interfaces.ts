@@ -1,6 +1,6 @@
 import { Ref, ShallowRef } from "vue";
 
-import type { ChainNamespaceType, CONNECTOR_STATUS_TYPE, IPlugin, IProvider, IWeb3AuthCoreOptions } from "../base";
+import type { ChainNamespaceType, Connection, CONNECTOR_STATUS_TYPE, IPlugin, IWeb3AuthCoreOptions } from "../base";
 import type { Web3AuthNoModal } from "../noModal";
 import { WalletServicesPluginType } from "../plugins/wallet-services-plugin";
 
@@ -15,7 +15,7 @@ export interface Web3AuthProviderProps {
 interface IBaseWeb3AuthComposableContext {
   isConnected: Ref<boolean>;
   isAuthorized: Ref<boolean>;
-  provider: Ref<IProvider | null>;
+  connection: Ref<Connection | null>;
   isInitializing: Ref<boolean>;
   initError: Ref<Error | null>;
   isInitialized: Ref<boolean>;

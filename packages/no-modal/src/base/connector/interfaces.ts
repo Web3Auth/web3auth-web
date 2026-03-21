@@ -72,7 +72,6 @@ export interface IBaseProvider<T> extends IProvider {
 }
 
 export interface Connection {
-  readonly provider: IProvider | null;
   readonly ethereumProvider: IProvider | null;
   readonly solanaWallet: Wallet | null;
   readonly connectorName: string;

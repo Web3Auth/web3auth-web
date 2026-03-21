@@ -21,9 +21,10 @@ export type IUseSolanaWallet = {
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
-  const { provider, web3Auth } = useWeb3Auth();
+  const { connection, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
   const [accounts, setAccounts] = useState<string[] | null>(null);
+  const provider = connection?.ethereumProvider ?? null;
 
   const solanaWallet = useMemo(() => {
     if (!provider) return null;

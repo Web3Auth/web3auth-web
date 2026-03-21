@@ -128,7 +128,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get provider(): IProvider | null {
-    return this.currentConnection?.provider ?? null;
+    return this.currentConnection?.ethereumProvider ?? null;
   }
 
   get connection(): Connection | null {
@@ -899,7 +899,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.cacheWallet(data.connector);
 
       this.currentConnection = {
-        provider: isSolanaOnly ? null : this.commonJRPCProvider,
         ethereumProvider: isSolanaOnly ? null : this.commonJRPCProvider,
         solanaWallet: connector.solanaWallet,
         connectorName: data.connector,
