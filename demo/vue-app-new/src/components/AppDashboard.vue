@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS, WALLET_PLUGINS } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS } from "@web3auth/modal";
 import {
   useCheckout,
   useFunding,
@@ -12,7 +12,7 @@ import {
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
-  useSwitchChain as useWeb3AuthSwitchChain,
+
 } from "@web3auth/modal/vue";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
@@ -25,7 +25,7 @@ import { ProviderConfig } from "@toruslabs/base-controllers";
 import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
-import { getBalance as getSolBalance, getPrivateKey as getSolPrivateKey } from "../services/solHandlers";
+import { getBalance as getSolBalance } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
 
@@ -39,12 +39,12 @@ const props = defineProps<{
   chains: CustomChainConfig[];
 }>();
 
-const { isConnected, provider, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
+const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
 const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
-const { switchChain } = useWeb3AuthSwitchChain();
+
 const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
@@ -73,13 +73,14 @@ const chainChangedListener = (chainId: string) => {
 };
 
 watch(
-  isConnected,
-  (newIsConnected, _, onCleanup) => {
-    if (!newIsConnected || !provider.value) return;
+  [isConnected, connection],
+  ([newIsConnected], _, onCleanup) => {
+    const ethereumProvider = connection.value?.ethereumProvider;
+    if (!newIsConnected || !ethereumProvider) return;
     currentChainId.value = web3Auth.value?.currentChain?.chainId;
-    provider.value.on("chainChanged", chainChangedListener);
+    ethereumProvider.on("chainChanged", chainChangedListener);
     onCleanup(() => {
-      provider.value?.removeListener("chainChanged", chainChangedListener);
+      ethereumProvider.removeListener("chainChanged", chainChangedListener);
     });
   },
   {
@@ -160,7 +161,7 @@ const ongetIdentityToken = async () => {
 };
 
 const onSendEth = async () => {
-  await sendEth(provider.value as IProvider, printToConsole);
+  await sendEth(connection.value?.ethereumProvider as IProvider, printToConsole);
 };
 
 const onSignEthMessage = async () => {
@@ -175,7 +176,7 @@ const onGetAccounts = async () => {
 };
 
 const onGetPrivateKey = async () => {
-  await getPrivateKey(provider.value as IProvider, printToConsole);
+  await getPrivateKey(connection.value?.ethereumProvider as IProvider, printToConsole);
 };
 
 const getConnectedChainId = async () => {
@@ -188,7 +189,7 @@ const onGetBalance = async () => {
 };
 
 const onSignEthTransaction = async () => {
-  await signEthTransaction(provider.value as IProvider, printToConsole);
+  await signEthTransaction(connection.value?.ethereumProvider as IProvider, printToConsole);
 };
 
 const onSignTypedData_v4 = async () => {
@@ -235,11 +236,7 @@ const onSendAATx = async () => {
   await sendEthWithSmartAccount(web3Auth.value, printToConsole);
 };
 
-// Solana
-const onGetSolPrivateKey = async () => {
-  await getSolPrivateKey(provider.value as IProvider, printToConsole);
-};
-
+// Solana — private key accessible via internal JRPC provider (Auth connector only)
 const onSignAndSendTransaction = async () => {
   if (!solanaAccounts.value) throw new Error("No account connected");
   if (!rpc.value) throw new Error("No RPC connection");
@@ -275,21 +272,6 @@ const onGetSolBalance = async () => {
   await getSolBalance(rpc.value, solanaAccounts.value[0], printToConsole);
 };
 
-const onSignAllTransactions = async () => {
-  if (!rpc.value) throw new Error("No RPC connection");
-  if (!solanaAccounts.value) throw new Error("No account connected");
-  if (!solanaWallet.value) throw new Error("No Solana wallet");
-
-  const account = solanaAccounts.value[0];
-  const instruction = generateSolTransferInstruction(account, account, 0.0001);
-  const tx1 = await generateLegacyTransaction(rpc.value, account, [instruction]);
-  const tx2 = await generateLegacyTransaction(rpc.value, account, [instruction]);
-  const tx3 = await generateLegacyTransaction(rpc.value, account, [instruction]);
-
-  const signedTransactions = await solanaWallet.value.signAllTransactions([tx1, tx2, tx3]);
-  printToConsole("signed transactions", { signedTransactions });
-};
-
 // Common
 const canSwitchChain = computed(() => {
   const currentNamespace = currentChainNamespace.value;
@@ -297,19 +279,10 @@ const canSwitchChain = computed(() => {
   return Boolean(newChain);
 });
 
-const canSwitchChainNamespace = computed(() => {
-  const currentNamespace = currentChainNamespace.value;
-  if (currentNamespace !== CHAIN_NAMESPACES.EIP155 && currentNamespace !== CHAIN_NAMESPACES.SOLANA) return false;
-
-  const newNamespace = currentNamespace === CHAIN_NAMESPACES.EIP155 ? CHAIN_NAMESPACES.SOLANA : CHAIN_NAMESPACES.EIP155;
-  const newChain = props.chains.find((x) => x.chainNamespace === newNamespace);
-  return Boolean(newChain);
-});
-
 const onSwitchChain = async () => {
   log.info("switching chain");
   try {
-    const { chainId } = provider.value as IProvider;
+    const chainId = connection.value?.ethereumProvider?.chainId;
     if (chainId !== currentChainId.value) throw new Error("chainId does not match current chainId");
 
     const currentNamespace = currentChainNamespace.value;
@@ -322,23 +295,7 @@ const onSwitchChain = async () => {
   }
 };
 
-const onSwitchChainNamespace = async () => {
-  log.info("switching chain namespace");
-  try {
-    const chainNamespace = currentChainNamespace.value;
-    if (chainNamespace !== CHAIN_NAMESPACES.EIP155 && chainNamespace !== CHAIN_NAMESPACES.SOLANA)
-      throw new Error("switching to differnt chainNamespaces is not supported for current chainNamespace");
-    const newChainNamespace = chainNamespace === CHAIN_NAMESPACES.EIP155 ? CHAIN_NAMESPACES.SOLANA : CHAIN_NAMESPACES.EIP155;
-    const supportedChains = props.chains || [];
-    const newChain = supportedChains.find((chain) => chain.chainNamespace === newChainNamespace);
 
-    if (!newChain) throw new Error(`chain namespace ${newChainNamespace} not supported, please configure this chain namespace in the config`);
-    await switchChain({ chainId: newChain.chainId });
-    printToConsole("switchedChainNamespace", { chainId: newChain.chainId, chainNamespace: newChainNamespace });
-  } catch (error) {
-    printToConsole("switchedChainNamespace error", error);
-  }
-};
 </script>
 
 <template>
@@ -420,9 +377,6 @@ const onSwitchChainNamespace = async () => {
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
           <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
-          <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">
-            {{ t("app.buttons.btnSwitchChainNamespace") }} to Solana
-          </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
           <Button v-if="isSmartAccount" block size="xs" pill class="mb-2" @click="onSendAATx">{{ t("app.buttons.btnSendAATx") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
@@ -444,11 +398,7 @@ const onSwitchChainNamespace = async () => {
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
-          <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
-          <Button v-if="canSwitchChainNamespace" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">
-            {{ t("app.buttons.btnSwitchChainNamespace") }} to EVM
-          </Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
@@ -456,9 +406,6 @@ const onSwitchChainNamespace = async () => {
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSignAllTransactions">
-            {{ t("app.buttons.btnSignAllTransactions") }}
           </Button>
           <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
         </Card>
