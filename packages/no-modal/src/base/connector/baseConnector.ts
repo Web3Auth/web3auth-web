@@ -9,6 +9,7 @@ import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
   BaseConnectorLoginParams,
   BaseConnectorSettings,
+  Connection,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_STATUS_TYPE,
   ConnectorEvents,
@@ -106,7 +107,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   }
 
   abstract init(options?: ConnectorInitOptions): Promise<void>;
-  abstract connect(params: T & BaseConnectorLoginParams): Promise<IProvider | null>;
+  abstract connect(params: T & BaseConnectorLoginParams): Promise<Connection | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;

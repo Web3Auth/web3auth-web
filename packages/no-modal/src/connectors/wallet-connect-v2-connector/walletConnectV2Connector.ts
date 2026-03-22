@@ -15,6 +15,7 @@ import {
   ChainNamespaceType,
   checkIfTokenIsExpired,
   CONNECTED_EVENT_DATA,
+  type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -161,7 +162,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -206,14 +207,14 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       // if already connected
       if (this.connected) {
         await this.onConnectHandler({ chain: chainConfig, getIdentityToken });
-        return this.provider;
+        return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
       }
 
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         await this.createNewSession({ chainConfig, trackCompletionEvents, getIdentityToken });
       }
 
-      return this.provider;
+      return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
     } catch (error) {
       log.error("Wallet connect v2 connector error while connecting", error);
       // ready again to be connected

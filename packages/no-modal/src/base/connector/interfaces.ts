@@ -90,7 +90,7 @@ export interface IConnector<T> extends SafeEventEmitter {
   icon?: string;
   init(options?: ConnectorInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
-  connect(params: T & { chainId: string }): Promise<IProvider | null>;
+  connect(params: T & { chainId: string }): Promise<Connection | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;

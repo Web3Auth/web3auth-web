@@ -30,6 +30,7 @@ import {
   cloneDeep,
   CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -209,13 +210,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
-  async connect(params: Partial<AuthLoginParams> & BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect(params: Partial<AuthLoginParams> & BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     this.status = CONNECTOR_STATUS.CONNECTING;
     this.emit(CONNECTOR_EVENTS.CONNECTING, { ...params, connector: WALLET_CONNECTORS.AUTH });
     try {
       await this.connectWithProvider(params);
-      return this.provider;
+      return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
     } catch (error: unknown) {
       log.error("Failed to connect with auth provider", error);
       // ready again to be connected

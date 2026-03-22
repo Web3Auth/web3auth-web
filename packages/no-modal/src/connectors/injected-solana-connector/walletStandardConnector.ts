@@ -27,6 +27,7 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -97,8 +98,8 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       log.debug("initializing solana injected connector");
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
-        if (!provider) {
+        const connection = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        if (!connection) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
         }
@@ -108,7 +109,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
     try {
       super.checkConnectionRequirements();
       const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -140,7 +141,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
         identityTokenInfo = await this.getIdentityToken();
       }
 
-      return this.provider;
+      return { ethereumProvider: null, solanaWallet: this.solanaWallet, connectorName: this.name };
     } catch (error: unknown) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
