@@ -863,7 +863,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
-      const isSolanaOnly = connector.connectorNamespace === CONNECTOR_NAMESPACES.SOLANA;
+      const isSolanaChain = this.currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA;
+      // isDirectSolana: connector owns the Wallet standard object directly (WalletStandard + WC Solana)
+      const isDirectSolana = isSolanaChain && !!connector.solanaWallet;
       let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
 
       // setup AA provider if AA is enabled
@@ -892,7 +894,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
-      if (!isSolanaOnly) {
+      if (!isDirectSolana) {
         this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
       }
 
@@ -900,19 +902,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.cacheWallet(data.connector);
 
       // Build solanaWallet for the connection
-      let solanaWallet: Wallet | null = null;
-      const isSolanaChain = this.currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA;
-      if (isSolanaOnly && connector.solanaWallet) {
-        // WalletStandardConnector: pass raw Wallet directly
-        solanaWallet = connector.solanaWallet;
-      } else if (isSolanaChain) {
-        // AuthConnector / WalletConnectV2 on a Solana chain: wrap commonJRPCProvider as Wallet
+      let solanaWallet: Wallet | null = connector.solanaWallet ?? null;
+      if (!solanaWallet && isSolanaChain) {
+        // AuthConnector on Solana (deferred): wrap commonJRPCProvider as Wallet standard
         const { Web3AuthSolanaWallet } = await import("./providers/solana-provider");
         solanaWallet = await Web3AuthSolanaWallet.create(this.commonJRPCProvider, this.currentChain);
       }
 
       this.currentConnection = {
-        ethereumProvider: isSolanaOnly ? null : this.commonJRPCProvider,
+        ethereumProvider: isDirectSolana ? null : this.commonJRPCProvider,
         solanaWallet,
         connectorName: data.connector,
       };

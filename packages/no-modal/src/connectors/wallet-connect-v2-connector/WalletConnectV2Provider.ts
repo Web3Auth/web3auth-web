@@ -10,9 +10,8 @@ import {
   createEthMiddleware,
   IEthChainSwitchHandlers,
 } from "../../providers/ethereum-provider";
-import { createSolanaJsonRpcClient as createSolJsonRpcClient, createSolanaMiddleware } from "../../providers/solana-provider";
 import { formatChainId } from "./utils";
-import { addChain, getAccounts, getEthProviderHandlers, getSolProviderHandlers, switchChain } from "./walletConnectV2Utils";
+import { addChain, getAccounts, getEthProviderHandlers, switchChain } from "./walletConnectV2Utils";
 
 export type WalletConnectV2ProviderConfig = BaseProviderConfig;
 
@@ -90,7 +89,9 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       await this.setupEthEngine(connector, chainId);
     } else if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      await this.setupSolEngine(connector, chainId);
+      // Solana operations are handled via WCSolanaWallet directly; only update accounts state.
+      const accounts = await getAccounts(connector);
+      this.update({ accounts: accounts || [] });
     } else {
       throw new Error(`Unsupported chainNamespace: ${chain.chainNamespace}`);
     }
@@ -116,23 +117,6 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     const { networkMiddleware } = createEthJsonRpcClient(chain);
     engine.push(ethMiddleware);
     engine.push(chainSwitchMiddleware);
-    engine.push(networkMiddleware);
-    const provider = providerFromEngine(engine);
-    this.updateProviderEngineProxy(provider);
-  }
-
-  private async setupSolEngine(connector: ISignClient, chainId: string): Promise<void> {
-    const chain = this.getChain(chainId);
-    const providerHandlers = getSolProviderHandlers({ connector, chainId });
-    const jrpcRes = await getAccounts(connector);
-
-    this.update({
-      accounts: jrpcRes || [],
-    });
-    const solMiddleware = createSolanaMiddleware(providerHandlers);
-    const engine = new JRPCEngine();
-    const { networkMiddleware } = createSolJsonRpcClient(chain);
-    engine.push(solMiddleware);
     engine.push(networkMiddleware);
     const provider = providerFromEngine(engine);
     this.updateProviderEngineProxy(provider);
