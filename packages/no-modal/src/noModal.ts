@@ -127,6 +127,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return Boolean(this.connectedConnector);
   }
 
+  /**
+   * @deprecated Use `connection.ethereumProvider` instead.
+   */
   get provider(): IProvider | null {
     return this.currentConnection?.ethereumProvider ?? null;
   }
@@ -292,6 +295,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
     if (CONNECTED_STATUSES.includes(this.status) && this.connectedConnector) {
+      // Connectors that are bound to a single namespace cannot cross namespace boundaries
+      if (this.currentChain?.chainNamespace !== newChainConfig.chainNamespace) {
+        throw WalletLoginError.connectionError(
+          `Cannot switch between chain namespaces with ${this.connectedConnector.name}. Disconnect and reconnect with the target chain.`
+        );
+      }
+
       await this.connectedConnector.switchChain(params);
       return;
     }
@@ -1034,9 +1044,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (chainId === this.currentChainId) return;
     const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
     if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
-    this.setState({
-      currentChainId: chainId,
-    });
+    this.setState({ currentChainId: chainId });
   }
 
   private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {

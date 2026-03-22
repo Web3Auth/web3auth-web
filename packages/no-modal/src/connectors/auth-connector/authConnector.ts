@@ -298,31 +298,27 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     return userInfo;
   }
 
-  // we don't support switching between different namespaces, except for solana and evm
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    // get chains and namespaces
+
+    const namespaces = new Set(this.coreOptions.chains.map((c) => c.chainNamespace));
+    if (namespaces.size > 1) {
+      throw WalletLoginError.unsupportedOperation(
+        "switchChain is not supported when multiple chain namespaces are configured. Use connection.ethereumProvider and connection.solanaWallet directly."
+      );
+    }
+
     const { chainId: newChainId } = params;
     const { chainId: currentChainId } = this.provider;
-    const { chainNamespace: currentNamespace } = this.getChain(currentChainId);
-    const { chainNamespace: newNamespace } = this.getChain(newChainId);
-
-    // skip if chainId is the same
     if (currentChainId === newChainId) return;
 
-    if (currentNamespace === CHAIN_NAMESPACES.SOLANA || currentNamespace === CHAIN_NAMESPACES.EIP155) {
-      // can only switch to solana or evm
-      if (newNamespace !== CHAIN_NAMESPACES.SOLANA && newNamespace !== CHAIN_NAMESPACES.EIP155)
-        throw WalletLoginError.connectionError("Cannot switch to other chain namespace");
+    const currentChain = this.coreOptions.chains.find((c) => c.chainId === currentChainId);
+    const { chainNamespace } = currentChain;
 
-      const fullChainId = `${newNamespace}:${Number(params.chainId)}`;
-      await this.wsEmbedInstance.provider?.request({
-        method: "wallet_switchChain",
-        params: { chainId: fullChainId },
-      });
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA || chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      const fullChainId = `${chainNamespace}:${Number(newChainId)}`;
+      await this.wsEmbedInstance.provider?.request({ method: "wallet_switchChain", params: { chainId: fullChainId } });
     } else {
-      // cannot switch to other namespaces
-      if (currentNamespace !== newNamespace) throw WalletLoginError.connectionError("Cannot switch to other chain namespace");
       await this.privateKeyProvider?.switchChain(params);
     }
   }
@@ -360,10 +356,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     if (wallet.accounts.length > 0) {
       this._solanaWallet = wallet;
     }
-  }
-
-  private getChain(chainId: string) {
-    return this.coreOptions.chains.find((x) => x.chainId === chainId);
   }
 
   private _getFinalPrivKey() {
