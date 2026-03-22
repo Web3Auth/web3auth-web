@@ -3,6 +3,7 @@ import { useCallback, useState } from "react";
 
 import { Web3AuthError } from "../../../base";
 import { WalletInitializationError } from "../../../base/errors";
+import { walletSignAndSendTransaction } from "../../../providers/solana-provider";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignAndSendTransaction = {
@@ -29,7 +30,7 @@ export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
       setError(null);
       try {
         if (!solanaWallet) throw WalletInitializationError.notReady();
-        const signature = await solanaWallet.signAndSendTransaction(transaction);
+        const signature = await walletSignAndSendTransaction(solanaWallet, transaction);
         setData(signature);
         return signature;
       } catch (err) {

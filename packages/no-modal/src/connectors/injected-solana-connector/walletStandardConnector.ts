@@ -1,5 +1,25 @@
-import { Wallet } from "@wallet-standard/base";
-import { StandardConnect, StandardDisconnect } from "@wallet-standard/features";
+import {
+  type SolanaSignAndSendTransactionFeature,
+  type SolanaSignMessageFeature,
+  type SolanaSignTransactionFeature,
+} from "@solana/wallet-standard-features";
+import { type Wallet, type WalletWithFeatures } from "@wallet-standard/base";
+import {
+  StandardConnect,
+  type StandardConnectFeature,
+  StandardDisconnect,
+  type StandardDisconnectFeature,
+  type StandardEventsFeature,
+} from "@wallet-standard/features";
+
+type WalletStandard = WalletWithFeatures<
+  StandardConnectFeature &
+    StandardDisconnectFeature &
+    StandardEventsFeature &
+    SolanaSignAndSendTransactionFeature &
+    SolanaSignMessageFeature &
+    SolanaSignTransactionFeature
+>;
 
 import {
   BaseConnectorLoginParams,
@@ -25,7 +45,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
-import { getSolanaChainByChainConfig, type WalletStandard, WalletStandardProvider } from "../../providers/solana-provider";
+import { getSolanaChainByChainConfig } from "../../providers/solana-provider";
 import { BaseSolanaConnector } from "../base-solana-connector";
 
 export class WalletStandardConnector extends BaseSolanaConnector<void> {
@@ -43,8 +63,6 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
 
   private wallet: WalletStandard | null = null;
 
-  private injectedProvider: WalletStandardProvider | null = null;
-
   constructor(options: BaseConnectorSettings & { name: string; wallet: Wallet }) {
     super(options);
     this.name = options.name;
@@ -56,9 +74,6 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   }
 
   get provider(): IProvider {
-    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.injectedProvider) {
-      return this.injectedProvider;
-    }
     return null;
   }
 
@@ -74,9 +89,6 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     await super.init(options);
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
-
-    this.injectedProvider = new WalletStandardProvider({ config: { chain: chainConfig, chains: this.coreOptions.chains } });
-    await this.injectedProvider.setupProvider(this.wallet, options.chainId);
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, this.name);
@@ -144,7 +156,6 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       await this.wallet.features[StandardDisconnect]?.disconnect();
       if (options.cleanup) {
         this.status = CONNECTOR_STATUS.NOT_READY;
-        this.injectedProvider = null;
       } else {
         this.status = CONNECTOR_STATUS.READY;
       }
@@ -161,7 +172,6 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
 
   async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    await this.injectedProvider?.switchChain(params);
   }
 
   async enableMFA(): Promise<void> {

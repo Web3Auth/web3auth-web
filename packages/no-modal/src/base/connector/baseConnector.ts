@@ -51,11 +51,11 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     return CAN_AUTHORIZE_STATUSES.includes(this.status);
   }
 
-  public abstract get provider(): IProvider | null;
-
   get solanaWallet(): Wallet | null {
     return null;
   }
+
+  public abstract get provider(): IProvider | null;
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing Wallet Connect or Metamask Connect session on calling connect again.

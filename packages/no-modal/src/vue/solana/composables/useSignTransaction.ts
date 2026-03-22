@@ -3,6 +3,7 @@ import { Ref, ref } from "vue";
 
 import { log } from "../../../base";
 import { WalletInitializationError, type Web3AuthError } from "../../../base/errors";
+import { walletSignTransaction } from "../../../providers/solana-provider";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignTransaction = {
@@ -28,7 +29,7 @@ export const useSignTransaction = (): IUseSignTransaction => {
     error.value = null;
     try {
       if (!solanaWallet.value) throw WalletInitializationError.notReady();
-      const signedTransaction = await solanaWallet.value.signTransaction(transaction);
+      const signedTransaction = await walletSignTransaction(solanaWallet.value, transaction);
       data.value = signedTransaction;
       return signedTransaction;
     } catch (err) {

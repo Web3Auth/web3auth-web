@@ -1,6 +1,7 @@
 import { useCallback, useState } from "react";
 
 import { Web3AuthError } from "../../../base";
+import { walletSignMessage } from "../../../providers/solana-provider";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignMessage = {
@@ -22,7 +23,7 @@ export const useSignMessage = (): IUseSignMessage => {
       setError(null);
       try {
         if (!solanaWallet) throw new Error("Solana wallet not found");
-        const signature = await solanaWallet.signMessage(message, from ?? accounts?.[0]);
+        const signature = await walletSignMessage(solanaWallet, message, from ?? accounts?.[0]);
         setData(signature);
         return signature;
       } catch (error) {
