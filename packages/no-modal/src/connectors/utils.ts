@@ -1,3 +1,5 @@
+import { generatePrivate } from "@toruslabs/eccrypto";
+import { bytesToHexPrefixedString, type Hex } from "@toruslabs/metadata-helpers";
 import { base64toJSON } from "@web3auth/auth";
 
 /**
@@ -69,3 +71,7 @@ export function parseToken<T>(token: string): { header: { alg: string; typ: stri
     payload: base64toJSON(payload) as T,
   };
 }
+
+export const generateNonce = (): Hex => {
+  return bytesToHexPrefixedString(generatePrivate());
+};

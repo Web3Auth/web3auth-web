@@ -16,6 +16,7 @@ const web3authConfig: Web3AuthContextConfig = {
     enableLogging: true,
     web3AuthNetwork: "sapphire_devnet",
     clientId: clientId,
+    authBuildEnv: "development",
   },
 };
 

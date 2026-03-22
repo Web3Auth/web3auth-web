@@ -12,7 +12,6 @@ import {
   getUserId,
   type LoginParams,
   PopupHandler,
-  randomId,
   SDK_MODE,
   SUPPORTED_KEY_CURVES,
   UX_MODE,
@@ -49,7 +48,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
-import { parseToken } from "../utils";
+import { generateNonce, parseToken } from "../utils";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
@@ -152,6 +151,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
               loginMode: WS_EMBED_LOGIN_MODE.PLUGIN,
               chains: wsSupportedChains as ProviderConfig[],
               chainId,
+              buildEnv: this.authOptions.buildEnv,
               whiteLabel: {
                 ...this.authOptions.whiteLabel,
                 ...this.wsSettings.whiteLabel,
@@ -409,6 +409,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
       const { sessionId, sessionNamespace } = this.authInstance || {};
       if (sessionId) {
+        this.wsEmbedInstance.setAccessTokenProvider(this.accessTokenProvider.bind(this));
+
         const isLoggedIn = await this.wsEmbedInstance.loginWithSessionId({
           sessionId,
           sessionNamespace,
@@ -464,7 +466,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       login_hint: params.loginHint || params.extraLoginOptions?.login_hint,
     } as Auth0ClientOptions;
 
-    const nonce = randomId();
+    const nonce = generateNonce();
 
     // post a message to the auth provider to indicate that login has been initiated.
     const loginParams = cloneDeep(params);
@@ -555,6 +557,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           reject(WalletLoginError.connectionError(error instanceof Error ? error.message : (error as string) || "Failed to login with social"));
         });
     });
+  }
+
+  private async accessTokenProvider({ forceRefresh }: { forceRefresh: boolean }): Promise<string> {
+    if (forceRefresh) {
+      await this.authInstance.refreshSession();
+    }
+    return this.authInstance.getAccessToken();
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
