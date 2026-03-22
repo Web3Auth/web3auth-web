@@ -38,9 +38,9 @@ import {
   WalletConnectV2Data,
   WalletInitializationError,
   WalletLoginError,
+  walletSignMessage,
   Web3AuthError,
 } from "../../base";
-import { walletSignMessage } from "../../providers/solana-provider";
 import { getWalletConnectV2Settings } from "./config";
 import { IConnectorSettings, WalletConnectV2ConnectorOptions } from "./interface";
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";

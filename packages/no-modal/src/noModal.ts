@@ -1,6 +1,5 @@
 import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controllers";
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import type { Wallet } from "@wallet-standard/base";
 import { cloneDeep, IStorage, MemoryStore, SafeEventEmitter, type SafeEventEmitterProvider, serializeError, UX_MODE } from "@web3auth/auth";
 import { WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
@@ -901,17 +900,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.setState({ connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connector);
 
-      // Build solanaWallet for the connection
-      let solanaWallet: Wallet | null = connector.solanaWallet ?? null;
-      if (!solanaWallet && isSolanaChain) {
-        // AuthConnector on Solana (deferred): wrap commonJRPCProvider as Wallet standard
-        const { Web3AuthSolanaWallet } = await import("./providers/solana-provider");
-        solanaWallet = await Web3AuthSolanaWallet.create(this.commonJRPCProvider, this.currentChain);
-      }
-
       this.currentConnection = {
         ethereumProvider: isDirectSolana ? null : this.commonJRPCProvider,
-        solanaWallet,
+        solanaWallet: connector.solanaWallet ?? null,
         connectorName: data.connector,
       };
 

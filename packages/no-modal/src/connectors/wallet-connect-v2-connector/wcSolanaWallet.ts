@@ -27,8 +27,7 @@ import {
 import type { ISignClient } from "@walletconnect/types";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { type CustomChainConfig, SOLANA_CAIP_CHAIN_MAP } from "../../base";
-import { getSolanaChainByChainConfig } from "../../providers/solana-provider/providers/injectedProviders/utils";
+import { type CustomChainConfig, getSolanaChainByChainConfig, SOLANA_CAIP_CHAIN_MAP } from "../../base";
 import { getSolanaAccounts, sendJrpcRequest } from "./walletConnectV2Utils";
 
 const base58Encoder = getBase58Encoder();

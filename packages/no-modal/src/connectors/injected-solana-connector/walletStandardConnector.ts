@@ -37,6 +37,7 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
+  getSolanaChainByChainConfig,
   IdentityTokenInfo,
   IProvider,
   log,
@@ -45,7 +46,6 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
-import { getSolanaChainByChainConfig } from "../../providers/solana-provider";
 import { BaseSolanaConnector } from "../base-solana-connector";
 
 export class WalletStandardConnector extends BaseSolanaConnector<void> {

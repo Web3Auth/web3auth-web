@@ -1,5 +1,6 @@
 import { type ProviderConfig } from "@toruslabs/base-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
+import type { Wallet } from "@wallet-standard/base";
 import {
   Auth,
   type AUTH_CONNECTION_TYPE,
@@ -51,6 +52,7 @@ import {
 } from "../../base";
 import { parseToken } from "../utils";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import { Web3AuthSolanaWallet } from "./web3AuthSolanaWallet";
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
@@ -77,6 +79,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private wsEmbedInstancePromise: Promise<void> | null = null;
 
+  private _solanaWallet: Wallet | null = null;
+
   constructor(params: AuthConnectorOptions) {
     super(params);
 
@@ -97,6 +101,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   get wsEmbed(): WsEmbed {
     return this.wsEmbedInstance;
+  }
+
+  get solanaWallet(): Wallet | null {
+    return this._solanaWallet;
   }
 
   set provider(_: IProvider | null) {
@@ -269,6 +277,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
 
     this.rehydrated = false;
+    this._solanaWallet = null;
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
@@ -344,6 +353,15 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     return providerConfig;
   }
 
+  private async setupSolanaWallet(): Promise<void> {
+    const solanaChain = this.coreOptions.chains.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
+    if (!solanaChain || !this.provider) return;
+    const wallet = await Web3AuthSolanaWallet.create(this.provider, solanaChain);
+    if (wallet.accounts.length > 0) {
+      this._solanaWallet = wallet;
+    }
+  }
+
   private getChain(chainId: string) {
     return this.coreOptions.chains.find((x) => x.chainId === chainId);
   }
@@ -414,6 +432,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           sessionNamespace,
         });
         if (isLoggedIn) {
+          await this.setupSolanaWallet();
           // if getIdentityToken is true, then get the identity token
           // No need to get the identity token for auth connector as it is already handled
           let identityTokenInfo: IdentityTokenInfo | undefined;

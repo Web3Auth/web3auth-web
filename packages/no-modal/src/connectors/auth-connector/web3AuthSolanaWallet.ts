@@ -20,7 +20,7 @@ import {
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import { type CustomChainConfig, type IProvider } from "../../base";
-import { getSolanaChainByChainConfig } from "./providers/injectedProviders/utils";
+import { getSolanaChainByChainConfig } from "../../base";
 
 const base58Encoder = getBase58Encoder();
 const base64Decoder = getBase64Decoder();
@@ -38,8 +38,8 @@ type Web3AuthSolanaFeatures = StandardConnectFeature &
 
 /**
  * Web3AuthSolanaWallet implements the Wallet Standard interface, wrapping a JRPC provider.
- * Used for AuthConnector and WalletConnectV2 on Solana chains so consumers always get
- * a standards-compliant Wallet object from `connection.solanaWallet`.
+ * Used by AuthConnector on Solana chains so consumers always get a standards-compliant
+ * Wallet object from `connection.solanaWallet`.
  */
 export class Web3AuthSolanaWallet implements Wallet {
   readonly version: WalletVersion = "1.0.0";

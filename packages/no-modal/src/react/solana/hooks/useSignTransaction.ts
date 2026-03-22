@@ -3,7 +3,7 @@ import { useCallback, useState } from "react";
 
 import { Web3AuthError } from "../../../base";
 import { WalletInitializationError } from "../../../base/errors";
-import { walletSignTransaction } from "../../../providers/solana-provider";
+import { walletSignTransaction } from "../../../base";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignTransaction = {

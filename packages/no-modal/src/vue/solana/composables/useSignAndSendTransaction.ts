@@ -3,7 +3,7 @@ import { Ref, ref } from "vue";
 
 import { log } from "../../../base";
 import { WalletInitializationError, type Web3AuthError } from "../../../base/errors";
-import { walletSignAndSendTransaction } from "../../../providers/solana-provider";
+import { walletSignAndSendTransaction } from "../../../base";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignAndSendTransaction = {

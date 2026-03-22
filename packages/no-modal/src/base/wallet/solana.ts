@@ -9,6 +9,21 @@ import {
 } from "@solana/wallet-standard-features";
 import type { IdentifierString, Wallet } from "@wallet-standard/base";
 
+import { type CustomChainConfig } from "../chain/IChainInterface";
+
+export const getSolanaChainByChainConfig = (chainConfig: CustomChainConfig): IdentifierString => {
+  switch (chainConfig.chainId) {
+    case "0x65":
+      return "solana:mainnet";
+    case "0x66":
+      return "solana:testnet";
+    case "0x67":
+      return "solana:devnet";
+    default:
+      return null;
+  }
+};
+
 const base58Decoder = getBase58Decoder();
 const base64Encoder = getBase64Encoder();
 const transactionDecoder = getTransactionDecoder();
