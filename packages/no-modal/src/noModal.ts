@@ -127,13 +127,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return Boolean(this.connectedConnector);
   }
 
-  /**
-   * @deprecated Use `connection.ethereumProvider` instead.
-   */
-  get provider(): IProvider | null {
-    return this.currentConnection?.ethereumProvider ?? null;
-  }
-
   get connection(): Connection | null {
     return this.currentConnection;
   }

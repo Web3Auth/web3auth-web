@@ -22,7 +22,6 @@ import {
   type IBaseProvider,
   type IConnector,
   type IdentityTokenInfo,
-  type IProvider,
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
@@ -204,7 +203,6 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
   connection: Connection | null;
-  provider: IProvider | null;
   init(options?: { signal?: AbortSignal }): Promise<void>;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   getPlugin(pluginName: string): IPlugin | null;
