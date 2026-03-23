@@ -351,8 +351,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   private async setupSolanaWallet(): Promise<void> {
+    // only setup solana wallet if solana chain is configured
     const solanaChain = this.coreOptions.chains.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
     if (!solanaChain || !this.provider) return;
+
     const wallet = await Web3AuthSolanaWallet.create(this.provider, solanaChain);
     if (wallet.accounts.length > 0) {
       this._solanaWallet = wallet;
@@ -425,7 +427,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           sessionNamespace,
         });
         if (isLoggedIn) {
-          await this.setupSolanaWallet();
+          // TODO: setup solana wallet if current chain's chainNamespace is SOLANA
+          // when WS supports multi-chain in parallel, we can remove this logic.
+          if (chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+            await this.setupSolanaWallet();
+          }
           // if getIdentityToken is true, then get the identity token
           // No need to get the identity token for auth connector as it is already handled
           let identityTokenInfo: IdentityTokenInfo | undefined;

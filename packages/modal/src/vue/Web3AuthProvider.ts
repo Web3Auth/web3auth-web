@@ -20,7 +20,7 @@ export const Web3AuthProvider = defineComponent({
   props: { config: { type: Object as PropType<Web3AuthContextConfig>, required: true } },
   setup(props) {
     const web3Auth = shallowRef<Web3Auth | null>(null);
-    const connection = ref<Connection | null>(null);
+    const connection = shallowRef<Connection | null>(null);
     const isMFAEnabled = ref(false);
     const status = ref<CONNECTOR_STATUS_TYPE | null>(null);
     const isAuthorized = ref(false);

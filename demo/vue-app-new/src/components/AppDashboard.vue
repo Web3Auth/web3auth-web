@@ -21,15 +21,10 @@ import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useS
 import { useConnection, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
 
 import { generateLegacyTransaction, generateSolTransferInstruction } from "../utils/solana";
-import { ProviderConfig } from "@toruslabs/base-controllers";
-import { SUPPORTED_NETWORKS } from "@toruslabs/ethereum-controllers";
 import { computed, ref, watch } from "vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { getBalance as getSolBalance } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
-import { SOLANA_SUPPORTED_NETWORKS } from "../utils/constants";
-
-const supportedNetworks = { ...SUPPORTED_NETWORKS, ...SOLANA_SUPPORTED_NETWORKS } as Record<string, ProviderConfig>;
 
 const { t } = useI18n({ useScope: "global" });
 
@@ -59,14 +54,12 @@ const balance = useBalance({
   address: address,
 });
 
-const { accounts: solanaAccounts, rpc, solanaWallet } = useSolanaWallet();
+const { accounts: solanaAccounts, rpc } = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
 
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
-const currentChainConfig = computed(() => supportedNetworks[currentChainId.value as keyof typeof supportedNetworks]);
-const currentChainNamespace = computed(() => currentChainConfig.value?.chainNamespace);
 
 const chainChangedListener = (chainId: string) => {
   currentChainId.value = chainId;
@@ -89,21 +82,22 @@ watch(
 );
 
 const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletServices"): boolean => {
-  const chainNamespace = currentChainNamespace.value;
+  const conn = connection.value;
+
   switch (name) {
     case "dashboard":
       return formData.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN ? isAuthorized.value : isConnected.value;
 
     case "ethServices":
-      return chainNamespace === CHAIN_NAMESPACES.EIP155;
+      return Boolean(conn?.ethereumProvider);
 
     case "solServices":
-      return chainNamespace === CHAIN_NAMESPACES.SOLANA;
+      return Boolean(conn?.solanaWallet);
 
     case "walletServices":
       return (
-        (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) &&
-        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH
+        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH &&
+        Boolean(conn?.ethereumProvider || conn?.solanaWallet)
       );
 
     default: {
@@ -272,22 +266,23 @@ const onGetSolBalance = async () => {
   await getSolBalance(rpc.value, solanaAccounts.value[0], printToConsole);
 };
 
-// Common
-const canSwitchChain = computed(() => {
-  const currentNamespace = currentChainNamespace.value;
-  const newChain = props.chains.find((x) => x.chainNamespace === currentNamespace && x.chainId !== currentChainId.value);
-  return Boolean(newChain);
+// EVM-only: wagmi switchChain does not change Solana cluster; only show when multiple EIP-155 chains are configured.
+const eip155Chains = computed(() => props.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155));
+
+const canSwitchEvmChain = computed(() => {
+  if (eip155Chains.value.length < 2) return false;
+  return Boolean(connection.value?.ethereumProvider);
 });
 
 const onSwitchChain = async () => {
   log.info("switching chain");
   try {
     const chainId = connection.value?.ethereumProvider?.chainId;
+    if (!chainId) throw new Error("No ethereum provider chainId");
     if (chainId !== currentChainId.value) throw new Error("chainId does not match current chainId");
 
-    const currentNamespace = currentChainNamespace.value;
-    const newChain = props.chains.find((x) => x.chainNamespace === currentNamespace && x.chainId !== chainId);
-    if (!newChain) throw new Error(`Please configure at least 2 chains for ${currentNamespace} in the config`);
+    const newChain = eip155Chains.value.find((c) => c.chainId !== chainId);
+    if (!newChain) throw new Error("Please configure at least 2 EVM chains in the config");
     const data = await switchChainAsync({ chainId: Number(newChain.chainId) });
     printToConsole("switchedChain", { chainId: data.id });
   } catch (error) {
@@ -376,7 +371,7 @@ const onSwitchChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onGetBalance">
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
-          <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+          <Button v-if="canSwitchEvmChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
           <Button v-if="isSmartAccount" block size="xs" pill class="mb-2" @click="onSendAATx">{{ t("app.buttons.btnSendAATx") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
@@ -398,7 +393,6 @@ const onSwitchChain = async () => {
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
-          <Button v-if="canSwitchChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">

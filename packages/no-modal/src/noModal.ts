@@ -865,38 +865,33 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
-      const isSolanaChain = this.currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA;
-      // isDirectSolana: connector owns the Wallet standard object directly (WalletStandard + WC Solana)
-      const isDirectSolana = isSolanaChain && !!connector.solanaWallet;
-      let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
-
       // setup AA provider if AA is enabled
-      const { accountAbstractionConfig } = this.coreOptions;
-      const isAaSupportedForCurrentChain =
-        this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
-        accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
-      if (isAaSupportedForCurrentChain && (data.connector === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
-        const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
-        // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
-        const eoaProvider: IProvider = data.connector === WALLET_CONNECTORS.AUTH ? await toEoaProvider(provider) : provider;
-        const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
-        const aaProvider = await accountAbstractionProvider({
-          accountAbstractionConfig,
-          provider: eoaProvider,
-          chain: this.currentChain,
-          chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
-          useProviderAsTransport: data.connector === WALLET_CONNECTORS.AUTH,
-        });
-        this.aaProvider = aaProvider;
+      if (provider) {
+        let finalProvider = (provider as IBaseProvider<unknown>)?.provider || (provider as SafeEventEmitterProvider);
+        const { accountAbstractionConfig } = this.coreOptions;
+        const isAaSupportedForCurrentChain =
+          this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+          accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
+        if (isAaSupportedForCurrentChain && (data.connector === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
+          const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
+          // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
+          const eoaProvider: IProvider = data.connector === WALLET_CONNECTORS.AUTH ? await toEoaProvider(provider) : provider;
+          const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
+          const aaProvider = await accountAbstractionProvider({
+            accountAbstractionConfig,
+            provider: eoaProvider,
+            chain: this.currentChain,
+            chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
+            useProviderAsTransport: data.connector === WALLET_CONNECTORS.AUTH,
+          });
+          this.aaProvider = aaProvider;
 
-        // if external wallet is used and AA is enabled for external wallets, use AA provider
-        // for embedded wallets, we use ws-embed provider which already supports AA
-        if (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet) {
-          finalProvider = this.aaProvider;
+          // if external wallet is used and AA is enabled for external wallets, use AA provider
+          // for embedded wallets, we use ws-embed provider which already supports AA
+          if (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet) {
+            finalProvider = this.aaProvider;
+          }
         }
-      }
-
-      if (!isDirectSolana) {
         this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
       }
 
@@ -904,7 +899,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.cacheWallet(data.connector);
 
       this.currentConnection = {
-        ethereumProvider: isDirectSolana ? null : this.commonJRPCProvider,
+        ethereumProvider: provider ? this.commonJRPCProvider : null,
         solanaWallet: connector.solanaWallet ?? null,
         connectorName: data.connector,
       };

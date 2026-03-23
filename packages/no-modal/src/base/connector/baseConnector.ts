@@ -56,7 +56,9 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     return null;
   }
 
-  public abstract get provider(): IProvider | null;
+  get provider(): IProvider | null {
+    return null;
+  }
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing Wallet Connect or Metamask Connect session on calling connect again.

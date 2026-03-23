@@ -114,9 +114,9 @@ export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
 export type CONNECTED_EVENT_DATA = {
   connector: WALLET_CONNECTOR_TYPE | string;
-  provider: IProvider;
+  provider?: IProvider | null;
   reconnected: boolean;
-  identityTokenInfo: IdentityTokenInfo;
+  identityTokenInfo?: IdentityTokenInfo;
 };
 
 export type AUTHORIZED_EVENT_DATA = {

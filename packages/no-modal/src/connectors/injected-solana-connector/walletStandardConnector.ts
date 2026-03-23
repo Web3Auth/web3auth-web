@@ -40,7 +40,6 @@ import {
   ConnectorParams,
   getSolanaChainByChainConfig,
   IdentityTokenInfo,
-  IProvider,
   log,
   normalizeWalletName,
   UserInfo,
@@ -72,10 +71,6 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     // it seems that Vue create a Proxy object for the wallet object which causes the issue
     // ref: https://stackoverflow.com/questions/64917686/vue-array-converted-to-proxy-object
     this.wallet = (["gate", "solflare"].includes(this.name) ? Object.freeze(options.wallet) : options.wallet) as WalletStandard;
-  }
-
-  get provider(): IProvider {
-    return null;
   }
 
   get solanaWallet(): WalletStandard | null {
