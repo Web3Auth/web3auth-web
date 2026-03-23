@@ -15,7 +15,7 @@ import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "v
 import { CHAIN_NAMESPACES, type CustomChainConfig, WalletInitializationError } from "../../base";
 import { log } from "../../base/loglevel";
 // import type { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn } from "wagmi";
-import { useWeb3Auth, useWeb3AuthDisconnect } from "../composables";
+import { useChain, useWeb3Auth, useWeb3AuthDisconnect } from "../composables";
 import { defaultWagmiConfig } from "./constants";
 import { WagmiProviderProps } from "./interface";
 
@@ -99,6 +99,7 @@ const Web3AuthWagmiProvider = defineComponent({
   name: "Web3AuthWagmiProvider",
   setup() {
     const { isConnected, provider } = useWeb3Auth();
+    const { chainNamespace } = useChain();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
     const { mutate: reconnect } = useReconnect();
@@ -118,9 +119,10 @@ const Web3AuthWagmiProvider = defineComponent({
     });
 
     watch(
-      isConnected,
-      async (newIsConnected) => {
-        if (newIsConnected && provider.value) {
+      [isConnected, chainNamespace],
+      async ([newIsConnected, namespace]) => {
+        const isEvm = namespace === CHAIN_NAMESPACES.EIP155;
+        if (newIsConnected && provider.value && isEvm) {
           const connector = await setupConnector(provider.value, wagmiConfig);
           if (!connector) {
             throw new Error("Failed to setup connector");

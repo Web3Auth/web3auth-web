@@ -18,7 +18,7 @@ import {
 import { injected } from "wagmi/connectors";
 
 import { CHAIN_NAMESPACES, CustomChainConfig, log, WalletInitializationError } from "../../base";
-import { useWeb3Auth, useWeb3AuthDisconnect } from "../hooks";
+import { useChain, useWeb3Auth, useWeb3AuthDisconnect } from "../hooks";
 import { defaultWagmiConfig } from "./constants";
 import { WagmiProviderProps } from "./interface";
 
@@ -100,6 +100,7 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 
 function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   const { isConnected, provider } = useWeb3Auth();
+  const { chainNamespace } = useChain();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
   const { mutate: reconnect } = useReconnect();
@@ -120,7 +121,8 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     (async () => {
-      if (isConnected && provider) {
+      const isEvm = chainNamespace === CHAIN_NAMESPACES.EIP155;
+      if (isConnected && provider && isEvm) {
         const connector = await setupConnector(provider, wagmiConfig);
         if (!connector) {
           throw new Error("Failed to setup connector");
@@ -134,7 +136,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
       }
     })();
-  }, [isConnected, wagmiConfig, provider, reconnect]);
+  }, [isConnected, wagmiConfig, provider, chainNamespace, reconnect]);
 
   return createElement(Fragment, null, children);
 }
