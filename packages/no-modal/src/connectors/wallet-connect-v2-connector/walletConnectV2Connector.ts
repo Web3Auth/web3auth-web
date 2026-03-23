@@ -33,6 +33,7 @@ import {
   IProvider,
   log,
   saveToken,
+  SOLANA_CAIP_CHAIN_MAP,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -458,9 +459,17 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       });
     }
     await this.wcProvider.setupProvider(this.connector);
-    const solanaChain = this.coreOptions.chains.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
-    if (solanaChain) {
-      this._solanaWallet = await WCSolanaWallet.create(this.connector, solanaChain);
+    // Derive the active Solana chain from the WC session namespaces (genesis hash → hex chainId),
+    // rather than picking the first Solana chain from coreOptions which may not match the session.
+    const sessionSolanaChains = this.activeSession?.namespaces?.solana?.chains ?? [];
+    if (sessionSolanaChains.length > 0) {
+      const reverseMap = Object.fromEntries(Object.entries(SOLANA_CAIP_CHAIN_MAP).map(([hex, hash]) => [hash, hex]));
+      const genesisHash = sessionSolanaChains[0].split(":")[1];
+      const hexChainId = reverseMap[genesisHash];
+      const solanaChain = hexChainId ? this.coreOptions.chains.find((c) => c.chainId === hexChainId) : null;
+      if (solanaChain) {
+        this._solanaWallet = await WCSolanaWallet.create(this.connector, solanaChain);
+      }
     }
     this.cleanupPendingPairings();
     this.status = CONNECTOR_STATUS.CONNECTED;

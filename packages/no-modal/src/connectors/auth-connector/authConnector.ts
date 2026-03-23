@@ -427,11 +427,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           sessionNamespace,
         });
         if (isLoggedIn) {
-          // TODO: setup solana wallet if current chain's chainNamespace is SOLANA
-          // when WS supports multi-chain in parallel, we can remove this logic.
-          if (chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-            await this.setupSolanaWallet();
-          }
+          // Setup Solana wallet whenever a Solana chain is configured (not just when current chain is Solana).
+          // For EVM+Solana multi-namespace configs connecting on EVM, solanaWallet must still be populated.
+          await this.setupSolanaWallet();
           // if getIdentityToken is true, then get the identity token
           // No need to get the identity token for auth connector as it is already handled
           let identityTokenInfo: IdentityTokenInfo | undefined;

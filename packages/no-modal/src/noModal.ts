@@ -102,6 +102,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
     if (!options.storageType) options.storageType = "local";
+    if (!options.initialAuthenticationMode) options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
 
     this.coreOptions = options;
     this.storage = this.getStorageMethod();
@@ -288,8 +289,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
     if (CONNECTED_STATUSES.includes(this.status) && this.connectedConnector) {
-      // Connectors that are bound to a single namespace cannot cross namespace boundaries
-      if (this.currentChain?.chainNamespace !== newChainConfig.chainNamespace) {
+      // Single-namespace connectors cannot cross namespace boundaries — MULTICHAIN connectors
+      // (Auth, WC) enforce their own switchChain policy internally.
+      if (
+        this.connectedConnector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN &&
+        this.currentChain?.chainNamespace !== newChainConfig.chainNamespace
+      ) {
         throw WalletLoginError.connectionError(
           `Cannot switch between chain namespaces with ${this.connectedConnector.name}. Disconnect and reconnect with the target chain.`
         );
@@ -898,8 +903,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.setState({ connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connector);
 
+      const isSolanaOnly = this.currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA && !!connector.solanaWallet;
       this.currentConnection = {
-        ethereumProvider: provider ? this.commonJRPCProvider : null,
+        ethereumProvider: isSolanaOnly ? null : provider ? this.commonJRPCProvider : null,
         solanaWallet: connector.solanaWallet ?? null,
         connectorName: data.connector,
       };

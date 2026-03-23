@@ -19,8 +19,7 @@ import {
 } from "@wallet-standard/features";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { type CustomChainConfig, type IProvider } from "../../base";
-import { getSolanaChainByChainConfig } from "../../base";
+import { type CustomChainConfig, getSolanaChainByChainConfig, type IProvider } from "../../base";
 
 const base58Encoder = getBase58Encoder();
 const base64Decoder = getBase64Decoder();

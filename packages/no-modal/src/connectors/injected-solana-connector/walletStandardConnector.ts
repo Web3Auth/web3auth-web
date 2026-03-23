@@ -166,8 +166,8 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     return {};
   }
 
-  async switchChain(params: { chainId: string }, init = false): Promise<void> {
-    super.checkSwitchChainRequirements(params, init);
+  async switchChain(_params: { chainId: string }, _init = false): Promise<void> {
+    throw WalletLoginError.unsupportedOperation("Injected Solana wallets do not support chain switching.");
   }
 
   async enableMFA(): Promise<void> {
