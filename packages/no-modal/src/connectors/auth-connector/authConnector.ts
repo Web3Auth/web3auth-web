@@ -52,8 +52,8 @@ import {
   Web3AuthError,
 } from "../../base";
 import { parseToken } from "../utils";
+import { AuthSolanaWallet } from "./authSolanaWallet";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
-import { Web3AuthSolanaWallet } from "./web3AuthSolanaWallet";
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
@@ -355,7 +355,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const solanaChain = this.coreOptions.chains.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
     if (!solanaChain || !this.provider) return;
 
-    const wallet = await Web3AuthSolanaWallet.create(this.provider, solanaChain);
+    const wallet = await AuthSolanaWallet.create(this.provider, solanaChain);
     if (wallet.accounts.length > 0) {
       this._solanaWallet = wallet;
     }
