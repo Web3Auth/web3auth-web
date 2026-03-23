@@ -7,7 +7,7 @@
   "devDependencies": {
     "@babel/register": "^7.28.6",
     "@rollup/plugin-node-resolve": "^16.0.3",
-    "@toruslabs/config": "^3.1.0",
+    "@toruslabs/config": "^4.0.0",
     "@toruslabs/eslint-config-typescript": "^4.1.4",
     "@toruslabs/torus-scripts": "^7.1.6",
     "@types/chai": "^5.2.3",
