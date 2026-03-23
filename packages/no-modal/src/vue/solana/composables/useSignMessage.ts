@@ -8,7 +8,7 @@ export type IUseSignMessage = {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
   data: Ref<string | null>;
-  signMessage: (message: string, from?: string) => Promise<string>;
+  signMessage: (message: string) => Promise<string>;
 };
 
 export const useSignMessage = (): IUseSignMessage => {
@@ -17,7 +17,7 @@ export const useSignMessage = (): IUseSignMessage => {
   const error = ref<Web3AuthError | null>(null);
   const data = ref<string | null>(null);
 
-  const signMessage = async (message: string, _from?: string) => {
+  const signMessage = async (message: string) => {
     loading.value = true;
     error.value = null;
     try {

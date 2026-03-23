@@ -25,13 +25,19 @@ export const SolanaProvider = defineComponent({
       [isConnected, provider, chainNamespace],
       async ([connected, prov, namespace]) => {
         const isSolana = namespace === CHAIN_NAMESPACES.SOLANA;
+
+        const disposeClient = async (client: SolanaClient) => {
+          try {
+            await client.actions.disconnectWallet();
+          } catch (e) {
+            log.warn("Solana client disconnect", e);
+          }
+          client.destroy();
+        };
+
         if (!connected || !prov || !isSolana || !web3Auth.value?.currentChain) {
           if (clientRef.value) {
-            try {
-              await clientRef.value.actions.disconnectWallet();
-            } catch (e) {
-              log.warn("Solana client disconnect", e);
-            }
+            await disposeClient(clientRef.value);
             clientRef.value = null;
           }
           return;
@@ -40,12 +46,14 @@ export const SolanaProvider = defineComponent({
         const chainConfig = web3Auth.value.currentChain;
         if (chainConfig.chainNamespace !== CHAIN_NAMESPACES.SOLANA) return;
 
+        const prevClient = clientRef.value;
         try {
           const client = createWeb3AuthSolanaClient({
             provider: prov,
             chainConfig,
           });
           clientRef.value = client;
+          if (prevClient) await disposeClient(prevClient);
           await client.actions.connectWallet(WEB3AUTH_SOLANA_CONNECTOR_ID, {
             autoConnect: true,
           });
