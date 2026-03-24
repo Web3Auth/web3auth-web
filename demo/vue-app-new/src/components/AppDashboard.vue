@@ -54,7 +54,7 @@ const balance = useBalance({
   address: address,
 });
 
-const { accounts: solanaAccounts, rpc } = useSolanaWallet();
+const { accounts: solanaAccounts, rpc, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -266,6 +266,15 @@ const onGetSolBalance = async () => {
   await getSolBalance(rpc.value, solanaAccounts.value[0], printToConsole);
 };
 
+const onGetSolPrivateKey = async () => {
+  try {
+    const privateKey = await getSolanaPrivateKey();
+    printToConsole("privateKey", { privateKey });
+  } catch (error) {
+    printToConsole("error", error instanceof Error ? error.message : error);
+  }
+};
+
 // EVM-only: wagmi switchChain does not change Solana cluster; only show when multiple EIP-155 chains are configured.
 const eip155Chains = computed(() => props.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155));
 
@@ -393,6 +402,7 @@ const onSwitchChain = async () => {
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
+          <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">

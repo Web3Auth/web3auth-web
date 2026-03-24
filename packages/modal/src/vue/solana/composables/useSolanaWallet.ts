@@ -1,6 +1,6 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
-import { CHAIN_NAMESPACES } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { computed, Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
 import { useChain, useWeb3Auth } from "../../composables";
@@ -17,6 +17,11 @@ export type IUseSolanaWallet = {
    * ```
    */
   rpc: ShallowRef<Rpc<SolanaRpcApi> | null>;
+  /**
+   * Returns the Solana ed25519 private key. Only works with the Auth connector.
+   * @throws Error if connected via a non-Auth connector or if the provider is unavailable.
+   */
+  getPrivateKey: () => Promise<string>;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
@@ -46,6 +51,18 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     rpc.value = null;
   };
 
+  const getPrivateKey = async (): Promise<string> => {
+    if (!web3Auth.value) throw new Error("Web3Auth not initialized");
+    if (connection.value?.connectorName !== WALLET_CONNECTORS.AUTH) {
+      throw new Error("getPrivateKey is only supported with the Auth connector");
+    }
+    const provider = web3Auth.value.connectedConnector?.provider;
+    if (!provider) throw new Error("Provider not available");
+    const privateKey = await provider.request<never, string>({ method: "solana_privateKey" });
+    if (!privateKey) throw new Error("Failed to retrieve private key");
+    return privateKey;
+  };
+
   watch(
     [connection, chainNamespace],
     ([newConnection, newChainNamespace]) => {
@@ -58,5 +75,5 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     { immediate: true }
   );
 
-  return { solanaWallet, accounts, rpc };
+  return { solanaWallet, accounts, rpc, getPrivateKey };
 };
