@@ -7,7 +7,6 @@ import {
   ANALYTICS_EVENTS,
   CAN_AUTHORIZE_STATUSES,
   CHAIN_NAMESPACES,
-  ChainNamespaceType,
   EVM_PLUGINS,
   IPlugin,
   IWeb3AuthCore,
@@ -46,9 +45,8 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.connection && !this.SUPPORTED_CONNECTORS.includes(web3auth.connectedConnectorName)) throw WalletServicesPluginError.notInitialized();
-    const currentChainConfig = web3auth.currentChain;
-    if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(currentChainConfig?.chainNamespace))
-      throw WalletServicesPluginError.unsupportedChainNamespace();
+    const currentChainConfig = web3auth.getCurrentChain(CHAIN_NAMESPACES.EIP155) ?? web3auth.getCurrentChain(CHAIN_NAMESPACES.SOLANA);
+    if (!currentChainConfig) throw WalletServicesPluginError.unsupportedChainNamespace();
 
     this.web3auth = web3auth;
     this.analytics = analytics;
