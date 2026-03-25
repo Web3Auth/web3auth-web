@@ -12,6 +12,7 @@ import {
   AuthLoginParams,
   AUTHORIZED_EVENT_DATA,
   CAN_AUTHORIZE_STATUSES,
+  CAN_LOGOUT_STATUSES,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
@@ -67,6 +68,10 @@ import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
+
+// TODO: remove this after consent is implemented
+const REQUIRE_CONSENT = true;
+
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
@@ -81,6 +86,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected analytics: Analytics;
 
   protected plugins: Record<string, IPlugin> = {};
+
+  protected consentRequired = REQUIRE_CONSENT;
+
+  private pendingConnectedData: (CONNECTED_EVENT_DATA & { loginMode: LoginModeType }) | null = null;
+
+  private pendingAuthorizedData: AUTHORIZED_EVENT_DATA | null = null;
 
   private storage: IStorage;
 
@@ -108,11 +119,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     this.loadState(initialState);
     if (this.state.idToken && this.coreOptions.ssr) {
-      // connect-only is the default authentication mode, so we need to set the status to connected if the idToken is present and ssr is enabled
-      this.status =
-        this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN
-          ? CONNECTOR_STATUS.AUTHORIZED
-          : CONNECTOR_STATUS.CONNECTED;
+      if (this.consentRequired) {
+        this.status = CONNECTOR_STATUS.CONSENT_REQUIRED;
+      } else {
+        this.status =
+          this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN
+            ? CONNECTOR_STATUS.AUTHORIZED
+            : CONNECTOR_STATUS.CONNECTED;
+      }
     }
   }
 
@@ -437,9 +451,36 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CAN_LOGOUT_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.status === CONNECTOR_STATUS.DISCONNECTING) return;
+    this.pendingConnectedData = null;
+    this.pendingAuthorizedData = null;
     await this.connectedConnector.disconnect(options);
+  }
+
+  async acceptConsent(): Promise<void> {
+    if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRED) {
+      throw WalletLoginError.connectionError("Cannot accept consent: not in consent_required state");
+    }
+
+    const connectedData = this.pendingConnectedData;
+    if (!connectedData) {
+      throw WalletLoginError.connectionError("Cannot accept consent: no pending connection data");
+    }
+
+    this.status = CONNECTOR_STATUS.CONNECTED;
+    log.debug("consent accepted, connected", this.status, this.connectedConnectorName);
+    this.connectToPlugins({ ...connectedData, connector: connectedData.connector as WALLET_CONNECTOR_TYPE });
+    this.emit(CONNECTOR_EVENTS.CONNECTED, connectedData);
+
+    if (this.pendingAuthorizedData) {
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      log.debug("consent accepted, authorized", this.status, this.connectedConnectorName);
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, this.pendingAuthorizedData);
+    }
+
+    this.pendingConnectedData = null;
+    this.pendingAuthorizedData = null;
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -891,6 +932,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.setState({ connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connector);
 
+      if (this.consentRequired) {
+        this.status = CONNECTOR_STATUS.CONSENT_REQUIRED;
+        this.pendingConnectedData = { ...data, loginMode: this.loginMode };
+        log.debug("consent_required", this.status, this.connectedConnectorName);
+        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRED, { ...data, loginMode: this.loginMode });
+        return;
+      }
+
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
       this.connectToPlugins({ ...data, connector: data.connector as WALLET_CONNECTOR_TYPE });
@@ -901,6 +950,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // re-setup commonJRPCProvider
       this.commonJRPCProvider.removeAllListeners();
       this.setupCommonJRPCProvider();
+
+      this.pendingConnectedData = null;
+      this.pendingAuthorizedData = null;
 
       // get back to ready state for rehydrating.
       this.status = CONNECTOR_STATUS.READY;
@@ -970,11 +1022,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.AUTHORIZING, (data) => {
+      if (this.status === CONNECTOR_STATUS.CONSENT_REQUIRED) return;
       this.status = CONNECTOR_STATUS.AUTHORIZING;
       this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
       log.debug("authorizing", this.status, this.connectedConnectorName);
     });
     connector.on(CONNECTOR_EVENTS.AUTHORIZED, (data: AUTHORIZED_EVENT_DATA) => {
+      if (this.status === CONNECTOR_STATUS.CONSENT_REQUIRED) {
+        this.pendingAuthorizedData = data;
+        this.setState({ idToken: data.identityTokenInfo.idToken });
+        log.debug("authorized (buffered, pending consent)", this.connectedConnectorName);
+        return;
+      }
       this.status = CONNECTOR_STATUS.AUTHORIZED;
       this.setState({ idToken: data.identityTokenInfo.idToken });
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);

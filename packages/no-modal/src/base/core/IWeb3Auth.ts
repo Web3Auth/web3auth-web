@@ -228,9 +228,10 @@ export interface IWeb3Auth extends IWeb3AuthCore {
 
 export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType };
 
-export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready"> & {
+export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready" | "consent_required"> & {
   [CONNECTOR_EVENTS.READY]: () => void;
   [CONNECTOR_EVENTS.CONNECTED]: (data: SDK_CONNECTED_EVENT_DATA) => void;
+  [CONNECTOR_EVENTS.CONSENT_REQUIRED]: (data: SDK_CONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError, loginMode: LoginModeType) => void;
   MODAL_VISIBILITY: (visibility: boolean) => void;
 };

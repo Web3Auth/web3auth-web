@@ -135,6 +135,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.CACHE_CLEAR]: () => void;
   [CONNECTOR_EVENTS.CONNECTORS_UPDATED]: (data: { connectors: IConnector<unknown>[] }) => void;
   [CONNECTOR_EVENTS.MFA_ENABLED]: (isMFAEnabled: boolean) => void;
+  [CONNECTOR_EVENTS.CONSENT_REQUIRED]: (data: CONNECTED_EVENT_DATA) => void;
 };
 
 export interface BaseConnectorConfig {

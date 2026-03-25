@@ -129,6 +129,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           onExternalWalletLogin: this.onExternalWalletLogin,
           onModalVisibility: this.onModalVisibility,
           onMobileVerifyConnect: this.onMobileVerifyConnect,
+          onAcceptConsent: this.onAcceptConsent,
+          onDeclineConsent: this.onDeclineConsent,
         }
       );
       await withAbort(() => this.loginModal.initModal(), signal);
@@ -693,6 +695,24 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       await connector.getIdentityToken();
     } catch (error) {
       log.error(`Error while connecting to connector: ${params.connector}`, error);
+    }
+  };
+
+  private onAcceptConsent = async (): Promise<void> => {
+    try {
+      await this.acceptConsent();
+    } catch (error) {
+      log.error("Error while accepting consent", error);
+    }
+  };
+
+  private onDeclineConsent = async (): Promise<void> => {
+    try {
+      await this.logout();
+    } catch (error) {
+      log.error("Error while declining consent", error);
+    } finally {
+      this.loginModal.closeModal();
     }
   };
 

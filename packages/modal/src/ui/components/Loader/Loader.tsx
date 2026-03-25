@@ -1,5 +1,5 @@
 import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS } from "../../interfaces";
@@ -122,6 +122,38 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
   );
 }
 
+function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () => void }) {
+  const { onAccept, onDecline } = props;
+  const [t] = useTranslation(undefined, { i18n });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAccept = () => {
+    setIsSubmitting(true);
+    onAccept?.();
+  };
+
+  return (
+    <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-between w3a--gap-y-4">
+      <p className="w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
+        {t("modal.consent.title", { defaultValue: "Terms and Conditions" })}
+      </p>
+      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
+        {t("modal.consent.message", {
+          defaultValue: "By continuing, you agree to the Terms and Conditions and Privacy Policy.",
+        })}
+      </p>
+      <div className="w3a--flex w3a--w-full w3a--flex-col w3a--gap-y-2">
+        <button type="button" disabled={isSubmitting} onClick={handleAccept} className="w3a--btn w3a--rounded-full disabled:w3a--opacity-60">
+          <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.consent.accept", { defaultValue: "Accept" })}</p>
+        </button>
+        <button type="button" disabled={isSubmitting} onClick={onDecline} className="w3a--btn w3a--rounded-full disabled:w3a--opacity-60">
+          <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.consent.decline", { defaultValue: "Decline" })}</p>
+        </button>
+      </div>
+    </div>
+  );
+}
+
 /**
  * Loader component
  * @param props - LoaderProps
@@ -140,6 +172,8 @@ function Loader(props: LoaderProps) {
     walletRegistry,
     handleMobileVerifyConnect,
     hideSuccessScreen = false,
+    onAcceptConsent,
+    onDeclineConsent,
   } = props;
 
   const isConnectedAccordingToAuthenticationMode = useMemo(
@@ -178,6 +212,8 @@ function Loader(props: LoaderProps) {
           handleMobileVerifyConnect={handleMobileVerifyConnect}
         />
       )}
+
+      {modalStatus === MODAL_STATUS.CONSENT_REQUIRED && <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} />}
     </div>
   );
 }

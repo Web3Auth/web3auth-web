@@ -260,6 +260,8 @@ export class LoginModal {
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleMobileVerifyConnect={this.handleMobileVerifyConnect}
             handleSocialLoginClick={this.handleSocialLoginClick}
+            handleAcceptConsent={this.handleAcceptConsent}
+            handleDeclineConsent={this.handleDeclineConsent}
             closeModal={this.closeModal}
           >
             <Widget stateListener={this.stateEmitter} />
@@ -363,6 +365,18 @@ export class LoginModal {
     }
   };
 
+  private handleAcceptConsent = () => {
+    if (this.callbacks.onAcceptConsent) {
+      this.callbacks.onAcceptConsent();
+    }
+  };
+
+  private handleDeclineConsent = () => {
+    if (this.callbacks.onDeclineConsent) {
+      this.callbacks.onDeclineConsent();
+    }
+  };
+
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { loginParams } = params;
@@ -458,6 +472,9 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
       this.setState({ status: MODAL_STATUS.AUTHORIZED });
+    });
+    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, () => {
+      this.setState({ status: MODAL_STATUS.CONSENT_REQUIRED, modalVisibility: true });
     });
   };
 }
