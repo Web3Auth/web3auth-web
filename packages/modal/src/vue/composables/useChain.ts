@@ -1,18 +1,12 @@
-import { ChainNamespaceType } from "@web3auth/no-modal";
-import { Ref } from "vue";
+import { ChainNamespaceType, CustomChainConfig } from "@web3auth/no-modal";
+import { computed, ComputedRef } from "vue";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export type IUseChain = {
-  chainId: Ref<string | null>;
-  chainNamespace: Ref<ChainNamespaceType | null>;
-};
-
-export const useChain = (): IUseChain => {
+export const useChain = (namespace: ChainNamespaceType): ComputedRef<CustomChainConfig | undefined> => {
   const context = useWeb3AuthInner();
-
-  return {
-    chainId: context.chainId,
-    chainNamespace: context.chainNamespace,
-  };
+  return computed(() => {
+    void context.currentChainIds.value;
+    return context.web3Auth.value?.getCurrentChain(namespace);
+  });
 };

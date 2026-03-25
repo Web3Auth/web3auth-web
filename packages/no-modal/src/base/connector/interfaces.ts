@@ -94,7 +94,7 @@ export interface IConnector<T> extends SafeEventEmitter {
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;
-  switchChain(params: { chainId: string }): Promise<void>;
+  switchChain(params: { chainId: string; namespace: ChainNamespaceType }): Promise<void>;
   getIdentityToken(): Promise<IdentityTokenInfo>;
   cleanup?(): Promise<void>;
 }

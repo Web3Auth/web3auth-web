@@ -21,8 +21,7 @@ interface IBaseWeb3AuthComposableContext {
   isInitialized: Ref<boolean>;
   status: Ref<CONNECTOR_STATUS_TYPE | null>;
   isMFAEnabled: Ref<boolean>;
-  chainId: Ref<string | null>;
-  chainNamespace: Ref<ChainNamespaceType | null>;
+  currentChainIds: Ref<Partial<Record<ChainNamespaceType, string>>>;
   getPlugin: (pluginName: string) => IPlugin | null;
   setIsMFAEnabled: (isMfaEnabled: boolean) => void;
 }

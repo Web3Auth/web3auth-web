@@ -201,6 +201,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
+  currentChainIds: Partial<Record<ChainNamespaceType, string>>;
   status: CONNECTOR_STATUS_TYPE;
   connection: Connection | null;
   init(options?: { signal?: AbortSignal }): Promise<void>;
@@ -209,7 +210,8 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   getIdentityToken(): Promise<IdentityTokenInfo>;
-  switchChain(params: { chainId: string }): Promise<void>;
+  getCurrentChain(namespace: ChainNamespaceType): CustomChainConfig | undefined;
+  switchChain(params: { chainId: string; namespace: ChainNamespaceType }): Promise<void>;
 }
 
 export interface IWeb3Auth extends IWeb3AuthCore {

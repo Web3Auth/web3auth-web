@@ -23,8 +23,7 @@ export const Web3AuthProvider = defineComponent({
     const connection = ref<Connection | null>(null);
     const isMFAEnabled = ref(false);
     const status = ref<CONNECTOR_STATUS_TYPE | null>(null);
-    const chainId = ref<string | null>(null);
-    const chainNamespace = ref<ChainNamespaceType | null>(null);
+    const currentChainIds = ref<Partial<Record<ChainNamespaceType, string>>>({});
 
     const isInitializing = ref(false);
     const initError = ref<Error | null>(null);
@@ -51,8 +50,7 @@ export const Web3AuthProvider = defineComponent({
           isConnected.value = false;
           isAuthorized.value = false;
           status.value = null;
-          chainId.value = null;
-          chainNamespace.value = null;
+          currentChainIds.value = {};
         };
 
         onInvalidate(() => {
@@ -116,8 +114,7 @@ export const Web3AuthProvider = defineComponent({
             if (!isInitialized.value) isInitialized.value = true;
             isConnected.value = true;
             connection.value = newWeb3Auth.connection;
-            chainId.value = web3Auth.value!.currentChainId;
-            chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
+            currentChainIds.value = { ...web3Auth.value!.currentChainIds };
           }
         };
 
@@ -183,9 +180,8 @@ export const Web3AuthProvider = defineComponent({
     watch(
       connection,
       (newConnection, prevConnection) => {
-        const handleChainChange = (newChainId: string) => {
-          chainId.value = newChainId;
-          chainNamespace.value = web3Auth.value?.currentChain?.chainNamespace ?? null;
+        const handleChainChange = (_newChainId: string) => {
+          currentChainIds.value = { ...web3Auth.value?.currentChainIds };
         };
 
         const prevProvider = prevConnection?.ethereumProvider ?? null;
@@ -212,8 +208,7 @@ export const Web3AuthProvider = defineComponent({
       isInitializing,
       initError,
       isMFAEnabled,
-      chainId,
-      chainNamespace,
+      currentChainIds,
       getPlugin,
       setIsMFAEnabled,
       isAuthorized,

@@ -1,4 +1,4 @@
-import { Web3AuthError } from "@web3auth/no-modal";
+import { ChainNamespaceType, Web3AuthError } from "@web3auth/no-modal";
 import { useCallback, useState } from "react";
 
 import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
@@ -6,7 +6,7 @@ import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
 export interface IUseSwitchChain {
   loading: boolean;
   error: Web3AuthError | null;
-  switchChain: (chainId: string) => Promise<void>;
+  switchChain: (params: { chainId: string; namespace: ChainNamespaceType }) => Promise<void>;
 }
 
 export const useSwitchChain = (): IUseSwitchChain => {
@@ -16,11 +16,11 @@ export const useSwitchChain = (): IUseSwitchChain => {
   const [error, setError] = useState<Web3AuthError | null>(null);
 
   const switchChain = useCallback(
-    async (chainId: string) => {
+    async (params: { chainId: string; namespace: ChainNamespaceType }) => {
       setLoading(true);
       setError(null);
       try {
-        await web3Auth.switchChain({ chainId });
+        await web3Auth.switchChain(params);
       } catch (error) {
         setError(error as Web3AuthError);
       } finally {

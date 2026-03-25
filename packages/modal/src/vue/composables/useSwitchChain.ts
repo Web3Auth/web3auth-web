@@ -1,4 +1,4 @@
-import { log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import { ChainNamespaceType, log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
@@ -6,7 +6,7 @@ import { useWeb3AuthInner } from "./useWeb3AuthInner";
 export interface IUseSwitchChain {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
-  switchChain: (chainParams: { chainId: string }) => Promise<void>;
+  switchChain: (chainParams: { chainId: string; namespace: ChainNamespaceType }) => Promise<void>;
 }
 
 export const useSwitchChain = (): IUseSwitchChain => {
@@ -14,7 +14,7 @@ export const useSwitchChain = (): IUseSwitchChain => {
   const loading = ref(false);
   const error = ref<Web3AuthError | null>(null);
 
-  const switchChain = async (chainParams: { chainId: string }) => {
+  const switchChain = async (chainParams: { chainId: string; namespace: ChainNamespaceType }) => {
     try {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       error.value = null;

@@ -186,7 +186,7 @@ export const WagmiProvider = defineComponent({
 
       const wagmiChains: Chain[] = [];
       if (isInitialized.value && web3Auth?.value?.coreOptions?.chains) {
-        const defaultChainId = web3Auth.value.currentChain?.chainId;
+        const defaultChainId = web3Auth.value.getCurrentChain(CHAIN_NAMESPACES.EIP155)?.chainId;
         const chains = web3Auth.value.coreOptions.chains.filter((chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155);
         if (chains.length === 0) throw WalletInitializationError.invalidParams("No valid chains found in web3auth config for wagmi.");
 

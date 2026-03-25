@@ -28,18 +28,18 @@ export type IUseSolanaWallet = {
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
-  const { chainNamespace } = useChain();
+  const solanaChain = useChain(CHAIN_NAMESPACES.SOLANA);
   const [accounts, setAccounts] = useState<string[] | null>(null);
 
   const solanaWallet = useMemo(() => {
-    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
+    if (!solanaChain) return null;
     return connection?.solanaWallet ?? null;
-  }, [connection, chainNamespace]);
+  }, [connection, solanaChain]);
 
   const rpc = useMemo(() => {
-    if (!web3Auth || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
-    return createSolanaRpc(web3Auth.currentChain.rpcTarget);
-  }, [web3Auth, solanaWallet, chainNamespace]);
+    if (!web3Auth || !solanaWallet || !solanaChain) return null;
+    return createSolanaRpc(solanaChain.rpcTarget);
+  }, [web3Auth, solanaWallet, solanaChain]);
 
   const getPrivateKey = useCallback(async (): Promise<string> => {
     if (!web3Auth) throw new Error("Web3Auth not initialized");
@@ -54,13 +54,13 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   }, [web3Auth, connection]);
 
   useEffect(() => {
-    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA || !solanaWallet) {
+    if (!solanaChain || !solanaWallet) {
       setAccounts(null);
       return;
     }
     const accts = solanaWallet.accounts.map((a) => a.address);
     if (accts.length > 0) setAccounts(accts);
-  }, [solanaWallet, chainNamespace]);
+  }, [solanaWallet, solanaChain]);
 
   return { solanaWallet, accounts, rpc, getPrivateKey };
 };

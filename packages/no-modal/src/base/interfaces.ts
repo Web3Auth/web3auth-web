@@ -14,7 +14,7 @@ export interface WhitelistResponse {
 export interface IWeb3AuthState {
   cachedConnector: string | null;
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
-  currentChainId: string;
+  currentChainIds: Partial<Record<ChainNamespaceType, string>>;
   idToken: string | null;
 }
 

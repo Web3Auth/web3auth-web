@@ -169,7 +169,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
 
     const wagmiChains: Chain[] = [];
     if (isInitialized && web3Auth?.coreOptions?.chains) {
-      const defaultChainId = web3Auth.currentChain?.chainId;
+      const defaultChainId = web3Auth.getCurrentChain(CHAIN_NAMESPACES.EIP155)?.chainId;
       const chains = web3Auth.coreOptions.chains.filter((chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155);
       if (chains.length === 0) throw WalletInitializationError.invalidParams("No valid chains found in web3auth config for wagmi.");
 

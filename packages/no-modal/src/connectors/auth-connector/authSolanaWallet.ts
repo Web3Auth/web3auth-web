@@ -19,7 +19,7 @@ import {
 } from "@wallet-standard/features";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { type CustomChainConfig, getSolanaChainByChainConfig, type IProvider } from "../../base";
+import { CHAIN_NAMESPACES, type CustomChainConfig, getSolanaChainByChainConfig, type IProvider } from "../../base";
 
 const base58Encoder = getBase58Encoder();
 const base64Decoder = getBase64Decoder();
@@ -142,7 +142,11 @@ export class AuthSolanaWallet implements Wallet {
    */
   static async create(provider: IProvider, chainConfig: CustomChainConfig): Promise<AuthSolanaWallet> {
     const chainIdentifier = getSolanaChainByChainConfig(chainConfig);
-    const addresses = (await provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS })) ?? [];
+    const addresses =
+      (await provider.request<{ chainNamespace: string }, string[]>({
+        method: SOLANA_METHOD_TYPES.GET_ACCOUNTS,
+        params: { chainNamespace: CHAIN_NAMESPACES.SOLANA },
+      })) ?? [];
     const accountFeatures: IdentifierArray = [SolanaSignAndSendTransaction, SolanaSignMessage, SolanaSignTransaction] as IdentifierArray;
     const accounts: WalletAccount[] = addresses.map((address) => ({
       address,

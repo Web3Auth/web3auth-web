@@ -25,8 +25,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     return new Web3AuthNoModal(web3AuthOptions, initialState);
   }, [web3AuthOptions, initialState]);
 
-  const [chainId, setChainId] = useState<string | null>(null);
-  const [chainNamespace, setChainNamespace] = useState<ChainNamespaceType | null>(null);
+  const [currentChainIds, setCurrentChainIds] = useState<Partial<Record<ChainNamespaceType, string>>>({});
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
@@ -54,8 +53,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
           integration_type: ANALYTICS_INTEGRATION_TYPE.REACT_HOOKS,
         });
         await web3Auth.init({ signal: controller.signal });
-        setChainId(web3Auth.currentChainId);
-        setChainNamespace(web3Auth.currentChain?.chainNamespace);
+        setCurrentChainIds({ ...web3Auth.currentChainIds });
       } catch (error) {
         setInitError(error as Error);
       } finally {
@@ -71,9 +69,8 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   }, [web3Auth]);
 
   useEffect(() => {
-    const handleChainChange = async (chainId: string) => {
-      setChainId(chainId);
-      setChainNamespace(web3Auth?.currentChain?.chainNamespace);
+    const handleChainChange = async (_chainId: string) => {
+      setCurrentChainIds({ ...web3Auth.currentChainIds });
     };
 
     const provider = connection?.ethereumProvider ?? null;
@@ -172,8 +169,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       isInitializing,
       initError,
       isMFAEnabled,
-      chainId,
-      chainNamespace,
+      currentChainIds,
       getPlugin,
       setIsMFAEnabled,
       isAuthorized,
@@ -189,8 +185,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     initError,
     isMFAEnabled,
     setIsMFAEnabled,
-    chainId,
-    chainNamespace,
+    currentChainIds,
     isAuthorized,
   ]);
 

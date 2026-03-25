@@ -659,7 +659,8 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
       whiteLabel,
-      accountAbstractionConfig: coreOptions.accountAbstractionConfig,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      accountAbstractionConfig: coreOptions.accountAbstractionConfig as any,
       enableLogging: coreOptions.enableLogging,
     };
 

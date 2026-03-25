@@ -3,8 +3,7 @@ import { type Connection, CONNECTOR_STATUS_TYPE } from "../connector";
 import { IPlugin } from "../plugin";
 
 export interface IBaseWeb3AuthHookContext {
-  chainId: string | null;
-  chainNamespace: ChainNamespaceType | null;
+  currentChainIds: Partial<Record<ChainNamespaceType, string>>;
   isInitialized: boolean;
   isInitializing: boolean;
   initError: unknown;
