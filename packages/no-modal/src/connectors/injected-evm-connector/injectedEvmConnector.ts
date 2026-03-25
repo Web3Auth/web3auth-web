@@ -96,10 +96,10 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       // switch chain if not connected to the right chain
       if (this.injectedProvider.chainId !== chainConfig.chainId) {
         try {
-          await this.switchChain(chainConfig, true);
+          await this.switchChain({ chainId: chainConfig.chainId, namespace: chainConfig.chainNamespace }, true);
         } catch {
           await this.addChain(chainConfig, true);
-          await this.switchChain(chainConfig, true);
+          await this.switchChain({ chainId: chainConfig.chainId, namespace: chainConfig.chainNamespace }, true);
         }
       }
       this.status = CONNECTOR_STATUS.CONNECTED;
@@ -175,7 +175,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
     });
   }
 
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+  public async switchChain(params: { chainId: string; namespace: ChainNamespaceType }, init = false): Promise<void> {
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
     super.checkSwitchChainRequirements(params, init);
     await this.injectedProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });

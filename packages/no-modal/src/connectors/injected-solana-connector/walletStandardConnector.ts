@@ -166,8 +166,8 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     return {};
   }
 
-  async switchChain(_params: { chainId: string }, _init = false): Promise<void> {
-    throw WalletLoginError.unsupportedOperation("Injected Solana wallets do not support chain switching.");
+  async switchChain(_params: { chainId: string; namespace: ChainNamespaceType }, _init = false): Promise<void> {
+    // Solana Wallet Standard has no native chain switching; chain change is a local state-only update at the SDK level.
   }
 
   async enableMFA(): Promise<void> {

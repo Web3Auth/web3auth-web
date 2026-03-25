@@ -156,7 +156,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       // switch chain if not connected to the right chain
       const currentChainId = (await this.metamaskProvider.request({ method: "eth_chainId" })) as string;
       if (currentChainId !== chainConfig.chainId) {
-        await this.switchChain(chainConfig, true);
+        await this.switchChain({ chainId: chainConfig.chainId, namespace: chainConfig.chainNamespace }, true);
       }
 
       // handle disconnect event
@@ -235,7 +235,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     return {};
   }
 
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+  public async switchChain(params: { chainId: string; namespace: ChainNamespaceType }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     const requestSwitchChain = () => this.metamaskProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
     try {

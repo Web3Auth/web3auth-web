@@ -1,7 +1,7 @@
 import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 import { CAN_AUTHORIZE_STATUSES, CONNECTED_STATUSES } from "./connectorStatus";
@@ -93,14 +93,16 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     if (!this.connected) throw WalletLoginError.disconnectionError("Not connected with wallet");
   }
 
-  checkSwitchChainRequirements(params: { chainId: string }, init = false): void {
+  checkSwitchChainRequirements(params: { chainId: string; namespace: ChainNamespaceType }, init = false): void {
     if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
     if (!this.coreOptions.chains) throw WalletInitializationError.invalidParams("chainConfigs is required");
     const doesChainExist = this.coreOptions.chains.some(
       (x) =>
-        x.chainId === params.chainId && (x.chainNamespace === this.connectorNamespace || this.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN)
+        x.chainId === params.chainId &&
+        x.chainNamespace === params.namespace &&
+        (x.chainNamespace === this.connectorNamespace || this.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN)
     );
-    if (!doesChainExist) throw WalletInitializationError.invalidParams("Invalid chainId");
+    if (!doesChainExist) throw WalletInitializationError.invalidParams(`Invalid chainId ${params.chainId} for namespace ${params.namespace}`);
   }
 
   updateConnectorData(data: unknown): void {
@@ -115,5 +117,5 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
   abstract getIdentityToken(): Promise<IdentityTokenInfo>;
-  abstract switchChain(params: { chainId: string }): Promise<void>;
+  abstract switchChain(params: { chainId: string; namespace: ChainNamespaceType }): Promise<void>;
 }

@@ -27,6 +27,7 @@ import {
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
+  ChainNamespaceType,
   cloneDeep,
   CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
@@ -299,28 +300,16 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     return userInfo;
   }
 
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+  public async switchChain(params: { chainId: string; namespace: ChainNamespaceType }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
 
-    const namespaces = new Set(this.coreOptions.chains.map((c) => c.chainNamespace));
-    if (namespaces.size > 1) {
-      throw WalletLoginError.unsupportedOperation(
-        "switchChain is not supported when multiple chain namespaces are configured. Use connection.ethereumProvider and connection.solanaWallet directly."
-      );
-    }
+    const { chainId, namespace } = params;
 
-    const { chainId: newChainId } = params;
-    const { chainId: currentChainId } = this.provider;
-    if (currentChainId === newChainId) return;
-
-    const currentChain = this.coreOptions.chains.find((c) => c.chainId === currentChainId);
-    const { chainNamespace } = currentChain;
-
-    if (chainNamespace === CHAIN_NAMESPACES.SOLANA || chainNamespace === CHAIN_NAMESPACES.EIP155) {
-      const fullChainId = `${chainNamespace}:${Number(newChainId)}`;
+    if (namespace === CHAIN_NAMESPACES.SOLANA || namespace === CHAIN_NAMESPACES.EIP155) {
+      const fullChainId = `${namespace}:${Number(chainId)}`;
       await this.wsEmbedInstance.provider?.request({ method: "wallet_switchChain", params: { chainId: fullChainId } });
     } else {
-      await this.privateKeyProvider?.switchChain(params);
+      await this.privateKeyProvider?.switchChain({ chainId });
     }
   }
 
@@ -659,8 +648,7 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
     const finalWsSettings: WalletServicesSettings = {
       ...coreOptions.walletServicesConfig,
       whiteLabel,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      accountAbstractionConfig: coreOptions.accountAbstractionConfig as any,
+      accountAbstractionConfig: coreOptions.accountAbstractionConfig,
       enableLogging: coreOptions.enableLogging,
     };
 

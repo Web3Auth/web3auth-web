@@ -107,7 +107,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
       const currentChainId = (await this.coinbaseProvider.request({ method: "eth_chainId" })) as string;
       if (currentChainId !== chainConfig.chainId) {
-        await this.switchChain(chainConfig, true);
+        await this.switchChain({ chainId: chainConfig.chainId, namespace: chainConfig.chainNamespace }, true);
       }
       this.status = CONNECTOR_STATUS.CONNECTED;
       if (!this.provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
@@ -159,7 +159,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     return {};
   }
 
-  public async switchChain(params: { chainId: string }, init = false): Promise<void> {
+  public async switchChain(params: { chainId: string; namespace: ChainNamespaceType }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     try {
       await this.coinbaseProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
