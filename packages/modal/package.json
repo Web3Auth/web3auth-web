@@ -139,6 +139,11 @@
       "require": "./dist/lib.cjs/packages/modal/src/vue/wagmi/index.js",
       "types": "./dist/lib.cjs/types/vue/wagmi/index.d.ts"
     },
+    "./connectors/base-account-connector": {
+      "import": "./dist/lib.esm/packages/modal/src/connectors/base-account-connector/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/connectors/base-account-connector/index.js",
+      "types": "./dist/lib.cjs/types/connectors/base-account-connector/index.d.ts"
+    },
     "./connectors/coinbase-connector": {
       "import": "./dist/lib.esm/packages/modal/src/connectors/coinbase-connector/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/connectors/coinbase-connector/index.js",
@@ -169,6 +174,9 @@
       ],
       "vue/wagmi": [
         "./dist/lib.cjs/types/vue/wagmi/index.d.ts"
+      ],
+      "connectors/base-account-connector": [
+        "./dist/lib.cjs/types/connectors/base-account-connector/index.d.ts"
       ],
       "connectors/coinbase-connector": [
         "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
