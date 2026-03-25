@@ -523,7 +523,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (connector.status !== CONNECTOR_STATUS.NOT_READY) return;
 
           // only initialize a external connectors here if it is a cached connector.
-          if (this.cachedConnector !== connectorName && connector.type === CONNECTOR_CATEGORY.EXTERNAL) return;
+          // match both name and namespace so EVM and Solana connectors with the same name don't collide.
+          const isCachedConnector = this.cachedConnector === connectorName && this.cachedConnectorNamespace === connector.connectorNamespace;
+          if (!isCachedConnector && connector.type === CONNECTOR_CATEGORY.EXTERNAL) return;
 
           // in-app wallets or cached wallet (being connected or already connected) are initialized first.
           // if connector is configured then only initialize in app or cached connector.
@@ -577,12 +579,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
       // initialize connectors
       // skip initializing cached connector here as it is already being initialized in initModal before.
-      if (connector.status === CONNECTOR_STATUS.NOT_READY && this.cachedConnector !== connectorName) {
+      const isCachedConnector = this.cachedConnector === connectorName && this.cachedConnectorNamespace === connector.connectorNamespace;
+      if (connector.status === CONNECTOR_STATUS.NOT_READY && !isCachedConnector) {
         try {
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
           await connector.init({
-            autoConnect: this.cachedConnector === connectorName,
+            autoConnect: isCachedConnector,
             chainId: initialChain.chainId,
             getIdentityToken: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
           });

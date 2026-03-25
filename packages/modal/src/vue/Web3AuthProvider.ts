@@ -122,6 +122,7 @@ export const Web3AuthProvider = defineComponent({
           connection.value = null;
           isMFAEnabled.value = false;
           isAuthorized.value = false;
+          currentChainIds.value = { ...web3Auth.value?.currentChainIds };
         };
 
         const connectingListener = () => {

@@ -10,7 +10,7 @@ import {
 } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
-import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
+import { type ChainNamespaceType, type ConnectorNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   CONNECTED_EVENT_DATA,
   type Connection,
@@ -199,6 +199,8 @@ export type LoginParamMap = {
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
   readonly coreOptions: IWeb3AuthCoreOptions;
+  cachedConnector: string | null;
+  cachedConnectorNamespace: ConnectorNamespaceType | null;
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
   currentChainIds: Partial<Record<ChainNamespaceType, string>>;

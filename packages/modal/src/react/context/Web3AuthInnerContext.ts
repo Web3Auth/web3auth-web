@@ -108,6 +108,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setIsConnected(false);
       setIsAuthorized(false);
       setConnection(null);
+      setCurrentChainIds({ ...web3Auth.currentChainIds });
     };
     const connectingListener = () => {
       setStatus(web3Auth.status);

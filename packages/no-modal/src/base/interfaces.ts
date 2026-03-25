@@ -2,7 +2,7 @@ import { type BUTTON_POSITION_TYPE } from "@toruslabs/base-controllers";
 import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
 import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
-import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
+import { type ChainNamespaceType, type ConnectorNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
 import { LOGIN_MODE, MODAL_SIGN_IN_METHODS, SMART_ACCOUNT_WALLET_SCOPE, WIDGET_TYPE } from "./constants";
 import { WALLET_CONNECTOR_TYPE } from "./wallet";
 
@@ -13,7 +13,9 @@ export interface WhitelistResponse {
 
 export interface IWeb3AuthState {
   cachedConnector: string | null;
+  cachedConnectorNamespace: ConnectorNamespaceType | null;
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
+  connectedConnectorNamespace: ConnectorNamespaceType | null;
   currentChainIds: Partial<Record<ChainNamespaceType, string>>;
   idToken: string | null;
 }

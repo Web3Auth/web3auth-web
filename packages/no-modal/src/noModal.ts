@@ -22,6 +22,7 @@ import {
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  type ConnectorNamespaceType,
   type CustomChainConfig,
   fetchProjectConfig,
   getAaAnalyticsProperties,
@@ -88,8 +89,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   private storage: IStorage;
 
   private state: IWeb3AuthState = {
-    connectedConnectorName: null,
     cachedConnector: null,
+    cachedConnectorNamespace: null,
+    connectedConnectorName: null,
+    connectedConnectorNamespace: null,
     currentChainIds: {},
     idToken: null,
   };
@@ -120,8 +123,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get currentChain(): CustomChainConfig | undefined {
-    // Returns the chain for the connected connector's namespace, or the default/first chain.
-    // Kept for backward compatibility; prefer getCurrentChain(namespace) for namespace-aware access.
     const connectedNamespace = this.connectedConnector?.connectorNamespace;
     if (connectedNamespace && connectedNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
       return this.getCurrentChain(connectedNamespace as ChainNamespaceType);
@@ -154,8 +155,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.state.cachedConnector;
   }
 
+  get cachedConnectorNamespace(): ConnectorNamespaceType | null {
+    return this.state.cachedConnectorNamespace;
+  }
+
   get connectedConnector(): IConnector<unknown> | null {
-    return this.getConnector(this.connectedConnectorName);
+    const ns = this.state.connectedConnectorNamespace;
+    const namespaceFilter = ns && ns !== CONNECTOR_NAMESPACES.MULTICHAIN ? (ns as ChainNamespaceType) : undefined;
+    return this.getConnector(this.connectedConnectorName, namespaceFilter);
   }
 
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
@@ -286,8 +293,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public clearCache() {
     this.setState({
-      connectedConnectorName: null,
       cachedConnector: null,
+      cachedConnectorNamespace: null,
+      connectedConnectorName: null,
+      connectedConnectorNamespace: null,
       currentChainIds: {},
       idToken: null,
     });
@@ -318,12 +327,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       await this.connectedConnector.switchChain({ chainId, namespace });
+      this.setChainForNamespace(namespace, chainId);
       return;
     }
 
-    // TODO: should do only for EVM
     if (this.commonJRPCProvider) {
       await this.commonJRPCProvider.switchChain({ chainId });
+      this.setChainForNamespace(namespace, chainId);
       return;
     }
     throw WalletInitializationError.notReady(`No wallet is ready`);
@@ -775,7 +785,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       chains: this.coreOptions.chains,
     });
 
-    // sync chainId — infer namespace by looking up chainId in configured chains
     this.commonJRPCProvider.on("chainChanged", (chainId: string) => {
       const changedChain = this.coreOptions.chains.find((c) => c.chainId === chainId);
       if (changedChain) this.setChainForNamespace(changedChain.chainNamespace, chainId);
@@ -942,8 +951,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
       }
 
-      this.setState({ connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE });
-      this.cacheWallet(data.connector);
+      this.setState({
+        connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE,
+        connectedConnectorNamespace: connector.connectorNamespace,
+      });
+      this.cacheWallet(data.connector, connector.connectorNamespace);
 
       const isSolanaOnly = connector.connectorNamespace === CHAIN_NAMESPACES.SOLANA && !!connector.solanaWallet;
       this.currentConnection = {
@@ -986,7 +998,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           });
         })
       );
-      this.setState({ connectedConnectorName: null });
+      this.setState({ connectedConnectorName: null, connectedConnectorNamespace: null });
       this.emit(CONNECTOR_EVENTS.DISCONNECTED);
     });
     connector.on(CONNECTOR_EVENTS.CONNECTING, (data) => {
@@ -1049,13 +1061,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected checkIfAutoConnect(connector: IConnector<unknown>): boolean {
-    let autoConnect = this.cachedConnector === connector.name;
-    if (autoConnect) {
-      if (connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN) autoConnect = true;
-      else {
-        // single-namespace connector: auto-connect only if we have a chain for its namespace
-        autoConnect = Boolean(this.state.currentChainIds[connector.connectorNamespace as ChainNamespaceType]);
-      }
+    const cachedNs = this.state.cachedConnectorNamespace;
+    const nameMatches = this.cachedConnector === connector.name;
+    // also match namespace so MetaMask EVM and MetaMask Solana wallet standard don't collide;
+    // cachedNs === null means old persisted state (pre-namespace) — allow any namespace to preserve auto-connect
+    const namespaceMatches =
+      cachedNs === null ||
+      cachedNs === connector.connectorNamespace ||
+      connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN ||
+      cachedNs === CONNECTOR_NAMESPACES.MULTICHAIN;
+    let autoConnect = nameMatches && namespaceMatches;
+    if (autoConnect && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
+      autoConnect = Boolean(this.state.currentChainIds[connector.connectorNamespace as ChainNamespaceType]);
     }
     return autoConnect;
   }
@@ -1081,9 +1098,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return chain;
   }
 
-  private cacheWallet(walletName: string) {
+  private cacheWallet(walletName: string, namespace: ConnectorNamespaceType) {
     this.setState({
       cachedConnector: walletName,
+      cachedConnectorNamespace: namespace,
     });
   }
 
@@ -1126,12 +1144,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private loadState(initialState?: IWeb3AuthState) {
     if (initialState) {
-      this.state = initialState;
+      this.state = { ...this.state, ...initialState };
       return;
     }
     const state = this.storage.getItem(WEB3AUTH_STATE_STORAGE_KEY);
     if (!state) return;
-    this.state = deserialize<IWeb3AuthState>(state);
+    const parsed = deserialize<IWeb3AuthState>(state);
+    // currentChainIds, connectedConnectorNamespace, cachedConnectorNamespace added later — guard all
+    this.state = {
+      ...this.state,
+      ...parsed,
+      currentChainIds: parsed.currentChainIds ?? {},
+      connectedConnectorNamespace: parsed.connectedConnectorNamespace ?? null,
+      cachedConnectorNamespace: parsed.cachedConnectorNamespace ?? null,
+    };
   }
 
   private getStorageMethod(): IStorage {
