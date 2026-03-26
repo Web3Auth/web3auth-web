@@ -27,7 +27,7 @@ import {
 import type { ISignClient } from "@walletconnect/types";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
-import { type CustomChainConfig, getSolanaChainByChainConfig, SOLANA_CAIP_CHAIN_MAP } from "../../base";
+import { type CustomChainConfig, getSolanaChainByChainConfig, SOLANA_CAIP_CHAIN_MAP, WEB3AUTH_ICON } from "../../base";
 import { getSolanaAccounts, sendJrpcRequest } from "./walletConnectV2Utils";
 
 const base58Encoder = getBase58Encoder();
@@ -35,8 +35,6 @@ const base58Decoder = getBase58Decoder();
 const base64Decoder = getBase64Decoder();
 const base64Encoder = getBase64Encoder();
 const transactionDecoder = getTransactionDecoder();
-
-const WEB3AUTH_ICON: WalletIcon = `data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciLz4=`;
 
 type WCSolanaFeatures = StandardConnectFeature &
   StandardDisconnectFeature &

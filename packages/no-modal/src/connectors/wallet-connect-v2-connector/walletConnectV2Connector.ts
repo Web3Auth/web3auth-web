@@ -479,9 +479,10 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
     let identityTokenInfo: IdentityTokenInfo | undefined;
     this.emit(CONNECTOR_EVENTS.CONNECTED, {
-      connector: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       reconnected: this.rehydrated,
-      provider: this.provider,
+      ethereumProvider: this.provider,
+      solanaWallet: this._solanaWallet,
       identityTokenInfo,
     } as CONNECTED_EVENT_DATA);
 

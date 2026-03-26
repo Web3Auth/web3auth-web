@@ -113,9 +113,10 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       let identityTokenInfo: IdentityTokenInfo | undefined;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: this.name,
+        connectorName: this.name,
         reconnected: this.rehydrated,
-        provider: this.injectedProvider,
+        ethereumProvider: this.injectedProvider,
+        solanaWallet: null,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 

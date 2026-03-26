@@ -126,9 +126,10 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       let identityTokenInfo: IdentityTokenInfo | undefined;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: this.name,
+        connectorName: this.name,
         reconnected: this.rehydrated,
-        provider: this.provider,
+        ethereumProvider: null,
+        solanaWallet: this.solanaWallet,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
