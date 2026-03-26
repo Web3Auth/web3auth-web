@@ -314,6 +314,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     if (currentChainId === newChainId) return;
 
     const currentChain = this.coreOptions.chains.find((c) => c.chainId === currentChainId);
+    if (!currentChain) throw WalletInitializationError.notReady("Chain config is not available");
     const { chainNamespace } = currentChain;
 
     if (chainNamespace === CHAIN_NAMESPACES.SOLANA || chainNamespace === CHAIN_NAMESPACES.EIP155) {

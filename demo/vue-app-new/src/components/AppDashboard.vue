@@ -370,7 +370,7 @@ const onSwitchChain = async () => {
 
         <!-- EVM -->
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
-          <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
+          <div class="mb-2 text-xl font-bold leading-tight text-left">EVM Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetAccounts">
             {{ t("app.buttons.btnGetAccounts") }}
           </Button>
@@ -401,7 +401,7 @@ const onSwitchChain = async () => {
 
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
-          <div class="mb-2 text-xl font-bold leading-tight text-left">Sample Transaction</div>
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Solana Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
