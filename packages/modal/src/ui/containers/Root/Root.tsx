@@ -221,6 +221,8 @@ function RootContent(props: RootProps) {
               hideSuccessScreen={hideSuccessScreen}
               onAcceptConsent={handleAcceptConsent}
               onDeclineConsent={handleDeclineConsent}
+              privacyPolicy={privacyPolicy}
+              tncLink={tncLink}
             />
           ) : (
             <>
@@ -247,7 +249,10 @@ function RootContent(props: RootProps) {
           )}
 
           {/* Footer */}
-          <Footer privacyPolicy={privacyPolicy} termsOfService={tncLink} />
+          <Footer
+            privacyPolicy={modalState.status !== MODAL_STATUS.CONSENT_REQUIRED ? privacyPolicy : undefined}
+            termsOfService={modalState.status !== MODAL_STATUS.CONSENT_REQUIRED ? tncLink : undefined}
+          />
 
           <RootBodySheets />
         </div>

@@ -16,6 +16,8 @@ export interface LoaderProps {
   hideSuccessScreen?: boolean;
   onAcceptConsent?: () => void;
   onDeclineConsent?: () => void;
+  privacyPolicy?: string;
+  tncLink?: string;
 }
 
 export type ConnectingStatusType = Pick<LoaderProps, "connectorName" | "appLogo" | "connector">;

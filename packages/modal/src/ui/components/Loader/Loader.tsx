@@ -122,8 +122,8 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
   );
 }
 
-function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () => void }) {
-  const { onAccept, onDecline } = props;
+function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () => void; privacyPolicy?: string; tncLink?: string }) {
+  const { onAccept, onDecline, privacyPolicy, tncLink } = props;
   const [t] = useTranslation(undefined, { i18n });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -138,9 +138,20 @@ function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () =>
         {t("modal.consent.title", { defaultValue: "Terms and Conditions" })}
       </p>
       <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
-        {t("modal.consent.message", {
-          defaultValue: "By continuing, you agree to the Terms and Conditions and Privacy Policy.",
-        })}
+        {t("modal.consent.prefix", { defaultValue: "By continuing, you agree to the" })}{" "}
+        {tncLink && (
+          <a href={tncLink} className="w3a--text-app-primary-600 dark:w3a--text-app-primary-500">
+            {t("modal.consent.tnc", { defaultValue: "Terms and Conditions" })}{" "}
+          </a>
+        )}
+        {privacyPolicy && (
+          <>
+            {t("modal.consent.and", { defaultValue: "and" })}{" "}
+            <a href={privacyPolicy} className="w3a--text-app-primary-600 dark:w3a--text-app-primary-500">
+              {t("modal.consent.privacy", { defaultValue: "Privacy Policy" })}
+            </a>
+          </>
+        )}
       </p>
       <div className="w3a--flex w3a--w-full w3a--flex-col w3a--gap-y-2">
         <button type="button" disabled={isSubmitting} onClick={handleAccept} className="w3a--btn w3a--rounded-full disabled:w3a--opacity-60">
@@ -174,6 +185,8 @@ function Loader(props: LoaderProps) {
     hideSuccessScreen = false,
     onAcceptConsent,
     onDeclineConsent,
+    privacyPolicy,
+    tncLink,
   } = props;
 
   const isConnectedAccordingToAuthenticationMode = useMemo(
@@ -213,7 +226,9 @@ function Loader(props: LoaderProps) {
         />
       )}
 
-      {modalStatus === MODAL_STATUS.CONSENT_REQUIRED && <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} />}
+      {modalStatus === MODAL_STATUS.CONSENT_REQUIRED && (
+        <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} privacyPolicy={privacyPolicy} tncLink={tncLink} />
+      )}
     </div>
   );
 }
