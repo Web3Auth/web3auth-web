@@ -3,6 +3,7 @@ export * from "./useCheckout";
 export * from "./useEnableMFA";
 export * from "./useFunding";
 export * from "./useIdentityToken";
+export * from "./useLinkWallet";
 export * from "./useManageMFA";
 export * from "./useReceive";
 export * from "./useSwap";

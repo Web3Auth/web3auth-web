@@ -220,6 +220,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
+  public async linkWallet(): Promise<void> {
+    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
+    if (!this.connectedConnectorName || !CONNECTED_STATUSES.includes(this.status)) {
+      throw WalletInitializationError.notReady("Must be connected before linking a wallet");
+    }
+    this.loginModal.openLinkWallet();
+  }
+
   protected initUIConfig(projectConfig: ProjectConfig) {
     super.initUIConfig(projectConfig);
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});

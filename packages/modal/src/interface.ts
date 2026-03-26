@@ -10,4 +10,5 @@ export interface ConnectorsModalConfig {
 }
 export interface IWeb3AuthModal extends IWeb3Auth {
   connect(): Promise<IProvider | null>;
+  linkWallet(): Promise<void>;
 }
