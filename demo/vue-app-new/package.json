@@ -27,7 +27,7 @@
     "@web3auth/ws-embed": "^5.6.0",
     "ethers": "^6.16.0",
     "petite-vue-i18n": "^11.2.8",
-    "vue": "^3.5.26",
+    "vue": "^3.5.31",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
   },
@@ -48,7 +48,7 @@
     "tailwindcss": "^3.4.13",
     "typescript": "^5.9.3",
     "vite": "^7.3.1",
-    "vue-tsc": "^3.2.2"
+    "vue-tsc": "^3.2.6"
   },
   "optionalDependencies": {
     "@esbuild/linux-x64": "0.27.2"
