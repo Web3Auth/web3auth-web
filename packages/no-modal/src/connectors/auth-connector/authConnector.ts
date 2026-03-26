@@ -436,9 +436,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           let identityTokenInfo: IdentityTokenInfo | undefined;
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
-            connector: WALLET_CONNECTORS.AUTH,
+            connectorName: WALLET_CONNECTORS.AUTH,
             reconnected: this.rehydrated,
-            provider: this.provider,
+            ethereumProvider: this.provider,
+            solanaWallet: this._solanaWallet,
             identityTokenInfo,
           } as CONNECTED_EVENT_DATA);
 
@@ -458,9 +459,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         await this.privateKeyProvider.setupProvider(finalPrivKey, params.chainId);
         this.status = CONNECTOR_STATUS.CONNECTED;
         this.emit(CONNECTOR_EVENTS.CONNECTED, {
-          connector: WALLET_CONNECTORS.AUTH,
+          connectorName: WALLET_CONNECTORS.AUTH,
+          ethereumProvider: this.provider,
+          solanaWallet: this._solanaWallet,
           reconnected: this.rehydrated,
-          provider: this.provider,
         } as CONNECTED_EVENT_DATA);
       }
     }
