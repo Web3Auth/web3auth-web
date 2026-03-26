@@ -69,9 +69,6 @@ import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
 
-// TODO: remove this after consent is implemented
-const REQUIRE_CONSENT = true;
-
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
@@ -87,7 +84,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected plugins: Record<string, IPlugin> = {};
 
-  protected consentRequired = REQUIRE_CONSENT;
+  protected consentRequired = false;
 
   private pendingConnectedData: (CONNECTED_EVENT_DATA & { loginMode: LoginModeType }) | null = null;
 

@@ -71,6 +71,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
 
+    const uiCfg = this.options.uiConfig;
+    this.consentRequired = Boolean("consentRequired" in uiCfg && uiCfg.consentRequired) && Boolean(uiCfg.privacyPolicy) && Boolean(uiCfg.tncLink);
+
+    if (this.consentRequired && this.status !== CONNECTOR_STATUS.NOT_READY) {
+      this.status = CONNECTOR_STATUS.CONSENT_REQUIRED;
+    }
+
     log.info("modalConfig", this.modalConfig);
   }
 
@@ -109,6 +116,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.analytics.setGlobalProperties({ team_id: projectConfig.teamId });
       trackData = this.getInitializationTrackData();
 
+      // TODO: remove override — testing consent flow
+      (this.options.uiConfig as Record<string, unknown>).consentRequired = true;
+      if (!this.options.uiConfig.privacyPolicy) this.options.uiConfig.privacyPolicy = "https://example.com/privacy";
+      if (!this.options.uiConfig.tncLink) this.options.uiConfig.tncLink = "https://example.com/terms";
+
       // init login modal
       const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
       this.loginModal = new LoginModal(
@@ -133,6 +145,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           onDeclineConsent: this.onDeclineConsent,
         }
       );
+      this.consentRequired = this.loginModal.consentRequired;
       await withAbort(() => this.loginModal.initModal(), signal);
 
       // setup common JRPC provider
