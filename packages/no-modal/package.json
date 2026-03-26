@@ -192,8 +192,8 @@
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
   },
   "engines": {
-    "node": ">=20.x",
-    "npm": ">=9.x"
+    "node": ">=22.x",
+    "npm": ">=10.x"
   },
   "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
 }
