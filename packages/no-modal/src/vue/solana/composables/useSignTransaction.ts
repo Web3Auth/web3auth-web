@@ -1,9 +1,7 @@
 import type { Transaction } from "@solana/kit";
 import { Ref, ref } from "vue";
 
-import { log } from "../../../base";
-import { WalletInitializationError, type Web3AuthError } from "../../../base/errors";
-import { walletSignTransaction } from "../../../base";
+import { log, WalletInitializationError, walletSignTransaction, type Web3AuthError } from "../../../base";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignTransaction = {

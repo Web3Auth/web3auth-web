@@ -119,9 +119,10 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
       let identityTokenInfo: IdentityTokenInfo | undefined;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: WALLET_CONNECTORS.COINBASE,
+        connectorName: WALLET_CONNECTORS.COINBASE,
         reconnected: this.rehydrated,
-        provider: this.provider,
+        ethereumProvider: this.provider,
+        solanaWallet: null,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 

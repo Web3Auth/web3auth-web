@@ -900,7 +900,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-      const { provider, identityTokenInfo } = data;
+      const { ethereumProvider, solanaWallet, identityTokenInfo } = data;
 
       if (identityTokenInfo) {
         this.setState({ idToken: identityTokenInfo.idToken });
@@ -923,28 +923,28 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       // setup AA provider if AA is enabled
-      if (provider) {
-        let finalProvider = (provider as IBaseProvider<unknown>)?.provider || (provider as SafeEventEmitterProvider);
+      if (ethereumProvider) {
+        let finalProvider = (ethereumProvider as IBaseProvider<unknown>)?.provider || (ethereumProvider as SafeEventEmitterProvider);
         const { accountAbstractionConfig } = this.coreOptions;
         const evmChain = this.getCurrentChain(CHAIN_NAMESPACES.EIP155);
         const isAaSupportedForCurrentChain = !!evmChain && accountAbstractionConfig?.chains?.some((chain) => chain.chainId === evmChain.chainId);
-        if (isAaSupportedForCurrentChain && (data.connector === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
+        if (isAaSupportedForCurrentChain && (data.connectorName === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
           const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
           // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
-          const eoaProvider: IProvider = data.connector === WALLET_CONNECTORS.AUTH ? await toEoaProvider(provider) : provider;
+          const eoaProvider: IProvider = data.connectorName === WALLET_CONNECTORS.AUTH ? await toEoaProvider(ethereumProvider) : ethereumProvider;
           const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
           const aaProvider = await accountAbstractionProvider({
             accountAbstractionConfig,
             provider: eoaProvider,
             chain: evmChain,
             chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
-            useProviderAsTransport: data.connector === WALLET_CONNECTORS.AUTH,
+            useProviderAsTransport: data.connectorName === WALLET_CONNECTORS.AUTH,
           });
           this.aaProvider = aaProvider;
 
           // if external wallet is used and AA is enabled for external wallets, use AA provider
           // for embedded wallets, we use ws-embed provider which already supports AA
-          if (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet) {
+          if (data.connectorName !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet) {
             finalProvider = this.aaProvider;
           }
         }
@@ -952,21 +952,21 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       this.setState({
-        connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE,
+        connectedConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE,
         connectedConnectorNamespace: connector.connectorNamespace,
       });
-      this.cacheWallet(data.connector, connector.connectorNamespace);
+      this.cacheWallet(data.connectorName, connector.connectorNamespace);
 
-      const isSolanaOnly = connector.connectorNamespace === CHAIN_NAMESPACES.SOLANA && !!connector.solanaWallet;
+      const isSolanaOnly = connector.connectorNamespace === CHAIN_NAMESPACES.SOLANA;
       this.currentConnection = {
-        ethereumProvider: isSolanaOnly ? null : provider ? this.commonJRPCProvider : null,
-        solanaWallet: connector.solanaWallet ?? null,
-        connectorName: data.connector,
+        ethereumProvider: isSolanaOnly ? null : ethereumProvider ? this.commonJRPCProvider : null,
+        solanaWallet: solanaWallet ?? null,
+        connectorName: data.connectorName,
       };
 
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
-      this.connectToPlugins({ ...data, connector: data.connector as WALLET_CONNECTOR_TYPE });
+      this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
       this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
     });
 

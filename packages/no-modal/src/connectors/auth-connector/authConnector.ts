@@ -304,6 +304,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     super.checkSwitchChainRequirements(params, init);
 
     const { chainId, namespace } = params;
+    const { chainId: currentChainId } = this.provider;
+    if (currentChainId === chainId) return;
+
+    const currentChain = this.coreOptions.chains.find((c) => c.chainId === currentChainId);
+    if (!currentChain) throw WalletInitializationError.notReady("Chain config is not available");
 
     if (namespace === CHAIN_NAMESPACES.SOLANA || namespace === CHAIN_NAMESPACES.EIP155) {
       const fullChainId = `${namespace}:${Number(chainId)}`;
@@ -416,17 +421,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           sessionNamespace,
         });
         if (isLoggedIn) {
-          // Setup Solana wallet whenever a Solana chain is configured (not just when current chain is Solana).
-          // For EVM+Solana multi-namespace configs connecting on EVM, solanaWallet must still be populated.
-          await this.setupSolanaWallet();
+          // Setup Solana wallet only when current chain is solana
+          // TODO: remove this condition when wallet services support multiple namespaces at the same time
+          if (chainNamespace === CHAIN_NAMESPACES.SOLANA) await this.setupSolanaWallet();
           // if getIdentityToken is true, then get the identity token
           // No need to get the identity token for auth connector as it is already handled
           let identityTokenInfo: IdentityTokenInfo | undefined;
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
-            connector: WALLET_CONNECTORS.AUTH,
+            connectorName: WALLET_CONNECTORS.AUTH,
             reconnected: this.rehydrated,
-            provider: this.provider,
+            ethereumProvider: this.provider,
+            solanaWallet: this._solanaWallet,
             identityTokenInfo,
           } as CONNECTED_EVENT_DATA);
 
@@ -446,9 +452,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         await this.privateKeyProvider.setupProvider(finalPrivKey, params.chainId);
         this.status = CONNECTOR_STATUS.CONNECTED;
         this.emit(CONNECTOR_EVENTS.CONNECTED, {
-          connector: WALLET_CONNECTORS.AUTH,
+          connectorName: WALLET_CONNECTORS.AUTH,
+          ethereumProvider: this.provider,
+          solanaWallet: this._solanaWallet,
           reconnected: this.rehydrated,
-          provider: this.provider,
         } as CONNECTED_EVENT_DATA);
       }
     }

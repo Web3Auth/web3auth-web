@@ -74,7 +74,7 @@ export interface IBaseProvider<T> extends IProvider {
 export interface Connection {
   readonly ethereumProvider: IProvider | null;
   readonly solanaWallet: Wallet | null;
-  readonly connectorName: string;
+  readonly connectorName: WALLET_CONNECTOR_TYPE | string;
 }
 
 export interface IConnector<T> extends SafeEventEmitter {
@@ -112,9 +112,7 @@ export type BaseConnectorLoginParams = {
 
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
-export type CONNECTED_EVENT_DATA = {
-  connector: WALLET_CONNECTOR_TYPE | string;
-  provider?: IProvider | null;
+export type CONNECTED_EVENT_DATA = Connection & {
   reconnected: boolean;
   identityTokenInfo?: IdentityTokenInfo;
 };

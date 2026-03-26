@@ -94,7 +94,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   }
 
   checkSwitchChainRequirements(params: { chainId: string; namespace: ChainNamespaceType }, init = false): void {
-    if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    if (!init && !this.provider && !this.solanaWallet) throw WalletLoginError.notConnectedError("Not connected with wallet.");
     if (!this.coreOptions.chains) throw WalletInitializationError.invalidParams("chainConfigs is required");
     const doesChainExist = this.coreOptions.chains.some(
       (x) =>

@@ -118,8 +118,9 @@ const Web3AuthWagmiProvider = defineComponent({
     });
 
     watch(
-      isConnected,
-      async (newIsConnected) => {
+      [isConnected, connection],
+      async () => {
+        const newIsConnected = isConnected.value;
         if (newIsConnected && connection.value?.ethereumProvider) {
           const connector = await setupConnector(connection.value.ethereumProvider, wagmiConfig);
           if (!connector) {
