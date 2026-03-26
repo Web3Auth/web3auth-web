@@ -3,6 +3,7 @@ import type { Wallet } from "@wallet-standard/base";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
+import type { CustomChainConfig } from "../../../base";
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { WALLET_CONNECTORS } from "../../../base/wallet";
 import { useChain } from "../../hooks";
@@ -10,6 +11,8 @@ import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
   accounts: string[] | null;
+  /** Active Solana chain config from Web3Auth (`useChain(CHAIN_NAMESPACES.SOLANA)`). */
+  solanaChain: CustomChainConfig | undefined;
   solanaWallet: Wallet | null;
   /**
    * Solana RPC client for making RPC calls.
@@ -63,5 +66,5 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     if (accts.length > 0) setAccounts(accts);
   }, [solanaWallet, solanaChain]);
 
-  return { solanaWallet, accounts, rpc, getPrivateKey };
+  return { solanaWallet, solanaChain, accounts, rpc, getPrivateKey };
 };

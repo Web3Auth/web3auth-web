@@ -8,11 +8,11 @@ import {
   useEnableMFA,
   useIdentityToken,
   useManageMFA,
+  useSwitchChain,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
-
 } from "@web3auth/modal/vue";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
@@ -34,7 +34,8 @@ const props = defineProps<{
   chains: CustomChainConfig[];
 }>();
 
-const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
+const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized, currentChainIds } = useWeb3Auth();
+const { switchChain: switchWeb3AuthChain, loading: switchWeb3AuthChainLoading, error: switchWeb3AuthChainError } = useSwitchChain();
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
@@ -54,7 +55,7 @@ const balance = useBalance({
   address: address,
 });
 
-const { accounts: solanaAccounts, rpc, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
+const { accounts: solanaAccounts, rpc, solanaChain, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -174,7 +175,7 @@ const onGetPrivateKey = async () => {
 };
 
 const getConnectedChainId = async () => {
-  printToConsole("chainId", wagmiChainId.value);
+  printToConsole("chainId", { chainId: wagmiChainId.value });
 };
 
 const onGetBalance = async () => {
@@ -266,6 +267,15 @@ const onGetSolBalance = async () => {
   await getSolBalance(rpc.value, solanaAccounts.value[0], printToConsole);
 };
 
+const onGetSolanaChain = () => {
+  const chain = solanaChain.value;
+  printToConsole("solanaChain", {
+    chainId: currentChainIds.value[CHAIN_NAMESPACES.SOLANA] ?? null,
+    displayName: chain?.displayName ?? null,
+    rpcTarget: chain?.rpcTarget ?? null,
+  });
+};
+
 const onGetSolPrivateKey = async () => {
   try {
     const privateKey = await getSolanaPrivateKey();
@@ -296,6 +306,30 @@ const onSwitchChain = async () => {
     printToConsole("switchedChain", { chainId: data.id });
   } catch (error) {
     printToConsole("switchedChain error", error);
+  }
+};
+
+const solanaChains = computed(() => props.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA));
+
+const canSwitchSolanaChain = computed(() => {
+  if (solanaChains.value.length < 2) return false;
+  return Boolean(connection.value?.solanaWallet);
+});
+
+const onSwitchSolanaChain = async () => {
+  log.info("switching Solana chain");
+  const currentSol =
+    currentChainIds.value[CHAIN_NAMESPACES.SOLANA] ?? solanaChains.value[0]?.chainId;
+  const newChain = solanaChains.value.find((c) => c.chainId !== currentSol);
+  if (!newChain) {
+    printToConsole("switchedSolanaChain error", new Error("Please configure at least 2 Solana chains in app settings"));
+    return;
+  }
+  await switchWeb3AuthChain({ chainId: newChain.chainId, namespace: CHAIN_NAMESPACES.SOLANA });
+  if (switchWeb3AuthChainError.value) {
+    printToConsole("switchedSolanaChain error", switchWeb3AuthChainError.value);
+  } else {
+    printToConsole("switchedSolanaChain", { chainId: newChain.chainId, displayName: newChain.displayName });
   }
 };
 
@@ -402,6 +436,18 @@ const onSwitchChain = async () => {
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Solana Transaction</div>
+          <Button block size="xs" pill class="mb-2" @click="onGetSolanaChain">{{ t("app.buttons.btnGetConnectedChainId") }}</Button>
+          <Button
+            v-if="canSwitchSolanaChain"
+            :loading="switchWeb3AuthChainLoading"
+            block
+            size="xs"
+            pill
+            class="mb-2"
+            @click="onSwitchSolanaChain"
+          >
+            {{ t("app.buttons.btnSwitchChain") }}
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>

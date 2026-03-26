@@ -65,7 +65,7 @@
       "btnSendEth": "Send ETH",
       "btnSendAATx": "Send ETH with Smart Account",
       "btnSignEthMessage": "Sign ETH Message",
-      "btnGetConnectedChainId": "Get Connected Chain ID",
+      "btnGetConnectedChainId": "Get Connected Chain",
       "btnAddChain": "Add Chain",
       "btnSwitchChain": "Switch Chain",
       "btnSwitchChainNamespace": "Switch Chain Namespace",

@@ -1,14 +1,18 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
-
+import type { CustomChainConfig } from "../../../base";
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { WALLET_CONNECTORS } from "../../../base/wallet";
+import type { ComputedRef } from "vue";
+import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
+
 import { useChain, useWeb3Auth } from "../../composables";
 
 export type IUseSolanaWallet = {
   accounts: Ref<string[] | null>;
+  /** Active Solana chain config from Web3Auth (`useChain(CHAIN_NAMESPACES.SOLANA)`). */
+  solanaChain: ComputedRef<CustomChainConfig | undefined>;
   solanaWallet: ShallowRef<Wallet | null>;
   /**
    * Solana RPC client for making RPC calls.
@@ -75,5 +79,5 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     { immediate: true }
   );
 
-  return { solanaWallet, accounts, rpc, getPrivateKey };
+  return { solanaWallet, solanaChain, accounts, rpc, getPrivateKey };
 };
