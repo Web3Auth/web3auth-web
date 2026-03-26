@@ -411,9 +411,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       if (sessionId) {
         this.wsEmbedInstance.setAccessTokenProvider(this.accessTokenProvider.bind(this));
 
-        const isLoggedIn = await this.wsEmbedInstance.loginWithSessionId({
+        const isLoggedIn = await this.wsEmbedInstance.connectWithSession({
           sessionId,
           sessionNamespace,
+          idToken: await this.getIdToken(),
         });
         if (isLoggedIn) {
           // if getIdentityToken is true, then get the identity token
@@ -498,6 +499,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       },
       web3AuthClientId: this.coreOptions.clientId,
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+      storageServerUrl: this.authInstance.options.storageServerUrl,
     };
 
     const loginHandler = createHandler(popupParams);
@@ -518,7 +520,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       });
 
       // this is to close the popup when the login is finished.
-      const securePubSub = new SecurePubSub({ sameIpCheck: true });
+      const securePubSub = new SecurePubSub({
+        sameIpCheck: true,
+        serverUrl: this.authInstance.options.storageServerUrl,
+        socketUrl: this.authInstance.options.sessionSocketUrl,
+      });
       securePubSub
         .subscribe(`web3auth-login-${nonce}`)
         .then((data: string) => {
@@ -564,6 +570,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       await this.authInstance.refreshSession();
     }
     return this.authInstance.getAccessToken();
+  }
+
+  private async getIdToken(): Promise<string> {
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    return this.authInstance.authSessionManager.getIdToken();
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {

@@ -14,5 +14,4 @@ export default [
       "import/no-unresolved": "off",
     },
   },
-  ,
 ];

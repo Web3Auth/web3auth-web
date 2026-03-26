@@ -13,9 +13,6 @@ export default defineConfig({
   resolve: {
     alias: {
       wagmi: resolve("./node_modules/wagmi"),
-      "@web3auth/auth": resolve("./node_modules/@web3auth/auth"),
-      "@web3auth/no-modal": resolve("./node_modules/@web3auth/no-modal"),
-      "@web3auth/ws-embed": resolve("./node_modules/@web3auth/ws-embed"),
       global: "globalThis",
     },
   },
