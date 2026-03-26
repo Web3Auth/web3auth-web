@@ -1,7 +1,6 @@
 import { Ref, ref } from "vue";
 
-import { log, WalletInitializationError, type Web3AuthError } from "../../../base";
-import { walletSignMessage } from "../../../base";
+import { log, WalletInitializationError, walletSignMessage, type Web3AuthError } from "../../../base";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignMessage = {
