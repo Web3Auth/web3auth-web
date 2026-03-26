@@ -903,7 +903,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.setState({ connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connector);
 
-      const isSolanaOnly = this.currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA && !!connector.solanaWallet;
+      const isSolanaOnly = connector.connectorNamespace === CHAIN_NAMESPACES.SOLANA;
       this.currentConnection = {
         ethereumProvider: isSolanaOnly ? null : provider ? this.commonJRPCProvider : null,
         solanaWallet: connector.solanaWallet ?? null,
