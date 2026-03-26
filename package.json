@@ -22,7 +22,6 @@
     "playwright": "^1.57.0",
     "prettier": "^3.8.1",
     "rimraf": "^6.1.3",
-    "ts-node": "^10.9.2",
     "ts-patch": "^3.3.0",
     "tsconfig-paths": "^4.2.0",
     "tsconfig-paths-webpack-plugin": "^4.2.0",
