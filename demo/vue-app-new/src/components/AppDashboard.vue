@@ -8,7 +8,6 @@ import {
   useEnableMFA,
   useIdentityToken,
   useManageMFA,
-  useSwitchChain,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
@@ -35,7 +34,6 @@ const props = defineProps<{
 }>();
 
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized, currentChainIds } = useWeb3Auth();
-const { switchChain: switchWeb3AuthChain, loading: switchWeb3AuthChainLoading, error: switchWeb3AuthChainError } = useSwitchChain();
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
@@ -55,7 +53,15 @@ const balance = useBalance({
   address: address,
 });
 
-const { accounts: solanaAccounts, rpc, solanaChain, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
+const {
+  accounts: solanaAccounts,
+  rpc,
+  solanaChain,
+  getPrivateKey: getSolanaPrivateKey,
+  switchChain: switchSolanaChain,
+  switchChainLoading: switchSolanaChainLoading,
+  switchChainError: switchSolanaChainError,
+} = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
@@ -325,9 +331,9 @@ const onSwitchSolanaChain = async () => {
     printToConsole("switchedSolanaChain error", new Error("Please configure at least 2 Solana chains in app settings"));
     return;
   }
-  await switchWeb3AuthChain({ chainId: newChain.chainId, namespace: CHAIN_NAMESPACES.SOLANA });
-  if (switchWeb3AuthChainError.value) {
-    printToConsole("switchedSolanaChain error", switchWeb3AuthChainError.value);
+  await switchSolanaChain(newChain.chainId);
+  if (switchSolanaChainError.value) {
+    printToConsole("switchedSolanaChain error", switchSolanaChainError.value);
   } else {
     printToConsole("switchedSolanaChain", { chainId: newChain.chainId, displayName: newChain.displayName });
   }
@@ -439,7 +445,7 @@ const onSwitchSolanaChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onGetSolanaChain">{{ t("app.buttons.btnGetConnectedChainId") }}</Button>
           <Button
             v-if="canSwitchSolanaChain"
-            :loading="switchWeb3AuthChainLoading"
+            :loading="switchSolanaChainLoading"
             block
             size="xs"
             pill

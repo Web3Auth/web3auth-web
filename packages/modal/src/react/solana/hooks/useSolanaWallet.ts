@@ -1,15 +1,19 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
-import { CHAIN_NAMESPACES, type CustomChainConfig, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import {
+  CHAIN_NAMESPACES,
+  type CustomChainConfig,
+  type Web3AuthError,
+  WALLET_CONNECTORS,
+} from "@web3auth/no-modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import { useCallback, useEffect, useMemo, useState } from "react";
 
-import { useChain } from "../../hooks";
+import { useChain, useSwitchChain } from "../../hooks";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
   accounts: string[] | null;
-  /** Active Solana chain config from Web3Auth (`useChain(CHAIN_NAMESPACES.SOLANA)`). */
   solanaChain: CustomChainConfig | undefined;
   solanaWallet: Wallet | null;
   /**
@@ -26,10 +30,15 @@ export type IUseSolanaWallet = {
    * @throws Error if connected via a non-Auth connector or if the provider is unavailable.
    */
   getPrivateKey: () => Promise<string>;
+  /** Switch active Solana cluster (`CHAIN_NAMESPACES.SOLANA`). */
+  switchChain: (chainId: string) => Promise<void>;
+  switchChainLoading: boolean;
+  switchChainError: Web3AuthError | null;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
+  const { switchChain: switchChainInternal, loading: switchChainLoading, error: switchChainError } = useSwitchChain();
   const solanaChain = useChain(CHAIN_NAMESPACES.SOLANA);
   const [accounts, setAccounts] = useState<string[] | null>(null);
 
@@ -64,5 +73,19 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     if (accts.length > 0) setAccounts(accts);
   }, [solanaWallet, solanaChain]);
 
-  return { solanaWallet, solanaChain, accounts, rpc, getPrivateKey };
+  const switchChain = useCallback(
+    (chainId: string) => switchChainInternal({ chainId, namespace: CHAIN_NAMESPACES.SOLANA }),
+    [switchChainInternal]
+  );
+
+  return {
+    solanaWallet,
+    solanaChain,
+    accounts,
+    rpc,
+    getPrivateKey,
+    switchChain,
+    switchChainLoading,
+    switchChainError,
+  };
 };

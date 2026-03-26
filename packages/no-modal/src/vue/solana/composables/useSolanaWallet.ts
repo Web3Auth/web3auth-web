@@ -1,17 +1,16 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import type { CustomChainConfig } from "../../../base";
+import type { CustomChainConfig, Web3AuthError } from "../../../base";
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { WALLET_CONNECTORS } from "../../../base/wallet";
 import type { ComputedRef } from "vue";
 import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
-import { useChain, useWeb3Auth } from "../../composables";
+import { useChain, useSwitchChain, useWeb3Auth } from "../../composables";
 
 export type IUseSolanaWallet = {
   accounts: Ref<string[] | null>;
-  /** Active Solana chain config from Web3Auth (`useChain(CHAIN_NAMESPACES.SOLANA)`). */
   solanaChain: ComputedRef<CustomChainConfig | undefined>;
   solanaWallet: ShallowRef<Wallet | null>;
   /**
@@ -28,10 +27,15 @@ export type IUseSolanaWallet = {
    * @throws Error if connected via a non-Auth connector or if the provider is unavailable.
    */
   getPrivateKey: () => Promise<string>;
+  /** Switch active Solana cluster (`CHAIN_NAMESPACES.SOLANA`). */
+  switchChain: (chainId: string) => Promise<void>;
+  switchChainLoading: Ref<boolean>;
+  switchChainError: Ref<Web3AuthError | null>;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
+  const { switchChain: switchChainInternal, loading: switchChainLoading, error: switchChainError } = useSwitchChain();
   const solanaChain = useChain(CHAIN_NAMESPACES.SOLANA);
   const accounts = ref<string[] | null>(null);
   const solanaWallet = shallowRef<Wallet | null>(null);
@@ -67,6 +71,8 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     return privateKey;
   };
 
+  const switchChain = (chainId: string) => switchChainInternal({ chainId, namespace: CHAIN_NAMESPACES.SOLANA });
+
   watch(
     [connection, solanaChain],
     ([newConnection, newSolanaChain]) => {
@@ -79,5 +85,5 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     { immediate: true }
   );
 
-  return { solanaWallet, solanaChain, accounts, rpc, getPrivateKey };
+  return { solanaWallet, solanaChain, accounts, rpc, getPrivateKey, switchChain, switchChainLoading, switchChainError };
 };
