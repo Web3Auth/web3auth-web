@@ -1,3 +1,5 @@
+export * from "./solana";
+
 export const MULTI_CHAIN_CONNECTORS = {
   AUTH: "auth",
   WALLET_CONNECT_V2: "wallet-connect-v2",

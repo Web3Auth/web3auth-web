@@ -11,6 +11,7 @@ import {
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  type Connection,
   CONNECTOR_CATEGORY,
   type CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -105,8 +106,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
-        if (!provider) {
+        const connection = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        if (!connection) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
         }
@@ -116,7 +117,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -191,7 +192,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         identityTokenInfo = await this.getIdentityToken();
       }
 
-      return this.metamaskProvider;
+      return { ethereumProvider: this.metamaskProvider, solanaWallet: null, connectorName: this.name };
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

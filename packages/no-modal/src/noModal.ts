@@ -16,6 +16,7 @@ import {
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
@@ -82,6 +83,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected plugins: Record<string, IPlugin> = {};
 
+  private currentConnection: Connection | null = null;
+
   private storage: IStorage;
 
   private state: IWeb3AuthState = {
@@ -125,11 +128,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return Boolean(this.connectedConnector);
   }
 
-  get provider(): IProvider | null {
-    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.commonJRPCProvider) {
-      return this.commonJRPCProvider;
-    }
-    return null;
+  get connection(): Connection | null {
+    return this.currentConnection;
   }
 
   get connectedConnectorName(): WALLET_CONNECTOR_TYPE | null {
@@ -289,6 +289,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
     if (CONNECTED_STATUSES.includes(this.status) && this.connectedConnector) {
+      // Single-namespace connectors cannot cross namespace boundaries — MULTICHAIN connectors
+      // (Auth, WC) enforce their own switchChain policy internally.
+      if (
+        this.connectedConnector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN &&
+        this.currentChain?.chainNamespace !== newChainConfig.chainNamespace
+      ) {
+        throw WalletLoginError.connectionError(
+          `Cannot switch between chain namespaces with ${this.connectedConnector.name}. Disconnect and reconnect with the target chain.`
+        );
+      }
+
       await this.connectedConnector.switchChain(params);
       return;
     }
@@ -308,7 +319,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connectorName: T,
     loginParams?: LoginParamMap[T],
     loginMode?: LoginModeType
-  ): Promise<IProvider | null> {
+  ): Promise<Connection | null> {
     this.loginMode = loginMode || "no-modal";
     const connector = this.getConnector(connectorName, (loginParams as { chainNamespace?: ChainNamespaceType })?.chainNamespace);
     if (!connector || !this.commonJRPCProvider)
@@ -398,7 +409,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
             duration: Date.now() - startTime,
           });
           cleanup();
-          resolve(this.provider);
+          resolve(this.connection);
         } catch (error) {
           cleanup();
           reject(error);
@@ -859,37 +870,45 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
-      let finalProvider = (provider as IBaseProvider<unknown>).provider || (provider as SafeEventEmitterProvider);
-
       // setup AA provider if AA is enabled
-      const { accountAbstractionConfig } = this.coreOptions;
-      const isAaSupportedForCurrentChain =
-        this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
-        accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
-      if (isAaSupportedForCurrentChain && (data.connector === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
-        const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
-        // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
-        const eoaProvider: IProvider = data.connector === WALLET_CONNECTORS.AUTH ? await toEoaProvider(provider) : provider;
-        const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
-        const aaProvider = await accountAbstractionProvider({
-          accountAbstractionConfig,
-          provider: eoaProvider,
-          chain: this.currentChain,
-          chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
-          useProviderAsTransport: data.connector === WALLET_CONNECTORS.AUTH,
-        });
-        this.aaProvider = aaProvider;
+      if (provider) {
+        let finalProvider = (provider as IBaseProvider<unknown>)?.provider || (provider as SafeEventEmitterProvider);
+        const { accountAbstractionConfig } = this.coreOptions;
+        const isAaSupportedForCurrentChain =
+          this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+          accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
+        if (isAaSupportedForCurrentChain && (data.connector === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
+          const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
+          // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
+          const eoaProvider: IProvider = data.connector === WALLET_CONNECTORS.AUTH ? await toEoaProvider(provider) : provider;
+          const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
+          const aaProvider = await accountAbstractionProvider({
+            accountAbstractionConfig,
+            provider: eoaProvider,
+            chain: this.currentChain,
+            chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
+            useProviderAsTransport: data.connector === WALLET_CONNECTORS.AUTH,
+          });
+          this.aaProvider = aaProvider;
 
-        // if external wallet is used and AA is enabled for external wallets, use AA provider
-        // for embedded wallets, we use ws-embed provider which already supports AA
-        if (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet) {
-          finalProvider = this.aaProvider;
+          // if external wallet is used and AA is enabled for external wallets, use AA provider
+          // for embedded wallets, we use ws-embed provider which already supports AA
+          if (data.connector !== WALLET_CONNECTORS.AUTH && this.coreOptions.useAAWithExternalWallet) {
+            finalProvider = this.aaProvider;
+          }
         }
+        this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
       }
 
-      this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
       this.setState({ connectedConnectorName: data.connector as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connector);
+
+      const isSolanaOnly = connector.connectorNamespace === CHAIN_NAMESPACES.SOLANA;
+      this.currentConnection = {
+        ethereumProvider: isSolanaOnly ? null : provider ? this.commonJRPCProvider : null,
+        solanaWallet: connector.solanaWallet ?? null,
+        connectorName: data.connector,
+      };
 
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("connected", this.status, this.connectedConnectorName);
@@ -898,6 +917,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
+      this.currentConnection = null;
       // re-setup commonJRPCProvider
       this.commonJRPCProvider.removeAllListeners();
       this.setupCommonJRPCProvider();
@@ -1018,9 +1038,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (chainId === this.currentChainId) return;
     const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
     if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
-    this.setState({
-      currentChainId: chainId,
-    });
+    this.setState({ currentChainId: chainId });
   }
 
   private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {

@@ -1,3 +1,4 @@
+import type { Wallet } from "@wallet-standard/base";
 import {
   AUTH_CONNECTION_TYPE,
   AuthUserInfo,
@@ -70,19 +71,26 @@ export interface IBaseProvider<T> extends IProvider {
   setKeyExportFlag(flag: boolean): void;
 }
 
+export interface Connection {
+  readonly ethereumProvider: IProvider | null;
+  readonly solanaWallet: Wallet | null;
+  readonly connectorName: string;
+}
+
 export interface IConnector<T> extends SafeEventEmitter {
   connectorNamespace: ConnectorNamespaceType;
   type: CONNECTOR_CATEGORY_TYPE;
   name: WALLET_CONNECTOR_TYPE | string;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
+  readonly solanaWallet: Wallet | null;
   connectorData?: unknown;
   connected: boolean;
   isInjected?: boolean;
   icon?: string;
   init(options?: ConnectorInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
-  connect(params: T & { chainId: string }): Promise<IProvider | null>;
+  connect(params: T & { chainId: string }): Promise<Connection | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;
@@ -106,9 +114,9 @@ export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
 export type CONNECTED_EVENT_DATA = {
   connector: WALLET_CONNECTOR_TYPE | string;
-  provider: IProvider;
+  provider?: IProvider | null;
   reconnected: boolean;
-  identityTokenInfo: IdentityTokenInfo;
+  identityTokenInfo?: IdentityTokenInfo;
 };
 
 export type AUTHORIZED_EVENT_DATA = {
