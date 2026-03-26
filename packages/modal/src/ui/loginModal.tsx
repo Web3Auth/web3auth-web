@@ -93,7 +93,7 @@ export class LoginModal {
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
     if (!uiConfig.widgetType) this.uiConfig.widgetType = WIDGET_TYPE.MODAL;
-    if (!uiConfig.initialAuthenticationMode) this.uiConfig.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY;
+    if (!uiConfig.initialAuthenticationMode) this.uiConfig.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
     if (!uiConfig.buttonRadiusType) this.uiConfig.buttonRadiusType = "pill";
     if (!uiConfig.logoAlignment) this.uiConfig.logoAlignment = "center";
     if (typeof uiConfig.displayInstalledExternalWallets === "undefined") this.uiConfig.displayInstalledExternalWallets = true;

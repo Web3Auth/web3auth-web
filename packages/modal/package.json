@@ -88,10 +88,10 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^2.0.1",
-    "@toruslabs/base-controllers": "^9.3.0",
+    "@toruslabs/base-controllers": "^9.4.1",
     "@toruslabs/http-helpers": "^9.0.0",
-    "@web3auth/auth": "^11.3.0",
-    "@web3auth/no-modal": "^10.15.0",
+    "@web3auth/auth": "^11.4.2",
+    "@web3auth/no-modal": "file:../../packages/no-modal",
     "bowser": "^2.13.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
