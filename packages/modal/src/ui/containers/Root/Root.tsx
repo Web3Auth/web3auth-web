@@ -197,6 +197,8 @@ function RootContent(props: RootProps) {
     return modalState.status !== MODAL_STATUS.INITIALIZED;
   }, [modalState.status]);
 
+  const isConsentRequired = modalState.status === MODAL_STATUS.CONSENT_REQUIRED;
+
   return (
     <div className="w3a--relative w3a--flex w3a--flex-col">
       <div
@@ -206,7 +208,10 @@ function RootContent(props: RootProps) {
         }}
       >
         <div className="w3a--modal-curtain" />
-        <div ref={contentRef} className={twMerge("w3a--relative w3a--flex w3a--flex-col w3a--p-6", isShowLoader ? "w3a--flex-1" : "w3a--flex-none")}>
+        <div
+          ref={contentRef}
+          className={twMerge("w3a--relative w3a--flex w3a--flex-col w3a--p-6", isShowLoader && !isConsentRequired ? "w3a--flex-1" : "w3a--flex-none")}
+        >
           {/* Content */}
           {isShowLoader ? (
             <Loader

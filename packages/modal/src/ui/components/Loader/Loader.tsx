@@ -133,7 +133,7 @@ function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () =>
   };
 
   return (
-    <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-between w3a--gap-y-4">
+    <div className="w3a--my-4 w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--gap-y-4">
       <p className="w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
         {t("modal.consent.title", { defaultValue: "Terms and Conditions" })}
       </p>
@@ -209,8 +209,16 @@ function Loader(props: LoaderProps) {
     }
   }, [isConnectedAccordingToAuthenticationMode, hideSuccessScreen, onClose]);
 
+  const isConsent = modalStatus === MODAL_STATUS.CONSENT_REQUIRED;
+
   return (
-    <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
+    <div
+      className={
+        isConsent
+          ? "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4"
+          : "w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4"
+      }
+    >
       {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
 
       {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
@@ -226,9 +234,7 @@ function Loader(props: LoaderProps) {
         />
       )}
 
-      {modalStatus === MODAL_STATUS.CONSENT_REQUIRED && (
-        <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} privacyPolicy={privacyPolicy} tncLink={tncLink} />
-      )}
+      {isConsent && <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} privacyPolicy={privacyPolicy} tncLink={tncLink} />}
     </div>
   );
 }
