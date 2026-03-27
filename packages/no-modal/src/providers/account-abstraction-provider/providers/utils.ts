@@ -1,4 +1,4 @@
-import { addHexPrefix, isHexString } from "@ethereumjs/util";
+import { add0x, isHexString } from "@toruslabs/metadata-helpers";
 import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { Chain, createWalletClient, Hex, http } from "viem";
 import { BundlerClient, SendUserOperationParameters, SmartAccount } from "viem/account-abstraction";
@@ -46,7 +46,7 @@ export function getProviderHandlers({
       });
     },
     processTransaction: async (txParams: TransactionParams & { gas?: string }): Promise<string> => {
-      if (txParams.input && !txParams.data) txParams.data = addHexPrefix(txParams.input);
+      if (txParams.input && !txParams.data) txParams.data = add0x(txParams.input);
       const { to, value, data } = txParams;
       const userOperationParams: SendUserOperationParameters = {
         account: smartAccount,
@@ -105,7 +105,7 @@ export function getProviderHandlers({
         account: smartAccount,
         message: isHexString(message)
           ? {
-              raw: message,
+              raw: add0x(message),
             }
           : message,
       });

@@ -1,6 +1,6 @@
 import { Ref, ref } from "vue";
 
-import { log, WalletInitializationError, type Web3AuthError } from "../../../base";
+import { log, WalletInitializationError, walletSignMessage, type Web3AuthError } from "../../../base";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignMessage = {
@@ -21,7 +21,7 @@ export const useSignMessage = (): IUseSignMessage => {
     error.value = null;
     try {
       if (!solanaWallet.value) throw WalletInitializationError.notReady();
-      const signature = await solanaWallet.value.signMessage(message, from ?? accounts.value?.[0]);
+      const signature = await walletSignMessage(solanaWallet.value, message, from ?? accounts.value?.[0]);
       data.value = signature;
       return signature;
     } catch (err) {

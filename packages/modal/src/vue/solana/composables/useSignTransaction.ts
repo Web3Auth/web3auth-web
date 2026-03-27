@@ -1,5 +1,5 @@
 import type { Transaction } from "@solana/kit";
-import { log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import { log, WalletInitializationError, walletSignTransaction, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -27,7 +27,7 @@ export const useSignTransaction = (): IUseSignTransaction => {
     error.value = null;
     try {
       if (!solanaWallet.value) throw WalletInitializationError.notReady();
-      const signedTransaction = await solanaWallet.value.signTransaction(transaction);
+      const signedTransaction = await walletSignTransaction(solanaWallet.value, transaction);
       data.value = signedTransaction;
       return signedTransaction;
     } catch (err) {

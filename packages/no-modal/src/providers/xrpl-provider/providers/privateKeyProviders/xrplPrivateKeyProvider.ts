@@ -1,10 +1,10 @@
-import { JRPCEngine, JRPCMiddleware, JRPCRequest, providerErrors, providerFromEngine, rpcErrors } from "@web3auth/auth";
+import { JRPCEngineV2, providerErrors, providerFromEngineV2, rpcErrors } from "@web3auth/auth";
 import type { PingResponse } from "xrpl";
 
 import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "../../../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "../../../../providers/base-provider";
 import { createXrplJsonRpcClient } from "../../rpc/JrpcClient";
-import { createXRPLMiddleware, creatXrplChainSwitchMiddleware, IXrplChainSwitchHandlers, KeyPair, RPC_METHODS } from "../../rpc/xrplRpcMiddlewares";
+import { createXRPLMiddleware, creatXrplChainSwitchMiddleware, KeyPair, RPC_METHODS } from "../../rpc/xrplRpcMiddlewares";
 import { getProviderHandlers } from "./xrplWalletUtils";
 
 export type XrplPrivKeyProviderConfig = BaseProviderConfig;
@@ -49,13 +49,13 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
       keyExportEnabled: this.config.keyExportEnabled,
     });
     const xrplWalletMiddleware = createXRPLMiddleware(providerHandlers);
-    const engine = new JRPCEngine();
     const { networkMiddleware } = createXrplJsonRpcClient(chain);
-    engine.push(this.getChainSwitchMiddleware());
-    engine.push(xrplWalletMiddleware);
-    engine.push(networkMiddleware);
+    const chainSwitchMiddleware = creatXrplChainSwitchMiddleware((params) => this.switchChain(params));
+    const engine = JRPCEngineV2.create({
+      middleware: [chainSwitchMiddleware, xrplWalletMiddleware, networkMiddleware],
+    });
 
-    const provider = providerFromEngine(engine);
+    const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
 
     await this.lookupNetwork(privKey, chainId);
@@ -91,17 +91,5 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
       const chain = this.getChain(chainId);
       throw WalletInitializationError.rpcConnectionError(`Failed to ping network for following rpc target: ${chain.rpcTarget}`);
     }
-  }
-
-  private getChainSwitchMiddleware(): JRPCMiddleware<unknown, unknown> {
-    const chainSwitchHandlers: IXrplChainSwitchHandlers = {
-      switchChain: async (req: JRPCRequest<{ chainId: string }>): Promise<void> => {
-        if (!req.params) throw rpcErrors.invalidParams("Missing request params");
-        if (!req.params.chainId) throw rpcErrors.invalidParams("Missing chainId");
-        await this.switchChain(req.params);
-      },
-    };
-    const chainSwitchMiddleware = creatXrplChainSwitchMiddleware(chainSwitchHandlers);
-    return chainSwitchMiddleware;
   }
 }
