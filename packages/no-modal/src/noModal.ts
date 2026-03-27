@@ -1,5 +1,9 @@
 import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controllers";
-import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
+import {
+  type AccountAbstractionMultiChainConfig,
+  EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES,
+  SMART_ACCOUNT_EIP_STANDARD,
+} from "@toruslabs/ethereum-controllers";
 import {
   cloneDeep,
   CookieStorage,
@@ -574,8 +578,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
     }
 
-    // if AA is enabled, filter out chains that are not AA-supported
-    if (this.coreOptions.accountAbstractionConfig) {
+    // if AA is enabled and smart account is not 7702, filter out chains that are not AA-supported
+    const is7702SmartAccount = this.coreOptions.accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
+    if (this.coreOptions.accountAbstractionConfig && !is7702SmartAccount) {
       // write a for loop over accountAbstractionConfig.chains and check if the chainId is valid
       if (this.coreOptions.accountAbstractionConfig.chains.length === 0) {
         log.error("Please configure chains for smart accounts on dashboard at https://dashboard.web3auth.io");
@@ -623,7 +628,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!isAAEnabled) return;
 
     // merge smart account config from project config with core options, core options will take precedence over project config
-    const { walletScope, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
+    const { walletScope, eipStandard, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
     const aaChainMap = new Map<string, AccountAbstractionMultiChainConfig["chains"][number]>();
     const allAaChains = [...(configWithoutWalletScope?.chains || []), ...(this.coreOptions.accountAbstractionConfig?.chains || [])];
     for (const chain of allAaChains) {
@@ -633,9 +638,22 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     this.coreOptions.accountAbstractionConfig = {
+      smartAccountEipStandard: eipStandard,
       ...deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {}),
       chains: Array.from(aaChainMap.values()),
     };
+
+    // if eipStandard is 7702, validate smart account type
+    const { smartAccountEipStandard, smartAccountType } = this.coreOptions.accountAbstractionConfig as {
+      smartAccountEipStandard?: string;
+      smartAccountType?: string;
+    };
+    const is7702SmartAccount = smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
+    if (is7702SmartAccount && smartAccountType && !(EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES as readonly string[]).includes(smartAccountType)) {
+      throw WalletInitializationError.invalidParams(
+        `Smart account type "${smartAccountType}" does not support EIP-7702. Supported: ${EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES.join(", ")}`
+      );
+    }
 
     // determine if we should use AA with external wallet
     if (this.coreOptions.useAAWithExternalWallet === undefined) {
@@ -884,14 +902,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
-      // setup AA provider if AA is enabled
+      // setup AA provider if AA is enabled (skip for EIP-7702; 7702 uses EOA + 5792/7702 RPC only)
       if (ethereumProvider) {
         let finalProvider = (ethereumProvider as IBaseProvider<unknown>)?.provider || (ethereumProvider as SafeEventEmitterProvider);
         const { accountAbstractionConfig } = this.coreOptions;
+        const is7702 = accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD["EIP_7702"];
         const isAaSupportedForCurrentChain =
           this.currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
           accountAbstractionConfig?.chains?.some((chain) => chain.chainId === this.currentChain?.chainId);
-        if (isAaSupportedForCurrentChain && (data.connectorName === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
+        if (!is7702 && isAaSupportedForCurrentChain && (data.connectorName === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
           const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
           // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
           const eoaProvider: IProvider = data.connectorName === WALLET_CONNECTORS.AUTH ? await toEoaProvider(ethereumProvider) : ethereumProvider;

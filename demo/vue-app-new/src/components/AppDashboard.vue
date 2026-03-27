@@ -18,7 +18,17 @@ import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
-import { useConnection, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain } from "@wagmi/vue";
+import {
+  useConnection,
+  useBalance,
+  useChainId,
+  useSignMessage,
+  useSignTypedData,
+  useSwitchChain as useWagmiSwitchChain,
+  useConfig,
+} from "@wagmi/vue";
+import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
+import { parseEther } from "viem";
 
 import { generateLegacyTransaction, generateSolTransferInstruction } from "../utils/solana";
 import { computed, ref, watch } from "vue";
@@ -53,6 +63,10 @@ const wagmiChainId = useChainId();
 const balance = useBalance({
   address: address,
 });
+
+// EIP-5792: only track calls id to show Refresh/Show Status buttons after Send Batch Calls
+const config = useConfig();
+const trackedCallsId = ref<string | undefined>();
 
 const { accounts: solanaAccounts, rpc, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
@@ -220,6 +234,59 @@ const onSignPersonalMsg = async () => {
     message: "Hello, Bob!",
   });
   printToConsole("result", result);
+};
+
+// EIP-5792 handlers (results/errors go to console only)
+const onGetCapabilities = async () => {
+  try {
+    const data = await getCapabilities(config);
+    printToConsole("capabilities", data);
+  } catch (err) {
+    printToConsole("capabilities error", err instanceof Error ? err.message : String(err));
+  }
+};
+
+const onSendBatchCalls = async () => {
+  const addr = address.value;
+  if (!addr) {
+    printToConsole("Send Batch Calls error", "No address");
+    return;
+  }
+  try {
+    const result = await sendCalls(config, {
+      calls: [
+        { to: addr as `0x${string}`, value: parseEther("0.0001") },
+        { to: addr as `0x${string}`, value: parseEther("0.0002") },
+      ],
+      version: "2.0",
+    });
+    trackedCallsId.value = result.id;
+    printToConsole("sendCalls result", result);
+  } catch (err) {
+    printToConsole("Send Batch Calls error", err instanceof Error ? err.message : String(err));
+  }
+};
+
+const onRefetchCallsStatus = async () => {
+  if (!trackedCallsId.value) return;
+  try {
+    const data = await getCallsStatus(config, { id: trackedCallsId.value });
+    printToConsole("callsStatus", data);
+  } catch (err) {
+    printToConsole("callsStatus error", err instanceof Error ? err.message : String(err));
+  }
+};
+
+const onShowCallsStatusInWallet = async () => {
+  if (!trackedCallsId.value) {
+    printToConsole("Show Calls Status error", "No calls id");
+    return;
+  }
+  try {
+    await showCallsStatus(config, { id: trackedCallsId.value });
+  } catch (err) {
+    printToConsole("Show Calls Status error", err instanceof Error ? err.message : String(err));
+  }
 };
 
 const isSmartAccount = computed(() => {
@@ -397,6 +464,21 @@ const onSwitchChain = async () => {
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
           <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+
+          <!-- EIP-5792 -->
+          <div class="mb-2 mt-4 text-xl font-bold leading-tight text-left">EIP-5792</div>
+          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">
+            Get Capabilities
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">
+            Send Batch Calls
+          </Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">
+            Refresh Calls Status
+          </Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">
+            Show Calls Status in Wallet
+          </Button>
         </Card>
 
         <!-- SOLANA -->
