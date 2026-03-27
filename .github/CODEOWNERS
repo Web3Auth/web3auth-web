@@ -16,7 +16,7 @@
 # and responsibility to publish libraries under the Web3auth name.
 
 # Fallback for all other files
-*                               @Web3auth/Web3Auth-Admins
+*                               @Web3Auth/Web3Auth-Admins
 
 # Product code
 packages/                       @Web3Auth/Web3Auth-Product
