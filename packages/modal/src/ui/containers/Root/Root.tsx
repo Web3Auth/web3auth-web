@@ -29,6 +29,7 @@ function RootContent(props: RootProps) {
     handleDeclineConsent,
   } = useWidget();
   const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen } = uiConfig;
+  const consentRequired = Boolean("consentRequired" in uiConfig && uiConfig.consentRequired);
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(530);
@@ -250,8 +251,8 @@ function RootContent(props: RootProps) {
 
           {/* Footer */}
           <Footer
-            privacyPolicy={modalState.status !== MODAL_STATUS.CONSENT_REQUIRED ? privacyPolicy : undefined}
-            termsOfService={modalState.status !== MODAL_STATUS.CONSENT_REQUIRED ? tncLink : undefined}
+            privacyPolicy={!consentRequired && modalState.status !== MODAL_STATUS.CONSENT_REQUIRED ? privacyPolicy : undefined}
+            termsOfService={!consentRequired && modalState.status !== MODAL_STATUS.CONSENT_REQUIRED ? tncLink : undefined}
           />
 
           <RootBodySheets />
