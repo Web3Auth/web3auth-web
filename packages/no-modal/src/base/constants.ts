@@ -29,11 +29,6 @@ export const SOLANA_CAIP_CHAIN_MAP: Record<string, string> = {
   "0x67": "EtWTRABZaYq6iMfeYKouRu166VU2xqa1",
 } as const;
 
-export const SMART_ACCOUNT_EIP_STANDARD = {
-  ERC_4337: "4337",
-  EIP_7702: "7702",
-} as const;
-
 export const EIP_7702_SUPPORTED_SMART_ACCOUNTS = [SMART_ACCOUNT.METAMASK] as const;
 
 export const WALLET_REGISTRY_URL = "https://assets.web3auth.io/v2/wallet-registry.json";

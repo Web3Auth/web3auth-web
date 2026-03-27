@@ -1,5 +1,9 @@
 import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controllers";
-import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
+import {
+  type AccountAbstractionMultiChainConfig,
+  EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES,
+  SMART_ACCOUNT_EIP_STANDARD,
+} from "@toruslabs/ethereum-controllers";
 import {
   cloneDeep,
   CookieStorage,
@@ -34,7 +38,6 @@ import {
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
   type CustomChainConfig,
-  EIP_7702_SUPPORTED_SMART_ACCOUNTS,
   fetchProjectConfig,
   getAaAnalyticsProperties,
   getCaipChainId,
@@ -60,7 +63,6 @@ import {
   PLUGIN_STATUS,
   type ProjectConfig,
   sdkVersion,
-  SMART_ACCOUNT_EIP_STANDARD,
   SMART_ACCOUNT_WALLET_SCOPE,
   type SmartAccountsConfig,
   storageAvailable,
@@ -647,9 +649,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       smartAccountType?: string;
     };
     const is7702SmartAccount = smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
-    if (is7702SmartAccount && smartAccountType && !(EIP_7702_SUPPORTED_SMART_ACCOUNTS as readonly string[]).includes(smartAccountType)) {
+    if (is7702SmartAccount && smartAccountType && !(EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES as readonly string[]).includes(smartAccountType)) {
       throw WalletInitializationError.invalidParams(
-        `Smart account type "${smartAccountType}" does not support EIP-7702. Supported: ${EIP_7702_SUPPORTED_SMART_ACCOUNTS.join(", ")}`
+        `Smart account type "${smartAccountType}" does not support EIP-7702. Supported: ${EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES.join(", ")}`
       );
     }
 
