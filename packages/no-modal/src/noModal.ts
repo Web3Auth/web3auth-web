@@ -577,10 +577,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     // if AA is enabled and smart account is not 7702, filter out chains that are not AA-supported
-    // TODO: upgrade to latest controllers
-    const is7702SmartAccount =
-      (this.coreOptions.accountAbstractionConfig as { smartAccountEipStandard?: string }).smartAccountEipStandard ===
-      SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
+    const is7702SmartAccount = this.coreOptions.accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
     if (this.coreOptions.accountAbstractionConfig && !is7702SmartAccount) {
       // write a for loop over accountAbstractionConfig.chains and check if the chainId is valid
       if (this.coreOptions.accountAbstractionConfig.chains.length === 0) {
