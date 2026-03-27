@@ -12,7 +12,7 @@ import {
   SMART_ACCOUNT,
   type TrustSmartAccountConfig,
 } from "@toruslabs/ethereum-controllers";
-import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
+import { JRPCEngineV2, providerErrors, providerFromEngineV2 } from "@web3auth/auth";
 import { type Client, createPublicClient, createWalletClient, custom, defineChain, Hex, http } from "viem";
 import { type BundlerClient, createBundlerClient, createPaymasterClient, type PaymasterClient, type SmartAccount } from "viem/account-abstraction";
 
@@ -150,15 +150,13 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     });
 
     // setup rpc engine and AA middleware
-    const engine = new JRPCEngine();
     const aaMiddleware = await createAaMiddleware({
       eoaProvider,
       handlers: providerHandlers,
     });
-    engine.push(aaMiddleware);
     const eoaMiddleware = providerAsMiddleware(eoaProvider);
-    engine.push(eoaMiddleware);
-    const provider = providerFromEngine(engine);
+    const engine = JRPCEngineV2.create({ middleware: [aaMiddleware, eoaMiddleware] });
+    const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
     eoaProvider.once("chainChanged", (chainId) => {
       this.update({ chainId });
@@ -246,11 +244,9 @@ export const accountAbstractionProvider = async ({
 
 export const toEoaProvider = async (aaProvider: IProvider): Promise<IProvider> => {
   // derive EOA provider from AA provider
-  const engine = new JRPCEngine();
   const eoaMiddleware = await createEoaMiddleware({ aaProvider });
-  engine.push(eoaMiddleware);
-  engine.push(providerAsMiddleware(aaProvider));
-  return providerFromEngine(engine) as IProvider;
+  const engine = JRPCEngineV2.create({ middleware: [eoaMiddleware, providerAsMiddleware(aaProvider)] });
+  return providerFromEngineV2(engine) as IProvider;
 };
 
 export { type AccountAbstractionMultiChainConfig, type AccountAbstractionProvider, type BundlerConfig, type PaymasterConfig, SMART_ACCOUNT };

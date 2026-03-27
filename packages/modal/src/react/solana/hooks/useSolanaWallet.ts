@@ -66,6 +66,7 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
 
   useEffect(() => {
     if (!solanaChain || !solanaWallet) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       setAccounts(null);
       return;
     }

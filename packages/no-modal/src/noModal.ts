@@ -1,6 +1,21 @@
 import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controllers";
-import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import { cloneDeep, IStorage, MemoryStore, SafeEventEmitter, type SafeEventEmitterProvider, serializeError, UX_MODE } from "@web3auth/auth";
+import {
+  type AccountAbstractionMultiChainConfig,
+  EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES,
+  SMART_ACCOUNT_EIP_STANDARD,
+} from "@toruslabs/ethereum-controllers";
+import {
+  cloneDeep,
+  CookieStorage,
+  type IStorageAdapter,
+  LocalStorageAdapter,
+  MemoryStorage,
+  SafeEventEmitter,
+  type SafeEventEmitterProvider,
+  serializeError,
+  SessionStorageAdapter,
+  UX_MODE,
+} from "@web3auth/auth";
 import { WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
@@ -62,7 +77,6 @@ import {
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
-import { cookieStorage } from "./base/cookie";
 import { deserialize } from "./base/deserialize";
 import { authConnector, type AuthConnectorType } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
@@ -84,9 +98,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected plugins: Record<string, IPlugin> = {};
 
-  private currentConnection: Connection | null = null;
+  private storage: IStorageAdapter;
 
-  private storage: IStorage;
+  private currentConnection: Connection | null = null;
 
   private state: IWeb3AuthState = {
     cachedConnector: null,
@@ -112,14 +126,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.analytics = new Analytics();
     this.analytics.setGlobalProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.NATIVE_SDK });
 
-    this.loadState(initialState);
-    if (this.state.idToken && this.coreOptions.ssr) {
-      // connect-only is the default authentication mode, so we need to set the status to connected if the idToken is present and ssr is enabled
-      this.status =
-        this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN
-          ? CONNECTOR_STATUS.AUTHORIZED
-          : CONNECTOR_STATUS.CONNECTED;
-    }
+    this.loadState(initialState)
+      .then((): undefined => {
+        if (this.state.idToken && this.coreOptions.ssr) {
+          // connect-only is the default authentication mode, so we need to set the status to connected if the idToken is present and ssr is enabled
+          this.status =
+            this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN
+              ? CONNECTOR_STATUS.AUTHORIZED
+              : CONNECTOR_STATUS.CONNECTED;
+        }
+        return undefined;
+      })
+      .catch(() => {});
   }
 
   get currentChain(): CustomChainConfig | undefined {
@@ -221,7 +239,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // init config
       this.initAccountAbstractionConfig(projectConfig);
       this.initChainsConfig(projectConfig);
-      this.initCachedConnectorAndChainId();
+      await this.initCachedConnectorAndChainId();
       this.initUIConfig(projectConfig);
       this.initWalletServicesConfig(projectConfig);
       this.initSessionTimeConfig(projectConfig);
@@ -291,8 +309,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     );
   }
 
-  public clearCache() {
-    this.setState({
+  public async clearCache(): Promise<void> {
+    await this.setState({
+      connectedConnectorName: null,
       cachedConnector: null,
       cachedConnectorNamespace: null,
       connectedConnectorName: null,
@@ -588,8 +607,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
     }
 
-    // if AA is enabled, filter out chains that are not AA-supported
-    if (this.coreOptions.accountAbstractionConfig) {
+    // if AA is enabled and smart account is not 7702, filter out chains that are not AA-supported
+    const is7702SmartAccount = this.coreOptions.accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
+    if (this.coreOptions.accountAbstractionConfig && !is7702SmartAccount) {
       // write a for loop over accountAbstractionConfig.chains and check if the chainId is valid
       if (this.coreOptions.accountAbstractionConfig.chains.length === 0) {
         log.error("Please configure chains for smart accounts on dashboard at https://dashboard.web3auth.io");
@@ -637,7 +657,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!isAAEnabled) return;
 
     // merge smart account config from project config with core options, core options will take precedence over project config
-    const { walletScope, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
+    const { walletScope, eipStandard, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
     const aaChainMap = new Map<string, AccountAbstractionMultiChainConfig["chains"][number]>();
     const allAaChains = [...(configWithoutWalletScope?.chains || []), ...(this.coreOptions.accountAbstractionConfig?.chains || [])];
     for (const chain of allAaChains) {
@@ -647,9 +667,22 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     this.coreOptions.accountAbstractionConfig = {
+      smartAccountEipStandard: eipStandard,
       ...deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {}),
       chains: Array.from(aaChainMap.values()),
     };
+
+    // if eipStandard is 7702, validate smart account type
+    const { smartAccountEipStandard, smartAccountType } = this.coreOptions.accountAbstractionConfig as {
+      smartAccountEipStandard?: string;
+      smartAccountType?: string;
+    };
+    const is7702SmartAccount = smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
+    if (is7702SmartAccount && smartAccountType && !(EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES as readonly string[]).includes(smartAccountType)) {
+      throw WalletInitializationError.invalidParams(
+        `Smart account type "${smartAccountType}" does not support EIP-7702. Supported: ${EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES.join(", ")}`
+      );
+    }
 
     // determine if we should use AA with external wallet
     if (this.coreOptions.useAAWithExternalWallet === undefined) {
@@ -903,7 +936,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const { ethereumProvider, solanaWallet, identityTokenInfo } = data;
 
       if (identityTokenInfo) {
-        this.setState({ idToken: identityTokenInfo.idToken });
+        await this.setState({ idToken: identityTokenInfo.idToken });
       }
 
       // when ssr is enabled, we need to get the idToken from the connector.
@@ -911,7 +944,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         try {
           const data = await connector.getIdentityToken();
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
-          this.setState({
+          await this.setState({
             idToken: data.idToken,
           });
         } catch (error) {
@@ -922,13 +955,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
       }
 
-      // setup AA provider if AA is enabled
+      // setup AA provider if AA is enabled (skip for EIP-7702; 7702 uses EOA + 5792/7702 RPC only)
       if (ethereumProvider) {
         let finalProvider = (ethereumProvider as IBaseProvider<unknown>)?.provider || (ethereumProvider as SafeEventEmitterProvider);
         const { accountAbstractionConfig } = this.coreOptions;
         const evmChain = this.getCurrentChain(CHAIN_NAMESPACES.EIP155);
+        const is7702 = accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD["EIP_7702"];
         const isAaSupportedForCurrentChain = !!evmChain && accountAbstractionConfig?.chains?.some((chain) => chain.chainId === evmChain.chainId);
-        if (isAaSupportedForCurrentChain && (data.connectorName === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
+        if (!is7702 && isAaSupportedForCurrentChain && (data.connectorName === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
           const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
           // for embedded wallets, we use ws-embed provider which is AA provider, need to derive EOA provider
           const eoaProvider: IProvider = data.connectorName === WALLET_CONNECTORS.AUTH ? await toEoaProvider(ethereumProvider) : ethereumProvider;
@@ -980,7 +1014,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.status = CONNECTOR_STATUS.READY;
       const cachedConnector = this.state.cachedConnector;
       if (this.connectedConnectorName === cachedConnector) {
-        this.clearCache();
+        await this.clearCache();
       }
 
       log.debug("disconnected", this.status, this.connectedConnectorName);
@@ -998,7 +1032,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           });
         })
       );
-      this.setState({ connectedConnectorName: null, connectedConnectorNamespace: null });
+      await this.setState({ connectedConnectorName: null, connectedConnectorNamespace: null });
       this.emit(CONNECTOR_EVENTS.DISCONNECTED);
     });
     connector.on(CONNECTOR_EVENTS.CONNECTING, (data) => {
@@ -1006,16 +1040,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.emit(CONNECTOR_EVENTS.CONNECTING, data);
       log.debug("connecting", this.status, this.connectedConnectorName);
     });
-    connector.on(CONNECTOR_EVENTS.ERRORED, (data) => {
+    connector.on(CONNECTOR_EVENTS.ERRORED, async (data) => {
       this.status = CONNECTOR_STATUS.ERRORED;
-      this.clearCache();
+      await this.clearCache();
       this.emit(CONNECTOR_EVENTS.ERRORED, data, this.loginMode);
       log.debug("errored", this.status, this.connectedConnectorName);
     });
 
-    connector.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, (error: Web3AuthError) => {
+    connector.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, async (error: Web3AuthError) => {
       this.status = CONNECTOR_STATUS.READY;
-      this.clearCache();
+      await this.clearCache();
       this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error);
     });
 
@@ -1024,9 +1058,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, data);
     });
 
-    connector.on(CONNECTOR_EVENTS.CACHE_CLEAR, (data) => {
+    connector.on(CONNECTOR_EVENTS.CACHE_CLEAR, async (data) => {
       log.debug("connector cache clear", data);
-      this.clearCache();
+      await this.clearCache();
     });
 
     connector.on(CONNECTOR_EVENTS.MFA_ENABLED, (isMFAEnabled: boolean) => {
@@ -1048,9 +1082,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
       log.debug("authorizing", this.status, this.connectedConnectorName);
     });
-    connector.on(CONNECTOR_EVENTS.AUTHORIZED, (data: AUTHORIZED_EVENT_DATA) => {
+    connector.on(CONNECTOR_EVENTS.AUTHORIZED, async (data: AUTHORIZED_EVENT_DATA) => {
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.setState({ idToken: data.identityTokenInfo.idToken });
+      await this.setState({ idToken: data.identityTokenInfo.idToken });
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
       log.debug("authorized", this.status, this.connectedConnectorName);
     });
@@ -1098,8 +1132,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return chain;
   }
 
-  private cacheWallet(walletName: string, namespace: ConnectorNamespaceType) {
-    this.setState({
+  private async cacheWallet(walletName: string, namespace: ConnectorNamespaceType): Promise<void> {
+    await this.setState({
       cachedConnector: walletName,
       cachedConnectorNamespace: namespace,
     });
@@ -1137,17 +1171,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
   }
 
-  private setState(newState: Partial<IWeb3AuthState>) {
+  private async setState(newState: Partial<IWeb3AuthState>): Promise<void> {
     this.state = { ...this.state, ...newState };
-    this.storage.setItem(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify(this.state));
+    await this.storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify(this.state));
   }
 
-  private loadState(initialState?: IWeb3AuthState) {
+  private async loadState(initialState?: IWeb3AuthState): Promise<void> {
     if (initialState) {
       this.state = { ...this.state, ...initialState };
       return;
     }
-    const state = this.storage.getItem(WEB3AUTH_STATE_STORAGE_KEY);
+    const state = await this.storage.get(WEB3AUTH_STATE_STORAGE_KEY);
     if (!state) return;
     const parsed = deserialize<IWeb3AuthState>(state);
     // currentChainIds, connectedConnectorNamespace, cachedConnectorNamespace added later — guard all
@@ -1160,11 +1194,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     };
   }
 
-  private getStorageMethod(): IStorage {
-    if (this.coreOptions.ssr || this.coreOptions.storageType === "cookies") return cookieStorage({ expiry: this.coreOptions.sessionTime });
-    if (this.coreOptions.storageType === "session" && storageAvailable("sessionStorage")) return window.sessionStorage;
-    if (this.coreOptions.storageType === "local" && storageAvailable("localStorage")) return window.localStorage;
-    // If no storage is available, use a memory store.
-    return new MemoryStore();
+  private getStorageMethod(): IStorageAdapter {
+    if (this.coreOptions.ssr || this.coreOptions.storageType === "cookies") return new CookieStorage({ maxAge: this.coreOptions.sessionTime });
+    if (this.coreOptions.storageType === "session" && storageAvailable("sessionStorage")) return new SessionStorageAdapter();
+    if (this.coreOptions.storageType === "local" && storageAvailable("localStorage")) return new LocalStorageAdapter();
+    return new MemoryStorage();
   }
 }

@@ -1,5 +1,5 @@
 import { IProvider, log, type Web3Auth } from "@web3auth/modal";
-import { verifyMessage as eipVerifyMessage } from "@web3auth/sign-in-with-ethereum";
+import { eipVerifyMessage } from "@web3auth/sign-in-with-web3";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import { BrowserProvider, parseEther, Transaction } from "ethers";
 
@@ -155,17 +155,17 @@ export const signPersonalMessage = async (provider: IProvider, uiConsole: (name:
     const signer = await ethProvider.getSigner();
     const account = await signer.getAddress();
     const from = account;
+    const rpcUrl = (provider as unknown as { currentChain: { rpcTarget: string } }).currentChain.rpcTarget;
 
     const originalMessage = "Example `personal_sign` messages";
 
-    // Sign the message
     const signedMessage = await signer.signMessage(originalMessage);
 
     const valid = await eipVerifyMessage({
-      provider: ethProvider,
+      rpcUrl,
       message: originalMessage,
-      signature: signedMessage,
-      signer: from,
+      signature: signedMessage as `0x${string}`,
+      signer: from as `0x${string}`,
     });
 
     uiConsole(`Success`, { signedMessage, verify: valid });
@@ -185,11 +185,23 @@ export const signTypedMessage = async (provider: IProvider, uiConsole: (name: st
 
     const signedMessage = await signer.signTypedData(typedData.domain, typedData.types, typedData.message);
 
+    const rpcUrl = (provider as unknown as { currentChain: { rpcTarget: string } }).currentChain.rpcTarget;
     const valid = await eipVerifyMessage({
-      provider: ethProvider,
-      typedData,
-      signature: signedMessage,
-      signer: from,
+      rpcUrl,
+      typedData: {
+        types: typedData.types,
+        primaryType: "Mail" as const,
+        domain: {
+          name: typedData.domain.name ?? undefined,
+          version: typedData.domain.version ?? undefined,
+          chainId: Number(typedData.domain.chainId),
+          verifyingContract: (typedData.domain.verifyingContract ?? undefined) as `0x${string}` | undefined,
+          salt: (typedData.domain.salt ?? undefined) as `0x${string}` | undefined,
+        },
+        message: typedData.message,
+      },
+      signature: signedMessage as `0x${string}`,
+      signer: from as `0x${string}`,
     });
 
     uiConsole(`Success`, { signedMessage, verify: valid });
