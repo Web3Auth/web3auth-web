@@ -13,7 +13,6 @@ import {
   getUserId,
   type LoginParams,
   PopupHandler,
-  randomId,
   SDK_MODE,
   SUPPORTED_KEY_CURVES,
   UX_MODE,
@@ -51,7 +50,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
-import { parseToken } from "../utils";
+import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
@@ -161,6 +160,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
               loginMode: WS_EMBED_LOGIN_MODE.PLUGIN,
               chains: wsSupportedChains as ProviderConfig[],
               chainId,
+              buildEnv: this.authOptions.buildEnv,
               whiteLabel: {
                 ...this.authOptions.whiteLabel,
                 ...this.wsSettings.whiteLabel,
@@ -423,9 +423,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
       const { sessionId, sessionNamespace } = this.authInstance || {};
       if (sessionId) {
-        const isLoggedIn = await this.wsEmbedInstance.loginWithSessionId({
+        this.wsEmbedInstance.setAccessTokenProvider(this.accessTokenProvider.bind(this));
+
+        const isLoggedIn = await this.wsEmbedInstance.connectWithSession({
           sessionId,
           sessionNamespace,
+          idToken: await this.getIdToken(),
         });
         if (isLoggedIn) {
           // Setup Solana wallet only when current chain is solana
@@ -483,7 +486,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       login_hint: params.loginHint || params.extraLoginOptions?.login_hint,
     } as Auth0ClientOptions;
 
-    const nonce = randomId();
+    const nonce = generateNonce();
 
     // post a message to the auth provider to indicate that login has been initiated.
     const loginParams = cloneDeep(params);
@@ -515,6 +518,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       },
       web3AuthClientId: this.coreOptions.clientId,
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+      storageServerUrl: this.authInstance.options.storageServerUrl,
     };
 
     const loginHandler = createHandler(popupParams);
@@ -535,7 +539,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       });
 
       // this is to close the popup when the login is finished.
-      const securePubSub = new SecurePubSub({ sameIpCheck: true });
+      const securePubSub = new SecurePubSub({
+        sameIpCheck: true,
+        serverUrl: this.authInstance.options.storageServerUrl,
+        socketUrl: this.authInstance.options.sessionSocketUrl,
+      });
       securePubSub
         .subscribe(`web3auth-login-${nonce}`)
         .then((data: string) => {
@@ -574,6 +582,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           reject(WalletLoginError.connectionError(error instanceof Error ? error.message : (error as string) || "Failed to login with social"));
         });
     });
+  }
+
+  private async accessTokenProvider({ forceRefresh }: { forceRefresh: boolean }): Promise<string> {
+    if (forceRefresh) {
+      await this.authInstance.refreshSession();
+    }
+    return this.authInstance.getAccessToken();
+  }
+
+  private async getIdToken(): Promise<string> {
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    return this.authInstance.authSessionManager.getIdToken();
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {

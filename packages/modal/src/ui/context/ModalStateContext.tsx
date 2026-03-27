@@ -98,6 +98,7 @@ export const ModalStateProvider: FC<ModalStateProviderProps> = ({ children, stat
 
   // Update visibility when initialVisibility changes
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
     setModalState((prev) => ({ ...prev, modalVisibility: initialVisibility }));
   }, [initialVisibility]);
 
