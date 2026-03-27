@@ -70,10 +70,7 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     if (accts.length > 0) setAccounts(accts);
   }, [solanaWallet, solanaChain]);
 
-  const switchChain = useCallback(
-    (chainId: string) => switchChainInternal({ chainId, namespace: CHAIN_NAMESPACES.SOLANA }),
-    [switchChainInternal]
-  );
+  const switchChain = useCallback((chainId: string) => switchChainInternal({ chainId, namespace: CHAIN_NAMESPACES.SOLANA }), [switchChainInternal]);
 
   return {
     solanaWallet,

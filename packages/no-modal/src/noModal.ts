@@ -312,10 +312,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   public async clearCache(): Promise<void> {
     await this.setState({
       connectedConnectorName: null,
+      connectedConnectorNamespace: null,
       cachedConnector: null,
       cachedConnectorNamespace: null,
-      connectedConnectorName: null,
-      connectedConnectorNamespace: null,
       currentChainIds: {},
       idToken: null,
     });
@@ -703,7 +702,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (projectConfig.sessionTime) this.coreOptions.sessionTime = projectConfig.sessionTime;
   }
 
-  protected initCachedConnectorAndChainId() {
+  protected async initCachedConnectorAndChainId(): Promise<void> {
     if (this.coreOptions.defaultChainId && !isHexStrict(this.coreOptions.defaultChainId))
       throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
 

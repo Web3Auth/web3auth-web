@@ -1,12 +1,12 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import type { CustomChainConfig, Web3AuthError } from "../../../base";
-import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
-import { WALLET_CONNECTORS } from "../../../base/wallet";
 import type { ComputedRef } from "vue";
 import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
+import type { CustomChainConfig, Web3AuthError } from "../../../base";
+import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
+import { WALLET_CONNECTORS } from "../../../base/wallet";
 import { useChain, useSwitchChain, useWeb3Auth } from "../../composables";
 
 export type IUseSolanaWallet = {

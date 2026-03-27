@@ -1,6 +1,6 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
-import { CHAIN_NAMESPACES, type CustomChainConfig, type Web3AuthError, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, type CustomChainConfig, WALLET_CONNECTORS, type Web3AuthError } from "@web3auth/no-modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import type { ComputedRef } from "vue";
 import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
