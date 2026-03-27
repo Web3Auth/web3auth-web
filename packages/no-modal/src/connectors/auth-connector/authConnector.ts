@@ -597,15 +597,20 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   private getOriginData(): string | undefined {
-    const { originData, redirectUrl } = this.authInstance.options;
-    const origin = new URL(redirectUrl).origin;
-    if (originData) {
-      const dappOriginData = originData[origin];
-      if (dappOriginData) {
-        return JSON.stringify({ [origin]: dappOriginData });
+    try {
+      const { originData, redirectUrl } = this.authInstance.options;
+      const origin = new URL(redirectUrl).origin;
+      if (originData) {
+        const dappOriginData = originData[origin];
+        if (dappOriginData) {
+          return JSON.stringify({ [origin]: dappOriginData });
+        }
       }
+      return undefined;
+    } catch (error) {
+      log.error("Error getting origin data", error);
+      return undefined;
     }
-    return undefined;
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
