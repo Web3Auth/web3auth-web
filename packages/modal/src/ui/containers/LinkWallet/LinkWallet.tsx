@@ -6,6 +6,9 @@ import { ExternalButton } from "../../interfaces";
 import ConnectWalletChainFilter from "../ConnectWallet/ConnectWalletChainFilter";
 import ConnectWalletList from "../ConnectWallet/ConnectWalletList";
 import ConnectWalletSearch from "../ConnectWallet/ConnectWalletSearch";
+import LinkWalletConnecting from "./LinkWalletConnecting";
+import LinkWalletSignVerify from "./LinkWalletSignVerify";
+import LinkWalletSuccess from "./LinkWalletSuccess";
 
 export interface LinkWalletProps {
   allRegistryButtons: ExternalButton[];
@@ -14,12 +17,17 @@ export interface LinkWalletProps {
   externalWalletsConfig: Record<string, BaseConnectorConfig>;
 }
 
+type LinkWalletStep = "wallet_list" | "connecting" | "sign_verify" | "success";
+
 function LinkWallet(props: LinkWalletProps) {
   const { allRegistryButtons, customConnectorButtons, connectorVisibilityMap } = props;
 
   const { isDark, uiConfig } = useWidget();
   const { walletRegistry } = uiConfig;
 
+  const [step, setStep] = useState<LinkWalletStep>("wallet_list");
+  const [stepError, setStepError] = useState(false);
+  const [selectedWallet, setSelectedWallet] = useState<ExternalButton | null>(null);
   const [walletSearch, setWalletSearch] = useState("");
   const [selectedChain, setSelectedChain] = useState("all");
   const [isShowAllWallets, setIsShowAllWallets] = useState(false);
@@ -115,11 +123,56 @@ function LinkWallet(props: LinkWalletProps) {
       hasInjectedWallet: button.hasInjectedWallet,
       chainNamespaces: button.chainNamespaces,
     });
+    setSelectedWallet(button);
+    setStepError(false);
+    setStep("connecting");
   }, []);
 
   const handleMoreWallets = useCallback(() => {
     setIsShowAllWallets(true);
   }, []);
+
+  const walletName = selectedWallet?.displayName || selectedWallet?.name || "Wallet";
+  const walletId = selectedWallet?.name || "";
+  const imgExtension = selectedWallet?.imgExtension;
+
+  if (step === "connecting") {
+    return (
+      <LinkWalletConnecting
+        walletName={walletName}
+        walletId={walletId}
+        imgExtension={imgExtension}
+        stepError={stepError}
+        onSimulateSuccess={() => {
+          setStepError(false);
+          setStep("sign_verify");
+        }}
+        onSimulateError={() => setStepError(true)}
+        onRetry={() => setStepError(false)}
+      />
+    );
+  }
+
+  if (step === "sign_verify") {
+    return (
+      <LinkWalletSignVerify
+        walletName={walletName}
+        walletId={walletId}
+        imgExtension={imgExtension}
+        stepError={stepError}
+        onSimulateSuccess={() => {
+          setStepError(false);
+          setStep("success");
+        }}
+        onSimulateError={() => setStepError(true)}
+        onRetry={() => setStepError(false)}
+      />
+    );
+  }
+
+  if (step === "success") {
+    return <LinkWalletSuccess walletName={walletName} walletId={walletId} imgExtension={imgExtension} />;
+  }
 
   return (
     <div className="w3a--relative w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
