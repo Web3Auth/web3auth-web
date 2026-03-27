@@ -44,6 +44,10 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     [web3Auth]
   );
 
+  const syncCurrentChainIdsFromSdk = useCallback(() => {
+    setCurrentChainIds({ ...web3Auth.currentChainIds });
+  }, [web3Auth]);
+
   useEffect(() => {
     const controller = new AbortController();
     async function init() {
@@ -173,6 +177,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       currentChainIds,
       getPlugin,
       setIsMFAEnabled,
+      syncCurrentChainIdsFromSdk,
     };
   }, [
     web3Auth,
@@ -187,6 +192,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     isInitializing,
     initError,
     currentChainIds,
+    syncCurrentChainIdsFromSdk,
   ]);
 
   return createElement(Web3AuthInnerContext.Provider, { value }, children);

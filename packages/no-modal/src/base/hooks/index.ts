@@ -4,6 +4,7 @@ import { IPlugin } from "../plugin";
 
 export interface IBaseWeb3AuthHookContext {
   currentChainIds: Partial<Record<ChainNamespaceType, string>>;
+  syncCurrentChainIdsFromSdk: () => void;
   isInitialized: boolean;
   isInitializing: boolean;
   initError: unknown;

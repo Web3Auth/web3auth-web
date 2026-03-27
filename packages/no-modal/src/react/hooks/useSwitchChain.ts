@@ -10,7 +10,7 @@ export interface IUseSwitchChain {
 }
 
 export const useSwitchChain = (): IUseSwitchChain => {
-  const { web3Auth } = useWeb3AuthInner();
+  const { web3Auth, syncCurrentChainIdsFromSdk } = useWeb3AuthInner();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
@@ -21,13 +21,14 @@ export const useSwitchChain = (): IUseSwitchChain => {
       setError(null);
       try {
         await web3Auth.switchChain(params);
+        syncCurrentChainIdsFromSdk();
       } catch (error) {
         setError(error as Web3AuthError);
       } finally {
         setLoading(false);
       }
     },
-    [web3Auth]
+    [web3Auth, syncCurrentChainIdsFromSdk]
   );
 
   return { loading, error, switchChain };
