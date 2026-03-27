@@ -514,7 +514,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         version: version.split(".")[0],
         web3AuthNetwork: this.coreOptions.web3AuthNetwork,
         web3AuthClientId: this.coreOptions.clientId,
-        originData: this.authInstance.options.originData ? JSON.stringify(this.authInstance.options.originData) : undefined,
+        originData: this.getOriginData(),
       },
       web3AuthClientId: this.coreOptions.clientId,
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
@@ -594,6 +594,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   private async getIdToken(): Promise<string> {
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     return this.authInstance.authSessionManager.getIdToken();
+  }
+
+  private getOriginData(): string | undefined {
+    const { originData, redirectUrl } = this.authInstance.options;
+    const origin = new URL(redirectUrl).origin;
+    if (originData) {
+      const dappOriginData = originData[origin];
+      if (dappOriginData) {
+        return JSON.stringify({ [origin]: dappOriginData });
+      }
+    }
+    return undefined;
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
