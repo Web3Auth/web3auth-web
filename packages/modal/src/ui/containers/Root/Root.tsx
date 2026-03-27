@@ -235,7 +235,14 @@ function RootContent(props: RootProps) {
                   />
                 )}
               {/* Link Wallet Screen */}
-              {modalState.currentPage === PAGES.LINK_WALLET && modalState.status === MODAL_STATUS.INITIALIZED && <LinkWallet />}
+              {modalState.currentPage === PAGES.LINK_WALLET && modalState.status === MODAL_STATUS.INITIALIZED && (
+                <LinkWallet
+                  allRegistryButtons={allRegistryButtons}
+                  customConnectorButtons={customConnectorButtons}
+                  connectorVisibilityMap={connectorVisibilityMap}
+                  externalWalletsConfig={modalState.externalWalletsConfig}
+                />
+              )}
             </>
           )}
 
