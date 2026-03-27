@@ -626,7 +626,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!isAAEnabled) return;
 
     // merge smart account config from project config with core options, core options will take precedence over project config
-    const { walletScope, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
+    const { walletScope, eipStandard, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
     const aaChainMap = new Map<string, AccountAbstractionMultiChainConfig["chains"][number]>();
     const allAaChains = [...(configWithoutWalletScope?.chains || []), ...(this.coreOptions.accountAbstractionConfig?.chains || [])];
     for (const chain of allAaChains) {
@@ -636,6 +636,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     this.coreOptions.accountAbstractionConfig = {
+      smartAccountEipStandard: eipStandard,
       ...deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {}),
       chains: Array.from(aaChainMap.values()),
     };

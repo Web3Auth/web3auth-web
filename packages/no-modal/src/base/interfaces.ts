@@ -31,7 +31,7 @@ export type SmartAccountWalletScope = (typeof SMART_ACCOUNT_WALLET_SCOPE)[keyof 
 export type SmartAccountEipStandardType = (typeof SMART_ACCOUNT_EIP_STANDARD)[keyof typeof SMART_ACCOUNT_EIP_STANDARD];
 
 export interface SmartAccountsConfig {
-  smartAccountEipStandard: SmartAccountEipStandardType | undefined;
+  eipStandard: SmartAccountEipStandardType | undefined;
   smartAccountType: SmartAccountType;
   walletScope: SmartAccountWalletScope;
   chains: {
