@@ -219,9 +219,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       this.metamaskProvider = provider;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: WALLET_CONNECTORS.METAMASK,
+        connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
-        provider: this.metamaskProvider,
+        ethereumProvider: this.metamaskProvider,
+        solanaWallet: null,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
     } else if (this.metamaskInstance.status === "loaded") {
