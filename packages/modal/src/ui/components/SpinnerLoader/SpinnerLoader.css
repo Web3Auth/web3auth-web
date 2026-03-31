@@ -6,6 +6,8 @@
 }
 
 .w3a--spinner-loader-ring {
+  --spinner-color: var(--app-primary-600);
+
   position: absolute;
   display: inline-block;
   height: 100%;
@@ -15,10 +17,10 @@
   background-position: 0px 0px;
   background-image: conic-gradient(
     from 0deg at 50% 50%,
-    var(--app-primary-600) 0%,
+    var(--spinner-color) 0%,
     rgb(229, 231, 235, 0.8) 90deg,
     rgb(229, 231, 235, 0.8) 270deg,
-    var(--app-primary-600) 360deg
+    var(--spinner-color) 360deg
   );
 
   -webkit-mask:
@@ -33,12 +35,14 @@
 }
 
 .w3a--dark .w3a--spinner-loader-ring {
+  --spinner-color: var(--app-primary-500);
+
   background-image: conic-gradient(
     from 0deg at 50% 50%,
-    var(--app-primary-500) 0%,
+    var(--spinner-color) 0%,
     rgb(229, 231, 235, 0.2) 90deg,
     rgb(229, 231, 235, 0.2) 270deg,
-    var(--app-primary-500) 360deg
+    var(--spinner-color) 360deg
   );
 }
 
@@ -46,7 +50,5 @@
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 40%;
-  height: 40%;
   transform: translate(-50%, -50%);
 }

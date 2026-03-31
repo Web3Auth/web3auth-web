@@ -7,6 +7,8 @@ export interface SpinnerLoaderProps {
   logoDark?: string;
   showLogo?: boolean;
   children?: ReactNode;
+  /** Override the primary color used for the spinner ring gradient. */
+  primaryColor?: string;
   classes?: Partial<Record<SpinnerLoaderClassesKey, string>>;
   width?: number | string;
   height?: number | string;
