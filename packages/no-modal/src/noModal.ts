@@ -546,12 +546,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
-    // Guard 1: user must be connected
     if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
       throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before linking an account.");
     }
 
-    // Guard 2: linking is only supported when the primary connector is AUTH
+    // linking is only supported when the primary connector is AUTH
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH) {
       throw WalletLoginError.unsupportedOperation("Account linking is only supported when connected with the AUTH connector.");
     }

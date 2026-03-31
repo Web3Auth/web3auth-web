@@ -39,6 +39,8 @@ export interface CitadelLinkResponse {
  * Throws AccountLinkingError when the server returns an error or the request itself fails.
  */
 export async function makeAccountLinkingRequest(request: CitadelLinkRequest): Promise<LinkAccountResult> {
+  // eslint-disable-next-line no-console
+  console.log("makeAccountLinkingRequest::request", request);
   const url = "http://localhost:3020/v1/link/wallet";
 
   let raw: CitadelLinkResponse;

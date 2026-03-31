@@ -7,13 +7,14 @@ import {
   useReceive,
   useEnableMFA,
   useIdentityToken,
+  useLinkAccount,
   useManageMFA,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
-
 } from "@web3auth/modal/vue";
+import type { LinkAccountResult } from "@web3auth/no-modal";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
@@ -72,6 +73,20 @@ const { accounts: solanaAccounts, rpc, getPrivateKey: getSolanaPrivateKey } = us
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
+
+// Account Linking
+const { linkAccount, loading: linkAccountLoading, error: linkAccountError } = useLinkAccount();
+const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
+const linkAccountResult = ref<LinkAccountResult | null>(null);
+
+const onLinkAccount = async () => {
+  linkAccountResult.value = null;
+  const result = await linkAccount({ connectorName: linkConnector.value });
+  if (result) {
+    linkAccountResult.value = result;
+    printToConsole("Link Wallet Result", result);
+  }
+};
 
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
 
@@ -433,6 +448,28 @@ const onSwitchChain = async () => {
           <Button v-if="isDisplay('solServices')" block size="xs" pill class="mb-2" @click="onWalletSignSolanaVersionedTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button> -->
+        </Card>
+
+        <!-- Account Linking -->
+        <Card v-if="isDisplay('walletServices')" class="!h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Link Wallet</div>
+          <select
+            v-model="linkConnector"
+            class="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            @change="linkAccountResult = null"
+          >
+            <option :value="WALLET_CONNECTORS.METAMASK">MetaMask</option>
+            <option :value="WALLET_CONNECTORS.WALLET_CONNECT_V2">WalletConnect</option>
+          </select>
+          <Button :loading="linkAccountLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">
+            Link Wallet
+          </Button>
+          <p v-if="linkAccountResult" class="text-green-600 text-xs break-all">
+            Linked: {{ linkAccountResult.linkedAddress }}
+          </p>
+          <p v-if="linkAccountError" class="text-red-500 text-xs break-all">
+            Error: {{ linkAccountError.message }}
+          </p>
         </Card>
 
         <!-- EVM -->
