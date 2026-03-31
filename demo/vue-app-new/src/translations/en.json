@@ -12,6 +12,7 @@
     "initialAuthenticationMode": "Authentication Mode",
     "showWalletDiscovery": "Show Wallet Discovery",
     "multiInjectedProviderDiscovery": "Multi Injected Provider Discovery",
+    "externalWalletOnly": "External Wallet Only (Hide Social Login)",
     "greeting": "Let's configure Web3Auth!",
     "enableWalletServicePlugin": "Enable Wallet Service Plugin",
     "walletPlugin": {
@@ -35,6 +36,7 @@
       "logoLight": "Light Logo",
       "logoDark": "Dark Logo",
       "useLogoLoader": "Use Logo Loader",
+      "hideSuccessScreen": "Hide Success Screen",
       "primaryColor": "Primary Color",
       "onPrimaryColor": "On Primary Color"
     },
@@ -70,7 +72,6 @@
       "btnSignAndSendTransaction": "Sign and Send Transaction",
       "btnSignTransaction": "Sign Transaction",
       "btnSignMessage": "Sign Message",
-      "btnSignAllTransactions": "Sign All Transactions",
       "btnShowWalletUI": "Show Wallet UI",
       "btnShowFunding": "Show Funding",
       "btnShowCheckout": "Show Checkout",

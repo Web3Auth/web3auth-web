@@ -1,4 +1,4 @@
-import { log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
+import { log, WalletInitializationError, walletSignMessage, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref } from "vue";
 
 import { useSolanaWallet } from "./useSolanaWallet";
@@ -20,7 +20,7 @@ export const useSignMessage = (): IUseSignMessage => {
     error.value = null;
     try {
       if (!solanaWallet.value) throw WalletInitializationError.notReady();
-      const signature = await solanaWallet.value.signMessage(message, from ?? accounts.value?.[0]);
+      const signature = await walletSignMessage(solanaWallet.value, message, from ?? accounts.value?.[0]);
       data.value = signature;
       return signature;
     } catch (err) {

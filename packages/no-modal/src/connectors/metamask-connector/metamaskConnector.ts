@@ -9,6 +9,7 @@ import {
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  type Connection,
   CONNECTOR_CATEGORY,
   type CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -242,7 +243,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
 
     const instance = await this.ensureMetamask();
@@ -303,9 +304,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       let identityTokenInfo: IdentityTokenInfo | undefined;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: WALLET_CONNECTORS.METAMASK,
+        connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
-        provider: this.metamaskProvider,
+        ethereumProvider: this.metamaskProvider,
+        solanaWallet: null,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
@@ -313,7 +315,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         identityTokenInfo = await this.getIdentityToken();
       }
 
-      return this.metamaskProvider;
+      return { ethereumProvider: this.metamaskProvider, solanaWallet: null, connectorName: this.name };
     } catch (error) {
       // Ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

@@ -1,0 +1,28 @@
+# Lines starting with '#' are comments.
+#
+# GUIDELINES:
+# Each line is a file pattern followed by one or more owners.
+# Owners bear a responsibility to the organization and the users of this
+# application. Repository administrators have the ability to merge pull
+# requests that have not yet received the requisite reviews as outlined
+# in this file. Do not force merge any PR without confidence that it
+# follows all policies or without full understanding of the impact of
+# those changes on build, release and publishing outcomes.
+#
+# The CODEOWNERS file constitutes an agreement amongst organisation
+# admins and maintainers to restrict approval capabilities to a subset
+# of contributors. Modifications to this file result in a modification of
+# that agreement and can only be approved by those with the knowledge
+# and responsibility to publish libraries under the Web3auth name.
+
+# Fallback for all other files
+*                               @Web3Auth/Web3Auth-Admins
+
+# Product code
+packages/                       @Web3Auth/Web3Auth-Product
+test/                           @Web3Auth/Web3Auth-Product
+
+# Most restrictive — last match wins
+.github/CODEOWNERS              @Web3Auth/Web3Auth-Admins
+packages/**/package.json        @Web3Auth/Web3Auth-Admins
+package.json                    @Web3Auth/Web3Auth-Admins

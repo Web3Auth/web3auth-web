@@ -7,7 +7,7 @@ import { chainConfigs, defaultLoginMethod, FormData, initWhiteLabel } from "../c
 export const formDataStore = reactive<FormData>({
   // authMode: "",
   connectors: [],
-  initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
+  initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
   network: process.env.NODE_ENV === "production" ? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET : WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
   chainNamespaces: [CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA],
   chains: [chainConfigs[CHAIN_NAMESPACES.EIP155][0], chainConfigs[CHAIN_NAMESPACES.SOLANA][0]],
@@ -15,10 +15,12 @@ export const formDataStore = reactive<FormData>({
   whiteLabel: {
     enable: false,
     config: initWhiteLabel,
+    hideSuccessScreen: false,
   },
   loginProviders: [],
   showWalletDiscovery: true,
   multiInjectedProviderDiscovery: true,
+  externalWalletOnly: false,
   loginMethods: defaultLoginMethod,
   walletPlugin: {
     enable: false,

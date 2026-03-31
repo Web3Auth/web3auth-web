@@ -1,4 +1,4 @@
-import { JRPCEngine, providerErrors, providerFromEngine } from "@web3auth/auth";
+import { providerErrors, providerFromMiddlewareV2 } from "@web3auth/auth";
 
 import { CustomChainConfig, SafeEventEmitterProvider } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
@@ -24,9 +24,7 @@ export class CommonJRPCProvider extends BaseProvider<CommonJRPCProviderConfig, C
     const chain = this.getChain(chainId);
     if (!chain) throw providerErrors.custom({ message: "Chain not found", code: 4902 });
     const { networkMiddleware } = createJsonRpcClient(chain);
-    const engine = new JRPCEngine();
-    engine.push(networkMiddleware);
-    const provider = providerFromEngine(engine);
+    const provider = providerFromMiddlewareV2(networkMiddleware);
     this.updateProviderEngineProxy(provider);
 
     this.emit("chainChanged", chainId);
