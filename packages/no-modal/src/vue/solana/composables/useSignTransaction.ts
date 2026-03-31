@@ -1,4 +1,4 @@
-import { type Transaction } from "@solana/kit";
+import type { Transaction } from "@solana/kit";
 import { Ref, ref } from "vue";
 
 import { log, WalletInitializationError, walletSignTransaction, type Web3AuthError } from "../../../base";

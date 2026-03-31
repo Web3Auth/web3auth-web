@@ -7,13 +7,16 @@ import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { WALLET_CONNECTORS } from "../../../base/wallet";
 import { useChain, useWeb3Auth } from "../../composables";
 
-/** Public API: only accounts, client, rpc. Signing is via useSignTransaction / useSignMessage / useSignAndSendTransaction. */
 export type IUseSolanaWallet = {
-  /** Connected account addresses (base58). From Framework Kit session when available. */
   accounts: Ref<string[] | null>;
   solanaWallet: ShallowRef<Wallet | null>;
   /**
-   * Solana RPC for building transactions (e.g. getLatestBlockhash). From \@solana/kit for compatibility.
+   * Solana RPC client for making RPC calls.
+   * @example
+   * ```typescript
+   * const { value: balance } = await rpc.value.getBalance(address("...")).send();
+   * const { value: latestBlockhash } = await rpc.value.getLatestBlockhash().send();
+   * ```
    */
   rpc: ShallowRef<Rpc<SolanaRpcApi> | null>;
   /**
@@ -26,7 +29,6 @@ export type IUseSolanaWallet = {
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
-
   const accounts = ref<string[] | null>(null);
   const solanaWallet = shallowRef<Wallet | null>(null);
   const rpc = shallowRef<Rpc<SolanaRpcApi> | null>(null);

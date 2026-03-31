@@ -1,4 +1,4 @@
-import { type Transaction } from "@solana/kit";
+import type { Transaction } from "@solana/kit";
 import { useCallback, useState } from "react";
 
 import { walletSignTransaction, Web3AuthError } from "../../../base";
