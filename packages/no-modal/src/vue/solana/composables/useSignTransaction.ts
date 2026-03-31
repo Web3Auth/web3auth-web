@@ -1,8 +1,7 @@
-import { getBase64EncodedWireTransaction, type SendableTransaction, type Transaction } from "@solana/kit";
+import { type Transaction } from "@solana/kit";
 import { Ref, ref } from "vue";
 
-import { log } from "../../../base";
-import { WalletInitializationError, type Web3AuthError } from "../../../base/errors";
+import { log, WalletInitializationError, walletSignTransaction, type Web3AuthError } from "../../../base";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignTransaction = {
@@ -18,7 +17,7 @@ export type IUseSignTransaction = {
 };
 
 export const useSignTransaction = (): IUseSignTransaction => {
-  const { client } = useSolanaWallet();
+  const { solanaWallet } = useSolanaWallet();
   const loading = ref(false);
   const error = ref<Web3AuthError | null>(null);
   const data = ref<string | null>(null);
@@ -27,16 +26,10 @@ export const useSignTransaction = (): IUseSignTransaction => {
     loading.value = true;
     error.value = null;
     try {
-      if (!client.value) throw WalletInitializationError.notReady();
-      const wallet = client.value.store.getState().wallet;
-      if (wallet.status !== "connected" || !wallet.session?.signTransaction) {
-        throw WalletInitializationError.notReady();
-      }
-
-      const signedTx = await wallet.session.signTransaction(transaction as SendableTransaction & Transaction);
-      const encodedTx = getBase64EncodedWireTransaction(signedTx);
-      data.value = encodedTx;
-      return encodedTx;
+      if (!solanaWallet.value) throw WalletInitializationError.notReady();
+      const signedTransaction = await walletSignTransaction(solanaWallet.value, transaction);
+      data.value = signedTransaction;
+      return signedTransaction;
     } catch (err) {
       log.error("Error signing transaction", err);
       error.value = err as Web3AuthError;

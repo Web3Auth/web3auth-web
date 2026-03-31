@@ -1,11 +1,10 @@
 import type { SolanaClient } from "@solana/client";
-import { createClient } from "@solana/client";
+import { createClient, createWalletStandardConnector } from "@solana/client";
 import { SolanaProvider as SolanaProviderBase } from "@solana/react-hooks";
 import { createElement, PropsWithChildren, useEffect, useRef, useState } from "react";
 
 import { CHAIN_NAMESPACES, log } from "../../base";
 import type { CustomChainConfig } from "../../base/chain/IChainInterface";
-import { createWeb3AuthSolanaClient, WEB3AUTH_SOLANA_CONNECTOR_ID } from "../../solana-framework-kit";
 import { useChain, useWeb3Auth } from "../hooks";
 import type { SolanaProviderProps } from "./interface";
 
@@ -43,7 +42,7 @@ function dispose(client: SolanaClient) {
  * connected on Solana. Ref + state so React re-renders on swap and effects dispose the right instance.
  */
 function useFrameworkKitSolanaClient(): SolanaClient {
-  const { isConnected, provider, web3Auth, isInitialized } = useWeb3Auth();
+  const { isConnected, connection, web3Auth, isInitialized } = useWeb3Auth();
   const { chainNamespace } = useChain();
 
   const ref = useRef<SolanaClient | null>(null);
@@ -86,7 +85,10 @@ function useFrameworkKitSolanaClient(): SolanaClient {
     void (async () => {
       const rpc = placeholderRpc(isInitialized, web3Auth);
       const onSolana =
-        isConnected && provider && chainNamespace === CHAIN_NAMESPACES.SOLANA && web3Auth?.currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA;
+        isConnected &&
+        connection.solanaWallet &&
+        chainNamespace === CHAIN_NAMESPACES.SOLANA &&
+        web3Auth?.currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA;
 
       if (!onSolana) {
         adopt(makePlaceholder(rpc));
@@ -94,11 +96,18 @@ function useFrameworkKitSolanaClient(): SolanaClient {
       }
 
       try {
-        const wired = createWeb3AuthSolanaClient({
-          provider,
-          chainConfig: web3Auth.currentChain,
+        const solanaWalletId = "wallet-standard:" + connection.connectorName;
+        const connector = createWalletStandardConnector(connection.solanaWallet, {
+          id: solanaWalletId,
+          name: connection.connectorName,
         });
-        await wired.actions.connectWallet(WEB3AUTH_SOLANA_CONNECTOR_ID, { autoConnect: true });
+        const { rpcTarget, wsTarget } = web3Auth.currentChain;
+        const wired = createClient({
+          endpoint: rpcTarget,
+          websocketEndpoint: wsTarget,
+          walletConnectors: [connector],
+        });
+        await wired.actions.connectWallet(solanaWalletId, { autoConnect: true });
         if (stale) {
           dispose(wired);
           return;
@@ -113,7 +122,7 @@ function useFrameworkKitSolanaClient(): SolanaClient {
     return () => {
       stale = true;
     };
-  }, [isConnected, provider, chainNamespace, web3Auth, isInitialized]);
+  }, [isConnected, connection.solanaWallet, chainNamespace, web3Auth, isInitialized]);
 
   return client;
 }

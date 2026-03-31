@@ -20,6 +20,7 @@ function Embed(props: EmbedProps) {
         setIsOpen(true);
       }, 50);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       setIsOpen(false);
     }
   }, [open]);

@@ -3,10 +3,10 @@ import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "v
 import {
   ANALYTICS_INTEGRATION_TYPE,
   type ChainNamespaceType,
+  type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
-  type IProvider,
   log,
   WalletInitializationError,
   Web3AuthContextKey,
@@ -20,7 +20,7 @@ export const Web3AuthProvider = defineComponent({
   props: { config: { type: Object as PropType<Web3AuthContextConfig>, required: true } },
   setup(props) {
     const web3Auth = shallowRef<Web3AuthNoModal | null>(null);
-    const provider = ref<IProvider | null>(null);
+    const connection = ref<Connection | null>(null);
     const isMFAEnabled = ref(false);
     const status = ref<CONNECTOR_STATUS_TYPE | null>(null);
     const chainId = ref<string | null>(null);
@@ -46,7 +46,7 @@ export const Web3AuthProvider = defineComponent({
       () => props.config,
       (newConfig, _, onInvalidate) => {
         const resetHookState = () => {
-          provider.value = null;
+          connection.value = null;
           isMFAEnabled.value = false;
           isConnected.value = false;
           isAuthorized.value = false;
@@ -115,7 +115,7 @@ export const Web3AuthProvider = defineComponent({
           if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED) {
             if (!isInitialized.value) isInitialized.value = true;
             isConnected.value = true;
-            provider.value = newWeb3Auth.provider;
+            connection.value = newWeb3Auth.connection;
             chainId.value = web3Auth.value!.currentChainId;
             chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
           }
@@ -132,7 +132,7 @@ export const Web3AuthProvider = defineComponent({
         const disconnectedListener = () => {
           status.value = web3Auth.value!.status;
           isConnected.value = false;
-          provider.value = null;
+          connection.value = null;
           isMFAEnabled.value = false;
           isAuthorized.value = false;
         };
@@ -179,14 +179,17 @@ export const Web3AuthProvider = defineComponent({
       { immediate: true }
     );
 
-    // Listen for chain changes on the provider
+    // Listen for chain changes on the provider (derived from connection)
     watch(
-      provider,
-      (newProvider, prevProvider) => {
+      connection,
+      (newConnection, prevConnection) => {
         const handleChainChange = (newChainId: string) => {
           chainId.value = newChainId;
           chainNamespace.value = web3Auth.value?.currentChain?.chainNamespace ?? null;
         };
+
+        const prevProvider = prevConnection?.ethereumProvider ?? null;
+        const newProvider = newConnection?.ethereumProvider ?? null;
 
         // unregister previous listener
         if (prevProvider && newProvider !== prevProvider) {
@@ -204,7 +207,7 @@ export const Web3AuthProvider = defineComponent({
       web3Auth,
       isConnected,
       isInitialized,
-      provider,
+      connection,
       status,
       isInitializing,
       initError,

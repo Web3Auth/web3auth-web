@@ -99,8 +99,8 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 }
 
 function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
-  const { isConnected, provider } = useWeb3Auth();
   const { chainNamespace } = useChain();
+  const { isConnected, connection } = useWeb3Auth();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
   const { mutate: reconnect } = useReconnect();
@@ -122,8 +122,8 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   useEffect(() => {
     (async () => {
       const isEvm = chainNamespace === CHAIN_NAMESPACES.EIP155;
-      if (isConnected && provider && isEvm) {
-        const connector = await setupConnector(provider, wagmiConfig);
+      if (isConnected && connection?.ethereumProvider && isEvm) {
+        const connector = await setupConnector(connection.ethereumProvider, wagmiConfig);
         if (!connector) {
           throw new Error("Failed to setup connector");
         }
@@ -136,7 +136,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
       }
     })();
-  }, [isConnected, wagmiConfig, provider, chainNamespace, reconnect]);
+  }, [isConnected, wagmiConfig, connection, chainNamespace, reconnect]);
 
   return createElement(Fragment, null, children);
 }

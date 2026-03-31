@@ -1,20 +1,16 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
-import type { StandardConnectFeature } from "@wallet-standard/features";
-import { StandardConnect } from "@wallet-standard/features";
-import { useEffect, useMemo, useState } from "react";
+import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
-import { createWeb3AuthWalletStandardWallet } from "../../../solana-framework-kit/web3authWalletStandardAdapter";
+import { WALLET_CONNECTORS } from "../../../base/wallet";
 import { useChain } from "../../hooks";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
   accounts: string[] | null;
-  /**
-   * Wallet Standard wallet backed by Web3Auth’s Solana provider (for Framework Kit and feature-based signing).
-   */
-  wallet: Wallet | null;
+  solanaWallet: Wallet | null;
   /**
    * Solana RPC client for making RPC calls.
    * @example
@@ -24,47 +20,48 @@ export type IUseSolanaWallet = {
    * ```
    */
   rpc: Rpc<SolanaRpcApi> | null;
+  /**
+   * Returns the Solana ed25519 private key. Only works with the Auth connector.
+   * @throws Error if connected via a non-Auth connector or if the provider is unavailable.
+   */
+  getPrivateKey: () => Promise<string>;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
-  const { provider, web3Auth } = useWeb3Auth();
+  const { connection, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
   const [accounts, setAccounts] = useState<string[] | null>(null);
 
-  const wallet = useMemo(() => {
-    if (!provider) return null;
+  const solanaWallet = useMemo(() => {
     if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
-    const chainConfig = web3Auth?.currentChain;
-    if (!chainConfig) return null;
-    return createWeb3AuthWalletStandardWallet({ provider, chainConfig });
-  }, [provider, chainNamespace, web3Auth?.currentChain]);
+    return connection?.solanaWallet ?? null;
+  }, [connection, chainNamespace]);
 
   const rpc = useMemo(() => {
-    if (!web3Auth || !provider || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
+    if (!web3Auth || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
     return createSolanaRpc(web3Auth.currentChain.rpcTarget);
-  }, [web3Auth, provider, chainNamespace]);
+  }, [web3Auth, solanaWallet, chainNamespace]);
+
+  const getPrivateKey = useCallback(async (): Promise<string> => {
+    if (!web3Auth) throw new Error("Web3Auth not initialized");
+    if (connection?.connectorName !== WALLET_CONNECTORS.AUTH) {
+      throw new Error("getPrivateKey is only supported with the Auth connector");
+    }
+    const provider = web3Auth.connectedConnector?.provider;
+    if (!provider) throw new Error("Provider not available");
+    const privateKey = await provider.request<never, string>({ method: SOLANA_METHOD_TYPES.SOLANA_PRIVATE_KEY });
+    if (!privateKey) throw new Error("Failed to retrieve private key");
+    return privateKey;
+  }, [web3Auth, connection]);
 
   useEffect(() => {
-    const init = async () => {
-      if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
-        setAccounts(null);
-        return;
-      }
-      if (!wallet) return;
-      const connectApi = wallet.features[StandardConnect] as StandardConnectFeature[typeof StandardConnect] | undefined;
-      const connect = connectApi?.connect;
-      if (!connect) return;
-      try {
-        const { accounts: accts } = await connect();
-        const addrs = accts.map((a) => a.address);
-        setAccounts(addrs.length > 0 ? addrs : null);
-      } catch {
-        setAccounts(null);
-      }
-    };
+    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA || !solanaWallet) {
+      setAccounts(null);
+      return;
+    }
+    const accts = solanaWallet.accounts.map((a) => a.address);
+    if (accts.length > 0) setAccounts(accts);
+  }, [solanaWallet, chainNamespace]);
 
-    if (wallet) void init();
-  }, [wallet, chainNamespace]);
-
-  return { wallet, accounts, rpc };
+  return { solanaWallet, accounts, rpc, getPrivateKey };
 };

@@ -1,74 +1,79 @@
-import type { SolanaClient } from "@solana/client";
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
-import { computed, onScopeDispose, Ref, ref, shallowRef, watch } from "vue";
+import type { Wallet } from "@wallet-standard/base";
+import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
+import { computed, Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
+import { WALLET_CONNECTORS } from "../../../base/wallet";
 import { useChain, useWeb3Auth } from "../../composables";
-import { useSolanaClient } from "./useSolanaClient";
 
 /** Public API: only accounts, client, rpc. Signing is via useSignTransaction / useSignMessage / useSignAndSendTransaction. */
 export type IUseSolanaWallet = {
   /** Connected account addresses (base58). From Framework Kit session when available. */
   accounts: Ref<string[] | null>;
-  /** Solana Framework Kit client for actions (fetchBalance, etc.) and watchers. */
-  client: Ref<SolanaClient | null>;
+  solanaWallet: ShallowRef<Wallet | null>;
   /**
    * Solana RPC for building transactions (e.g. getLatestBlockhash). From \@solana/kit for compatibility.
    */
-  rpc: Ref<Rpc<SolanaRpcApi> | null>;
+  rpc: ShallowRef<Rpc<SolanaRpcApi> | null>;
+  /**
+   * Returns the Solana ed25519 private key. Only works with the Auth connector.
+   * @throws Error if connected via a non-Auth connector or if the provider is unavailable.
+   */
+  getPrivateKey: () => Promise<string>;
 };
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
-  const solanaClientRef = useSolanaClient();
-  const { web3Auth } = useWeb3Auth();
+  const { connection, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
 
   const accounts = ref<string[] | null>(null);
+  const solanaWallet = shallowRef<Wallet | null>(null);
   const rpc = shallowRef<Rpc<SolanaRpcApi> | null>(null);
 
   const isSolana = computed(() => chainNamespace.value === CHAIN_NAMESPACES.SOLANA);
 
-  watch(
-    [solanaClientRef, isSolana],
-    ([_, isSol]) => {
-      if (!isSol || !web3Auth.value?.currentChain?.rpcTarget) {
-        rpc.value = null;
-        return;
-      }
+  const setupWallet = () => {
+    if (!isSolana.value) return;
+    const wallet = connection.value?.solanaWallet ?? null;
+    if (!wallet) return;
+    solanaWallet.value = wallet;
+    const accts = wallet.accounts.map((a) => a.address);
+    if (accts.length > 0) accounts.value = accts;
+    if (web3Auth.value?.currentChain?.rpcTarget) {
       rpc.value = createSolanaRpc(web3Auth.value.currentChain.rpcTarget);
-    },
-    { immediate: true }
-  );
+    }
+  };
+
+  const resetWallet = () => {
+    solanaWallet.value = null;
+    accounts.value = null;
+    rpc.value = null;
+  };
+
+  const getPrivateKey = async (): Promise<string> => {
+    if (!web3Auth.value) throw new Error("Web3Auth not initialized");
+    if (connection.value?.connectorName !== WALLET_CONNECTORS.AUTH) {
+      throw new Error("getPrivateKey is only supported with the Auth connector");
+    }
+    const provider = web3Auth.value.connectedConnector?.provider;
+    if (!provider) throw new Error("Provider not available");
+    const privateKey = await provider.request<never, string>({ method: SOLANA_METHOD_TYPES.SOLANA_PRIVATE_KEY });
+    if (!privateKey) throw new Error("Failed to retrieve private key");
+    return privateKey;
+  };
 
   watch(
-    solanaClientRef,
-    (client) => {
-      if (!client) {
-        accounts.value = null;
+    [connection, chainNamespace],
+    ([newConnection, newChainNamespace]) => {
+      if (!newConnection?.solanaWallet || newChainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        if (solanaWallet.value) resetWallet();
         return;
       }
-
-      const update = () => {
-        const state = client.store.getState();
-        const wallet = state.wallet;
-        if (wallet.status === "connected" && wallet.session) {
-          const addr = wallet.session.account.address;
-          accounts.value = [addr];
-        } else {
-          accounts.value = null;
-        }
-      };
-
-      update();
-      const unsub = client.store.subscribe(update);
-      onScopeDispose(() => unsub());
+      if (!solanaWallet.value) setupWallet();
     },
     { immediate: true }
   );
 
-  return {
-    accounts,
-    client: solanaClientRef,
-    rpc,
-  };
+  return { solanaWallet, accounts, rpc, getPrivateKey };
 };

@@ -170,6 +170,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   // also resets everytime we search causing no. of wallets to change or select different chain
   useEffect(() => {
     if (walletDiscoverySupported && totalExternalWalletsCount <= 15) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       setIsShowAllWallets(true);
     } else {
       setIsShowAllWallets(false);
@@ -179,6 +180,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   // Handle pre-selected wallet from Login page (e.g., MetaMask QR code flow)
   useEffect(() => {
     if (bodyState.preSelectedWallet) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       setSelectedButton(bodyState.preSelectedWallet);
       setSelectedWallet(true);
       setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);

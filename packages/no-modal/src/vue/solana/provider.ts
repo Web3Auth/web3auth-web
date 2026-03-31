@@ -1,9 +1,8 @@
-import type { SolanaClient } from "@solana/client";
+import { createClient, createWalletStandardConnector, type SolanaClient } from "@solana/client";
 import { defineComponent, Fragment, h, provide, ref, watch } from "vue";
 
 import { log } from "../../base";
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
-import { createWeb3AuthSolanaClient, WEB3AUTH_SOLANA_CONNECTOR_ID } from "../../solana-framework-kit";
 import { useChain, useWeb3Auth } from "../composables";
 import { SOLANA_CLIENT_KEY } from "./constants";
 
@@ -15,14 +14,14 @@ import { SOLANA_CLIENT_KEY } from "./constants";
 export const SolanaProvider = defineComponent({
   name: "SolanaProvider",
   setup(_, { slots }) {
-    const { isConnected, provider, web3Auth } = useWeb3Auth();
+    const { isConnected, connection, web3Auth } = useWeb3Auth();
     const { chainNamespace } = useChain();
     const clientRef = ref<SolanaClient | null>(null);
 
     provide(SOLANA_CLIENT_KEY, clientRef);
 
     watch(
-      [isConnected, provider, chainNamespace],
+      [isConnected, connection, chainNamespace],
       async ([connected, prov, namespace]) => {
         const isSolana = namespace === CHAIN_NAMESPACES.SOLANA;
 
@@ -48,13 +47,20 @@ export const SolanaProvider = defineComponent({
 
         const prevClient = clientRef.value;
         try {
-          const client = createWeb3AuthSolanaClient({
-            provider: prov,
-            chainConfig,
+          const solanaWalletId = "wallet-standard:" + connection.value.connectorName;
+          const connector = createWalletStandardConnector(connection.value.solanaWallet, {
+            id: solanaWalletId,
+            name: connection.value.connectorName,
+          });
+          const { rpcTarget, wsTarget } = chainConfig;
+          const client = createClient({
+            endpoint: rpcTarget,
+            websocketEndpoint: wsTarget,
+            walletConnectors: [connector],
           });
           clientRef.value = client;
           if (prevClient) await disposeClient(prevClient);
-          await client.actions.connectWallet(WEB3AUTH_SOLANA_CONNECTOR_ID, {
+          await client.actions.connectWallet(solanaWalletId, {
             autoConnect: true,
           });
         } catch (err) {
