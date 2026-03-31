@@ -2,11 +2,13 @@ import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
+import { useWidget } from "../../context/WidgetContext";
 import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
 import CircularLoader from "../CircularLoader";
 import Image from "../Image";
 import PulseLoader from "../PulseLoader";
+import SpinnerLoader from "../SpinnerLoader";
 import { AuthorizingStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
 
 /**
@@ -16,7 +18,10 @@ import { AuthorizingStatusType, ConnectedStatusType, ConnectingStatusType, Error
  */
 function ConnectingStatus(props: ConnectingStatusType) {
   const [t] = useTranslation(undefined, { i18n });
+  const { uiConfig } = useWidget();
   const { connector, appLogo, connectorName } = props;
+
+  const primaryColor = uiConfig.theme?.primary;
 
   const providerIcon = useMemo(
     () => (connector === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${connector}`} height="40" width="40" />),
@@ -25,6 +30,17 @@ function ConnectingStatus(props: ConnectingStatusType) {
 
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
+      <SpinnerLoader width={95} height={95}>
+        {providerIcon}
+      </SpinnerLoader>
+      <SpinnerLoader width={95} height={95}>
+        <figure className="w3a--flex w3a--size-10 w3a--items-center w3a--justify-center w3a--overflow-hidden">
+          <img src={appLogo} alt="" className="w3a--size-full w3a--object-contain" />
+        </figure>
+      </SpinnerLoader>
+      <CircularLoader width={95} height={95} thickness={6} arcSizeDeg={100} arcColors={primaryColor ? [primaryColor, primaryColor] : undefined}>
+        {providerIcon}
+      </CircularLoader>
       <div className="w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-6">
         <figure className="w3a--flex w3a--size-10 w3a--items-center w3a--justify-center w3a--overflow-hidden">
           <img src={appLogo} alt="" className="w3a--size-full w3a--object-contain" />
