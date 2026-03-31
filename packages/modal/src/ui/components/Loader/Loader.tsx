@@ -122,8 +122,8 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
   );
 }
 
-function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () => void; privacyPolicy?: string; tncLink?: string }) {
-  const { onAccept, onDecline, privacyPolicy, tncLink } = props;
+function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () => void; privacyPolicy?: string; tncLink?: string; appLogo?: string }) {
+  const { onAccept, onDecline, privacyPolicy, tncLink, appLogo } = props;
   const [t] = useTranslation(undefined, { i18n });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -133,32 +133,50 @@ function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () =>
   };
 
   return (
-    <div className="w3a--my-4 w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--gap-y-4">
-      <p className="w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
-        {t("modal.consent.title", { defaultValue: "Terms and Conditions" })}
-      </p>
-      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
-        {t("modal.consent.prefix", { defaultValue: "By continuing, you agree to the" })}{" "}
-        {tncLink && (
-          <a href={tncLink} className="w3a--text-app-primary-600 dark:w3a--text-app-primary-500">
-            {t("modal.consent.tnc", { defaultValue: "Terms and Conditions" })}{" "}
-          </a>
-        )}
-        {privacyPolicy && (
-          <>
-            {t("modal.consent.and", { defaultValue: "and" })}{" "}
-            <a href={privacyPolicy} className="w3a--text-app-primary-600 dark:w3a--text-app-primary-500">
+    <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--gap-y-4">
+      {appLogo && (
+        <figure className="w3a--flex w3a--h-12 w3a--w-[200px] w3a--items-center w3a--justify-center">
+          <img src={appLogo} alt="Logo" className="w3a--size-full w3a--object-contain" />
+        </figure>
+      )}
+      <div className="w3a--w-full w3a--text-left w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
+        {t("modal.consent.description", { defaultValue: "To proceed, please accept the terms and privacy policy" })}
+      </div>
+      {(tncLink || privacyPolicy) && (
+        <div className="w3a--flex w3a--w-full w3a--flex-col w3a--gap-y-2">
+          {tncLink && (
+            <a
+              href={tncLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w3a--btn !w3a--justify-start w3a--rounded-full w3a--border-app-gray-50 w3a--bg-app-gray-50 w3a--p-3 w3a--text-left w3a--font-normal w3a--text-app-gray-700 hover:w3a--border-app-gray-200 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--border-app-gray-800 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white dark:hover:w3a--border-app-gray-600 dark:hover:w3a--bg-app-gray-600"
+            >
+              {t("modal.consent.tnc", { defaultValue: "Terms of service" })}
+            </a>
+          )}
+          {privacyPolicy && (
+            <a
+              href={privacyPolicy}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w3a--btn !w3a--justify-start w3a--rounded-full w3a--border-app-gray-50 w3a--bg-app-gray-50 w3a--p-3 w3a--text-left w3a--font-normal w3a--text-app-gray-700 hover:w3a--border-app-gray-200 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--border-app-gray-800 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white dark:hover:w3a--border-app-gray-600 dark:hover:w3a--bg-app-gray-600"
+            >
               {t("modal.consent.privacy", { defaultValue: "Privacy Policy" })}
             </a>
-          </>
-        )}
-      </p>
-      <div className="w3a--flex w3a--w-full w3a--flex-col w3a--gap-y-2">
-        <button type="button" disabled={isSubmitting} onClick={handleAccept} className="w3a--btn w3a--rounded-full disabled:w3a--opacity-60">
-          <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.consent.accept", { defaultValue: "Accept" })}</p>
-        </button>
+          )}
+        </div>
+      )}
+      <div className="w3a--flex w3a--w-full w3a--gap-x-2">
         <button type="button" disabled={isSubmitting} onClick={onDecline} className="w3a--btn w3a--rounded-full disabled:w3a--opacity-60">
           <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.consent.decline", { defaultValue: "Decline" })}</p>
+        </button>
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={handleAccept}
+          className="w3a--btn w3a--rounded-full w3a--border-app-primary-600 w3a--bg-app-primary-600 hover:w3a--border-app-primary-700 hover:w3a--bg-app-primary-700 disabled:w3a--opacity-60 dark:w3a--border-app-primary-600 dark:w3a--bg-app-primary-600 dark:hover:w3a--border-app-primary-700 dark:hover:w3a--bg-app-primary-700"
+        >
+          <p className="w3a--text-app-onPrimary">{t("modal.consent.accept", { defaultValue: "Accept" })}</p>
         </button>
       </div>
     </div>
@@ -234,7 +252,15 @@ function Loader(props: LoaderProps) {
         />
       )}
 
-      {isConsent && <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} privacyPolicy={privacyPolicy} tncLink={tncLink} />}
+      {isConsent && (
+        <ConsentRequiredStatus
+          onAccept={onAcceptConsent}
+          onDecline={onDeclineConsent}
+          privacyPolicy={privacyPolicy}
+          tncLink={tncLink}
+          appLogo={appLogo}
+        />
+      )}
     </div>
   );
 }
