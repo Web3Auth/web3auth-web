@@ -30,6 +30,46 @@ import { LoginModeType } from "../interfaces";
 import { type IPlugin, type PluginFn } from "../plugin";
 import { type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 
+/**
+ * Parameters for linking an external wallet to the currently authenticated account.
+ */
+export interface LinkAccountParams {
+  /**
+   * Name of the external wallet connector to link.
+   * Example: WALLET_CONNECTORS.METAMASK, WALLET_CONNECTORS.WALLET_CONNECT_V2
+   */
+  connectorName: WALLET_CONNECTOR_TYPE | string;
+
+  /**
+   * Chain ID to use when generating the wallet identity proof.
+   * Defaults to the currently active chain if not specified.
+   */
+  chainId?: string;
+
+  /**
+   * Pre-obtained wallet identity token.
+   * When provided, the SDK skips the internal wallet-connection step
+   * and uses this token directly for the Citadel request.
+   * Obtain this token by connecting the external wallet separately and
+   * calling connector.getIdentityToken().
+   */
+  walletIdToken?: string;
+}
+
+/**
+ * Result returned after a successful account-linking operation.
+ */
+export interface LinkAccountResult {
+  /** Whether the Citadel server accepted the linking request. */
+  success: boolean;
+  /** Wallet address that was linked, if returned by the server. */
+  linkedAddress?: string;
+  /** Name of the connector that was linked. */
+  connectorName: string;
+  /** Any additional data returned by the Citadel response. */
+  data?: Record<string, unknown>;
+}
+
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
   loginHint?: string;
@@ -224,6 +264,18 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
   cleanup(): Promise<void>;
+  /**
+   * Link an external wallet to the currently authenticated user account
+   * via the Citadel account-linking endpoint.
+   *
+   * Requires:
+   * - The user to be currently connected with the AUTH connector.
+   * - `accountLinking.serverUrl` to be set in the Web3Auth constructor options.
+   *
+   * @param params - Linking parameters including the target connector name.
+   * @returns A result object confirming the link, including the linked address.
+   */
+  linkAccount(params: LinkAccountParams): Promise<LinkAccountResult>;
 }
 
 export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType };

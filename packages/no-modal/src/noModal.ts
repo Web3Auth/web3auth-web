@@ -37,6 +37,7 @@ import {
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  type ConnectorParams,
   type CustomChainConfig,
   fetchProjectConfig,
   getAaAnalyticsProperties,
@@ -55,6 +56,8 @@ import {
   type IWeb3Auth,
   type IWeb3AuthCoreOptions,
   IWeb3AuthState,
+  type LinkAccountParams,
+  type LinkAccountResult,
   log,
   LOGIN_MODE,
   LoginModeType,
@@ -76,7 +79,9 @@ import {
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
+import { makeAccountLinkingRequest } from "./base/account-linking";
 import { deserialize } from "./base/deserialize";
+import { AccountLinkingError } from "./base/errors";
 import { authConnector, type AuthConnectorType } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
@@ -96,6 +101,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected analytics: Analytics;
 
   protected plugins: Record<string, IPlugin> = {};
+
+  protected projectConfig: ProjectConfig | null = null;
 
   private storage: IStorageAdapter;
 
@@ -214,6 +221,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       // init config
+      this.projectConfig = projectConfig;
       this.initAccountAbstractionConfig(projectConfig);
       this.initChainsConfig(projectConfig);
       await this.initCachedConnectorAndChainId();
@@ -535,6 +543,69 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public getPlugin(name: string): IPlugin | null {
     return this.plugins[name] || null;
+  }
+
+  public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
+    // Guard 1: user must be connected
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
+      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before linking an account.");
+    }
+
+    // Guard 2: linking is only supported when the primary connector is AUTH
+    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH) {
+      throw WalletLoginError.unsupportedOperation("Account linking is only supported when connected with the AUTH connector.");
+    }
+
+    const trackData = {
+      connector: this.connectedConnector.name,
+      linking_connector: params.connectorName,
+      chain_id: params.chainId || this.currentChainId,
+    };
+
+    try {
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
+
+      // Step 1: Obtain the primary identity token for the active AUTH session.
+      let primaryIdToken = this.idToken;
+      if (!primaryIdToken) {
+        const tokenInfo = await this.connectedConnector.getIdentityToken();
+        primaryIdToken = tokenInfo.idToken;
+      }
+      if (!primaryIdToken) {
+        throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
+      }
+
+      // Step 2: Obtain the wallet proof token.
+      // If the caller already resolved the token (e.g. via a custom flow), use it directly.
+      // Otherwise create an isolated connector instance to sign and verify on behalf of the user.
+      let walletIdToken: string;
+      if (params.walletIdToken) {
+        walletIdToken = params.walletIdToken;
+      } else {
+        walletIdToken = await this.getLinkingWalletToken(params.connectorName, params.chainId);
+      }
+
+      // Step 3: Submit both proofs to the Citadel account-linking endpoint.
+      const result = await makeAccountLinkingRequest({
+        primaryIdToken,
+        walletIdToken,
+        connectorName: params.connectorName,
+        chainId: params.chainId || this.currentChainId,
+      });
+
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_COMPLETED, {
+        ...trackData,
+        linked_address: result.linkedAddress,
+      });
+
+      return result;
+    } catch (error) {
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+      });
+      throw error;
+    }
   }
 
   public setAnalyticsProperties(properties: Record<string, unknown>) {
@@ -1094,6 +1165,95 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         log.error(error);
       }
     });
+  }
+
+  /**
+   * Obtain a wallet identity token from an external wallet without replacing the primary AUTH
+   * session. Checks first whether the target connector is already in a connected state (e.g.
+   * when the SDK is running in CONNECT_ONLY mode), then falls back to an isolated connector
+   * instance whose events are never subscribed to the main SDK event loop.
+   */
+  private async getLinkingWalletToken(connectorName: WALLET_CONNECTOR_TYPE | string, chainId?: string): Promise<string> {
+    const effectiveChainId = chainId || this.currentChainId;
+    if (!effectiveChainId) {
+      throw AccountLinkingError.walletProofFailed(
+        "No chainId is available. Please specify chainId in LinkAccountParams or ensure the SDK has an active chain."
+      );
+    }
+
+    // If the target connector is already in a connected state (CONNECT_ONLY mode), use it
+    // directly without creating a second instance.
+    const existingConnector = this.getConnector(connectorName as WALLET_CONNECTOR_TYPE);
+    if (existingConnector && CONNECTED_STATUSES.includes(existingConnector.status)) {
+      const { idToken } = await existingConnector.getIdentityToken();
+      return idToken;
+    }
+
+    // Create and use an isolated connector instance.
+    const isolatedConnector = await this.createIsolatedWalletConnector(connectorName as WALLET_CONNECTOR_TYPE, effectiveChainId);
+
+    return new Promise<string>((resolve, reject) => {
+      const onConnected = async () => {
+        try {
+          const { idToken } = await isolatedConnector.getIdentityToken();
+          // Best-effort cleanup — do not surface cleanup errors to the caller.
+          isolatedConnector.disconnect({ cleanup: true }).catch((e) => log.debug("isolated connector cleanup error", e));
+          resolve(idToken);
+        } catch (err) {
+          reject(AccountLinkingError.walletProofFailed(err instanceof Error ? err.message : String(err), err));
+        }
+      };
+
+      const onErrored = (err: Web3AuthError) => {
+        reject(AccountLinkingError.walletProofFailed(err.message, err));
+      };
+
+      isolatedConnector.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
+      isolatedConnector.once(CONNECTOR_EVENTS.ERRORED, onErrored);
+
+      isolatedConnector.connect({ chainId: effectiveChainId }).catch((err) => {
+        isolatedConnector.removeListener(CONNECTOR_EVENTS.CONNECTED, onConnected);
+        isolatedConnector.removeListener(CONNECTOR_EVENTS.ERRORED, onErrored);
+        reject(AccountLinkingError.walletProofFailed(err instanceof Error ? err.message : String(err), err));
+      });
+    });
+  }
+
+  /**
+   * Create a new connector instance that is NOT registered in this.connectors and NOT
+   * subscribed to the main SDK event loop. Its lifecycle events are therefore isolated
+   * and will not mutate any global SDK state (connectedConnectorName, connection, idToken).
+   */
+  private async createIsolatedWalletConnector(connectorName: WALLET_CONNECTOR_TYPE, chainId: string): Promise<IConnector<unknown>> {
+    const config: ConnectorParams = {
+      projectConfig: this.projectConfig,
+      coreOptions: this.coreOptions,
+      analytics: this.analytics,
+    };
+
+    let connector: IConnector<unknown>;
+
+    switch (connectorName) {
+      case WALLET_CONNECTORS.METAMASK:
+        connector = metaMaskConnector()(config);
+        break;
+      case WALLET_CONNECTORS.WALLET_CONNECT_V2: {
+        const { walletConnectV2Connector } = await import("./connectors/wallet-connect-v2-connector");
+        connector = walletConnectV2Connector()(config);
+        break;
+      }
+      default:
+        throw AccountLinkingError.unsupportedConnector(
+          `Connector "${connectorName}" does not support automatic wallet linking. ` +
+            `Pass walletIdToken directly in LinkAccountParams, or use ${WALLET_CONNECTORS.METAMASK} / ${WALLET_CONNECTORS.WALLET_CONNECT_V2}.`
+        );
+    }
+
+    // Init the isolated connector WITHOUT subscribing to the main event loop.
+    // This is the key difference from setupConnector(), which calls subscribeToConnectorEvents().
+    // autoConnect: false ensures the connector does not attempt to rehydrate a previous session.
+    await connector.init({ chainId, autoConnect: false });
+    return connector;
   }
 
   private async setState(newState: Partial<IWeb3AuthState>): Promise<void> {
