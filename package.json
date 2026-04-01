@@ -75,9 +75,11 @@
   ],
   "overrides": {
     "react": "19.2.0",
-    "react-dom": "19.2.0"
+    "react-dom": "19.2.0",
+    "@web3auth/auth": "$@web3auth/auth"
   },
   "dependencies": {
+    "@web3auth/auth": "file:web3auth-auth-11.4.3.tgz",
     "@web3auth/ws-embed": "file:web3auth-ws-embed-5.6.5.tgz"
   }
 }

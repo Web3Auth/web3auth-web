@@ -1,4 +1,6 @@
 import { type ProviderConfig } from "@toruslabs/base-controllers";
+import { CITADEL_SERVER_MAP } from "@toruslabs/constants";
+import { put } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import type { Wallet } from "@wallet-standard/base";
 import {
@@ -10,6 +12,7 @@ import {
   BUILD_ENV,
   createHandler,
   type CreateHandlerParams,
+  generateRecordId,
   getUserId,
   type LoginParams,
   PopupHandler,
@@ -489,7 +492,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const nonce = generateNonce();
 
     // post a message to the auth provider to indicate that login has been initiated.
-    const loginParams = cloneDeep(params);
+    const loginParams = {
+      ...cloneDeep(params),
+      recordId: generateRecordId(),
+      loginSource: "web3auth-web",
+    };
     loginParams.extraLoginOptions = {
       ...(loginParams.extraLoginOptions || {}),
       login_hint: params.loginHint || params.extraLoginOptions?.login_hint,
@@ -531,6 +538,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     let isClosedWindow = false;
 
+    this.auditOAuditProgress(loginParams as LoginParams).catch((error: unknown) => {
+      log.error("Error reporting `oauthInitiated` audit progress", error);
+    });
+
     return new Promise((resolve, reject) => {
       verifierWindow.open().catch((error: unknown) => {
         log.error("Error during login with social", error);
@@ -562,6 +573,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         .catch((error: unknown) => {
           // swallow the error, dont need to throw.
           log.error("Error during login with social", error);
+          this.auditOAuditProgress(loginParams as LoginParams, "failed");
         });
 
       verifierWindow.once("close", () => {
@@ -576,6 +588,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         .postLoginInitiatedMessage(loginParams as LoginParams, nonce)
         .then(resolve)
         .catch((error: unknown) => {
+          this.auditOAuditProgress(loginParams as LoginParams, "failed");
           if (error instanceof Web3AuthError) {
             throw error;
           }
@@ -663,6 +676,32 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
+  }
+
+  private async auditOAuditProgress(
+    loginParams: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "recordId" | "loginSource">,
+    status?: "failed" | "completed"
+  ) {
+    const { authConnection, authConnectionId, groupedAuthConnectionId, recordId, loginSource } = loginParams;
+    const { authBuildEnv = BUILD_ENV.PRODUCTION, web3AuthNetwork, clientId } = this.coreOptions;
+    const auditServerUrl = `${CITADEL_SERVER_MAP[authBuildEnv]}/v1/auth/audit`;
+
+    const progressFlag: { oauthInitiated?: boolean; oauthFailed?: boolean; oauthCompleted?: boolean } = {
+      oauthInitiated: true,
+    };
+    if (status === "failed") progressFlag.oauthFailed = true;
+    if (status === "completed") progressFlag.oauthCompleted = true;
+
+    await put(auditServerUrl, {
+      authConnection,
+      authConnectionId,
+      groupedAuthConnectionId,
+      recordId,
+      source: loginSource,
+      web3AuthNetwork,
+      web3AuthClientId: clientId,
+      ...progressFlag,
+    });
   }
 }
 
