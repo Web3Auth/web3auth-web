@@ -32,6 +32,7 @@ import { parseEther } from "viem";
 
 import { generateLegacyTransaction, generateSolTransferInstruction } from "../utils/solana";
 import { computed, ref, watch } from "vue";
+import X402Tester from "./X402Tester.vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { getBalance as getSolBalance } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
@@ -480,6 +481,9 @@ const onSwitchChain = async () => {
             Show Calls Status in Wallet
           </Button>
         </Card>
+
+        <!-- x402 -->
+        <X402Tester v-if="isDisplay('ethServices')" class="mb-2" />
 
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">

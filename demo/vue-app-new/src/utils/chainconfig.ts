@@ -57,6 +57,20 @@ export const getEvmChainConfig = (chainId: number, web3AuthClientId: string = ""
       tickerName: "Ethereum",
     };
   }
+  if (chainId === 84532) {
+    return {
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+      decimals: 18,
+      blockExplorerUrl: "https://sepolia.basescan.org",
+      chainId: "0x14a34",
+      displayName: "Base Sepolia Testnet",
+      logo: "base.svg",
+      rpcTarget: infuraRpcTarget,
+      ticker: "ETH",
+      tickerName: "Ethereum",
+      isTestnet: true,
+    };
+  }
   if (chainId === 42161) {
     return {
       chainNamespace: CHAIN_NAMESPACES.EIP155,
