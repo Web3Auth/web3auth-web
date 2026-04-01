@@ -127,27 +127,42 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     if (!this.authSessionManager) return null;
 
     const idToken = await this.authSessionManager.getIdToken();
-    if (idToken && !checkIfTokenIsExpired(idToken)) {
-      const [accessToken, refreshToken] = await Promise.all([this.authSessionManager.getAccessToken(), this.authSessionManager.getRefreshToken()]);
-      return { idToken, accessToken: accessToken ?? undefined, refreshToken: refreshToken ?? undefined };
+    if (!idToken || checkIfTokenIsExpired(idToken)) {
+      return this.tryRefreshIdentityToken();
     }
 
-    const refreshToken = await this.authSessionManager.getRefreshToken();
-    if (refreshToken) {
+    let [accessToken, refreshToken] = await Promise.all([this.authSessionManager.getAccessToken(), this.authSessionManager.getRefreshToken()]);
+
+    if ((!accessToken || checkIfTokenIsExpired(accessToken)) && refreshToken) {
       try {
         const response = await this.authSessionManager.ensureRefresh();
-        const refreshedIdToken = await this.authSessionManager.getIdToken();
-        return {
-          idToken: refreshedIdToken ?? response.access_token,
-          accessToken: response.access_token,
-          refreshToken: response.refresh_token,
-        };
+        accessToken = response.access_token || (await this.authSessionManager.getAccessToken());
+        refreshToken = response.refresh_token || refreshToken;
       } catch {
-        // refresh failed, fall through to re-sign
+        // access token refresh failed; still return the valid idToken
       }
     }
 
-    return null;
+    return { idToken, accessToken: accessToken ?? undefined, refreshToken: refreshToken ?? undefined };
+  }
+
+  private async tryRefreshIdentityToken(): Promise<IdentityTokenInfo | null> {
+    if (!this.authSessionManager) return null;
+
+    const refreshToken = await this.authSessionManager.getRefreshToken();
+    if (!refreshToken) return null;
+
+    try {
+      const response = await this.authSessionManager.ensureRefresh();
+      const refreshedIdToken = await this.authSessionManager.getIdToken();
+      if (!refreshedIdToken || checkIfTokenIsExpired(refreshedIdToken)) return null;
+
+      const latestAccessToken = response.access_token || (await this.authSessionManager.getAccessToken()) || undefined;
+      const latestRefreshToken = response.refresh_token || refreshToken;
+      return { idToken: refreshedIdToken, accessToken: latestAccessToken, refreshToken: latestRefreshToken };
+    } catch {
+      return null;
+    }
   }
 
   protected async saveIdentityToken(tokens: SiwwTokens): Promise<void> {
