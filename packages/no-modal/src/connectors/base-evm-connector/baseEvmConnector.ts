@@ -3,13 +3,12 @@ import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
   BaseConnector,
-  checkIfTokenIsExpired,
   citadelServerUrl,
   clearToken,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  getSavedToken,
+  getCachedTokenInfo,
   IdentityTokenInfo,
   saveToken,
   WALLET_CONNECTOR_TYPE,
@@ -27,7 +26,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
     const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      const cachedTokenInfo = this.getCachedTokenInfo(accounts[0] as string);
+      const cachedTokenInfo = getCachedTokenInfo(accounts[0] as string, this.name);
       if (cachedTokenInfo) {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
         this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
@@ -89,18 +88,5 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
   async disconnect(): Promise<void> {
     this.rehydrated = false;
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
-  }
-
-  private getCachedTokenInfo(account: string): IdentityTokenInfo | null {
-    const saved = getSavedToken(account, this.name);
-    if (!saved) return null;
-
-    try {
-      const parsed = JSON.parse(saved) as IdentityTokenInfo;
-      if (parsed.idToken && !checkIfTokenIsExpired(parsed.idToken)) return parsed;
-    } catch {
-      if (!checkIfTokenIsExpired(saved)) return { idToken: saved };
-    }
-    return null;
   }
 }

@@ -13,8 +13,6 @@ import {
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  checkIfTokenIsExpired,
-  citadelServerUrl,
   CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_CATEGORY,
@@ -28,8 +26,8 @@ import {
   ConnectorNamespaceType,
   ConnectorParams,
   CustomChainConfig,
+  getCachedTokenInfo,
   getCaipChainId,
-  getSavedToken,
   IdentityTokenInfo,
   IProvider,
   log,
@@ -301,14 +299,11 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         ? this._solanaWallet.accounts.map((a) => a.address)
         : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      const existingToken = getSavedToken(accounts[0] as string, this.name);
-      if (existingToken) {
-        const isExpired = checkIfTokenIsExpired(existingToken);
-        if (!isExpired) {
-          this.status = CONNECTOR_STATUS.AUTHORIZED;
-          this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: { idToken: existingToken } });
-          return { idToken: existingToken };
-        }
+      const cachedTokenInfo = getCachedTokenInfo(accounts[0] as string, this.name);
+      if (cachedTokenInfo) {
+        this.status = CONNECTOR_STATUS.AUTHORIZED;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: cachedTokenInfo });
+        return cachedTokenInfo;
       }
 
       const payload = {

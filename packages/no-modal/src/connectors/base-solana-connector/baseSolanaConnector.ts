@@ -3,13 +3,12 @@ import { getDeviceInfo, signChallenge, type SiwwTokens, verifySignedChallenge } 
 import {
   BaseConnector,
   CHAIN_NAMESPACES,
-  checkIfTokenIsExpired,
   citadelServerUrl,
   clearToken,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  getSavedToken,
+  getCachedTokenInfo,
   getSolanaChainByChainConfig,
   IdentityTokenInfo,
   saveToken,
@@ -31,7 +30,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
     const accounts = this.solanaWallet.accounts.map((a) => a.address);
     if (accounts.length > 0) {
-      const cachedTokenInfo = this.getCachedTokenInfo(accounts[0]);
+      const cachedTokenInfo = getCachedTokenInfo(accounts[0], this.name);
       if (cachedTokenInfo) {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
         this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
@@ -94,18 +93,5 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
   async disconnect(): Promise<void> {
     this.rehydrated = false;
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
-  }
-
-  private getCachedTokenInfo(account: string): IdentityTokenInfo | null {
-    const saved = getSavedToken(account, this.name);
-    if (!saved) return null;
-
-    try {
-      const parsed = JSON.parse(saved) as IdentityTokenInfo;
-      if (parsed.idToken && !checkIfTokenIsExpired(parsed.idToken)) return parsed;
-    } catch {
-      if (!checkIfTokenIsExpired(saved)) return { idToken: saved };
-    }
-    return null;
   }
 }
