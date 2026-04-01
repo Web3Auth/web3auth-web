@@ -8,6 +8,7 @@ import {
   type CONNECTOR_STATUS_TYPE,
   WalletInitializationError,
 } from "@web3auth/no-modal";
+import { Web3AuthInnerContext as NoModalInnerContext } from "@web3auth/no-modal/react";
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Web3Auth } from "../../modalManager";
@@ -193,5 +194,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     chainNamespace,
   ]);
 
-  return createElement(Web3AuthInnerContext.Provider, { value }, children);
+  const noModalChild = createElement(NoModalInnerContext.Provider, { value }, children);
+  return createElement(Web3AuthInnerContext.Provider, { value }, noModalChild);
 }

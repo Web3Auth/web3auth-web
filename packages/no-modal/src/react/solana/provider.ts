@@ -122,7 +122,7 @@ function useFrameworkKitSolanaClient(): SolanaClient {
     return () => {
       stale = true;
     };
-  }, [isConnected, connection.solanaWallet, chainNamespace, web3Auth, isInitialized]);
+  }, [isConnected, connection?.solanaWallet, chainNamespace, web3Auth, isInitialized]);
 
   return client;
 }
