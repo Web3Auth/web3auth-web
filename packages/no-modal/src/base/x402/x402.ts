@@ -1,11 +1,12 @@
 import { address, getBase58Encoder, SignatureDictionary, Transaction } from "@solana/kit";
+import { Wallet } from "@wallet-standard/base";
 import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
 import { ClientSvmSigner, ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
 import { Address, createWalletClient, custom, type WalletClient } from "viem";
 
-import { SolanaWallet } from "../../providers";
 import { IProvider } from "../connector";
+import { walletSignAndSendTransaction } from "../wallet";
 
 export const EVM_CAIP2_WILDCARD = "eip155:*";
 export const SOLANA_CAIP2_WILDCARD = "solana:*";
@@ -93,7 +94,7 @@ export function withX402BodyShim(baseFetch: typeof fetch): typeof fetch {
  * encoded in base58 (64 bytes). We decode it back to bytes and slot it into
  * the signature dictionary that `@solana/kit`'s partial-signing helpers expect.
  */
-function createSvmSigner(wallet: SolanaWallet, walletAddress: string): ClientSvmSigner {
+function createSvmSigner(wallet: Wallet, walletAddress: string): ClientSvmSigner {
   const base58Encoder = getBase58Encoder();
   const signerAddress = address(walletAddress);
 
@@ -102,7 +103,7 @@ function createSvmSigner(wallet: SolanaWallet, walletAddress: string): ClientSvm
     signTransactions: async (transactions: readonly Transaction[]): Promise<readonly SignatureDictionary[]> => {
       const signatureDictionaries = await Promise.all(
         transactions.map(async (tx) => {
-          const signatureBase58 = await wallet.signTransaction(tx);
+          const signatureBase58 = await walletSignAndSendTransaction(wallet, tx);
           return { [signerAddress]: base58Encoder.encode(signatureBase58) } as SignatureDictionary;
         })
       );
@@ -123,7 +124,7 @@ function createSvmSigner(wallet: SolanaWallet, walletAddress: string): ClientSvm
  * @param rpcUrl - Optional custom Solana RPC URL (defaults to public cluster endpoints)
  * @returns A fetch-compatible function that handles x402 payment flows
  */
-export function createSolanaX402Fetch(wallet: SolanaWallet, walletAddress: string, rpcUrl?: string): typeof fetch {
+export function createSolanaX402Fetch(wallet: Wallet, walletAddress: string, rpcUrl?: string): typeof fetch {
   if (!walletAddress) throw new Error("Wallet address is unavailable.");
 
   const svmSigner = createSvmSigner(wallet, walletAddress);

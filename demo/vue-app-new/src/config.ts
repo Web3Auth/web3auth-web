@@ -18,7 +18,7 @@ export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name
 export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
 
 export const chainConfigs: Record<ChainNamespaceType, string[]> = {
-  [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x14a34", "0x61", "0x13882"],
+  [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x61", "0x13882"],
   [CHAIN_NAMESPACES.SOLANA]: ["0x65", "0x67"],
   [CHAIN_NAMESPACES.CASPER]: [],
   [CHAIN_NAMESPACES.XRPL]: [],

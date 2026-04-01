@@ -77,7 +77,7 @@
     "@web3auth/ws-embed": "file:../../web3auth-ws-embed-5.6.5.tgz",
     "@x402/evm": "^2.7.0",
     "@x402/fetch": "^2.7.0",
-    "@x402/svm": "^2.7.0"
+    "@x402/svm": "^2.7.0",
     "bignumber.js": "~9.3.1",
     "deepmerge": "^4.3.1",
     "ethers": "^6.16.0",

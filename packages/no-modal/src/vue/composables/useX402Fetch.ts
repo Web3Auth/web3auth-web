@@ -1,5 +1,5 @@
 import type { Address } from "viem";
-import { computed, type MaybeRefOrGetter, ref, toValue, watch } from "vue";
+import { type MaybeRefOrGetter, toValue } from "vue";
 
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
 import {
@@ -11,7 +11,7 @@ import {
   type IUseX402FetchReturnValues,
 } from "../../base/x402";
 import { useSolanaWallet } from "../solana/composables/useSolanaWallet";
-import { useWeb3AuthInner } from "./useWeb3AuthInner";
+import { useWeb3Auth } from "./useWeb3Auth";
 
 export { createEvmX402Fetch, createSolanaX402Fetch };
 export type { IUseX402FetchParams, IUseX402FetchReturnValues };
@@ -28,78 +28,29 @@ export type { IUseX402FetchParams, IUseX402FetchReturnValues };
  * When `address` is provided, it takes precedence over the provider's active account.
  */
 export const useX402Fetch = (address?: MaybeRefOrGetter<Address | undefined>): IUseX402FetchReturnValues => {
-  const { provider, chainNamespace } = useWeb3AuthInner();
+  const { isConnected, web3Auth, chainNamespace } = useWeb3Auth();
   const { solanaWallet, accounts } = useSolanaWallet();
-  const providedAddress = computed(() => toValue(address) ?? null);
-  const providerAddress = ref<Address | null>(null);
-  const evmAddress = computed(() => providedAddress.value ?? providerAddress.value);
-
-  watch(
-    [provider, chainNamespace, providedAddress],
-    ([nextProvider, nextChainNamespace, nextProvidedAddress], _, onInvalidate) => {
-      let active = true;
-
-      if (!nextProvider || nextChainNamespace !== CHAIN_NAMESPACES.EIP155) {
-        providerAddress.value = null;
-        return;
-      }
-
-      if (nextProvidedAddress) {
-        providerAddress.value = null;
-        return;
-      }
-
-      const handleAccountsChanged = (nextAccounts: string[]) => {
-        if (active) {
-          providerAddress.value = (nextAccounts[0] as Address | undefined) ?? null;
-        }
-      };
-
-      nextProvider.on("accountsChanged", handleAccountsChanged);
-
-      void (async () => {
-        try {
-          const nextAddress = await getEvmAddress(nextProvider);
-          if (active) providerAddress.value = nextAddress;
-        } catch {
-          if (active) providerAddress.value = null;
-        }
-      })();
-
-      onInvalidate(() => {
-        active = false;
-        nextProvider.removeListener("accountsChanged", handleAccountsChanged);
-      });
-    },
-    { immediate: true }
-  );
-
-  const evmX402Fetch = computed(() => {
-    if (!provider.value || !evmAddress.value) return null;
-    const evmSigner = createProviderBackedEvmSigner(provider.value, evmAddress.value);
-    return createEvmX402Fetch(evmSigner);
-  });
-
-  const solanaX402Fetch = computed(() => {
-    if (!solanaWallet.value || !accounts.value?.[0]) return null;
-    return createSolanaX402Fetch(solanaWallet.value, accounts.value[0]);
-  });
-
-  const x402Fetch = computed(() => {
-    if (chainNamespace.value === CHAIN_NAMESPACES.SOLANA) {
-      return solanaX402Fetch.value;
-    }
-    if (chainNamespace.value === CHAIN_NAMESPACES.EIP155) {
-      return evmX402Fetch.value;
-    }
-    return null;
-  });
 
   const fetchWithPayment = async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
-    const x402FetchFn = x402Fetch.value;
+    if (!isConnected.value) throw new Error("Wallet not connected");
 
-    if (!x402FetchFn) throw new Error("Wallet not connected");
-    return x402FetchFn(url, options);
+    if (chainNamespace.value === CHAIN_NAMESPACES.SOLANA) {
+      if (!solanaWallet.value || !accounts.value?.[0]) throw new Error("Solana wallet not available");
+      return createSolanaX402Fetch(solanaWallet.value, accounts.value[0])(url, options);
+    }
+
+    if (chainNamespace.value === CHAIN_NAMESPACES.EIP155) {
+      const provider = web3Auth.value?.connectedConnector?.provider;
+      if (!provider) throw new Error("EVM provider not available");
+
+      const evmAddress = toValue(address) ?? (await getEvmAddress(provider));
+      if (!evmAddress) throw new Error("EVM address not available");
+
+      const signer = createProviderBackedEvmSigner(provider, evmAddress);
+      return createEvmX402Fetch(signer)(url, options);
+    }
+
+    throw new Error("Unsupported chain namespace");
   };
 
   return { fetchWithPayment };

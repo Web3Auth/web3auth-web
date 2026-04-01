@@ -5,13 +5,10 @@ import { defineConfig, loadEnv } from "vite";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => {
-  const {
-    VITE_APP_INFURA_PROJECT_KEY,
-    VITE_APP_SOLANA_MAINNET_RPC,
-    VITE_APP_SOLANA_TESTNET_RPC,
-    VITE_APP_SOLANA_DEVNET_RPC,
-    VITE_APP_X402_TEST_CONTENT_URL,
-  } = loadEnv(mode, process.cwd());
+  const { VITE_APP_INFURA_PROJECT_KEY, VITE_APP_SOLANA_MAINNET_RPC, VITE_APP_SOLANA_TESTNET_RPC, VITE_APP_SOLANA_DEVNET_RPC } = loadEnv(
+    mode,
+    process.cwd()
+  );
 
   return {
     mode,
@@ -33,7 +30,6 @@ export default defineConfig(({ mode }) => {
       "process.env.VITE_APP_SOLANA_MAINNET_RPC": JSON.stringify(VITE_APP_SOLANA_MAINNET_RPC),
       "process.env.VITE_APP_SOLANA_TESTNET_RPC": JSON.stringify(VITE_APP_SOLANA_TESTNET_RPC),
       "process.env.VITE_APP_SOLANA_DEVNET_RPC": JSON.stringify(VITE_APP_SOLANA_DEVNET_RPC),
-      "process.env.VITE_APP_X402_TEST_CONTENT_URL": JSON.stringify(VITE_APP_X402_TEST_CONTENT_URL),
     },
   };
 });

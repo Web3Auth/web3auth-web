@@ -12,8 +12,8 @@ import {
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
+
 } from "@web3auth/modal/vue";
-import { useX402Fetch } from "@web3auth/modal/vue";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
@@ -109,7 +109,10 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return Boolean(conn?.solanaWallet);
 
     case "walletServices":
-      return web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
+      return (
+        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH &&
+        Boolean(conn?.ethereumProvider || conn?.solanaWallet)
+      );
 
     default: {
       return false;
@@ -362,6 +365,8 @@ const onSwitchChain = async () => {
     printToConsole("switchedChain error", error);
   }
 };
+
+
 </script>
 
 <template>
@@ -374,7 +379,7 @@ const onSwitchChain = async () => {
           </Button>
         </div>
         <div class="mb-2">
-          <Button :loading="resolveLoading(userInfoLoading)" block size="xs" pill @click="onGetUserInfo">
+          <Button :loading="userInfoLoading" block size="xs" pill @click="onGetUserInfo">
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
 
@@ -399,26 +404,19 @@ const onSwitchChain = async () => {
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
-          <Button :loading="resolveLoading(showWalletUILoading)" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
+          <Button :loading="showWalletUILoading" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
             {{ $t("app.buttons.btnShowWalletUI") }}
           </Button>
-          <Button
-            :loading="resolveLoading(showWalletConnectScannerLoading)"
-            block
-            size="xs"
-            pill
-            class="mb-2"
-            @click="() => showWalletConnectScanner()"
-          >
+          <Button :loading="showWalletConnectScannerLoading" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
             {{ $t("app.buttons.btnShowWalletConnectScanner") }}
           </Button>
-          <Button :loading="resolveLoading(showFundingLoading)" block size="xs" pill class="mb-2" @click="() => showFunding()">
+          <Button :loading="showFundingLoading" block size="xs" pill class="mb-2" @click="() => showFunding()">
             {{ $t("app.buttons.btnShowFunding") }}
           </Button>
-          <Button :loading="resolveLoading(showCheckoutLoading)" block size="xs" pill class="mb-2" @click="() => showCheckout()">
+          <Button :loading="showCheckoutLoading" block size="xs" pill class="mb-2" @click="() => showCheckout()">
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
-          <Button :loading="resolveLoading(showReceiveLoading)" block size="xs" pill class="mb-2" @click="() => showReceive()">
+          <Button :loading="showReceiveLoading" block size="xs" pill class="mb-2" @click="() => showReceive()">
             {{ $t("app.buttons.btnShowReceive") }}
           </Button>
           <!-- <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
@@ -469,10 +467,18 @@ const onSwitchChain = async () => {
 
           <!-- EIP-5792 -->
           <div class="mb-2 mt-4 text-xl font-bold leading-tight text-left">EIP-5792</div>
-          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">Get Capabilities</Button>
-          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">Send Batch Calls</Button>
-          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">Refresh Calls Status</Button>
-          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">Show Calls Status in Wallet</Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">
+            Get Capabilities
+          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">
+            Send Batch Calls
+          </Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">
+            Refresh Calls Status
+          </Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">
+            Show Calls Status in Wallet
+          </Button>
         </Card>
 
         <!-- SOLANA -->

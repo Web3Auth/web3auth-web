@@ -69,8 +69,6 @@
       "btnAddChain": "Add Chain",
       "btnSwitchChain": "Switch Chain",
       "btnSwitchChainNamespace": "Switch Chain Namespace",
-      "btnSwitchToSolanaDevnet": "Switch to Solana Devnet",
-      "btnSwitchToSolanaMainnet": "Switch to Solana Mainnet",
       "btnSignAndSendTransaction": "Sign and Send Transaction",
       "btnSignTransaction": "Sign Transaction",
       "btnSignMessage": "Sign Message",
@@ -81,16 +79,6 @@
       "btnShowWalletConnectScanner": "Show WalletConnect Scanner",
       "btnSignTypedData_v4": "Sign Typed Data v4",
       "btnSignPersonalMsg": "Sign Personal Message"
-    },
-    "x402": {
-      "title": "X402 Payment Protocol",
-      "description": "Uses useX402Fetch — signs a micro-payment with your wallet automatically.",
-      "solanaDescription": "Uses useX402Fetch — pays with your Solana wallet (USDC on devnet) automatically.",
-      "notOnBaseSepolia": "The x402 test server runs on Base Sepolia. Switch first to use it.",
-      "btnSwitchToBaseSepolia": "Switch to Base Sepolia",
-      "btnFetchWeather": "Fetch Weather (x402)",
-      "chainMismatch": "Payment requires chain {chainId}. Switch your wallet and retry.",
-      "btnSwitchAndRetry": "Switch to chain {chainId} & retry"
     },
     "widget": {
       "title": "Widget",
