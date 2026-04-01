@@ -6,7 +6,7 @@ import { CHAIN_NAMESPACES } from "@web3auth/no-modal";
 import { ref, watch } from "vue";
 
 const BASE_SEPOLIA_CHAIN_ID = "0x14a34"; // 84532
-const DEFAULT_X402_URL = "http://localhost:4021/weather";
+const DEFAULT_X402_URL = import.meta.env.VITE_APP_X402_TEST_CONTENT_URL || "https://x402.org/protected";
 
 const { isConnected } = useWeb3Auth();
 const { chainId, chainNamespace } = useChain();
