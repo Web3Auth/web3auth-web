@@ -25,6 +25,7 @@ watch(chainId, (id) => {
 }, { immediate: true });
 
 const onSwitchToBaseSepolia = async () => {
+  fetchLoading.value = true;
   try {
     result.value = null;
     fetchError.value = null;
