@@ -4,13 +4,10 @@ import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import {
   BaseConnector,
   citadelServerUrl,
-  clearToken,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  getCachedTokenInfo,
   IdentityTokenInfo,
-  saveToken,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -26,7 +23,8 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
     const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      const cachedTokenInfo = getCachedTokenInfo(accounts[0] as string, this.name);
+      this.initSessionManager(accounts[0] as string);
+      const cachedTokenInfo = await this.getCachedIdentityToken();
       if (cachedTokenInfo) {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
         this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
@@ -68,8 +66,8 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
         deviceInfo: getDeviceInfo(),
       });
 
+      await this.saveIdentityToken(tokens);
       const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
-      saveToken(accounts[0] as string, this.name, JSON.stringify(tokenInfo));
       this.status = CONNECTOR_STATUS.AUTHORIZED;
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: tokenInfo });
       return tokenInfo;
@@ -79,10 +77,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = await this.provider.request<never, string[]>({ method: "eth_accounts" });
-    if (accounts && accounts.length > 0) {
-      clearToken(accounts[0], this.name);
-    }
+    await this.clearWalletSession();
   }
 
   async disconnect(): Promise<void> {

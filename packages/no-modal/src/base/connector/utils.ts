@@ -1,7 +1,5 @@
 import { jwtDecode } from "jwt-decode";
 
-import type { IdentityTokenInfo } from "./interfaces";
-
 export function storageAvailable(type: "sessionStorage" | "localStorage"): boolean {
   let storageExists = false;
   let storageLength = 0;
@@ -43,38 +41,4 @@ export const checkIfTokenIsExpired = (token: string) => {
     return true;
   }
   return false;
-};
-
-export const getSavedToken = (userAddress: string, issuer: string) => {
-  if (storageAvailable("localStorage")) {
-    return localStorage.getItem(`${userAddress.toLowerCase()}_${issuer}`);
-  }
-  return null;
-};
-
-export const saveToken = (userAddress: string, issuer: string, token: string) => {
-  if (storageAvailable("localStorage")) {
-    return localStorage.setItem(`${userAddress.toLowerCase()}_${issuer}`, token);
-  }
-  return null;
-};
-
-export const clearToken = (userAddress: string, issuer: string) => {
-  if (storageAvailable("localStorage")) {
-    return localStorage.removeItem(`${userAddress.toLowerCase()}_${issuer}`);
-  }
-  return null;
-};
-
-export const getCachedTokenInfo = (account: string, connectorName: string): IdentityTokenInfo | null => {
-  const saved = getSavedToken(account, connectorName);
-  if (!saved) return null;
-
-  try {
-    const parsed = JSON.parse(saved) as IdentityTokenInfo;
-    if (parsed.idToken && !checkIfTokenIsExpired(parsed.idToken)) return parsed;
-  } catch {
-    if (!checkIfTokenIsExpired(saved)) return { idToken: saved };
-  }
-  return null;
 };

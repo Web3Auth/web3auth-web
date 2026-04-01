@@ -27,12 +27,10 @@ import {
   ConnectorNamespaceType,
   ConnectorParams,
   CustomChainConfig,
-  getCachedTokenInfo,
   getCaipChainId,
   IdentityTokenInfo,
   IProvider,
   log,
-  saveToken,
   SOLANA_CAIP_CHAIN_MAP,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
@@ -272,6 +270,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     if (!this.connector || !this.connected || !this.activeSession?.topic) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!options.sessionRemovedByWallet)
       await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
+    await this.clearWalletSession();
     this.rehydrated = false;
     this._solanaWallet = null;
     if (cleanup) {
@@ -300,7 +299,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         ? this._solanaWallet.accounts.map((a) => a.address)
         : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      const cachedTokenInfo = getCachedTokenInfo(accounts[0] as string, this.name);
+      this.initSessionManager(accounts[0] as string);
+      const cachedTokenInfo = await this.getCachedIdentityToken();
       if (cachedTokenInfo) {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
         this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: cachedTokenInfo });
@@ -333,8 +333,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         deviceInfo: getDeviceInfo(),
       });
 
+      await this.saveIdentityToken(tokens);
       const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
-      saveToken(accounts[0] as string, this.name, JSON.stringify(tokenInfo));
       this.status = CONNECTOR_STATUS.AUTHORIZED;
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: tokenInfo });
       return tokenInfo;

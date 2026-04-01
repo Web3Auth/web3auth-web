@@ -4,14 +4,11 @@ import {
   BaseConnector,
   CHAIN_NAMESPACES,
   citadelServerUrl,
-  clearToken,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  getCachedTokenInfo,
   getSolanaChainByChainConfig,
   IdentityTokenInfo,
-  saveToken,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -30,7 +27,8 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
     const accounts = this.solanaWallet.accounts.map((a) => a.address);
     if (accounts.length > 0) {
-      const cachedTokenInfo = getCachedTokenInfo(accounts[0], this.name);
+      this.initSessionManager(accounts[0]);
+      const cachedTokenInfo = await this.getCachedIdentityToken();
       if (cachedTokenInfo) {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
         this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
@@ -73,8 +71,8 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         deviceInfo: getDeviceInfo(),
       });
 
+      await this.saveIdentityToken(tokens);
       const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
-      saveToken(accounts[0], this.name, JSON.stringify(tokenInfo));
       this.status = CONNECTOR_STATUS.AUTHORIZED;
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: tokenInfo });
       return tokenInfo;
@@ -84,10 +82,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = this.solanaWallet?.accounts.map((a) => a.address) ?? [];
-    if (accounts.length > 0) {
-      clearToken(accounts[0], this.name);
-    }
+    await this.clearWalletSession();
   }
 
   async disconnect(): Promise<void> {

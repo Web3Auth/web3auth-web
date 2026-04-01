@@ -1,8 +1,11 @@
+import type { SiwwTokens } from "@toruslabs/base-controllers";
+import { AuthSessionManager, LocalStorageAdapter } from "@toruslabs/session-manager";
 import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
+import { citadelServerUrl } from "../utils";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 import { CAN_AUTHORIZE_STATUSES, CONNECTED_STATUSES } from "./connectorStatus";
 import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
@@ -19,6 +22,7 @@ import type {
   IProvider,
   UserInfo,
 } from "./interfaces";
+import { checkIfTokenIsExpired } from "./utils";
 
 export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents> implements IConnector<T> {
   public connectorData?: unknown = {};
@@ -30,6 +34,8 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   public coreOptions: BaseConnectorSettings["coreOptions"];
 
   protected rehydrated = false;
+
+  protected authSessionManager: AuthSessionManager | null = null;
 
   public abstract connectorNamespace: ConnectorNamespaceType;
 
@@ -106,6 +112,61 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   updateConnectorData(data: unknown): void {
     this.connectorData = data;
     this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, { connectorName: this.name, data });
+  }
+
+  protected initSessionManager(address: string): void {
+    const ls = new LocalStorageAdapter();
+    this.authSessionManager = new AuthSessionManager({
+      storageKeyPrefix: `w3a:siww:${this.name}:${address.toLowerCase()}`,
+      apiClientConfig: { baseURL: citadelServerUrl(this.coreOptions.authBuildEnv) },
+      storage: { sessionId: ls, accessToken: ls, refreshToken: ls, idToken: ls },
+    });
+  }
+
+  protected async getCachedIdentityToken(): Promise<IdentityTokenInfo | null> {
+    if (!this.authSessionManager) return null;
+
+    const idToken = await this.authSessionManager.getIdToken();
+    if (idToken && !checkIfTokenIsExpired(idToken)) {
+      const [accessToken, refreshToken] = await Promise.all([this.authSessionManager.getAccessToken(), this.authSessionManager.getRefreshToken()]);
+      return { idToken, accessToken: accessToken ?? undefined, refreshToken: refreshToken ?? undefined };
+    }
+
+    const refreshToken = await this.authSessionManager.getRefreshToken();
+    if (refreshToken) {
+      try {
+        const response = await this.authSessionManager.ensureRefresh();
+        const refreshedIdToken = await this.authSessionManager.getIdToken();
+        return {
+          idToken: refreshedIdToken ?? response.access_token,
+          accessToken: response.access_token,
+          refreshToken: response.refresh_token,
+        };
+      } catch {
+        // refresh failed, fall through to re-sign
+      }
+    }
+
+    return null;
+  }
+
+  protected async saveIdentityToken(tokens: SiwwTokens): Promise<void> {
+    if (!this.authSessionManager) return;
+    await this.authSessionManager.setTokens({
+      idToken: tokens.idToken,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+
+  protected async clearWalletSession(): Promise<void> {
+    if (!this.authSessionManager) return;
+    try {
+      await this.authSessionManager.logout();
+    } catch {
+      await this.authSessionManager.clearSessionData();
+    }
+    this.authSessionManager = null;
   }
 
   abstract init(options?: ConnectorInitOptions): Promise<void>;
