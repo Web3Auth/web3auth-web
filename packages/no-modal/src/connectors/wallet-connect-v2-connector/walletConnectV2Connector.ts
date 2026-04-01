@@ -13,6 +13,7 @@ import {
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
+  citadelServerUrl,
   CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_CATEGORY,
