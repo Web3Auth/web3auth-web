@@ -308,7 +308,7 @@ const onSignAndSendTransaction = async () => {
   if (!pubKey) throw new Error("No account connected");
 
   const signature = await client.solTransfer.sendTransfer({
-    amount: 1_000_000,
+    amount: 1_000_000n,
     authority: wallet.session,
     destination: pubKey,
   });
