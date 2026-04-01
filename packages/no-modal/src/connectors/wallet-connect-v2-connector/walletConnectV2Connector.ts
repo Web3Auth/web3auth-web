@@ -317,7 +317,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         issuedAt: new Date().toISOString(),
       };
 
-      const challenge = await signChallenge(payload, chainNamespace, citadelServerUrl(this.coreOptions.authBuildEnv));
+      const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
       const signedMessage = await this._getSignedMessage(challenge, accounts, chainNamespace);
 
       const tokens: SiwwTokens = await verifySignedChallenge({
@@ -325,7 +326,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         signedMessage: signedMessage as string,
         challenge,
         connector: this.name,
-        authServer: citadelServerUrl(this.coreOptions.authBuildEnv),
+        authServer,
         web3AuthClientId: this.coreOptions.clientId,
         web3AuthNetwork: this.coreOptions.web3AuthNetwork,
         sessionTimeout: this.coreOptions.sessionTime,
