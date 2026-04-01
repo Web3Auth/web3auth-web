@@ -1,12 +1,12 @@
 import type { SolanaClient } from "@solana/client";
 import { createClient, createWalletStandardConnector } from "@solana/client";
 import { SolanaProvider as SolanaProviderBase } from "@solana/react-hooks";
+import type { ComponentProps } from "react";
 import { createElement, PropsWithChildren, useEffect, useRef, useState } from "react";
 
 import { CHAIN_NAMESPACES, log } from "../../base";
 import type { CustomChainConfig } from "../../base/chain/IChainInterface";
 import { useChain, useWeb3Auth } from "../hooks";
-import type { SolanaProviderProps } from "./interface";
 
 const DEVNET_ENDPOINT = "https://api.devnet.solana.com";
 
@@ -126,6 +126,8 @@ function useFrameworkKitSolanaClient(): SolanaClient {
 
   return client;
 }
+
+type SolanaProviderProps = Omit<ComponentProps<typeof SolanaProviderBase>, "client" | "config">;
 
 export function SolanaProvider({ children, ...props }: PropsWithChildren<SolanaProviderProps>) {
   const client = useFrameworkKitSolanaClient();
