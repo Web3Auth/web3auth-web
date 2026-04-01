@@ -1,9 +1,10 @@
-import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { getDeviceInfo, signChallenge, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
   BaseConnector,
   checkIfTokenIsExpired,
+  citadelServerUrl,
   clearToken,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
@@ -26,20 +27,18 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
     const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      const existingToken = getSavedToken(accounts[0] as string, this.name);
-      if (existingToken) {
-        const isExpired = checkIfTokenIsExpired(existingToken);
-        if (!isExpired) {
-          this.status = CONNECTOR_STATUS.AUTHORIZED;
-          this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken: existingToken } });
-          return { idToken: existingToken };
-        }
+      const cachedTokenInfo = this.getCachedTokenInfo(accounts[0] as string);
+      if (cachedTokenInfo) {
+        this.status = CONNECTOR_STATUS.AUTHORIZED;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
+        return cachedTokenInfo;
       }
 
       const chainId = await this.provider.request<never, string>({ method: "eth_chainId" });
       const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
       if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
       const { chainNamespace } = currentChainConfig;
+      const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
       const payload = {
         domain: window.location.origin,
         uri: window.location.href,
@@ -50,7 +49,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
         issuedAt: new Date().toISOString(),
       };
 
-      const challenge = await signChallenge(payload, chainNamespace);
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
       const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
 
       const signedMessage = await this.provider.request<[string, string], string>({
@@ -58,19 +57,23 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
         params: [hexChallenge, accounts[0]],
       });
 
-      const idToken = await verifySignedChallenge(
+      const tokens: SiwwTokens = await verifySignedChallenge({
         chainNamespace,
-        signedMessage as string,
+        signedMessage: signedMessage as string,
         challenge,
-        this.name,
-        this.coreOptions.sessionTime,
-        this.coreOptions.clientId,
-        this.coreOptions.web3AuthNetwork
-      );
-      saveToken(accounts[0] as string, this.name, idToken);
+        connector: this.name,
+        authServer,
+        web3AuthClientId: this.coreOptions.clientId,
+        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+        sessionTimeout: this.coreOptions.sessionTime,
+        deviceInfo: getDeviceInfo(),
+      });
+
+      const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+      saveToken(accounts[0] as string, this.name, JSON.stringify(tokenInfo));
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken } });
-      return { idToken };
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: tokenInfo });
+      return tokenInfo;
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
@@ -86,5 +89,18 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
   async disconnect(): Promise<void> {
     this.rehydrated = false;
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
+  }
+
+  private getCachedTokenInfo(account: string): IdentityTokenInfo | null {
+    const saved = getSavedToken(account, this.name);
+    if (!saved) return null;
+
+    try {
+      const parsed = JSON.parse(saved) as IdentityTokenInfo;
+      if (parsed.idToken && !checkIfTokenIsExpired(parsed.idToken)) return parsed;
+    } catch {
+      if (!checkIfTokenIsExpired(saved)) return { idToken: saved };
+    }
+    return null;
   }
 }
