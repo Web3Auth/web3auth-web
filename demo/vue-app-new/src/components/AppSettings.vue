@@ -262,6 +262,21 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :label-enabled="$t('app.externalWalletOnly')"
             class="mb-2"
           />
+          <Select
+            v-model="formData.tokenStorage"
+            data-testid="selectTokenStorage"
+            label="Token Storage"
+            aria-label="Token Storage"
+            placeholder="Token Storage"
+            :options="[
+              { name: 'Default (AuthSessionManager)', value: 'default' },
+              { name: 'LocalStorage', value: 'local' },
+              { name: 'SessionStorage', value: 'session' },
+              { name: 'Cookies', value: 'cookies' },
+              { name: 'Memory (no persist)', value: 'memory' },
+            ]"
+            matchParentsWidth
+          />
         </Card>
         <Card v-if="isActiveTab(1)" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-2" :shadow="false">
           <Toggle
