@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 
-import { IProvider, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "../../base";
+import { Connection, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
 
 export interface IUseWeb3AuthConnect {
@@ -8,7 +8,7 @@ export interface IUseWeb3AuthConnect {
   loading: boolean;
   error: Web3AuthError | null;
   connectorName: WALLET_CONNECTOR_TYPE | null;
-  connect<T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]): Promise<IProvider | null>;
+  connect<T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]): Promise<Connection | null>;
 }
 
 export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {

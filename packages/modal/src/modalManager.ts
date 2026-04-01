@@ -9,6 +9,7 @@ import {
   type ChainNamespaceType,
   cloneDeep,
   CONNECTED_STATUSES,
+  type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
@@ -20,7 +21,6 @@ import {
   fetchWalletRegistry,
   getErrorAnalyticsProperties,
   type IConnector,
-  type IProvider,
   type IWeb3AuthCoreOptions,
   IWeb3AuthState,
   log,
@@ -178,10 +178,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  public async connect(): Promise<IProvider | null> {
+  public async connect(): Promise<Connection | null> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
-    // if already connected return provider
-    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.provider) return this.provider;
+    // if already connected return connection
+    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
       // remove all listeners when promise is resolved or rejected.
@@ -189,7 +189,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const handleConnected = () => {
         this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
-        return resolve(this.provider);
+        return resolve(this.connection);
       };
 
       const handleError = (err: unknown) => {

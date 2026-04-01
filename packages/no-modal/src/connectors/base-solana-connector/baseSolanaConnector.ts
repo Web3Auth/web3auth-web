@@ -1,34 +1,36 @@
 import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
-import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
   BaseConnector,
+  CHAIN_NAMESPACES,
   checkIfTokenIsExpired,
   clearToken,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
   getSavedToken,
+  getSolanaChainByChainConfig,
   IdentityTokenInfo,
   saveToken,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
+  walletSignMessage,
 } from "../../base";
 
 export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
   async getIdentityToken(): Promise<IdentityTokenInfo> {
-    if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
+    if (!this.solanaWallet || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
 
-    const accounts = await this.provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS });
-    if (accounts && accounts.length > 0) {
-      const existingToken = getSavedToken(accounts[0] as string, this.name);
+    const accounts = this.solanaWallet.accounts.map((a) => a.address);
+    if (accounts.length > 0) {
+      const existingToken = getSavedToken(accounts[0], this.name);
       if (existingToken) {
         const isExpired = checkIfTokenIsExpired(existingToken);
         if (!isExpired) {
@@ -38,10 +40,16 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         }
       }
 
-      const chainId = await this.provider.request<never, string>({ method: "solana_chainId" });
-      const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
-      if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
-      const { chainNamespace } = currentChainConfig;
+      const walletChains = new Set(this.solanaWallet.chains);
+      const currentChainConfig = this.coreOptions.chains.find((c) => {
+        if (c.chainNamespace !== CHAIN_NAMESPACES.SOLANA) return false;
+        const id = getSolanaChainByChainConfig(c);
+        return id != null && walletChains.has(id);
+      });
+      if (!currentChainConfig) {
+        throw WalletInitializationError.invalidParams("No Solana chain in common between the connected wallet and Web3Auth chain configuration");
+      }
+      const { chainId, chainNamespace } = currentChainConfig;
 
       const payload = {
         domain: window.location.origin,
@@ -54,10 +62,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
       };
 
       const challenge = await signChallenge(payload, chainNamespace);
-      const signedMessage = await this.provider.request<{ data: string; display: string }, string>({
-        method: SOLANA_METHOD_TYPES.SIGN_MESSAGE,
-        params: { data: challenge, display: "utf8" },
-      });
+      const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accounts[0]);
       const idToken = await verifySignedChallenge(
         chainNamespace,
         signedMessage,
@@ -67,7 +72,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         this.coreOptions.clientId,
         this.coreOptions.web3AuthNetwork
       );
-      saveToken(accounts[0] as string, this.name, idToken);
+      saveToken(accounts[0], this.name, idToken);
       this.status = CONNECTOR_STATUS.AUTHORIZED;
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken } });
       return { idToken };
@@ -77,8 +82,8 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = await this.provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS });
-    if (accounts && accounts.length > 0) {
+    const accounts = this.solanaWallet?.accounts.map((a) => a.address) ?? [];
+    if (accounts.length > 0) {
       clearToken(accounts[0], this.name);
     }
   }

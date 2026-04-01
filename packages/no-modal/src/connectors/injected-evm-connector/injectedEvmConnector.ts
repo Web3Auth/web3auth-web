@@ -7,6 +7,7 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -71,8 +72,8 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       log.debug(`initializing ${this.name} injected connector`);
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
-        if (!provider) {
+        const connection = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        if (!connection) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
         }
@@ -82,7 +83,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     if (!this.injectedProvider) throw WalletLoginError.connectionError("Injected provider is not available");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -112,9 +113,10 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
       let identityTokenInfo: IdentityTokenInfo | undefined;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: this.name,
+        connectorName: this.name,
         reconnected: this.rehydrated,
-        provider: this.injectedProvider,
+        ethereumProvider: this.injectedProvider,
+        solanaWallet: null,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
@@ -122,7 +124,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
         identityTokenInfo = await this.getIdentityToken();
       }
 
-      return this.injectedProvider;
+      return { ethereumProvider: this.injectedProvider, solanaWallet: null, connectorName: this.name };
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

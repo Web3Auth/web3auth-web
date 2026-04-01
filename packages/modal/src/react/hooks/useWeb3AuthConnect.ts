@@ -1,4 +1,4 @@
-import type { IProvider, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@web3auth/no-modal";
+import type { Connection, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@web3auth/no-modal";
 import { useCallback, useEffect, useState } from "react";
 
 import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
@@ -8,8 +8,8 @@ export interface IUseWeb3AuthConnect {
   loading: boolean;
   error: Web3AuthError | null;
   connectorName: WALLET_CONNECTOR_TYPE | null;
-  connect(): Promise<IProvider | null>;
-  connectTo<T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]): Promise<IProvider | null>;
+  connect(): Promise<Connection | null>;
+  connectTo<T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]): Promise<Connection | null>;
 }
 
 export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {

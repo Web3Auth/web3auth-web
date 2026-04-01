@@ -31,6 +31,7 @@ function Modal(props: ModalProps) {
         setIsOpen(true);
       }, 50);
     } else {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       setIsOpen(false);
       // Remove overflow styling to enable scroll again.
       document.body.style.overflow = "";

@@ -7,6 +7,7 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -82,9 +83,9 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        const connection = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
         // the connect function could fail silently as well.
-        if (!provider) {
+        if (!connection) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
         }
@@ -94,7 +95,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Connector is not initialized");
     this.status = CONNECTOR_STATUS.CONNECTING;
@@ -118,9 +119,10 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
       let identityTokenInfo: IdentityTokenInfo | undefined;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: WALLET_CONNECTORS.COINBASE,
+        connectorName: WALLET_CONNECTORS.COINBASE,
         reconnected: this.rehydrated,
-        provider: this.provider,
+        ethereumProvider: this.provider,
+        solanaWallet: null,
         identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
@@ -128,7 +130,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
         identityTokenInfo = await this.getIdentityToken();
       }
 
-      return this.provider;
+      return { ethereumProvider: this.provider, solanaWallet: null, connectorName: this.name };
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

@@ -1,5 +1,5 @@
 import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
-import { createAsyncMiddleware, createScaffoldMiddleware, JRPCMiddleware, JRPCRequest, JRPCResponse, rpcErrors } from "@web3auth/auth";
+import { createScaffoldMiddlewareV2, type JRPCRequest, type MiddlewareConstraint, type MiddlewareParams, rpcErrors } from "@web3auth/auth";
 
 import { IProvider } from "../../../base";
 import { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../ethereum-provider";
@@ -10,7 +10,7 @@ export async function createAaMiddleware({
 }: {
   eoaProvider: IProvider;
   handlers: IEthProviderHandlers;
-}): Promise<JRPCMiddleware<unknown, unknown>> {
+}): Promise<MiddlewareConstraint> {
   const [eoaAddress] = (await eoaProvider.request({ method: METHOD_TYPES.GET_ACCOUNTS })) as string[];
 
   /**
@@ -53,31 +53,33 @@ export async function createAaMiddleware({
     });
   }
 
-  async function lookupAccounts(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
-    res.result = await handlers.getAccounts(req);
+  async function lookupAccounts(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string[]> {
+    return handlers.getAccounts(params.request);
   }
 
-  async function fetchPrivateKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+  async function fetchPrivateKey(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
     if (!handlers.getPrivateKey) {
       throw rpcErrors.methodNotSupported();
     }
-    res.result = await handlers.getPrivateKey(req);
+    return handlers.getPrivateKey(params.request);
   }
 
-  async function sendTransaction(req: JRPCRequest<TransactionParams>, res: JRPCResponse<unknown>): Promise<void> {
+  async function sendTransaction(params: MiddlewareParams<JRPCRequest<TransactionParams[]>>): Promise<string> {
     if (!handlers.processTransaction) {
       throw rpcErrors.methodNotSupported();
     }
+    const req = params.request;
     const txParams: TransactionParams =
       (req.params as TransactionParams[])[0] ||
       ({
         from: "",
       } as TransactionParams);
     txParams.from = await validateAndNormalizeKeyholder(txParams.from as string, req);
-    res.result = handlers.processTransaction(txParams, req);
+    return handlers.processTransaction(txParams, req);
   }
 
-  async function signTransaction(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+  async function signTransaction(params: MiddlewareParams<JRPCRequest<TransactionParams[]>>): Promise<string> {
+    const req = params.request;
     const txParams: TransactionParams =
       (req.params as TransactionParams[])[0] ||
       ({
@@ -89,10 +91,11 @@ export async function createAaMiddleware({
       txParams.from = await normalizeSignSenderAddress(txParams.from, req);
     }
 
-    res.result = await handlers.processSignTransaction(txParams, req);
+    return handlers.processSignTransaction(txParams, req);
   }
 
-  async function ethSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+  async function ethSign(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
+    const req = params.request;
     let msgParams: MessageParams<string> = req.params as MessageParams<string>;
     const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
 
@@ -110,10 +113,11 @@ export async function createAaMiddleware({
     }
     msgParams = { ...extraParams, ...msgParams };
 
-    res.result = await handlers.processEthSignMessage(msgParams, req);
+    return handlers.processEthSignMessage(msgParams, req);
   }
 
-  async function signTypedDataV4(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+  async function signTypedDataV4(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
+    const req = params.request;
     if (!req?.params) throw new Error("WalletMiddleware - missing params");
 
     let msgParams: TypedMessageParams = req.params as TypedMessageParams;
@@ -131,10 +135,11 @@ export async function createAaMiddleware({
       };
     }
 
-    res.result = await handlers.processTypedMessageV4(msgParams, req);
+    return handlers.processTypedMessageV4(msgParams, req);
   }
 
-  async function personalSign(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+  async function personalSign(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
+    const req = params.request;
     let msgParams: MessageParams<string> = req.params as MessageParams<string>;
     const extraParams: Record<string, unknown> = (req.params as Record<string, unknown>[])[2] || {};
 
@@ -160,60 +165,53 @@ export async function createAaMiddleware({
     }
     msgParams = { ...extraParams, ...msgParams };
 
-    res.result = await handlers.processPersonalMessage(msgParams, req);
+    return handlers.processPersonalMessage(msgParams, req);
   }
 
-  async function fetchPublicKey(req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+  async function fetchPublicKey(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
     if (!handlers.getPublicKey) {
       throw rpcErrors.methodNotSupported();
     }
-    res.result = await handlers.getPublicKey(req);
+    return handlers.getPublicKey(params.request);
   }
 
-  return createScaffoldMiddleware({
+  return createScaffoldMiddlewareV2({
     // account lookups
-    eth_accounts: createAsyncMiddleware(lookupAccounts),
-    eth_requestAccounts: createAsyncMiddleware(lookupAccounts),
-    eth_private_key: createAsyncMiddleware(fetchPrivateKey),
-    private_key: createAsyncMiddleware(fetchPrivateKey),
-    eth_public_key: createAsyncMiddleware(fetchPublicKey),
-    public_key: createAsyncMiddleware(fetchPublicKey),
+    eth_accounts: lookupAccounts,
+    eth_requestAccounts: lookupAccounts,
+    eth_private_key: fetchPrivateKey,
+    private_key: fetchPrivateKey,
+    eth_public_key: fetchPublicKey,
+    public_key: fetchPublicKey,
     // tx signatures
-    eth_sendTransaction: createAsyncMiddleware(sendTransaction),
-    eth_signTransaction: createAsyncMiddleware(signTransaction),
+    eth_sendTransaction: sendTransaction,
+    eth_signTransaction: signTransaction,
     // message signatures
-    eth_sign: createAsyncMiddleware(ethSign),
-    eth_signTypedData_v4: createAsyncMiddleware(signTypedDataV4),
-    personal_sign: createAsyncMiddleware(personalSign),
+    eth_sign: ethSign,
+    eth_signTypedData_v4: signTypedDataV4,
+    personal_sign: personalSign,
   });
 }
 
-export async function createEoaMiddleware({ aaProvider }: { aaProvider: IProvider }): Promise<JRPCMiddleware<unknown, unknown>> {
-  async function getAccounts(_req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+export async function createEoaMiddleware({ aaProvider }: { aaProvider: IProvider }): Promise<MiddlewareConstraint> {
+  async function getAccounts(): Promise<string[]> {
     const [, eoaAddress] = await aaProvider.request<never, string[]>({ method: METHOD_TYPES.GET_ACCOUNTS });
-    res.result = [eoaAddress];
+    return [eoaAddress];
   }
 
-  async function requestAccounts(_req: JRPCRequest<unknown>, res: JRPCResponse<unknown>): Promise<void> {
+  async function requestAccounts(): Promise<string[]> {
     const [, eoaAddress] = await aaProvider.request<never, string[]>({ method: METHOD_TYPES.ETH_REQUEST_ACCOUNTS });
-    res.result = [eoaAddress];
+    return [eoaAddress];
   }
 
-  return createScaffoldMiddleware({
-    eth_accounts: createAsyncMiddleware(getAccounts),
-    eth_requestAccounts: createAsyncMiddleware(requestAccounts),
+  return createScaffoldMiddlewareV2({
+    eth_accounts: getAccounts,
+    eth_requestAccounts: requestAccounts,
   });
 }
 
-export function providerAsMiddleware(provider: IProvider): JRPCMiddleware<unknown, unknown> {
-  return async (req, res, _next, end) => {
-    // send request to provider
-    try {
-      const providerRes = await provider.request(req);
-      res.result = providerRes;
-      return end();
-    } catch (error) {
-      return end(error as Error);
-    }
+export function providerAsMiddleware(provider: IProvider): MiddlewareConstraint {
+  return async ({ request }) => {
+    return provider.request({ method: request.method, params: request.params });
   };
 }

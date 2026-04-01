@@ -17,12 +17,12 @@ import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useMemo, useState } from "react";
 import { parseEther } from "viem";
 import {
+  useAccount,
   useBalance,
   useCallsStatus,
   useCapabilities,
   useChainId,
   useChains,
-  useConnection,
   useSendCalls,
   useShowCallsStatus,
   useSignMessage,
@@ -39,18 +39,18 @@ const Main = () => {
   const { chainNamespace: currentChainNamespace, chainId: currentChainId } = useChain();
   const { loading: connecting, connect, error: connectingError, connectorName, connectTo } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
-  const { mutateAsync: signMessageAsync, data: signedMessageData } = useSignMessage();
-  const { address, isConnected: isWagmiConnected } = useConnection();
+  const { signMessageAsync, data: signedMessageData } = useSignMessage();
+  const { address, isConnected: isWagmiConnected } = useAccount();
   const { userInfo, isMFAEnabled } = useWeb3AuthUser();
   const { data: balance } = useBalance({ address });
-  const { mutate: signTypedData, data: signedTypedDataData } = useSignTypedData();
+  const { signTypedDataAsync, data: signedTypedDataData } = useSignTypedData();
   const { enableMFA, loading: isEnableMFALoading, error: enableMFAError } = useEnableMFA();
   const { manageMFA, loading: isManageMFALoading, error: manageMFAError } = useManageMFA();
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
   const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
-  const { mutateAsync: switchChainAsync } = useSwitchChain();
+  const { switchChainAsync } = useSwitchChain();
   const chains = useChains();
   const { switchChain: switchWeb3AuthChain } = useWeb3AuthSwitchChain();
 
@@ -205,7 +205,7 @@ const Main = () => {
           {/* Sign Typed Data */}
           <button
             onClick={() =>
-              signTypedData({
+              signTypedDataAsync({
                 types: {
                   Person: [
                     { name: "name", type: "string" },
@@ -358,8 +358,8 @@ const Main = () => {
           <button onClick={() => connect()} className={styles.card}>
             Login with Modal
           </button>
-          <button onClick={() => connectTo("auth", { authConnection: "facebook" })} className={styles.card}>
-            Login with Facebook
+          <button onClick={() => connectTo("auth", { authConnection: "github" })} className={styles.card}>
+            Login with Github
           </button>
         </>
       )}
