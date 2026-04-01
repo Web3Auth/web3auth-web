@@ -1,5 +1,5 @@
 import type { SiwwTokens } from "@toruslabs/base-controllers";
-import { AuthSessionManager, LocalStorageAdapter } from "@toruslabs/session-manager";
+import { AuthSessionManager } from "@toruslabs/session-manager";
 import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
@@ -115,11 +115,12 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   }
 
   protected initSessionManager(address: string): void {
-    const ls = new LocalStorageAdapter();
     this.authSessionManager = new AuthSessionManager({
       storageKeyPrefix: `w3a:siww:${this.name}:${address.toLowerCase()}`,
       apiClientConfig: { baseURL: citadelServerUrl(this.coreOptions.authBuildEnv) },
-      storage: { sessionId: ls, accessToken: ls, refreshToken: ls, idToken: ls },
+      storage: this.coreOptions.storage,
+      cookieOptions: this.coreOptions.cookieOptions,
+      accessTokenProvider: this.coreOptions.accessTokenProvider,
     });
   }
 

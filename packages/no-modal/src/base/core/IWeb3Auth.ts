@@ -1,10 +1,13 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import {
+  type AccessTokenProvider,
   type BUILD_ENV_TYPE,
+  type CookieOptions,
   type LoginParams,
   MfaLevelType,
   MfaSettings,
   SafeEventEmitter,
+  type StorageConfig,
   UX_MODE_TYPE,
   type WhiteLabelData,
 } from "@web3auth/auth";
@@ -91,13 +94,23 @@ export interface IWeb3AuthCoreOptions {
    * @defaultValue false
    */
   enableLogging?: boolean;
+
   /**
-   * setting to "local" will persist social login session across browser tabs.
-   *
-   * @defaultValue "local"
+   * Custom storage adapters for auth tokens (sessionId, accessToken, refreshToken, idToken).
+   * @defaultValue localStorage-based adapters
    */
-  // TODO: rename this to match customauth, sfa
-  storageType?: "session" | "local" | "cookies";
+  storage?: StorageConfig;
+
+  /**
+   * Cookie configuration used when storage adapters are cookie-based.
+   */
+  cookieOptions?: CookieOptions;
+
+  /**
+   * Custom provider for access tokens. When set, the session manager
+   * uses this instead of its internal token refresh flow.
+   */
+  accessTokenProvider?: AccessTokenProvider;
 
   /**
    * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
