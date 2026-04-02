@@ -497,7 +497,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     this.status = CONNECTOR_STATUS.CONNECTED;
     log.debug("consent accepted, connected", this.status, this.connectedConnectorName);
-    this.connectToPlugins({ ...connectedData, connector: connectedData.connector as WALLET_CONNECTOR_TYPE });
+    this.connectToPlugins({ ...connectedData, connector: connectedData.connectorName as WALLET_CONNECTOR_TYPE });
     this.emit(CONNECTOR_EVENTS.CONNECTED, connectedData);
 
     if (this.pendingAuthorizedData) {
