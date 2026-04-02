@@ -1,4 +1,4 @@
-import type { SiwwTokens } from "@toruslabs/base-controllers";
+import type { ChainNamespaceType, SiwwTokens } from "@toruslabs/base-controllers";
 import { AuthSessionManager } from "@toruslabs/session-manager";
 import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
@@ -192,5 +192,6 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
   abstract getIdentityToken(): Promise<IdentityTokenInfo>;
+  abstract generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }

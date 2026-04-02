@@ -1,4 +1,4 @@
-import { type ProviderConfig } from "@toruslabs/base-controllers";
+import { ChainNamespaceType, type ProviderConfig } from "@toruslabs/base-controllers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import type { Wallet } from "@wallet-standard/base";
 import {
@@ -349,6 +349,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       return x.authConnection === authConnection && x.isDefault;
     });
     return providerConfig;
+  }
+
+  public async generateChallengeAndSign(): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    // we do not support this for auth connector, as of now.
+    throw new Error("Not implemented");
   }
 
   private async setupSolanaWallet(): Promise<void> {

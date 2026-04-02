@@ -86,6 +86,14 @@ import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
+
+type WalletLinkingProof = {
+  address: string;
+  challenge: string;
+  signature: string;
+  signatureType: "eip191" | "sip99";
+  network: "ethereum" | "solana";
+};
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
@@ -574,37 +582,34 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     try {
       this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
 
-      // Step 1: Obtain the primary identity token for the active AUTH session.
-      let primaryIdToken = this.idToken;
-      if (!primaryIdToken) {
+      let idToken = this.idToken;
+      if (!idToken) {
         const tokenInfo = await this.connectedConnector.getIdentityToken();
-        primaryIdToken = tokenInfo.idToken;
+        idToken = tokenInfo.idToken;
       }
-      if (!primaryIdToken) {
+      if (!idToken) {
         throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
       }
 
-      // Step 2: Obtain the wallet proof token.
-      // If the caller already resolved the token (e.g. via a custom flow), use it directly.
-      // Otherwise create an isolated connector instance to sign and verify on behalf of the user.
-      let walletIdToken: string;
-      if (params.walletIdToken) {
-        walletIdToken = params.walletIdToken;
-      } else {
-        walletIdToken = await this.getLinkingWalletToken(params.connectorName, params.chainId);
-      }
+      // 1. generate challenge and get signature from the external wallet
+      const walletProof = await this.getLinkingWalletProof(params.connectorName, params.chainId);
 
-      // Step 3: Submit both proofs to the Citadel account-linking endpoint.
+      // 2. submit the both challenge and signature to the Citadel account-linking endpoint.
       const result = await makeAccountLinkingRequest({
-        primaryIdToken,
-        walletIdToken,
-        connectorName: params.connectorName,
-        chainId: params.chainId || this.currentChainId,
+        idToken,
+        network: walletProof.network,
+        connector: params.connectorName,
+        message: walletProof.challenge,
+        signature: {
+          s: walletProof.signature,
+          t: walletProof.signatureType,
+        },
       });
+      await this.setState({ idToken: result.idToken });
 
       this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_COMPLETED, {
         ...trackData,
-        linked_address: result.linkedAddress,
+        linked_address: walletProof.address,
       });
 
       return result;
@@ -1186,13 +1191,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
   }
 
-  /**
-   * Obtain a wallet identity token from an external wallet without replacing the primary AUTH
-   * session. Checks first whether the target connector is already in a connected state (e.g.
-   * when the SDK is running in CONNECT_ONLY mode), then falls back to an isolated connector
-   * instance whose events are never subscribed to the main SDK event loop.
-   */
-  private async getLinkingWalletToken(connectorName: WALLET_CONNECTOR_TYPE | string, chainId?: string): Promise<string> {
+  private async getLinkingWalletProof(connectorName: WALLET_CONNECTOR_TYPE | string, chainId?: string): Promise<WalletLinkingProof> {
     const effectiveChainId = chainId || this.currentChainId;
     if (!effectiveChainId) {
       throw AccountLinkingError.walletProofFailed(
@@ -1200,42 +1199,70 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       );
     }
 
-    // If the target connector is already in a connected state (CONNECT_ONLY mode), use it
-    // directly without creating a second instance.
-    const existingConnector = this.getConnector(connectorName as WALLET_CONNECTOR_TYPE);
-    if (existingConnector && CONNECTED_STATUSES.includes(existingConnector.status)) {
-      const { idToken } = await existingConnector.getIdentityToken();
-      return idToken;
-    }
-
-    // Create and use an isolated connector instance.
     const isolatedConnector = await this.createIsolatedWalletConnector(connectorName as WALLET_CONNECTOR_TYPE, effectiveChainId);
 
-    return new Promise<string>((resolve, reject) => {
-      const onConnected = async () => {
-        try {
-          const { idToken } = await isolatedConnector.getIdentityToken();
-          // Best-effort cleanup — do not surface cleanup errors to the caller.
-          isolatedConnector.disconnect({ cleanup: true }).catch((e) => log.debug("isolated connector cleanup error", e));
-          resolve(idToken);
-        } catch (err) {
-          reject(AccountLinkingError.walletProofFailed(err instanceof Error ? err.message : String(err), err));
-        }
-      };
+    try {
+      const connection = await isolatedConnector.connect({ chainId: effectiveChainId });
+      if (!connection) {
+        throw AccountLinkingError.walletProofFailed(`Failed to connect to "${connectorName}" for account linking.`);
+      }
 
-      const onErrored = (err: Web3AuthError) => {
-        reject(AccountLinkingError.walletProofFailed(err.message, err));
-      };
-
-      isolatedConnector.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
-      isolatedConnector.once(CONNECTOR_EVENTS.ERRORED, onErrored);
-
-      isolatedConnector.connect({ chainId: effectiveChainId }).catch((err) => {
-        isolatedConnector.removeListener(CONNECTOR_EVENTS.CONNECTED, onConnected);
-        isolatedConnector.removeListener(CONNECTOR_EVENTS.ERRORED, onErrored);
-        reject(AccountLinkingError.walletProofFailed(err instanceof Error ? err.message : String(err), err));
+      return await this.createWalletLinkingProof(isolatedConnector);
+    } catch (error) {
+      throw AccountLinkingError.walletProofFailed(error instanceof Error ? error.message : String(error), error);
+    } finally {
+      isolatedConnector.disconnect({ cleanup: true }).catch((error) => {
+        log.debug("isolated connector cleanup error", error);
       });
-    });
+    }
+  }
+
+  private async createWalletLinkingProof(connector: IConnector<unknown>): Promise<WalletLinkingProof> {
+    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign();
+    const address = await this.getLinkingWalletAddress(connector, chainNamespace);
+
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      return {
+        address,
+        challenge,
+        signature,
+        signatureType: "eip191",
+        network: "ethereum",
+      };
+    }
+
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      return {
+        address,
+        challenge,
+        signature,
+        signatureType: "sip99",
+        network: "solana",
+      };
+    }
+
+    throw AccountLinkingError.unsupportedConnector(`Connector "${connector.name}" returned unsupported chain namespace "${chainNamespace}".`);
+  }
+
+  private async getLinkingWalletAddress(connector: IConnector<unknown>, chainNamespace: ChainNamespaceType): Promise<string> {
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      const address = connector.solanaWallet?.accounts?.[0]?.address;
+      if (!address) {
+        throw AccountLinkingError.walletProofFailed("No connected Solana account found for account linking.");
+      }
+      return address;
+    }
+
+    if (!connector.provider) {
+      throw AccountLinkingError.walletProofFailed("No connected EVM account found for account linking.");
+    }
+
+    const accounts = await connector.provider.request<never, string[]>({ method: "eth_accounts" });
+    if (!accounts?.length) {
+      throw AccountLinkingError.walletProofFailed("No connected EVM account found for account linking.");
+    }
+
+    return accounts[0];
   }
 
   /**
@@ -1264,7 +1291,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       default:
         throw AccountLinkingError.unsupportedConnector(
           `Connector "${connectorName}" does not support automatic wallet linking. ` +
-            `Pass walletIdToken directly in LinkAccountParams, or use ${WALLET_CONNECTORS.METAMASK} / ${WALLET_CONNECTORS.WALLET_CONNECT_V2}.`
+            `Use ${WALLET_CONNECTORS.METAMASK} or ${WALLET_CONNECTORS.WALLET_CONNECT_V2}.`
         );
     }
 

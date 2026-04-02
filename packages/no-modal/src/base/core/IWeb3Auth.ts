@@ -59,18 +59,29 @@ export interface LinkAccountParams {
   walletIdToken?: string;
 }
 
+export interface LinkedAccountInfo {
+  /** Type of the account (e.g. "social", "external_wallet", "account_abstraction") */
+  accountType: string;
+  /** Address of the account */
+  address: string | null;
+  /** Auth connection id of the account */
+  authConnectionId: string | null;
+  /** Chain namespace of the account */
+  chainNamespace: string | null;
+}
+
 /**
  * Result returned after a successful account-linking operation.
  */
 export interface LinkAccountResult {
   /** Whether the Citadel server accepted the linking request. */
   success: boolean;
-  /** Wallet address that was linked, if returned by the server. */
-  linkedAddress?: string;
-  /** Name of the connector that was linked. */
-  connectorName: string;
-  /** Any additional data returned by the Citadel response. */
-  data?: Record<string, unknown>;
+
+  /** Refreshed id token for the user */
+  idToken: string;
+
+  /** Linked account info */
+  linkedAccounts: LinkedAccountInfo[];
 }
 
 export type AuthLoginParams = LoginParams & {

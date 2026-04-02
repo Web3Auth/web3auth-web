@@ -307,23 +307,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         return cachedTokenInfo;
       }
 
-      const payload = {
-        domain: window.location.origin,
-        uri: window.location.href,
-        address: accounts[0],
-        chainId: parseInt(chainId, 16),
-        version: "1",
-        nonce: Math.random().toString(36).slice(2),
-        issuedAt: new Date().toISOString(),
-      };
-
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
-      const challenge = await signChallenge(payload, chainNamespace, authServer);
-      const signedMessage = await this._getSignedMessage(challenge, accounts, chainNamespace);
+      const { challenge, signature, chainNamespace } = await this.generateChallengeAndSign(authServer);
 
       const tokens: SiwwTokens = await verifySignedChallenge({
         chainNamespace,
-        signedMessage: signedMessage as string,
+        signedMessage: signature,
         challenge,
         connector: this.name,
         authServer,
@@ -340,6 +329,39 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       return tokenInfo;
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+  }
+
+  async generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    const authServer = authServerUrl ?? citadelServerUrl(this.coreOptions.authBuildEnv);
+
+    const { chainId } = this.provider;
+    const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+    if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
+    const { chainNamespace } = currentChainConfig;
+    const accounts =
+      chainNamespace === CHAIN_NAMESPACES.SOLANA && this._solanaWallet
+        ? this._solanaWallet.accounts.map((a) => a.address)
+        : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
+
+    if (!accounts || accounts?.length === 0) {
+      throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    }
+
+    const payload = {
+      domain: window.location.origin,
+      uri: window.location.href,
+      address: accounts[0],
+      chainId: parseInt(chainId, 16),
+      version: "1",
+      nonce: Math.random().toString(36).slice(2),
+      issuedAt: new Date().toISOString(),
+    };
+
+    const challenge = await signChallenge(payload, chainNamespace, authServer);
+    const signature = await this._getSignedMessage(challenge, accounts, chainNamespace);
+
+    return { challenge, signature, chainNamespace };
   }
 
   public async enableMFA(): Promise<void> {
