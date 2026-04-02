@@ -1,5 +1,3 @@
-/* eslint-disable promise/always-return */
-
 import fs from "fs";
 import path from "path";
 
@@ -7,13 +5,7 @@ const args = process.argv.slice(2);
 const branch = args[0] || "main";
 const repoUrl = `https://raw.githubusercontent.com/Web3Auth/web3auth-locales/${branch}/Web3Auth-locale`;
 const localeGroups = ["locale-common"];
-const promises = [];
 const locales = {};
-
-localeGroups.forEach((group) => {
-  const urlFetch = `${repoUrl}/${group}.json`;
-  promises.push(fetch(urlFetch).then((res) => res.json()));
-});
 
 function processRecords(items) {
   Object.keys(items).forEach((groupKey) => {
@@ -27,13 +19,18 @@ function processRecords(items) {
   });
 }
 
-Promise.all(promises)
-  .then((results) => {
+async function main() {
+  const promises = localeGroups.map((group) => {
+    const urlFetch = `${repoUrl}/${group}.json`;
+    return fetch(urlFetch).then((res) => res.json());
+  });
+
+  try {
+    const results = await Promise.all(promises);
     results.forEach((set) => {
       processRecords(set);
     });
 
-    // Create json files
     const folder = "./packages/modal/src/ui/i18n/";
     const folderPath = path.resolve(folder);
     if (!fs.existsSync(folderPath)) {
@@ -44,13 +41,16 @@ Promise.all(promises)
     for (const localeKey of keys) {
       if (Object.prototype.hasOwnProperty.call(locales, localeKey)) {
         const filePath = path.resolve(`${folder}${localeKey}.json`);
-        fs.writeFile(filePath, JSON.stringify(locales[localeKey], null, 2), { flag: "w" }, (error) => {
-          if (error) throw error;
-        });
+        await fs.promises.writeFile(filePath, JSON.stringify(locales[localeKey], null, 2), { flag: "w" });
       }
     }
-  })
-  .catch((error) => {
-    // eslint-disable-next-line no-console
+  } catch (error) {
     console.error(error);
-  });
+    process.exit(1);
+  }
+}
+
+main().catch((error) => {
+  console.error(error);
+  process.exit(1);
+});

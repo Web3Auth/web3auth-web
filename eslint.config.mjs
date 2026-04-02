@@ -14,4 +14,10 @@ export default [
       "import/no-unresolved": "off",
     },
   },
+  {
+    files: ["scripts/**/*.mjs", "locales/**/*.mjs"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 ];
