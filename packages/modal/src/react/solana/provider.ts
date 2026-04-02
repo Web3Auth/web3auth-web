@@ -1,11 +1,9 @@
-import type { SolanaClient } from "@solana/client";
-import { createClient, createWalletStandardConnector } from "@solana/client";
+import { createClient, createWalletStandardConnector, type SolanaClient } from "@solana/client";
 import { SolanaProvider as SolanaProviderBase } from "@solana/react-hooks";
+import { CHAIN_NAMESPACES, CustomChainConfig, log } from "@web3auth/no-modal";
 import type { ComponentProps } from "react";
-import { createElement, PropsWithChildren, useEffect, useRef, useState } from "react";
+import { createElement, PropsWithChildren, useEffect, useState } from "react";
 
-import { CHAIN_NAMESPACES, log } from "../../base";
-import type { CustomChainConfig } from "../../base/chain/IChainInterface";
 import { useChain, useWeb3Auth } from "../hooks";
 
 const DEVNET_ENDPOINT = "https://api.devnet.solana.com";
@@ -32,54 +30,26 @@ function makePlaceholder(rpc: Pick<CustomChainConfig, "rpcTarget" | "wsTarget">)
   });
 }
 
-function dispose(client: SolanaClient) {
-  void client.actions.disconnectWallet().catch(() => {});
-  client.destroy();
-}
-
 /**
  * Builds the SolanaClient for Framework Kit React hooks: placeholder when idle, Web3Auth-backed when
- * connected on Solana. Ref + state so React re-renders on swap and effects dispose the right instance.
+ * connected on Solana. State drives re-renders when the active client instance changes.
  */
 function useFrameworkKitSolanaClient(): SolanaClient {
   const { isConnected, connection, web3Auth, isInitialized } = useWeb3Auth();
   const { chainNamespace } = useChain();
 
-  const ref = useRef<SolanaClient | null>(null);
-  const [client, setClient] = useState<SolanaClient>(() => {
-    const c = makePlaceholder({ rpcTarget: DEVNET_ENDPOINT });
-    ref.current = c;
-    return c;
-  });
+  const [client, setClient] = useState<SolanaClient>(() => makePlaceholder({ rpcTarget: DEVNET_ENDPOINT }));
 
   useEffect(() => {
     if (isInitialized) web3Auth?.setAnalyticsProperties({ solana_framework_kit_enabled: true });
   }, [isInitialized, web3Auth]);
 
-  useEffect(
-    () => () => {
-      const c = ref.current;
-      if (c) {
-        dispose(c);
-        ref.current = null;
-      }
-    },
-    []
-  );
-
   useEffect(() => {
     let stale = false;
 
     const adopt = (next: SolanaClient) => {
-      if (stale) {
-        dispose(next);
-        return;
-      }
-      const prev = ref.current;
-      if (prev === next) return;
-      if (prev) dispose(prev);
-      ref.current = next;
-      setClient(next);
+      if (stale) return;
+      setClient((prev) => (prev === next ? prev : next));
     };
 
     void (async () => {
@@ -115,10 +85,7 @@ function useFrameworkKitSolanaClient(): SolanaClient {
           walletConnectors: [connector],
         });
         await wired.actions.connectWallet(solanaWalletId, { autoConnect: true });
-        if (stale) {
-          dispose(wired);
-          return;
-        }
+        if (stale) return;
         adopt(wired);
       } catch (e) {
         log.error("Failed to create or connect Solana client", e);
@@ -129,7 +96,7 @@ function useFrameworkKitSolanaClient(): SolanaClient {
     return () => {
       stale = true;
     };
-  }, [isConnected, connection?.solanaWallet, chainNamespace, web3Auth, isInitialized, connection?.connectorName]);
+  }, [isConnected, connection, connection?.solanaWallet, chainNamespace, web3Auth, isInitialized, connection?.connectorName]);
 
   return client;
 }
@@ -139,10 +106,13 @@ type SolanaProviderProps = Omit<ComponentProps<typeof SolanaProviderBase>, "clie
 export function SolanaProvider({ children, ...props }: PropsWithChildren<SolanaProviderProps>) {
   const client = useFrameworkKitSolanaClient();
 
-  return createElement(SolanaProviderBase, {
-    ...props,
-    client,
-    walletPersistence: false,
-    children,
-  });
+  return createElement(
+    SolanaProviderBase,
+    {
+      ...props,
+      client,
+      walletPersistence: false,
+    } as ComponentProps<typeof SolanaProviderBase>,
+    children
+  );
 }

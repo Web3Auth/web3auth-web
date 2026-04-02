@@ -1,1 +1,2 @@
-export * from "@web3auth/no-modal/react/solana";
+export * from "./hooks";
+export * from "./provider";

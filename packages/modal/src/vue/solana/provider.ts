@@ -1,8 +1,7 @@
 import { createClient, createWalletStandardConnector, type SolanaClient } from "@solana/client";
+import { CHAIN_NAMESPACES, log } from "@web3auth/no-modal";
 import { defineComponent, Fragment, h, provide, ref, watch } from "vue";
 
-import { log } from "../../base";
-import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
 import { useWeb3Auth } from "../composables";
 import { SOLANA_CLIENT_KEY } from "./constants";
 
