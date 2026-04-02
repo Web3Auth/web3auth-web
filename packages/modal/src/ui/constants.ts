@@ -7,6 +7,8 @@ export const PAGES = {
   WALLET_LIST: "connect_wallet",
   /** QR code or instructions for connecting to the selected wallet */
   WALLET_CONNECTION_DETAILS: "selected_wallet",
+  /** Link an external wallet to the logged-in account */
+  LINK_WALLET: "link_wallet",
 };
 
 export const CONNECT_WALLET_PAGES = {

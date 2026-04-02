@@ -11,6 +11,7 @@ import { RootProvider } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
 import { ExternalButton, MODAL_STATUS } from "../../interfaces";
 import ConnectWallet from "../ConnectWallet";
+import LinkWallet from "../LinkWallet";
 import Login from "../Login";
 import { RootProps } from "./Root.type";
 import RootBodySheets from "./RootBodySheets/RootBodySheets";
@@ -233,6 +234,15 @@ function RootContent(props: RootProps) {
                     isExternalWalletModeOnly={isExternalWalletModeOnly}
                   />
                 )}
+              {/* Link Wallet Screen */}
+              {modalState.currentPage === PAGES.LINK_WALLET && modalState.status === MODAL_STATUS.INITIALIZED && (
+                <LinkWallet
+                  allRegistryButtons={allRegistryButtons}
+                  customConnectorButtons={customConnectorButtons}
+                  connectorVisibilityMap={connectorVisibilityMap}
+                  externalWalletsConfig={modalState.externalWalletsConfig}
+                />
+              )}
             </>
           )}
 
