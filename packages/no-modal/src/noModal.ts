@@ -13,7 +13,6 @@ import {
   SafeEventEmitter,
   type SafeEventEmitterProvider,
   serializeError,
-  SessionStorageAdapter,
   UX_MODE,
 } from "@web3auth/auth";
 import { WsEmbedParams } from "@web3auth/ws-embed";
@@ -113,6 +112,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     cachedConnector: null,
     currentChainId: null,
     idToken: null,
+    accessToken: null,
+    refreshToken: null,
   };
 
   private loginMode: LoginModeType = LOGIN_MODE.NO_MODAL;
@@ -122,7 +123,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    if (!options.storageType) options.storageType = "local";
     if (!options.initialAuthenticationMode) options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
 
     this.coreOptions = options;
@@ -179,6 +179,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   get idToken(): string | null {
     return this.state.idToken || null;
+  }
+
+  get accessToken(): string | null {
+    return this.state.accessToken || null;
+  }
+
+  get refreshToken(): string | null {
+    return this.state.refreshToken || null;
   }
 
   set provider(_: IProvider | null) {
@@ -300,6 +308,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       cachedConnector: null,
       currentChainId: null,
       idToken: null,
+      accessToken: null,
+      refreshToken: null,
     });
   }
 
@@ -810,7 +820,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         default_chain_id: defaultChain ? getCaipChainId(defaultChain) : undefined,
         default_chain_name: defaultChain?.displayName,
         logging_enabled: this.coreOptions.enableLogging,
-        storage_type: this.coreOptions.storageType,
+        custom_storage: Boolean(this.coreOptions.storage),
         session_time: this.coreOptions.sessionTime,
         sfa_key_enabled: this.coreOptions.useSFAKey,
         mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
@@ -953,7 +963,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const { ethereumProvider, solanaWallet, identityTokenInfo } = data;
 
       if (identityTokenInfo) {
-        await this.setState({ idToken: identityTokenInfo.idToken });
+        await this.setState({
+          idToken: identityTokenInfo.idToken,
+          accessToken: identityTokenInfo.accessToken,
+          refreshToken: identityTokenInfo.refreshToken,
+        });
       }
 
       // when ssr is enabled, we need to get the idToken from the connector.
@@ -963,6 +977,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           await this.setState({
             idToken: data.idToken,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
           });
         } catch (error) {
           log.error(error);
@@ -1099,7 +1115,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
     connector.on(CONNECTOR_EVENTS.AUTHORIZED, async (data: AUTHORIZED_EVENT_DATA) => {
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      await this.setState({ idToken: data.identityTokenInfo.idToken });
+      await this.setState({
+        idToken: data.identityTokenInfo.idToken,
+        accessToken: data.identityTokenInfo.accessToken,
+        refreshToken: data.identityTokenInfo.refreshToken,
+      });
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
       log.debug("authorized", this.status, this.connectedConnectorName);
     });
@@ -1271,9 +1291,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private getStorageMethod(): IStorageAdapter {
-    if (this.coreOptions.ssr || this.coreOptions.storageType === "cookies") return new CookieStorage({ maxAge: this.coreOptions.sessionTime });
-    if (this.coreOptions.storageType === "session" && storageAvailable("sessionStorage")) return new SessionStorageAdapter();
-    if (this.coreOptions.storageType === "local" && storageAvailable("localStorage")) return new LocalStorageAdapter();
+    if (this.coreOptions.storage?.sessionId) return this.coreOptions.storage.sessionId;
+    if (this.coreOptions.ssr) return new CookieStorage({ maxAge: this.coreOptions.sessionTime });
+    if (storageAvailable("localStorage")) return new LocalStorageAdapter();
     return new MemoryStorage();
   }
 }

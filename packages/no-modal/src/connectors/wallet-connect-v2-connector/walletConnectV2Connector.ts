@@ -1,4 +1,4 @@
-import { getErrorAnalyticsProperties, signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { getDeviceInfo, getErrorAnalyticsProperties, signChallenge, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
 import type { Wallet } from "@wallet-standard/base";
 import Client from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
@@ -13,7 +13,7 @@ import {
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  checkIfTokenIsExpired,
+  citadelServerUrl,
   CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_CATEGORY,
@@ -28,11 +28,9 @@ import {
   ConnectorParams,
   CustomChainConfig,
   getCaipChainId,
-  getSavedToken,
   IdentityTokenInfo,
   IProvider,
   log,
-  saveToken,
   SOLANA_CAIP_CHAIN_MAP,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
@@ -272,6 +270,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     if (!this.connector || !this.connected || !this.activeSession?.topic) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!options.sessionRemovedByWallet)
       await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
+    await this.clearWalletSession();
     this.rehydrated = false;
     this._solanaWallet = null;
     if (cleanup) {
@@ -300,14 +299,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         ? this._solanaWallet.accounts.map((a) => a.address)
         : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      const existingToken = getSavedToken(accounts[0] as string, this.name);
-      if (existingToken) {
-        const isExpired = checkIfTokenIsExpired(existingToken);
-        if (!isExpired) {
-          this.status = CONNECTOR_STATUS.AUTHORIZED;
-          this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: { idToken: existingToken } });
-          return { idToken: existingToken };
-        }
+      this.initSessionManager(accounts[0] as string);
+      const cachedTokenInfo = await this.getCachedIdentityToken();
+      if (cachedTokenInfo) {
+        this.status = CONNECTOR_STATUS.AUTHORIZED;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: cachedTokenInfo });
+        return cachedTokenInfo;
       }
 
       const payload = {
@@ -320,22 +317,27 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         issuedAt: new Date().toISOString(),
       };
 
-      const challenge = await signChallenge(payload, chainNamespace);
+      const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
       const signedMessage = await this._getSignedMessage(challenge, accounts, chainNamespace);
 
-      const idToken = await verifySignedChallenge(
+      const tokens: SiwwTokens = await verifySignedChallenge({
         chainNamespace,
-        signedMessage as string,
+        signedMessage: signedMessage as string,
         challenge,
-        this.name,
-        this.coreOptions.sessionTime,
-        this.coreOptions.clientId,
-        this.coreOptions.web3AuthNetwork
-      );
-      saveToken(accounts[0] as string, this.name, idToken);
+        connector: this.name,
+        authServer,
+        web3AuthClientId: this.coreOptions.clientId,
+        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+        sessionTimeout: this.coreOptions.sessionTime,
+        deviceInfo: getDeviceInfo(),
+      });
+
+      await this.saveIdentityToken(tokens);
+      const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: { idToken } });
-      return { idToken };
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: tokenInfo });
+      return tokenInfo;
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }

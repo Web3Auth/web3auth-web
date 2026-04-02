@@ -19,7 +19,7 @@ import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { BUILD_ENV } from "@web3auth/auth";
+import { BUILD_ENV, CookieStorage, LocalStorageAdapter, MemoryStorage, SessionStorageAdapter, type StorageConfig } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -32,6 +32,22 @@ import { WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 const formData = formDataStore;
 
 const externalConnectors = ref<ConnectorFn[]>([]);
+
+function buildStorageConfig(): StorageConfig | undefined {
+  const type = formData.tokenStorage;
+  if (type === "default") return undefined;
+
+  const adapter =
+    type === "session"
+      ? new SessionStorageAdapter()
+      : type === "cookies"
+        ? new CookieStorage({ maxAge: 7 * 86400 })
+        : type === "memory"
+          ? new MemoryStorage()
+          : new LocalStorageAdapter();
+
+  return { sessionId: adapter, accessToken: adapter, refreshToken: adapter, idToken: adapter };
+}
 
 const showAAProviderSettings = computed(() => formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155));
 
@@ -121,11 +137,7 @@ const options = computed((): Web3AuthOptions => {
     uiConfig,
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
-    // TODO: Add more options
-    // enableLogging?: boolean;
-    // storageType?: "session" | "local";
-    // sessionTime?: number;
-    // useSFAKey?: boolean;
+    storage: buildStorageConfig(),
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
@@ -212,6 +224,7 @@ onBeforeMount(() => {
         formData.defaultChainId = json.defaultChainId;
         formData.initialAuthenticationMode = json.initialAuthenticationMode;
         formData.externalWalletOnly = json.externalWalletOnly || false;
+        formData.tokenStorage = json.tokenStorage || "default";
       }
     } catch (error) {}
   }

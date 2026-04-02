@@ -1,17 +1,14 @@
-import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { getDeviceInfo, signChallenge, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
 
 import {
   BaseConnector,
   CHAIN_NAMESPACES,
-  checkIfTokenIsExpired,
-  clearToken,
+  citadelServerUrl,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  getSavedToken,
   getSolanaChainByChainConfig,
   IdentityTokenInfo,
-  saveToken,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -30,14 +27,12 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
     const accounts = this.solanaWallet.accounts.map((a) => a.address);
     if (accounts.length > 0) {
-      const existingToken = getSavedToken(accounts[0], this.name);
-      if (existingToken) {
-        const isExpired = checkIfTokenIsExpired(existingToken);
-        if (!isExpired) {
-          this.status = CONNECTOR_STATUS.AUTHORIZED;
-          this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken: existingToken } });
-          return { idToken: existingToken };
-        }
+      this.initSessionManager(accounts[0]);
+      const cachedTokenInfo = await this.getCachedIdentityToken();
+      if (cachedTokenInfo) {
+        this.status = CONNECTOR_STATUS.AUTHORIZED;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
+        return cachedTokenInfo;
       }
 
       const walletChains = new Set(this.solanaWallet.chains);
@@ -50,6 +45,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         throw WalletInitializationError.invalidParams("No Solana chain in common between the connected wallet and Web3Auth chain configuration");
       }
       const { chainId, chainNamespace } = currentChainConfig;
+      const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
 
       const payload = {
         domain: window.location.origin,
@@ -61,31 +57,32 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         issuedAt: new Date().toISOString(),
       };
 
-      const challenge = await signChallenge(payload, chainNamespace);
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
       const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accounts[0]);
-      const idToken = await verifySignedChallenge(
+      const tokens: SiwwTokens = await verifySignedChallenge({
         chainNamespace,
         signedMessage,
         challenge,
-        this.name,
-        this.coreOptions.sessionTime,
-        this.coreOptions.clientId,
-        this.coreOptions.web3AuthNetwork
-      );
-      saveToken(accounts[0], this.name, idToken);
+        connector: this.name,
+        authServer,
+        web3AuthClientId: this.coreOptions.clientId,
+        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+        sessionTimeout: this.coreOptions.sessionTime,
+        deviceInfo: getDeviceInfo(),
+      });
+
+      await this.saveIdentityToken(tokens);
+      const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken } });
-      return { idToken };
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: tokenInfo });
+      return tokenInfo;
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = this.solanaWallet?.accounts.map((a) => a.address) ?? [];
-    if (accounts.length > 0) {
-      clearToken(accounts[0], this.name);
-    }
+    await this.clearWalletSession();
   }
 
   async disconnect(): Promise<void> {

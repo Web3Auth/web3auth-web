@@ -1,8 +1,8 @@
 import { CHAIN_NAMESPACES, cloneDeep } from "@toruslabs/base-controllers";
-import { DASHBOARD_PUBLIC_API_MAP } from "@toruslabs/constants";
+import { CITADEL_SERVER_MAP, DASHBOARD_PUBLIC_API_MAP } from "@toruslabs/constants";
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import { get } from "@toruslabs/http-helpers";
-import { type BUILD_ENV_TYPE } from "@web3auth/auth";
+import { BUILD_ENV, type BUILD_ENV_TYPE } from "@web3auth/auth";
 import { type Chain } from "viem";
 
 import { type CustomChainConfig } from "./chain/IChainInterface";
@@ -18,6 +18,10 @@ export const isHexStrict = (hex: string): boolean => {
 
 export const dashboardPublicApiUrl = (buildEnv: BUILD_ENV_TYPE) => {
   return DASHBOARD_PUBLIC_API_MAP[buildEnv];
+};
+
+export const citadelServerUrl = (buildEnv?: BUILD_ENV_TYPE): string => {
+  return CITADEL_SERVER_MAP[buildEnv || BUILD_ENV.PRODUCTION];
 };
 
 export const fetchProjectConfig = async ({
