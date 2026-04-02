@@ -132,6 +132,10 @@ export const ANALYTICS_EVENTS = {
   WALLET_CHECKOUT_CLICKED: "Wallet Checkout Clicked",
   WALLET_RECEIVE_CLICKED: "Wallet Receive Clicked",
   WALLET_SWAP_CLICKED: "Wallet Swap Clicked",
+  // Account Linking
+  ACCOUNT_LINKING_STARTED: "Account Linking Started",
+  ACCOUNT_LINKING_COMPLETED: "Account Linking Completed",
+  ACCOUNT_LINKING_FAILED: "Account Linking Failed",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {

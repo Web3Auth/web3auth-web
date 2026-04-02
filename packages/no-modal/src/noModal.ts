@@ -13,7 +13,6 @@ import {
   SafeEventEmitter,
   type SafeEventEmitterProvider,
   serializeError,
-  SessionStorageAdapter,
   UX_MODE,
 } from "@web3auth/auth";
 import { WsEmbedParams } from "@web3auth/ws-embed";
@@ -37,6 +36,7 @@ import {
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  type ConnectorParams,
   type CustomChainConfig,
   fetchProjectConfig,
   getAaAnalyticsProperties,
@@ -55,6 +55,8 @@ import {
   type IWeb3Auth,
   type IWeb3AuthCoreOptions,
   IWeb3AuthState,
+  type LinkAccountParams,
+  type LinkAccountResult,
   log,
   LOGIN_MODE,
   LoginModeType,
@@ -76,12 +78,22 @@ import {
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
+import { makeAccountLinkingRequest } from "./base/account-linking";
 import { deserialize } from "./base/deserialize";
+import { AccountLinkingError } from "./base/errors";
 import { authConnector, type AuthConnectorType } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
+
+type WalletLinkingProof = {
+  address: string;
+  challenge: string;
+  signature: string;
+  signatureType: "eip191" | "sip99";
+  network: "ethereum" | "solana";
+};
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
@@ -97,6 +109,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected plugins: Record<string, IPlugin> = {};
 
+  protected projectConfig: ProjectConfig | null = null;
+
   private storage: IStorageAdapter;
 
   private currentConnection: Connection | null = null;
@@ -106,6 +120,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     cachedConnector: null,
     currentChainId: null,
     idToken: null,
+    accessToken: null,
+    refreshToken: null,
   };
 
   private loginMode: LoginModeType = LOGIN_MODE.NO_MODAL;
@@ -115,7 +131,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    if (!options.storageType) options.storageType = "local";
     if (!options.initialAuthenticationMode) options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
 
     this.coreOptions = options;
@@ -174,6 +189,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.state.idToken || null;
   }
 
+  get accessToken(): string | null {
+    return this.state.accessToken || null;
+  }
+
+  get refreshToken(): string | null {
+    return this.state.refreshToken || null;
+  }
+
   set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
@@ -214,6 +237,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       // init config
+      this.projectConfig = projectConfig;
       this.initAccountAbstractionConfig(projectConfig);
       this.initChainsConfig(projectConfig);
       await this.initCachedConnectorAndChainId();
@@ -292,6 +316,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       cachedConnector: null,
       currentChainId: null,
       idToken: null,
+      accessToken: null,
+      refreshToken: null,
     });
   }
 
@@ -537,6 +563,65 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
+  public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
+      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before linking an account.");
+    }
+
+    // linking is only supported when the primary connector is AUTH
+    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH) {
+      throw WalletLoginError.unsupportedOperation("Account linking is only supported when connected with the AUTH connector.");
+    }
+
+    const trackData = {
+      connector: this.connectedConnector.name,
+      linking_connector: params.connectorName,
+      chain_id: params.chainId || this.currentChainId,
+    };
+
+    try {
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
+
+      let idToken = this.idToken;
+      if (!idToken) {
+        const tokenInfo = await this.connectedConnector.getIdentityToken();
+        idToken = tokenInfo.idToken;
+      }
+      if (!idToken) {
+        throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
+      }
+
+      // 1. generate challenge and get signature from the external wallet
+      const walletProof = await this.getLinkingWalletProof(params.connectorName, params.chainId);
+
+      // 2. submit the both challenge and signature to the Citadel account-linking endpoint.
+      const result = await makeAccountLinkingRequest({
+        idToken,
+        network: walletProof.network,
+        connector: params.connectorName,
+        message: walletProof.challenge,
+        signature: {
+          s: walletProof.signature,
+          t: walletProof.signatureType,
+        },
+      });
+      await this.setState({ idToken: result.idToken });
+
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_COMPLETED, {
+        ...trackData,
+        linked_address: walletProof.address,
+      });
+
+      return result;
+    } catch (error) {
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+      });
+      throw error;
+    }
+  }
+
   public setAnalyticsProperties(properties: Record<string, unknown>) {
     this.analytics.setGlobalProperties(properties);
   }
@@ -740,7 +825,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         default_chain_id: defaultChain ? getCaipChainId(defaultChain) : undefined,
         default_chain_name: defaultChain?.displayName,
         logging_enabled: this.coreOptions.enableLogging,
-        storage_type: this.coreOptions.storageType,
+        custom_storage: Boolean(this.coreOptions.storage),
         session_time: this.coreOptions.sessionTime,
         sfa_key_enabled: this.coreOptions.useSFAKey,
         mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
@@ -883,7 +968,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const { ethereumProvider, solanaWallet, identityTokenInfo } = data;
 
       if (identityTokenInfo) {
-        await this.setState({ idToken: identityTokenInfo.idToken });
+        await this.setState({
+          idToken: identityTokenInfo.idToken,
+          accessToken: identityTokenInfo.accessToken,
+          refreshToken: identityTokenInfo.refreshToken,
+        });
       }
 
       // when ssr is enabled, we need to get the idToken from the connector.
@@ -893,6 +982,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           await this.setState({
             idToken: data.idToken,
+            accessToken: data.accessToken,
+            refreshToken: data.refreshToken,
           });
         } catch (error) {
           log.error(error);
@@ -1029,7 +1120,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
     connector.on(CONNECTOR_EVENTS.AUTHORIZED, async (data: AUTHORIZED_EVENT_DATA) => {
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      await this.setState({ idToken: data.identityTokenInfo.idToken });
+      await this.setState({
+        idToken: data.identityTokenInfo.idToken,
+        accessToken: data.identityTokenInfo.accessToken,
+        refreshToken: data.identityTokenInfo.refreshToken,
+      });
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
       log.debug("authorized", this.status, this.connectedConnectorName);
     });
@@ -1096,6 +1191,117 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
   }
 
+  private async getLinkingWalletProof(connectorName: WALLET_CONNECTOR_TYPE | string, chainId?: string): Promise<WalletLinkingProof> {
+    const effectiveChainId = chainId || this.currentChainId;
+    if (!effectiveChainId) {
+      throw AccountLinkingError.walletProofFailed(
+        "No chainId is available. Please specify chainId in LinkAccountParams or ensure the SDK has an active chain."
+      );
+    }
+
+    const isolatedConnector = await this.createIsolatedWalletConnector(connectorName as WALLET_CONNECTOR_TYPE, effectiveChainId);
+
+    try {
+      const connection = await isolatedConnector.connect({ chainId: effectiveChainId });
+      if (!connection) {
+        throw AccountLinkingError.walletProofFailed(`Failed to connect to "${connectorName}" for account linking.`);
+      }
+
+      return await this.createWalletLinkingProof(isolatedConnector);
+    } catch (error) {
+      throw AccountLinkingError.walletProofFailed(error instanceof Error ? error.message : String(error), error);
+    } finally {
+      isolatedConnector.disconnect({ cleanup: true }).catch((error) => {
+        log.debug("isolated connector cleanup error", error);
+      });
+    }
+  }
+
+  private async createWalletLinkingProof(connector: IConnector<unknown>): Promise<WalletLinkingProof> {
+    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign();
+    const address = await this.getLinkingWalletAddress(connector, chainNamespace);
+
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      return {
+        address,
+        challenge,
+        signature,
+        signatureType: "eip191",
+        network: "ethereum",
+      };
+    }
+
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      return {
+        address,
+        challenge,
+        signature,
+        signatureType: "sip99",
+        network: "solana",
+      };
+    }
+
+    throw AccountLinkingError.unsupportedConnector(`Connector "${connector.name}" returned unsupported chain namespace "${chainNamespace}".`);
+  }
+
+  private async getLinkingWalletAddress(connector: IConnector<unknown>, chainNamespace: ChainNamespaceType): Promise<string> {
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      const address = connector.solanaWallet?.accounts?.[0]?.address;
+      if (!address) {
+        throw AccountLinkingError.walletProofFailed("No connected Solana account found for account linking.");
+      }
+      return address;
+    }
+
+    if (!connector.provider) {
+      throw AccountLinkingError.walletProofFailed("No connected EVM account found for account linking.");
+    }
+
+    const accounts = await connector.provider.request<never, string[]>({ method: "eth_accounts" });
+    if (!accounts?.length) {
+      throw AccountLinkingError.walletProofFailed("No connected EVM account found for account linking.");
+    }
+
+    return accounts[0];
+  }
+
+  /**
+   * Create a new connector instance that is NOT registered in this.connectors and NOT
+   * subscribed to the main SDK event loop. Its lifecycle events are therefore isolated
+   * and will not mutate any global SDK state (connectedConnectorName, connection, idToken).
+   */
+  private async createIsolatedWalletConnector(connectorName: WALLET_CONNECTOR_TYPE, chainId: string): Promise<IConnector<unknown>> {
+    const config: ConnectorParams = {
+      projectConfig: this.projectConfig,
+      coreOptions: this.coreOptions,
+      analytics: this.analytics,
+    };
+
+    let connector: IConnector<unknown>;
+
+    switch (connectorName) {
+      case WALLET_CONNECTORS.METAMASK:
+        connector = metaMaskConnector()(config);
+        break;
+      case WALLET_CONNECTORS.WALLET_CONNECT_V2: {
+        const { walletConnectV2Connector } = await import("./connectors/wallet-connect-v2-connector");
+        connector = walletConnectV2Connector()(config);
+        break;
+      }
+      default:
+        throw AccountLinkingError.unsupportedConnector(
+          `Connector "${connectorName}" does not support automatic wallet linking. ` +
+            `Use ${WALLET_CONNECTORS.METAMASK} or ${WALLET_CONNECTORS.WALLET_CONNECT_V2}.`
+        );
+    }
+
+    // Init the isolated connector WITHOUT subscribing to the main event loop.
+    // This is the key difference from setupConnector(), which calls subscribeToConnectorEvents().
+    // autoConnect: false ensures the connector does not attempt to rehydrate a previous session.
+    await connector.init({ chainId, autoConnect: false });
+    return connector;
+  }
+
   private async setState(newState: Partial<IWeb3AuthState>): Promise<void> {
     this.state = { ...this.state, ...newState };
     await this.storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify(this.state));
@@ -1112,9 +1318,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private getStorageMethod(): IStorageAdapter {
-    if (this.coreOptions.ssr || this.coreOptions.storageType === "cookies") return new CookieStorage({ maxAge: this.coreOptions.sessionTime });
-    if (this.coreOptions.storageType === "session" && storageAvailable("sessionStorage")) return new SessionStorageAdapter();
-    if (this.coreOptions.storageType === "local" && storageAvailable("localStorage")) return new LocalStorageAdapter();
+    if (this.coreOptions.storage?.sessionId) return this.coreOptions.storage.sessionId;
+    if (this.coreOptions.ssr) return new CookieStorage({ maxAge: this.coreOptions.sessionTime });
+    if (storageAvailable("localStorage")) return new LocalStorageAdapter();
     return new MemoryStorage();
   }
 }

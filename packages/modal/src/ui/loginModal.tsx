@@ -335,6 +335,17 @@ export class LoginModal {
     }
   };
 
+  openLinkWallet = () => {
+    this.setState({
+      modalVisibility: true,
+      currentPage: PAGES.LINK_WALLET,
+      status: MODAL_STATUS.INITIALIZED,
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
+  };
+
   initExternalWalletContainer = () => {
     this.setState({
       hasExternalWallets: true,
