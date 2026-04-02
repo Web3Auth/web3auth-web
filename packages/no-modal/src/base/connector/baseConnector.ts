@@ -1,3 +1,4 @@
+import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
@@ -8,6 +9,7 @@ import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
   BaseConnectorLoginParams,
   BaseConnectorSettings,
+  Connection,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_STATUS_TYPE,
   ConnectorEvents,
@@ -50,7 +52,13 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     return CAN_AUTHORIZE_STATUSES.includes(this.status);
   }
 
-  public abstract get provider(): IProvider | null;
+  get solanaWallet(): Wallet | null {
+    return null;
+  }
+
+  get provider(): IProvider | null {
+    return null;
+  }
 
   checkConnectionRequirements(): void {
     // we reconnect without killing existing Wallet Connect or Metamask Connect session on calling connect again.
@@ -86,7 +94,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   }
 
   checkSwitchChainRequirements(params: { chainId: string }, init = false): void {
-    if (!init && !this.provider) throw WalletLoginError.notConnectedError("Not connected with wallet.");
+    if (!init && !this.provider && !this.solanaWallet) throw WalletLoginError.notConnectedError("Not connected with wallet.");
     if (!this.coreOptions.chains) throw WalletInitializationError.invalidParams("chainConfigs is required");
     const doesChainExist = this.coreOptions.chains.some(
       (x) =>
@@ -101,7 +109,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   }
 
   abstract init(options?: ConnectorInitOptions): Promise<void>;
-  abstract connect(params: T & BaseConnectorLoginParams): Promise<IProvider | null>;
+  abstract connect(params: T & BaseConnectorLoginParams): Promise<Connection | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;

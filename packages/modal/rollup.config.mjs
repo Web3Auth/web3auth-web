@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
 import url from "@rollup/plugin-url";

@@ -4,10 +4,10 @@ import {
   ANALYTICS_INTEGRATION_TYPE,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   CONNECTOR_STATUS_TYPE,
-  IProvider,
   WalletInitializationError,
 } from "../../base";
 import { Web3AuthNoModal } from "../../noModal";
@@ -20,7 +20,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const { web3AuthOptions } = config;
 
   const web3Auth = useMemo(() => {
-    setProvider(null);
+    setConnection(null);
 
     return new Web3AuthNoModal(web3AuthOptions, initialState);
   }, [web3AuthOptions, initialState]);
@@ -30,7 +30,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
   const [isConnected, setIsConnected] = useState<boolean>(false);
-  const [provider, setProvider] = useState<IProvider | null>(null);
+  const [connection, setConnection] = useState<Connection | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
   const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
@@ -76,15 +76,14 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setChainNamespace(web3Auth?.currentChain?.chainNamespace);
     };
 
+    const provider = connection?.ethereumProvider ?? null;
     if (provider) {
       provider.on("chainChanged", handleChainChange);
       return () => {
-        if (provider) {
-          provider.removeListener("chainChanged", handleChainChange);
-        }
+        provider.removeListener("chainChanged", handleChainChange);
       };
     }
-  }, [web3Auth, provider]);
+  }, [web3Auth, connection]);
 
   useEffect(() => {
     const notReadyListener = () => setStatus(CONNECTOR_STATUS.NOT_READY);
@@ -92,20 +91,20 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
       setIsInitialized(true);
     };
-    const connectedListener = (data: CONNECTED_EVENT_DATA) => {
+    const connectedListener = (_data: CONNECTED_EVENT_DATA) => {
       setStatus(web3Auth.status);
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);
         setIsConnected(true);
-        setProvider(data.provider);
+        setConnection(web3Auth.connection);
       }
     };
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
       setIsConnected(false);
       setIsAuthorized(false);
-      setProvider(null);
+      setConnection(null);
     };
 
     const connectingListener = () => {
@@ -118,7 +117,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
       setIsConnected(false);
       setIsAuthorized(false);
-      setProvider(null);
+      setConnection(null);
     };
 
     const authorizedListener = () => {
@@ -168,7 +167,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       web3Auth,
       isConnected,
       isInitialized,
-      provider,
+      connection,
       status,
       isInitializing,
       initError,
@@ -183,7 +182,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     web3Auth,
     isConnected,
     isInitialized,
-    provider,
+    connection,
     status,
     getPlugin,
     isInitializing,

@@ -1,8 +1,9 @@
 import { getErrorAnalyticsProperties, signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
+import type { Wallet } from "@wallet-standard/base";
 import Client from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
 import { getSdkError, isValidArray } from "@walletconnect/utils";
-import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
+import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
 import {
@@ -14,6 +15,7 @@ import {
   ChainNamespaceType,
   checkIfTokenIsExpired,
   CONNECTED_EVENT_DATA,
+  type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -31,17 +33,20 @@ import {
   IProvider,
   log,
   saveToken,
+  SOLANA_CAIP_CHAIN_MAP,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletConnectV2Data,
   WalletInitializationError,
   WalletLoginError,
+  walletSignMessage,
   Web3AuthError,
 } from "../../base";
 import { getWalletConnectV2Settings } from "./config";
 import { IConnectorSettings, WalletConnectV2ConnectorOptions } from "./interface";
 import { WalletConnectV2Provider } from "./WalletConnectV2Provider";
+import { WCSolanaWallet } from "./wcSolanaWallet";
 
 class WalletConnectV2Connector extends BaseConnector<void> {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.WALLET_CONNECT_V2;
@@ -63,6 +68,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   public activeSession: SessionTypes.Struct | null = null;
 
   private wcProvider: WalletConnectV2Provider | null = null;
+
+  private _solanaWallet: Wallet | null = null;
 
   private analytics?: Analytics;
 
@@ -99,6 +106,10 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       return this.wcProvider;
     }
     return null;
+  }
+
+  get solanaWallet(): Wallet | null {
+    return this._solanaWallet;
   }
 
   set provider(_: IProvider | null) {
@@ -152,7 +163,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -197,14 +208,14 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       // if already connected
       if (this.connected) {
         await this.onConnectHandler({ chain: chainConfig, getIdentityToken });
-        return this.provider;
+        return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
       }
 
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         await this.createNewSession({ chainConfig, trackCompletionEvents, getIdentityToken });
       }
 
-      return this.provider;
+      return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
     } catch (error) {
       log.error("Wallet connect v2 connector error while connecting", error);
       // ready again to be connected
@@ -232,6 +243,14 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
+
+    const namespaces = new Set(this.coreOptions.chains.map((c) => c.chainNamespace));
+    if (namespaces.size > 1) {
+      throw WalletLoginError.unsupportedOperation(
+        "switchChain is not supported when multiple chain namespaces are configured. Use connection.ethereumProvider and connection.solanaWallet directly."
+      );
+    }
+
     if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet Connect provider is not ready yet");
     try {
       await this.wcProvider.switchChain({ chainId: params.chainId });
@@ -254,6 +273,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     if (!options.sessionRemovedByWallet)
       await this.connector.disconnect({ topic: this.activeSession?.topic, reason: getSdkError("USER_DISCONNECTED") });
     this.rehydrated = false;
+    this._solanaWallet = null;
     if (cleanup) {
       this.connector = null;
       this.status = CONNECTOR_STATUS.NOT_READY;
@@ -275,9 +295,10 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     const { chainNamespace } = currentChainConfig;
-    const accounts = await this.provider.request<never, string[]>({
-      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? EVM_METHOD_TYPES.GET_ACCOUNTS : SOLANA_METHOD_TYPES.GET_ACCOUNTS,
-    });
+    const accounts =
+      chainNamespace === CHAIN_NAMESPACES.SOLANA && this._solanaWallet
+        ? this._solanaWallet.accounts.map((a) => a.address)
+        : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
       const existingToken = getSavedToken(accounts[0] as string, this.name);
       if (existingToken) {
@@ -438,6 +459,18 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       });
     }
     await this.wcProvider.setupProvider(this.connector);
+    // Derive the active Solana chain from the WC session namespaces (genesis hash → hex chainId),
+    // rather than picking the first Solana chain from coreOptions which may not match the session.
+    const sessionSolanaChains = this.activeSession?.namespaces?.solana?.chains ?? [];
+    if (sessionSolanaChains.length > 0) {
+      const reverseMap = Object.fromEntries(Object.entries(SOLANA_CAIP_CHAIN_MAP).map(([hex, hash]) => [hash, hex]));
+      const genesisHash = sessionSolanaChains[0].split(":")[1];
+      const hexChainId = reverseMap[genesisHash];
+      const solanaChain = hexChainId ? this.coreOptions.chains.find((c) => c.chainId === hexChainId) : null;
+      if (solanaChain) {
+        this._solanaWallet = await WCSolanaWallet.create(this.connector, solanaChain);
+      }
+    }
     this.cleanupPendingPairings();
     this.status = CONNECTOR_STATUS.CONNECTED;
 
@@ -446,9 +479,10 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
     let identityTokenInfo: IdentityTokenInfo | undefined;
     this.emit(CONNECTOR_EVENTS.CONNECTED, {
-      connector: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       reconnected: this.rehydrated,
-      provider: this.provider,
+      ethereumProvider: this.provider,
+      solanaWallet: this._solanaWallet,
       identityTokenInfo,
     } as CONNECTED_EVENT_DATA);
 
@@ -487,11 +521,13 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   }
 
   private async _getSignedMessage(challenge: string, accounts: string[], chainNamespace: ChainNamespaceType): Promise<string> {
-    const signedMessage = await this.provider.request<string[] | { data: string }, string>({
-      method: chainNamespace === CHAIN_NAMESPACES.EIP155 ? EVM_METHOD_TYPES.PERSONAL_SIGN : SOLANA_METHOD_TYPES.SIGN_MESSAGE,
-      params: chainNamespace === CHAIN_NAMESPACES.EIP155 ? [challenge, accounts[0]] : { data: challenge },
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA && this._solanaWallet) {
+      return walletSignMessage(this._solanaWallet, challenge, accounts[0]);
+    }
+    return this.provider.request<string[], string>({
+      method: EVM_METHOD_TYPES.PERSONAL_SIGN,
+      params: [challenge, accounts[0]],
     });
-    return signedMessage;
   }
 }
 

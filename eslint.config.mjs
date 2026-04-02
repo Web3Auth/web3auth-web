@@ -8,4 +8,16 @@ export default [
       "import/no-extraneous-dependencies": "off",
     },
   },
+  {
+    files: ["packages/no-modal/src/connectors/auth-connector/*.ts"],
+    rules: {
+      "import/no-unresolved": "off",
+    },
+  },
+  {
+    files: ["scripts/**/*.mjs", "locales/**/*.mjs"],
+    rules: {
+      "no-console": "off",
+    },
+  },
 ];

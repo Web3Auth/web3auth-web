@@ -17,6 +17,7 @@ export function WalletServicesContextProvider({ children, context }: PropsWithCh
   useEffect(() => {
     if (isInitialized) {
       const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       setWalletServicesPlugin(plugin);
     }
   }, [isInitialized, getPlugin]);
@@ -24,6 +25,7 @@ export function WalletServicesContextProvider({ children, context }: PropsWithCh
   useEffect(() => {
     if (isConnected) {
       const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as WalletServicesPluginType;
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       setWalletServicesPlugin(plugin);
       // when rehydrating, the connectedListener may be registered after the connected event is emitted, we need to check the status here
       if (CONNECTED_STATUSES.includes(plugin?.status)) setReady(true);

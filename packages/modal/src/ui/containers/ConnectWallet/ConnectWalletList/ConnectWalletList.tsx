@@ -39,7 +39,7 @@ function WalletsFound(props: WalletsFoundProps) {
   }
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--gap-y-2 w3a--pr-1.5">
+    <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
       {externalButtons.map((button) => (
         <Button
           key={button.name}
@@ -86,7 +86,7 @@ function MoreWalletsButton(props: MoreWalletsButtonProps) {
     <button
       type="button"
       className={cn(
-        "w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--bg-app-gray-50 w3a--p-3 hover:w3a--bg-app-gray-200 dark:w3a--bg-app-gray-800 dark:hover:w3a--bg-app-gray-600 active:w3a--scale-95 w3a--transition-all w3a--duration-150 w3a--mr-2.5",
+        "w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--bg-app-gray-50 w3a--p-3 hover:w3a--bg-app-gray-200 dark:w3a--bg-app-gray-800 dark:hover:w3a--bg-app-gray-600 active:w3a--scale-95 w3a--transition-all w3a--duration-150",
         {
           "w3a--rounded-full": buttonRadius === "pill",
           "w3a--rounded-lg": buttonRadius === "rounded",
@@ -129,9 +129,12 @@ function ConnectWalletList(props: ConnectWalletListProps) {
   return (
     <>
       <ul
-        className={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px] w3a--social-container w3a--pr-2.5", {
-          "w3a--h-[328px]": !showMoreWalletsButton,
-        })}
+        className={cn(
+          "w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px] w3a--social-container -w3a--mx-5 w3a--pl-5 w3a--pr-1",
+          {
+            "w3a--h-[328px]": !showMoreWalletsButton,
+          }
+        )}
       >
         {externalButtons.length === 0 ? (
           <NoWalletsFound />

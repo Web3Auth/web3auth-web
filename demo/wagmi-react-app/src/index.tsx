@@ -1,6 +1,7 @@
 import "./index.css";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BUILD_ENV } from "@web3auth/auth";
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/react";
 import { WagmiProvider } from "@web3auth/modal/react/wagmi";
 import { StrictMode } from "react";
@@ -16,6 +17,7 @@ const web3authConfig: Web3AuthContextConfig = {
     enableLogging: true,
     web3AuthNetwork: "sapphire_devnet",
     clientId: clientId,
+    authBuildEnv: BUILD_ENV.TESTING,
   },
 };
 
