@@ -174,14 +174,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.state.idToken || null;
   }
 
-  get accessToken(): string | null {
-    return this.state.accessToken || null;
-  }
-
-  get refreshToken(): string | null {
-    return this.state.refreshToken || null;
-  }
-
   set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
