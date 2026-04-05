@@ -3,7 +3,7 @@
 import {
   useCheckout,
   useEnableMFA,
-  useIdentityToken,
+  useAuthTokenInfo,
   useManageMFA,
   useWalletConnectScanner,
   useWalletUI,
@@ -31,7 +31,7 @@ const Main = () => {
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
-  const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
+  const { token, loading: isUserTokenLoading, error: userTokenError, getAuthTokenInfo } = useAuthTokenInfo();
 
   console.log("isConnected", isConnected, balance);
 
@@ -59,7 +59,7 @@ const Main = () => {
               {isUserTokenLoading ? (
                 <p>Authenticating...</p>
               ) : (
-                <button onClick={() => getIdentityToken()} className="card">
+                <button onClick={() => getAuthTokenInfo()} className="card">
                   Authenticate User
                 </button>
               )}

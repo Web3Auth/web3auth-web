@@ -1,6 +1,7 @@
 import { getDeviceInfo, signChallenge, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
 
 import {
+  AuthTokenInfo,
   BaseConnector,
   CHAIN_NAMESPACES,
   citadelServerUrl,
@@ -8,7 +9,6 @@ import {
   CONNECTOR_STATUS,
   ConnectorInitOptions,
   getSolanaChainByChainConfig,
-  IdentityTokenInfo,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -18,7 +18,7 @@ import {
 export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
-  async getIdentityToken(): Promise<IdentityTokenInfo> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.solanaWallet || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
@@ -28,10 +28,10 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     const accounts = this.solanaWallet.accounts.map((a) => a.address);
     if (accounts.length > 0) {
       this.initSessionManager(accounts[0]);
-      const cachedTokenInfo = await this.getCachedIdentityToken();
+      const cachedTokenInfo = await this.getCachedAuthTokenInfo();
       if (cachedTokenInfo) {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
-        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: cachedTokenInfo });
         return cachedTokenInfo;
       }
 
@@ -71,10 +71,10 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         deviceInfo: getDeviceInfo(),
       });
 
-      await this.saveIdentityToken(tokens);
-      const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+      await this.saveAuthTokenInfo(tokens);
+      const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: tokenInfo });
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: tokenInfo });
       return tokenInfo;
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");

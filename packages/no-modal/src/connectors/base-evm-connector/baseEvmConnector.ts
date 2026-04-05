@@ -2,12 +2,12 @@ import { getDeviceInfo, signChallenge, type SiwwTokens, verifySignedChallenge } 
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
+  AuthTokenInfo,
   BaseConnector,
   citadelServerUrl,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  IdentityTokenInfo,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -16,7 +16,7 @@ import {
 export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
-  async getIdentityToken(): Promise<IdentityTokenInfo> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with valid options");
     this.status = CONNECTOR_STATUS.AUTHORIZING;
@@ -24,10 +24,10 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
       this.initSessionManager(accounts[0] as string);
-      const cachedTokenInfo = await this.getCachedIdentityToken();
+      const cachedTokenInfo = await this.getCachedAuthTokenInfo();
       if (cachedTokenInfo) {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
-        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: cachedTokenInfo });
         return cachedTokenInfo;
       }
 
@@ -66,10 +66,10 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
         deviceInfo: getDeviceInfo(),
       });
 
-      await this.saveIdentityToken(tokens);
-      const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+      await this.saveAuthTokenInfo(tokens);
+      const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: tokenInfo });
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: tokenInfo });
       return tokenInfo;
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");

@@ -14,6 +14,7 @@ import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
+  type AuthTokenInfo,
   CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_EVENTS,
@@ -23,7 +24,6 @@ import {
   type ConnectorFn,
   type IBaseProvider,
   type IConnector,
-  type AuthTokenInfo,
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
@@ -214,7 +214,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
-  getIdentityToken(): Promise<AuthTokenInfo>;
+  getAuthTokenInfo(): Promise<AuthTokenInfo>;
   switchChain(params: { chainId: string }): Promise<void>;
 }
 

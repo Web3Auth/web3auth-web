@@ -10,6 +10,7 @@ import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 import { CAN_AUTHORIZE_STATUSES, CONNECTED_STATUSES } from "./connectorStatus";
 import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
+  AuthTokenInfo,
   BaseConnectorLoginParams,
   BaseConnectorSettings,
   Connection,
@@ -18,7 +19,6 @@ import type {
   ConnectorEvents,
   ConnectorInitOptions,
   IConnector,
-  AuthTokenInfo,
   IProvider,
   UserInfo,
 } from "./interfaces";
@@ -123,12 +123,12 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     });
   }
 
-  protected async getCachedIdentityToken(): Promise<AuthTokenInfo | null> {
+  protected async getCachedAuthTokenInfo(): Promise<AuthTokenInfo | null> {
     if (!this.authSessionManager) return null;
 
     const idToken = await this.authSessionManager.getIdToken();
     if (!idToken || checkIfTokenIsExpired(idToken)) {
-      return this.tryRefreshIdentityToken();
+      return this.tryRefreshAuthTokenInfo();
     }
 
     let [accessToken, refreshToken] = await Promise.all([this.authSessionManager.getAccessToken(), this.authSessionManager.getRefreshToken()]);
@@ -146,26 +146,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     return { idToken, accessToken: accessToken ?? undefined, refreshToken: refreshToken ?? undefined };
   }
 
-  private async tryRefreshIdentityToken(): Promise<AuthTokenInfo | null> {
-    if (!this.authSessionManager) return null;
-
-    const refreshToken = await this.authSessionManager.getRefreshToken();
-    if (!refreshToken) return null;
-
-    try {
-      const response = await this.authSessionManager.ensureRefresh();
-      const refreshedIdToken = await this.authSessionManager.getIdToken();
-      if (!refreshedIdToken || checkIfTokenIsExpired(refreshedIdToken)) return null;
-
-      const latestAccessToken = response.access_token || (await this.authSessionManager.getAccessToken()) || undefined;
-      const latestRefreshToken = response.refresh_token || refreshToken;
-      return { idToken: refreshedIdToken, accessToken: latestAccessToken, refreshToken: latestRefreshToken };
-    } catch {
-      return null;
-    }
-  }
-
-  protected async saveIdentityToken(tokens: SiwwTokens): Promise<void> {
+  protected async saveAuthTokenInfo(tokens: SiwwTokens): Promise<void> {
     if (!this.authSessionManager) return;
     await this.authSessionManager.setTokens({
       idToken: tokens.idToken,
@@ -184,12 +165,31 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     this.authSessionManager = null;
   }
 
+  private async tryRefreshAuthTokenInfo(): Promise<AuthTokenInfo | null> {
+    if (!this.authSessionManager) return null;
+
+    const refreshToken = await this.authSessionManager.getRefreshToken();
+    if (!refreshToken) return null;
+
+    try {
+      const response = await this.authSessionManager.ensureRefresh();
+      const refreshedIdToken = await this.authSessionManager.getIdToken();
+      if (!refreshedIdToken || checkIfTokenIsExpired(refreshedIdToken)) return null;
+
+      const latestAccessToken = response.access_token || (await this.authSessionManager.getAccessToken()) || undefined;
+      const latestRefreshToken = response.refresh_token || refreshToken;
+      return { idToken: refreshedIdToken, accessToken: latestAccessToken, refreshToken: latestRefreshToken };
+    } catch {
+      return null;
+    }
+  }
+
   abstract init(options?: ConnectorInitOptions): Promise<void>;
   abstract connect(params: T & BaseConnectorLoginParams): Promise<Connection | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
-  abstract getIdentityToken(): Promise<AuthTokenInfo>;
+  abstract getAuthTokenInfo(): Promise<AuthTokenInfo>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }

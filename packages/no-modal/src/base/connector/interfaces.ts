@@ -40,14 +40,14 @@ export interface ConnectorInitOptions {
    */
   chainId: string;
   /**
-   * Whether to get the identity token
+   * Whether to fetch auth token info (id / access / refresh tokens)
    */
-  getIdentityToken?: boolean;
+  getAuthTokenInfo?: boolean;
 }
 
 export type CONNECTOR_STATUS_TYPE = (typeof CONNECTOR_STATUS)[keyof typeof CONNECTOR_STATUS];
 
-export type IdentityTokenInfo = { idToken: string; accessToken?: string; refreshToken?: string };
+export type AuthTokenInfo = { idToken: string; accessToken?: string; refreshToken?: string };
 
 export interface BaseConnectorSettings {
   coreOptions: IWeb3AuthCoreOptions;
@@ -95,7 +95,7 @@ export interface IConnector<T> extends SafeEventEmitter {
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
-  getIdentityToken(): Promise<IdentityTokenInfo>;
+  getAuthTokenInfo(): Promise<AuthTokenInfo>;
   cleanup?(): Promise<void>;
 }
 
@@ -107,19 +107,19 @@ export type ConnectorParams = {
 
 export type BaseConnectorLoginParams = {
   chainId: string;
-  getIdentityToken: boolean;
+  getAuthTokenInfo: boolean;
 };
 
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
 export type CONNECTED_EVENT_DATA = Connection & {
   reconnected: boolean;
-  identityTokenInfo?: IdentityTokenInfo;
+  authTokenInfo?: AuthTokenInfo;
 };
 
 export type AUTHORIZED_EVENT_DATA = {
   connector: WALLET_CONNECTOR_TYPE | string;
-  identityTokenInfo: IdentityTokenInfo;
+  authTokenInfo: AuthTokenInfo;
 };
 
 export interface IConnectorDataEvent {

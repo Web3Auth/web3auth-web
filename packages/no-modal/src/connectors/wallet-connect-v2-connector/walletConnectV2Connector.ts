@@ -9,6 +9,7 @@ import deepmerge from "deepmerge";
 import {
   type Analytics,
   ANALYTICS_EVENTS,
+  AuthTokenInfo,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
@@ -28,7 +29,6 @@ import {
   ConnectorParams,
   CustomChainConfig,
   getCaipChainId,
-  IdentityTokenInfo,
   IProvider,
   log,
   SOLANA_CAIP_CHAIN_MAP,
@@ -149,7 +149,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       if (this.connected) {
         this.rehydrated = true;
         try {
-          await this.onConnectHandler({ chain: chainConfig, getIdentityToken: options.getIdentityToken });
+          await this.onConnectHandler({ chain: chainConfig, getAuthTokenInfo: options.getAuthTokenInfo });
         } catch (error) {
           log.error("wallet auto connect", error);
           this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
@@ -161,7 +161,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
+  async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -205,12 +205,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
       // if already connected
       if (this.connected) {
-        await this.onConnectHandler({ chain: chainConfig, getIdentityToken });
+        await this.onConnectHandler({ chain: chainConfig, getAuthTokenInfo });
         return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
       }
 
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
-        await this.createNewSession({ chainConfig, trackCompletionEvents, getIdentityToken });
+        await this.createNewSession({ chainConfig, trackCompletionEvents, getAuthTokenInfo });
       }
 
       return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
@@ -285,7 +285,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
-  async getIdentityToken(): Promise<IdentityTokenInfo> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
@@ -300,10 +300,10 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
       this.initSessionManager(accounts[0] as string);
-      const cachedTokenInfo = await this.getCachedIdentityToken();
+      const cachedTokenInfo = await this.getCachedAuthTokenInfo();
       if (cachedTokenInfo) {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
-        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: cachedTokenInfo });
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, authTokenInfo: cachedTokenInfo });
         return cachedTokenInfo;
       }
 
@@ -333,10 +333,10 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         deviceInfo: getDeviceInfo(),
       });
 
-      await this.saveIdentityToken(tokens);
-      const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+      await this.saveAuthTokenInfo(tokens);
+      const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: tokenInfo });
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, authTokenInfo: tokenInfo });
       return tokenInfo;
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
@@ -376,12 +376,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     forceNewSession = false,
     chainConfig,
     trackCompletionEvents,
-    getIdentityToken,
+    getAuthTokenInfo,
   }: {
     forceNewSession?: boolean;
     chainConfig: CustomChainConfig;
     trackCompletionEvents?: () => void;
-    getIdentityToken?: boolean;
+    getAuthTokenInfo?: boolean;
   }): Promise<void> {
     try {
       if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
@@ -420,7 +420,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       const session = await approval();
       this.activeSession = session;
       // Handle the returned session (e.g. update UI to "connected" state).
-      await this.onConnectHandler({ chain: chainConfig, trackCompletionEvents, getIdentityToken });
+      await this.onConnectHandler({ chain: chainConfig, trackCompletionEvents, getAuthTokenInfo });
       if (qrcodeModal) {
         qrcodeModal.closeModal();
       }
@@ -430,7 +430,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         log.info("current connector status: ", this.status);
         if (this.status === CONNECTOR_STATUS.CONNECTING) {
           log.info("retrying to create new wallet connect session since proposal expired");
-          return this.createNewSession({ forceNewSession: true, chainConfig, getIdentityToken });
+          return this.createNewSession({ forceNewSession: true, chainConfig, getAuthTokenInfo });
         }
         if (this.status === CONNECTOR_STATUS.READY) {
           log.info("ignoring proposal expired error since some other connector is connected");
@@ -446,11 +446,11 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   private async onConnectHandler({
     chain,
     trackCompletionEvents,
-    getIdentityToken,
+    getAuthTokenInfo,
   }: {
     chain: CustomChainConfig;
     trackCompletionEvents?: () => void;
-    getIdentityToken?: boolean;
+    getAuthTokenInfo?: boolean;
   }) {
     if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet connect connector is not ready yet");
     this.subscribeEvents();
@@ -479,17 +479,17 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     // track connection events
     if (trackCompletionEvents) trackCompletionEvents();
 
-    let identityTokenInfo: IdentityTokenInfo | undefined;
+    let authTokenInfo: AuthTokenInfo | undefined;
     this.emit(CONNECTOR_EVENTS.CONNECTED, {
       connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       reconnected: this.rehydrated,
       ethereumProvider: this.provider,
       solanaWallet: this._solanaWallet,
-      identityTokenInfo,
+      authTokenInfo,
     } as CONNECTED_EVENT_DATA);
 
-    if (getIdentityToken) {
-      identityTokenInfo = await this.getIdentityToken();
+    if (getAuthTokenInfo) {
+      authTokenInfo = await this.getAuthTokenInfo();
     }
   }
 
