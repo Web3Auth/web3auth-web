@@ -192,9 +192,14 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     try {
       await this.authSessionManager.logout();
     } catch {
-      await this.authSessionManager.clearSessionData();
+      try {
+        await this.authSessionManager.clearSessionData();
+      } catch {
+        // best-effort cleanup; don't block disconnect
+      }
+    } finally {
+      this.authSessionManager = null;
     }
-    this.authSessionManager = null;
   }
 
   abstract init(options?: ConnectorInitOptions): Promise<void>;
