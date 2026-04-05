@@ -1,6 +1,5 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import {
-  type AccessTokenProvider,
   type BUILD_ENV_TYPE,
   type CookieOptions,
   type LoginParams,
@@ -24,7 +23,7 @@ import {
   type ConnectorFn,
   type IBaseProvider,
   type IConnector,
-  type IdentityTokenInfo,
+  type AuthTokenInfo,
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
@@ -105,12 +104,6 @@ export interface IWeb3AuthCoreOptions {
    * Cookie configuration used when storage adapters are cookie-based.
    */
   cookieOptions?: CookieOptions;
-
-  /**
-   * Custom provider for access tokens. When set, the session manager
-   * uses this instead of its internal token refresh flow.
-   */
-  accessTokenProvider?: AccessTokenProvider;
 
   /**
    * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
@@ -221,7 +214,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
-  getIdentityToken(): Promise<IdentityTokenInfo>;
+  getIdentityToken(): Promise<AuthTokenInfo>;
   switchChain(params: { chainId: string }): Promise<void>;
 }
 

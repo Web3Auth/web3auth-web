@@ -18,7 +18,7 @@ import type {
   ConnectorEvents,
   ConnectorInitOptions,
   IConnector,
-  IdentityTokenInfo,
+  AuthTokenInfo,
   IProvider,
   UserInfo,
 } from "./interfaces";
@@ -120,11 +120,10 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
       apiClientConfig: { baseURL: citadelServerUrl(this.coreOptions.authBuildEnv) },
       storage: this.coreOptions.storage,
       cookieOptions: this.coreOptions.cookieOptions,
-      accessTokenProvider: this.coreOptions.accessTokenProvider,
     });
   }
 
-  protected async getCachedIdentityToken(): Promise<IdentityTokenInfo | null> {
+  protected async getCachedIdentityToken(): Promise<AuthTokenInfo | null> {
     if (!this.authSessionManager) return null;
 
     const idToken = await this.authSessionManager.getIdToken();
@@ -147,7 +146,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     return { idToken, accessToken: accessToken ?? undefined, refreshToken: refreshToken ?? undefined };
   }
 
-  private async tryRefreshIdentityToken(): Promise<IdentityTokenInfo | null> {
+  private async tryRefreshIdentityToken(): Promise<AuthTokenInfo | null> {
     if (!this.authSessionManager) return null;
 
     const refreshToken = await this.authSessionManager.getRefreshToken();
@@ -191,6 +190,6 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
-  abstract getIdentityToken(): Promise<IdentityTokenInfo>;
+  abstract getIdentityToken(): Promise<AuthTokenInfo>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }
