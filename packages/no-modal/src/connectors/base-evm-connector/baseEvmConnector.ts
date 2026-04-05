@@ -1,4 +1,4 @@
-import { getDeviceInfo, signChallenge, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { signChallenge } from "@toruslabs/base-controllers";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
@@ -23,13 +23,8 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
     const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      this.initSessionManager(accounts[0] as string);
-      const cachedTokenInfo = await this.getCachedAuthTokenInfo();
-      if (cachedTokenInfo) {
-        this.status = CONNECTOR_STATUS.AUTHORIZED;
-        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: cachedTokenInfo });
-        return cachedTokenInfo;
-      }
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
+      if (cached) return cached;
 
       const chainId = await this.provider.request<never, string>({ method: "eth_chainId" });
       const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -54,23 +49,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
         params: [hexChallenge, accounts[0]],
       });
 
-      const tokens: SiwwTokens = await verifySignedChallenge({
-        chainNamespace,
-        signedMessage: signedMessage as string,
-        challenge,
-        connector: this.name,
-        authServer,
-        web3AuthClientId: this.coreOptions.clientId,
-        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-        sessionTimeout: this.coreOptions.sessionTime,
-        deviceInfo: getDeviceInfo(),
-      });
-
-      await this.saveAuthTokenInfo(tokens);
-      const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: tokenInfo });
-      return tokenInfo;
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }

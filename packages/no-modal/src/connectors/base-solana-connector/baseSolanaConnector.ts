@@ -1,4 +1,4 @@
-import { getDeviceInfo, signChallenge, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { signChallenge } from "@toruslabs/base-controllers";
 
 import {
   AuthTokenInfo,
@@ -27,13 +27,8 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
     const accounts = this.solanaWallet.accounts.map((a) => a.address);
     if (accounts.length > 0) {
-      this.initSessionManager(accounts[0]);
-      const cachedTokenInfo = await this.getCachedAuthTokenInfo();
-      if (cachedTokenInfo) {
-        this.status = CONNECTOR_STATUS.AUTHORIZED;
-        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: cachedTokenInfo });
-        return cachedTokenInfo;
-      }
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0]);
+      if (cached) return cached;
 
       const walletChains = new Set(this.solanaWallet.chains);
       const currentChainConfig = this.coreOptions.chains.find((c) => {
@@ -59,23 +54,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
       const challenge = await signChallenge(payload, chainNamespace, authServer);
       const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accounts[0]);
-      const tokens: SiwwTokens = await verifySignedChallenge({
-        chainNamespace,
-        signedMessage,
-        challenge,
-        connector: this.name,
-        authServer,
-        web3AuthClientId: this.coreOptions.clientId,
-        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-        sessionTimeout: this.coreOptions.sessionTime,
-        deviceInfo: getDeviceInfo(),
-      });
-
-      await this.saveAuthTokenInfo(tokens);
-      const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: tokenInfo });
-      return tokenInfo;
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }

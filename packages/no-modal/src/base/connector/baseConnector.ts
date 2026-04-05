@@ -1,9 +1,9 @@
-import type { SiwwTokens } from "@toruslabs/base-controllers";
+import { getDeviceInfo, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
 import { AuthSessionManager } from "@toruslabs/session-manager";
 import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { CHAIN_NAMESPACES, type ChainNamespaceType, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { citadelServerUrl } from "../utils";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
@@ -153,6 +153,40 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
       accessToken: tokens.accessToken,
       refreshToken: tokens.refreshToken,
     });
+  }
+
+  protected async getCachedOrNullAuthTokenInfo(account: string): Promise<AuthTokenInfo | null> {
+    this.initSessionManager(account);
+    const cached = await this.getCachedAuthTokenInfo();
+    if (cached) {
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: cached });
+    }
+    return cached;
+  }
+
+  protected async verifyAndAuthorize(params: {
+    chainNamespace: ChainNamespaceType;
+    signedMessage: string;
+    challenge: string;
+    authServer: string;
+  }): Promise<AuthTokenInfo> {
+    const tokens = await verifySignedChallenge({
+      chainNamespace: params.chainNamespace,
+      signedMessage: params.signedMessage,
+      challenge: params.challenge,
+      connector: this.name,
+      authServer: params.authServer,
+      web3AuthClientId: this.coreOptions.clientId,
+      web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+      sessionTimeout: this.coreOptions.sessionTime,
+      deviceInfo: getDeviceInfo(),
+    });
+    await this.saveAuthTokenInfo(tokens);
+    const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+    this.status = CONNECTOR_STATUS.AUTHORIZED;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: tokenInfo });
+    return tokenInfo;
   }
 
   protected async clearWalletSession(): Promise<void> {
