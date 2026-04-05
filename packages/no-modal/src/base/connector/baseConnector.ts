@@ -127,9 +127,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     if (!this.authSessionManager) return null;
 
     const idToken = await this.authSessionManager.getIdToken();
-    if (!idToken || checkIfTokenIsExpired(idToken)) {
-      return this.tryRefreshAuthTokenInfo();
-    }
+    if (!idToken || checkIfTokenIsExpired(idToken)) return null;
 
     let [accessToken, refreshToken] = await Promise.all([this.authSessionManager.getAccessToken(), this.authSessionManager.getRefreshToken()]);
 
@@ -197,25 +195,6 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
       await this.authSessionManager.clearSessionData();
     }
     this.authSessionManager = null;
-  }
-
-  private async tryRefreshAuthTokenInfo(): Promise<AuthTokenInfo | null> {
-    if (!this.authSessionManager) return null;
-
-    const refreshToken = await this.authSessionManager.getRefreshToken();
-    if (!refreshToken) return null;
-
-    try {
-      const response = await this.authSessionManager.ensureRefresh();
-      const refreshedIdToken = await this.authSessionManager.getIdToken();
-      if (!refreshedIdToken || checkIfTokenIsExpired(refreshedIdToken)) return null;
-
-      const latestAccessToken = response.access_token || (await this.authSessionManager.getAccessToken()) || undefined;
-      const latestRefreshToken = response.refresh_token || refreshToken;
-      return { idToken: refreshedIdToken, accessToken: latestAccessToken, refreshToken: latestRefreshToken };
-    } catch {
-      return null;
-    }
   }
 
   abstract init(options?: ConnectorInitOptions): Promise<void>;
