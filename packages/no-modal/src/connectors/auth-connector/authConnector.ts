@@ -59,7 +59,7 @@ import {
   type AuthConnectorOptions,
   type LoginSettings,
   type PrivateKeyProvider,
-  type UserInfoWithConnectedAccounts,
+  UserInfoWithConnectedAccounts,
   type WalletServicesSettings,
 } from "./interface";
 
@@ -692,12 +692,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   }
 
   private async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
-    const idToken = await this.getIdToken();
-    if (!idToken) throw WalletLoginError.connectionError("Could not obtain an identity token from the current AUTH session.");
+    const accessToken = await this.authInstance.authSessionManager.getAccessToken();
+    if (!accessToken) throw WalletLoginError.connectionError("Could not obtain an access token from the current AUTH session.");
 
     const citadelUserInfo = await get<UserInfoWithConnectedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
       headers: {
-        Authorization: `Bearer ${idToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     });
     return citadelUserInfo?.accounts || [];

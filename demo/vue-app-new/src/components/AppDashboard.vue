@@ -31,7 +31,7 @@ import {
 import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
 import { parseEther } from "viem";
 import { createWalletTransactionSigner, toAddress } from "@solana/client";
-import { address as solanaAddress,  } from "@solana/kit";
+import { address as solanaAddress } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 import { computed, ref, watch } from "vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
@@ -46,7 +46,7 @@ const props = defineProps<{
 }>();
 
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
-const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
+const { userInfo, loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
 const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
@@ -79,12 +79,17 @@ const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
 const linkAccountResult = ref<LinkAccountResult | null>(null);
 const lastUnlinkedAddress = ref<string | null>(null);
 const pendingUnlinkAddress = ref<string | null>(null);
+const connectedWallets = computed(() => {
+  console.log("userInfo", userInfo.value);
+  return userInfo.value?.connectedAccounts ?? [];
+});
 
 const onLinkAccount = async () => {
   linkAccountResult.value = null;
   lastUnlinkedAddress.value = null;
   const result = await linkAccount({ connectorName: linkConnector.value });
   if (result) {
+    await getUserInfo();
     linkAccountResult.value = result;
     printToConsole("Link Wallet Result", result);
   }
@@ -99,6 +104,7 @@ const onUnlinkAccount = async (address: string) => {
   pendingUnlinkAddress.value = null;
 
   if (result) {
+    await getUserInfo();
     lastUnlinkedAddress.value = address;
     printToConsole("Unlink Wallet Result", result);
   }
@@ -188,7 +194,8 @@ watch(
 
 // Ethereum Provider
 const onGetUserInfo = async () => {
-  printToConsole("User Info", userInfo.value);
+  const result = await getUserInfo();
+  printToConsole("User Info", result);
 };
 
 const onGetAuthTokenInfo = async () => {
@@ -457,6 +464,35 @@ const onSwitchChain = async () => {
             {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
         </div>
+        <Card class="!h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Connected Wallets</div>
+          <p class="text-xs text-gray-500 break-all">
+            Loaded from
+            <code>useWeb3AuthUser().userInfo.connectedAccounts</code>
+          </p>
+          <p class="text-xs font-semibold text-gray-700">Total: {{ connectedWallets.length }}</p>
+          <div v-if="connectedWallets.length" class="mt-2 space-y-2">
+            <div
+              v-for="account in connectedWallets"
+              :key="`${account.address || 'no-address'}-${account.connector}-${account.accountType}-${account.authConnectionId}`"
+              class="border border-gray-200 rounded-lg p-3"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-xs font-semibold text-gray-700 break-all">
+                  {{ account.eoaAddress || "No address available" }}
+                </p>
+                <span v-if="account.isPrimary" class="text-[10px] font-semibold uppercase tracking-wide text-blue-600">Primary</span>
+              </div>
+              <p class="text-xs text-gray-500 break-all">
+                {{ account.connector }}
+                <span v-if="account.accountType">· {{ account.accountType }}</span>
+                <span v-if="account.chainNamespace">· {{ account.chainNamespace }}</span>
+              </p>
+              <p v-if="account.aaAddress" class="text-xs text-gray-500 break-all">Smart account: {{ account.aaAddress }}</p>
+            </div>
+          </div>
+          <p v-else class="text-xs text-gray-500">No connected wallets found in user info yet.</p>
+        </Card>
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>

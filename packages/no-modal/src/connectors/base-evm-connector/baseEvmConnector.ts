@@ -23,35 +23,26 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
     const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      this.initSessionManager(accounts[0] as string);
-      const cachedTokenInfo = await this.getCachedIdentityToken();
-      if (cachedTokenInfo) {
-        this.status = CONNECTOR_STATUS.AUTHORIZED;
-        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: cachedTokenInfo });
-        return cachedTokenInfo;
-      }
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
+      if (cached) return cached;
 
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
       const { challenge, signature, chainNamespace } = await this.generateChallengeAndSign(authServer);
-
-      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage: signature, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   async generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
     const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
-    if (!accounts || accounts?.length === 0) {
-      throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+    if (!accounts || accounts.length === 0) {
+      throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
     }
-
-    const authServer = authServerUrl ?? citadelServerUrl(this.coreOptions.authBuildEnv);
-
     const chainId = await this.provider.request<never, string>({ method: "eth_chainId" });
     const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
     const { chainNamespace } = currentChainConfig;
-
+    const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
     const payload = {
       domain: window.location.origin,
       uri: window.location.href,
@@ -69,7 +60,6 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       method: EVM_METHOD_TYPES.PERSONAL_SIGN,
       params: [hexChallenge, accounts[0]],
     });
-
     return { challenge, signature, chainNamespace };
   }
 

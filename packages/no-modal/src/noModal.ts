@@ -190,6 +190,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.state.idToken || null;
   }
 
+  get accessToken(): string | null {
+    return this.state.accessToken || null;
+  }
+
+  get refreshToken(): string | null {
+    return this.state.refreshToken || null;
+  }
+
   set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
@@ -575,19 +583,21 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     try {
       this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
 
+      let accessToken = this.accessToken;
       let idToken = this.idToken;
-      if (!idToken) {
-        const tokenInfo = await this.connectedConnector.getIdentityToken();
+      if (!accessToken || !idToken) {
+        const tokenInfo = await this.connectedConnector.getAuthTokenInfo();
+        accessToken = tokenInfo.accessToken;
         idToken = tokenInfo.idToken;
       }
-      if (!idToken) {
+      if (!accessToken || !idToken) {
         throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
       }
 
       const walletProof = await this.getLinkingWalletProof(params.connectorName, params.chainId);
 
       const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
-      const result = await makeAccountLinkingRequest(authServerUrl, {
+      const result = await makeAccountLinkingRequest(authServerUrl, accessToken, {
         idToken,
         network: walletProof.network,
         connector: params.connectorName,
@@ -632,12 +642,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_STARTED, trackData);
 
     try {
+      let accessToken = this.accessToken;
       let idToken = this.idToken;
-      if (!idToken) {
-        const tokenInfo = await this.connectedConnector.getIdentityToken();
+      if (!accessToken || !idToken) {
+        const tokenInfo = await this.connectedConnector.getAuthTokenInfo();
+        accessToken = tokenInfo.accessToken;
         idToken = tokenInfo.idToken;
       }
-      if (!idToken) {
+      if (!accessToken || !idToken) {
         throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
       }
 
@@ -649,7 +661,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const network = chainNamespace === CHAIN_NAMESPACES.EIP155 ? "ethereum" : "solana";
       const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
 
-      const result = await makeAccountUnlinkingRequest(authServerUrl, {
+      const result = await makeAccountUnlinkingRequest(authServerUrl, accessToken, {
         idToken,
         address,
         network,

@@ -29,6 +29,9 @@ export interface ConnectedAccountInfo extends LinkedAccountInfo {
   /** Whether the account is the primary account for the user */
   isPrimary: boolean;
 
+  /** Wallet address of the connected account */
+  eoaAddress: string;
+
   /** Address of the account abstraction for the account */
   aaAddress?: string;
 

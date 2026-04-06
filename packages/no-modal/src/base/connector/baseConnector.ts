@@ -1,4 +1,4 @@
-import { getDeviceInfo, type ChainNamespaceType, SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { getDeviceInfo, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
 import { AuthSessionManager } from "@toruslabs/session-manager";
 import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
@@ -49,12 +49,6 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   constructor(options: BaseConnectorSettings) {
     super();
     this.coreOptions = options.coreOptions;
-  }
-  getIdentityToken(): Promise<IdentityTokenInfo> {
-    throw new Error("Method not implemented.");
-  }
-  cleanup?(): Promise<void> {
-    throw new Error("Method not implemented.");
   }
 
   get connected(): boolean {

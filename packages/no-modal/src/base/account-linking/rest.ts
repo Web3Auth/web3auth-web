@@ -9,11 +9,19 @@ import { CitadelLinkAccountPayload, LinkAccountResult, UnlinkAccountPayload, Unl
  *
  * Throws AccountLinkingError when the server returns an error or the request itself fails.
  */
-export async function makeAccountLinkingRequest(authServerUrl: string, payload: CitadelLinkAccountPayload): Promise<LinkAccountResult> {
+export async function makeAccountLinkingRequest(
+  authServerUrl: string,
+  accessToken: string,
+  payload: CitadelLinkAccountPayload
+): Promise<LinkAccountResult> {
   const url = `${authServerUrl}/v1/link/wallet`;
 
   try {
-    const result = await post<LinkAccountResult>(url, payload);
+    const result = await post<LinkAccountResult>(url, payload, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     if (!result.success) {
       throw AccountLinkingError.requestFailed("Failed to link account");
     }
@@ -24,10 +32,18 @@ export async function makeAccountLinkingRequest(authServerUrl: string, payload: 
   }
 }
 
-export async function makeAccountUnlinkingRequest(authServerUrl: string, payload: UnlinkAccountPayload): Promise<UnlinkAccountResult> {
+export async function makeAccountUnlinkingRequest(
+  authServerUrl: string,
+  accessToken: string,
+  payload: UnlinkAccountPayload
+): Promise<UnlinkAccountResult> {
   const url = `${authServerUrl}/v1/unlink/wallet`;
   try {
-    const result = await post<UnlinkAccountResult>(url, payload);
+    const result = await post<UnlinkAccountResult>(url, payload, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
     if (!result.success) {
       throw AccountLinkingError.requestFailed("Failed to unlink account");
     }
