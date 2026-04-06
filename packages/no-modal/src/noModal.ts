@@ -1081,7 +1081,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.AUTHORIZED, async (data: AUTHORIZED_EVENT_DATA) => {
       if (this.status === CONNECTOR_STATUS.CONSENT_REQUIRED) {
         this.pendingAuthorizedData = data;
-        this.setState({ idToken: data.identityTokenInfo.idToken });
+        this.setState({ idToken: data.authTokenInfo.idToken });
         log.debug("authorized (buffered, pending consent)", this.connectedConnectorName);
         return;
       }
