@@ -22,7 +22,6 @@ type WalletStandard = WalletWithFeatures<
 >;
 
 import {
-  AuthTokenInfo,
   BaseConnectorLoginParams,
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -123,18 +122,15 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       if (this.wallet.accounts.length === 0) throw WalletLoginError.connectionError();
 
       this.status = CONNECTOR_STATUS.CONNECTED;
-      let authTokenInfo: AuthTokenInfo | undefined;
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: this.name,
         reconnected: this.rehydrated,
         ethereumProvider: null,
         solanaWallet: this.solanaWallet,
-        authTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
       if (getAuthTokenInfo) {
-        authTokenInfo = await this.getAuthTokenInfo();
+        await this.getAuthTokenInfo();
       }
 
       return { ethereumProvider: null, solanaWallet: this.solanaWallet, connectorName: this.name };

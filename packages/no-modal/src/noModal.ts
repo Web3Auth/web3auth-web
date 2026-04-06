@@ -882,15 +882,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-      const { ethereumProvider, solanaWallet, authTokenInfo } = data;
-
-      if (authTokenInfo) {
-        await this.setState({
-          idToken: authTokenInfo.idToken,
-          accessToken: authTokenInfo.accessToken,
-          refreshToken: authTokenInfo.refreshToken,
-        });
-      }
+      const { ethereumProvider, solanaWallet } = data;
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {

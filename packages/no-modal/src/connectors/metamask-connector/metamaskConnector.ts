@@ -6,7 +6,6 @@ import {
   AddEthereumChainConfig,
   type Analytics,
   ANALYTICS_EVENTS,
-  AuthTokenInfo,
   BaseConnectorLoginParams,
   type BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -179,18 +178,15 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         });
       }
 
-      let authTokenInfo: AuthTokenInfo | undefined;
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
         ethereumProvider: this.metamaskProvider,
         solanaWallet: null,
-        authTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
       if (getAuthTokenInfo) {
-        authTokenInfo = await this.getAuthTokenInfo();
+        await this.getAuthTokenInfo();
       }
 
       return { ethereumProvider: this.metamaskProvider, solanaWallet: null, connectorName: this.name };

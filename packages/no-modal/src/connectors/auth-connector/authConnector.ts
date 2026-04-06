@@ -23,7 +23,6 @@ import deepmerge from "deepmerge";
 
 import {
   AuthLoginParams,
-  AuthTokenInfo,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
@@ -436,18 +435,16 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           if (chainNamespace === CHAIN_NAMESPACES.SOLANA) await this.setupSolanaWallet();
           // if getAuthTokenInfo is true, then get auth token info
           // No need to get auth token info for auth connector as it is already handled
-          let authTokenInfo: AuthTokenInfo | undefined;
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
             connectorName: WALLET_CONNECTORS.AUTH,
             reconnected: this.rehydrated,
             ethereumProvider: this.provider,
             solanaWallet: this._solanaWallet,
-            authTokenInfo,
           } as CONNECTED_EVENT_DATA);
 
           if (params.getAuthTokenInfo) {
-            authTokenInfo = await this.getAuthTokenInfo();
+            await this.getAuthTokenInfo();
           }
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {

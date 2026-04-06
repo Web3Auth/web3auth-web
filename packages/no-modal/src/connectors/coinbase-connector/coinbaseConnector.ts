@@ -2,7 +2,6 @@ import type { AppMetadata, Preference, ProviderInterface } from "@coinbase/walle
 import type { ProviderRpcError } from "@coinbase/wallet-sdk/dist/core/provider/interface";
 
 import {
-  AuthTokenInfo,
   BaseConnectorLoginParams,
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -116,18 +115,15 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
         this.disconnect();
       });
 
-      let authTokenInfo: AuthTokenInfo | undefined;
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.COINBASE,
         reconnected: this.rehydrated,
         ethereumProvider: this.provider,
         solanaWallet: null,
-        authTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
       if (getAuthTokenInfo) {
-        authTokenInfo = await this.getAuthTokenInfo();
+        await this.getAuthTokenInfo();
       }
 
       return { ethereumProvider: this.provider, solanaWallet: null, connectorName: this.name };
