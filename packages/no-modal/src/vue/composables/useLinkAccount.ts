@@ -1,3 +1,5 @@
+import { Ref, ref } from "vue";
+
 import {
   type LinkAccountParams,
   type LinkAccountResult,
@@ -6,9 +8,7 @@ import {
   UnlinkAccountResult,
   WalletInitializationError,
   Web3AuthError,
-} from "@web3auth/no-modal";
-import { Ref, ref } from "vue";
-
+} from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseLinkAccount {

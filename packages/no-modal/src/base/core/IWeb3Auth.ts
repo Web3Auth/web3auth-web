@@ -13,6 +13,7 @@ import {
 } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
+import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "../account-linking";
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   CONNECTED_EVENT_DATA,
@@ -32,57 +33,6 @@ import { Web3AuthError } from "../errors";
 import { LoginModeType } from "../interfaces";
 import { type IPlugin, type PluginFn } from "../plugin";
 import { type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
-
-/**
- * Parameters for linking an external wallet to the currently authenticated account.
- */
-export interface LinkAccountParams {
-  /**
-   * Name of the external wallet connector to link.
-   * Example: WALLET_CONNECTORS.METAMASK, WALLET_CONNECTORS.WALLET_CONNECT_V2
-   */
-  connectorName: WALLET_CONNECTOR_TYPE | string;
-
-  /**
-   * Chain ID to use when generating the wallet identity proof.
-   * Defaults to the currently active chain if not specified.
-   */
-  chainId?: string;
-
-  /**
-   * Pre-obtained wallet identity token.
-   * When provided, the SDK skips the internal wallet-connection step
-   * and uses this token directly for the Citadel request.
-   * Obtain this token by connecting the external wallet separately and
-   * calling connector.getIdentityToken().
-   */
-  walletIdToken?: string;
-}
-
-export interface LinkedAccountInfo {
-  /** Type of the account (e.g. "social", "external_wallet", "account_abstraction") */
-  accountType: string;
-  /** Address of the account */
-  address: string | null;
-  /** Auth connection id of the account */
-  authConnectionId: string | null;
-  /** Chain namespace of the account */
-  chainNamespace: string | null;
-}
-
-/**
- * Result returned after a successful account-linking operation.
- */
-export interface LinkAccountResult {
-  /** Whether the Citadel server accepted the linking request. */
-  success: boolean;
-
-  /** Refreshed id token for the user */
-  idToken: string;
-
-  /** Linked account info */
-  linkedAccounts: LinkedAccountInfo[];
-}
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -288,6 +238,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
   cleanup(): Promise<void>;
+
   /**
    * Link an external wallet to the currently authenticated user account
    * via the Citadel account-linking endpoint.
@@ -300,6 +251,15 @@ export interface IWeb3Auth extends IWeb3AuthCore {
    * @returns A result object confirming the link, including the linked address.
    */
   linkAccount(params: LinkAccountParams): Promise<LinkAccountResult>;
+
+  /**
+   * Unlink an external wallet from the currently authenticated user account
+   * via the Citadel account-unlinking endpoint.
+   *
+   * @param params - Unlinking parameters including the target account address.
+   * @returns A result object confirming the unlink.
+   */
+  unlinkAccount(address: string): Promise<UnlinkAccountResult>;
 }
 
 export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType };

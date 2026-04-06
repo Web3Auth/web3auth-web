@@ -78,7 +78,7 @@ import {
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
-import { makeAccountLinkingRequest } from "./base/account-linking";
+import { makeAccountLinkingRequest, makeAccountUnlinkingRequest, UnlinkAccountResult } from "./base/account-linking";
 import { deserialize } from "./base/deserialize";
 import { AccountLinkingError } from "./base/errors";
 import { authConnector, type AuthConnectorType } from "./connectors/auth-connector";
@@ -591,10 +591,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
       }
 
-      // 1. generate challenge and get signature from the external wallet
       const walletProof = await this.getLinkingWalletProof(params.connectorName, params.chainId);
 
-      // 2. submit the both challenge and signature to the Citadel account-linking endpoint.
       const result = await makeAccountLinkingRequest({
         idToken,
         network: walletProof.network,
@@ -615,6 +613,63 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       return result;
     } catch (error) {
       this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+      });
+      throw error;
+    }
+  }
+
+  public async unlinkAccount(address: string): Promise<UnlinkAccountResult> {
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
+      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before unlinking an account.");
+    }
+
+    // unlinking is only supported when the primary connector is AUTH
+    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH) {
+      throw WalletLoginError.unsupportedOperation("Account unlinking is only supported when connected with the AUTH connector.");
+    }
+
+    const trackData = {
+      connector: this.connectedConnector.name,
+      address,
+    };
+
+    this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_STARTED, trackData);
+
+    try {
+      let idToken = this.idToken;
+      if (!idToken) {
+        const tokenInfo = await this.connectedConnector.getIdentityToken();
+        idToken = tokenInfo.idToken;
+      }
+      if (!idToken) {
+        throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
+      }
+
+      const chainNamespace = this.currentChain?.chainNamespace;
+      if (!chainNamespace) {
+        throw Error("Could not obtain the chain namespace from the current chain.");
+      }
+
+      const network = chainNamespace === CHAIN_NAMESPACES.EIP155 ? "ethereum" : "solana";
+
+      const result = await makeAccountUnlinkingRequest({
+        idToken,
+        address,
+        network,
+      });
+
+      await this.setState({ idToken: result.idToken });
+
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_COMPLETED, {
+        ...trackData,
+        linked_address: address,
+      });
+
+      return result;
+    } catch (error) {
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_FAILED, {
         ...trackData,
         ...getErrorAnalyticsProperties(error),
       });

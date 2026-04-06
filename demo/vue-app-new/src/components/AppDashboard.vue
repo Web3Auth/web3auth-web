@@ -75,16 +75,33 @@ const { signTransaction: signSolTransaction } = useSignTransaction();
 const { signAndSendTransaction } = useSignAndSendTransaction();
 
 // Account Linking
-const { linkAccount, loading: linkAccountLoading, error: linkAccountError } = useLinkAccount();
+const { linkAccount, unlinkAccount, linkedAccounts, loading: accountLinkingLoading, error: accountLinkingError } = useLinkAccount();
 const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
 const linkAccountResult = ref<LinkAccountResult | null>(null);
+const lastUnlinkedAddress = ref<string | null>(null);
+const pendingUnlinkAddress = ref<string | null>(null);
 
 const onLinkAccount = async () => {
   linkAccountResult.value = null;
+  lastUnlinkedAddress.value = null;
   const result = await linkAccount({ connectorName: linkConnector.value });
   if (result) {
     linkAccountResult.value = result;
     printToConsole("Link Wallet Result", result);
+  }
+};
+
+const onUnlinkAccount = async (address: string) => {
+  linkAccountResult.value = null;
+  lastUnlinkedAddress.value = null;
+  pendingUnlinkAddress.value = address;
+
+  const result = await unlinkAccount(address);
+  pendingUnlinkAddress.value = null;
+
+  if (result) {
+    lastUnlinkedAddress.value = address;
+    printToConsole("Unlink Wallet Result", result);
   }
 };
 
@@ -461,14 +478,43 @@ const onSwitchChain = async () => {
             <option :value="WALLET_CONNECTORS.METAMASK">MetaMask</option>
             <option :value="WALLET_CONNECTORS.WALLET_CONNECT_V2">WalletConnect</option>
           </select>
-          <Button :loading="linkAccountLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">
+          <Button :loading="accountLinkingLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">
             Link Wallet
           </Button>
           <p v-if="linkAccountResult" class="text-green-600 text-xs break-all">
-            Linked: {{ linkAccountResult.linkedAddress }}
+            Linked accounts: {{ linkAccountResult.linkedAccounts.length }}
           </p>
-          <p v-if="linkAccountError" class="text-red-500 text-xs break-all">
-            Error: {{ linkAccountError.message }}
+          <p v-if="lastUnlinkedAddress" class="text-green-600 text-xs break-all">
+            Unlinked: {{ lastUnlinkedAddress }}
+          </p>
+          <div v-if="linkedAccounts.length" class="mt-3 space-y-2">
+            <div class="text-xs font-semibold text-gray-700">Linked Accounts</div>
+            <div
+              v-for="account in linkedAccounts"
+              :key="`${account.address}-${account.authConnectionId}-${account.accountType}`"
+              class="border border-gray-200 rounded-lg p-3"
+            >
+              <p class="text-xs break-all">
+                {{ account.address || "No address available" }}
+              </p>
+              <p class="text-xs text-gray-500 break-all">
+                {{ account.accountType }}<span v-if="account.chainNamespace"> · {{ account.chainNamespace }}</span>
+              </p>
+              <Button
+                v-if="account.address"
+                :loading="accountLinkingLoading && pendingUnlinkAddress === account.address"
+                block
+                size="xs"
+                pill
+                class="mt-2"
+                @click="onUnlinkAccount(account.address)"
+              >
+                Unlink Wallet
+              </Button>
+            </div>
+          </div>
+          <p v-if="accountLinkingError" class="text-red-500 text-xs break-all">
+            Error: {{ accountLinkingError.message }}
           </p>
         </Card>
 

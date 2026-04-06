@@ -136,6 +136,10 @@ export const ANALYTICS_EVENTS = {
   ACCOUNT_LINKING_STARTED: "Account Linking Started",
   ACCOUNT_LINKING_COMPLETED: "Account Linking Completed",
   ACCOUNT_LINKING_FAILED: "Account Linking Failed",
+  // Account Unlinking
+  ACCOUNT_UNLINKING_STARTED: "Account Unlinking Started",
+  ACCOUNT_UNLINKING_COMPLETED: "Account Unlinking Completed",
+  ACCOUNT_UNLINKING_FAILED: "Account Unlinking Failed",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {
