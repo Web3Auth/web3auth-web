@@ -28,6 +28,7 @@ import {
   CAN_AUTHORIZE_STATUSES,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
+  citadelServerUrl,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
   type Connection,
@@ -593,7 +594,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       const walletProof = await this.getLinkingWalletProof(params.connectorName, params.chainId);
 
-      const result = await makeAccountLinkingRequest({
+      const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
+      const result = await makeAccountLinkingRequest(authServerUrl, {
         idToken,
         network: walletProof.network,
         connector: params.connectorName,
@@ -653,8 +655,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
 
       const network = chainNamespace === CHAIN_NAMESPACES.EIP155 ? "ethereum" : "solana";
+      const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
 
-      const result = await makeAccountUnlinkingRequest({
+      const result = await makeAccountUnlinkingRequest(authServerUrl, {
         idToken,
         address,
         network,

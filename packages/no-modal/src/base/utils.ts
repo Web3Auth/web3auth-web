@@ -21,11 +21,7 @@ export const dashboardPublicApiUrl = (buildEnv: BUILD_ENV_TYPE) => {
 };
 
 export const citadelServerUrl = (buildEnv: BUILD_ENV_TYPE = BUILD_ENV.PRODUCTION): string => {
-  // eslint-disable-next-line no-console
-  console.log("citadelServerUrl::buildEnv", buildEnv);
-  // eslint-disable-next-line no-console
-  console.log("citadelServerUrl::CITADEL_SERVER_MAP", CITADEL_SERVER_MAP);
-  return "http://localhost:3020";
+  return CITADEL_SERVER_MAP[buildEnv];
 };
 
 export const fetchProjectConfig = async ({

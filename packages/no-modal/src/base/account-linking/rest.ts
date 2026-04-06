@@ -9,8 +9,8 @@ import { CitadelLinkAccountPayload, LinkAccountResult, UnlinkAccountPayload, Unl
  *
  * Throws AccountLinkingError when the server returns an error or the request itself fails.
  */
-export async function makeAccountLinkingRequest(payload: CitadelLinkAccountPayload): Promise<LinkAccountResult> {
-  const url = "http://localhost:3020/v1/link/wallet";
+export async function makeAccountLinkingRequest(authServerUrl: string, payload: CitadelLinkAccountPayload): Promise<LinkAccountResult> {
+  const url = `${authServerUrl}/v1/link/wallet`;
 
   try {
     const result = await post<LinkAccountResult>(url, payload);
@@ -24,8 +24,8 @@ export async function makeAccountLinkingRequest(payload: CitadelLinkAccountPaylo
   }
 }
 
-export async function makeAccountUnlinkingRequest(payload: UnlinkAccountPayload): Promise<UnlinkAccountResult> {
-  const url = "http://localhost:3020/v1/unlink/wallet";
+export async function makeAccountUnlinkingRequest(authServerUrl: string, payload: UnlinkAccountPayload): Promise<UnlinkAccountResult> {
+  const url = `${authServerUrl}/v1/unlink/wallet`;
   try {
     const result = await post<UnlinkAccountResult>(url, payload);
     if (!result.success) {
