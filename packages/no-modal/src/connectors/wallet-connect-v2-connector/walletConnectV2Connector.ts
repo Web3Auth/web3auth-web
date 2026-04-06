@@ -1,4 +1,4 @@
-import { getDeviceInfo, getErrorAnalyticsProperties, signChallenge, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-controllers";
 import type { Wallet } from "@wallet-standard/base";
 import Client from "@walletconnect/sign-client";
 import { SessionTypes } from "@walletconnect/types";
@@ -9,6 +9,7 @@ import deepmerge from "deepmerge";
 import {
   type Analytics,
   ANALYTICS_EVENTS,
+  AuthTokenInfo,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
@@ -28,7 +29,6 @@ import {
   ConnectorParams,
   CustomChainConfig,
   getCaipChainId,
-  IdentityTokenInfo,
   IProvider,
   log,
   SOLANA_CAIP_CHAIN_MAP,
@@ -149,7 +149,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       if (this.connected) {
         this.rehydrated = true;
         try {
-          await this.onConnectHandler({ chain: chainConfig, getIdentityToken: options.getIdentityToken });
+          await this.onConnectHandler({ chain: chainConfig, getAuthTokenInfo: options.getAuthTokenInfo });
         } catch (error) {
           log.error("wallet auto connect", error);
           this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
@@ -161,7 +161,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
+  async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -205,12 +205,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
       // if already connected
       if (this.connected) {
-        await this.onConnectHandler({ chain: chainConfig, getIdentityToken });
+        await this.onConnectHandler({ chain: chainConfig, getAuthTokenInfo });
         return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
       }
 
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
-        await this.createNewSession({ chainConfig, trackCompletionEvents, getIdentityToken });
+        await this.createNewSession({ chainConfig, trackCompletionEvents, getAuthTokenInfo });
       }
 
       return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
@@ -285,7 +285,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
-  async getIdentityToken(): Promise<IdentityTokenInfo> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
@@ -299,69 +299,25 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         ? this._solanaWallet.accounts.map((a) => a.address)
         : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      this.initSessionManager(accounts[0] as string);
-      const cachedTokenInfo = await this.getCachedIdentityToken();
-      if (cachedTokenInfo) {
-        this.status = CONNECTOR_STATUS.AUTHORIZED;
-        this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: cachedTokenInfo });
-        return cachedTokenInfo;
-      }
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
+      if (cached) return cached;
+
+      const payload = {
+        domain: window.location.origin,
+        uri: window.location.href,
+        address: accounts[0],
+        chainId: parseInt(chainId, 16),
+        version: "1",
+        nonce: Math.random().toString(36).slice(2),
+        issuedAt: new Date().toISOString(),
+      };
 
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
-      const { challenge, signature, chainNamespace } = await this.generateChallengeAndSign(authServer);
-
-      const tokens: SiwwTokens = await verifySignedChallenge({
-        chainNamespace,
-        signedMessage: signature,
-        challenge,
-        connector: this.name,
-        authServer,
-        web3AuthClientId: this.coreOptions.clientId,
-        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-        sessionTimeout: this.coreOptions.sessionTime,
-        deviceInfo: getDeviceInfo(),
-      });
-
-      await this.saveIdentityToken(tokens);
-      const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2, identityTokenInfo: tokenInfo });
-      return tokenInfo;
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
+      const signedMessage = await this._getSignedMessage(challenge, accounts, chainNamespace);
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage: signedMessage as string, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
-  }
-
-  async generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
-    const authServer = authServerUrl ?? citadelServerUrl(this.coreOptions.authBuildEnv);
-
-    const { chainId } = this.provider;
-    const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
-    if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-
-    const { chainNamespace } = currentChainConfig;
-    const accounts =
-      chainNamespace === CHAIN_NAMESPACES.SOLANA && this._solanaWallet
-        ? this._solanaWallet.accounts.map((a) => a.address)
-        : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
-
-    if (!accounts || accounts?.length === 0) {
-      throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
-    }
-
-    const payload = {
-      domain: window.location.origin,
-      uri: window.location.href,
-      address: accounts[0],
-      chainId: parseInt(chainId, 16),
-      version: "1",
-      nonce: Math.random().toString(36).slice(2),
-      issuedAt: new Date().toISOString(),
-    };
-
-    const challenge = await signChallenge(payload, chainNamespace, authServer);
-    const signature = await this._getSignedMessage(challenge, accounts, chainNamespace);
-
-    return { challenge, signature, chainNamespace };
   }
 
   public async enableMFA(): Promise<void> {
@@ -398,12 +354,12 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     forceNewSession = false,
     chainConfig,
     trackCompletionEvents,
-    getIdentityToken,
+    getAuthTokenInfo,
   }: {
     forceNewSession?: boolean;
     chainConfig: CustomChainConfig;
     trackCompletionEvents?: () => void;
-    getIdentityToken?: boolean;
+    getAuthTokenInfo?: boolean;
   }): Promise<void> {
     try {
       if (!this.connector) throw WalletInitializationError.notReady("Wallet connector is not ready yet");
@@ -442,7 +398,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       const session = await approval();
       this.activeSession = session;
       // Handle the returned session (e.g. update UI to "connected" state).
-      await this.onConnectHandler({ chain: chainConfig, trackCompletionEvents, getIdentityToken });
+      await this.onConnectHandler({ chain: chainConfig, trackCompletionEvents, getAuthTokenInfo });
       if (qrcodeModal) {
         qrcodeModal.closeModal();
       }
@@ -452,7 +408,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         log.info("current connector status: ", this.status);
         if (this.status === CONNECTOR_STATUS.CONNECTING) {
           log.info("retrying to create new wallet connect session since proposal expired");
-          return this.createNewSession({ forceNewSession: true, chainConfig, getIdentityToken });
+          return this.createNewSession({ forceNewSession: true, chainConfig, getAuthTokenInfo });
         }
         if (this.status === CONNECTOR_STATUS.READY) {
           log.info("ignoring proposal expired error since some other connector is connected");
@@ -468,11 +424,11 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   private async onConnectHandler({
     chain,
     trackCompletionEvents,
-    getIdentityToken,
+    getAuthTokenInfo,
   }: {
     chain: CustomChainConfig;
     trackCompletionEvents?: () => void;
-    getIdentityToken?: boolean;
+    getAuthTokenInfo?: boolean;
   }) {
     if (!this.connector || !this.wcProvider) throw WalletInitializationError.notReady("Wallet connect connector is not ready yet");
     this.subscribeEvents();
@@ -501,17 +457,17 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     // track connection events
     if (trackCompletionEvents) trackCompletionEvents();
 
-    let identityTokenInfo: IdentityTokenInfo | undefined;
+    let authTokenInfo: AuthTokenInfo | undefined;
     this.emit(CONNECTOR_EVENTS.CONNECTED, {
       connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       reconnected: this.rehydrated,
       ethereumProvider: this.provider,
       solanaWallet: this._solanaWallet,
-      identityTokenInfo,
+      authTokenInfo,
     } as CONNECTED_EVENT_DATA);
 
-    if (getIdentityToken) {
-      identityTokenInfo = await this.getIdentityToken();
+    if (getAuthTokenInfo) {
+      authTokenInfo = await this.getAuthTokenInfo();
     }
   }
 

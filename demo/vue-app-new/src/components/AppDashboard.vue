@@ -6,7 +6,7 @@ import {
   useFunding,
   useReceive,
   useEnableMFA,
-  useIdentityToken,
+  useAuthTokenInfo,
   useLinkAccount,
   useManageMFA,
   useWalletConnectScanner,
@@ -56,7 +56,7 @@ const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = u
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { showFunding, loading: showFundingLoading } = useFunding();
 const { showReceive, loading: showReceiveLoading } = useReceive();
-const { getIdentityToken, loading: getIdentityTokenLoading } = useIdentityToken();
+const { getAuthTokenInfo, loading: getAuthTokenInfoLoading } = useAuthTokenInfo();
 const { status, address } = useConnection();
 const { mutateAsync: signTypedDataAsync } = useSignTypedData();
 const { mutateAsync: signMessageAsync } = useSignMessage();
@@ -141,10 +141,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return Boolean(conn?.solanaWallet);
 
     case "walletServices":
-      return (
-        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH &&
-        Boolean(conn?.ethereumProvider || conn?.solanaWallet)
-      );
+      return web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
 
     default: {
       return false;
@@ -195,8 +192,8 @@ const onGetUserInfo = async () => {
   printToConsole("User Info", userInfo.value);
 };
 
-const ongetIdentityToken = async () => {
-  const idToken = await getIdentityToken();
+const onGetAuthTokenInfo = async () => {
+  const idToken = await getAuthTokenInfo();
   printToConsole("id token", idToken);
 };
 
@@ -397,8 +394,6 @@ const onSwitchChain = async () => {
     printToConsole("switchedChain error", error);
   }
 };
-
-
 </script>
 
 <template>
@@ -470,23 +465,13 @@ const onSwitchChain = async () => {
         <!-- Account Linking -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Link Wallet</div>
-          <select
-            v-model="linkConnector"
-            class="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg text-sm"
-            @change="linkAccountResult = null"
-          >
+          <select v-model="linkConnector" class="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg text-sm" @change="linkAccountResult = null">
             <option :value="WALLET_CONNECTORS.METAMASK">MetaMask</option>
             <option :value="WALLET_CONNECTORS.WALLET_CONNECT_V2">WalletConnect</option>
           </select>
-          <Button :loading="accountLinkingLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">
-            Link Wallet
-          </Button>
-          <p v-if="linkAccountResult" class="text-green-600 text-xs break-all">
-            Linked accounts: {{ linkAccountResult.linkedAccounts.length }}
-          </p>
-          <p v-if="lastUnlinkedAddress" class="text-green-600 text-xs break-all">
-            Unlinked: {{ lastUnlinkedAddress }}
-          </p>
+          <Button :loading="accountLinkingLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">Link Wallet</Button>
+          <p v-if="linkAccountResult" class="text-green-600 text-xs break-all">Linked accounts: {{ linkAccountResult.linkedAccounts.length }}</p>
+          <p v-if="lastUnlinkedAddress" class="text-green-600 text-xs break-all">Unlinked: {{ lastUnlinkedAddress }}</p>
           <div v-if="linkedAccounts.length" class="mt-3 space-y-2">
             <div class="text-xs font-semibold text-gray-700">Linked Accounts</div>
             <div
@@ -498,7 +483,8 @@ const onSwitchChain = async () => {
                 {{ account.address || "No address available" }}
               </p>
               <p class="text-xs text-gray-500 break-all">
-                {{ account.accountType }}<span v-if="account.chainNamespace"> · {{ account.chainNamespace }}</span>
+                {{ account.accountType }}
+                <span v-if="account.chainNamespace">· {{ account.chainNamespace }}</span>
               </p>
               <Button
                 v-if="account.address"
@@ -513,9 +499,7 @@ const onSwitchChain = async () => {
               </Button>
             </div>
           </div>
-          <p v-if="accountLinkingError" class="text-red-500 text-xs break-all">
-            Error: {{ accountLinkingError.message }}
-          </p>
+          <p v-if="accountLinkingError" class="text-red-500 text-xs break-all">Error: {{ accountLinkingError.message }}</p>
         </Card>
 
         <!-- EVM -->
@@ -546,22 +530,14 @@ const onSwitchChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="getAuthTokenInfoLoading" block size="xs" pill class="mb-2" @click="onGetAuthTokenInfo">Get id token</Button>
 
           <!-- EIP-5792 -->
           <div class="mb-2 mt-4 text-xl font-bold leading-tight text-left">EIP-5792</div>
-          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">
-            Get Capabilities
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">
-            Send Batch Calls
-          </Button>
-          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">
-            Refresh Calls Status
-          </Button>
-          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">
-            Show Calls Status in Wallet
-          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">Get Capabilities</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">Send Batch Calls</Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">Refresh Calls Status</Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">Show Calls Status in Wallet</Button>
         </Card>
 
         <!-- SOLANA -->
@@ -576,7 +552,7 @@ const onSwitchChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignSolTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
-          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="getAuthTokenInfoLoading" block size="xs" pill class="mb-2" @click="onGetAuthTokenInfo">Get id token</Button>
         </Card>
       </Card>
       <Card

@@ -1,6 +1,4 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/no-var-requires */
-const fs = require("fs").promises;
+import fs from "node:fs/promises";
 
 async function mergeJsonFiles(file1Path, file2Path, outputPath) {
   try {

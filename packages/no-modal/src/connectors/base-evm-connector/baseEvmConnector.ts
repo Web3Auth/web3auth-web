@@ -1,13 +1,13 @@
-import { ChainNamespaceType, getDeviceInfo, signChallenge, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { ChainNamespaceType, signChallenge } from "@toruslabs/base-controllers";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
+  AuthTokenInfo,
   BaseConnector,
   citadelServerUrl,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  IdentityTokenInfo,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -16,7 +16,7 @@ import {
 export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
-  async getIdentityToken(): Promise<IdentityTokenInfo> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with valid options");
     this.status = CONNECTOR_STATUS.AUTHORIZING;
@@ -34,23 +34,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
       const { challenge, signature, chainNamespace } = await this.generateChallengeAndSign(authServer);
 
-      const tokens: SiwwTokens = await verifySignedChallenge({
-        chainNamespace,
-        signedMessage: signature,
-        challenge,
-        connector: this.name,
-        authServer,
-        web3AuthClientId: this.coreOptions.clientId,
-        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-        sessionTimeout: this.coreOptions.sessionTime,
-        deviceInfo: getDeviceInfo(),
-      });
-
-      await this.saveIdentityToken(tokens);
-      const tokenInfo: IdentityTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: tokenInfo });
-      return tokenInfo;
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }

@@ -1,15 +1,16 @@
-import type { ChainNamespaceType, SiwwTokens } from "@toruslabs/base-controllers";
+import { getDeviceInfo, type ChainNamespaceType, SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
 import { AuthSessionManager } from "@toruslabs/session-manager";
 import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { CHAIN_NAMESPACES, type ChainNamespaceType, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { citadelServerUrl } from "../utils";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 import { CAN_AUTHORIZE_STATUSES, CONNECTED_STATUSES } from "./connectorStatus";
 import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
+  AuthTokenInfo,
   BaseConnectorLoginParams,
   BaseConnectorSettings,
   Connection,
@@ -18,7 +19,6 @@ import type {
   ConnectorEvents,
   ConnectorInitOptions,
   IConnector,
-  IdentityTokenInfo,
   IProvider,
   UserInfo,
 } from "./interfaces";
@@ -48,6 +48,12 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   constructor(options: BaseConnectorSettings) {
     super();
     this.coreOptions = options.coreOptions;
+  }
+  getIdentityToken(): Promise<IdentityTokenInfo> {
+    throw new Error("Method not implemented.");
+  }
+  cleanup?(): Promise<void> {
+    throw new Error("Method not implemented.");
   }
 
   get connected(): boolean {
@@ -120,17 +126,14 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
       apiClientConfig: { baseURL: citadelServerUrl(this.coreOptions.authBuildEnv) },
       storage: this.coreOptions.storage,
       cookieOptions: this.coreOptions.cookieOptions,
-      accessTokenProvider: this.coreOptions.accessTokenProvider,
     });
   }
 
-  protected async getCachedIdentityToken(): Promise<IdentityTokenInfo | null> {
+  protected async getCachedAuthTokenInfo(): Promise<AuthTokenInfo | null> {
     if (!this.authSessionManager) return null;
 
     const idToken = await this.authSessionManager.getIdToken();
-    if (!idToken || checkIfTokenIsExpired(idToken)) {
-      return this.tryRefreshIdentityToken();
-    }
+    if (!idToken || checkIfTokenIsExpired(idToken)) return null;
 
     let [accessToken, refreshToken] = await Promise.all([this.authSessionManager.getAccessToken(), this.authSessionManager.getRefreshToken()]);
 
@@ -147,26 +150,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     return { idToken, accessToken: accessToken ?? undefined, refreshToken: refreshToken ?? undefined };
   }
 
-  private async tryRefreshIdentityToken(): Promise<IdentityTokenInfo | null> {
-    if (!this.authSessionManager) return null;
-
-    const refreshToken = await this.authSessionManager.getRefreshToken();
-    if (!refreshToken) return null;
-
-    try {
-      const response = await this.authSessionManager.ensureRefresh();
-      const refreshedIdToken = await this.authSessionManager.getIdToken();
-      if (!refreshedIdToken || checkIfTokenIsExpired(refreshedIdToken)) return null;
-
-      const latestAccessToken = response.access_token || (await this.authSessionManager.getAccessToken()) || undefined;
-      const latestRefreshToken = response.refresh_token || refreshToken;
-      return { idToken: refreshedIdToken, accessToken: latestAccessToken, refreshToken: latestRefreshToken };
-    } catch {
-      return null;
-    }
-  }
-
-  protected async saveIdentityToken(tokens: SiwwTokens): Promise<void> {
+  protected async saveAuthTokenInfo(tokens: SiwwTokens): Promise<void> {
     if (!this.authSessionManager) return;
     await this.authSessionManager.setTokens({
       idToken: tokens.idToken,
@@ -175,14 +159,53 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     });
   }
 
+  protected async getCachedOrNullAuthTokenInfo(account: string): Promise<AuthTokenInfo | null> {
+    this.initSessionManager(account);
+    const cached = await this.getCachedAuthTokenInfo();
+    if (cached) {
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: cached });
+    }
+    return cached;
+  }
+
+  protected async verifyAndAuthorize(params: {
+    chainNamespace: ChainNamespaceType;
+    signedMessage: string;
+    challenge: string;
+    authServer: string;
+  }): Promise<AuthTokenInfo> {
+    const tokens = await verifySignedChallenge({
+      chainNamespace: params.chainNamespace,
+      signedMessage: params.signedMessage,
+      challenge: params.challenge,
+      connector: this.name,
+      authServer: params.authServer,
+      web3AuthClientId: this.coreOptions.clientId,
+      web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+      sessionTimeout: this.coreOptions.sessionTime,
+      deviceInfo: getDeviceInfo(),
+    });
+    await this.saveAuthTokenInfo(tokens);
+    const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+    this.status = CONNECTOR_STATUS.AUTHORIZED;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: tokenInfo });
+    return tokenInfo;
+  }
+
   protected async clearWalletSession(): Promise<void> {
     if (!this.authSessionManager) return;
     try {
       await this.authSessionManager.logout();
     } catch {
-      await this.authSessionManager.clearSessionData();
+      try {
+        await this.authSessionManager.clearSessionData();
+      } catch {
+        // best-effort cleanup; don't block disconnect
+      }
+    } finally {
+      this.authSessionManager = null;
     }
-    this.authSessionManager = null;
   }
 
   abstract init(options?: ConnectorInitOptions): Promise<void>;
@@ -191,7 +214,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
-  abstract getIdentityToken(): Promise<IdentityTokenInfo>;
+  abstract getAuthTokenInfo(): Promise<AuthTokenInfo>;
   abstract generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }

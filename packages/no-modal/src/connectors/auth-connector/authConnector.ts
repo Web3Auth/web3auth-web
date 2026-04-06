@@ -24,6 +24,7 @@ import deepmerge from "deepmerge";
 
 import {
   AuthLoginParams,
+  AuthTokenInfo,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
@@ -43,7 +44,6 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
-  IdentityTokenInfo,
   IProvider,
   log,
   UserInfo,
@@ -207,7 +207,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
-        await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        await this.connect({ chainId: options.chainId, getAuthTokenInfo: options.getAuthTokenInfo });
       } else if (!sessionId && options.autoConnect) {
         // if here, this means that the connector is cached but the sessionId is not available.
         // this can happen if the sessionId has expired.
@@ -291,13 +291,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
-  async getIdentityToken(): Promise<{ idToken: string }> {
+  async getAuthTokenInfo(): Promise<{ idToken: string }> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
     const userInfo = await this.getUserInfo();
     this.status = CONNECTOR_STATUS.AUTHORIZED;
-    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH, identityTokenInfo: { idToken: userInfo.idToken as string } });
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH, authTokenInfo: { idToken: userInfo.idToken as string } });
     return { idToken: userInfo.idToken as string };
   }
 
@@ -451,20 +451,20 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
           // Setup Solana wallet only when current chain is solana
           // TODO: remove this condition when wallet services support multiple namespaces at the same time
           if (chainNamespace === CHAIN_NAMESPACES.SOLANA) await this.setupSolanaWallet();
-          // if getIdentityToken is true, then get the identity token
-          // No need to get the identity token for auth connector as it is already handled
-          let identityTokenInfo: IdentityTokenInfo | undefined;
+          // if getAuthTokenInfo is true, then get auth token info
+          // No need to get auth token info for auth connector as it is already handled
+          let authTokenInfo: AuthTokenInfo | undefined;
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
             connectorName: WALLET_CONNECTORS.AUTH,
             reconnected: this.rehydrated,
             ethereumProvider: this.provider,
             solanaWallet: this._solanaWallet,
-            identityTokenInfo,
+            authTokenInfo,
           } as CONNECTED_EVENT_DATA);
 
-          if (params.getIdentityToken) {
-            identityTokenInfo = await this.getIdentityToken();
+          if (params.getAuthTokenInfo) {
+            authTokenInfo = await this.getAuthTokenInfo();
           }
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
