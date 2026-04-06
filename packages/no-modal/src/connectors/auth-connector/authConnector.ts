@@ -23,6 +23,7 @@ import deepmerge from "deepmerge";
 
 import {
   AuthLoginParams,
+  AuthTokenInfo,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
@@ -281,7 +282,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
-  async getAuthTokenInfo(): Promise<{ idToken: string }> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
