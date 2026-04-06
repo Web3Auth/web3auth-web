@@ -127,6 +127,7 @@ export type FormData = {
   smartAccountType?: SmartAccountType;
   smartAccountChains: string[];
   smartAccountChainsConfig: Record<string, { bundlerUrl: string; paymasterUrl: string }>;
+  tokenStorage: "default" | "local" | "session" | "cookies" | "memory";
   widget?: WidgetType;
   targetId?: string;
 };

@@ -1,33 +1,33 @@
+import { log, WalletInitializationError, Web3AuthError } from "@web3auth/no-modal";
 import { Ref, ref, watch } from "vue";
 
-import { log, WalletInitializationError, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export interface IUseIdentityToken {
+export interface IUseAuthTokenInfo {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
   token: Ref<string | null>;
-  getIdentityToken: () => Promise<string | null>;
+  getAuthTokenInfo: () => Promise<string | null>;
 }
 
-export const useIdentityToken = (): IUseIdentityToken => {
+export const useAuthTokenInfo = (): IUseAuthTokenInfo => {
   const { web3Auth, isAuthorized } = useWeb3AuthInner();
   const loading = ref(false);
   const error = ref<Web3AuthError | null>(null);
   const token = ref<string | null>(null);
 
-  const getIdentityToken = async () => {
+  const getAuthTokenInfo = async () => {
     try {
       if (!web3Auth.value) throw WalletInitializationError.notReady();
       error.value = null;
       loading.value = true;
-      const result = await web3Auth.value.getIdentityToken();
+      const result = await web3Auth.value.getAuthTokenInfo();
       if (result?.idToken) {
         token.value = result.idToken;
       }
       return result?.idToken;
     } catch (err) {
-      log.error("Error getting identity token", err);
+      log.error("Error getting auth token info", err);
       error.value = err as Web3AuthError;
     } finally {
       loading.value = false;
@@ -52,6 +52,6 @@ export const useIdentityToken = (): IUseIdentityToken => {
     loading,
     error,
     token,
-    getIdentityToken,
+    getAuthTokenInfo,
   };
 };
