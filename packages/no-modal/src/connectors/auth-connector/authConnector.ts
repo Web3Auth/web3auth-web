@@ -300,7 +300,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         refreshToken,
       },
     });
-    return { idToken: userInfo.idToken as string };
+    return { idToken: userInfo.idToken as string, accessToken, refreshToken };
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
