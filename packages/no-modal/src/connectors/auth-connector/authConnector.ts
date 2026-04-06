@@ -1,4 +1,5 @@
 import { ChainNamespaceType, type ProviderConfig } from "@toruslabs/base-controllers";
+import { get } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import type { Wallet } from "@wallet-standard/base";
 import {
@@ -26,9 +27,11 @@ import {
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
+  citadelServerUrl,
   cloneDeep,
   CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  ConnectedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
@@ -52,7 +55,13 @@ import {
 } from "../../base";
 import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
-import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import {
+  type AuthConnectorOptions,
+  type LoginSettings,
+  type PrivateKeyProvider,
+  type UserInfoWithConnectedAccounts,
+  type WalletServicesSettings,
+} from "./interface";
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
@@ -295,8 +304,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
-    const userInfo = this.authInstance.getUserInfo();
-    return userInfo;
+    const [userInfo, connectedAccounts] = await Promise.all([this.authInstance.getUserInfo(), this.getConnectedAccounts()]);
+    return {
+      ...userInfo,
+      connectedAccounts,
+    };
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
@@ -668,6 +680,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
+  }
+
+  private async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
+    const idToken = await this.getIdToken();
+    if (!idToken) throw WalletLoginError.connectionError("Could not obtain an identity token from the current AUTH session.");
+
+    const citadelUserInfo = await get<UserInfoWithConnectedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${idToken}`,
+      },
+    });
+    return citadelUserInfo?.accounts || [];
   }
 }
 
