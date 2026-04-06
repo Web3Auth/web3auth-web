@@ -112,8 +112,8 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
   );
 }
 
-function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () => void; privacyPolicy?: string; tncLink?: string; appLogo?: string }) {
-  const { onAccept, onDecline, privacyPolicy, tncLink, appLogo } = props;
+function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () => void; privacyPolicy?: string; tncLink?: string }) {
+  const { onAccept, onDecline, privacyPolicy, tncLink } = props;
   const [t] = useTranslation(undefined, { i18n });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -123,13 +123,19 @@ function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () =>
   };
 
   return (
-    <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--gap-y-4">
-      {appLogo && (
-        <figure className="w3a--flex w3a--h-12 w3a--w-[200px] w3a--items-center w3a--justify-center">
-          <img src={appLogo} alt="Logo" className="w3a--size-full w3a--object-contain" />
-        </figure>
-      )}
-      <div className="w3a--w-full w3a--text-left w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
+    <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--gap-y-6 w3a--mt-8">
+      <div className="w3a--flex w3a--items-center w3a--justify-center w3a--p-3 w3a--bg-app-gray-100 dark:w3a--bg-app-gray-800 w3a--rounded-full w3a--text-app-gray-600 dark:w3a--text-app-white">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w3a--size-10">
+          <path
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2"
+          ></path>
+        </svg>
+      </div>
+      <div className="w3a--w-full w3a--px-8 w3a--text-center w3a--text-app-gray-900 dark:w3a--text-app-white">
         {t("modal.consent.description", { defaultValue: "To proceed, please accept the terms and privacy policy" })}
       </div>
       {(tncLink || privacyPolicy) && (
