@@ -9,9 +9,9 @@ export type IUseSignTransaction = {
   error: Ref<Web3AuthError | null>;
   data: Ref<string | null>;
   /**
-   * Signs a transaction and returns the signature
+   * Signs a transaction and returns the base64-encoded wire transaction.
    * @param transaction - Compiled transaction from \@solana/kit
-   * @returns The signature of the transaction encoded in base58
+   * @returns The signed transaction encoded as a base64 wire transaction
    */
   signTransaction: (transaction: Transaction) => Promise<string>;
 };
