@@ -534,7 +534,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
+  async getAuthTokenInfo(): Promise<Pick<AuthTokenInfo, "idToken">> {
     if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
 
     const trackData = { connector: this.connectedConnector.name };
@@ -542,7 +542,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_STARTED, trackData);
       const authTokenInfo = await this.connectedConnector.getAuthTokenInfo();
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
-      return authTokenInfo;
+      return { idToken: authTokenInfo.idToken };
     } catch (error) {
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_FAILED, {
         ...trackData,
@@ -1015,15 +1015,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-      const { ethereumProvider, solanaWallet, authTokenInfo } = data;
-
-      if (authTokenInfo) {
-        await this.setState({
-          idToken: authTokenInfo.idToken,
-          accessToken: authTokenInfo.accessToken,
-          refreshToken: authTokenInfo.refreshToken,
-        });
-      }
+      const { ethereumProvider, solanaWallet } = data;
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
@@ -1032,8 +1024,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           await this.setState({
             idToken: data.idToken,
-            accessToken: data.accessToken,
-            refreshToken: data.refreshToken,
+            accessToken: data.accessToken ?? null,
+            refreshToken: data.refreshToken ?? null,
           });
         } catch (error) {
           log.error(error);
@@ -1172,8 +1164,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.status = CONNECTOR_STATUS.AUTHORIZED;
       await this.setState({
         idToken: data.authTokenInfo.idToken,
-        accessToken: data.authTokenInfo.accessToken,
-        refreshToken: data.authTokenInfo.refreshToken,
+        accessToken: data.authTokenInfo.accessToken ?? null,
+        refreshToken: data.authTokenInfo.refreshToken ?? null,
       });
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
       log.debug("authorized", this.status, this.connectedConnectorName);

@@ -457,17 +457,15 @@ class WalletConnectV2Connector extends BaseConnector<void> {
     // track connection events
     if (trackCompletionEvents) trackCompletionEvents();
 
-    let authTokenInfo: AuthTokenInfo | undefined;
     this.emit(CONNECTOR_EVENTS.CONNECTED, {
       connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       reconnected: this.rehydrated,
       ethereumProvider: this.provider,
       solanaWallet: this._solanaWallet,
-      authTokenInfo,
     } as CONNECTED_EVENT_DATA);
 
     if (getAuthTokenInfo) {
-      authTokenInfo = await this.getAuthTokenInfo();
+      await this.getAuthTokenInfo();
     }
   }
 

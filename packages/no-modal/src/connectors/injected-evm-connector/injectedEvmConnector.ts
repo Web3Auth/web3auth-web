@@ -2,7 +2,6 @@ import { type EIP6963ProviderDetail } from "mipd";
 
 import {
   AddEthereumChainConfig,
-  AuthTokenInfo,
   BaseConnectorLoginParams,
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -110,18 +109,15 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
         }
       };
       this.injectedProvider.on("accountsChanged", accountDisconnectHandler);
-      let authTokenInfo: AuthTokenInfo | undefined;
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: this.name,
         reconnected: this.rehydrated,
         ethereumProvider: this.injectedProvider,
         solanaWallet: null,
-        authTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
       if (getAuthTokenInfo) {
-        authTokenInfo = await this.getAuthTokenInfo();
+        await this.getAuthTokenInfo();
       }
 
       return { ethereumProvider: this.injectedProvider, solanaWallet: null, connectorName: this.name };
