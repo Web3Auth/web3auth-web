@@ -25,6 +25,7 @@
     "@web3auth/sign-in-with-web3": "^6.1.0",
     "@web3auth/ws-embed": "file:../../web3auth-ws-embed-5.6.5.tgz",
     "ethers": "^6.16.0",
+    "ox": "^0.11.3",
     "petite-vue-i18n": "^11.3.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

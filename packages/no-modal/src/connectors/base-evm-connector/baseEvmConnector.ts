@@ -1,16 +1,13 @@
-import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { signChallenge } from "@toruslabs/base-controllers";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
+  AuthTokenInfo,
   BaseConnector,
-  checkIfTokenIsExpired,
-  clearToken,
+  citadelServerUrl,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  getSavedToken,
-  IdentityTokenInfo,
-  saveToken,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -19,27 +16,21 @@ import {
 export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
-  async getIdentityToken(): Promise<IdentityTokenInfo> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.provider || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with valid options");
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
     const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
     if (accounts && accounts.length > 0) {
-      const existingToken = getSavedToken(accounts[0] as string, this.name);
-      if (existingToken) {
-        const isExpired = checkIfTokenIsExpired(existingToken);
-        if (!isExpired) {
-          this.status = CONNECTOR_STATUS.AUTHORIZED;
-          this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken: existingToken } });
-          return { idToken: existingToken };
-        }
-      }
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
+      if (cached) return cached;
 
       const chainId = await this.provider.request<never, string>({ method: "eth_chainId" });
       const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
       if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
       const { chainNamespace } = currentChainConfig;
+      const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
       const payload = {
         domain: window.location.origin,
         uri: window.location.href,
@@ -50,7 +41,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
         issuedAt: new Date().toISOString(),
       };
 
-      const challenge = await signChallenge(payload, chainNamespace);
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
       const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
 
       const signedMessage = await this.provider.request<[string, string], string>({
@@ -58,29 +49,14 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
         params: [hexChallenge, accounts[0]],
       });
 
-      const idToken = await verifySignedChallenge(
-        chainNamespace,
-        signedMessage as string,
-        challenge,
-        this.name,
-        this.coreOptions.sessionTime,
-        this.coreOptions.clientId,
-        this.coreOptions.web3AuthNetwork
-      );
-      saveToken(accounts[0] as string, this.name, idToken);
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken } });
-      return { idToken };
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = await this.provider.request<never, string[]>({ method: "eth_accounts" });
-    if (accounts && accounts.length > 0) {
-      clearToken(accounts[0], this.name);
-    }
+    await this.clearWalletSession();
   }
 
   async disconnect(): Promise<void> {

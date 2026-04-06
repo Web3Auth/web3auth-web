@@ -1,12 +1,17 @@
+import { getDeviceInfo, type SiwwTokens, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { AuthSessionManager } from "@toruslabs/session-manager";
 import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
-import { CHAIN_NAMESPACES, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { CHAIN_NAMESPACES, type ChainNamespaceType, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
+import { log } from "../loglevel";
+import { citadelServerUrl } from "../utils";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 import { CAN_AUTHORIZE_STATUSES, CONNECTED_STATUSES } from "./connectorStatus";
 import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 import type {
+  AuthTokenInfo,
   BaseConnectorLoginParams,
   BaseConnectorSettings,
   Connection,
@@ -15,10 +20,10 @@ import type {
   ConnectorEvents,
   ConnectorInitOptions,
   IConnector,
-  IdentityTokenInfo,
   IProvider,
   UserInfo,
 } from "./interfaces";
+import { checkIfTokenIsExpired } from "./utils";
 
 export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents> implements IConnector<T> {
   public connectorData?: unknown = {};
@@ -30,6 +35,8 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   public coreOptions: BaseConnectorSettings["coreOptions"];
 
   protected rehydrated = false;
+
+  protected authSessionManager: AuthSessionManager | null = null;
 
   public abstract connectorNamespace: ConnectorNamespaceType;
 
@@ -108,12 +115,102 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, { connectorName: this.name, data });
   }
 
+  protected initSessionManager(address: string): void {
+    this.authSessionManager = new AuthSessionManager({
+      storageKeyPrefix: `w3a:siww:${this.name}:${address.toLowerCase()}`,
+      apiClientConfig: { baseURL: citadelServerUrl(this.coreOptions.authBuildEnv) },
+      storage: this.coreOptions.storage,
+      cookieOptions: this.coreOptions.cookieOptions,
+    });
+  }
+
+  protected async getCachedAuthTokenInfo(): Promise<AuthTokenInfo | null> {
+    if (!this.authSessionManager) return null;
+
+    const idToken = await this.authSessionManager.getIdToken();
+    if (!idToken || checkIfTokenIsExpired(idToken)) return null;
+
+    let [accessToken, refreshToken] = await Promise.all([this.authSessionManager.getAccessToken(), this.authSessionManager.getRefreshToken()]);
+
+    if ((!accessToken || checkIfTokenIsExpired(accessToken)) && refreshToken) {
+      try {
+        const response = await this.authSessionManager.ensureRefresh();
+        accessToken = response.access_token || (await this.authSessionManager.getAccessToken());
+        refreshToken = response.refresh_token || refreshToken;
+      } catch {
+        // access token refresh failed; still return the valid idToken
+        log.error("Access token refresh failed");
+      }
+    }
+
+    return { idToken, accessToken: accessToken ?? undefined, refreshToken: refreshToken ?? undefined };
+  }
+
+  protected async saveAuthTokenInfo(tokens: SiwwTokens): Promise<void> {
+    if (!this.authSessionManager) return;
+    await this.authSessionManager.setTokens({
+      idToken: tokens.idToken,
+      accessToken: tokens.accessToken,
+      refreshToken: tokens.refreshToken,
+    });
+  }
+
+  protected async getCachedOrNullAuthTokenInfo(account: string): Promise<AuthTokenInfo | null> {
+    this.initSessionManager(account);
+    const cached = await this.getCachedAuthTokenInfo();
+    if (cached) {
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: cached });
+    }
+    return cached;
+  }
+
+  protected async verifyAndAuthorize(params: {
+    chainNamespace: ChainNamespaceType;
+    signedMessage: string;
+    challenge: string;
+    authServer: string;
+  }): Promise<AuthTokenInfo> {
+    const tokens = await verifySignedChallenge({
+      chainNamespace: params.chainNamespace,
+      signedMessage: params.signedMessage,
+      challenge: params.challenge,
+      connector: this.name,
+      authServer: params.authServer,
+      web3AuthClientId: this.coreOptions.clientId,
+      web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+      sessionTimeout: this.coreOptions.sessionTime,
+      deviceInfo: getDeviceInfo(),
+    });
+    await this.saveAuthTokenInfo(tokens);
+    const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
+    this.status = CONNECTOR_STATUS.AUTHORIZED;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: tokenInfo });
+    return tokenInfo;
+  }
+
+  protected async clearWalletSession(): Promise<void> {
+    if (!this.authSessionManager) return;
+    try {
+      await this.authSessionManager.logout();
+    } catch {
+      try {
+        await this.authSessionManager.clearSessionData();
+      } catch {
+        // best-effort cleanup; don't block disconnect
+        log.error("Failed to clear wallet session");
+      }
+    } finally {
+      this.authSessionManager = null;
+    }
+  }
+
   abstract init(options?: ConnectorInitOptions): Promise<void>;
   abstract connect(params: T & BaseConnectorLoginParams): Promise<Connection | null>;
   abstract disconnect(): Promise<void>;
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
-  abstract getIdentityToken(): Promise<IdentityTokenInfo>;
+  abstract getAuthTokenInfo(): Promise<AuthTokenInfo>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }
