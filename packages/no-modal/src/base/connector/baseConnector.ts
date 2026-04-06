@@ -5,6 +5,7 @@ import { SafeEventEmitter } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES, type ChainNamespaceType, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import { WalletInitializationError, WalletLoginError } from "../errors";
+import { log } from "../loglevel";
 import { citadelServerUrl } from "../utils";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 import { CAN_AUTHORIZE_STATUSES, CONNECTED_STATUSES } from "./connectorStatus";
@@ -138,6 +139,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
         refreshToken = response.refresh_token || refreshToken;
       } catch {
         // access token refresh failed; still return the valid idToken
+        log.error("Access token refresh failed");
       }
     }
 
@@ -196,6 +198,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
         await this.authSessionManager.clearSessionData();
       } catch {
         // best-effort cleanup; don't block disconnect
+        log.error("Failed to clear wallet session");
       }
     } finally {
       this.authSessionManager = null;
