@@ -6,7 +6,7 @@
 }
 
 .w3a--spinner-loader-ring {
-  --spinner-color: var(--app-primary-600);
+  --spinner-color: var(--app-gray-400);
 
   position: absolute;
   display: inline-block;
@@ -35,8 +35,6 @@
 }
 
 .w3a--dark .w3a--spinner-loader-ring {
-  --spinner-color: var(--app-primary-500);
-
   background-image: conic-gradient(
     from 0deg at 50% 50%,
     var(--spinner-color) 0%,

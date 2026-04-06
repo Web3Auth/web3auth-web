@@ -85,10 +85,7 @@ function ErroredStatus(props: ErroredStatusType) {
 
 function AuthorizingStatus(props: AuthorizingStatusType) {
   const [t] = useTranslation(undefined, { i18n });
-  const { connector, externalWalletsConfig, walletRegistry, handleMobileVerifyConnect } = props;
-
-  const registryItem = walletRegistry?.default?.[connector] || walletRegistry?.others?.[connector];
-  const primaryColor = registryItem?.primaryColor || "";
+  const { connector, externalWalletsConfig, handleMobileVerifyConnect } = props;
 
   const handleMobileVerifyConnectClick = () => {
     handleMobileVerifyConnect({ connector: connector as WALLET_CONNECTOR_TYPE });
@@ -100,7 +97,7 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
         {t("modal.loader.authorizing-header", { connector: externalWalletsConfig[connector].label })}
       </p>
       <div className="w3a--flex w3a--justify-center">
-        <SpinnerLoader width={95} height={95} primaryColor={primaryColor}>
+        <SpinnerLoader width={95} height={95}>
           <Image imageId={`login-${connector}`} hoverImageId={`login-${connector}`} height="45" width="45" />
         </SpinnerLoader>
       </div>
@@ -129,7 +126,6 @@ function Loader(props: LoaderProps) {
     message,
     isConnectAndSignAuthenticationMode,
     externalWalletsConfig,
-    walletRegistry,
     handleMobileVerifyConnect,
     hideSuccessScreen = false,
   } = props;
@@ -166,7 +162,6 @@ function Loader(props: LoaderProps) {
         <AuthorizingStatus
           connector={connector}
           externalWalletsConfig={externalWalletsConfig}
-          walletRegistry={walletRegistry}
           handleMobileVerifyConnect={handleMobileVerifyConnect}
         />
       )}

@@ -207,7 +207,6 @@ function RootContent(props: RootProps) {
               onClose={onCloseLoader}
               isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
               externalWalletsConfig={modalState.externalWalletsConfig}
-              walletRegistry={walletRegistry}
               handleMobileVerifyConnect={handleMobileVerifyConnect}
               hideSuccessScreen={hideSuccessScreen}
             />
