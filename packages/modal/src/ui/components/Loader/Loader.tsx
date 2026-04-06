@@ -126,7 +126,6 @@ function Loader(props: LoaderProps) {
     connectorName,
     modalStatus,
     onClose,
-    appLogo,
     message,
     isConnectAndSignAuthenticationMode,
     externalWalletsConfig,
@@ -157,7 +156,7 @@ function Loader(props: LoaderProps) {
 
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
-      {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
+      {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} />}
 
       {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
 

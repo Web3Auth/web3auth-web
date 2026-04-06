@@ -1,11 +1,8 @@
 import type { ReactNode } from "react";
 
-export type SpinnerLoaderClassesKey = "spinner" | "logo";
+export type SpinnerLoaderClassesKey = "spinner";
 
 export interface SpinnerLoaderProps {
-  logoLight?: string;
-  logoDark?: string;
-  showLogo?: boolean;
   children?: ReactNode;
   /** Override the primary color used for the spinner ring gradient. */
   primaryColor?: string;

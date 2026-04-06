@@ -6,7 +6,6 @@ export interface LoaderProps {
   externalWalletsConfig: Record<string, BaseConnectorConfig>;
   walletRegistry?: WalletRegistry;
   message?: string;
-  appLogo?: string;
   connector: string;
   connectorName: string;
   modalStatus: ModalStatusType;
@@ -16,7 +15,7 @@ export interface LoaderProps {
   hideSuccessScreen?: boolean;
 }
 
-export type ConnectingStatusType = Pick<LoaderProps, "connectorName" | "appLogo" | "connector">;
+export type ConnectingStatusType = Pick<LoaderProps, "connectorName" | "connector">;
 
 export type ConnectedStatusType = Pick<LoaderProps, "message">;
 
