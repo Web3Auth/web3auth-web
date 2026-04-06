@@ -4,6 +4,7 @@
   "private": true,
   "dependencies": {
     "@web3auth/modal": "file:../../packages/modal",
+    "@solana/react-hooks": "^1.4.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0"
   },
