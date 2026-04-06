@@ -582,7 +582,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         .catch((error: unknown) => {
           // swallow the error, dont need to throw.
           log.error("Error during login with social", error);
-          this.auditOAuditProgress(loginParams as LoginParams, "failed");
+          this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
+            log.error("Error reporting `oauthFailed` audit progress", error);
+          });
         });
 
       verifierWindow.once("close", () => {
@@ -597,7 +599,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         .postLoginInitiatedMessage(loginParams as LoginParams, nonce)
         .then(resolve)
         .catch((error: unknown) => {
-          this.auditOAuditProgress(loginParams as LoginParams, "failed");
+          this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
+            log.error("Error reporting `oauthFailed` audit progress", error);
+          });
           if (error instanceof Web3AuthError) {
             throw error;
           }
@@ -698,10 +702,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const progressFlag: { oauthInitiated?: boolean; oauthFailed?: boolean; oauthCompleted?: boolean } = {
       oauthInitiated: true,
     };
-    if (status === "failed") progressFlag.oauthFailed = true;
-    if (status === "completed") progressFlag.oauthCompleted = true;
 
-    await put(auditServerUrl, {
+    const auditPayload: Record<string, unknown> = {
       authConnection,
       authConnectionId,
       groupedAuthConnectionId,
@@ -710,7 +712,17 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       web3AuthNetwork,
       web3AuthClientId: clientId,
       ...progressFlag,
-    });
+    };
+
+    if (status === "failed") {
+      auditPayload.oauthFailed = true;
+    } else if (status === "completed") {
+      auditPayload.oauthCompleted = true;
+    } else {
+      auditPayload.oauthInitiated = true;
+    }
+
+    await put(auditServerUrl, auditPayload);
   }
 }
 
