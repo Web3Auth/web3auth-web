@@ -82,7 +82,7 @@ function useFrameworkKitSolanaClient(): SolanaClient {
       setClient(next);
     };
 
-    void (async () => {
+    (async () => {
       const rpc = placeholderRpc(isInitialized, web3Auth);
       const solanaWallet = connection?.solanaWallet;
       const onSolana =
