@@ -214,7 +214,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
-  getAuthTokenInfo(): Promise<AuthTokenInfo>;
+  getAuthTokenInfo(): Promise<Pick<AuthTokenInfo, "idToken">>;
   switchChain(params: { chainId: string }): Promise<void>;
 }
 

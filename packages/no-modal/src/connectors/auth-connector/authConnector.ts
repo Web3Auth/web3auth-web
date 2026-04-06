@@ -288,7 +288,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
     const userInfo = await this.getUserInfo();
     this.status = CONNECTOR_STATUS.AUTHORIZED;
-    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH, authTokenInfo: { idToken: userInfo.idToken as string } });
+    const [accessToken, refreshToken] = await Promise.all([
+      this.authInstance.authSessionManager.getAccessToken(),
+      this.authInstance.authSessionManager.getRefreshToken(),
+    ]);
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      connector: WALLET_CONNECTORS.AUTH,
+      authTokenInfo: {
+        idToken: userInfo.idToken as string,
+        accessToken,
+        refreshToken,
+      },
+    });
     return { idToken: userInfo.idToken as string };
   }
 
