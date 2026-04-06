@@ -19,7 +19,7 @@ function RootContent(props: RootProps) {
   const { onCloseLoader } = props;
 
   const { modalState, shouldShowLoginPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
-  const { appLogo, deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect } = useWidget();
+  const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect } = useWidget();
   const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen } = uiConfig;
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -205,7 +205,6 @@ function RootContent(props: RootProps) {
               connectorName={modalState.detailedLoaderConnectorName}
               modalStatus={modalState.status}
               onClose={onCloseLoader}
-              appLogo={appLogo}
               isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
               externalWalletsConfig={modalState.externalWalletsConfig}
               walletRegistry={walletRegistry}
