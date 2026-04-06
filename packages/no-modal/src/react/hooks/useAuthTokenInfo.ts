@@ -1,27 +1,27 @@
-import { Web3AuthError } from "@web3auth/no-modal";
 import { useCallback, useEffect, useState } from "react";
 
+import { Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export interface IUseIdentityToken {
+export interface IUseAuthTokenInfo {
   loading: boolean;
   error: Web3AuthError | null;
   token: string | null;
-  getIdentityToken: () => Promise<string | null>;
+  getAuthTokenInfo: () => Promise<string | null>;
 }
 
-export const useIdentityToken = () => {
-  const { web3Auth, isAuthorized } = useWeb3AuthInner();
+export const useAuthTokenInfo = () => {
+  const { web3Auth, isConnected, isAuthorized } = useWeb3AuthInner();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
   const [token, setToken] = useState<string | null>(null);
 
-  const getIdentityToken = useCallback(async () => {
+  const getAuthTokenInfo = useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
-      const userAuthInfo = await web3Auth.getIdentityToken();
+      const userAuthInfo = await web3Auth.getAuthTokenInfo();
       if (userAuthInfo?.idToken) {
         setToken(userAuthInfo.idToken);
       }
@@ -41,7 +41,7 @@ export const useIdentityToken = () => {
     if (isAuthorized && !token) {
       setToken(web3Auth.idToken);
     }
-  }, [isAuthorized, token, web3Auth]);
+  }, [isConnected, isAuthorized, token]);
 
-  return { loading, error, token, getIdentityToken };
+  return { loading, error, token, getAuthTokenInfo };
 };

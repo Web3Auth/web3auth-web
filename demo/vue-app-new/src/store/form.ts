@@ -31,6 +31,7 @@ export const formDataStore = reactive<FormData>({
   smartAccountType: "metamask", // default smart account type to safe
   smartAccountChains: [],
   smartAccountChainsConfig: {},
+  tokenStorage: "default",
   widget: WIDGET_TYPE.MODAL,
   targetId: "w3a-parent-test-container",
 });

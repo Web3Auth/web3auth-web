@@ -4,9 +4,8 @@ import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
-import CircularLoader from "../CircularLoader";
 import Image from "../Image";
-import PulseLoader from "../PulseLoader";
+import SpinnerLoader from "../SpinnerLoader";
 import { AuthorizingStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
 
 /**
@@ -16,7 +15,7 @@ import { AuthorizingStatusType, ConnectedStatusType, ConnectingStatusType, Error
  */
 function ConnectingStatus(props: ConnectingStatusType) {
   const [t] = useTranslation(undefined, { i18n });
-  const { connector, appLogo, connectorName } = props;
+  const { connector, connectorName } = props;
 
   const providerIcon = useMemo(
     () => (connector === "twitter" ? <Image imageId="login-x-dark" /> : <Image imageId={`login-${connector}`} height="40" width="40" />),
@@ -25,15 +24,9 @@ function ConnectingStatus(props: ConnectingStatusType) {
 
   return (
     <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
-      <div className="w3a--flex w3a--items-center w3a--justify-center w3a--gap-x-6">
-        <figure className="w3a--flex w3a--size-10 w3a--items-center w3a--justify-center w3a--overflow-hidden">
-          <img src={appLogo} alt="" className="w3a--size-full w3a--object-contain" />
-        </figure>
-
-        <PulseLoader />
-
+      <SpinnerLoader width={95} height={95}>
         {providerIcon}
-      </div>
+      </SpinnerLoader>
       <div className="w3a--flex w3a--flex-col w3a--gap-y-1">
         <div className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">
           {t("modal.adapter-loader.message1", { adapter: connectorName })}
@@ -92,10 +85,7 @@ function ErroredStatus(props: ErroredStatusType) {
 
 function AuthorizingStatus(props: AuthorizingStatusType) {
   const [t] = useTranslation(undefined, { i18n });
-  const { connector, externalWalletsConfig, walletRegistry, handleMobileVerifyConnect } = props;
-
-  const registryItem = walletRegistry?.default?.[connector] || walletRegistry?.others?.[connector];
-  const primaryColor = registryItem?.primaryColor || "";
+  const { connector, externalWalletsConfig, handleMobileVerifyConnect } = props;
 
   const handleMobileVerifyConnectClick = () => {
     handleMobileVerifyConnect({ connector: connector as WALLET_CONNECTOR_TYPE });
@@ -107,9 +97,9 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
         {t("modal.loader.authorizing-header", { connector: externalWalletsConfig[connector].label })}
       </p>
       <div className="w3a--flex w3a--justify-center">
-        <CircularLoader width={95} height={95} thickness={6} arcSizeDeg={100} arcColors={primaryColor ? [primaryColor, primaryColor] : undefined}>
+        <SpinnerLoader width={95} height={95}>
           <Image imageId={`login-${connector}`} hoverImageId={`login-${connector}`} height="45" width="45" />
-        </CircularLoader>
+        </SpinnerLoader>
       </div>
       <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{t("modal.loader.authorizing-message")}</p>
       <button
@@ -194,11 +184,9 @@ function Loader(props: LoaderProps) {
     connectorName,
     modalStatus,
     onClose,
-    appLogo,
     message,
     isConnectAndSignAuthenticationMode,
     externalWalletsConfig,
-    walletRegistry,
     handleMobileVerifyConnect,
     hideSuccessScreen = false,
     onAcceptConsent,
@@ -237,7 +225,7 @@ function Loader(props: LoaderProps) {
           : "w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4"
       }
     >
-      {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} appLogo={appLogo} />}
+      {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} />}
 
       {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
 
@@ -247,20 +235,11 @@ function Loader(props: LoaderProps) {
         <AuthorizingStatus
           connector={connector}
           externalWalletsConfig={externalWalletsConfig}
-          walletRegistry={walletRegistry}
           handleMobileVerifyConnect={handleMobileVerifyConnect}
         />
       )}
 
-      {isConsent && (
-        <ConsentRequiredStatus
-          onAccept={onAcceptConsent}
-          onDecline={onDeclineConsent}
-          privacyPolicy={privacyPolicy}
-          tncLink={tncLink}
-          appLogo={appLogo}
-        />
-      )}
+      {isConsent && <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} privacyPolicy={privacyPolicy} tncLink={tncLink} />}
     </div>
   );
 }

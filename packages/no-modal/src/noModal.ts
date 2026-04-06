@@ -13,7 +13,6 @@ import {
   SafeEventEmitter,
   type SafeEventEmitterProvider,
   serializeError,
-  SessionStorageAdapter,
   UX_MODE,
 } from "@web3auth/auth";
 import { WsEmbedParams } from "@web3auth/ws-embed";
@@ -26,6 +25,7 @@ import {
   ANALYTICS_SDK_TYPE,
   AuthLoginParams,
   AUTHORIZED_EVENT_DATA,
+  type AuthTokenInfo,
   CAN_AUTHORIZE_STATUSES,
   CAN_LOGOUT_STATUSES,
   CHAIN_NAMESPACES,
@@ -48,7 +48,6 @@ import {
   getWhitelabelAnalyticsProperties,
   type IBaseProvider,
   type IConnector,
-  type IdentityTokenInfo,
   type IPlugin,
   type IProvider,
   isBrowser,
@@ -114,6 +113,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     cachedConnector: null,
     currentChainId: null,
     idToken: null,
+    accessToken: null,
+    refreshToken: null,
   };
 
   private loginMode: LoginModeType = LOGIN_MODE.NO_MODAL;
@@ -123,7 +124,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
     else log.setLevel("error");
-    if (!options.storageType) options.storageType = "local";
     if (!options.initialAuthenticationMode) options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
 
     this.coreOptions = options;
@@ -304,6 +304,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       cachedConnector: null,
       currentChainId: null,
       idToken: null,
+      accessToken: null,
+      refreshToken: null,
     });
   }
 
@@ -359,7 +361,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const finalLoginParams = {
       ...loginParams,
       chainId: initialChain.chainId,
-      getIdentityToken: this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      getAuthTokenInfo: this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
     };
 
     // track connection started event
@@ -417,7 +419,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       const checkCompletion = async () => {
         // In CONNECT_AND_SIGN mode, wait for both connected event and authorized event
-        if (finalLoginParams.getIdentityToken) {
+        if (finalLoginParams.getAuthTokenInfo) {
           if (connectedEventCompleted && authorizedEventReceived) {
             await completeConnection();
           }
@@ -468,7 +470,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       };
 
       this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
-      if (finalLoginParams.getIdentityToken) {
+      if (finalLoginParams.getAuthTokenInfo) {
         this.once(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
       }
       this.once(CONNECTOR_EVENTS.ERRORED, onErrored);
@@ -554,15 +556,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  async getIdentityToken(): Promise<IdentityTokenInfo> {
+  async getAuthTokenInfo(): Promise<Pick<AuthTokenInfo, "idToken">> {
     if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
 
     const trackData = { connector: this.connectedConnector.name };
     try {
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_STARTED, trackData);
-      const identityToken = await this.connectedConnector.getIdentityToken();
+      const authTokenInfo = await this.connectedConnector.getAuthTokenInfo();
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
-      return identityToken;
+      return { idToken: authTokenInfo.idToken };
     } catch (error) {
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_FAILED, {
         ...trackData,
@@ -779,7 +781,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         default_chain_id: defaultChain ? getCaipChainId(defaultChain) : undefined,
         default_chain_name: defaultChain?.displayName,
         logging_enabled: this.coreOptions.enableLogging,
-        storage_type: this.coreOptions.storageType,
+        custom_storage: Boolean(this.coreOptions.storage),
         session_time: this.coreOptions.sessionTime,
         sfa_key_enabled: this.coreOptions.useSFAKey,
         mipd_enabled: this.coreOptions.multiInjectedProviderDiscovery,
@@ -818,7 +820,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       await connector.init({
         autoConnect,
         chainId: initialChain.chainId,
-        getIdentityToken: this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+        getAuthTokenInfo: this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
       });
     } catch (e) {
       log.error(e, connector.name);
@@ -919,19 +921,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-      const { ethereumProvider, solanaWallet, identityTokenInfo } = data;
-
-      if (identityTokenInfo) {
-        await this.setState({ idToken: identityTokenInfo.idToken });
-      }
+      const { ethereumProvider, solanaWallet } = data;
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
         try {
-          const data = await connector.getIdentityToken();
+          const data = await connector.getAuthTokenInfo();
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           await this.setState({
             idToken: data.idToken,
+            accessToken: data.accessToken ?? null,
+            refreshToken: data.refreshToken ?? null,
           });
         } catch (error) {
           log.error(error);
@@ -1086,7 +1086,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         return;
       }
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      await this.setState({ idToken: data.identityTokenInfo.idToken });
+      await this.setState({
+        idToken: data.authTokenInfo.idToken,
+        accessToken: data.authTokenInfo.accessToken ?? null,
+        refreshToken: data.authTokenInfo.refreshToken ?? null,
+      });
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
       log.debug("authorized", this.status, this.connectedConnectorName);
     });
@@ -1169,9 +1173,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private getStorageMethod(): IStorageAdapter {
-    if (this.coreOptions.ssr || this.coreOptions.storageType === "cookies") return new CookieStorage({ maxAge: this.coreOptions.sessionTime });
-    if (this.coreOptions.storageType === "session" && storageAvailable("sessionStorage")) return new SessionStorageAdapter();
-    if (this.coreOptions.storageType === "local" && storageAvailable("localStorage")) return new LocalStorageAdapter();
+    if (this.coreOptions.storage?.sessionId) return this.coreOptions.storage.sessionId;
+    if (this.coreOptions.ssr) return new CookieStorage({ maxAge: this.coreOptions.sessionTime });
+    if (storageAvailable("localStorage")) return new LocalStorageAdapter();
     return new MemoryStorage();
   }
 }

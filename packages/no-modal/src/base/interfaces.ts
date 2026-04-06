@@ -16,6 +16,8 @@ export interface IWeb3AuthState {
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChainId: string;
   idToken: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
 }
 
 export type ChainsConfig = CustomChainConfig[];

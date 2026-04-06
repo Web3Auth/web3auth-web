@@ -19,15 +19,8 @@ function RootContent(props: RootProps) {
   const { onCloseLoader } = props;
 
   const { modalState, shouldShowLoginPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
-  const {
-    appLogo,
-    deviceDetails,
-    uiConfig,
-    isConnectAndSignAuthenticationMode,
-    handleMobileVerifyConnect,
-    handleAcceptConsent,
-    handleDeclineConsent,
-  } = useWidget();
+  const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect, handleAcceptConsent, handleDeclineConsent } =
+    useWidget();
   const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen } = uiConfig;
   const consentRequired = Boolean("consentRequired" in uiConfig && uiConfig.consentRequired);
 
@@ -219,10 +212,8 @@ function RootContent(props: RootProps) {
               connectorName={modalState.detailedLoaderConnectorName}
               modalStatus={modalState.status}
               onClose={onCloseLoader}
-              appLogo={appLogo}
               isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
               externalWalletsConfig={modalState.externalWalletsConfig}
-              walletRegistry={walletRegistry}
               handleMobileVerifyConnect={handleMobileVerifyConnect}
               hideSuccessScreen={hideSuccessScreen}
               onAcceptConsent={handleAcceptConsent}
