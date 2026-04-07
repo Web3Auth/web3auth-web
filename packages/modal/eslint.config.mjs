@@ -24,12 +24,7 @@ export default [
       "import/no-extraneous-dependencies": [
         "error",
         {
-          devDependencies: [
-            "**/*.test.ts",
-            "**/*.test.tsx",
-            "**/test/configs/**",
-            "**/**/eslint.config.mjs",
-          ],
+          devDependencies: ["**/*.test.ts", "**/*.test.tsx", "**/test/configs/**", "**/**/eslint.config.mjs"],
         },
       ],
     },
