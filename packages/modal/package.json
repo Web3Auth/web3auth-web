@@ -98,7 +98,7 @@
     "@hcaptcha/react-hcaptcha": "^2.0.2",
     "@toruslabs/base-controllers": "^9.5.0",
     "@toruslabs/http-helpers": "^9.0.0",
-    "@web3auth/auth": "^11.4.2",
+    "@web3auth/auth": "^11.5.0",
     "@web3auth/no-modal": "^10.15.0",
     "@web3auth/ws-embed": "file:../../web3auth-ws-embed-5.6.5.tgz",
     "bowser": "^2.14.1",
