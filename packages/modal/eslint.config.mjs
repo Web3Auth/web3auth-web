@@ -17,4 +17,21 @@ export default [
       "react-hooks/rules-of-hooks": "off",
     },
   },
+  {
+    files: ["./test/configs/browsers.config.mts"],
+    rules: {
+      // @vitest/browser-playwright is hoisted at repo root; suppress only that import via file-local disable in the file.
+      "import/no-extraneous-dependencies": [
+        "error",
+        {
+          devDependencies: [
+            "**/*.test.ts",
+            "**/*.test.tsx",
+            "**/test/configs/**",
+            "**/**/eslint.config.mjs",
+          ],
+        },
+      ],
+    },
+  },
 ];
