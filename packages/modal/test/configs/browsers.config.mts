@@ -43,7 +43,6 @@ export default defineConfig({
   },
   test: {
     reporters: ["default", "verbose"],
-    setupFiles: ["./test/setup/browser-polyfills.ts"],
     include: ["test/**/*.{test,spec}.{ts,tsx,js,mjs,cjs}"],
     passWithNoTests: true,
     browser: {
