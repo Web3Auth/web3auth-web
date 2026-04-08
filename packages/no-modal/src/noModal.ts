@@ -4,6 +4,7 @@ import {
   EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES,
   SMART_ACCOUNT_EIP_STANDARD,
 } from "@toruslabs/ethereum-controllers";
+import { Wallet } from "@wallet-standard/base";
 import {
   cloneDeep,
   CookieStorage,
@@ -89,7 +90,6 @@ import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
-import { Wallet } from "@wallet-standard/base";
 
 type WalletLinkingProof = {
   address: string;
