@@ -26,6 +26,9 @@ import { WALLET_CONNECTOR_TYPE } from "../wallet";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 
 export interface ConnectedAccountInfo extends LinkedAccountInfo {
+  /** Linked account id */
+  id: string;
+
   /** Whether the account is the primary account for the user */
   isPrimary: boolean;
 
@@ -159,6 +162,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.CACHE_CLEAR]: () => void;
   [CONNECTOR_EVENTS.CONNECTORS_UPDATED]: (data: { connectors: IConnector<unknown>[] }) => void;
   [CONNECTOR_EVENTS.MFA_ENABLED]: (isMFAEnabled: boolean) => void;
+  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: () => void;
 };
 
 export interface BaseConnectorConfig {

@@ -9,12 +9,13 @@ import {
   useAuthTokenInfo,
   useLinkAccount,
   useManageMFA,
+  useSwitchAccount,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
 } from "@web3auth/modal/vue";
-import type { LinkAccountResult } from "@web3auth/no-modal";
+import type { ConnectedAccountInfo, LinkAccountResult } from "@web3auth/no-modal";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
@@ -75,14 +76,27 @@ const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 
 // Account Linking
 const { linkAccount, unlinkAccount, linkedAccounts, loading: accountLinkingLoading, error: accountLinkingError } = useLinkAccount();
+const { switchAccount, loading: switchAccountLoading, error: switchAccountError } = useSwitchAccount();
 const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
 const linkAccountResult = ref<LinkAccountResult | null>(null);
 const lastUnlinkedAddress = ref<string | null>(null);
 const pendingUnlinkAddress = ref<string | null>(null);
-const connectedWallets = computed(() => {
-  console.log("userInfo", userInfo.value);
-  return userInfo.value?.connectedAccounts ?? [];
-});
+const connectedWallets = computed(() => userInfo.value?.connectedAccounts ?? []);
+
+const pendingSwitchAccountId = ref<string | null>(null);
+const lastSwitchAuthConnectionId = ref<string | null>(null);
+
+const onSwitchToConnectedWallet = async (account: ConnectedAccountInfo) => {
+  lastSwitchAuthConnectionId.value = null;
+  pendingSwitchAccountId.value = account.id;
+  await switchAccount(account);
+  pendingSwitchAccountId.value = null;
+  if (!switchAccountError.value) {
+    await getUserInfo();
+    lastSwitchAuthConnectionId.value = account.id;
+    printToConsole("Switch connected wallet", { accountId: account.id, accountType: account.accountType, eoaAddress: account.eoaAddress });
+  }
+};
 
 const onLinkAccount = async () => {
   linkAccountResult.value = null;
@@ -471,6 +485,10 @@ const onSwitchChain = async () => {
             <code>useWeb3AuthUser().userInfo.connectedAccounts</code>
           </p>
           <p class="text-xs font-semibold text-gray-700">Total: {{ connectedWallets.length }}</p>
+          <p v-if="lastSwitchAuthConnectionId" class="text-green-600 text-xs break-all mt-1">
+            Switched active wallet (authConnectionId: {{ lastSwitchAuthConnectionId }}).
+          </p>
+          <p v-if="switchAccountError" class="text-red-500 text-xs break-all mt-1">Switch account: {{ switchAccountError.message }}</p>
           <div v-if="connectedWallets.length" class="mt-2 space-y-2">
             <div
               v-for="account in connectedWallets"
@@ -488,7 +506,19 @@ const onSwitchChain = async () => {
                 <span v-if="account.accountType">· {{ account.accountType }}</span>
                 <span v-if="account.chainNamespace">· {{ account.chainNamespace }}</span>
               </p>
+              <p v-if="account.authConnectionId" class="text-xs text-gray-400 break-all mt-1">authConnectionId: {{ account.authConnectionId }}</p>
               <p v-if="account.aaAddress" class="text-xs text-gray-500 break-all">Smart account: {{ account.aaAddress }}</p>
+              <Button
+                v-if="!account.isPrimary"
+                :loading="switchAccountLoading && pendingSwitchAccountId === account.authConnectionId"
+                block
+                size="xs"
+                pill
+                class="mt-2"
+                @click="onSwitchToConnectedWallet(account)"
+              >
+                Switch to this wallet
+              </Button>
             </div>
           </div>
           <p v-else class="text-xs text-gray-500">No connected wallets found in user info yet.</p>

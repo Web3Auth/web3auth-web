@@ -17,6 +17,8 @@ export const CONNECTOR_EVENTS = {
   CONNECTORS_UPDATED: "connectors_updated",
   MFA_ENABLED: "mfa_enabled",
   REHYDRATION_ERROR: "rehydration_error",
+  /** Emitted when `currentConnection` signing providers change without a full reconnect (e.g. account switch). */
+  CONNECTION_UPDATED: "connection_updated",
 } as const;
 
 export const CONNECTOR_CATEGORY = {

@@ -1,8 +1,5 @@
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
 
-/**
- * Parameters for linking an external wallet to the currently authenticated account.
- */
 export interface LinkAccountParams {
   /**
    * Name of the external wallet connector to link.
@@ -65,9 +62,6 @@ export interface UnlinkAccountResult {
   linkedAccounts: LinkedAccountInfo[];
 }
 
-/**
- * Payload sent to the Citadel account-linking endpoint.
- */
 export interface CitadelLinkAccountPayload {
   /** Access token to authenticate the request */
   idToken: string;

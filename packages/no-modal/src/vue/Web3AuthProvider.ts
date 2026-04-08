@@ -149,6 +149,11 @@ export const Web3AuthProvider = defineComponent({
           isMFAEnabled.value = true;
         };
 
+        const signingConnectionUpdatedListener = () => {
+          console.log("signingConnectionUpdatedListener", web3Auth.value?.connection);
+          if (web3Auth.value) connection.value = web3Auth.value.connection;
+        };
+
         // unregister previous listeners
         if (prevWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
@@ -160,6 +165,7 @@ export const Web3AuthProvider = defineComponent({
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.ERRORED, errorListener);
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONNECTION_UPDATED, signingConnectionUpdatedListener);
         }
 
         if (newWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
@@ -174,6 +180,7 @@ export const Web3AuthProvider = defineComponent({
           newWeb3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, signingConnectionUpdatedListener);
         }
       },
       { immediate: true }

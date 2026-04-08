@@ -7,6 +7,7 @@ export * from "./useLinkAccount";
 export * from "./useManageMFA";
 export * from "./useReceive";
 export * from "./useSwap";
+export * from "./useSwitchAccount";
 export * from "./useSwitchChain";
 export * from "./useWalletConnectScanner";
 export * from "./useWalletServicesPlugin";

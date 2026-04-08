@@ -140,6 +140,10 @@ export const ANALYTICS_EVENTS = {
   ACCOUNT_UNLINKING_STARTED: "Account Unlinking Started",
   ACCOUNT_UNLINKING_COMPLETED: "Account Unlinking Completed",
   ACCOUNT_UNLINKING_FAILED: "Account Unlinking Failed",
+  // Account switch (active connected wallet)
+  ACCOUNT_SWITCH_STARTED: "Account Switch Started",
+  ACCOUNT_SWITCH_COMPLETED: "Account Switch Completed",
+  ACCOUNT_SWITCH_FAILED: "Account Switch Failed",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {

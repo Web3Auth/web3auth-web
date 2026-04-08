@@ -17,6 +17,7 @@ import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChain
 import {
   type AuthTokenInfo,
   CONNECTED_EVENT_DATA,
+  ConnectedAccountInfo,
   type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
@@ -233,6 +234,17 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   cleanup(): Promise<void>;
 
   /**
+   * Switch the active connection to a linked wallet: connects an isolated
+   * instance of that wallet’s connector, updates `connection.ethereumProvider` / `solanaWallet`,
+   * and emits `connection_updated` so Wagmi/UI can resync.
+   * The auxiliary connector stays connected (not torn down after switch). The previous auxiliary
+   * connector is disconnected when starting another switch or when the primary session disconnects.
+   *
+   * Requires an AUTH primary session and a matching `userInfo.connectedAccounts` entry.
+   */
+  switchAccount(account: ConnectedAccountInfo): Promise<void>;
+
+  /**
    * Link an external wallet to the currently authenticated user account
    * via the Citadel account-linking endpoint.
    *
@@ -257,10 +269,11 @@ export interface IWeb3Auth extends IWeb3AuthCore {
 
 export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType };
 
-export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready"> & {
+export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready" | "signing_connection_updated"> & {
   [CONNECTOR_EVENTS.READY]: () => void;
   [CONNECTOR_EVENTS.CONNECTED]: (data: SDK_CONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError, loginMode: LoginModeType) => void;
+  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: () => void;
   MODAL_VISIBILITY: (visibility: boolean) => void;
 };
 

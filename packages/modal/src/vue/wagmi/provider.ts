@@ -94,6 +94,7 @@ const Web3AuthWagmiProvider = defineComponent({
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
     const { mutate: reconnect } = useReconnect();
+    const lastSyncedWeb3AuthConnection = shallowRef<unknown>(null);
 
     useConnectionEffect({
       onDisconnect: async () => {
@@ -113,16 +114,27 @@ const Web3AuthWagmiProvider = defineComponent({
       [isConnected, connection],
       async () => {
         const newIsConnected = isConnected.value;
-        if (newIsConnected && connection.value?.ethereumProvider) {
-          const connector = await setupConnector(connection.value.ethereumProvider, wagmiConfig);
-          if (!connector) {
-            log.error("Failed to setup vue wagmi connector");
-            throw new Error("Failed to setup connector");
-          }
+        const newConnection = connection.value;
+        const newEth = newConnection?.ethereumProvider ?? null;
+        if (newIsConnected && newConnection && newEth) {
+          // `ethereumProvider` is a stable proxy (`commonJRPCProvider`) across account switches,
+          // so key wagmi resyncs off the Web3Auth connection object instead of provider identity.
+          if (lastSyncedWeb3AuthConnection.value !== newConnection) {
+            if (getWeb3authConnector(wagmiConfig)) {
+              resetConnectorState(wagmiConfig);
+            }
+            lastSyncedWeb3AuthConnection.value = newConnection;
+            const connector = await setupConnector(newEth, wagmiConfig);
+            if (!connector) {
+              log.error("Failed to setup vue wagmi connector");
+              throw new Error("Failed to setup connector");
+            }
 
-          await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-          reconnect();
+            await connectWeb3AuthWithWagmi(connector, wagmiConfig);
+            reconnect();
+          }
         } else if (!newIsConnected) {
+          lastSyncedWeb3AuthConnection.value = null;
           if (wagmiConfig.state.status === "connected") {
             await disconnectWeb3AuthFromWagmi(wagmiConfig);
           }
