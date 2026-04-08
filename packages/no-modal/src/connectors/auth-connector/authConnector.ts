@@ -716,7 +716,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    return citadelUserInfo?.accounts || [];
+    const connectedAccounts = citadelUserInfo?.accounts || [];
+    return connectedAccounts.map((account) => ({
+      ...account,
+      // by default, the primary account is the active account
+      active: account.isPrimary,
+    }));
   }
 
   private async auditOAuditProgress(

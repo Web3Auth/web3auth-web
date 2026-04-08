@@ -150,7 +150,6 @@ export const Web3AuthProvider = defineComponent({
         };
 
         const signingConnectionUpdatedListener = () => {
-          console.log("signingConnectionUpdatedListener", web3Auth.value?.connection);
           if (web3Auth.value) connection.value = web3Auth.value.connection;
         };
 

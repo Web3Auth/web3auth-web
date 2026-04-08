@@ -43,6 +43,9 @@ export interface ConnectedAccountInfo extends LinkedAccountInfo {
 
   /** Connector name of the account */
   connector: string;
+
+  /** Indicates if the account is the active account */
+  active: boolean;
 }
 
 export type UserInfo = AuthUserInfo & { connectedAccounts?: ConnectedAccountInfo[] };

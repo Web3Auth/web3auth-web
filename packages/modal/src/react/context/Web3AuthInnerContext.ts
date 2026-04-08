@@ -131,7 +131,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     };
 
     const signingConnectionUpdatedListener = () => {
-      console.log("signingConnectionUpdatedListener", web3Auth.connection);
       setConnection(web3Auth.connection);
     };
 

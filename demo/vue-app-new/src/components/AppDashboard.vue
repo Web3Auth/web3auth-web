@@ -509,7 +509,7 @@ const onSwitchChain = async () => {
               <p v-if="account.authConnectionId" class="text-xs text-gray-400 break-all mt-1">authConnectionId: {{ account.authConnectionId }}</p>
               <p v-if="account.aaAddress" class="text-xs text-gray-500 break-all">Smart account: {{ account.aaAddress }}</p>
               <Button
-                v-if="!account.isPrimary"
+                v-if="!account.active"
                 :loading="switchAccountLoading && pendingSwitchAccountId === account.authConnectionId"
                 block
                 size="xs"
