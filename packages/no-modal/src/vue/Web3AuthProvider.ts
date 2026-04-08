@@ -150,7 +150,11 @@ export const Web3AuthProvider = defineComponent({
         };
 
         const signingConnectionUpdatedListener = () => {
-          if (web3Auth.value) connection.value = web3Auth.value.connection;
+          if (web3Auth.value) {
+            connection.value = web3Auth.value.connection;
+            chainId.value = web3Auth.value.currentChainId;
+            chainNamespace.value = web3Auth.value.currentChain?.chainNamespace ?? null;
+          }
         };
 
         // unregister previous listeners

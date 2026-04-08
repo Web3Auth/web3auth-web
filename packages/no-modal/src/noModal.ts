@@ -205,6 +205,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.state.refreshToken || null;
   }
 
+  private get signingConnector(): IConnector<unknown> | null {
+    if (this.state.activeAccount && this.state.activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
+      return this.auxiliarySigningConnector;
+    }
+    return this.connectedConnector;
+  }
+
   set provider(_: IProvider | null) {
     throw new Error("Not implemented");
   }
@@ -340,19 +347,22 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const newChainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
-    if (CONNECTED_STATUSES.includes(this.status) && this.connectedConnector) {
+    if (CONNECTED_STATUSES.includes(this.status)) {
+      const signingConnector = this.signingConnector;
+      if (!signingConnector) throw WalletInitializationError.notReady("Active signing connector is not ready");
+
       // Single-namespace connectors cannot cross namespace boundaries — MULTICHAIN connectors
       // (Auth, WC) enforce their own switchChain policy internally.
       if (
-        this.connectedConnector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN &&
-        this.currentChain?.chainNamespace !== newChainConfig.chainNamespace
+        signingConnector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN &&
+        signingConnector.connectorNamespace !== newChainConfig.chainNamespace
       ) {
         throw WalletLoginError.connectionError(
-          `Cannot switch between chain namespaces with ${this.connectedConnector.name}. Disconnect and reconnect with the target chain.`
+          `Cannot switch between chain namespaces with ${signingConnector.name}. Disconnect and reconnect with the target chain.`
         );
       }
 
-      await this.connectedConnector.switchChain(params);
+      await signingConnector.switchChain(params);
       return;
     }
 
@@ -609,9 +619,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_STARTED, trackData);
 
-      const chainId = this.state.currentChainId;
-      if (!chainId) throw WalletInitializationError.invalidParams("No active chainId for account switch.");
-
       // check if there is an existing auxiliary signing connector and disconnect it
       if (this.auxiliarySigningConnector) {
         try {
@@ -627,10 +634,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       let newConnectorName: WALLET_CONNECTOR_TYPE;
       let connectorNamespace: ConnectorNamespaceType;
       let activeAccount: ConnectedAccountInfo | null = null;
+      let activeChainId: string;
 
       // rebind to the primary connector if the target account is the primary account
       if (targetAccount.connector === WALLET_CONNECTORS.AUTH && targetAccount.isPrimary) {
         const primaryConnector = this.connectedConnector as AuthConnectorType;
+        activeChainId = this.getChainIdForConnectedAccount(targetAccount, primaryConnector.provider?.chainId ?? this.state.currentChainId);
         ethereumProvider = primaryConnector.provider;
         solanaWallet = primaryConnector.solanaWallet;
         newConnectorName = primaryConnector.name;
@@ -640,8 +649,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
         activeAccount = null; // primary account is not isolated
       } else {
-        const walletConnector = await this.createIsolatedWalletConnector(targetAccount.connector as WALLET_CONNECTOR_TYPE, chainId);
-        const newConnection = await walletConnector.connect({ chainId });
+        const targetChainId = this.getChainIdForConnectedAccount(targetAccount, this.state.currentChainId);
+        const walletConnector = await this.createIsolatedWalletConnector(targetAccount.connector as WALLET_CONNECTOR_TYPE, targetChainId);
+        const newConnection = await walletConnector.connect({ chainId: targetChainId });
         if (!newConnection) {
           throw AccountLinkingError.requestFailed(`Failed to connect isolated connector "${targetAccount.connector}" for account switch.`);
         }
@@ -653,6 +663,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         solanaWallet = newConnection.solanaWallet;
         connectorNamespace = walletConnector.connectorNamespace;
         activeAccount = targetAccount;
+        activeChainId = targetChainId;
       }
 
       if (ethereumProvider) {
@@ -666,6 +677,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connectorNamespace,
       });
 
+      await this.setCurrentChain(activeChainId);
       await this.setState({ activeAccount });
       this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED);
 
@@ -1148,7 +1160,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       let { ethereumProvider, solanaWallet } = data;
-      const connectedChainId = ethereumProvider.chainId;
+      const connectedChainId = ethereumProvider?.chainId;
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
@@ -1171,8 +1183,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const { activeAccount } = this.state;
       // if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
       if (activeAccount && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
-        const walletConnector = await this.createIsolatedWalletConnector(activeAccount.connector as WALLET_CONNECTOR_TYPE, ethereumProvider.chainId);
-        const newConnection = await walletConnector.connect({ chainId: connectedChainId });
+        const targetChainId = this.getChainIdForConnectedAccount(activeAccount, connectedChainId);
+        const walletConnector = await this.createIsolatedWalletConnector(activeAccount.connector as WALLET_CONNECTOR_TYPE, targetChainId);
+        const newConnection = await walletConnector.connect({ chainId: targetChainId });
         if (!newConnection) {
           throw AccountLinkingError.requestFailed(`Failed to connect isolated connector "${activeAccount.connector}" for account switch.`);
         }
@@ -1323,6 +1336,27 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (!initialChain) throw WalletInitializationError.invalidParams(`No chain found for ${connector.connectorNamespace}`);
     }
     return initialChain;
+  }
+
+  private getChainIdForConnectedAccount(
+    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector">,
+    preferredChainId?: string | null
+  ): string {
+    if (preferredChainId) {
+      const preferredChain = this.coreOptions.chains.find((chain) => chain.chainId === preferredChainId);
+      if (preferredChain && (!account.chainNamespace || preferredChain.chainNamespace === account.chainNamespace)) {
+        return preferredChainId;
+      }
+    }
+
+    if (account.chainNamespace) {
+      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === account.chainNamespace);
+      if (namespaceChain) {
+        return namespaceChain.chainId;
+      }
+    }
+
+    throw WalletInitializationError.invalidParams(`No compatible chainId found for connector "${account.connector}".`);
   }
 
   private async cacheWallet(walletName: string): Promise<void> {
