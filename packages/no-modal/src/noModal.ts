@@ -1170,7 +1170,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       const { activeAccount } = this.state;
       // if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
-      if (activeAccount) {
+      if (activeAccount && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
         const walletConnector = await this.createIsolatedWalletConnector(activeAccount.connector as WALLET_CONNECTOR_TYPE, ethereumProvider.chainId);
         const newConnection = await walletConnector.connect({ chainId: connectedChainId });
         if (!newConnection) {

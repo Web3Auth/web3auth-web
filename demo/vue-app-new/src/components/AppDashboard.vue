@@ -75,13 +75,14 @@ const solanaClient = useSolanaClient();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 
 // Account Linking
-const { linkAccount, unlinkAccount, linkedAccounts, loading: accountLinkingLoading, error: accountLinkingError } = useLinkAccount();
+const { linkAccount, unlinkAccount, loading: accountLinkingLoading, error: accountLinkingError } = useLinkAccount();
 const { switchAccount, loading: switchAccountLoading, error: switchAccountError } = useSwitchAccount();
 const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
 const linkAccountResult = ref<LinkAccountResult | null>(null);
 const lastUnlinkedAddress = ref<string | null>(null);
 const pendingUnlinkAddress = ref<string | null>(null);
 const connectedWallets = computed(() => userInfo.value?.connectedAccounts ?? []);
+console.log("connectedWallets", connectedWallets.value);
 
 const pendingSwitchAccountId = ref<string | null>(null);
 const lastSwitchAuthConnectionId = ref<string | null>(null);
@@ -122,6 +123,10 @@ const onUnlinkAccount = async (address: string) => {
     lastUnlinkedAddress.value = address;
     printToConsole("Unlink Wallet Result", result);
   }
+};
+
+const canUnlinkConnectedWallet = (account: ConnectedAccountInfo): boolean => {
+  return !account.isPrimary && !account.active && Boolean(account.eoaAddress);
 };
 
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
@@ -484,22 +489,39 @@ const onSwitchChain = async () => {
             Loaded from
             <code>useWeb3AuthUser().userInfo.connectedAccounts</code>
           </p>
+          <p class="text-xs text-gray-500 break-all mt-1">Switch the active wallet here. Non-primary inactive wallets can also be unlinked.</p>
           <p class="text-xs font-semibold text-gray-700">Total: {{ connectedWallets.length }}</p>
           <p v-if="lastSwitchAuthConnectionId" class="text-green-600 text-xs break-all mt-1">
-            Switched active wallet (authConnectionId: {{ lastSwitchAuthConnectionId }}).
+            Switched active wallet (accountId: {{ lastSwitchAuthConnectionId }}).
           </p>
+          <p v-if="lastUnlinkedAddress" class="text-green-600 text-xs break-all mt-1">Unlinked wallet: {{ lastUnlinkedAddress }}.</p>
           <p v-if="switchAccountError" class="text-red-500 text-xs break-all mt-1">Switch account: {{ switchAccountError.message }}</p>
+          <p v-if="accountLinkingError" class="text-red-500 text-xs break-all mt-1">Link or unlink wallet: {{ accountLinkingError.message }}</p>
           <div v-if="connectedWallets.length" class="mt-2 space-y-2">
             <div
               v-for="account in connectedWallets"
-              :key="`${account.address || 'no-address'}-${account.connector}-${account.accountType}-${account.authConnectionId}`"
-              class="border border-gray-200 rounded-lg p-3"
+              :key="account.id"
+              class="border rounded-lg p-3 transition-colors"
+              :class="account.active ? 'border-emerald-400 bg-emerald-50/60' : 'border-gray-200'"
             >
               <div class="flex items-center justify-between gap-2">
                 <p class="text-xs font-semibold text-gray-700 break-all">
                   {{ account.eoaAddress || "No address available" }}
                 </p>
-                <span v-if="account.isPrimary" class="text-[10px] font-semibold uppercase tracking-wide text-blue-600">Primary</span>
+                <div class="flex items-center gap-1">
+                  <span
+                    v-if="account.active"
+                    class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700"
+                  >
+                    Active
+                  </span>
+                  <span
+                    v-if="account.isPrimary"
+                    class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-600"
+                  >
+                    Primary
+                  </span>
+                </div>
               </div>
               <p class="text-xs text-gray-500 break-all">
                 {{ account.connector }}
@@ -508,17 +530,37 @@ const onSwitchChain = async () => {
               </p>
               <p v-if="account.authConnectionId" class="text-xs text-gray-400 break-all mt-1">authConnectionId: {{ account.authConnectionId }}</p>
               <p v-if="account.aaAddress" class="text-xs text-gray-500 break-all">Smart account: {{ account.aaAddress }}</p>
-              <Button
-                v-if="!account.active"
-                :loading="switchAccountLoading && pendingSwitchAccountId === account.authConnectionId"
-                block
-                size="xs"
-                pill
-                class="mt-2"
-                @click="onSwitchToConnectedWallet(account)"
-              >
-                Switch to this wallet
-              </Button>
+              <p v-if="account.active" class="mt-2 text-xs font-medium text-emerald-700">
+                Currently used for wallet actions
+                <span v-if="!account.isPrimary">. Switch to another wallet before unlinking it.</span>
+              </p>
+              <p v-else-if="account.isPrimary" class="mt-2 text-xs text-blue-600">
+                Primary AUTH account stays linked and can be switched back to at any time.
+              </p>
+              <p v-else-if="!account.address" class="mt-2 text-xs text-gray-500">This wallet does not expose an unlinkable address.</p>
+              <div v-if="!account.active || canUnlinkConnectedWallet(account)" class="mt-2 flex flex-col gap-2">
+                <Button
+                  v-if="!account.active"
+                  :loading="switchAccountLoading && pendingSwitchAccountId === account.id"
+                  block
+                  size="xs"
+                  pill
+                  @click="onSwitchToConnectedWallet(account)"
+                >
+                  Switch to this wallet
+                </Button>
+                <Button
+                  v-if="canUnlinkConnectedWallet(account)"
+                  :loading="accountLinkingLoading && pendingUnlinkAddress === account.address"
+                  block
+                  size="xs"
+                  pill
+                  variant="tertiary"
+                  @click="onUnlinkAccount(account.eoaAddress)"
+                >
+                  Unlink this wallet
+                </Button>
+              </div>
             </div>
           </div>
           <p v-else class="text-xs text-gray-500">No connected wallets found in user info yet.</p>
@@ -565,36 +607,6 @@ const onSwitchChain = async () => {
             <option :value="WALLET_CONNECTORS.WALLET_CONNECT_V2">WalletConnect</option>
           </select>
           <Button :loading="accountLinkingLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">Link Wallet</Button>
-          <p v-if="linkAccountResult" class="text-green-600 text-xs break-all">Linked accounts: {{ linkAccountResult.linkedAccounts.length }}</p>
-          <p v-if="lastUnlinkedAddress" class="text-green-600 text-xs break-all">Unlinked: {{ lastUnlinkedAddress }}</p>
-          <div v-if="linkedAccounts.length" class="mt-3 space-y-2">
-            <div class="text-xs font-semibold text-gray-700">Linked Accounts</div>
-            <div
-              v-for="account in linkedAccounts"
-              :key="`${account.address}-${account.authConnectionId}-${account.accountType}`"
-              class="border border-gray-200 rounded-lg p-3"
-            >
-              <p class="text-xs break-all">
-                {{ account.address || "No address available" }}
-              </p>
-              <p class="text-xs text-gray-500 break-all">
-                {{ account.accountType }}
-                <span v-if="account.chainNamespace">· {{ account.chainNamespace }}</span>
-              </p>
-              <Button
-                v-if="account.address"
-                :loading="accountLinkingLoading && pendingUnlinkAddress === account.address"
-                block
-                size="xs"
-                pill
-                class="mt-2"
-                @click="onUnlinkAccount(account.address)"
-              >
-                Unlink Wallet
-              </Button>
-            </div>
-          </div>
-          <p v-if="accountLinkingError" class="text-red-500 text-xs break-all">Error: {{ accountLinkingError.message }}</p>
         </Card>
 
         <!-- EVM -->

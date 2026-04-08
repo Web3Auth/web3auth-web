@@ -37,7 +37,7 @@ export async function makeAccountUnlinkingRequest(
   accessToken: string,
   payload: UnlinkAccountPayload
 ): Promise<UnlinkAccountResult> {
-  const url = `${authServerUrl}/v1/unlink/wallet`;
+  const url = `${authServerUrl}/v1/unlink`;
   try {
     const result = await post<UnlinkAccountResult>(url, payload, {
       headers: {
