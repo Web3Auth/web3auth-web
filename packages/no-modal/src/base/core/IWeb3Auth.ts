@@ -1,10 +1,12 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import {
   type BUILD_ENV_TYPE,
+  type CookieOptions,
   type LoginParams,
   MfaLevelType,
   MfaSettings,
   SafeEventEmitter,
+  type StorageConfig,
   UX_MODE_TYPE,
   type WhiteLabelData,
 } from "@web3auth/auth";
@@ -12,6 +14,7 @@ import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
+  type AuthTokenInfo,
   CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_EVENTS,
@@ -21,7 +24,6 @@ import {
   type ConnectorFn,
   type IBaseProvider,
   type IConnector,
-  type IdentityTokenInfo,
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
@@ -91,13 +93,17 @@ export interface IWeb3AuthCoreOptions {
    * @defaultValue false
    */
   enableLogging?: boolean;
+
   /**
-   * setting to "local" will persist social login session across browser tabs.
-   *
-   * @defaultValue "local"
+   * Custom storage adapters for auth tokens (sessionId, accessToken, refreshToken, idToken).
+   * @defaultValue localStorage-based adapters
    */
-  // TODO: rename this to match customauth, sfa
-  storageType?: "session" | "local" | "cookies";
+  storage?: StorageConfig;
+
+  /**
+   * Cookie configuration used when storage adapters are cookie-based.
+   */
+  cookieOptions?: CookieOptions;
 
   /**
    * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
@@ -208,7 +214,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
-  getIdentityToken(): Promise<IdentityTokenInfo>;
+  getAuthTokenInfo(): Promise<Pick<AuthTokenInfo, "idToken">>;
   switchChain(params: { chainId: string }): Promise<void>;
 }
 

@@ -39,7 +39,6 @@ import {
   ConnectorNamespaceType,
   ConnectorParams,
   getSolanaChainByChainConfig,
-  IdentityTokenInfo,
   log,
   normalizeWalletName,
   UserInfo,
@@ -93,7 +92,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       log.debug("initializing solana injected connector");
       if (options.autoConnect) {
         this.rehydrated = true;
-        const connection = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        const connection = await this.connect({ chainId: options.chainId, getAuthTokenInfo: options.getAuthTokenInfo });
         if (!connection) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
@@ -104,7 +103,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
+  async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     try {
       super.checkConnectionRequirements();
       const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -123,18 +122,15 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       if (this.wallet.accounts.length === 0) throw WalletLoginError.connectionError();
 
       this.status = CONNECTOR_STATUS.CONNECTED;
-      let identityTokenInfo: IdentityTokenInfo | undefined;
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: this.name,
         reconnected: this.rehydrated,
         ethereumProvider: null,
         solanaWallet: this.solanaWallet,
-        identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
+      if (getAuthTokenInfo) {
+        await this.getAuthTokenInfo();
       }
 
       return { ethereumProvider: null, solanaWallet: this.solanaWallet, connectorName: this.name };

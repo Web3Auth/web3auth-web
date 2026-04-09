@@ -1,7 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-var-requires */
-/* eslint-disable no-console */
-const fs = require("fs");
+import fs from "node:fs";
 
 // Read the input files
 const walletRegistry = JSON.parse(fs.readFileSync("./wallet-registry-wc.json", "utf8"));
@@ -116,7 +113,7 @@ function convertToMergedFormat(registryWallet, otherWallet) {
   return obj;
 }
 
-for (const [_, wallet] of registryMap) {
+for (const [, wallet] of registryMap) {
   // uniswap-wallet
   const walletKey = wallet.name.toLowerCase().replace(/\| /g, "").replace(/ /g, "-");
   const suffixRemoveKey = walletKey.replace("-wallet", "");
@@ -157,7 +154,6 @@ const removeKeys = [
   "puzzle",
   "rss",
   "sistemas",
-  "smart.baby",
   "smartrush",
   "solace",
   "trust-asset",
@@ -211,7 +207,7 @@ const removeJSONKeys = () => {
 removeJSONKeys();
 
 function addImgExt(data) {
-  for (const [keys, value] of Object.entries(data)) {
+  for (const keys of Object.keys(data)) {
     if (!data[keys].imgExtension) {
       data[keys].imgExtension = "svg";
     }

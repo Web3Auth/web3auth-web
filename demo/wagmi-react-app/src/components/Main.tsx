@@ -3,7 +3,7 @@ import {
   useChain,
   useCheckout,
   useEnableMFA,
-  useIdentityToken,
+  useAuthTokenInfo,
   useManageMFA,
   useSwitchChain as useWeb3AuthSwitchChain,
   useWalletConnectScanner,
@@ -49,7 +49,7 @@ const Main = () => {
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
-  const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
+  const { token, loading: isUserTokenLoading, error: userTokenError, getAuthTokenInfo } = useAuthTokenInfo();
   const { switchChainAsync } = useSwitchChain();
   const chains = useChains();
   const { switchChain: switchWeb3AuthChain } = useWeb3AuthSwitchChain();
@@ -117,7 +117,7 @@ const Main = () => {
               {isUserTokenLoading ? (
                 <p>Authenticating...</p>
               ) : (
-                <button onClick={() => getIdentityToken()} className={styles.card}>
+                <button onClick={() => getAuthTokenInfo()} className={styles.card}>
                   Authenticate User
                 </button>
               )}

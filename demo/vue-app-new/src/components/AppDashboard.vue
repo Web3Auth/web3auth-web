@@ -6,7 +6,7 @@ import {
   useFunding,
   useReceive,
   useEnableMFA,
-  useIdentityToken,
+  useAuthTokenInfo,
   useManageMFA,
   useWalletConnectScanner,
   useWalletUI,
@@ -17,7 +17,7 @@ import {
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
-import { useSignAndSendTransaction, useSignMessage as useSolanaSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/modal/vue/solana";
+import { useSignMessage as useSolanaSignMessage, useSolanaWallet, useSolanaClient } from "@web3auth/modal/vue/solana";
 import {
   useConnection,
   useBalance,
@@ -29,12 +29,12 @@ import {
 } from "@wagmi/vue";
 import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
 import { parseEther } from "viem";
-
-import { generateLegacyTransaction, generateSolTransferInstruction } from "../utils/solana";
+import { createWalletTransactionSigner, toAddress } from "@solana/client";
+import { address as solanaAddress,  } from "@solana/kit";
+import { getTransferSolInstruction } from "@solana-program/system";
 import { computed, ref, watch } from "vue";
 import X402Tester from "./X402Tester.vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
-import { getBalance as getSolBalance } from "../services/solHandlers";
 import { formDataStore } from "../store/form";
 
 const { t } = useI18n({ useScope: "global" });
@@ -56,7 +56,7 @@ const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = u
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { showFunding, loading: showFundingLoading } = useFunding();
 const { showReceive, loading: showReceiveLoading } = useReceive();
-const { getIdentityToken, loading: getIdentityTokenLoading } = useIdentityToken();
+const { getAuthTokenInfo, loading: getAuthTokenInfoLoading } = useAuthTokenInfo();
 const { status, address } = useConnection();
 const { mutateAsync: signTypedDataAsync } = useSignTypedData();
 const { mutateAsync: signMessageAsync } = useSignMessage();
@@ -69,10 +69,9 @@ const balance = useBalance({
 const config = useConfig();
 const trackedCallsId = ref<string | undefined>();
 
-const { accounts: solanaAccounts, rpc, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
+const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
+const solanaClient = useSolanaClient();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
-const { signTransaction: signSolTransaction } = useSignTransaction();
-const { signAndSendTransaction } = useSignAndSendTransaction();
 
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
 
@@ -164,8 +163,8 @@ const onGetUserInfo = async () => {
   printToConsole("User Info", userInfo.value);
 };
 
-const ongetIdentityToken = async () => {
-  const idToken = await getIdentityToken();
+const onGetAuthTokenInfo = async () => {
+  const idToken = await getAuthTokenInfo();
   printToConsole("id token", idToken);
 };
 
@@ -298,29 +297,50 @@ const onSendAATx = async () => {
   await sendEthWithSmartAccount(web3Auth.value, printToConsole);
 };
 
-// Solana — private key accessible via internal JRPC provider (Auth connector only)
+// Solana — sign + send via Framework Kit (see https://www.framework-kit.com/docs/client#sol-transfer)
 const onSignAndSendTransaction = async () => {
-  if (!solanaAccounts.value) throw new Error("No account connected");
-  if (!rpc.value) throw new Error("No RPC connection");
-  const pubKey = solanaAccounts.value[0];
+  const client = solanaClient.value;
+  if (!client) throw new Error("Solana client not available");
 
-  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.0001);
-  const transaction = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
+  const wallet = client.store.getState().wallet;
+  if (wallet.status !== "connected") throw new Error("Connect wallet first");
 
-  const data = await signAndSendTransaction(transaction);
-  printToConsole("result", data);
+  const pubKey = solanaAccounts.value?.[0];
+  if (!pubKey) throw new Error("No account connected");
+
+  const signature = await client.solTransfer.sendTransfer({
+    amount: 1_000_000n,
+    authority: wallet.session,
+    destination: pubKey,
+  });
+
+  printToConsole("result", String(signature));
 };
 
 const onSignSolTransaction = async () => {
-  if (!solanaAccounts.value) throw new Error("No account connected");
-  if (!rpc.value) throw new Error("No RPC connection");
-  const pubKey = solanaAccounts.value[0];
+  const client = solanaClient.value;
+  if (!client) throw new Error("Solana client not available");
 
-  const instruction = generateSolTransferInstruction(pubKey, pubKey, 0.0000001);
-  const transaction = await generateLegacyTransaction(rpc.value, pubKey, [instruction]);
+  const wallet = client.store.getState().wallet;
+  if (wallet.status !== "connected") throw new Error("Connect wallet first");
 
-  const result = await signSolTransaction(transaction);
-  printToConsole("result", result);
+  const pubKey = solanaAccounts.value?.[0];
+  if (!pubKey) throw new Error("No account connected");
+
+  // One signer instance for fee payer + transfer source (noop signer would duplicate the same address).
+  const { signer: authoritySigner } = createWalletTransactionSigner(wallet.session);
+  const instruction = getTransferSolInstruction({
+    source: authoritySigner,
+    destination: solanaAddress(pubKey),
+    amount: BigInt(Math.floor(0.0000001 * 1_000_000_000)),
+  });
+  const prepared = await client.transaction.prepare({
+    authority: authoritySigner,
+    instructions: [instruction],
+    version: "legacy",
+  });
+  const wire = await client.transaction.toWire(prepared);
+  printToConsole("result", wire);
 };
 
 const onSignSolMessage = async () => {
@@ -329,9 +349,18 @@ const onSignSolMessage = async () => {
 };
 
 const onGetSolBalance = async () => {
-  if (!rpc.value) throw new Error("No RPC connection");
-  if (!solanaAccounts.value) throw new Error("No account connected");
-  await getSolBalance(rpc.value, solanaAccounts.value[0], printToConsole);
+  const client = solanaClient.value;
+  if (!client) throw new Error("Solana client not available");
+  const account = solanaAccounts.value?.[0];
+  if (!account) throw new Error("No account connected");
+
+  try {
+    const lamports = await client.actions.fetchBalance(toAddress(account));
+    printToConsole("balance", `Lamports: ${lamports.toString()}`);
+  } catch (error) {
+    log.error("Error", error);
+    printToConsole("error", error);
+  }
 };
 
 const onGetSolPrivateKey = async () => {
@@ -464,7 +493,7 @@ const onSwitchChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="getAuthTokenInfoLoading" block size="xs" pill class="mb-2" @click="onGetAuthTokenInfo">Get id token</Button>
 
           <!-- EIP-5792 -->
           <div class="mb-2 mt-4 text-xl font-bold leading-tight text-left">EIP-5792</div>
@@ -497,7 +526,7 @@ const onSwitchChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignSolTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
-          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="getAuthTokenInfoLoading" block size="xs" pill class="mb-2" @click="onGetAuthTokenInfo">Get id token</Button>
         </Card>
       </Card>
       <Card
