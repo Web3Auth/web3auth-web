@@ -512,7 +512,7 @@ const onSwitchChain = async () => {
         </Card>
 
         <!-- x402 -->
-        <X402Tester v-if="isDisplay('ethServices')" class="mb-2" />
+        <X402Tester v-if="isDisplay('ethServices')" class="mb-2" @print-to-console="printToConsole" />
 
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">

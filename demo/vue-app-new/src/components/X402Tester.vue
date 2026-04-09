@@ -12,13 +12,22 @@ const { isConnected } = useWeb3Auth();
 const { chainId, chainNamespace } = useChain();
 const { mutateAsync: switchChainAsync } = useSwitchChain();
 const { fetchWithPayment } = useX402Fetch();
+const emit = defineEmits<{
+  (e: "print-to-console", title: string, payload?: unknown): void;
+}>();
 
 const url = ref(DEFAULT_X402_URL);
 const fetchLoading = ref(false);
-const result = ref<string | null>(null);
-const fetchError = ref<string | null>(null);
 
 const isOnBaseSepolia = ref(false);
+
+const parseConsoleBody = (text: string) => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
 
 watch(chainId, (id) => {
   isOnBaseSepolia.value = id?.toLowerCase() === BASE_SEPOLIA_CHAIN_ID.toLowerCase();
@@ -27,26 +36,30 @@ watch(chainId, (id) => {
 const onSwitchToBaseSepolia = async () => {
   fetchLoading.value = true;
   try {
-    result.value = null;
-    fetchError.value = null;
     await switchChainAsync({ chainId: parseInt(BASE_SEPOLIA_CHAIN_ID, 16) });
   } catch (err) {
-    fetchError.value = err instanceof Error ? err.message : String(err);
+    emit("print-to-console", "x402 network error", err instanceof Error ? err.message : String(err));
   } finally {
     fetchLoading.value = false;
   }
 };
 
 const onFetchWithPayment = async () => {
-  result.value = null;
-  fetchError.value = null;
   fetchLoading.value = true;
   try {
     const response = await fetchWithPayment({ url: url.value });
     const text = await response.text();
-    result.value = text;
+    emit("print-to-console", "x402 response", {
+      url: url.value,
+      status: response.status,
+      ok: response.ok,
+      body: parseConsoleBody(text),
+    });
   } catch (err) {
-    fetchError.value = err instanceof Error ? err.message : String(err);
+    emit("print-to-console", "x402 error", {
+      url: url.value,
+      message: err instanceof Error ? err.message : String(err),
+    });
   } finally {
     fetchLoading.value = false;
   }
@@ -117,16 +130,5 @@ const onFetchWithPayment = async () => {
     >
       Fetch with Payment
     </Button>
-
-    <!-- Result -->
-    <div v-if="result !== null || fetchError" class="rounded-lg overflow-hidden text-xs">
-      <div v-if="fetchError" class="bg-red-50 border border-red-200 px-3 py-2 text-red-600 break-words">
-        <span class="font-semibold">Error: </span>{{ fetchError }}
-      </div>
-      <div v-else class="bg-green-50 border border-green-200 px-3 py-2">
-        <div class="font-semibold text-green-700 mb-1">Response</div>
-        <pre class="text-gray-800 whitespace-pre-wrap break-words max-h-48 overflow-y-auto">{{ result }}</pre>
-      </div>
-    </div>
   </Card>
 </template>
