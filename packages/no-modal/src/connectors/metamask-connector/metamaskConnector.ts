@@ -4,6 +4,7 @@ import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
 import {
   type Analytics,
   ANALYTICS_EVENTS,
+  AuthTokenInfo,
   BaseConnectorLoginParams,
   type BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -21,7 +22,6 @@ import {
   type ConnectorNamespaceType,
   type ConnectorParams,
   getCaipChainId,
-  IdentityTokenInfo,
   type IProvider,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
@@ -206,11 +206,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
     if (this.metamaskInstance.status === "connected") {
       this.status = CONNECTOR_STATUS.CONNECTED;
-      let identityTokenInfo: IdentityTokenInfo | undefined;
 
-      if (options.getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
-      }
       this.rehydrated = true;
 
       const provider = this.metamaskInstance.getProvider() as unknown as IProvider;
@@ -223,8 +219,11 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         reconnected: this.rehydrated,
         ethereumProvider: this.metamaskProvider,
         solanaWallet: null,
-        identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
+
+      if (options.getAuthTokenInfo) {
+        await this.getAuthTokenInfo();
+      }
     } else if (this.metamaskInstance.status === "loaded") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
@@ -244,7 +243,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
+  async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
 
     const instance = await this.ensureMetamask();
@@ -302,18 +301,15 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         });
       }
 
-      let identityTokenInfo: IdentityTokenInfo | undefined;
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
         ethereumProvider: this.metamaskProvider,
         solanaWallet: null,
-        identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
+      if (getAuthTokenInfo) {
+        await this.getAuthTokenInfo();
       }
 
       return { ethereumProvider: this.metamaskProvider, solanaWallet: null, connectorName: this.name };

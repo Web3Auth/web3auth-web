@@ -1,17 +1,14 @@
-import { signChallenge, verifySignedChallenge } from "@toruslabs/base-controllers";
+import { signChallenge } from "@toruslabs/base-controllers";
 
 import {
+  AuthTokenInfo,
   BaseConnector,
   CHAIN_NAMESPACES,
-  checkIfTokenIsExpired,
-  clearToken,
+  citadelServerUrl,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
-  getSavedToken,
   getSolanaChainByChainConfig,
-  IdentityTokenInfo,
-  saveToken,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
   WalletLoginError,
@@ -21,7 +18,7 @@ import {
 export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
   async init(_?: ConnectorInitOptions): Promise<void> {}
 
-  async getIdentityToken(): Promise<IdentityTokenInfo> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.solanaWallet || !this.canAuthorize) throw WalletLoginError.notConnectedError();
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with a valid options");
 
@@ -30,15 +27,8 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
     const accounts = this.solanaWallet.accounts.map((a) => a.address);
     if (accounts.length > 0) {
-      const existingToken = getSavedToken(accounts[0], this.name);
-      if (existingToken) {
-        const isExpired = checkIfTokenIsExpired(existingToken);
-        if (!isExpired) {
-          this.status = CONNECTOR_STATUS.AUTHORIZED;
-          this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken: existingToken } });
-          return { idToken: existingToken };
-        }
-      }
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0]);
+      if (cached) return cached;
 
       const walletChains = new Set(this.solanaWallet.chains);
       const currentChainConfig = this.coreOptions.chains.find((c) => {
@@ -50,6 +40,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         throw WalletInitializationError.invalidParams("No Solana chain in common between the connected wallet and Web3Auth chain configuration");
       }
       const { chainId, chainNamespace } = currentChainConfig;
+      const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
 
       const payload = {
         domain: window.location.origin,
@@ -61,31 +52,16 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
         issuedAt: new Date().toISOString(),
       };
 
-      const challenge = await signChallenge(payload, chainNamespace);
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
       const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accounts[0]);
-      const idToken = await verifySignedChallenge(
-        chainNamespace,
-        signedMessage,
-        challenge,
-        this.name,
-        this.coreOptions.sessionTime,
-        this.coreOptions.clientId,
-        this.coreOptions.web3AuthNetwork
-      );
-      saveToken(accounts[0], this.name, idToken);
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, identityTokenInfo: { idToken } });
-      return { idToken };
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   async disconnectSession(): Promise<void> {
     super.checkDisconnectionRequirements();
-    const accounts = this.solanaWallet?.accounts.map((a) => a.address) ?? [];
-    if (accounts.length > 0) {
-      clearToken(accounts[0], this.name);
-    }
+    await this.clearWalletSession();
   }
 
   async disconnect(): Promise<void> {

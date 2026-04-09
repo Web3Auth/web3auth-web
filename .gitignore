@@ -111,3 +111,5 @@ dist
 yalc.lock
 types
 build/
+
+.npmrc
