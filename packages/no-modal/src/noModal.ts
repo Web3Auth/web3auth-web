@@ -65,6 +65,7 @@ import {
   LOGIN_MODE,
   LoginModeType,
   type LoginParamMap,
+  normalizeWalletName,
   parseChainNamespaceFromCitadelResponse,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
@@ -645,7 +646,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         activeAccount = null; // primary account is not isolated
       } else {
         const targetChainId = this.getChainIdForConnectedAccount(targetAccount, this.state.currentChainId);
-        const walletConnector = await this.createIsolatedWalletConnector(targetAccount.connector as WALLET_CONNECTOR_TYPE, targetChainId);
+        const walletConnector = await this.createIsolatedWalletConnector(targetAccount.connector, targetChainId);
         const newConnection = await walletConnector.connect({ chainId: targetChainId });
         if (!newConnection) {
           throw AccountLinkingError.requestFailed(`Failed to connect isolated connector "${targetAccount.connector}" for account switch.`);
@@ -1250,7 +1251,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           });
         })
       );
-      await this.setState({ connectedConnectorName: null });
+      await this.setState({ connectedConnectorName: null, activeAccount: null });
       this.emit(CONNECTOR_EVENTS.DISCONNECTED);
     });
     connector.on(CONNECTOR_EVENTS.CONNECTING, (data) => {
@@ -1448,7 +1449,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       );
     }
 
-    const isolatedConnector = await this.createIsolatedWalletConnector(connectorName as WALLET_CONNECTOR_TYPE, effectiveChainId);
+    const isolatedConnector = await this.createIsolatedWalletConnector(connectorName, effectiveChainId);
 
     try {
       const connection = await isolatedConnector.connect({ chainId: effectiveChainId });
@@ -1519,7 +1520,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * subscribed to the main SDK event loop. Its lifecycle events are therefore isolated
    * and will not mutate any global SDK state (connectedConnectorName, connection, idToken).
    */
-  private async createIsolatedWalletConnector(connectorName: WALLET_CONNECTOR_TYPE, chainId: string): Promise<IConnector<unknown>> {
+  private async createIsolatedWalletConnector(connectorName: WALLET_CONNECTOR_TYPE | string, chainId: string): Promise<IConnector<unknown>> {
     const config: ConnectorParams = {
       projectConfig: this.projectConfig,
       coreOptions: this.coreOptions,
@@ -1537,11 +1538,30 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connector = walletConnectV2Connector()(config);
         break;
       }
-      default:
+      case WALLET_CONNECTORS.AUTH:
+        throw AccountLinkingError.unsupportedConnector(`Connector "${connectorName}" does not support automatic wallet linking.`);
+      default: {
+        const isExternalWalletEnabled = Boolean(this.projectConfig?.externalWalletAuth);
+        const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
+        const isEip155Configured = this.coreOptions.chains.some((chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155);
+
+        if (connectorName !== WALLET_CONNECTORS.AUTH && isBrowser() && isMipdEnabled && isEip155Configured) {
+          const { createMipd, injectedEvmConnector } = await import("./connectors/injected-evm-connector");
+          const providerDetail = createMipd()
+            .getProviders()
+            .find((detail) => normalizeWalletName(detail.info.name) === connectorName);
+
+          if (providerDetail) {
+            connector = injectedEvmConnector(providerDetail)(config);
+            break;
+          }
+        }
+
         throw AccountLinkingError.unsupportedConnector(
           `Connector "${connectorName}" does not support automatic wallet linking. ` +
             `Use ${WALLET_CONNECTORS.METAMASK} or ${WALLET_CONNECTORS.WALLET_CONNECT_V2}.`
         );
+      }
     }
 
     // Init the isolated connector WITHOUT subscribing to the main event loop.
