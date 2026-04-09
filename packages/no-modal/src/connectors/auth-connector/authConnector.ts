@@ -1,6 +1,6 @@
-import { type ProviderConfig } from "@toruslabs/base-controllers";
+import { ChainNamespaceType, type ProviderConfig } from "@toruslabs/base-controllers";
 import { CITADEL_SERVER_MAP } from "@toruslabs/constants";
-import { put } from "@toruslabs/http-helpers";
+import { get, put } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import type { Wallet } from "@wallet-standard/base";
 import {
@@ -30,9 +30,11 @@ import {
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
+  citadelServerUrl,
   cloneDeep,
   CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  ConnectedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
@@ -55,7 +57,13 @@ import {
 } from "../../base";
 import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
-import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import {
+  type AuthConnectorOptions,
+  type LoginSettings,
+  type PrivateKeyProvider,
+  UserInfoWithConnectedAccounts,
+  type WalletServicesSettings,
+} from "./interface";
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
@@ -309,8 +317,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
-    const userInfo = this.authInstance.getUserInfo();
-    return userInfo;
+    const [userInfo, connectedAccounts] = await Promise.all([this.authInstance.getUserInfo(), this.getConnectedAccounts()]);
+    return {
+      ...userInfo,
+      connectedAccounts,
+    };
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
@@ -363,6 +374,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       return x.authConnection === authConnection && x.isDefault;
     });
     return providerConfig;
+  }
+
+  public async generateChallengeAndSign(): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    // we do not support this for auth connector, as of now.
+    throw new Error("Not implemented");
   }
 
   private async setupSolanaWallet(): Promise<void> {
@@ -689,6 +705,23 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
+  }
+
+  private async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
+    const accessToken = await this.authInstance.authSessionManager.getAccessToken();
+    if (!accessToken) throw WalletLoginError.connectionError("Could not obtain an access token from the current AUTH session.");
+
+    const citadelUserInfo = await get<UserInfoWithConnectedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const connectedAccounts = citadelUserInfo?.accounts || [];
+    return connectedAccounts.map((account) => ({
+      ...account,
+      // by default, the primary account is the active account
+      active: account.isPrimary,
+    }));
   }
 
   private async auditOAuditProgress(

@@ -7,13 +7,15 @@ import {
   useReceive,
   useEnableMFA,
   useAuthTokenInfo,
+  useLinkAccount,
   useManageMFA,
+  useSwitchAccount,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
-
 } from "@web3auth/modal/vue";
+import type { ConnectedAccountInfo, LinkAccountResult } from "@web3auth/no-modal";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
@@ -30,7 +32,7 @@ import {
 import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
 import { parseEther } from "viem";
 import { createWalletTransactionSigner, toAddress } from "@solana/client";
-import { address as solanaAddress,  } from "@solana/kit";
+import { address as solanaAddress } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 import { computed, ref, watch } from "vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
@@ -45,7 +47,7 @@ const props = defineProps<{
 }>();
 
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
-const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
+const { userInfo, loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
 const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
@@ -71,6 +73,60 @@ const trackedCallsId = ref<string | undefined>();
 const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
 const solanaClient = useSolanaClient();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
+
+// Account Linking
+const { linkAccount, unlinkAccount, loading: accountLinkingLoading, error: accountLinkingError } = useLinkAccount();
+const { switchAccount, loading: switchAccountLoading, error: switchAccountError } = useSwitchAccount();
+const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
+const linkAccountResult = ref<LinkAccountResult | null>(null);
+const lastUnlinkedAddress = ref<string | null>(null);
+const pendingUnlinkAddress = ref<string | null>(null);
+const connectedWallets = computed(() => userInfo.value?.connectedAccounts ?? []);
+
+const pendingSwitchAccountId = ref<string | null>(null);
+const lastSwitchAuthConnectionId = ref<string | null>(null);
+
+const onSwitchToConnectedWallet = async (account: ConnectedAccountInfo) => {
+  lastSwitchAuthConnectionId.value = null;
+  pendingSwitchAccountId.value = account.id;
+  await switchAccount(account);
+  pendingSwitchAccountId.value = null;
+  if (!switchAccountError.value) {
+    await getUserInfo();
+    lastSwitchAuthConnectionId.value = account.id;
+    printToConsole("Switch connected wallet", { accountId: account.id, accountType: account.accountType, eoaAddress: account.eoaAddress });
+  }
+};
+
+const onLinkAccount = async () => {
+  linkAccountResult.value = null;
+  lastUnlinkedAddress.value = null;
+  const result = await linkAccount({ connectorName: linkConnector.value });
+  if (result) {
+    await getUserInfo();
+    linkAccountResult.value = result;
+    printToConsole("Link Wallet Result", result);
+  }
+};
+
+const onUnlinkAccount = async (address: string) => {
+  linkAccountResult.value = null;
+  lastUnlinkedAddress.value = null;
+  pendingUnlinkAddress.value = address;
+
+  const result = await unlinkAccount(address);
+  pendingUnlinkAddress.value = null;
+
+  if (result) {
+    await getUserInfo();
+    lastUnlinkedAddress.value = address;
+    printToConsole("Unlink Wallet Result", result);
+  }
+};
+
+const canUnlinkConnectedWallet = (account: ConnectedAccountInfo): boolean => {
+  return !account.isPrimary && !account.active && Boolean(account.eoaAddress);
+};
 
 const currentChainId = ref<string | undefined>(web3Auth.value?.currentChain?.chainId);
 
@@ -108,10 +164,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return Boolean(conn?.solanaWallet);
 
     case "walletServices":
-      return (
-        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH &&
-        Boolean(conn?.ethereumProvider || conn?.solanaWallet)
-      );
+      return web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
 
     default: {
       return false;
@@ -159,7 +212,8 @@ watch(
 
 // Ethereum Provider
 const onGetUserInfo = async () => {
-  printToConsole("User Info", userInfo.value);
+  const result = await getUserInfo();
+  printToConsole("User Info", result);
 };
 
 const onGetAuthTokenInfo = async () => {
@@ -257,7 +311,7 @@ const onSendBatchCalls = async () => {
         { to: addr as `0x${string}`, value: parseEther("0.0001") },
         { to: addr as `0x${string}`, value: parseEther("0.0002") },
       ],
-      version: "2.0",
+      version: "2.0.0",
     });
     trackedCallsId.value = result.id;
     printToConsole("sendCalls result", result);
@@ -394,8 +448,6 @@ const onSwitchChain = async () => {
     printToConsole("switchedChain error", error);
   }
 };
-
-
 </script>
 
 <template>
@@ -430,6 +482,88 @@ const onSwitchChain = async () => {
             {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
         </div>
+        <Card class="!h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Connected Wallets</div>
+          <p class="text-xs text-gray-500 break-all">
+            Loaded from
+            <code>useWeb3AuthUser().userInfo.connectedAccounts</code>
+          </p>
+          <p class="text-xs text-gray-500 break-all mt-1">Switch the active wallet here. Non-primary inactive wallets can also be unlinked.</p>
+          <p class="text-xs font-semibold text-gray-700">Total: {{ connectedWallets.length }}</p>
+          <p v-if="lastSwitchAuthConnectionId" class="text-green-600 text-xs break-all mt-1">
+            Switched active wallet (accountId: {{ lastSwitchAuthConnectionId }}).
+          </p>
+          <p v-if="lastUnlinkedAddress" class="text-green-600 text-xs break-all mt-1">Unlinked wallet: {{ lastUnlinkedAddress }}.</p>
+          <p v-if="switchAccountError" class="text-red-500 text-xs break-all mt-1">Switch account: {{ switchAccountError.message }}</p>
+          <p v-if="accountLinkingError" class="text-red-500 text-xs break-all mt-1">Link or unlink wallet: {{ accountLinkingError.message }}</p>
+          <div v-if="connectedWallets.length" class="mt-2 space-y-2">
+            <div
+              v-for="account in connectedWallets"
+              :key="account.id"
+              class="border rounded-lg p-3 transition-colors"
+              :class="account.active ? 'border-emerald-400 bg-emerald-50/60' : 'border-gray-200'"
+            >
+              <div class="flex items-center justify-between gap-2">
+                <p class="text-xs font-semibold text-gray-700 break-all">
+                  {{ account.eoaAddress || "No address available" }}
+                </p>
+                <div class="flex items-center gap-1">
+                  <span
+                    v-if="account.active"
+                    class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700"
+                  >
+                    Active
+                  </span>
+                  <span
+                    v-if="account.isPrimary"
+                    class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-600"
+                  >
+                    Primary
+                  </span>
+                </div>
+              </div>
+              <p class="text-xs text-gray-500 break-all">
+                {{ account.connector }}
+                <span v-if="account.accountType">· {{ account.accountType }}</span>
+                <span v-if="account.chainNamespace">· {{ account.chainNamespace }}</span>
+              </p>
+              <p v-if="account.authConnectionId" class="text-xs text-gray-400 break-all mt-1">authConnectionId: {{ account.authConnectionId }}</p>
+              <p v-if="account.aaAddress" class="text-xs text-gray-500 break-all">Smart account: {{ account.aaAddress }}</p>
+              <p v-if="account.active" class="mt-2 text-xs font-medium text-emerald-700">
+                Currently used for wallet actions
+                <span v-if="!account.isPrimary">. Switch to another wallet before unlinking it.</span>
+              </p>
+              <p v-else-if="account.isPrimary" class="mt-2 text-xs text-blue-600">
+                Primary AUTH account stays linked and can be switched back to at any time.
+              </p>
+              <p v-else-if="!account.address" class="mt-2 text-xs text-gray-500">This wallet does not expose an unlinkable address.</p>
+              <div v-if="!account.active || canUnlinkConnectedWallet(account)" class="mt-2 flex flex-col gap-2">
+                <Button
+                  v-if="!account.active"
+                  :loading="switchAccountLoading && pendingSwitchAccountId === account.id"
+                  block
+                  size="xs"
+                  pill
+                  @click="onSwitchToConnectedWallet(account)"
+                >
+                  Switch to this wallet
+                </Button>
+                <Button
+                  v-if="canUnlinkConnectedWallet(account)"
+                  :loading="accountLinkingLoading && pendingUnlinkAddress === account.eoaAddress"
+                  block
+                  size="xs"
+                  pill
+                  variant="tertiary"
+                  @click="onUnlinkAccount(account.eoaAddress)"
+                >
+                  Unlink this wallet
+                </Button>
+              </div>
+            </div>
+          </div>
+          <p v-else class="text-xs text-gray-500">No connected wallets found in user info yet.</p>
+        </Card>
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
@@ -464,6 +598,17 @@ const onSwitchChain = async () => {
           </Button> -->
         </Card>
 
+        <!-- Account Linking -->
+        <Card v-if="isDisplay('walletServices')" class="!h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
+          <div class="mb-2 text-xl font-bold leading-tight text-left">Link Wallet</div>
+          <select v-model="linkConnector" class="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg text-sm" @change="linkAccountResult = null">
+            <option :value="WALLET_CONNECTORS.METAMASK">MetaMask</option>
+            <option value="phantom">Phantom</option>
+            <option :value="WALLET_CONNECTORS.WALLET_CONNECT_V2">WalletConnect</option>
+          </select>
+          <Button :loading="accountLinkingLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">Link Wallet</Button>
+        </Card>
+
         <!-- EVM -->
         <Card v-if="isDisplay('ethServices')" class="px-4 py-4 gap-4 !h-auto lg:!h-[calc(100dvh_-_240px)]" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">EVM Transaction</div>
@@ -496,18 +641,10 @@ const onSwitchChain = async () => {
 
           <!-- EIP-5792 -->
           <div class="mb-2 mt-4 text-xl font-bold leading-tight text-left">EIP-5792</div>
-          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">
-            Get Capabilities
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">
-            Send Batch Calls
-          </Button>
-          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">
-            Refresh Calls Status
-          </Button>
-          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">
-            Show Calls Status in Wallet
-          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">Get Capabilities</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">Send Batch Calls</Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">Refresh Calls Status</Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">Show Calls Status in Wallet</Button>
         </Card>
 
         <!-- SOLANA -->

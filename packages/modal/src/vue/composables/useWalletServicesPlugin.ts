@@ -1,7 +1,7 @@
 import { WalletInitializationError } from "@web3auth/no-modal";
-import { WalletServicesContextKey } from "@web3auth/no-modal/vue";
 import { inject } from "vue";
 
+import { WalletServicesContextKey } from "../context/WalletServicesContext";
 import { IWalletServicesInnerContext } from "../interfaces";
 
 export const useWalletServicesPlugin = (): IWalletServicesInnerContext => {

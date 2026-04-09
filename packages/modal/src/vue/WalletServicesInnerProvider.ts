@@ -1,9 +1,9 @@
 import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS, WalletServicesPluginError } from "@web3auth/no-modal";
 import { type WalletServicesPluginType } from "@web3auth/no-modal";
-import { WalletServicesContextKey } from "@web3auth/no-modal/vue";
 import { defineComponent, h, provide, Ref, ref, shallowRef, watch } from "vue";
 
 import { useWeb3AuthInner } from "./composables/useWeb3AuthInner";
+import { WalletServicesContextKey } from "./context/WalletServicesContext";
 import { IWalletServicesInnerContext } from "./interfaces";
 
 export const WalletServicesInnerProvider = defineComponent({

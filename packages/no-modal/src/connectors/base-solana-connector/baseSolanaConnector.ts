@@ -1,4 +1,4 @@
-import { signChallenge } from "@toruslabs/base-controllers";
+import { ChainNamespaceType, signChallenge } from "@toruslabs/base-controllers";
 
 import {
   AuthTokenInfo,
@@ -30,33 +30,44 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
       const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0]);
       if (cached) return cached;
 
-      const walletChains = new Set(this.solanaWallet.chains);
-      const currentChainConfig = this.coreOptions.chains.find((c) => {
-        if (c.chainNamespace !== CHAIN_NAMESPACES.SOLANA) return false;
-        const id = getSolanaChainByChainConfig(c);
-        return id != null && walletChains.has(id);
-      });
-      if (!currentChainConfig) {
-        throw WalletInitializationError.invalidParams("No Solana chain in common between the connected wallet and Web3Auth chain configuration");
-      }
-      const { chainId, chainNamespace } = currentChainConfig;
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
 
-      const payload = {
-        domain: window.location.origin,
-        uri: window.location.href,
-        address: accounts[0],
-        chainId: parseInt(chainId, 16),
-        version: "1",
-        nonce: Math.random().toString(36).slice(2),
-        issuedAt: new Date().toISOString(),
-      };
-
-      const challenge = await signChallenge(payload, chainNamespace, authServer);
-      const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accounts[0]);
-      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
+      const { challenge, signature, chainNamespace } = await this.generateChallengeAndSign(authServer);
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage: signature, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+  }
+
+  async generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    const accounts = this.solanaWallet.accounts.map((a) => a.address);
+    if (!accounts || accounts.length === 0) {
+      throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
+    }
+    const walletChains = new Set(this.solanaWallet.chains);
+    const currentChainConfig = this.coreOptions.chains.find((c) => {
+      if (c.chainNamespace !== CHAIN_NAMESPACES.SOLANA) return false;
+      const id = getSolanaChainByChainConfig(c);
+      return id != null && walletChains.has(id);
+    });
+    if (!currentChainConfig) {
+      throw WalletInitializationError.invalidParams("No Solana chain in common between the connected wallet and Web3Auth chain configuration");
+    }
+    const { chainId, chainNamespace } = currentChainConfig;
+    const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
+
+    const payload = {
+      domain: window.location.origin,
+      uri: window.location.href,
+      address: accounts[0],
+      chainId: parseInt(chainId, 16),
+      version: "1",
+      nonce: Math.random().toString(36).slice(2),
+      issuedAt: new Date().toISOString(),
+    };
+
+    const challenge = await signChallenge(payload, chainNamespace, authServer);
+    const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accounts[0]);
+    return { challenge, signature: signedMessage, chainNamespace };
   }
 
   async disconnectSession(): Promise<void> {

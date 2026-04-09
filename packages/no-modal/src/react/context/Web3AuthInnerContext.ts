@@ -91,14 +91,22 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
       setIsInitialized(true);
     };
+    const syncConnectionState = () => {
+      setConnection(web3Auth.connection);
+      setChainId(web3Auth.currentChainId);
+      setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
+    };
     const connectedListener = (_data: CONNECTED_EVENT_DATA) => {
       setStatus(web3Auth.status);
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);
         setIsConnected(true);
-        setConnection(web3Auth.connection);
+        syncConnectionState();
       }
+    };
+    const connectionUpdatedListener = () => {
+      syncConnectionState();
     };
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
@@ -139,6 +147,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
       web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
       web3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
       web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
@@ -152,6 +161,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         web3Auth.removeListener(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTING, connectingListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.ERRORED, errorListener);

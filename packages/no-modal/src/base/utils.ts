@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, cloneDeep } from "@toruslabs/base-controllers";
+import { CHAIN_NAMESPACES, ChainNamespaceType, cloneDeep } from "@toruslabs/base-controllers";
 import { CITADEL_SERVER_MAP, DASHBOARD_PUBLIC_API_MAP } from "@toruslabs/constants";
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import { get } from "@toruslabs/http-helpers";
@@ -20,8 +20,8 @@ export const dashboardPublicApiUrl = (buildEnv: BUILD_ENV_TYPE) => {
   return DASHBOARD_PUBLIC_API_MAP[buildEnv];
 };
 
-export const citadelServerUrl = (buildEnv?: BUILD_ENV_TYPE): string => {
-  return CITADEL_SERVER_MAP[buildEnv || BUILD_ENV.PRODUCTION];
+export const citadelServerUrl = (buildEnv: BUILD_ENV_TYPE = BUILD_ENV.PRODUCTION): string => {
+  return CITADEL_SERVER_MAP[buildEnv];
 };
 
 export const fetchProjectConfig = async ({
@@ -201,4 +201,16 @@ export const getCaipChainId = (chain: Pick<CustomChainConfig, "chainNamespace" |
 
   // for other chain namespaces, we just return the chainId as is
   return `${chain.chainNamespace}:${chain.chainId}`;
+};
+
+/**
+ * Parse the chain namespace from the citadel response
+ * @param chainNamespace - The chain namespace from the citadel response
+ * @returns The parsed chain namespace
+ */
+export const parseChainNamespaceFromCitadelResponse = (chainNamespace: string): ChainNamespaceType => {
+  if (chainNamespace === "evm") {
+    return CHAIN_NAMESPACES.EIP155;
+  }
+  return chainNamespace as ChainNamespaceType;
 };

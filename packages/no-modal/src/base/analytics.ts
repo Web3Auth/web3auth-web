@@ -132,6 +132,18 @@ export const ANALYTICS_EVENTS = {
   WALLET_CHECKOUT_CLICKED: "Wallet Checkout Clicked",
   WALLET_RECEIVE_CLICKED: "Wallet Receive Clicked",
   WALLET_SWAP_CLICKED: "Wallet Swap Clicked",
+  // Account Linking
+  ACCOUNT_LINKING_STARTED: "Account Linking Started",
+  ACCOUNT_LINKING_COMPLETED: "Account Linking Completed",
+  ACCOUNT_LINKING_FAILED: "Account Linking Failed",
+  // Account Unlinking
+  ACCOUNT_UNLINKING_STARTED: "Account Unlinking Started",
+  ACCOUNT_UNLINKING_COMPLETED: "Account Unlinking Completed",
+  ACCOUNT_UNLINKING_FAILED: "Account Unlinking Failed",
+  // Account switch (active connected wallet)
+  ACCOUNT_SWITCH_STARTED: "Account Switch Started",
+  ACCOUNT_SWITCH_COMPLETED: "Account Switch Completed",
+  ACCOUNT_SWITCH_FAILED: "Account Switch Failed",
 };
 
 export const ANALYTICS_INTEGRATION_TYPE = {

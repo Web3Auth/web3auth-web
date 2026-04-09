@@ -12,10 +12,12 @@ import {
 } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
+import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "../account-linking";
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   type AuthTokenInfo,
   CONNECTED_EVENT_DATA,
+  ConnectedAccountInfo,
   type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
@@ -230,14 +232,48 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
   cleanup(): Promise<void>;
+
+  /**
+   * Switch the active connection to a linked wallet: connects an isolated
+   * instance of that wallet’s connector, updates `connection.ethereumProvider` / `solanaWallet`,
+   * and emits `connection_updated` so Wagmi/UI can resync.
+   * The auxiliary connector stays connected (not torn down after switch). The previous auxiliary
+   * connector is disconnected when starting another switch or when the primary session disconnects.
+   *
+   * Requires an AUTH primary session and a matching `userInfo.connectedAccounts` entry.
+   */
+  switchAccount(account: ConnectedAccountInfo): Promise<void>;
+
+  /**
+   * Link an external wallet to the currently authenticated user account
+   * via the Citadel account-linking endpoint.
+   *
+   * Requires:
+   * - The user to be currently connected with the AUTH connector.
+   * - `accountLinking.serverUrl` to be set in the Web3Auth constructor options.
+   *
+   * @param params - Linking parameters including the target connector name.
+   * @returns A result object confirming the link, including the linked address.
+   */
+  linkAccount(params: LinkAccountParams): Promise<LinkAccountResult>;
+
+  /**
+   * Unlink an external wallet from the currently authenticated user account
+   * via the Citadel account-unlinking endpoint.
+   *
+   * @param params - Unlinking parameters including the target account address.
+   * @returns A result object confirming the unlink.
+   */
+  unlinkAccount(address: string): Promise<UnlinkAccountResult>;
 }
 
 export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType };
 
-export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready"> & {
+export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready" | "signing_connection_updated"> & {
   [CONNECTOR_EVENTS.READY]: () => void;
   [CONNECTOR_EVENTS.CONNECTED]: (data: SDK_CONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError, loginMode: LoginModeType) => void;
+  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: () => void;
   MODAL_VISIBILITY: (visibility: boolean) => void;
 };
 
