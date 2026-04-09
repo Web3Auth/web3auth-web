@@ -82,7 +82,6 @@ const linkAccountResult = ref<LinkAccountResult | null>(null);
 const lastUnlinkedAddress = ref<string | null>(null);
 const pendingUnlinkAddress = ref<string | null>(null);
 const connectedWallets = computed(() => userInfo.value?.connectedAccounts ?? []);
-console.log("connectedWallets", connectedWallets.value);
 
 const pendingSwitchAccountId = ref<string | null>(null);
 const lastSwitchAuthConnectionId = ref<string | null>(null);
@@ -312,7 +311,7 @@ const onSendBatchCalls = async () => {
         { to: addr as `0x${string}`, value: parseEther("0.0001") },
         { to: addr as `0x${string}`, value: parseEther("0.0002") },
       ],
-      version: "2.0",
+      version: "2.0.0",
     });
     trackedCallsId.value = result.id;
     printToConsole("sendCalls result", result);
@@ -551,7 +550,7 @@ const onSwitchChain = async () => {
                 </Button>
                 <Button
                   v-if="canUnlinkConnectedWallet(account)"
-                  :loading="accountLinkingLoading && pendingUnlinkAddress === account.address"
+                  :loading="accountLinkingLoading && pendingUnlinkAddress === account.eoaAddress"
                   block
                   size="xs"
                   pill

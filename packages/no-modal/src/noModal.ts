@@ -65,6 +65,7 @@ import {
   LOGIN_MODE,
   LoginModeType,
   type LoginParamMap,
+  parseChainNamespaceFromCitadelResponse,
   PLUGIN_NAMESPACES,
   PLUGIN_STATUS,
   type ProjectConfig,
@@ -120,7 +121,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   private currentConnection: Connection | null = null;
 
   /** Isolated connector kept connected after `switchAccount`; cleared on primary disconnect or next switch. */
-  private auxiliarySigningConnector: IConnector<unknown> | null = null;
+  private auxiliarySigningConnectorMap: Map<string, IConnector<unknown>> = new Map();
 
   private state: IWeb3AuthState = {
     connectedConnectorName: null,
@@ -206,8 +207,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private get signingConnector(): IConnector<unknown> | null {
-    if (this.state.activeAccount && this.state.activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
-      return this.auxiliarySigningConnector;
+    const { activeAccount } = this.state;
+    if (activeAccount && !activeAccount.isPrimary && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
+      if (this.auxiliarySigningConnectorMap.has(activeAccount.id)) {
+        return this.auxiliarySigningConnectorMap.get(activeAccount.id);
+      }
+      throw new Error(`Signing connector not found for account "${activeAccount.id}".`);
     }
     return this.connectedConnector;
   }
@@ -619,16 +624,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_STARTED, trackData);
 
-      // check if there is an existing auxiliary signing connector and disconnect it
-      if (this.auxiliarySigningConnector) {
-        try {
-          await this.auxiliarySigningConnector.disconnect({ cleanup: true });
-        } catch (e) {
-          log.debug("Previous auxiliary signing connector disconnect", e);
-        }
-        this.auxiliarySigningConnector = null;
-      }
-
       let ethereumProvider: IProvider;
       let solanaWallet: Wallet;
       let newConnectorName: WALLET_CONNECTOR_TYPE;
@@ -656,7 +651,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           throw AccountLinkingError.requestFailed(`Failed to connect isolated connector "${targetAccount.connector}" for account switch.`);
         }
 
-        this.auxiliarySigningConnector = walletConnector;
+        this.auxiliarySigningConnectorMap.set(targetAccount.id, walletConnector);
 
         newConnectorName = newConnection.connectorName as WALLET_CONNECTOR_TYPE;
         ethereumProvider = newConnection.ethereumProvider;
@@ -1182,7 +1177,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
       const { activeAccount } = this.state;
       // if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
-      if (activeAccount && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
+      if (activeAccount && !activeAccount.isPrimary && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
         const targetChainId = this.getChainIdForConnectedAccount(activeAccount, connectedChainId);
         const walletConnector = await this.createIsolatedWalletConnector(activeAccount.connector as WALLET_CONNECTOR_TYPE, targetChainId);
         const newConnection = await walletConnector.connect({ chainId: targetChainId });
@@ -1190,7 +1185,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           throw AccountLinkingError.requestFailed(`Failed to connect isolated connector "${activeAccount.connector}" for account switch.`);
         }
 
-        this.auxiliarySigningConnector = walletConnector;
+        this.auxiliarySigningConnectorMap.set(activeAccount.id, walletConnector);
         ({ ethereumProvider, solanaWallet } = newConnection);
       }
 
@@ -1215,14 +1210,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
-      if (this.auxiliarySigningConnector) {
-        try {
-          await this.auxiliarySigningConnector.disconnect({ cleanup: true });
-        } catch (e) {
-          log.debug("Auxiliary signing connector disconnect on primary disconnect", e);
-        }
-        this.auxiliarySigningConnector = null;
+      const { activeAccount } = this.state;
+      if (activeAccount && activeAccount.isPrimary) {
+        // if primary account is disconnected, disconnect all auxiliary signing connectors
+        this.auxiliarySigningConnectorMap.forEach(async (connector) => {
+          try {
+            await connector.disconnect({ cleanup: true });
+            this.auxiliarySigningConnectorMap.delete(activeAccount.id);
+          } catch (e) {
+            log.debug("Auxiliary signing connector disconnect on primary disconnect", e);
+          }
+        });
       }
+
       this.currentConnection = null;
       // re-setup commonJRPCProvider
       this.commonJRPCProvider.removeAllListeners();
@@ -1350,7 +1350,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     if (account.chainNamespace) {
-      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === account.chainNamespace);
+      const parsedChainNamespace = parseChainNamespaceFromCitadelResponse(account.chainNamespace);
+      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === parsedChainNamespace);
       if (namespaceChain) {
         return namespaceChain.chainId;
       }
