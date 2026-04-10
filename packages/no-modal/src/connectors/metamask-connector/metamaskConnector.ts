@@ -71,7 +71,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   private evmClient: MetamaskConnectEVM | null = null;
 
-  private evmClientPromise: Promise<MetamaskConnectEVM> | undefined;
+  private initializationPromise: Promise<void> | undefined;
 
   private multichainClient: MultichainCore | null = null;
 
@@ -97,16 +97,13 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   /**
-   * Ensures the MetaMask Connect EVM instance is initialized
+   * Ensures the connector is initialized
    */
-  private async ensureMetamask(): Promise<MetamaskConnectEVM> {
-    if (!this.evmClient) {
-      if (!this.evmClientPromise) {
-        throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
-      }
-      this.evmClient = await this.evmClientPromise;
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initializationPromise) {
+      throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
     }
-    return this.evmClient;
+    await this.initializationPromise;
   }
 
   /**
@@ -176,6 +173,13 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       headless: this.connectorSettings?.ui?.headless ?? true,
     };
 
+    let initResolve: () => void;
+    let initReject: (reason?: Error) => void;
+    this.initializationPromise = new Promise((resolve, reject) => {
+      initResolve = resolve;
+      initReject = reject;
+    });
+
     try {
       // Initialize the multichain client (singleton) first
       this.multichainClient = await createMultichainClient({
@@ -193,7 +197,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       });
 
       // Create the EVM client (reuses the singleton multichain core internally)
-      this.evmClientPromise = createEVMClient({
+      this.evmClient = await createEVMClient({
         dapp,
         eventHandlers: {
           accountsChanged: this.handleAccountsChanged,
@@ -206,9 +210,11 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         debug: this.connectorSettings?.debug,
       });
 
-      this.evmClient = await this.evmClientPromise;
+      this.evmProvider = this.evmClient.getProvider() as unknown as IProvider;
+
+      initResolve();
     } catch (error) {
-      throw WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error);
+      initReject(WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error));
     }
 
     // TODO need to figure this out
@@ -218,11 +224,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       this.status = CONNECTOR_STATUS.CONNECTED;
 
       this.rehydrated = true;
-
-      const provider = this.evmClient.getProvider() as unknown as IProvider;
-      if (!provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
-
-      this.evmProvider = provider;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
@@ -256,9 +257,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
 
-    const instance = await this.ensureMetamask();
-
-    if (!this.multichainClient) throw WalletLoginError.notConnectedError("Multichain client is not initialized. Call init() first.");
+    await this.ensureInitialized();
 
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -286,14 +285,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         await this.multichainClient.connect(scopes, []);
       }
 
-      // Get the provider from the SDK
-      const provider = instance.getProvider() as unknown as IProvider;
-      if (!provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
-
-      this.evmProvider = provider;
-
       // Switch chain if not connected to the right chain
-      const currentChainId = instance.getChainId();
+      const currentChainId = this.evmClient.getChainId();
 
       if (currentChainId !== chainId) {
         await this.switchChain(chainConfig, true);
@@ -353,7 +346,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       this.status = CONNECTOR_STATUS.NOT_READY;
       this.evmProvider = null;
       this.evmClient = null;
-      this.evmClientPromise = undefined;
       this.multichainClient = null;
     } else {
       // Ready to be connected again
@@ -370,14 +362,12 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
 
-    const instance = await this.ensureMetamask();
+    await this.ensureInitialized();
 
     const chainConfig = this.coreOptions.chains.find(
       (x) => x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
     );
 
-    // Build chain configuration for the new SDK
-    // The new SDK handles adding the chain automatically if needed
     const chainConfiguration = chainConfig
       ? {
           chainId: params.chainId,
@@ -393,8 +383,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         }
       : undefined;
 
-    // The new SDK's switchChain handles both switching and adding chains automatically
-    await instance.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
+    await this.evmClient!.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
   }
 
   public async enableMFA(): Promise<void> {
