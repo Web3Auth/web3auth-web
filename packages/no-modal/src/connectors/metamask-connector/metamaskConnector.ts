@@ -1,16 +1,20 @@
 import { createEVMClient, type Hex, type MetamaskConnectEVM } from "@metamask/connect-evm";
 import { createMultichainClient, type MultichainCore, type Scope } from "@metamask/connect-multichain";
 import { createSolanaClient, type SolanaClient } from "@metamask/connect-solana";
-import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
+import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-controllers";
 import type { Wallet } from "@wallet-standard/base";
+import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
   type Analytics,
   ANALYTICS_EVENTS,
+  type AuthTokenInfo,
+  BaseConnector,
   BaseConnectorLoginParams,
   type BaseConnectorSettings,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
+  citadelServerUrl,
   CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_CATEGORY,
@@ -29,9 +33,9 @@ import {
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletLoginError,
+  walletSignMessage,
   Web3AuthError,
 } from "../../base";
-import { BaseEvmConnector } from "../base-evm-connector";
 import { getSiteName } from "../utils";
 
 /**
@@ -58,10 +62,10 @@ export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
   connectorSettings?: MetaMaskConnectorSettings;
 }
 
-class MetaMaskConnector extends BaseEvmConnector<void> {
-  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.EIP155;
+class MetaMaskConnector extends BaseConnector<void> {
+  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 
-  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
+  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.OTHER;
 
   readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
@@ -100,6 +104,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   set provider(_: IProvider | null) {
     throw new Error("Not implemented");
+  }
+
+  get solanaWallet(): Wallet | null {
+    return this.solanaProvider;
   }
 
   /**
@@ -147,7 +155,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   };
 
   async init(options: ConnectorInitOptions): Promise<void> {
-    await super.init(options);
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
@@ -160,7 +167,21 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     // Build supported networks in hex format for EVM client
     const hexSupportedNetworks: Record<string, string> = {};
     for (const chain of this.coreOptions.chains) {
-      hexSupportedNetworks[chain.chainId] = chain.rpcTarget;
+      if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+        hexSupportedNetworks[chain.chainId] = chain.rpcTarget;
+      }
+    }
+
+    // Build supported networks for Solana client (maps hex chainId to network name)
+    const solanaSupportedNetworks: Record<string, string> = {};
+    const solanaChainIdToNetwork: Record<string, string> = { "0x65": "mainnet", "0x66": "testnet", "0x67": "devnet" };
+    for (const chain of this.coreOptions.chains) {
+      if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+        const networkName = solanaChainIdToNetwork[chain.chainId];
+        if (networkName) {
+          solanaSupportedNetworks[networkName] = chain.rpcTarget;
+        }
+      }
     }
 
     // Detect app metadata
@@ -186,6 +207,9 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       initReject = reject;
     });
 
+    const hasEvmChains = Object.keys(hexSupportedNetworks).length > 0;
+    const hasSolanaChains = Object.keys(solanaSupportedNetworks).length > 0;
+
     try {
       // Initialize the multichain client (singleton) first
       this.multichainClient = await createMultichainClient({
@@ -202,28 +226,34 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         }
       });
 
-      // Create the EVM client (reuses the singleton multichain core internally)
-      this.evmClient = await createEVMClient({
-        dapp,
-        eventHandlers: {
-          accountsChanged: this.handleAccountsChanged,
-          chainChanged: this.handleChainChanged,
-          connect: this.handleConnect,
-          disconnect: this.handleDisconnect,
-        },
-        api: { supportedNetworks: hexSupportedNetworks },
-        ui,
-        debug: this.connectorSettings?.debug,
-      });
+      // Create the EVM client only when EVM chains are configured
+      // (createEVMClient requires at least one entry in supportedNetworks)
+      if (hasEvmChains) {
+        this.evmClient = await createEVMClient({
+          dapp,
+          eventHandlers: {
+            accountsChanged: this.handleAccountsChanged,
+            chainChanged: this.handleChainChanged,
+            connect: this.handleConnect,
+            disconnect: this.handleDisconnect,
+          },
+          api: { supportedNetworks: hexSupportedNetworks },
+          ui,
+          debug: this.connectorSettings?.debug,
+        });
 
-      this.evmProvider = this.evmClient.getProvider() as unknown as IProvider;
+        this.evmProvider = this.evmClient.getProvider() as unknown as IProvider;
+      }
 
-      // Create the Solana client (reuses the singleton multichain core internally)
-      this.solanaClient = await createSolanaClient({
-        dapp,
-        debug: this.connectorSettings?.debug,
-      });
-      this.solanaProvider = this.solanaClient.getWallet();
+      // Create the Solana client only when Solana chains are configured
+      if (hasSolanaChains) {
+        this.solanaClient = await createSolanaClient({
+          dapp,
+          api: { supportedNetworks: solanaSupportedNetworks },
+          debug: this.connectorSettings?.debug,
+        });
+        this.solanaProvider = this.solanaClient.getWallet();
+      }
 
       initResolve();
     } catch (error) {
@@ -233,7 +263,14 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     // TODO need to figure this out
     this.isInjected = false;
 
-    if (this.evmClient.status === "connected") {
+    if (!this.multichainClient) {
+      this.status = CONNECTOR_STATUS.ERRORED;
+      this.emit(CONNECTOR_EVENTS.ERRORED, new Error("Failed to initialize MetaMask Connect.") as Web3AuthError);
+      return;
+    }
+
+    const coreStatus = this.multichainClient.status;
+    if (coreStatus === "connected") {
       this.status = CONNECTOR_STATUS.CONNECTED;
 
       this.rehydrated = true;
@@ -248,10 +285,10 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       if (options.getAuthTokenInfo) {
         await this.getAuthTokenInfo();
       }
-    } else if (this.evmClient.status === "loaded") {
+    } else if (coreStatus === "loaded" || coreStatus === "disconnected") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
-    } else if (this.evmClient.status === "pending") {
+    } else if (coreStatus === "pending") {
       // 'pending' implies that a transport failed to resume the connection
       // if (options.autoConnect) {
       //   this.rehydrated = false;
@@ -298,12 +335,13 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         await this.multichainClient.connect(scopes, []);
       }
 
-      // Switch chain if not connected to the right chain
-      const currentChainId = this.evmClient.getChainId();
-
-      if (currentChainId !== chainId) {
-        await this.switchChain(chainConfig, true);
-      }
+      // // Switch EVM chain if not connected to the right one (Solana chains are handled by the wallet-standard provider)
+      // if (chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      //   const currentChainId = this.evmClient!.getChainId();
+      //   if (currentChainId !== chainId) {
+      //     await this.switchChain(chainConfig, true);
+      //   }
+      // }
 
       this.status = CONNECTOR_STATUS.CONNECTED;
 
@@ -350,7 +388,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (!this.multichainClient) throw WalletLoginError.connectionError("Multichain client is not available");
-    await super.disconnectSession();
+    this.checkDisconnectionRequirements();
+    await this.clearWalletSession();
 
     // Disconnect using the multichain client
     await this.multichainClient.disconnect();
@@ -367,7 +406,67 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       // Ready to be connected again
       this.status = CONNECTOR_STATUS.READY;
     }
-    await super.disconnect();
+    this.rehydrated = false;
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
+  }
+
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError();
+
+    // Determine the active chain: prefer Solana if no EVM provider, otherwise use EVM provider's chain
+    const isSolanaOnly = !this.evmProvider && !!this.solanaProvider;
+    const activeChainConfig = isSolanaOnly
+      ? this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.SOLANA)
+      : this.evmProvider
+        ? this.coreOptions.chains.find((x) => x.chainId === this.evmProvider!.chainId)
+        : undefined;
+
+    if (!activeChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
+    this.status = CONNECTOR_STATUS.AUTHORIZING;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.METAMASK });
+
+    const { chainNamespace } = activeChainConfig;
+    const accounts =
+      chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider
+        ? this.solanaProvider.accounts.map((a) => a.address)
+        : this.evmProvider
+          ? await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })
+          : [];
+
+    if (accounts && accounts.length > 0) {
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
+      if (cached) return cached;
+
+      const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
+      const payload = {
+        domain: window.location.origin,
+        uri: window.location.href,
+        address: accounts[0],
+        chainId: parseInt(activeChainConfig.chainId, 16),
+        version: "1",
+        nonce: Math.random().toString(36).slice(2),
+        issuedAt: new Date().toISOString(),
+      };
+
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
+
+      let signedMessage: string;
+      if (chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider) {
+        signedMessage = await walletSignMessage(this.solanaProvider, challenge, accounts[0]);
+      } else if (this.evmProvider) {
+        const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
+        signedMessage = await this.evmProvider.request<[string, string], string>({
+          method: EVM_METHOD_TYPES.PERSONAL_SIGN,
+          params: [hexChallenge, accounts[0]],
+        });
+      } else {
+        throw WalletLoginError.notConnectedError("No provider available for signing");
+      }
+
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
+    }
+    throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -378,7 +477,18 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
 
+    const namespaces = new Set(this.coreOptions.chains.map((c) => c.chainNamespace));
+    if (namespaces.size > 1) {
+      throw WalletLoginError.unsupportedOperation(
+        "switchChain is not supported when multiple chain namespaces are configured. Use connection.ethereumProvider and connection.solanaWallet directly."
+      );
+    }
+
     await this.ensureInitialized();
+
+    if (!this.evmClient) {
+      throw WalletLoginError.unsupportedOperation("switchChain requires an EVM client, but no EVM chains are configured.");
+    }
 
     const chainConfig = this.coreOptions.chains.find(
       (x) => x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
@@ -399,7 +509,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         }
       : undefined;
 
-    await this.evmClient!.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
+    await this.evmClient.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
   }
 
   public async enableMFA(): Promise<void> {
