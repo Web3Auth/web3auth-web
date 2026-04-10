@@ -118,6 +118,21 @@
       "require": "./dist/lib.cjs/packages/modal/src/index.js",
       "types": "./dist/lib.cjs/types/index.d.ts"
     },
+    "./x402": {
+      "import": "./dist/lib.esm/packages/modal/src/x402/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/x402/index.js",
+      "types": "./dist/lib.cjs/types/x402/index.d.ts"
+    },
+    "./x402/react": {
+      "import": "./dist/lib.esm/packages/modal/src/x402/react.js",
+      "require": "./dist/lib.cjs/packages/modal/src/x402/react.js",
+      "types": "./dist/lib.cjs/types/x402/react.d.ts"
+    },
+    "./x402/vue": {
+      "import": "./dist/lib.esm/packages/modal/src/x402/vue.js",
+      "require": "./dist/lib.cjs/packages/modal/src/x402/vue.js",
+      "types": "./dist/lib.cjs/types/x402/vue.d.ts"
+    },
     "./react": {
       "import": "./dist/lib.esm/packages/modal/src/react/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/react/index.js",
@@ -161,6 +176,15 @@
   },
   "typesVersions": {
     "*": {
+      "x402": [
+        "./dist/lib.cjs/types/x402/index.d.ts"
+      ],
+      "x402/react": [
+        "./dist/lib.cjs/types/x402/react.d.ts"
+      ],
+      "x402/vue": [
+        "./dist/lib.cjs/types/x402/vue.d.ts"
+      ],
       "react": [
         "./dist/lib.cjs/types/react/index.d.ts"
       ],

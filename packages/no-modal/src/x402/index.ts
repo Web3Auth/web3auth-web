@@ -5,8 +5,10 @@ import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
 import { ClientSvmSigner, ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
 import { Address, createWalletClient, custom, type WalletClient } from "viem";
 
-import { IProvider } from "../connector";
-import { walletSignAndSendTransaction } from "../wallet";
+import { IProvider } from "../base/connector";
+import { walletSignAndSendTransaction } from "../base/wallet";
+
+export * from "./interfaces";
 
 export const EVM_CAIP2_WILDCARD = "eip155:*";
 export const SOLANA_CAIP2_WILDCARD = "solana:*";
@@ -41,7 +43,7 @@ async function normalizePaymentRequiredResponse(response: Response): Promise<Res
       });
     }
   } catch {
-    // Malformed JSON — fall through and return response with the already-consumed body
+    // Malformed JSON - fall through and return response with the already-consumed body
   }
   return new Response(body, {
     status: response.status,

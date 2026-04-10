@@ -1,17 +1,11 @@
 import type { Address } from "viem";
 import { type MaybeRefOrGetter, toValue } from "vue";
 
-import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
-import {
-  createEvmX402Fetch,
-  createProviderBackedEvmSigner,
-  createSolanaX402Fetch,
-  getEvmAddress,
-  type IUseX402FetchParams,
-  type IUseX402FetchReturnValues,
-} from "../../base/x402";
-import { useSolanaWallet } from "../solana/composables/useSolanaWallet";
-import { useWeb3Auth } from "./useWeb3Auth";
+import { CHAIN_NAMESPACES } from "../base/chain/IChainInterface";
+import { useWeb3Auth } from "../vue/composables/useWeb3Auth";
+import { useSolanaWallet } from "../vue/solana/composables/useSolanaWallet";
+import { createEvmX402Fetch, createProviderBackedEvmSigner, createSolanaX402Fetch, getEvmAddress } from "./index";
+import type { IUseX402FetchParams, IUseX402FetchReturnValues } from "./interfaces";
 
 export { createEvmX402Fetch, createSolanaX402Fetch };
 export type { IUseX402FetchParams, IUseX402FetchReturnValues };
@@ -21,8 +15,8 @@ export type { IUseX402FetchParams, IUseX402FetchReturnValues };
  *
  * Automatically selects the correct payment path based on the currently connected
  * chain namespace:
- *  - **Solana** – uses `createSolanaX402Fetch` backed by the web3auth Solana wallet.
- *  - **EVM** – uses `createEvmX402Fetch` backed by the web3auth EIP-1193 provider.
+ *  - **Solana** - uses `createSolanaX402Fetch` backed by the web3auth Solana wallet.
+ *  - **EVM** - uses `createEvmX402Fetch` backed by the web3auth EIP-1193 provider.
  *
  * Callers do not need to pass a signer manually; it is sourced internally.
  * When `address` is provided, it takes precedence over the provider's active account.

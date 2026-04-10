@@ -13,4 +13,3 @@ export * from "./plugin";
 export * from "./provider/IProvider";
 export * from "./utils";
 export * from "./wallet";
-export * from "./x402";

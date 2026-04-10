@@ -1,6 +1,7 @@
 import { CHAIN_NAMESPACES } from "@web3auth/modal";
-import { useChain, useX402Fetch } from "@web3auth/modal/react";
+import { useChain } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
+import { useX402Fetch } from "@web3auth/modal/x402/react";
 import { useCallback, useState } from "react";
 import { useWalletClient } from "wagmi";
 

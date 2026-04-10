@@ -1,19 +1,14 @@
-import { CHAIN_NAMESPACES } from "@web3auth/no-modal";
-import {
-  createEvmX402Fetch,
-  createProviderBackedEvmSigner,
-  createSolanaX402Fetch,
-  getEvmAddress,
-  type IUseX402FetchParams,
-  type IUseX402FetchReturnValues,
-} from "@web3auth/no-modal/react";
 import { useCallback } from "react";
 import type { Address } from "viem";
 
-import { useSolanaWallet } from "../solana/hooks/useSolanaWallet";
-import { useChain } from "./useChain";
-import { useWeb3Auth } from "./useWeb3Auth";
+import { CHAIN_NAMESPACES } from "../base/chain/IChainInterface";
+import { useChain } from "../react/hooks/useChain";
+import { useWeb3Auth } from "../react/hooks/useWeb3Auth";
+import { useSolanaWallet } from "../react/solana/hooks/useSolanaWallet";
+import { createEvmX402Fetch, createProviderBackedEvmSigner, createSolanaX402Fetch, getEvmAddress } from "./index";
+import type { IUseX402FetchParams, IUseX402FetchReturnValues } from "./interfaces";
 
+export { createEvmX402Fetch, createProviderBackedEvmSigner, createSolanaX402Fetch, getEvmAddress };
 export type { IUseX402FetchParams, IUseX402FetchReturnValues };
 
 /**
@@ -21,8 +16,8 @@ export type { IUseX402FetchParams, IUseX402FetchReturnValues };
  *
  * Automatically selects the correct payment path based on the currently connected
  * chain namespace:
- *  - **Solana** – uses `createSolanaX402Fetch` backed by the web3auth Solana wallet.
- *  - **EVM** – uses `createEvmX402Fetch` backed by the web3auth EIP-1193 provider.
+ *  - **Solana** - uses `createSolanaX402Fetch` backed by the web3auth Solana wallet.
+ *  - **EVM** - uses `createEvmX402Fetch` backed by the web3auth EIP-1193 provider.
  *
  * Callers do not need to pass a signer manually; it is sourced internally.
  * When `address` is provided, it takes precedence over the provider's active account.

@@ -18,7 +18,7 @@ This plan covers the main x402 demo path across:
 - `demo/vue-app-new/src/components/X402Tester.vue`
 - `demo/vue-app-new/src/components/AppDashboard.vue`
 - `demo/x402-test-server/src/index.ts`
-- the `useX402Fetch` flow exposed through `@web3auth/modal/vue`
+- the `useX402Fetch` flow exposed through `@web3auth/modal/x402/vue`
 
 It does not try to fully validate every wallet provider or every facilitator implementation.
 
