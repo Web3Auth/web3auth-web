@@ -1,6 +1,8 @@
 import { createEVMClient, type Hex, type MetamaskConnectEVM } from "@metamask/connect-evm";
 import { createMultichainClient, type MultichainCore, type Scope } from "@metamask/connect-multichain";
+import { createSolanaClient, type SolanaClient } from "@metamask/connect-solana";
 import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
+import type { Wallet } from "@wallet-standard/base";
 
 import {
   type Analytics,
@@ -67,11 +69,15 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
-  private evmProvider: IProvider | null = null;
-
   private evmClient: MetamaskConnectEVM | null = null;
 
-  private initializationPromise: Promise<void> | undefined;
+  private evmProvider: IProvider | null = null;
+
+  private solanaClient: SolanaClient | null = null;
+
+  private solanaProvider: Wallet | null = null;
+
+  private initializationPromise: Promise<void> | null = null;
 
   private multichainClient: MultichainCore | null = null;
 
@@ -212,6 +218,13 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
       this.evmProvider = this.evmClient.getProvider() as unknown as IProvider;
 
+      // Create the Solana client (reuses the singleton multichain core internally)
+      this.solanaClient = await createSolanaClient({
+        dapp,
+        debug: this.connectorSettings?.debug,
+      });
+      this.solanaProvider = this.solanaClient.getWallet();
+
       initResolve();
     } catch (error) {
       initReject(WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error));
@@ -229,7 +242,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
         ethereumProvider: this.evmProvider,
-        solanaWallet: null,
+        solanaWallet: this.solanaProvider,
       } as CONNECTED_EVENT_DATA);
 
       if (options.getAuthTokenInfo) {
@@ -307,14 +320,14 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
         ethereumProvider: this.evmProvider,
-        solanaWallet: null,
+        solanaWallet: this.solanaProvider,
       } as CONNECTED_EVENT_DATA);
 
       if (getAuthTokenInfo) {
         await this.getAuthTokenInfo();
       }
 
-      return { ethereumProvider: this.evmProvider, solanaWallet: null, connectorName: this.name };
+      return { ethereumProvider: this.evmProvider, solanaWallet: this.solanaProvider, connectorName: this.name };
     } catch (error) {
       // Ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
@@ -344,9 +357,12 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
-      this.evmProvider = null;
-      this.evmClient = null;
+      this.initializationPromise = null;
       this.multichainClient = null;
+      this.evmClient = null;
+      this.evmProvider = null;
+      this.solanaClient = null;
+      this.solanaProvider = null;
     } else {
       // Ready to be connected again
       this.status = CONNECTOR_STATUS.READY;
