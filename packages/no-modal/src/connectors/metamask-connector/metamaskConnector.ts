@@ -1,10 +1,10 @@
-import { createEVMClient, EIP1193Provider, Hex, type MetamaskConnectEVM } from "@metamask/connect-evm";
+import { createEVMClient, type Hex, type MetamaskConnectEVM } from "@metamask/connect-evm";
+import { createMultichainClient, type MultichainCore, type Scope } from "@metamask/connect-multichain";
 import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
 
 import {
   type Analytics,
   ANALYTICS_EVENTS,
-  AuthTokenInfo,
   BaseConnectorLoginParams,
   type BaseConnectorSettings,
   CHAIN_NAMESPACES,
@@ -73,6 +73,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   private metamaskPromise: Promise<MetamaskConnectEVM> | undefined;
 
+  private multichainClient: MultichainCore | null = null;
+
   private connectorSettings?: MetaMaskConnectorSettings;
 
   private analytics?: Analytics;
@@ -105,18 +107,6 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       this.metamaskInstance = await this.metamaskPromise;
     }
     return this.metamaskInstance;
-  }
-
-  /**
-   * Sets up event listeners on the MetaMask instance
-   */
-  private setupEventListeners(provider: EIP1193Provider): void {
-    // Listen for QR code URI to display (for mobile wallet connection)
-    provider.on("display_uri", (uri: unknown) => {
-      if (typeof uri === "string" && uri) {
-        this.updateConnectorData({ uri });
-      }
-    });
   }
 
   /**
@@ -158,10 +148,16 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
-    // Build supported networks in CAIP-2 format (eip155:chainId -> rpcUrl)
-    const supportedNetworks: Record<string, string> = {};
+    // Build supported networks in CAIP-2 format for multichain client
+    const caipSupportedNetworks: Record<string, string> = {};
     for (const chain of this.coreOptions.chains) {
-      supportedNetworks[chain.chainId] = chain.rpcTarget;
+      caipSupportedNetworks[getCaipChainId(chain)] = chain.rpcTarget;
+    }
+
+    // Build supported networks in hex format for EVM client
+    const hexSupportedNetworks: Record<string, string> = {};
+    for (const chain of this.coreOptions.chains) {
+      hexSupportedNetworks[chain.chainId] = chain.rpcTarget;
     }
 
     // Detect app metadata
@@ -169,34 +165,48 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     const appUrl = this.connectorSettings?.dapp?.url || window.location.origin || "https://web3auth.io";
     const appIconUrl = this.connectorSettings?.dapp?.iconUrl;
 
-    // Initialize the MetaMask Connect EVM SDK
-    this.metamaskPromise = createEVMClient({
-      dapp: {
-        name: appName,
-        url: appUrl,
-        ...(appIconUrl && { iconUrl: appIconUrl }),
-      },
-      eventHandlers: {
-        accountsChanged: this.handleAccountsChanged,
-        chainChanged: this.handleChainChanged,
-        connect: this.handleConnect,
-        disconnect: this.handleDisconnect,
-      },
-      api: {
-        supportedNetworks,
-      },
-      ui: {
-        preferExtension: this.connectorSettings?.ui?.preferExtension ?? true,
-        showInstallModal: this.connectorSettings?.ui?.showInstallModal ?? false,
-        headless: this.connectorSettings?.ui?.headless ?? true,
-      },
-      debug: this.connectorSettings?.debug,
-    });
+    const dapp = {
+      name: appName,
+      url: appUrl,
+      ...(appIconUrl && { iconUrl: appIconUrl }),
+    };
+    const ui = {
+      preferExtension: this.connectorSettings?.ui?.preferExtension ?? true,
+      showInstallModal: this.connectorSettings?.ui?.showInstallModal ?? false,
+      headless: this.connectorSettings?.ui?.headless ?? true,
+    };
 
     try {
+      // Initialize the multichain client (singleton) first
+      this.multichainClient = await createMultichainClient({
+        dapp,
+        api: { supportedNetworks: caipSupportedNetworks },
+        ui,
+        debug: this.connectorSettings?.debug,
+      });
+
+      // Listen for QR code URI from the multichain client (for mobile wallet connection)
+      this.multichainClient.on("display_uri", (uri: string) => {
+        if (uri) {
+          this.updateConnectorData({ uri });
+        }
+      });
+
+      // Create the EVM client (reuses the singleton multichain core internally)
+      this.metamaskPromise = createEVMClient({
+        dapp,
+        eventHandlers: {
+          accountsChanged: this.handleAccountsChanged,
+          chainChanged: this.handleChainChanged,
+          connect: this.handleConnect,
+          disconnect: this.handleDisconnect,
+        },
+        api: { supportedNetworks: hexSupportedNetworks },
+        ui,
+        debug: this.connectorSettings?.debug,
+      });
+
       this.metamaskInstance = await this.metamaskPromise;
-      const provider = this.metamaskInstance.getProvider();
-      this.setupEventListeners(provider);
     } catch (error) {
       throw WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error);
     }
@@ -248,10 +258,12 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
     const instance = await this.ensureMetamask();
 
+    if (!this.multichainClient) throw WalletLoginError.notConnectedError("Multichain client is not initialized. Call init() first.");
+
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-    const chainIds = this.coreOptions.chains.map((c) => c.chainId) as Hex[];
+    const scopes = this.coreOptions.chains.map((c) => getCaipChainId(c) as Scope);
 
     // Skip tracking for rehydration since only new connections are tracked
     const shouldTrack = !this.rehydrated;
@@ -270,11 +282,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         this.status = CONNECTOR_STATUS.CONNECTING;
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
-        // Connect using the new SDK
-        await instance.connect({
-          account: undefined,
-          chainIds,
-        });
+        // Connect using the multichain client
+        await this.multichainClient.connect(scopes, []);
       }
 
       // Get the provider from the SDK
@@ -334,17 +343,18 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (!this.metamaskInstance) throw WalletLoginError.connectionError("MetaMask instance is not available");
+    if (!this.multichainClient) throw WalletLoginError.connectionError("Multichain client is not available");
     await super.disconnectSession();
 
-    // Disconnect using the new SDK
-    await this.metamaskInstance.disconnect();
+    // Disconnect using the multichain client
+    await this.multichainClient.disconnect();
 
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
       this.metamaskProvider = null;
       this.metamaskInstance = null;
       this.metamaskPromise = undefined;
+      this.multichainClient = null;
     } else {
       // Ready to be connected again
       this.status = CONNECTOR_STATUS.READY;
