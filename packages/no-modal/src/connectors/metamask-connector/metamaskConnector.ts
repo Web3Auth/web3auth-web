@@ -67,11 +67,11 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
-  private metamaskProvider: IProvider | null = null;
+  private evmProvider: IProvider | null = null;
 
-  private metamaskInstance: MetamaskConnectEVM | null = null;
+  private evmClient: MetamaskConnectEVM | null = null;
 
-  private metamaskPromise: Promise<MetamaskConnectEVM> | undefined;
+  private evmClientPromise: Promise<MetamaskConnectEVM> | undefined;
 
   private multichainClient: MultichainCore | null = null;
 
@@ -86,8 +86,8 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   get provider(): IProvider | null {
-    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.metamaskProvider) {
-      return this.metamaskProvider as unknown as IProvider;
+    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.evmProvider) {
+      return this.evmProvider as unknown as IProvider;
     }
     return null;
   }
@@ -100,13 +100,13 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
    * Ensures the MetaMask Connect EVM instance is initialized
    */
   private async ensureMetamask(): Promise<MetamaskConnectEVM> {
-    if (!this.metamaskInstance) {
-      if (!this.metamaskPromise) {
+    if (!this.evmClient) {
+      if (!this.evmClientPromise) {
         throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
       }
-      this.metamaskInstance = await this.metamaskPromise;
+      this.evmClient = await this.evmClientPromise;
     }
-    return this.metamaskInstance;
+    return this.evmClient;
   }
 
   /**
@@ -193,7 +193,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       });
 
       // Create the EVM client (reuses the singleton multichain core internally)
-      this.metamaskPromise = createEVMClient({
+      this.evmClientPromise = createEVMClient({
         dapp,
         eventHandlers: {
           accountsChanged: this.handleAccountsChanged,
@@ -206,7 +206,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         debug: this.connectorSettings?.debug,
       });
 
-      this.metamaskInstance = await this.metamaskPromise;
+      this.evmClient = await this.evmClientPromise;
     } catch (error) {
       throw WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error);
     }
@@ -214,30 +214,30 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     // TODO need to figure this out
     this.isInjected = false;
 
-    if (this.metamaskInstance.status === "connected") {
+    if (this.evmClient.status === "connected") {
       this.status = CONNECTOR_STATUS.CONNECTED;
 
       this.rehydrated = true;
 
-      const provider = this.metamaskInstance.getProvider() as unknown as IProvider;
+      const provider = this.evmClient.getProvider() as unknown as IProvider;
       if (!provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
 
-      this.metamaskProvider = provider;
+      this.evmProvider = provider;
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
-        ethereumProvider: this.metamaskProvider,
+        ethereumProvider: this.evmProvider,
         solanaWallet: null,
       } as CONNECTED_EVENT_DATA);
 
       if (options.getAuthTokenInfo) {
         await this.getAuthTokenInfo();
       }
-    } else if (this.metamaskInstance.status === "loaded") {
+    } else if (this.evmClient.status === "loaded") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
-    } else if (this.metamaskInstance.status === "pending") {
+    } else if (this.evmClient.status === "pending") {
       // 'pending' implies that a transport failed to resume the connection
       // if (options.autoConnect) {
       //   this.rehydrated = false;
@@ -290,7 +290,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       const provider = instance.getProvider() as unknown as IProvider;
       if (!provider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
 
-      this.metamaskProvider = provider;
+      this.evmProvider = provider;
 
       // Switch chain if not connected to the right chain
       const currentChainId = instance.getChainId();
@@ -313,7 +313,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
-        ethereumProvider: this.metamaskProvider,
+        ethereumProvider: this.evmProvider,
         solanaWallet: null,
       } as CONNECTED_EVENT_DATA);
 
@@ -321,7 +321,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         await this.getAuthTokenInfo();
       }
 
-      return { ethereumProvider: this.metamaskProvider, solanaWallet: null, connectorName: this.name };
+      return { ethereumProvider: this.evmProvider, solanaWallet: null, connectorName: this.name };
     } catch (error) {
       // Ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
@@ -351,9 +351,9 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
-      this.metamaskProvider = null;
-      this.metamaskInstance = null;
-      this.metamaskPromise = undefined;
+      this.evmProvider = null;
+      this.evmClient = null;
+      this.evmClientPromise = undefined;
       this.multichainClient = null;
     } else {
       // Ready to be connected again
