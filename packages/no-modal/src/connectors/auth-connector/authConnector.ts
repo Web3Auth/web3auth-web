@@ -57,6 +57,9 @@ import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
+const WEB3AUTH_LOGIN_FINISHED = "web3auth_login_finished";
+const WEB3AUTH_LOGIN_ACK = "web3auth_login_ack";
+
 class AuthConnector extends BaseConnector<AuthLoginParams> {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
 
@@ -552,35 +555,61 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     });
 
     return new Promise((resolve, reject) => {
-      verifierWindow.open().catch((error: unknown) => {
-        log.error("Error during login with social", error);
-        this.authInstance.postLoginCancelledMessage(nonce);
-        reject(error);
-      });
+      let loginFinished = false;
 
-      // this is to close the popup when the login is finished.
       const securePubSub = new SecurePubSub({
         sameIpCheck: true,
         serverUrl: this.authInstance.options.storageServerUrl,
         socketUrl: this.authInstance.options.sessionSocketUrl,
       });
+
+      const authServiceOrigin = new URL(this.authInstance.options.sdkUrl).origin;
+
+      const handleLoginFinished = (error?: string) => {
+        if (loginFinished) return;
+        loginFinished = true;
+        window.removeEventListener("message", handlePostMessage);
+        if (error) {
+          this.authInstance.postLoginCancelledMessage(nonce);
+          reject(error);
+        }
+        isClosedWindow = true;
+        securePubSub.cleanup();
+        verifierWindow.close();
+      };
+
+      const handlePostMessage = (event: MessageEvent) => {
+        if (event.origin !== authServiceOrigin) return;
+        if (event.data?.type !== WEB3AUTH_LOGIN_FINISHED) return;
+        if (event.data?.nonce !== nonce) return;
+        try {
+          (event.source as WindowProxy)?.postMessage({ type: WEB3AUTH_LOGIN_ACK, nonce }, authServiceOrigin);
+        } catch {
+          // best-effort ACK
+        }
+        handleLoginFinished(event.data?.error);
+      };
+
+      window.addEventListener("message", handlePostMessage);
+
+      verifierWindow.open().catch((error: unknown) => {
+        log.error("Error during login with social", error);
+        window.removeEventListener("message", handlePostMessage);
+        this.authInstance.postLoginCancelledMessage(nonce);
+        reject(error);
+      });
+
+      // SecurePubSub fallback for when window.opener is unavailable (e.g. COOP headers)
       securePubSub
         .subscribe(`web3auth-login-${nonce}`)
         .then((data: string) => {
           const parsedData = JSON.parse(data || "{}");
           if (parsedData?.message === "login_finished") {
-            if (parsedData?.error) {
-              this.authInstance.postLoginCancelledMessage(nonce);
-              reject(parsedData.error);
-            }
-            isClosedWindow = true;
-            securePubSub.cleanup();
-            verifierWindow.close();
+            handleLoginFinished(parsedData?.error);
           }
           return true;
         })
         .catch((error: unknown) => {
-          // swallow the error, dont need to throw.
           log.error("Error during login with social", error);
           this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
             log.error("Error reporting `oauthFailed` audit progress", error);
@@ -589,6 +618,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
       verifierWindow.once("close", () => {
         if (!isClosedWindow) {
+          window.removeEventListener("message", handlePostMessage);
           securePubSub.cleanup();
           this.authInstance.postLoginCancelledMessage(nonce);
           reject(WalletLoginError.popupClosed());
