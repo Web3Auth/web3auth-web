@@ -20,4 +20,10 @@ export default [
       "no-console": "off",
     },
   },
+  {
+    files: ["packages/**/test/**/*.ts", "packages/**/test/**/*.tsx", "packages/**/test/**/*.mts"],
+    rules: {
+      "import/no-extraneous-dependencies": "off",
+    },
+  },
 ];
