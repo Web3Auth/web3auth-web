@@ -102,57 +102,9 @@ class MetaMaskConnector extends BaseConnector<void> {
     return null;
   }
 
-  set provider(_: IProvider | null) {
-    throw new Error("Not implemented");
-  }
-
   get solanaWallet(): Wallet | null {
     return this.solanaProvider;
   }
-
-  /**
-   * Ensures the connector is initialized
-   */
-  private async ensureInitialized(): Promise<void> {
-    if (!this.initializationPromise) {
-      throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
-    }
-    await this.initializationPromise;
-  }
-
-  /**
-   * Handles accounts changed events from the MetaMask provider
-   */
-  private handleAccountsChanged = (accounts: string[]): void => {
-    if (accounts.length === 0) {
-      this.disconnect().catch(() => {
-        // Ignore disconnect errors during account change
-      });
-    }
-  };
-
-  /**
-   * Handles disconnect events from the MetaMask provider
-   */
-  private handleDisconnect = (): void => {
-    this.disconnect().catch(() => {
-      // Ignore disconnect errors
-    });
-  };
-
-  /**
-   * Handles chain changed events from the MetaMask provider
-   */
-  private handleChainChanged = (_chainId: string): void => {
-    // Chain change is handled internally by the provider
-  };
-
-  /**
-   * Handles connect events from the MetaMask provider
-   */
-  private handleConnect = (_result: { chainId: string; accounts: string[] }): void => {
-    // Connect is handled internally
-  };
 
   async init(options: ConnectorInitOptions): Promise<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
@@ -414,11 +366,12 @@ class MetaMaskConnector extends BaseConnector<void> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError();
 
     // Determine the active chain: prefer Solana if no EVM provider, otherwise use EVM provider's chain
+    const evmChainId = this.evmProvider?.chainId || this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155)?.chainId;
     const isSolanaOnly = !this.evmProvider && !!this.solanaProvider;
     const activeChainConfig = isSolanaOnly
       ? this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.SOLANA)
       : this.evmProvider
-        ? this.coreOptions.chains.find((x) => x.chainId === this.evmProvider!.chainId)
+        ? this.coreOptions.chains.find((x) => x.chainId === evmChainId)
         : undefined;
 
     if (!activeChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -519,6 +472,50 @@ class MetaMaskConnector extends BaseConnector<void> {
   public async manageMFA(): Promise<void> {
     throw new Error("Method Not implemented");
   }
+
+  /**
+   * Ensures the connector is initialized
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initializationPromise) {
+      throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
+    }
+    await this.initializationPromise;
+  }
+
+  /**
+   * Handles accounts changed events from the MetaMask provider
+   */
+  private handleAccountsChanged = (accounts: string[]): void => {
+    if (accounts.length === 0) {
+      this.disconnect().catch(() => {
+        // Ignore disconnect errors during account change
+      });
+    }
+  };
+
+  /**
+   * Handles disconnect events from the MetaMask provider
+   */
+  private handleDisconnect = (): void => {
+    this.disconnect().catch(() => {
+      // Ignore disconnect errors
+    });
+  };
+
+  /**
+   * Handles chain changed events from the MetaMask provider
+   */
+  private handleChainChanged = (_chainId: string): void => {
+    // Chain change is handled internally by the provider
+  };
+
+  /**
+   * Handles connect events from the MetaMask provider
+   */
+  private handleConnect = (_result: { chainId: string; accounts: string[] }): void => {
+    // Connect is handled internally
+  };
 }
 
 /**
