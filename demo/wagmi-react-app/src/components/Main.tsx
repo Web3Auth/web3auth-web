@@ -31,6 +31,7 @@ import {
 } from "wagmi";
 
 import styles from "../styles/Home.module.css";
+import X402 from "./X402";
 
 const Main = () => {
   const { provider, isConnected, web3Auth, status } = useWeb3Auth();
@@ -333,6 +334,9 @@ const Main = () => {
             </button>
           ))}
         </div>
+
+        {/* X402 Payment Protocol */}
+        <X402 />
 
         {/* Disconnect */}
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
