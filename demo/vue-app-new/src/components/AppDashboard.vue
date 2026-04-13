@@ -12,7 +12,6 @@ import {
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
-
 } from "@web3auth/modal/vue";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
@@ -33,6 +32,7 @@ import { createWalletTransactionSigner, toAddress } from "@solana/client";
 import { address as solanaAddress } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 import { computed, ref, watch } from "vue";
+import X402Tester from "./X402Tester.vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { formDataStore } from "../store/form";
 
@@ -104,10 +104,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return Boolean(conn?.solanaWallet);
 
     case "walletServices":
-      return (
-        web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH &&
-        Boolean(conn?.ethereumProvider || conn?.solanaWallet)
-      );
+      return web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
 
     default: {
       return false;
@@ -404,8 +401,6 @@ const onSwitchChain = async () => {
     printToConsole("switchedChain error", error);
   }
 };
-
-
 </script>
 
 <template>
@@ -506,19 +501,14 @@ const onSwitchChain = async () => {
 
           <!-- EIP-5792 -->
           <div class="mb-2 mt-4 text-xl font-bold leading-tight text-left">EIP-5792</div>
-          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">
-            Get Capabilities
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">
-            Send Batch Calls
-          </Button>
-          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">
-            Refresh Calls Status
-          </Button>
-          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">
-            Show Calls Status in Wallet
-          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetCapabilities">Get Capabilities</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSendBatchCalls">Send Batch Calls</Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">Refresh Calls Status</Button>
+          <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">Show Calls Status in Wallet</Button>
         </Card>
+
+        <!-- x402 -->
+        <X402Tester v-if="isDisplay('ethServices') || isDisplay('solServices')" class="mb-2" @print-to-console="printToConsole" />
 
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
