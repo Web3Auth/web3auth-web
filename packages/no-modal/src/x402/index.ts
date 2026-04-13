@@ -8,7 +8,7 @@ import { ClientSvmSigner, ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
 import { Address, createWalletClient, custom, type WalletClient } from "viem";
 
 import { IProvider } from "../base/connector";
-import { walletSignAndSendTransaction } from "../base/wallet";
+import { walletSignTransaction } from "../base/wallet";
 import { PAYMENT_REQUIRED_HEADER } from "./interfaces";
 
 export * from "./interfaces";
@@ -107,7 +107,7 @@ function createSvmSigner(wallet: Wallet, walletAddress: string): ClientSvmSigner
     signTransactions: async (transactions: readonly Transaction[]): Promise<readonly SignatureDictionary[]> => {
       const signatureDictionaries = await Promise.all(
         transactions.map(async (tx) => {
-          const signatureBase58 = await walletSignAndSendTransaction(wallet, tx);
+          const signatureBase58 = await walletSignTransaction(wallet, tx);
           return { [signerAddress]: base58Encoder.encode(signatureBase58) } as SignatureDictionary;
         })
       );
