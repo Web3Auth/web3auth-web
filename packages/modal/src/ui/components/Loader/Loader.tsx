@@ -145,7 +145,7 @@ function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () =>
               href={tncLink}
               target="_blank"
               rel="noopener noreferrer"
-              className="w3a--btn !w3a--justify-start w3a--rounded-full w3a--border-app-gray-50 w3a--bg-app-gray-50 w3a--p-3 w3a--text-left w3a--font-normal w3a--text-app-gray-700 hover:w3a--border-app-gray-200 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--border-app-gray-800 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white dark:hover:w3a--border-app-gray-600 dark:hover:w3a--bg-app-gray-600"
+              className="w3a--btn !w3a--text-sm w3a--font-light !w3a--justify-start w3a--rounded-full w3a--border-app-gray-50 w3a--bg-app-gray-50 w3a--p-3 w3a--text-left w3a--text-app-gray-700 hover:w3a--border-app-gray-200 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--border-app-gray-800 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white dark:hover:w3a--border-app-gray-600 dark:hover:w3a--bg-app-gray-600"
             >
               {t("modal.consent.tnc", { defaultValue: "Terms of service" })}
             </a>
@@ -155,7 +155,7 @@ function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () =>
               href={privacyPolicy}
               target="_blank"
               rel="noopener noreferrer"
-              className="w3a--btn !w3a--justify-start w3a--rounded-full w3a--border-app-gray-50 w3a--bg-app-gray-50 w3a--p-3 w3a--text-left w3a--font-normal w3a--text-app-gray-700 hover:w3a--border-app-gray-200 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--border-app-gray-800 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white dark:hover:w3a--border-app-gray-600 dark:hover:w3a--bg-app-gray-600"
+              className="w3a--btn !w3a--text-sm w3a--font-light !w3a--justify-start w3a--rounded-full w3a--border-app-gray-50 w3a--bg-app-gray-50 w3a--p-3 w3a--text-left w3a--text-app-gray-700 hover:w3a--border-app-gray-200 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--border-app-gray-800 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white dark:hover:w3a--border-app-gray-600 dark:hover:w3a--bg-app-gray-600"
             >
               {t("modal.consent.privacy", { defaultValue: "Privacy Policy" })}
             </a>
