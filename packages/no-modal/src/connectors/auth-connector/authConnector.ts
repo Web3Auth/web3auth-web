@@ -1,4 +1,6 @@
 import { type ProviderConfig } from "@toruslabs/base-controllers";
+import { CITADEL_SERVER_MAP } from "@toruslabs/constants";
+import { put } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import type { Wallet } from "@wallet-standard/base";
 import {
@@ -10,6 +12,7 @@ import {
   BUILD_ENV,
   createHandler,
   type CreateHandlerParams,
+  generateRecordId,
   getUserId,
   type LoginParams,
   PopupHandler,
@@ -23,6 +26,7 @@ import deepmerge from "deepmerge";
 
 import {
   AuthLoginParams,
+  AuthTokenInfo,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
@@ -41,7 +45,6 @@ import {
   ConnectorNamespaceType,
   ConnectorParams,
   getCaipChainId,
-  IdentityTokenInfo,
   IProvider,
   log,
   UserInfo,
@@ -199,7 +202,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
-        await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        await this.connect({ chainId: options.chainId, getAuthTokenInfo: options.getAuthTokenInfo });
       } else if (!sessionId && options.autoConnect) {
         // if here, this means that the connector is cached but the sessionId is not available.
         // this can happen if the sessionId has expired.
@@ -283,14 +286,25 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
-  async getIdentityToken(): Promise<{ idToken: string }> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
     const userInfo = await this.getUserInfo();
     this.status = CONNECTOR_STATUS.AUTHORIZED;
-    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH, identityTokenInfo: { idToken: userInfo.idToken as string } });
-    return { idToken: userInfo.idToken as string };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.authInstance.authSessionManager.getAccessToken(),
+      this.authInstance.authSessionManager.getRefreshToken(),
+    ]);
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      connector: WALLET_CONNECTORS.AUTH,
+      authTokenInfo: {
+        idToken: userInfo.idToken as string,
+        accessToken,
+        refreshToken,
+      },
+    });
+    return { idToken: userInfo.idToken as string, accessToken, refreshToken };
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -422,20 +436,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         });
         if (isLoggedIn) {
           this.setupSolanaWallet();
-          // if getIdentityToken is true, then get the identity token
-          // No need to get the identity token for auth connector as it is already handled
-          let identityTokenInfo: IdentityTokenInfo | undefined;
+          // if getAuthTokenInfo is true, then get auth token info
+          // No need to get auth token info for auth connector as it is already handled
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
             connectorName: WALLET_CONNECTORS.AUTH,
             reconnected: this.rehydrated,
             ethereumProvider: this.provider,
             solanaWallet: this._solanaWallet,
-            identityTokenInfo,
           } as CONNECTED_EVENT_DATA);
 
-          if (params.getIdentityToken) {
-            identityTokenInfo = await this.getIdentityToken();
+          if (params.getAuthTokenInfo) {
+            await this.getAuthTokenInfo();
           }
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
@@ -477,7 +489,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     const nonce = generateNonce();
 
     // post a message to the auth provider to indicate that login has been initiated.
-    const loginParams = cloneDeep(params);
+    const loginParams = {
+      ...cloneDeep(params),
+      recordId: generateRecordId(),
+      loginSource: "web3auth-web",
+    };
     loginParams.extraLoginOptions = {
       ...(loginParams.extraLoginOptions || {}),
       login_hint: params.loginHint || params.extraLoginOptions?.login_hint,
@@ -519,6 +535,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     let isClosedWindow = false;
 
+    this.auditOAuditProgress(loginParams as LoginParams).catch((error: unknown) => {
+      log.error("Error reporting `oauthInitiated` audit progress", error);
+    });
+
     return new Promise((resolve, reject) => {
       verifierWindow.open().catch((error: unknown) => {
         log.error("Error during login with social", error);
@@ -550,6 +570,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         .catch((error: unknown) => {
           // swallow the error, dont need to throw.
           log.error("Error during login with social", error);
+          this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
+            log.error("Error reporting `oauthFailed` audit progress", error);
+          });
         });
 
       verifierWindow.once("close", () => {
@@ -564,6 +587,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         .postLoginInitiatedMessage(loginParams as LoginParams, nonce)
         .then(resolve)
         .catch((error: unknown) => {
+          this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
+            log.error("Error reporting `oauthFailed` audit progress", error);
+          });
           if (error instanceof Web3AuthError) {
             throw error;
           }
@@ -651,6 +677,40 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
+  }
+
+  private async auditOAuditProgress(
+    loginParams: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "recordId" | "loginSource">,
+    status?: "failed" | "completed"
+  ) {
+    const { authConnection, authConnectionId, groupedAuthConnectionId, recordId, loginSource } = loginParams;
+    const { authBuildEnv = BUILD_ENV.PRODUCTION, web3AuthNetwork, clientId } = this.coreOptions;
+    const auditServerUrl = `${CITADEL_SERVER_MAP[authBuildEnv]}/v1/auth/audit`;
+
+    const progressFlag: { oauthInitiated?: boolean; oauthFailed?: boolean; oauthCompleted?: boolean } = {
+      oauthInitiated: true,
+    };
+
+    const auditPayload: Record<string, unknown> = {
+      authConnection,
+      authConnectionId,
+      groupedAuthConnectionId,
+      recordId,
+      source: loginSource,
+      web3AuthNetwork,
+      web3AuthClientId: clientId,
+      ...progressFlag,
+    };
+
+    if (status === "failed") {
+      auditPayload.oauthFailed = true;
+    } else if (status === "completed") {
+      auditPayload.oauthCompleted = true;
+    } else {
+      auditPayload.oauthInitiated = true;
+    }
+
+    await put(auditServerUrl, auditPayload);
   }
 }
 

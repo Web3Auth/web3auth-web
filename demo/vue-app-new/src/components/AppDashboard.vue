@@ -6,7 +6,7 @@ import {
   useFunding,
   useReceive,
   useEnableMFA,
-  useIdentityToken,
+  useAuthTokenInfo,
   useManageMFA,
   useWalletConnectScanner,
   useWalletUI,
@@ -55,7 +55,7 @@ const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = u
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { showFunding, loading: showFundingLoading } = useFunding();
 const { showReceive, loading: showReceiveLoading } = useReceive();
-const { getIdentityToken, loading: getIdentityTokenLoading } = useIdentityToken();
+const { getAuthTokenInfo, loading: getAuthTokenInfoLoading } = useAuthTokenInfo();
 const { status, address } = useConnection();
 const { mutateAsync: signTypedDataAsync } = useSignTypedData();
 const { mutateAsync: signMessageAsync } = useSignMessage();
@@ -162,8 +162,8 @@ const onGetUserInfo = async () => {
   printToConsole("User Info", userInfo.value);
 };
 
-const ongetIdentityToken = async () => {
-  const idToken = await getIdentityToken();
+const onGetAuthTokenInfo = async () => {
+  const idToken = await getAuthTokenInfo();
   printToConsole("id token", idToken);
 };
 
@@ -492,7 +492,7 @@ const onSwitchChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignPersonalMsg">
             {{ t("app.buttons.btnSignPersonalMsg") }}
           </Button>
-          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="getAuthTokenInfoLoading" block size="xs" pill class="mb-2" @click="onGetAuthTokenInfo">Get id token</Button>
 
           <!-- EIP-5792 -->
           <div class="mb-2 mt-4 text-xl font-bold leading-tight text-left">EIP-5792</div>
@@ -522,7 +522,7 @@ const onSwitchChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onSignSolTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
-          <Button :loading="getIdentityTokenLoading" block size="xs" pill class="mb-2" @click="ongetIdentityToken">Get id token</Button>
+          <Button :loading="getAuthTokenInfoLoading" block size="xs" pill class="mb-2" @click="onGetAuthTokenInfo">Get id token</Button>
         </Card>
       </Card>
       <Card

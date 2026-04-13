@@ -24,7 +24,6 @@ import {
   type ConnectorParams,
   type CustomChainConfig,
   getCaipChainId,
-  IdentityTokenInfo,
   type IProvider,
   type MetaMaskConnectorData,
   type UserInfo,
@@ -106,7 +105,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const connection = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        const connection = await this.connect({ chainId: options.chainId, getAuthTokenInfo: options.getAuthTokenInfo });
         if (!connection) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
@@ -117,7 +116,7 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<Connection | null> {
+  async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -179,18 +178,15 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
         });
       }
 
-      let identityTokenInfo: IdentityTokenInfo | undefined;
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
         ethereumProvider: this.metamaskProvider,
         solanaWallet: null,
-        identityTokenInfo,
       } as CONNECTED_EVENT_DATA);
 
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
+      if (getAuthTokenInfo) {
+        await this.getAuthTokenInfo();
       }
 
       return { ethereumProvider: this.metamaskProvider, solanaWallet: null, connectorName: this.name };
