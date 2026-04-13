@@ -40,8 +40,8 @@ export const SolanaProvider = defineComponent({
           return;
         }
 
-        const chainConfig = web3Auth.value.currentChain;
-        if (chainConfig.chainNamespace !== CHAIN_NAMESPACES.SOLANA) return;
+        const chainConfig = web3Auth.value.coreOptions.chains.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
+        if (!chainConfig) return;
 
         const prevClient = clientRef.value;
         try {

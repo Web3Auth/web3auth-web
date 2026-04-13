@@ -430,11 +430,10 @@ class MetaMaskConnector extends BaseConnector<void> {
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
 
-    const namespaces = new Set(this.coreOptions.chains.map((c) => c.chainNamespace));
-    if (namespaces.size > 1) {
-      throw WalletLoginError.unsupportedOperation(
-        "switchChain is not supported when multiple chain namespaces are configured. Use connection.ethereumProvider and connection.solanaWallet directly."
-      );
+    const targetChainConfig = this.coreOptions.chains.find((c) => c.chainId === params.chainId);
+    if (targetChainConfig?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      // no need to switch chain for Solana
+      return;
     }
 
     await this.ensureInitialized();

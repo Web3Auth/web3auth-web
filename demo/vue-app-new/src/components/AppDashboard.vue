@@ -14,7 +14,7 @@ import {
   useWeb3AuthUser,
 
 } from "@web3auth/modal/vue";
-import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignMessage as useSolanaSignMessage, useSolanaWallet, useSolanaClient } from "@web3auth/modal/vue/solana";
@@ -30,7 +30,7 @@ import {
 import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
 import { parseEther } from "viem";
 import { createWalletTransactionSigner, toAddress } from "@solana/client";
-import { address as solanaAddress,  } from "@solana/kit";
+import { address as solanaAddress } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 import { computed, ref, watch } from "vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
@@ -39,10 +39,6 @@ import { formDataStore } from "../store/form";
 const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
-
-const props = defineProps<{
-  chains: CustomChainConfig[];
-}>();
 
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
@@ -68,7 +64,7 @@ const balance = useBalance({
 const config = useConfig();
 const trackedCallsId = ref<string | undefined>();
 
-const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
+const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey, solanaWallet } = useSolanaWallet();
 const solanaClient = useSolanaClient();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 
@@ -350,7 +346,7 @@ const onSignSolMessage = async () => {
 const onGetSolBalance = async () => {
   const client = solanaClient.value;
   if (!client) throw new Error("Solana client not available");
-  const account = solanaAccounts.value?.[0];
+  const account = solanaWallet.value?.accounts[0]?.address;
   if (!account) throw new Error("No account connected");
 
   try {
@@ -360,6 +356,20 @@ const onGetSolBalance = async () => {
     log.error("Error", error);
     printToConsole("error", error);
   }
+};
+
+const onGetSolChain = async () => {
+  const w3a = web3Auth.value;
+  if (!w3a) {
+    printToConsole("Solana chain", "Web3Auth not initialized");
+    return;
+  }
+  const current = w3a.currentChain;
+  const chain =
+    current?.chainNamespace === CHAIN_NAMESPACES.SOLANA
+      ? current
+      : w3a.coreOptions.chains?.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
+  printToConsole("Solana chain", chain ?? null);
 };
 
 const onGetSolPrivateKey = async () => {
@@ -372,7 +382,7 @@ const onGetSolPrivateKey = async () => {
 };
 
 // EVM-only: wagmi switchChain does not change Solana cluster; only show when multiple EIP-155 chains are configured.
-const eip155Chains = computed(() => props.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155));
+const eip155Chains = computed(() => web3Auth.value?.coreOptions.chains?.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155) || []);
 
 const canSwitchEvmChain = computed(() => {
   if (eip155Chains.value.length < 2) return false;
@@ -515,6 +525,7 @@ const onSwitchChain = async () => {
           <div class="mb-2 text-xl font-bold leading-tight text-left">Solana Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetSolChain">{{ t("app.buttons.btnGetCurrentSolanaChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}

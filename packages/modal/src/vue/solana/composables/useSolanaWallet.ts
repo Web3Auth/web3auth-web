@@ -1,10 +1,10 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
-import { CHAIN_NAMESPACES, WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import { computed, Ref, ref, ShallowRef, shallowRef, watch } from "vue";
+import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
-import { useChain, useWeb3Auth } from "../../composables";
+import { useWeb3Auth } from "../../composables";
 
 export type IUseSolanaWallet = {
   accounts: Ref<string[] | null>;
@@ -27,15 +27,11 @@ export type IUseSolanaWallet = {
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
-  const { chainNamespace } = useChain();
   const accounts = ref<string[] | null>(null);
   const solanaWallet = shallowRef<Wallet | null>(null);
   const rpc = shallowRef<Rpc<SolanaRpcApi> | null>(null);
 
-  const isSolana = computed(() => chainNamespace.value === CHAIN_NAMESPACES.SOLANA);
-
   const setupWallet = () => {
-    if (!isSolana.value) return;
     const wallet = connection.value?.solanaWallet ?? null;
     if (!wallet) return;
     solanaWallet.value = wallet;
@@ -65,9 +61,9 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   };
 
   watch(
-    [connection, chainNamespace],
-    ([newConnection, newChainNamespace]) => {
-      if (!newConnection?.solanaWallet || newChainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+    [connection],
+    ([newConnection]) => {
+      if (!newConnection?.solanaWallet) {
         if (solanaWallet.value) resetWallet();
         return;
       }
