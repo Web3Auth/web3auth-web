@@ -21,8 +21,7 @@ function RootContent(props: RootProps) {
   const { modalState, shouldShowLoginPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
   const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect, handleAcceptConsent, handleDeclineConsent } =
     useWidget();
-  const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen } = uiConfig;
-  const consentRequired = Boolean("consentRequired" in uiConfig && uiConfig.consentRequired);
+  const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen, consentRequired } = uiConfig;
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(530);

@@ -104,8 +104,7 @@ export class LoginModal {
     if (!uiConfig.privacyPolicy) this.uiConfig.privacyPolicy = "";
     if (!uiConfig.tncLink) this.uiConfig.tncLink = "";
 
-    this._consentRequired =
-      Boolean("consentRequired" in uiConfig && uiConfig.consentRequired) && Boolean(this.uiConfig.privacyPolicy) && Boolean(this.uiConfig.tncLink);
+    this._consentRequired = this.uiConfig.consentRequired && Boolean(this.uiConfig.privacyPolicy) && Boolean(this.uiConfig.tncLink);
 
     if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");

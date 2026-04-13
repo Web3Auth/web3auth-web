@@ -508,6 +508,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.emit(CONNECTOR_EVENTS.AUTHORIZED, this.pendingAuthorizedData);
     }
 
+    // TODO: call api to update user consent status
+
     this.pendingConnectedData = null;
     this.pendingAuthorizedData = null;
   }
