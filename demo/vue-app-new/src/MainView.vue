@@ -20,7 +20,15 @@ import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { BUILD_ENV, CookieStorage, LocalStorageAdapter, MemoryStorage, SessionStorageAdapter, type BUILD_ENV_TYPE, type StorageConfig } from "@web3auth/auth";
+import {
+  BUILD_ENV,
+  CookieStorage,
+  LocalStorageAdapter,
+  MemoryStorage,
+  SessionStorageAdapter,
+  type BUILD_ENV_TYPE,
+  type StorageConfig,
+} from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -34,14 +42,10 @@ const formData = formDataStore;
 
 const externalConnectors = ref<ConnectorFn[]>([]);
 const buildEnvValues = new Set<BUILD_ENV_TYPE>(Object.values(BUILD_ENV));
-
-function resolveAuthBuildEnv(): BUILD_ENV_TYPE {
-  const envValue = import.meta.env.VITE_APP_AUTH_BUILD_ENV;
-  if (envValue && buildEnvValues.has(envValue as BUILD_ENV_TYPE)) {
-    return envValue as BUILD_ENV_TYPE;
-  }
-
-  return import.meta.env.DEV ? BUILD_ENV.TESTING : BUILD_ENV.PRODUCTION;
+const envValue = import.meta.env.VITE_APP_AUTH_BUILD_ENV;
+let authBuildEnv: BUILD_ENV_TYPE = import.meta.env.DEV ? BUILD_ENV.TESTING : BUILD_ENV.PRODUCTION;
+if (envValue && buildEnvValues.has(envValue as BUILD_ENV_TYPE)) {
+  authBuildEnv = envValue as BUILD_ENV_TYPE;
 }
 
 function buildStorageConfig(): StorageConfig | undefined {
@@ -152,7 +156,7 @@ const options = computed((): Web3AuthOptions => {
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
-    authBuildEnv: resolveAuthBuildEnv(),
+    authBuildEnv,
     connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
@@ -165,13 +169,33 @@ const options = computed((): Web3AuthOptions => {
   };
 });
 
+// Note: authConnectionId may varies based on the project config and web3auth client id.
+// The following function return the authConnectionId relevant to the AuthBuildEnv and `clientIds` Map from `config.ts`
+const getAuthConnectionIds = (authConnectionStr: string): { authConnectionId: string; groupedAuthConnectionId?: string } => {
+  if (authBuildEnv === BUILD_ENV.PRODUCTION) {
+    //
+    return {
+      authConnectionId: "web3auth",
+      groupedAuthConnectionId: `web3auth-auth0-${authConnectionStr}-passwordless-sapphire`,
+    };
+  }
+  return {
+    authConnectionId: `w3a-custom-${authConnectionStr}-${formData.network.replace("_", "-")}`,
+  };
+};
+
 const loginMethodsConfig = computed(() => {
+  const { authConnectionId: customEmailAuthConnectionId, groupedAuthConnectionId: customEmailGroupedAuthConnectionId } =
+    getAuthConnectionIds("email");
+  const { authConnectionId: customSmsAuthConnectionId, groupedAuthConnectionId: customSmsGroupedAuthConnectionId } = getAuthConnectionIds("sms");
   const customConfig = {
     email_passwordless: {
-      authConnectionId: `w3a-custom-email-${formData.network.replace("_", "-")}`,
+      authConnectionId: customEmailAuthConnectionId,
+      groupedAuthConnectionId: customEmailGroupedAuthConnectionId,
     },
     sms_passwordless: {
-      authConnectionId: `w3a-custom-sms-${formData.network.replace("_", "-")}`,
+      authConnectionId: customSmsAuthConnectionId,
+      groupedAuthConnectionId: customSmsGroupedAuthConnectionId,
     },
   };
   if (formData.loginProviders.length === 0) return customConfig;
@@ -183,10 +207,12 @@ const loginMethodsConfig = computed(() => {
   }, {} as LoginMethodConfig);
 
   if (config.email_passwordless) {
-    config.email_passwordless.authConnectionId = `w3a-custom-email-${formData.network.replace("_", "-")}`;
+    config.email_passwordless.authConnectionId = customEmailAuthConnectionId;
+    config.email_passwordless.groupedAuthConnectionId = customEmailGroupedAuthConnectionId;
   }
   if (config.sms_passwordless) {
-    config.sms_passwordless.authConnectionId = `w3a-custom-sms-${formData.network.replace("_", "-")}`;
+    config.sms_passwordless.authConnectionId = customSmsAuthConnectionId;
+    config.sms_passwordless.groupedAuthConnectionId = customSmsGroupedAuthConnectionId;
   }
 
   const loginMethods: LoginMethodConfig = JSON.parse(JSON.stringify(config));
