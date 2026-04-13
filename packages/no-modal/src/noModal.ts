@@ -805,7 +805,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // prioritize using MM connector over injected connector for EVM chains
     if (isBrowser() && chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
       // only set headless to true if modal SDK is used, otherwise just use the modal from native Metamask SDK
-      connectorFns.push(metaMaskConnector(modalMode ? { headless: true } : undefined));
+      connectorFns.push(metaMaskConnector(modalMode ? { ui: { headless: true } } : undefined));
     }
 
     if (isMipdEnabled && isBrowser()) {
