@@ -4,7 +4,6 @@ import type { Address } from "viem";
 import { CHAIN_NAMESPACES } from "../base/chain/IChainInterface";
 import { useChain } from "../react/hooks/useChain";
 import { useWeb3Auth } from "../react/hooks/useWeb3Auth";
-import { useSolanaWallet } from "../react/solana/hooks/useSolanaWallet";
 import { createEvmX402Fetch, createProviderBackedEvmSigner, createSolanaX402Fetch, getEvmAddress } from "./index";
 import type { IUseX402FetchParams, IUseX402FetchReturnValues } from "./interfaces";
 
@@ -24,20 +23,25 @@ export type { IUseX402FetchParams, IUseX402FetchReturnValues };
  */
 export const useX402Fetch = (address?: Address): IUseX402FetchReturnValues => {
   const { chainNamespace } = useChain();
-  const { web3Auth, isConnected } = useWeb3Auth();
-  const { solanaWallet, accounts } = useSolanaWallet();
+  const { web3Auth, isConnected, connection } = useWeb3Auth();
+  // const { solanaWallet, accounts } = useSolanaWallet();
 
   const fetchWithPayment = useCallback(
     async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
       if (!isConnected) throw new Error("Wallet not connected");
 
       if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        if (!solanaWallet || !accounts?.[0]) throw new Error("Solana wallet not available");
-        return createSolanaX402Fetch(solanaWallet, accounts[0])(url, options);
+        const { solanaWallet } = connection;
+        if (!solanaWallet || !solanaWallet.accounts?.[0]) throw new Error("Solana wallet not available");
+
+        const account = solanaWallet.accounts[0];
+        if (!account) throw new Error("Solana account not available");
+
+        return createSolanaX402Fetch(solanaWallet, account.address)(url, options);
       }
 
-      if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
-        const provider = web3Auth.connectedConnector?.provider;
+      if (chainNamespace === CHAIN_NAMESPACES.EIP155 && connection?.ethereumProvider) {
+        const provider = connection?.ethereumProvider;
         if (!provider) throw new Error("EVM provider not available");
 
         const evmAddress = address ?? (await getEvmAddress(provider));
@@ -49,7 +53,7 @@ export const useX402Fetch = (address?: Address): IUseX402FetchReturnValues => {
 
       throw new Error("Unsupported chain namespace");
     },
-    [web3Auth, isConnected, chainNamespace, address, solanaWallet, accounts]
+    [web3Auth, isConnected, chainNamespace, address, connection]
   );
 
   return { fetchWithPayment };

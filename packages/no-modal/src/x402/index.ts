@@ -1,5 +1,7 @@
 import { address, getBase58Encoder, SignatureDictionary, Transaction } from "@solana/kit";
+import { encodeBase64Url } from "@toruslabs/metadata-helpers";
 import { Wallet } from "@wallet-standard/base";
+import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import { ExactEvmScheme, toClientEvmSigner } from "@x402/evm";
 import { wrapFetchWithPayment, x402Client } from "@x402/fetch";
 import { ClientSvmSigner, ExactSvmScheme, toClientSvmSigner } from "@x402/svm";
@@ -7,16 +9,12 @@ import { Address, createWalletClient, custom, type WalletClient } from "viem";
 
 import { IProvider } from "../base/connector";
 import { walletSignAndSendTransaction } from "../base/wallet";
+import { PAYMENT_REQUIRED_HEADER } from "./interfaces";
 
 export * from "./interfaces";
 
 export const EVM_CAIP2_WILDCARD = "eip155:*";
 export const SOLANA_CAIP2_WILDCARD = "solana:*";
-
-// TODO: Use helpers from @toruslabs/metadata-helpers after the Stack upgrades
-function encodeBase64(str: string): string {
-  return Buffer.from(str).toString("base64");
-}
 
 /**
  * For 402 responses that carry v2 payment requirements in the JSON body instead
@@ -28,14 +26,18 @@ function encodeBase64(str: string): string {
  */
 async function normalizePaymentRequiredResponse(response: Response): Promise<Response> {
   const contentType = response.headers.get("Content-Type") ?? "";
-  if (!contentType.includes("application/json")) return response;
+  let body;
+  if (contentType.includes("application/json")) {
+    body = await response.json();
+  } else {
+    const data = await response.text();
+    body = JSON.parse(data);
+  }
 
-  const body = await response.text();
   try {
-    const parsed = JSON.parse(body) as { x402Version?: number };
-    if (parsed.x402Version && parsed.x402Version >= 2) {
+    if (body.x402Version && body.x402Version >= 2) {
       const newHeaders = new Headers(response.headers);
-      newHeaders.set("PAYMENT-REQUIRED", encodeBase64(JSON.stringify(parsed)));
+      newHeaders.set(PAYMENT_REQUIRED_HEADER, encodeBase64Url(JSON.stringify(body)));
       return new Response(body, {
         status: response.status,
         statusText: response.statusText,
@@ -45,7 +47,7 @@ async function normalizePaymentRequiredResponse(response: Response): Promise<Res
   } catch {
     // Malformed JSON - fall through and return response with the already-consumed body
   }
-  return new Response(body, {
+  return new Response(JSON.stringify(body), {
     status: response.status,
     statusText: response.statusText,
     headers: response.headers,
@@ -53,7 +55,7 @@ async function normalizePaymentRequiredResponse(response: Response): Promise<Res
 }
 
 export async function getEvmAddress(provider: IProvider): Promise<Address | null> {
-  const accounts = (await provider.request({ method: "eth_accounts" })) as string[] | null;
+  const accounts = (await provider.request({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })) as string[] | null;
   return (accounts?.[0] as Address | undefined) ?? null;
 }
 
@@ -81,7 +83,7 @@ export function createProviderBackedEvmSigner(provider: IProvider, address: Addr
 export function withX402BodyShim(baseFetch: typeof fetch): typeof fetch {
   return async (input, init) => {
     const response = await baseFetch(input, init);
-    if (response.status === 402 && !response.headers.get("PAYMENT-REQUIRED")) {
+    if (response.status === 402 && !response.headers.get(PAYMENT_REQUIRED_HEADER)) {
       return normalizePaymentRequiredResponse(response);
     }
     return response;

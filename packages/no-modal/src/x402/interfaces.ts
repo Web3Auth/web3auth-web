@@ -1,3 +1,5 @@
+export const PAYMENT_REQUIRED_HEADER = "PAYMENT-REQUIRED";
+
 export interface IUseX402FetchParams {
   /** The URL to send the payment-gated request to. */
   url: string;

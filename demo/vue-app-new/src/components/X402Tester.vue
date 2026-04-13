@@ -30,9 +30,13 @@ const parseConsoleBody = (text: string) => {
   }
 };
 
-watch(chainId, (id) => {
-  isOnBaseSepolia.value = id?.toLowerCase() === BASE_SEPOLIA_CHAIN_ID.toLowerCase();
-}, { immediate: true });
+watch(
+  chainId,
+  (id) => {
+    isOnBaseSepolia.value = id?.toLowerCase() === BASE_SEPOLIA_CHAIN_ID.toLowerCase();
+  },
+  { immediate: true }
+);
 
 const onSwitchToBaseSepolia = async () => {
   fetchLoading.value = true;
@@ -73,18 +77,13 @@ const onFetchWithPayment = async () => {
 
     <!-- Status badges -->
     <div class="flex flex-wrap gap-2 mb-3 text-xs">
-      <span
-        class="px-2 py-1 rounded-full font-medium"
-        :class="isConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'"
-      >
+      <span class="px-2 py-1 rounded-full font-medium" :class="isConnected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-600'">
         {{ isConnected ? "Connected" : "Not connected" }}
       </span>
       <span v-if="chainNamespace" class="px-2 py-1 rounded-full bg-blue-100 text-blue-700 font-medium">
         {{ chainNamespace }}
       </span>
-      <span v-if="chainId" class="px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-medium font-mono">
-        chain {{ chainId }}
-      </span>
+      <span v-if="chainId" class="px-2 py-1 rounded-full bg-gray-100 text-gray-600 font-medium font-mono">chain {{ chainId }}</span>
       <span
         v-if="chainNamespace === CHAIN_NAMESPACES.EIP155"
         class="px-2 py-1 rounded-full font-medium"
@@ -96,14 +95,7 @@ const onFetchWithPayment = async () => {
 
     <!-- Switch chain -->
     <div v-if="isConnected && chainNamespace === CHAIN_NAMESPACES.EIP155" class="mb-3">
-      <Button
-        block
-        size="xs"
-        pill
-        :loading="fetchLoading"
-        :disabled="isOnBaseSepolia"
-        @click="onSwitchToBaseSepolia"
-      >
+      <Button block size="xs" pill :loading="fetchLoading" :disabled="isOnBaseSepolia" @click="onSwitchToBaseSepolia">
         {{ isOnBaseSepolia ? "Already on Base Sepolia" : "Switch to Base Sepolia" }}
       </Button>
     </div>
@@ -120,16 +112,6 @@ const onFetchWithPayment = async () => {
     </div>
 
     <!-- Fetch button -->
-    <Button
-      block
-      size="xs"
-      pill
-      :loading="fetchLoading"
-      :disabled="!isConnected"
-      class="mb-3"
-      @click="onFetchWithPayment"
-    >
-      Fetch with Payment
-    </Button>
+    <Button block size="xs" pill :loading="fetchLoading" :disabled="!isConnected" class="mb-3" @click="onFetchWithPayment">Fetch with Payment</Button>
   </Card>
 </template>
