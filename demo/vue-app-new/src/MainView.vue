@@ -26,6 +26,7 @@ import {
   LocalStorageAdapter,
   MemoryStorage,
   SessionStorageAdapter,
+  WEB3AUTH_NETWORK,
   type BUILD_ENV_TYPE,
   type StorageConfig,
 } from "@web3auth/auth";
@@ -171,9 +172,9 @@ const options = computed((): Web3AuthOptions => {
 
 // Note: authConnectionId may varies based on the project config and web3auth client id.
 // The following function return the authConnectionId relevant to the AuthBuildEnv and `clientIds` Map from `config.ts`
+// we may need to change the values every time we change the web3auth client id or build environment.
 const getAuthConnectionIds = (authConnectionStr: string): { authConnectionId: string; groupedAuthConnectionId?: string } => {
-  if (authBuildEnv === BUILD_ENV.PRODUCTION) {
-    //
+  if (formData.network === WEB3AUTH_NETWORK.SAPPHIRE_MAINNET) {
     return {
       authConnectionId: "web3auth",
       groupedAuthConnectionId: `web3auth-auth0-${authConnectionStr}-passwordless-sapphire`,
