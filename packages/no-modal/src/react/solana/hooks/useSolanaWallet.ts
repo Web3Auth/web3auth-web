@@ -5,7 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { WALLET_CONNECTORS } from "../../../base/wallet";
-import { useChain } from "../../hooks";
+import { useChain } from "../../hooks/useChain";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
