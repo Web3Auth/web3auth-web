@@ -49,6 +49,7 @@ typings/
 
 # Optional npm cache directory
 .npm
+.npmrc
 
 # Optional eslint cache
 .eslintcache
@@ -111,3 +112,5 @@ dist
 yalc.lock
 types
 build/
+
+.npmrc
