@@ -37,8 +37,9 @@ async function normalizePaymentRequiredResponse(response: Response): Promise<Res
   try {
     if (body.x402Version && body.x402Version >= 2) {
       const newHeaders = new Headers(response.headers);
-      newHeaders.set(PAYMENT_REQUIRED_HEADER, encodeBase64Url(JSON.stringify(body)));
-      return new Response(body, {
+      const jsonData = JSON.stringify(body);
+      newHeaders.set(PAYMENT_REQUIRED_HEADER, encodeBase64Url(jsonData));
+      return new Response(jsonData, {
         status: response.status,
         statusText: response.statusText,
         headers: newHeaders,
