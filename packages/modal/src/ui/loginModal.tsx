@@ -432,6 +432,7 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.CONNECTED, (data: SDK_CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);
+      if (data.pendingUserConsent) return;
       // only show success if not being reconnected again.
       if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
         this.setState({
@@ -479,10 +480,25 @@ export class LoginModal {
       this.setState({ status: MODAL_STATUS.AUTHORIZING });
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
+      if (this.consentRequired) return;
       this.setState({ status: MODAL_STATUS.AUTHORIZED });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, () => {
       this.setState({ status: MODAL_STATUS.CONSENT_REQUIRED, modalVisibility: true });
+    });
+    listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONNECTED_EVENT_DATA) => {
+      if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true });
+      } else if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
+        this.setState({
+          status: MODAL_STATUS.CONNECTED,
+          modalVisibility: true,
+          postLoadingMessage: "modal.post-loading.connected",
+          currentPage: PAGES.LOGIN_OPTIONS,
+        });
+      } else {
+        this.setState({ status: MODAL_STATUS.CONNECTED });
+      }
     });
   };
 }

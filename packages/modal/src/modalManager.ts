@@ -199,15 +199,23 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     return new Promise((resolve, reject) => {
       // remove all listeners when promise is resolved or rejected.
       // this is to prevent memory leaks if user clicks connect button multiple times.
-      const handleConnected = () => {
+      const handleCompletion = () => {
         this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
+        if (this.consentRequired) {
+          this.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
+        } else if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+          this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
+        } else {
+          this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
+        }
         return resolve(this.connection);
       };
 
       const handleError = (err: unknown) => {
-        this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
-        this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
+        this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
+        this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
+        this.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
         return reject(err);
       };
@@ -215,17 +223,20 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const handleVisibility = (visibility: boolean) => {
         // modal is closed but user is not connected to any wallet.
         if (!visibility && !CONNECTED_STATUSES.includes(this.status)) {
-          this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+          this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
           this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
-          this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
+          this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
+          this.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
           return reject(new Error("User closed the modal"));
         }
       };
 
-      if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
-        this.once(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
+      if (this.consentRequired) {
+        this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
+      } else if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+        this.once(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
       } else {
-        this.once(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+        this.once(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
       }
 
       this.once(CONNECTOR_EVENTS.ERRORED, handleError);

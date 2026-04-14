@@ -19,7 +19,7 @@ import { type Analytics } from "../analytics";
 import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
-import type { ProjectConfig } from "../interfaces";
+import type { LoginModeType, ProjectConfig } from "../interfaces";
 import type { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
@@ -141,6 +141,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.CONNECTORS_UPDATED]: (data: { connectors: IConnector<unknown>[] }) => void;
   [CONNECTOR_EVENTS.MFA_ENABLED]: (isMFAEnabled: boolean) => void;
   [CONNECTOR_EVENTS.CONSENT_REQUIRED]: (data: CONNECTED_EVENT_DATA) => void;
+  [CONNECTOR_EVENTS.CONSENT_ACCEPTED]: (data: CONNECTED_EVENT_DATA & { loginMode: LoginModeType }) => void;
 };
 
 export interface BaseConnectorConfig {

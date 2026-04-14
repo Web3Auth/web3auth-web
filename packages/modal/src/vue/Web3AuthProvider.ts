@@ -143,6 +143,20 @@ export const Web3AuthProvider = defineComponent({
           }
         };
 
+        const consentAcceptedListener = () => {
+          status.value = web3Auth.value!.status;
+          if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED || web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
+            if (!isInitialized.value) isInitialized.value = true;
+            isConnected.value = true;
+            connection.value = newWeb3Auth.connection;
+            chainId.value = web3Auth.value!.currentChainId;
+            chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
+            if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
+              isAuthorized.value = true;
+            }
+          }
+        };
+
         const mfaEnabledListener = () => {
           isMFAEnabled.value = true;
         };
@@ -153,6 +167,7 @@ export const Web3AuthProvider = defineComponent({
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONNECTED, connectedListener);
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -167,6 +182,7 @@ export const Web3AuthProvider = defineComponent({
           newWeb3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+          newWeb3Auth.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
           newWeb3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);

@@ -106,6 +106,19 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         setIsAuthorized(true);
       }
     };
+    const consentAcceptedListener = () => {
+      setStatus(web3Auth.status);
+      if (web3Auth.status === CONNECTOR_STATUS.CONNECTED || web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+        setIsInitialized(true);
+        setIsConnected(true);
+        setConnection(web3Auth.connection);
+        setChainId(web3Auth.currentChainId);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
+        if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+          setIsAuthorized(true);
+        }
+      }
+    };
     const disconnectedListener = () => {
       setStatus(web3Auth.status);
       setIsConnected(false);
@@ -137,6 +150,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
       web3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
       web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
       web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
@@ -150,6 +164,7 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         web3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTED, connectedListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+        web3Auth.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTING, connectingListener);
         web3Auth.removeListener(CONNECTOR_EVENTS.ERRORED, errorListener);
