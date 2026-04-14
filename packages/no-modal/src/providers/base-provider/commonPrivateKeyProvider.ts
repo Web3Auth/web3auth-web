@@ -1,12 +1,4 @@
-import {
-  createAsyncMiddleware,
-  createScaffoldMiddleware,
-  JRPCEngine,
-  JRPCMiddleware,
-  JRPCRequest,
-  JRPCResponse,
-  providerFromEngine,
-} from "@web3auth/auth";
+import { createScaffoldMiddlewareV2, JRPCEngineV2, type MiddlewareConstraint, providerFromEngineV2 } from "@web3auth/auth";
 
 import { CustomChainConfig, IBaseProvider, SafeEventEmitterProvider } from "../../base";
 import { BaseProvider, BaseProviderConfig, BaseProviderState } from "./baseProvider";
@@ -45,9 +37,8 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
 
   public async setupProvider(privKey: string): Promise<void> {
     const privKeyMiddleware = this.getPrivKeyMiddleware(privKey);
-    const engine = new JRPCEngine();
-    engine.push(privKeyMiddleware);
-    const provider = providerFromEngine(engine);
+    const engine = JRPCEngineV2.create({ middleware: [privKeyMiddleware] });
+    const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
   }
 
@@ -63,7 +54,7 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     return Promise.resolve("");
   }
 
-  private getPrivKeyMiddleware(privKey: string): JRPCMiddleware<unknown, unknown> {
+  private getPrivKeyMiddleware(privKey: string): MiddlewareConstraint {
     const middleware = {
       getPrivatekey: async (): Promise<string> => {
         if (!this.config.keyExportEnabled) throw new Error("Exporting private key is disabled. Please enable it in the provider config");
@@ -73,17 +64,13 @@ export class CommonPrivateKeyProvider extends BaseProvider<BaseProviderConfig, C
     return this.createPrivKeyMiddleware(middleware);
   }
 
-  private createPrivKeyMiddleware({ getPrivatekey }: { getPrivatekey: () => Promise<string> }): JRPCMiddleware<unknown, unknown> {
-    async function getPrivatekeyHandler(_: JRPCRequest<{ privateKey: string }[]>, res: JRPCResponse<unknown>): Promise<void> {
-      try {
-        res.result = await getPrivatekey();
-      } catch (error: unknown) {
-        res.error = error instanceof Error ? (error as Error).message : error;
-      }
+  private createPrivKeyMiddleware({ getPrivatekey }: { getPrivatekey: () => Promise<string> }): MiddlewareConstraint {
+    async function getPrivatekeyHandler(): Promise<string> {
+      return getPrivatekey();
     }
 
-    return createScaffoldMiddleware({
-      private_key: createAsyncMiddleware(getPrivatekeyHandler) as JRPCMiddleware<unknown, unknown>,
+    return createScaffoldMiddlewareV2({
+      private_key: getPrivatekeyHandler,
     });
   }
 }

@@ -1,14 +1,17 @@
 import { WalletRegistryItem } from "@web3auth/no-modal";
 
 export const PAGES = {
-  LOGIN: "login",
-  SHOW_SOCIAL_LOGINS: "show_social_logins",
-  CONNECT_WALLET: "connect_wallet",
-  SELECTED_WALLET: "selected_wallet",
+  /** Main login options: social logins and wallet button (e.g. MetaMask) */
+  LOGIN_OPTIONS: "login",
+  /** List of all available wallets to connect */
+  WALLET_LIST: "connect_wallet",
+  /** QR code or instructions for connecting to the selected wallet */
+  WALLET_CONNECTION_DETAILS: "selected_wallet",
 };
 
 export const CONNECT_WALLET_PAGES = {
   CONNECT_WALLET: "Connect Your Wallet",
+  /** Sub-page title when showing QR/instructions for selected wallet */
   SELECTED_WALLET: "Selected Wallet",
 };
 

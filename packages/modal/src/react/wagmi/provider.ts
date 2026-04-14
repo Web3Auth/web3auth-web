@@ -9,8 +9,8 @@ import {
   type CreateConfigParameters,
   CreateConnectorFn,
   fallback,
-  useAccountEffect,
   useConfig as useWagmiConfig,
+  useConnectionEffect,
   useReconnect,
   WagmiProvider as WagmiProviderBase,
 } from "wagmi";
@@ -97,12 +97,12 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 }
 
 function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
-  const { isConnected, provider } = useWeb3Auth();
+  const { isConnected, connection } = useWeb3Auth();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
-  const { reconnect } = useReconnect();
+  const { mutate: reconnect } = useReconnect();
 
-  useAccountEffect({
+  useConnectionEffect({
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
       if (isConnected) await disconnect();
@@ -118,8 +118,8 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     (async () => {
-      if (isConnected && provider) {
-        const connector = await setupConnector(provider, wagmiConfig);
+      if (isConnected && connection?.ethereumProvider) {
+        const connector = await setupConnector(connection.ethereumProvider, wagmiConfig);
         if (!connector) {
           log.error("Failed to setup react wagmi connector");
           throw new Error("Failed to setup connector");
@@ -133,7 +133,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
       }
     })();
-  }, [isConnected, wagmiConfig, provider, reconnect]);
+  }, [isConnected, wagmiConfig, connection, reconnect]);
 
   return createElement(Fragment, null, children);
 }
@@ -209,6 +209,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     }
 
     return createWagmiConfig(finalConfig);
+    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [config, web3Auth, isInitialized]);
 
   return createElement(

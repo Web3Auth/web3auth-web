@@ -7,7 +7,6 @@ import {
   type Analytics,
   ANALYTICS_EVENTS,
   type BaseConnectorConfig,
-  type ChainNamespaceType,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   getWhitelabelAnalyticsProperties,
@@ -22,7 +21,6 @@ import {
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
   WalletInitializationError,
-  type WalletRegistry,
   type Web3AuthError,
   type Web3AuthNoModalEvents,
   WIDGET_TYPE,
@@ -31,10 +29,10 @@ import Bowser from "bowser";
 import { createRoot } from "react-dom/client";
 
 import { getLoginModalAnalyticsProperties } from "../utils";
-import Widget from "./components/Widget";
 import { DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT, DEFAULT_ON_PRIMARY_COLOR, DEFAULT_PRIMARY_COLOR, PAGES } from "./constants";
+import Widget from "./containers/Widget";
 import { AnalyticsContext } from "./context/AnalyticsContext";
-import { ThemedContext } from "./context/ThemeContext";
+import { WidgetProvider } from "./context/WidgetContext";
 import {
   browser,
   ExternalWalletEventType,
@@ -76,10 +74,6 @@ export class LoginModal {
 
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
-  private chainNamespaces: ChainNamespaceType[];
-
-  private walletRegistry: WalletRegistry;
-
   private callbacks: LoginModalCallbacks;
 
   private externalWalletsConfig: Record<string, BaseConnectorConfig>;
@@ -99,7 +93,14 @@ export class LoginModal {
     if (!uiConfig.primaryButton) this.uiConfig.primaryButton = "socialLogin";
     if (!uiConfig.defaultLanguage) this.uiConfig.defaultLanguage = getUserLanguage(uiConfig.defaultLanguage);
     if (!uiConfig.widgetType) this.uiConfig.widgetType = WIDGET_TYPE.MODAL;
-    if (!uiConfig.initialAuthenticationMode) this.uiConfig.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY;
+    if (!uiConfig.initialAuthenticationMode) this.uiConfig.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+    if (!uiConfig.buttonRadiusType) this.uiConfig.buttonRadiusType = "pill";
+    if (!uiConfig.logoAlignment) this.uiConfig.logoAlignment = "center";
+    if (typeof uiConfig.displayInstalledExternalWallets === "undefined") this.uiConfig.displayInstalledExternalWallets = true;
+    if (typeof uiConfig.displayExternalWalletsCount === "undefined") this.uiConfig.displayExternalWalletsCount = true;
+    if (typeof uiConfig.hideSuccessScreen === "undefined") this.uiConfig.hideSuccessScreen = false;
+    if (!uiConfig.privacyPolicy) this.uiConfig.privacyPolicy = "";
+    if (!uiConfig.tncLink) this.uiConfig.tncLink = "";
 
     if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");
@@ -107,8 +108,6 @@ export class LoginModal {
     }
 
     this.stateEmitter = new SafeEventEmitter<StateEmitterEvents>();
-    this.chainNamespaces = uiConfig.chainNamespaces;
-    this.walletRegistry = uiConfig.walletRegistry;
     this.callbacks = callbacks;
     this.analytics = uiConfig.analytics;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
@@ -129,8 +128,6 @@ export class LoginModal {
   }
 
   initModal = async (): Promise<void> => {
-    const darkState = { isDark: this.isDark };
-
     const useLang = this.uiConfig.defaultLanguage || LANGUAGES.en;
 
     // Load new language resource
@@ -232,9 +229,6 @@ export class LoginModal {
         log.info("rendered");
         this.setState({
           status: MODAL_STATUS.INITIALIZED,
-          web3authClientId: this.uiConfig.web3authClientId,
-          web3authNetwork: this.uiConfig.web3authNetwork,
-          authBuildEnv: this.uiConfig.authBuildEnv,
         });
         return resolve();
       });
@@ -249,7 +243,7 @@ export class LoginModal {
 
       const container = document.getElementById("w3a-parent-container");
 
-      if (darkState.isDark) {
+      if (this.isDark) {
         container.classList.add("w3a--dark");
       } else {
         container.classList.remove("w3a--dark");
@@ -257,25 +251,20 @@ export class LoginModal {
 
       const root = createRoot(container);
       root.render(
-        <ThemedContext.Provider value={darkState}>
-          <AnalyticsContext.Provider value={{ analytics: this.analytics }}>
-            <Widget
-              stateListener={this.stateEmitter}
-              appLogo={darkState.isDark ? this.uiConfig.logoDark : this.uiConfig.logoLight}
-              appName={this.uiConfig.appName}
-              chainNamespaces={this.chainNamespaces}
-              walletRegistry={this.walletRegistry}
-              deviceDetails={this.deviceDetails}
-              handleShowExternalWallets={this.handleShowExternalWallets}
-              handleExternalWalletClick={this.handleExternalWalletClick}
-              handleMobileVerifyConnect={this.handleMobileVerifyConnect}
-              handleSocialLoginClick={this.handleSocialLoginClick}
-              closeModal={this.closeModal}
-              uiConfig={this.uiConfig}
-              initialAuthenticationMode={this.uiConfig.initialAuthenticationMode}
-            />
-          </AnalyticsContext.Provider>
-        </ThemedContext.Provider>
+        <AnalyticsContext.Provider value={{ analytics: this.analytics }}>
+          <WidgetProvider
+            isDark={this.isDark}
+            deviceDetails={this.deviceDetails}
+            uiConfig={this.uiConfig}
+            handleShowExternalWallets={this.handleShowExternalWallets}
+            handleExternalWalletClick={this.handleExternalWalletClick}
+            handleMobileVerifyConnect={this.handleMobileVerifyConnect}
+            handleSocialLoginClick={this.handleSocialLoginClick}
+            closeModal={this.closeModal}
+          >
+            <Widget stateListener={this.stateEmitter} />
+          </WidgetProvider>
+        </AnalyticsContext.Provider>
       );
 
       const isDefaultColors = this.uiConfig?.theme?.primary === DEFAULT_PRIMARY_COLOR && this.uiConfig.theme?.onPrimary === DEFAULT_ON_PRIMARY_COLOR;
@@ -294,21 +283,15 @@ export class LoginModal {
     });
   };
 
-  addSocialLogins = (
-    connector: WALLET_CONNECTOR_TYPE,
-    loginMethods: LoginMethodConfig,
-    loginMethodsOrder: string[],
-    uiConfig: Omit<UIConfig, "connectorListener">
-  ): void => {
+  addSocialLogins = (loginMethods: LoginMethodConfig, loginMethodsOrder: string[], uiConfig: Omit<UIConfig, "connectorListener">): void => {
     this.setState({
       socialLoginsConfig: {
-        connector,
         loginMethods,
         loginMethodsOrder,
         uiConfig,
       },
     });
-    log.info("addSocialLogins", connector, loginMethods, loginMethodsOrder, uiConfig);
+    log.info("addSocialLogins", loginMethods, loginMethodsOrder, uiConfig);
   };
 
   addWalletLogins = (
@@ -330,8 +313,8 @@ export class LoginModal {
       modalVisibility: true,
     });
     this.analytics?.track(ANALYTICS_EVENTS.LOGIN_MODAL_OPENED, {
-      chain_namespaces: this.chainNamespaces,
-      wallet_registry_count: Object.keys(this.walletRegistry?.default).length + Object.keys(this.walletRegistry?.others).length,
+      chain_namespaces: this.uiConfig.chainNamespaces,
+      wallet_registry_count: Object.keys(this.uiConfig.walletRegistry?.default).length + Object.keys(this.uiConfig.walletRegistry?.others).length,
       external_wallet_connectors: Object.keys(this.externalWalletsConfig || {}),
       ...getWhitelabelAnalyticsProperties(this.uiConfig),
       ...getLoginModalAnalyticsProperties(this.uiConfig),
@@ -382,15 +365,15 @@ export class LoginModal {
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
-    const { connector, loginParams } = params;
+    const { loginParams } = params;
     this.analytics?.track(ANALYTICS_EVENTS.SOCIAL_LOGIN_SELECTED, {
-      connector,
+      connector: WALLET_CONNECTORS.AUTH,
       auth_connection: loginParams.authConnection,
       auth_connection_id: loginParams.authConnectionId,
       group_auth_connection_id: loginParams.groupedAuthConnectionId,
     });
     if (this.callbacks.onSocialLogin) {
-      this.callbacks.onSocialLogin({ connector, loginParams });
+      this.callbacks.onSocialLogin({ loginParams });
     }
   };
 
@@ -433,7 +416,7 @@ export class LoginModal {
           status: MODAL_STATUS.CONNECTED,
           modalVisibility: true,
           postLoadingMessage: "modal.post-loading.connected",
-          currentPage: PAGES.LOGIN,
+          currentPage: PAGES.LOGIN_OPTIONS,
         });
       } else {
         this.setState({

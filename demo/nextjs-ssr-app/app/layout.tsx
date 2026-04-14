@@ -13,8 +13,8 @@ export const metadata = {
   description: "Web3Auth NextJS Quick Start",
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const web3authInitialState = cookieToWeb3AuthState((headers()).get('cookie'))
+export default async function RootLayout({ children }: { children: React.ReactNode }) {
+  const web3authInitialState = cookieToWeb3AuthState(((await headers())).get('cookie'))
   console.log("web3authInitialState", web3authInitialState)
   return (
     <html lang="en">

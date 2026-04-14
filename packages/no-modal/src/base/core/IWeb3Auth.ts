@@ -1,10 +1,12 @@
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import {
   type BUILD_ENV_TYPE,
+  type CookieOptions,
   type LoginParams,
   MfaLevelType,
   MfaSettings,
   SafeEventEmitter,
+  type StorageConfig,
   UX_MODE_TYPE,
   type WhiteLabelData,
 } from "@web3auth/auth";
@@ -12,7 +14,9 @@ import { type WsEmbedParams } from "@web3auth/ws-embed";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
+  type AuthTokenInfo,
   CONNECTED_EVENT_DATA,
+  type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   type CONNECTOR_STATUS_TYPE,
@@ -20,8 +24,6 @@ import {
   type ConnectorFn,
   type IBaseProvider,
   type IConnector,
-  type IdentityTokenInfo,
-  type IProvider,
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
@@ -91,13 +93,17 @@ export interface IWeb3AuthCoreOptions {
    * @defaultValue false
    */
   enableLogging?: boolean;
+
   /**
-   * setting to "local" will persist social login session across browser tabs.
-   *
-   * @defaultValue "local"
+   * Custom storage adapters for auth tokens (sessionId, accessToken, refreshToken, idToken).
+   * @defaultValue localStorage-based adapters
    */
-  // TODO: rename this to match customauth, sfa
-  storageType?: "session" | "local" | "cookies";
+  storage?: StorageConfig;
+
+  /**
+   * Cookie configuration used when storage adapters are cookie-based.
+   */
+  cookieOptions?: CookieOptions;
 
   /**
    * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
@@ -155,7 +161,7 @@ export interface IWeb3AuthCoreOptions {
   walletServicesConfig?: WalletServicesConfig;
 
   /**
-   * Private key provider for xrpl, mpc cases
+   * Private key provider for xrpl cases
    */
   privateKeyProvider?: IBaseProvider<string>;
 
@@ -185,7 +191,7 @@ export interface IWeb3AuthCoreOptions {
 
   /**
    * Initial authentication mode for the auth connector.
-   * @defaultValue "connect-only"
+   * @defaultValue "connect-and-sign"
    */
   initialAuthenticationMode?: ConnectorInitialAuthenticationModeType;
 }
@@ -202,13 +208,13 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
-  provider: IProvider | null;
+  connection: Connection | null;
   init(options?: { signal?: AbortSignal }): Promise<void>;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
   getPlugin(pluginName: string): IPlugin | null;
   logout(options?: { cleanup: boolean }): Promise<void>;
   getUserInfo(): Promise<Partial<UserInfo>>;
-  getIdentityToken(): Promise<IdentityTokenInfo>;
+  getAuthTokenInfo(): Promise<Pick<AuthTokenInfo, "idToken">>;
   switchChain(params: { chainId: string }): Promise<void>;
 }
 
@@ -220,7 +226,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
    * Connect to a specific wallet connector
    * @param walletName - Key of the wallet connector to use.
    */
-  connectTo<T extends WALLET_CONNECTOR_TYPE>(walletName: T, loginParams?: LoginParamMap[T]): Promise<IProvider | null>;
+  connectTo<T extends WALLET_CONNECTOR_TYPE>(walletName: T, loginParams?: LoginParamMap[T]): Promise<Connection | null>;
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
   cleanup(): Promise<void>;

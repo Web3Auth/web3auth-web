@@ -1,0 +1,52 @@
+.w3a--spinner-loader {
+  position: relative;
+  display: inline-flex;
+  height: 60px;
+  width: 60px;
+}
+
+.w3a--spinner-loader-ring {
+  --spinner-color: var(--app-gray-400);
+
+  position: absolute;
+  display: inline-block;
+  height: 100%;
+  width: 100%;
+  border-radius: 100vw;
+  background-size: 100% 100%;
+  background-position: 0px 0px;
+  background-image: conic-gradient(
+    from 0deg at 50% 50%,
+    var(--spinner-color) 0%,
+    rgb(229, 231, 235, 0.8) 90deg,
+    rgb(229, 231, 235, 0.8) 270deg,
+    var(--spinner-color) 360deg
+  );
+
+  -webkit-mask:
+    radial-gradient(farthest-side, #000 98%, #0000) center/85% 85% no-repeat,
+    linear-gradient(#000 0 0);
+  -webkit-mask-composite: destination-out;
+
+  mask:
+    radial-gradient(farthest-side, #000 98%, #0000) center/85% 85% no-repeat,
+    linear-gradient(#000 0 0);
+  mask-composite: exclude;
+}
+
+.w3a--dark .w3a--spinner-loader-ring {
+  background-image: conic-gradient(
+    from 0deg at 50% 50%,
+    var(--spinner-color) 0%,
+    rgb(229, 231, 235, 0.2) 90deg,
+    rgb(229, 231, 235, 0.2) 270deg,
+    var(--spinner-color) 360deg
+  );
+}
+
+.w3a--spinner-loader-image {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}

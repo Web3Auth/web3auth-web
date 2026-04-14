@@ -1,4 +1,3 @@
-import { bs58 as base58 } from "@toruslabs/bs58";
 import {
   EIP_5792_METHODS,
   Eip5792GetCapabilitiesParams,
@@ -8,12 +7,11 @@ import {
 import type { ISignClient, SessionTypes } from "@walletconnect/types";
 import { getAccountsFromNamespaces, parseAccountId } from "@walletconnect/utils";
 import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
-import { EVM_METHOD_TYPES, SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
+import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import type { GetCapabilitiesReturnType, SendCallsReturnType, WalletGetCallsStatusReturnType } from "viem";
 
-import { AddEthereumChainConfig, SOLANA_CAIP_CHAIN_MAP, WalletLoginError } from "../../base";
+import { AddEthereumChainConfig, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
-import type { ISolanaProviderHandlers } from "../../providers/solana-provider";
 import { formatChainId } from "./utils";
 
 async function getLastActiveSession(signClient: ISignClient): Promise<SessionTypes.Struct | null> {
@@ -75,6 +73,15 @@ export async function getAccounts(signClient: ISignClient): Promise<string[]> {
     ];
   }
   throw WalletLoginError.connectionError("Failed to get accounts");
+}
+
+export async function getSolanaAccounts(signClient: ISignClient): Promise<string[]> {
+  const session = await getLastActiveSession(signClient);
+  if (!session) {
+    throw providerErrors.disconnected();
+  }
+  const accounts = getAccountsFromNamespaces(session.namespaces);
+  return [...new Set(accounts.filter((add) => add.startsWith("solana:")).map((add) => parseAccountId(add).address))];
 }
 
 export function getEthProviderHandlers({ connector, chainId }: { connector: ISignClient; chainId: number }): IEthProviderHandlers {
@@ -153,54 +160,6 @@ export function getEthProviderHandlers({ connector, chainId }: { connector: ISig
     // EIP-5792: wallet_showCallsStatus
     processShowCallsStatus: async (batchId: Eip5792ShowCallsStatusParams) => {
       await sendJrpcRequest<void, string[]>(connector, `eip155:${chainId}`, EIP_5792_METHODS.WALLET_SHOW_CALLS_STATUS, [batchId]);
-    },
-  };
-}
-
-export function getSolProviderHandlers({ connector, chainId }: { connector: ISignClient; chainId: string }): ISolanaProviderHandlers {
-  return {
-    requestAccounts: async (_: JRPCRequest<unknown>) => {
-      return getAccounts(connector);
-    },
-    getPrivateKey: async () => {
-      throw rpcErrors.methodNotSupported();
-    },
-    getSecretKey: async () => {
-      throw rpcErrors.methodNotSupported();
-    },
-    getPublicKey: async () => {
-      throw rpcErrors.methodNotSupported();
-    },
-    getAccounts: async (_: JRPCRequest<unknown>) => {
-      return getAccounts(connector);
-    },
-    signAllTransactions: async (_: JRPCRequest<unknown>) => {
-      throw rpcErrors.methodNotSupported();
-    },
-    signAndSendTransaction: async (_: JRPCRequest<unknown>) => {
-      throw rpcErrors.methodNotSupported();
-    },
-    signMessage: async (req: JRPCRequest<{ data: string }>): Promise<string> => {
-      const methodRes = await sendJrpcRequest<{ signature: string }, { message: string }>(
-        connector,
-        `solana:${SOLANA_CAIP_CHAIN_MAP[chainId]}`,
-        SOLANA_METHOD_TYPES.SIGN_MESSAGE,
-        { message: base58.encode(Buffer.from(req.params.data, "utf-8")) }
-      );
-      return methodRes.signature;
-    },
-    signTransaction: async (req: JRPCRequest<{ message: string }>): Promise<string> => {
-      const accounts = await getAccounts(connector);
-      if (accounts.length === 0) {
-        throw providerErrors.disconnected();
-      }
-      const methodRes = await sendJrpcRequest<{ signature: string }, { transaction: string }>(
-        connector,
-        `solana:${SOLANA_CAIP_CHAIN_MAP[chainId]}`,
-        SOLANA_METHOD_TYPES.SIGN_TRANSACTION,
-        { transaction: req.params.message }
-      );
-      return methodRes.signature;
     },
   };
 }

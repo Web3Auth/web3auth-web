@@ -1,5 +1,8 @@
 import { type ProviderConfig } from "@toruslabs/base-controllers";
+import { CITADEL_SERVER_MAP } from "@toruslabs/constants";
+import { put } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
+import type { Wallet } from "@wallet-standard/base";
 import {
   Auth,
   type AUTH_CONNECTION_TYPE,
@@ -9,10 +12,10 @@ import {
   BUILD_ENV,
   createHandler,
   type CreateHandlerParams,
+  generateRecordId,
   getUserId,
   type LoginParams,
   PopupHandler,
-  randomId,
   SDK_MODE,
   SUPPORTED_KEY_CURVES,
   UX_MODE,
@@ -23,12 +26,14 @@ import deepmerge from "deepmerge";
 
 import {
   AuthLoginParams,
+  AuthTokenInfo,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
   cloneDeep,
   CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -39,7 +44,7 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
-  IdentityTokenInfo,
+  getCaipChainId,
   IProvider,
   log,
   UserInfo,
@@ -49,7 +54,8 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
-import { parseToken } from "../utils";
+import { generateNonce, parseToken } from "../utils";
+import { AuthSolanaWallet } from "./authSolanaWallet";
 import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
 
 class AuthConnector extends BaseConnector<AuthLoginParams> {
@@ -77,6 +83,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private wsEmbedInstancePromise: Promise<void> | null = null;
 
+  private _solanaWallet: Wallet | null = null;
+
   constructor(params: AuthConnectorOptions) {
     super(params);
 
@@ -97,6 +105,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   get wsEmbed(): WsEmbed {
     return this.wsEmbedInstance;
+  }
+
+  get solanaWallet(): Wallet | null {
+    return this._solanaWallet;
   }
 
   set provider(_: IProvider | null) {
@@ -129,7 +141,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     // making it async here to initialize provider.
     const authInstancePromise = this.authInstance.init();
 
-    // Use this for xrpl, mpc cases
+    // Use this for xrpl cases
     if (this.coreOptions.privateKeyProvider) {
       this.privateKeyProvider = this.coreOptions.privateKeyProvider;
     } else {
@@ -152,6 +164,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
               loginMode: WS_EMBED_LOGIN_MODE.PLUGIN,
               chains: wsSupportedChains as ProviderConfig[],
               chainId,
+              buildEnv: this.authOptions.buildEnv,
               whiteLabel: {
                 ...this.authOptions.whiteLabel,
                 ...this.wsSettings.whiteLabel,
@@ -189,7 +202,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       // connect only if it is redirect result or if connect (connector is cached/already connected in same session) is true
       if (sessionId && (options.autoConnect || isRedirectResult)) {
         this.rehydrated = true;
-        await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        await this.connect({ chainId: options.chainId, getAuthTokenInfo: options.getAuthTokenInfo });
       } else if (!sessionId && options.autoConnect) {
         // if here, this means that the connector is cached but the sessionId is not available.
         // this can happen if the sessionId has expired.
@@ -201,13 +214,13 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
   }
 
-  async connect(params: Partial<AuthLoginParams> & BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect(params: Partial<AuthLoginParams> & BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     this.status = CONNECTOR_STATUS.CONNECTING;
     this.emit(CONNECTOR_EVENTS.CONNECTING, { ...params, connector: WALLET_CONNECTORS.AUTH });
     try {
       await this.connectWithProvider(params);
-      return this.provider;
+      return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
     } catch (error: unknown) {
       log.error("Failed to connect with auth provider", error);
       // ready again to be connected
@@ -269,17 +282,29 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     }
 
     this.rehydrated = false;
+    this._solanaWallet = null;
     this.emit(CONNECTOR_EVENTS.DISCONNECTED);
   }
 
-  async getIdentityToken(): Promise<{ idToken: string }> {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.AUTH });
     const userInfo = await this.getUserInfo();
     this.status = CONNECTOR_STATUS.AUTHORIZED;
-    this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: WALLET_CONNECTORS.AUTH, identityTokenInfo: { idToken: userInfo.idToken as string } });
-    return { idToken: userInfo.idToken as string };
+    const [accessToken, refreshToken] = await Promise.all([
+      this.authInstance.authSessionManager.getAccessToken(),
+      this.authInstance.authSessionManager.getRefreshToken(),
+    ]);
+    this.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      connector: WALLET_CONNECTORS.AUTH,
+      authTokenInfo: {
+        idToken: userInfo.idToken as string,
+        accessToken,
+        refreshToken,
+      },
+    });
+    return { idToken: userInfo.idToken as string, accessToken, refreshToken };
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -289,31 +314,21 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     return userInfo;
   }
 
-  // we don't support switching between different namespaces, except for solana and evm
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    // get chains and namespaces
+
     const { chainId: newChainId } = params;
     const { chainId: currentChainId } = this.provider;
-    const { chainNamespace: currentNamespace } = this.getChain(currentChainId);
-    const { chainNamespace: newNamespace } = this.getChain(newChainId);
-
-    // skip if chainId is the same
     if (currentChainId === newChainId) return;
 
-    if (currentNamespace === CHAIN_NAMESPACES.SOLANA || currentNamespace === CHAIN_NAMESPACES.EIP155) {
-      // can only switch to solana or evm
-      if (newNamespace !== CHAIN_NAMESPACES.SOLANA && newNamespace !== CHAIN_NAMESPACES.EIP155)
-        throw WalletLoginError.connectionError("Cannot switch to other chain namespace");
+    const newChainConfig = this.coreOptions.chains.find((c) => c.chainId === newChainId);
+    if (!newChainConfig) throw WalletInitializationError.invalidParams("Chain config is not available");
 
-      const fullChainId = `${newNamespace}:${Number(params.chainId)}`;
-      await this.wsEmbedInstance.provider?.request({
-        method: "wallet_switchChain",
-        params: { chainId: fullChainId },
-      });
+    if (newChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA || newChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      if (!this.wsEmbedInstance?.provider) throw WalletInitializationError.notReady("Wallet embed is not ready");
+      const fullChainId = getCaipChainId(newChainConfig);
+      await this.wsEmbedInstance.provider.request({ method: "wallet_switchChain", params: { chainId: fullChainId } });
     } else {
-      // cannot switch to other namespaces
-      if (currentNamespace !== newNamespace) throw WalletLoginError.connectionError("Cannot switch to other chain namespace");
       await this.privateKeyProvider?.switchChain(params);
     }
   }
@@ -344,8 +359,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     return providerConfig;
   }
 
-  private getChain(chainId: string) {
-    return this.coreOptions.chains.find((x) => x.chainId === chainId);
+  private setupSolanaWallet(): void {
+    const solanaChains = this.coreOptions.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
+    if (solanaChains.length === 0 || !this.provider) return;
+
+    this._solanaWallet = new AuthSolanaWallet(this.provider, solanaChains);
   }
 
   private _getFinalPrivKey() {
@@ -409,24 +427,27 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
       const { sessionId, sessionNamespace } = this.authInstance || {};
       if (sessionId) {
-        const isLoggedIn = await this.wsEmbedInstance.loginWithSessionId({
+        this.wsEmbedInstance.setAccessTokenProvider(this.accessTokenProvider.bind(this));
+
+        const isLoggedIn = await this.wsEmbedInstance.connectWithSession({
           sessionId,
           sessionNamespace,
+          idToken: await this.getIdToken(),
         });
         if (isLoggedIn) {
-          // if getIdentityToken is true, then get the identity token
-          // No need to get the identity token for auth connector as it is already handled
-          let identityTokenInfo: IdentityTokenInfo | undefined;
+          this.setupSolanaWallet();
+          // if getAuthTokenInfo is true, then get auth token info
+          // No need to get auth token info for auth connector as it is already handled
           this.status = CONNECTOR_STATUS.CONNECTED;
           this.emit(CONNECTOR_EVENTS.CONNECTED, {
-            connector: WALLET_CONNECTORS.AUTH,
+            connectorName: WALLET_CONNECTORS.AUTH,
             reconnected: this.rehydrated,
-            provider: this.provider,
-            identityTokenInfo,
+            ethereumProvider: this.provider,
+            solanaWallet: this._solanaWallet,
           } as CONNECTED_EVENT_DATA);
 
-          if (params.getIdentityToken) {
-            identityTokenInfo = await this.getIdentityToken();
+          if (params.getAuthTokenInfo) {
+            await this.getAuthTokenInfo();
           }
           // handle disconnect from ws embed
           this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
@@ -441,9 +462,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         await this.privateKeyProvider.setupProvider(finalPrivKey, params.chainId);
         this.status = CONNECTOR_STATUS.CONNECTED;
         this.emit(CONNECTOR_EVENTS.CONNECTED, {
-          connector: WALLET_CONNECTORS.AUTH,
+          connectorName: WALLET_CONNECTORS.AUTH,
+          ethereumProvider: this.provider,
+          solanaWallet: this._solanaWallet,
           reconnected: this.rehydrated,
-          provider: this.provider,
         } as CONNECTED_EVENT_DATA);
       }
     }
@@ -464,10 +486,14 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       login_hint: params.loginHint || params.extraLoginOptions?.login_hint,
     } as Auth0ClientOptions;
 
-    const nonce = randomId();
+    const nonce = generateNonce();
 
     // post a message to the auth provider to indicate that login has been initiated.
-    const loginParams = cloneDeep(params);
+    const loginParams = {
+      ...cloneDeep(params),
+      recordId: generateRecordId(),
+      loginSource: "web3auth-web",
+    };
     loginParams.extraLoginOptions = {
       ...(loginParams.extraLoginOptions || {}),
       login_hint: params.loginHint || params.extraLoginOptions?.login_hint,
@@ -492,10 +518,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         version: version.split(".")[0],
         web3AuthNetwork: this.coreOptions.web3AuthNetwork,
         web3AuthClientId: this.coreOptions.clientId,
-        originData: this.authInstance.options.originData ? JSON.stringify(this.authInstance.options.originData) : undefined,
+        originData: this.getOriginData(),
       },
       web3AuthClientId: this.coreOptions.clientId,
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+      storageServerUrl: this.authInstance.options.storageServerUrl,
     };
 
     const loginHandler = createHandler(popupParams);
@@ -508,6 +535,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     let isClosedWindow = false;
 
+    this.auditOAuditProgress(loginParams as LoginParams).catch((error: unknown) => {
+      log.error("Error reporting `oauthInitiated` audit progress", error);
+    });
+
     return new Promise((resolve, reject) => {
       verifierWindow.open().catch((error: unknown) => {
         log.error("Error during login with social", error);
@@ -516,7 +547,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       });
 
       // this is to close the popup when the login is finished.
-      const securePubSub = new SecurePubSub({ sameIpCheck: true });
+      const securePubSub = new SecurePubSub({
+        sameIpCheck: true,
+        serverUrl: this.authInstance.options.storageServerUrl,
+        socketUrl: this.authInstance.options.sessionSocketUrl,
+      });
       securePubSub
         .subscribe(`web3auth-login-${nonce}`)
         .then((data: string) => {
@@ -535,6 +570,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         .catch((error: unknown) => {
           // swallow the error, dont need to throw.
           log.error("Error during login with social", error);
+          this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
+            log.error("Error reporting `oauthFailed` audit progress", error);
+          });
         });
 
       verifierWindow.once("close", () => {
@@ -549,12 +587,44 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
         .postLoginInitiatedMessage(loginParams as LoginParams, nonce)
         .then(resolve)
         .catch((error: unknown) => {
+          this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
+            log.error("Error reporting `oauthFailed` audit progress", error);
+          });
           if (error instanceof Web3AuthError) {
             throw error;
           }
           reject(WalletLoginError.connectionError(error instanceof Error ? error.message : (error as string) || "Failed to login with social"));
         });
     });
+  }
+
+  private async accessTokenProvider({ forceRefresh }: { forceRefresh: boolean }): Promise<string> {
+    if (forceRefresh) {
+      await this.authInstance.refreshSession();
+    }
+    return this.authInstance.getAccessToken();
+  }
+
+  private async getIdToken(): Promise<string> {
+    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
+    return this.authInstance.authSessionManager.getIdToken();
+  }
+
+  private getOriginData(): string | undefined {
+    try {
+      const { originData, redirectUrl } = this.authInstance.options;
+      const origin = new URL(redirectUrl).origin;
+      if (originData) {
+        const dappOriginData = originData[origin];
+        if (dappOriginData) {
+          return JSON.stringify({ [origin]: dappOriginData });
+        }
+      }
+      return undefined;
+    } catch (error) {
+      log.error("Error getting origin data", error);
+      return undefined;
+    }
   }
 
   private connectWithJwtLogin(params: Partial<AuthLoginParams> & { chainId: string }) {
@@ -607,6 +677,40 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
+  }
+
+  private async auditOAuditProgress(
+    loginParams: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "recordId" | "loginSource">,
+    status?: "failed" | "completed"
+  ) {
+    const { authConnection, authConnectionId, groupedAuthConnectionId, recordId, loginSource } = loginParams;
+    const { authBuildEnv = BUILD_ENV.PRODUCTION, web3AuthNetwork, clientId } = this.coreOptions;
+    const auditServerUrl = `${CITADEL_SERVER_MAP[authBuildEnv]}/v1/auth/audit`;
+
+    const progressFlag: { oauthInitiated?: boolean; oauthFailed?: boolean; oauthCompleted?: boolean } = {
+      oauthInitiated: true,
+    };
+
+    const auditPayload: Record<string, unknown> = {
+      authConnection,
+      authConnectionId,
+      groupedAuthConnectionId,
+      recordId,
+      source: loginSource,
+      web3AuthNetwork,
+      web3AuthClientId: clientId,
+      ...progressFlag,
+    };
+
+    if (status === "failed") {
+      auditPayload.oauthFailed = true;
+    } else if (status === "completed") {
+      auditPayload.oauthCompleted = true;
+    } else {
+      auditPayload.oauthInitiated = true;
+    }
+
+    await put(auditServerUrl, auditPayload);
   }
 }
 

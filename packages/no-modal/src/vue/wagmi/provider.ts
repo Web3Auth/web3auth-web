@@ -3,8 +3,8 @@ import {
   configKey,
   createConfig as createWagmiConfig,
   type CreateConfigParameters,
-  useAccountEffect,
   useConfig as useWagmiConfig,
+  useConnectionEffect,
   useReconnect,
 } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
@@ -98,12 +98,12 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 const Web3AuthWagmiProvider = defineComponent({
   name: "Web3AuthWagmiProvider",
   setup() {
-    const { isConnected, provider } = useWeb3Auth();
+    const { isConnected, connection } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
-    const { reconnect } = useReconnect();
+    const { mutate: reconnect } = useReconnect();
 
-    useAccountEffect({
+    useConnectionEffect({
       onDisconnect: async () => {
         log.info("Disconnected from wagmi");
         if (isConnected.value) await disconnect();
@@ -118,10 +118,11 @@ const Web3AuthWagmiProvider = defineComponent({
     });
 
     watch(
-      isConnected,
-      async (newIsConnected) => {
-        if (newIsConnected && provider.value) {
-          const connector = await setupConnector(provider.value, wagmiConfig);
+      [isConnected, connection],
+      async () => {
+        const newIsConnected = isConnected.value;
+        if (newIsConnected && connection.value?.ethereumProvider) {
+          const connector = await setupConnector(connection.value.ethereumProvider, wagmiConfig);
           if (!connector) {
             throw new Error("Failed to setup connector");
           }

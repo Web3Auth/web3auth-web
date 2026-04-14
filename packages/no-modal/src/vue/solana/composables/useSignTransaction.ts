@@ -1,15 +1,19 @@
+import type { Transaction } from "@solana/kit";
 import { Ref, ref } from "vue";
 
-import { log } from "../../../base";
-import { WalletInitializationError, type Web3AuthError } from "../../../base/errors";
-import { TransactionOrVersionedTransaction } from "../../../providers/solana-provider";
+import { log, WalletInitializationError, walletSignTransaction, type Web3AuthError } from "../../../base";
 import { useSolanaWallet } from "./useSolanaWallet";
 
 export type IUseSignTransaction = {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
   data: Ref<string | null>;
-  signTransaction: (transaction: TransactionOrVersionedTransaction) => Promise<string>;
+  /**
+   * Signs a transaction and returns the base64-encoded wire transaction.
+   * @param transaction - Compiled transaction from \@solana/kit
+   * @returns The signed transaction encoded as a base64 wire transaction
+   */
+  signTransaction: (transaction: Transaction) => Promise<string>;
 };
 
 export const useSignTransaction = (): IUseSignTransaction => {
@@ -18,12 +22,12 @@ export const useSignTransaction = (): IUseSignTransaction => {
   const error = ref<Web3AuthError | null>(null);
   const data = ref<string | null>(null);
 
-  const signTransaction = async (transaction: TransactionOrVersionedTransaction) => {
+  const signTransaction = async (transaction: Transaction) => {
     loading.value = true;
     error.value = null;
     try {
       if (!solanaWallet.value) throw WalletInitializationError.notReady();
-      const signedTransaction = await solanaWallet.value.signTransaction(transaction);
+      const signedTransaction = await walletSignTransaction(solanaWallet.value, transaction);
       data.value = signedTransaction;
       return signedTransaction;
     } catch (err) {

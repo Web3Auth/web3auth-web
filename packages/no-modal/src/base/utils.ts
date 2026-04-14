@@ -1,12 +1,12 @@
 import { CHAIN_NAMESPACES, cloneDeep } from "@toruslabs/base-controllers";
-import { SIGNER_MAP } from "@toruslabs/constants";
+import { CITADEL_SERVER_MAP, DASHBOARD_PUBLIC_API_MAP } from "@toruslabs/constants";
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import { get } from "@toruslabs/http-helpers";
-import { type BUILD_ENV_TYPE } from "@web3auth/auth";
+import { BUILD_ENV, type BUILD_ENV_TYPE } from "@web3auth/auth";
 import { type Chain } from "viem";
 
 import { type CustomChainConfig } from "./chain/IChainInterface";
-import { WEB3AUTH_NETWORK, type WEB3AUTH_NETWORK_TYPE } from "./connector";
+import { type WEB3AUTH_NETWORK_TYPE } from "./connector";
 import { SOLANA_CAIP_CHAIN_MAP, WALLET_REGISTRY_URL } from "./constants";
 import { type UIConfig, type WalletServicesConfig } from "./core/IWeb3Auth";
 import { Web3AuthError } from "./errors";
@@ -16,8 +16,12 @@ export const isHexStrict = (hex: string): boolean => {
   return (typeof hex === "string" || typeof hex === "number") && /^(-)?0x[0-9a-f]*$/i.test(hex);
 };
 
-export const signerHost = (web3AuthNetwork: WEB3AUTH_NETWORK_TYPE = WEB3AUTH_NETWORK.SAPPHIRE_MAINNET): string => {
-  return SIGNER_MAP[web3AuthNetwork];
+export const dashboardPublicApiUrl = (buildEnv: BUILD_ENV_TYPE) => {
+  return DASHBOARD_PUBLIC_API_MAP[buildEnv];
+};
+
+export const citadelServerUrl = (buildEnv?: BUILD_ENV_TYPE): string => {
+  return CITADEL_SERVER_MAP[buildEnv || BUILD_ENV.PRODUCTION];
 };
 
 export const fetchProjectConfig = async ({
@@ -31,7 +35,7 @@ export const fetchProjectConfig = async ({
   aaProvider?: string;
   authBuildEnv?: BUILD_ENV_TYPE;
 }): Promise<ProjectConfig> => {
-  const url = new URL(`${signerHost(web3AuthNetwork)}/api/v2/configuration`);
+  const url = new URL(`${dashboardPublicApiUrl(authBuildEnv)}/api/v2/configuration`);
   url.searchParams.append("project_id", clientId);
   url.searchParams.append("network", web3AuthNetwork);
   if (authBuildEnv) url.searchParams.append("build_env", authBuildEnv);

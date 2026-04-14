@@ -3,7 +3,7 @@
 import {
   useCheckout,
   useEnableMFA,
-  useIdentityToken,
+  useAuthTokenInfo,
   useManageMFA,
   useWalletConnectScanner,
   useWalletUI,
@@ -12,25 +12,26 @@ import {
   useWeb3AuthDisconnect,
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
-import { useAccount, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain } from "wagmi";
+import { useConnection, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain, useChains } from "wagmi";
 
 const Main = () => {
   const { provider, isConnected } = useWeb3Auth();
-  const { chains, switchChain } = useSwitchChain();
+  const { mutate: switchChain } = useSwitchChain();
+  const chains = useChains();
   const chainId = useChainId();
   const { loading: connecting, connect, error: connectingError, connectorName } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
-  const { signMessageAsync, data: signedMessageData } = useSignMessage();
-  const { address, isConnected: isWagmiConnected } = useAccount();
+  const { mutateAsync: signMessageAsync, data: signedMessageData } = useSignMessage();
+  const { address, isConnected: isWagmiConnected } = useConnection();
   const { userInfo, isMFAEnabled } = useWeb3AuthUser();
   const { data: balance } = useBalance({ address });
-  const { signTypedData, data: signedTypedDataData } = useSignTypedData();
+  const { mutate: signTypedData, data: signedTypedDataData } = useSignTypedData();
   const { enableMFA, loading: isEnableMFALoading, error: enableMFAError } = useEnableMFA();
   const { manageMFA, loading: isManageMFALoading, error: manageMFAError } = useManageMFA();
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
-  const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
+  const { token, loading: isUserTokenLoading, error: userTokenError, getAuthTokenInfo } = useAuthTokenInfo();
 
   console.log("isConnected", isConnected, balance);
 
@@ -58,7 +59,7 @@ const Main = () => {
               {isUserTokenLoading ? (
                 <p>Authenticating...</p>
               ) : (
-                <button onClick={() => getIdentityToken()} className="card">
+                <button onClick={() => getAuthTokenInfo()} className="card">
                   Authenticate User
                 </button>
               )}

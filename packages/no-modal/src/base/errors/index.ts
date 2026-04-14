@@ -1,7 +1,5 @@
-import { CustomError } from "ts-custom-error";
-
 // @flow
-export interface IWeb3AuthError extends CustomError {
+export interface IWeb3AuthError extends Error {
   code: number;
   message: string;
   cause?: unknown;
@@ -12,7 +10,7 @@ export type ErrorCodes = {
   [key: number]: string;
 };
 
-export abstract class Web3AuthError extends CustomError implements IWeb3AuthError {
+export abstract class Web3AuthError extends Error implements IWeb3AuthError {
   code: number;
 
   message: string;
@@ -20,14 +18,21 @@ export abstract class Web3AuthError extends CustomError implements IWeb3AuthErro
   cause?: unknown;
 
   public constructor(code: number, message?: string, cause?: unknown) {
-    // takes care of stack and proto
-    super(message);
+    if (cause !== undefined) {
+      super(message, { cause });
+      // Browser backwards-compatibility fallback
+      if (!Object.hasOwn(this, "cause")) {
+        Object.assign(this, { cause });
+      }
+    } else {
+      super(message);
+    }
 
     this.code = code;
     this.message = message || "";
     this.cause = cause;
     // Set name explicitly as minification can mangle class names
-    Object.defineProperty(this, "name", { value: "Web3AuthError" });
+    Object.defineProperty(this, "name", { value: "Web3AuthError", configurable: true });
   }
 
   toJSON(): IWeb3AuthError {
@@ -66,7 +71,7 @@ export class WalletInitializationError extends Web3AuthError {
     super(code, message, cause);
 
     // Set name explicitly as minification can mangle class names
-    Object.defineProperty(this, "name", { value: "WalletInitializationError" });
+    Object.defineProperty(this, "name", { value: "WalletInitializationError", configurable: true });
   }
 
   public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {
@@ -146,7 +151,7 @@ export class WalletLoginError extends Web3AuthError {
     super(code, message, cause);
 
     // Set name explicitly as minification can mangle class names
-    Object.defineProperty(this, "name", { value: "WalletLoginError" });
+    Object.defineProperty(this, "name", { value: "WalletLoginError", configurable: true });
   }
 
   public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {
@@ -202,7 +207,7 @@ export class WalletOperationsError extends Web3AuthError {
     super(code, message, cause);
 
     // Set name explicitly as minification can mangle class names
-    Object.defineProperty(this, "name", { value: "WalletOperationsError" });
+    Object.defineProperty(this, "name", { value: "WalletOperationsError", configurable: true });
   }
 
   public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {
@@ -236,7 +241,7 @@ export class WalletProviderError extends Web3AuthError {
     super(code, message, cause);
 
     // Set name explicitly as minification can mangle class names
-    Object.defineProperty(this, "name", { value: "WalletProviderError" });
+    Object.defineProperty(this, "name", { value: "WalletProviderError", configurable: true });
   }
 
   public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {

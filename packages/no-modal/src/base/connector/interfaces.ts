@@ -1,3 +1,4 @@
+import type { Wallet } from "@wallet-standard/base";
 import {
   AUTH_CONNECTION_TYPE,
   AuthUserInfo,
@@ -39,14 +40,14 @@ export interface ConnectorInitOptions {
    */
   chainId: string;
   /**
-   * Whether to get the identity token
+   * Whether to fetch auth token info (id / access / refresh tokens)
    */
-  getIdentityToken?: boolean;
+  getAuthTokenInfo?: boolean;
 }
 
 export type CONNECTOR_STATUS_TYPE = (typeof CONNECTOR_STATUS)[keyof typeof CONNECTOR_STATUS];
 
-export type IdentityTokenInfo = { idToken: string };
+export type AuthTokenInfo = { idToken: string; accessToken?: string; refreshToken?: string };
 
 export interface BaseConnectorSettings {
   coreOptions: IWeb3AuthCoreOptions;
@@ -70,24 +71,31 @@ export interface IBaseProvider<T> extends IProvider {
   setKeyExportFlag(flag: boolean): void;
 }
 
+export interface Connection {
+  readonly ethereumProvider: IProvider | null;
+  readonly solanaWallet: Wallet | null;
+  readonly connectorName: WALLET_CONNECTOR_TYPE | string;
+}
+
 export interface IConnector<T> extends SafeEventEmitter {
   connectorNamespace: ConnectorNamespaceType;
   type: CONNECTOR_CATEGORY_TYPE;
   name: WALLET_CONNECTOR_TYPE | string;
   status: CONNECTOR_STATUS_TYPE;
   provider: IProvider | null;
+  readonly solanaWallet: Wallet | null;
   connectorData?: unknown;
   connected: boolean;
   isInjected?: boolean;
   icon?: string;
   init(options?: ConnectorInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
-  connect(params: T & { chainId: string }): Promise<IProvider | null>;
+  connect(params: T & { chainId: string }): Promise<Connection | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
-  getIdentityToken(): Promise<IdentityTokenInfo>;
+  getAuthTokenInfo(): Promise<AuthTokenInfo>;
   cleanup?(): Promise<void>;
 }
 
@@ -99,21 +107,18 @@ export type ConnectorParams = {
 
 export type BaseConnectorLoginParams = {
   chainId: string;
-  getIdentityToken: boolean;
+  getAuthTokenInfo: boolean;
 };
 
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
-export type CONNECTED_EVENT_DATA = {
-  connector: WALLET_CONNECTOR_TYPE | string;
-  provider: IProvider;
+export type CONNECTED_EVENT_DATA = Connection & {
   reconnected: boolean;
-  identityTokenInfo: IdentityTokenInfo;
 };
 
 export type AUTHORIZED_EVENT_DATA = {
   connector: WALLET_CONNECTOR_TYPE | string;
-  identityTokenInfo: IdentityTokenInfo;
+  authTokenInfo: AuthTokenInfo;
 };
 
 export interface IConnectorDataEvent {

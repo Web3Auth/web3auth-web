@@ -32,7 +32,6 @@
           await modal.initSdk();
           console.log("modal init");
           modal.addSocialLogins(
-            "auth",
             {
               google: {
                 name: "google",
@@ -53,7 +52,8 @@
                 name: "github",
               },
             },
-            ["facebook"]
+            ["facebook"],
+            {}
           );
           modal.initExternalWalletContainer();
           modal.addWalletLogins(

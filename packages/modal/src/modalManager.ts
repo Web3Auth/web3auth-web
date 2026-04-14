@@ -9,6 +9,7 @@ import {
   type ChainNamespaceType,
   cloneDeep,
   CONNECTED_STATUSES,
+  type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
@@ -20,7 +21,6 @@ import {
   fetchWalletRegistry,
   getErrorAnalyticsProperties,
   type IConnector,
-  type IProvider,
   type IWeb3AuthCoreOptions,
   IWeb3AuthState,
   log,
@@ -64,6 +64,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   constructor(options: Web3AuthOptions, initialState?: IWeb3AuthState) {
     super(options, initialState);
     this.options = { ...options };
+    if (!this.options.initialAuthenticationMode) {
+      this.options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+    }
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
@@ -175,10 +178,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  public async connect(): Promise<IProvider | null> {
+  public async connect(): Promise<Connection | null> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
-    // if already connected return provider
-    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.provider) return this.provider;
+    // if already connected return connection
+    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
       // remove all listeners when promise is resolved or rejected.
@@ -186,7 +189,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const handleConnected = () => {
         this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
-        return resolve(this.provider);
+        return resolve(this.connection);
       };
 
       const handleError = (err: unknown) => {
@@ -531,7 +534,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           await connector.init({
             autoConnect,
             chainId: initialChain.chainId,
-            getIdentityToken: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+            getAuthTokenInfo: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
           });
 
           // note: not adding cachedWallet to modal if it is external wallet.
@@ -539,7 +542,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           if (connector.type === CONNECTOR_CATEGORY.IN_APP) {
             log.info("connectorInitResults", connectorName);
             const loginMethods = this.modalConfig.connectors[connectorName]?.loginMethods || {};
-            this.loginModal.addSocialLogins(connectorName, loginMethods, this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS, {
+            this.loginModal.addSocialLogins(loginMethods, this.options.uiConfig?.loginMethodsOrder || AUTH_PROVIDERS, {
               ...this.options.uiConfig,
               loginGridCol: this.options.uiConfig?.loginGridCol || 3,
               primaryButton: this.options.uiConfig?.primaryButton || "socialLogin",
@@ -581,7 +584,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           await connector.init({
             autoConnect: this.cachedConnector === connectorName,
             chainId: initialChain.chainId,
-            getIdentityToken: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+            getAuthTokenInfo: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
           });
         } catch (error) {
           log.error(error, "error while initializing connector", connectorName);
@@ -626,11 +629,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     );
   };
 
-  private onSocialLogin = async (params: { connector: WALLET_CONNECTOR_TYPE; loginParams: AuthLoginParams }): Promise<void> => {
+  private onSocialLogin = async (params: { loginParams: AuthLoginParams }): Promise<void> => {
     try {
       await this.connectTo(WALLET_CONNECTORS.AUTH, params.loginParams, LOGIN_MODE.MODAL);
     } catch (error) {
-      log.error(`Error while connecting to connector: ${params.connector}`, error);
+      log.error("Error while connecting via social login (AUTH)", error);
     }
   };
 
@@ -687,7 +690,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   private onMobileVerifyConnect = async (params: { connector: WALLET_CONNECTOR_TYPE }): Promise<void> => {
     try {
       const connector = this.getConnector(params.connector);
-      await connector.getIdentityToken();
+      await connector.getAuthTokenInfo();
     } catch (error) {
       log.error(`Error while connecting to connector: ${params.connector}`, error);
     }

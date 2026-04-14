@@ -15,11 +15,21 @@ import {
 } from "@web3auth/modal";
 
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
+import { SolanaProvider } from "@web3auth/modal/vue/solana";
 import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { BUILD_ENV } from "@web3auth/auth";
+import {
+  BUILD_ENV,
+  CookieStorage,
+  LocalStorageAdapter,
+  MemoryStorage,
+  SessionStorageAdapter,
+  WEB3AUTH_NETWORK,
+  type BUILD_ENV_TYPE,
+  type StorageConfig,
+} from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -32,6 +42,28 @@ import { WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 const formData = formDataStore;
 
 const externalConnectors = ref<ConnectorFn[]>([]);
+const buildEnvValues = new Set<BUILD_ENV_TYPE>(Object.values(BUILD_ENV));
+const envValue = import.meta.env.VITE_APP_AUTH_BUILD_ENV;
+let authBuildEnv: BUILD_ENV_TYPE = import.meta.env.DEV ? BUILD_ENV.TESTING : BUILD_ENV.PRODUCTION;
+if (envValue && buildEnvValues.has(envValue as BUILD_ENV_TYPE)) {
+  authBuildEnv = envValue as BUILD_ENV_TYPE;
+}
+
+function buildStorageConfig(): StorageConfig | undefined {
+  const type = formData.tokenStorage;
+  if (type === "default") return undefined;
+
+  const adapter =
+    type === "session"
+      ? new SessionStorageAdapter()
+      : type === "cookies"
+        ? new CookieStorage({ maxAge: 7 * 86400 })
+        : type === "memory"
+          ? new MemoryStorage()
+          : new LocalStorageAdapter();
+
+  return { sessionId: adapter, accessToken: adapter, refreshToken: adapter, idToken: adapter };
+}
 
 const showAAProviderSettings = computed(() => formData.chainNamespaces.includes(CHAIN_NAMESPACES.EIP155));
 
@@ -121,15 +153,11 @@ const options = computed((): Web3AuthOptions => {
     uiConfig,
     accountAbstractionConfig,
     useAAWithExternalWallet: formData.useAAWithExternalWallet,
-    // TODO: Add more options
-    // enableLogging?: boolean;
-    // storageType?: "session" | "local";
-    // sessionTime?: number;
-    // useSFAKey?: boolean;
+    storage: buildStorageConfig(),
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
-    authBuildEnv: BUILD_ENV.PRODUCTION, // Custom build env
+    authBuildEnv,
     connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
@@ -142,13 +170,33 @@ const options = computed((): Web3AuthOptions => {
   };
 });
 
+// Note: authConnectionId may varies based on the project config and web3auth client id.
+// The following function return the authConnectionId relevant to the AuthBuildEnv and `clientIds` Map from `config.ts`
+// we may need to change the values every time we change the web3auth client id or build environment.
+const getAuthConnectionIds = (authConnectionStr: string): { authConnectionId: string; groupedAuthConnectionId?: string } => {
+  if (formData.network === WEB3AUTH_NETWORK.SAPPHIRE_MAINNET) {
+    return {
+      authConnectionId: "web3auth",
+      groupedAuthConnectionId: `web3auth-auth0-${authConnectionStr}-passwordless-sapphire`,
+    };
+  }
+  return {
+    authConnectionId: `w3a-custom-${authConnectionStr}-${formData.network.replace("_", "-")}`,
+  };
+};
+
 const loginMethodsConfig = computed(() => {
+  const { authConnectionId: customEmailAuthConnectionId, groupedAuthConnectionId: customEmailGroupedAuthConnectionId } =
+    getAuthConnectionIds("email");
+  const { authConnectionId: customSmsAuthConnectionId, groupedAuthConnectionId: customSmsGroupedAuthConnectionId } = getAuthConnectionIds("sms");
   const customConfig = {
     email_passwordless: {
-      authConnectionId: `w3a-custom-email-${formData.network.replace("_", "-")}`,
+      authConnectionId: customEmailAuthConnectionId,
+      groupedAuthConnectionId: customEmailGroupedAuthConnectionId,
     },
     sms_passwordless: {
-      authConnectionId: `w3a-custom-sms-${formData.network.replace("_", "-")}`,
+      authConnectionId: customSmsAuthConnectionId,
+      groupedAuthConnectionId: customSmsGroupedAuthConnectionId,
     },
   };
   if (formData.loginProviders.length === 0) return customConfig;
@@ -160,10 +208,12 @@ const loginMethodsConfig = computed(() => {
   }, {} as LoginMethodConfig);
 
   if (config.email_passwordless) {
-    config.email_passwordless.authConnectionId = `w3a-custom-email-${formData.network.replace("_", "-")}`;
+    config.email_passwordless.authConnectionId = customEmailAuthConnectionId;
+    config.email_passwordless.groupedAuthConnectionId = customEmailGroupedAuthConnectionId;
   }
   if (config.sms_passwordless) {
-    config.sms_passwordless.authConnectionId = `w3a-custom-sms-${formData.network.replace("_", "-")}`;
+    config.sms_passwordless.authConnectionId = customSmsAuthConnectionId;
+    config.sms_passwordless.groupedAuthConnectionId = customSmsGroupedAuthConnectionId;
   }
 
   const loginMethods: LoginMethodConfig = JSON.parse(JSON.stringify(config));
@@ -212,6 +262,7 @@ onBeforeMount(() => {
         formData.defaultChainId = json.defaultChainId;
         formData.initialAuthenticationMode = json.initialAuthenticationMode;
         formData.externalWalletOnly = json.externalWalletOnly || false;
+        formData.tokenStorage = json.tokenStorage || "default";
       }
     } catch (error) {}
   }
@@ -243,13 +294,15 @@ const configs = computed<Web3AuthContextConfig>(() => {
 <template>
   <Web3AuthProvider :config="configs">
     <WagmiProvider>
-      <AppHeader />
-      <div class="flex flex-col items-center justify-center">
-        <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
-          <AppSettings />
-          <AppDashboard :chains="options.chains || []" />
-        </main>
-      </div>
+      <SolanaProvider>
+        <AppHeader />
+        <div class="flex flex-col items-center justify-center">
+          <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
+            <AppSettings />
+            <AppDashboard />
+          </main>
+        </div>
+      </SolanaProvider>
     </WagmiProvider>
   </Web3AuthProvider>
 </template>

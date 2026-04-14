@@ -1,5 +1,5 @@
 import type { ChainNamespaceType } from "../chain/IChainInterface";
-import { CONNECTOR_STATUS_TYPE, IProvider } from "../connector";
+import { type Connection, CONNECTOR_STATUS_TYPE } from "../connector";
 import { IPlugin } from "../plugin";
 
 export interface IBaseWeb3AuthHookContext {
@@ -11,7 +11,7 @@ export interface IBaseWeb3AuthHookContext {
   isConnected: boolean;
   isAuthorized: boolean;
   isMFAEnabled: boolean;
-  provider: IProvider | null;
+  connection: Connection | null;
   status: CONNECTOR_STATUS_TYPE | null;
   getPlugin(pluginName: string): IPlugin | null;
   setIsMFAEnabled(isMFAEnabled: boolean): void;
