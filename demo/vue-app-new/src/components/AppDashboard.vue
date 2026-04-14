@@ -355,20 +355,6 @@ const onGetSolBalance = async () => {
   }
 };
 
-const onGetSolChain = async () => {
-  const w3a = web3Auth.value;
-  if (!w3a) {
-    printToConsole("Solana chain", "Web3Auth not initialized");
-    return;
-  }
-  const current = w3a.currentChain;
-  const chain =
-    current?.chainNamespace === CHAIN_NAMESPACES.SOLANA
-      ? current
-      : w3a.coreOptions.chains?.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
-  printToConsole("Solana chain", chain ?? null);
-};
-
 const onGetSolPrivateKey = async () => {
   try {
     const privateKey = await getSolanaPrivateKey();
@@ -515,7 +501,6 @@ const onSwitchChain = async () => {
           <div class="mb-2 text-xl font-bold leading-tight text-left">Solana Transaction</div>
           <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
-          <Button block size="xs" pill class="mb-2" @click="onGetSolChain">{{ t("app.buttons.btnGetCurrentSolanaChain") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}

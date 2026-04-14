@@ -1,5 +1,5 @@
 import { createEVMClient, type Hex, type MetamaskConnectEVM } from "@metamask/connect-evm";
-import { createMultichainClient, type MultichainCore, type Scope } from "@metamask/connect-multichain";
+import { createMultichainClient, hasExtension, type MultichainCore, type Scope } from "@metamask/connect-multichain";
 import { createSolanaClient, type SolanaClient } from "@metamask/connect-solana";
 import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-controllers";
 import type { Wallet } from "@wallet-standard/base";
@@ -28,6 +28,7 @@ import {
   type ConnectorNamespaceType,
   type ConnectorParams,
   getCaipChainId,
+  getSolanaChainByChainConfig,
   type IProvider,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
@@ -39,7 +40,7 @@ import {
 import { getSiteName } from "../utils";
 
 /**
- * Configuration options for the MetaMask connector using @metamask/connect-evm
+ * Configuration options for the MetaMask connector using \@metamask/connect-evm
  */
 export interface MetaMaskConnectorSettings {
   /** Dapp identification and branding settings */
@@ -124,16 +125,14 @@ class MetaMaskConnector extends BaseConnector<void> {
       }
     }
 
-    // Build supported networks for Solana client (maps hex chainId to network name)
+    // Build supported networks for Solana client (MetaMask expects mainnet | testnet | devnet keys)
     const solanaSupportedNetworks: Record<string, string> = {};
-    const solanaChainIdToNetwork: Record<string, string> = { "0x65": "mainnet", "0x66": "testnet", "0x67": "devnet" };
     for (const chain of this.coreOptions.chains) {
-      if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        const networkName = solanaChainIdToNetwork[chain.chainId];
-        if (networkName) {
-          solanaSupportedNetworks[networkName] = chain.rpcTarget;
-        }
-      }
+      if (chain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) continue;
+      const solanaChainId = getSolanaChainByChainConfig(chain);
+      if (!solanaChainId) continue;
+      const networkName = solanaChainId.split(":")[1];
+      if (networkName) solanaSupportedNetworks[networkName] = chain.rpcTarget;
     }
 
     // Detect app metadata
@@ -202,18 +201,17 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.solanaClient = await createSolanaClient({
           dapp,
           api: { supportedNetworks: solanaSupportedNetworks },
-          debug: this.connectorSettings?.debug,
+          skipAutoRegister: true,
         });
         this.solanaProvider = this.solanaClient.getWallet();
       }
+
+      this.isInjected = await hasExtension();
 
       initResolve();
     } catch (error) {
       initReject(WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error));
     }
-
-    // TODO need to figure this out
-    this.isInjected = false;
 
     if (!this.multichainClient) {
       this.status = CONNECTOR_STATUS.ERRORED;

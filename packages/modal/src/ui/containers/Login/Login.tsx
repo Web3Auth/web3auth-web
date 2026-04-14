@@ -367,7 +367,8 @@ function Login(props: LoginProps) {
     }
 
     // when having multiple namespaces, ask user to select one
-    if (wallet.chainNamespaces?.length > 1) {
+    const isCustomMetaMaskConnectorAndHasInjected = wallet.name === WALLET_CONNECTORS.METAMASK && wallet.isInstalled && wallet.hasInjectedWallet;
+    if (wallet.chainNamespaces?.length > 1 && !isCustomMetaMaskConnectorAndHasInjected) {
       setBodyState({
         ...bodyState,
         multiChainSelector: {
