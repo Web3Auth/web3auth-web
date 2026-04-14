@@ -1,10 +1,10 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
-import { WALLET_CONNECTORS } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import { Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
-import { useWeb3Auth } from "../../composables";
+import { useChain, useWeb3Auth } from "../../composables";
 
 export type IUseSolanaWallet = {
   accounts: Ref<string[] | null>;
@@ -27,6 +27,7 @@ export type IUseSolanaWallet = {
 
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
+  const { chainNamespace } = useChain();
   const accounts = ref<string[] | null>(null);
   const solanaWallet = shallowRef<Wallet | null>(null);
   const rpc = shallowRef<Rpc<SolanaRpcApi> | null>(null);
@@ -34,10 +35,11 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   const setupWallet = () => {
     const wallet = connection.value?.solanaWallet ?? null;
     if (!wallet) return;
+
     solanaWallet.value = wallet;
     const accts = wallet.accounts.map((a) => a.address);
     if (accts.length > 0) accounts.value = accts;
-    if (web3Auth.value?.currentChain?.rpcTarget) {
+    if (web3Auth.value?.currentChain?.rpcTarget && chainNamespace.value === CHAIN_NAMESPACES.SOLANA) {
       rpc.value = createSolanaRpc(web3Auth.value.currentChain.rpcTarget);
     }
   };
@@ -61,13 +63,14 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   };
 
   watch(
-    [connection],
-    ([newConnection]) => {
+    [connection, chainNamespace],
+    ([newConnection, newChainNamespace]) => {
       if (!newConnection?.solanaWallet) {
         if (solanaWallet.value) resetWallet();
         return;
       }
-      if (!solanaWallet.value) setupWallet();
+      // setup wallet if not setup or chain namespace is changed to solana
+      if (!solanaWallet.value || newChainNamespace === CHAIN_NAMESPACES.SOLANA) setupWallet();
     },
     { immediate: true }
   );

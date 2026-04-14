@@ -2,7 +2,7 @@ import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
 import { CHAIN_NAMESPACES, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 
 import { useChain } from "../../hooks/useChain";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
@@ -29,20 +29,37 @@ export type IUseSolanaWallet = {
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
+  const [solanaWallet, setSolanaWallet] = useState<Wallet | null>(null);
+  const [accounts, setAccounts] = useState<string[] | null>(null);
 
-  const solanaWallet = useMemo(() => {
-    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
-    return connection?.solanaWallet ?? null;
+  /* eslint-disable react-hooks/set-state-in-effect -- intentional */
+  useEffect(() => {
+    if (!connection?.solanaWallet) {
+      setSolanaWallet(null);
+      setAccounts(null);
+      return;
+    }
+    setSolanaWallet((prev) => {
+      const shouldSetup = prev === null || chainNamespace === CHAIN_NAMESPACES.SOLANA;
+      if (!shouldSetup) return prev;
+      return connection.solanaWallet;
+    });
   }, [connection, chainNamespace]);
 
-  const accounts = useMemo((): string[] | null => {
-    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA || !solanaWallet) return null;
+  useEffect(() => {
+    if (!solanaWallet) {
+      setAccounts(null);
+      return;
+    }
     const accts = solanaWallet.accounts.map((a) => a.address);
-    return accts.length > 0 ? accts : null;
-  }, [solanaWallet, chainNamespace]);
+    setAccounts(accts.length > 0 ? accts : null);
+  }, [solanaWallet]);
+  /* eslint-enable react-hooks/set-state-in-effect */
 
   const rpc = useMemo(() => {
-    if (!web3Auth || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
+    if (!web3Auth?.currentChain?.rpcTarget || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+      return null;
+    }
     return createSolanaRpc(web3Auth.currentChain.rpcTarget);
   }, [web3Auth, solanaWallet, chainNamespace]);
 

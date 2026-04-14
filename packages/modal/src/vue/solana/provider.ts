@@ -1,5 +1,5 @@
 import { createClient, createWalletStandardConnector, type SolanaClient } from "@solana/client";
-import { CHAIN_NAMESPACES, log } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, type CustomChainConfig, log } from "@web3auth/no-modal";
 import { defineComponent, Fragment, h, provide, ref, watch } from "vue";
 
 import { useWeb3Auth } from "../composables";
@@ -40,8 +40,15 @@ export const SolanaProvider = defineComponent({
           return;
         }
 
-        const chainConfig = web3Auth.value.coreOptions.chains.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
-        if (!chainConfig) return;
+        const currentChain = web3Auth.value.currentChain;
+        let chainConfig: CustomChainConfig;
+        if (currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+          chainConfig = currentChain;
+        } else {
+          // use the 1st Solana chain if current chain is not solana
+          chainConfig = web3Auth.value.coreOptions.chains.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
+          if (!chainConfig) return;
+        }
 
         const prevClient = clientRef.value;
         try {
