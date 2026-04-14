@@ -1,10 +1,11 @@
 import { CONNECTED_STATUSES, EVM_PLUGINS, PLUGIN_EVENTS } from "@web3auth/no-modal";
 import { type WalletServicesPluginType } from "@web3auth/no-modal";
-import { Context, createContext, createElement, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
+import { WalletServicesContext as SharedWalletServicesContext } from "@web3auth/no-modal/react";
+import { type Context, createElement, PropsWithChildren, useContext, useEffect, useMemo, useState } from "react";
 
-import { IWalletServicesContext, IWeb3AuthInnerContext } from "../interfaces";
+import { type IWalletServicesContext, IWeb3AuthInnerContext } from "../interfaces";
 
-export const WalletServicesContext = createContext<IWalletServicesContext>(null);
+export const WalletServicesContext = SharedWalletServicesContext as Context<IWalletServicesContext>;
 
 export function WalletServicesContextProvider({ children, context }: PropsWithChildren<{ context: Context<IWeb3AuthInnerContext> }>) {
   const web3AuthContext = useContext(context);

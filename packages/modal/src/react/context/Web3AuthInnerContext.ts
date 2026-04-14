@@ -8,12 +8,14 @@ import {
   type CONNECTOR_STATUS_TYPE,
   WalletInitializationError,
 } from "@web3auth/no-modal";
-import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
+import { Web3AuthInnerContext as SharedWeb3AuthInnerContext } from "@web3auth/no-modal/react";
+import { type Context, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
 
 import { Web3Auth } from "../../modalManager";
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 
-export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
+// Re-expose the shared context with modal's narrower type while keeping the same runtime identity.
+export const Web3AuthInnerContext = SharedWeb3AuthInnerContext as unknown as Context<IWeb3AuthInnerContext>;
 
 export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProviderProps>) {
   const { children, config, initialState } = params;
