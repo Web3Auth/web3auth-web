@@ -10,7 +10,7 @@ import {
 import { useCallback } from "react";
 import type { Address } from "viem";
 
-import { useChain } from "../react/hooks/useChain";
+import { useChain } from "../react/hooks";
 import { useWeb3Auth } from "../react/hooks/useWeb3Auth";
 
 export { createEvmX402Fetch, createProviderBackedEvmSigner, createSolanaX402Fetch, getEvmAddress };

@@ -4,7 +4,7 @@ import { CHAIN_NAMESPACES, WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
 import { useCallback, useMemo } from "react";
 
-import { useChain } from "../../hooks/useChain";
+import { useChain } from "../../hooks";
 import { useWeb3Auth } from "../../hooks/useWeb3Auth";
 
 export type IUseSolanaWallet = {
