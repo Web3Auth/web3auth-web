@@ -994,7 +994,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRED;
         this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
         log.debug("consent_required", this.status, this.connectedConnectorName);
-        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRED, { ...data, loginMode: this.loginMode });
+        const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+        // Connect-and-sign: show signing (AUTHORIZING) first; emit consent UI after AUTHORIZED.
+        if (!isConnectAndSign) {
+          this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRED, { ...data, loginMode: this.loginMode });
+        }
         this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent: true });
         return;
       }
@@ -1079,7 +1083,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.AUTHORIZING, (data) => {
-      if (this.status === CONNECTOR_STATUS.CONSENT_REQUIRED) return;
+      // Keep SDK status CONSENT_REQUIRED (getUserInfo etc.) but still notify UI so connect-and-sign
+      // can show AuthorizingStatus instead of staying on the consent screen during signing.
+      if (this.status === CONNECTOR_STATUS.CONSENT_REQUIRED) {
+        this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
+        log.debug("authorizing (pending consent)", this.connectedConnectorName);
+        return;
+      }
       this.status = CONNECTOR_STATUS.AUTHORIZING;
       this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
       log.debug("authorizing", this.status, this.connectedConnectorName);
@@ -1091,6 +1101,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         refreshToken: data.authTokenInfo.refreshToken ?? null,
       });
       if (this.status === CONNECTOR_STATUS.CONSENT_REQUIRED) {
+        const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+        if (isConnectAndSign && this.consentRequired && this.currentConnection) {
+          this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRED, {
+            ...this.currentConnection,
+            reconnected: false,
+            loginMode: this.loginMode,
+          });
+        }
         this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
         log.debug("authorized (pending consent)", this.connectedConnectorName);
         return;
