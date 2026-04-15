@@ -8,23 +8,10 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  type IWeb3AuthLike,
   type IWeb3AuthState,
   WalletInitializationError,
-  type Web3AuthNoModalEvents,
 } from "../../base";
-
-type IWeb3AuthLike = {
-  status: CONNECTOR_STATUS_TYPE;
-  currentChainId: string | null;
-  currentChain?: { chainNamespace?: ChainNamespaceType | null } | null;
-  connection: Connection | null;
-  setAnalyticsProperties: (properties: Record<string, unknown>) => void;
-  init: (options?: { signal?: AbortSignal }) => Promise<void>;
-  getPlugin: (name: string) => unknown;
-  on: <TEvent extends keyof Web3AuthNoModalEvents>(event: TEvent, listener: Web3AuthNoModalEvents[TEvent]) => unknown;
-  removeListener: <TEvent extends keyof Web3AuthNoModalEvents>(event: TEvent, listener: Web3AuthNoModalEvents[TEvent]) => unknown;
-  cleanup: () => void;
-};
 
 export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike> = {
   web3Auth: TWeb3Auth;
