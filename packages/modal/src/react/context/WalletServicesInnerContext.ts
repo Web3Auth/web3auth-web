@@ -1,8 +1,7 @@
 import { type WalletServicesPluginType } from "@web3auth/no-modal";
-import { WalletServicesContext as WalletServicesContextNoModal } from "@web3auth/no-modal/react";
+import { useWalletServicesContextValue, WalletServicesContext as WalletServicesContextNoModal } from "@web3auth/no-modal/react";
 import { type Context, createElement, PropsWithChildren, useContext } from "react";
 
-import { useWalletServicesContextValue } from "../../../../no-modal/src/react/context/useWalletServicesContextValue";
 import { type IWalletServicesContext } from "../interfaces";
 
 type IWeb3AuthContextForWalletServices = {

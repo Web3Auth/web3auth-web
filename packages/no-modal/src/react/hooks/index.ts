@@ -1,3 +1,4 @@
+export * from "./pickWeb3AuthContextValue";
 export * from "./useAuthTokenInfo";
 export * from "./useChain";
 export * from "./useCheckout";

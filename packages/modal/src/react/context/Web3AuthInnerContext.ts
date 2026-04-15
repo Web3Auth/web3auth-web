@@ -1,7 +1,6 @@
-import { Web3AuthInnerContext as Web3AuthInnerContextNoModal } from "@web3auth/no-modal/react";
+import { useWeb3AuthInnerContextValue, Web3AuthInnerContext as Web3AuthInnerContextNoModal } from "@web3auth/no-modal/react";
 import { createElement, PropsWithChildren } from "react";
 
-import { useWeb3AuthInnerContextValue } from "../../../../no-modal/src/react/context/useWeb3AuthInnerContextValue";
 import { Web3Auth } from "../../modalManager";
 import { Web3AuthProviderProps } from "../interfaces";
 

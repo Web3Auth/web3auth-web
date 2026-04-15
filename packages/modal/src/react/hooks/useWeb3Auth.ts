@@ -1,4 +1,5 @@
-import { type IUseWeb3AuthValue, pickWeb3AuthContextValue } from "../../../../no-modal/src/react/hooks/pickWeb3AuthContextValue";
+import { type IUseWeb3AuthValue, pickWeb3AuthContextValue } from "@web3auth/no-modal/react";
+
 import { IWeb3AuthInnerContext } from "../interfaces";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
