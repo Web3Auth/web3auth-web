@@ -3,6 +3,7 @@ export * from "./useChain";
 export * from "./useCheckout";
 export * from "./useEnableMFA";
 export * from "./useFunding";
+export { useInjectedWeb3AuthInnerContext } from "./useInjectedWeb3AuthInnerContext";
 export * from "./useManageMFA";
 export * from "./useReceive";
 export * from "./useSwap";
