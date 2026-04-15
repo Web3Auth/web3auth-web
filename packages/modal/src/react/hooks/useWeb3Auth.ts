@@ -1,21 +1,9 @@
-import { useWeb3Auth as useSharedWeb3Auth } from "@web3auth/no-modal/react";
-
+import { type IUseWeb3AuthValue, pickWeb3AuthContextValue } from "../../../../no-modal/src/react/hooks/pickWeb3AuthContextValue";
 import { IWeb3AuthInnerContext } from "../interfaces";
+import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export type IUseWeb3Auth = Omit<IWeb3AuthInnerContext, "isMFAEnabled" | "setIsMFAEnabled" | "chainId" | "chainNamespace">;
+export type IUseWeb3Auth = IUseWeb3AuthValue<IWeb3AuthInnerContext>;
 
 export const useWeb3Auth = (): IUseWeb3Auth => {
-  const { initError, isConnected, isAuthorized, isInitialized, isInitializing, connection, status, web3Auth, getPlugin } =
-    useSharedWeb3Auth() as Omit<IWeb3AuthInnerContext, "isMFAEnabled" | "setIsMFAEnabled">;
-  return {
-    initError,
-    isConnected,
-    isAuthorized,
-    isInitialized,
-    isInitializing,
-    connection,
-    status,
-    web3Auth,
-    getPlugin,
-  };
+  return pickWeb3AuthContextValue(useWeb3AuthInner());
 };
