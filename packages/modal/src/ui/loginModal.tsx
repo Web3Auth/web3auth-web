@@ -374,15 +374,11 @@ export class LoginModal {
   };
 
   private handleAcceptConsent = () => {
-    if (this.callbacks.onAcceptConsent) {
-      return this.callbacks.onAcceptConsent();
-    }
+    return this.callbacks.onAcceptConsent();
   };
 
   private handleDeclineConsent = () => {
-    if (this.callbacks.onDeclineConsent) {
-      this.callbacks.onDeclineConsent();
-    }
+    this.callbacks.onDeclineConsent();
   };
 
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
