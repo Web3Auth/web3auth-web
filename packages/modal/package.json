@@ -97,7 +97,7 @@
     "@toruslabs/http-helpers": "^9.0.0",
     "@web3auth/auth": "^11.6.0",
     "@web3auth/no-modal": "^10.15.0",
-    "@web3auth/ws-embed": "file:../../web3auth-ws-embed-5.6.5.tgz",
+    "@web3auth/ws-embed": "^6.0.0",
     "bowser": "^2.14.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
