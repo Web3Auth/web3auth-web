@@ -375,7 +375,7 @@ export class LoginModal {
 
   private handleAcceptConsent = () => {
     if (this.callbacks.onAcceptConsent) {
-      this.callbacks.onAcceptConsent();
+      return this.callbacks.onAcceptConsent();
     }
   };
 

@@ -112,14 +112,18 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
   );
 }
 
-function ConsentRequiredStatus(props: { onAccept?: () => void; onDecline?: () => void; privacyPolicy?: string; tncLink?: string }) {
+function ConsentRequiredStatus(props: { onAccept?: () => void | Promise<void>; onDecline?: () => void; privacyPolicy?: string; tncLink?: string }) {
   const { onAccept, onDecline, privacyPolicy, tncLink } = props;
   const [t] = useTranslation(undefined, { i18n });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleAccept = () => {
+  const handleAccept = async () => {
     setIsSubmitting(true);
-    onAccept?.();
+    try {
+      await onAccept?.();
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (

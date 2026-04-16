@@ -13,7 +13,7 @@ type WidgetContextType = {
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
-  handleAcceptConsent: () => void;
+  handleAcceptConsent: () => void | Promise<void>;
   handleDeclineConsent: () => void;
   closeModal: () => void;
 };
@@ -27,7 +27,7 @@ type WidgetProviderProps = {
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
-  handleAcceptConsent: () => void;
+  handleAcceptConsent: () => void | Promise<void>;
   handleDeclineConsent: () => void;
   closeModal: () => void;
 };
