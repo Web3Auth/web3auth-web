@@ -104,7 +104,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private currentConnection: Connection | null = null;
 
-  private currentConsentUserId: string | null = null;
+  private currentConsentUserAddress: string | null = null;
 
   private isConsentPreApprovedForSession = false;
 
@@ -991,11 +991,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.cacheWallet(data.connectorName);
 
       if (this.consentRequired) {
-        this.currentConsentUserId = await this.resolveConsentUserId({
+        this.currentConsentUserAddress = await this.resolveConsentUserAddress({
           ethereumProvider: isSolanaOnly ? null : ethereumProvider,
           solanaWallet: solanaWallet ?? null,
         });
-        this.isConsentPreApprovedForSession = this.currentConsentUserId ? this.getStoredConsentDecision(this.currentConsentUserId) : false;
+        this.isConsentPreApprovedForSession = this.currentConsentUserAddress ? this.getStoredConsentDecision(this.currentConsentUserAddress) : false;
         // Signal that consent userId + pre-approval are resolved; AUTHORIZED handler can proceed.
         resolveConsentSetup?.();
         this.consentSetupComplete = null;
@@ -1184,38 +1184,38 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private resetConsentContext(): void {
-    this.currentConsentUserId = null;
+    this.currentConsentUserAddress = null;
     this.isConsentPreApprovedForSession = false;
     this.consentSetupComplete = null;
   }
 
-  private normalizeConsentUserId(userId: string): string {
-    return /^0x[a-fA-F0-9]+$/.test(userId) ? userId.toLowerCase() : userId;
+  private normalizeConsentUserAddress(address: string): string {
+    return isHexStrict(address) ? address.toLowerCase() : address;
   }
 
-  private async resolveConsentUserId(connection: Pick<Connection, "ethereumProvider" | "solanaWallet">): Promise<string | null> {
+  private async resolveConsentUserAddress(connection: Pick<Connection, "ethereumProvider" | "solanaWallet">): Promise<string | null> {
     const solanaAddress = connection.solanaWallet?.accounts?.[0]?.address;
-    if (solanaAddress) return this.normalizeConsentUserId(solanaAddress);
+    if (solanaAddress) return this.normalizeConsentUserAddress(solanaAddress);
 
     if (!connection.ethereumProvider) return null;
     try {
       const accounts = await connection.ethereumProvider.request<never, string[]>({ method: "eth_accounts" });
       const address = accounts?.[0];
       if (!address) return null;
-      return this.normalizeConsentUserId(address);
+      return this.normalizeConsentUserAddress(address);
     } catch (error: unknown) {
       log.error("Failed to resolve consent user id from ethereum provider", error);
       return null;
     }
   }
 
-  private getStoredConsentDecision(userId: string): boolean {
-    return this.state.consentDecisions?.[userId] === true;
+  private getStoredConsentDecision(address: string): boolean {
+    return this.state.consentDecisions?.[address] === true;
   }
 
-  private async saveConsentDecision(userId: string): Promise<void> {
+  private async saveConsentDecision(address: string): Promise<void> {
     await this.setState({
-      consentDecisions: { ...this.state.consentDecisions, [userId]: true },
+      consentDecisions: { ...this.state.consentDecisions, [address]: true },
     });
   }
 
@@ -1229,11 +1229,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletLoginError.connectionError("Cannot accept consent: no active connection");
     }
 
-    const consentUserId = this.currentConsentUserId || (await this.resolveConsentUserId(connection));
-    if (consentUserId) {
-      this.currentConsentUserId = consentUserId;
+    const consentUserAddress = this.currentConsentUserAddress || (await this.resolveConsentUserAddress(connection));
+    if (consentUserAddress) {
+      this.currentConsentUserAddress = consentUserAddress;
       if (options.persistDecision) {
-        await this.saveConsentDecision(consentUserId);
+        await this.saveConsentDecision(consentUserAddress);
       }
     }
 
