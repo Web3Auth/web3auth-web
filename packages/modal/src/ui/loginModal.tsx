@@ -72,8 +72,6 @@ function createWrapperForEmbed(targetId: string) {
 export class LoginModal {
   private uiConfig: LoginModalProps;
 
-  private _consentRequired: boolean;
-
   private stateEmitter: SafeEventEmitter<StateEmitterEvents>;
 
   private callbacks: LoginModalCallbacks;
@@ -104,8 +102,6 @@ export class LoginModal {
     if (!uiConfig.privacyPolicy) this.uiConfig.privacyPolicy = "";
     if (!uiConfig.tncLink) this.uiConfig.tncLink = "";
 
-    this._consentRequired = this.uiConfig.consentRequired && Boolean(this.uiConfig.privacyPolicy) && Boolean(this.uiConfig.tncLink);
-
     if (uiConfig.widgetType === WIDGET_TYPE.EMBED && !uiConfig.targetId) {
       log.error("targetId is required for embed widget");
       throw WalletInitializationError.invalidParams("targetId is required for embed widget");
@@ -118,7 +114,7 @@ export class LoginModal {
   }
 
   get consentRequired(): boolean {
-    return this._consentRequired;
+    return this.uiConfig.consentRequired && Boolean(this.uiConfig.privacyPolicy) && Boolean(this.uiConfig.tncLink);
   }
 
   get isDark(): boolean {
