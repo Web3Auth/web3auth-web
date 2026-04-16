@@ -149,8 +149,6 @@ export const Web3AuthProvider = defineComponent({
             if (!isInitialized.value) isInitialized.value = true;
             isConnected.value = true;
             connection.value = newWeb3Auth.connection;
-            chainId.value = web3Auth.value!.currentChainId;
-            chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
             if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
               isAuthorized.value = true;
             }

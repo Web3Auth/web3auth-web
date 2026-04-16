@@ -112,8 +112,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
         setIsInitialized(true);
         setIsConnected(true);
         setConnection(web3Auth.connection);
-        setChainId(web3Auth.currentChainId);
-        setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
         if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
           setIsAuthorized(true);
         }
