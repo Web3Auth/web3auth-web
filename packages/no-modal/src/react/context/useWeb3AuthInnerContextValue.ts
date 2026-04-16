@@ -39,6 +39,28 @@ type UseWeb3AuthInnerContextValueOptions<TWeb3Auth extends IWeb3AuthLike, TWeb3A
   initEffectDependency?: unknown;
 };
 
+type SeededStatusState = {
+  isConnected: boolean;
+  isAuthorized: boolean;
+  status: CONNECTOR_STATUS_TYPE | null;
+};
+
+function getSeededStatusState(web3AuthStatus: CONNECTOR_STATUS_TYPE, seedStateFromStatus: boolean): SeededStatusState {
+  if (!seedStateFromStatus) {
+    return {
+      isConnected: false,
+      isAuthorized: false,
+      status: null,
+    };
+  }
+
+  return {
+    isConnected: web3AuthStatus === CONNECTOR_STATUS.CONNECTED,
+    isAuthorized: web3AuthStatus === CONNECTOR_STATUS.AUTHORIZED,
+    status: web3AuthStatus,
+  };
+}
+
 export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike, TWeb3AuthOptions>({
   Web3AuthConstructor,
   web3AuthOptions,
@@ -52,30 +74,23 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike, TW
   const [chainNamespace, setChainNamespace] = useState<ChainNamespaceType | null>(null);
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
-  const [isConnected, setIsConnected] = useState<boolean>(false);
   const [connection, setConnection] = useState<Connection | null>(null);
   const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
-
   const web3Auth = useMemo(() => {
     setConnection(null);
-
     return new Web3AuthConstructor(web3AuthOptions, initialState);
   }, [Web3AuthConstructor, web3AuthOptions, initialState]);
+  const seededStatusState = getSeededStatusState(web3Auth.status, seedStateFromStatus);
+  const [isConnected, setIsConnected] = useState<boolean>(seededStatusState.isConnected);
+  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(seededStatusState.status);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(seededStatusState.isAuthorized);
 
   useEffect(() => {
-    if (seedStateFromStatus) {
-      setIsConnected(web3Auth.status === CONNECTOR_STATUS.CONNECTED);
-      setIsAuthorized(web3Auth.status === CONNECTOR_STATUS.AUTHORIZED);
-      setStatus(web3Auth.status);
-      return;
-    }
-
-    setIsConnected(false);
-    setIsAuthorized(false);
-    setStatus(null);
+    const nextSeededStatusState = getSeededStatusState(web3Auth.status, seedStateFromStatus);
+    setIsConnected(nextSeededStatusState.isConnected);
+    setIsAuthorized(nextSeededStatusState.isAuthorized);
+    setStatus(nextSeededStatusState.status);
   }, [seedStateFromStatus, web3Auth]);
 
   const getPlugin = useCallback(

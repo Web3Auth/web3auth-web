@@ -1,11 +1,10 @@
 import { useContext } from "react";
 
-import { WalletInitializationError } from "../../base";
 import { WalletServicesContext } from "../context/WalletServicesInnerContext";
 import { IWalletServicesContext } from "../interfaces";
 
 export const useWalletServicesPlugin = (): IWalletServicesContext => {
   const context = useContext(WalletServicesContext);
-  if (!context) throw WalletInitializationError.fromCode(1000, "usage of useWalletServicesPlugin not wrapped in `WalletServicesContextProvider`.");
+  if (!context) throw new TypeError("WalletServicesContext not found");
   return context;
 };
