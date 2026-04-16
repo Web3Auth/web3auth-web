@@ -116,9 +116,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.analytics.setGlobalProperties({ team_id: projectConfig.teamId });
       trackData = this.getInitializationTrackData();
 
-      if (!this.options.uiConfig.privacyPolicy) this.options.uiConfig.privacyPolicy = "https://example.com/privacy";
-      if (!this.options.uiConfig.tncLink) this.options.uiConfig.tncLink = "https://example.com/terms";
-
       // init login modal
       const { filteredWalletRegistry, disabledExternalWallets } = this.filterWalletRegistry(walletRegistry, projectConfig);
       this.loginModal = new LoginModal(
