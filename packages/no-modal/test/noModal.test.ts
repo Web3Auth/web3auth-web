@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { beforeAll, describe, expect, it, vi } from "vitest";
 
 import {
   CHAIN_NAMESPACES,
@@ -12,6 +12,7 @@ import {
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
+  WEB3AUTH_STATE_STORAGE_KEY,
 } from "../src/base";
 import { Web3AuthNoModal } from "../src/noModal";
 import { createChain, createMockStorage, createProjectConfig, MockConnector, MULTICHAIN_CONNECTOR_NAMESPACE } from "./helpers";
@@ -32,9 +33,23 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
   public exposeCheckIfAutoConnect(connector: MockConnector) {
     return this.checkIfAutoConnect(connector as unknown as IConnector<unknown>);
   }
+
+  public exposeSetConsentRequired(value: boolean) {
+    this.consentRequired = value;
+  }
+
+  public exposeSubscribeToConnectorEvents(connector: MockConnector) {
+    this.subscribeToConnectorEvents(connector as unknown as IConnector<unknown>);
+  }
 }
 
 describe("Web3AuthNoModal", () => {
+  beforeAll(() => {
+    vi.stubGlobal("window", {
+      location: { origin: "http://localhost:3000" },
+    });
+  });
+
   it("throws when clientId is missing", () => {
     expect(
       () =>
@@ -256,6 +271,126 @@ describe("Web3AuthNoModal", () => {
     const sdk = createSdk();
     await expect(sdk.logout()).rejects.toThrow(WalletLoginError);
     await expect(sdk.getUserInfo()).rejects.toThrow(WalletLoginError);
+  });
+
+  it("auto-skips consent UI when consent:<userId> is true", async () => {
+    const storage = createMockStorage();
+    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ consentDecisions: { "0xabc123": true } }));
+    const sdk = createSdk({
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      storage: { sessionId: storage },
+    });
+    sdk.exposeSetConsentRequired(true);
+    const consentRequiredListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, consentRequiredListener);
+
+    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xAbC123"]) };
+    const consentAcceptedListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+    sdk.exposeSubscribeToConnectorEvents(connector);
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
+      updateProviderEngineProxy: vi.fn(),
+      removeAllListeners: vi.fn(),
+    };
+
+    connector.emit(CONNECTOR_EVENTS.CONNECTED, {
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: ethereumProvider as never,
+      solanaWallet: null,
+      reconnected: false,
+    });
+    await vi.waitFor(() => {
+      expect(sdk.status).toBe(CONNECTOR_STATUS.CONSENT_REQUIRED);
+    });
+    connector.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      connector: WALLET_CONNECTORS.METAMASK,
+      authTokenInfo: { idToken: "id-token" },
+    });
+    await vi.waitFor(() => {
+      expect(consentAcceptedListener).toHaveBeenCalledTimes(1);
+    });
+
+    expect(sdk.status).toBe(CONNECTOR_STATUS.AUTHORIZED);
+    expect(consentRequiredListener).not.toHaveBeenCalled();
+  });
+
+  it("shows consent UI when stored decision is false", async () => {
+    const storage = createMockStorage();
+    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ consentDecisions: { "0xbeef": false } }));
+    const sdk = createSdk({
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
+      storage: { sessionId: storage },
+    });
+    sdk.exposeSetConsentRequired(true);
+    const consentRequiredListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, consentRequiredListener);
+
+    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xBEEF"]) };
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+    connector.connect = vi.fn(async () => {
+      connector.emit(CONNECTOR_EVENTS.CONNECTED, {
+        connectorName: WALLET_CONNECTORS.METAMASK,
+        ethereumProvider: ethereumProvider as never,
+        solanaWallet: null,
+        reconnected: false,
+      });
+      return null;
+    });
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+    sdk.exposeSubscribeToConnectorEvents(connector);
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
+      updateProviderEngineProxy: vi.fn(),
+      removeAllListeners: vi.fn(),
+    };
+
+    const connectionPromise = sdk.connectTo(WALLET_CONNECTORS.METAMASK);
+    await vi.waitFor(() => {
+      expect(consentRequiredListener).toHaveBeenCalledTimes(1);
+    });
+    await sdk.acceptConsent();
+    await expect(connectionPromise).resolves.not.toBeNull();
+  });
+
+  it("persists consent:<userId> when user accepts consent UI", async () => {
+    const storage = createMockStorage();
+    const sdk = createSdk({
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
+      storage: { sessionId: storage },
+    });
+    sdk.exposeSetConsentRequired(true);
+
+    const consentRequiredListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, consentRequiredListener);
+    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xFEEd"]) };
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+    connector.connect = vi.fn(async () => {
+      connector.emit(CONNECTOR_EVENTS.CONNECTED, {
+        connectorName: WALLET_CONNECTORS.METAMASK,
+        ethereumProvider: ethereumProvider as never,
+        solanaWallet: null,
+        reconnected: false,
+      });
+      return null;
+    });
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+    sdk.exposeSubscribeToConnectorEvents(connector);
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
+      updateProviderEngineProxy: vi.fn(),
+      removeAllListeners: vi.fn(),
+    };
+
+    const connectionPromise = sdk.connectTo(WALLET_CONNECTORS.METAMASK);
+    await vi.waitFor(() => {
+      expect(consentRequiredListener).toHaveBeenCalledTimes(1);
+    });
+    await sdk.acceptConsent();
+    await connectionPromise;
+
+    const stateJson = await storage.get(WEB3AUTH_STATE_STORAGE_KEY);
+    const state = JSON.parse(stateJson!);
+    expect(state.consentDecisions["0xfeed"]).toBe(true);
   });
 
   it("setConnectors deduplicates and emits updates only for new connectors", () => {
