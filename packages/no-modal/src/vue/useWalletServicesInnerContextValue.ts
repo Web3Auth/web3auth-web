@@ -1,6 +1,6 @@
 import { type Ref, ref, type ShallowRef, shallowRef, watch } from "vue";
 
-import { CONNECTOR_STATUS, EVM_PLUGINS, PLUGIN_EVENTS } from "../base";
+import { CONNECTED_STATUSES, CONNECTOR_STATUS_TYPE, EVM_PLUGINS, PLUGIN_EVENTS } from "../base";
 
 type IWeb3AuthContextForWalletServices = {
   getPlugin: (pluginName: string) => unknown;
@@ -40,7 +40,7 @@ export function useWalletServicesInnerContextValue<TWalletServicesPlugin>(
       const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as IWalletServicesPluginState<TWalletServicesPlugin> | null;
       walletServicesPlugin.value = plugin;
       // When rehydrating, the connected listener may be registered after the connected event is emitted.
-      if (plugin?.status === CONNECTOR_STATUS.CONNECTED) ready.value = true;
+      if (CONNECTED_STATUSES.includes(plugin?.status as CONNECTOR_STATUS_TYPE)) ready.value = true;
     }
   });
 

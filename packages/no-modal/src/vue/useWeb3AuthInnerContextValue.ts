@@ -45,14 +45,15 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
   const connection = createConnectionRef();
   const isMFAEnabled = ref(false);
   const status = ref<CONNECTOR_STATUS_TYPE | null>(null);
-  const isAuthorized = ref(false);
   const chainId = ref<string | null>(null);
   const chainNamespace = ref<ChainNamespaceType | null>(null);
 
   const isInitializing = ref(false);
   const initError = ref<Error | null>(null);
   const isInitialized = ref(false);
+
   const isConnected = ref(false);
+  const isAuthorized = ref(false);
 
   const getPlugin = ((name: string) => {
     if (!web3Auth.value) throw WalletInitializationError.notReady();
