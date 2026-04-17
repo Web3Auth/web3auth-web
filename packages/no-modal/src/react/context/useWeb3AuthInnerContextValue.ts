@@ -10,6 +10,7 @@ import {
   type CONNECTOR_STATUS_TYPE,
   IWeb3Auth,
   type IWeb3AuthState,
+  LOGIN_MODE,
   WalletInitializationError,
 } from "../../base";
 
@@ -119,13 +120,16 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       setStatus(web3Auth.status);
       setIsInitialized(true);
     };
-    const connectedListener = (_data: CONNECTED_EVENT_DATA) => {
+    const connectedListener = (data: CONNECTED_EVENT_DATA) => {
+      if (data.pendingUserConsent) return;
       setStatus(web3Auth.status);
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);
         setIsConnected(true);
         setConnection(web3Auth.connection);
+        setChainId(web3Auth.currentChainId);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
       }
     };
     const disconnectedListener = () => {
@@ -153,6 +157,19 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
         setIsAuthorized(true);
       }
     };
+    const consentAcceptedListener = () => {
+      setStatus(web3Auth.status);
+      if (web3Auth.status === CONNECTOR_STATUS.CONNECTED || web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+        setIsInitialized(true);
+        setIsConnected(true);
+        setConnection(web3Auth.connection);
+        setChainId(web3Auth.currentChainId);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
+        if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+          setIsAuthorized(true);
+        }
+      }
+    };
     const mfaEnabledListener = (nextIsMFAEnabled: boolean) => {
       if (typeof nextIsMFAEnabled === "boolean") setIsMFAEnabled(nextIsMFAEnabled);
     };
@@ -166,6 +183,10 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
       web3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
       web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+
+      if (web3Auth.loginMode === LOGIN_MODE.MODAL) {
+        web3Auth.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
+      }
     }
     return () => {
       if (!web3Auth) return;
@@ -178,6 +199,10 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       web3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+
+      if (web3Auth.loginMode === LOGIN_MODE.MODAL) {
+        web3Auth.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
+      }
 
       if (cleanupOnUnmount) {
         web3Auth.cleanup();

@@ -19,8 +19,9 @@ function RootContent(props: RootProps) {
   const { onCloseLoader } = props;
 
   const { modalState, shouldShowLoginPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
-  const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect } = useWidget();
-  const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen } = uiConfig;
+  const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect, handleAcceptConsent, handleDeclineConsent } =
+    useWidget();
+  const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen, consentRequired } = uiConfig;
 
   const contentRef = useRef<HTMLDivElement>(null);
   const [containerHeight, setContainerHeight] = useState(530);
@@ -188,6 +189,8 @@ function RootContent(props: RootProps) {
     return modalState.status !== MODAL_STATUS.INITIALIZED;
   }, [modalState.status]);
 
+  const isConsentRequired = modalState.status === MODAL_STATUS.CONSENT_REQUIRING;
+
   return (
     <div className="w3a--relative w3a--flex w3a--flex-col">
       <div
@@ -197,7 +200,10 @@ function RootContent(props: RootProps) {
         }}
       >
         <div className="w3a--modal-curtain" />
-        <div ref={contentRef} className={twMerge("w3a--relative w3a--flex w3a--flex-col w3a--p-6", isShowLoader ? "w3a--flex-1" : "w3a--flex-none")}>
+        <div
+          ref={contentRef}
+          className={twMerge("w3a--relative w3a--flex w3a--flex-col w3a--p-6", isShowLoader && !isConsentRequired ? "w3a--flex-1" : "w3a--flex-none")}
+        >
           {/* Content */}
           {isShowLoader ? (
             <Loader
@@ -209,6 +215,10 @@ function RootContent(props: RootProps) {
               externalWalletsConfig={modalState.externalWalletsConfig}
               handleMobileVerifyConnect={handleMobileVerifyConnect}
               hideSuccessScreen={hideSuccessScreen}
+              onAcceptConsent={handleAcceptConsent}
+              onDeclineConsent={handleDeclineConsent}
+              privacyPolicy={privacyPolicy}
+              tncLink={tncLink}
             />
           ) : (
             <>
@@ -235,7 +245,10 @@ function RootContent(props: RootProps) {
           )}
 
           {/* Footer */}
-          <Footer privacyPolicy={privacyPolicy} termsOfService={tncLink} />
+          <Footer
+            privacyPolicy={!consentRequired && modalState.status !== MODAL_STATUS.CONSENT_REQUIRING ? privacyPolicy : undefined}
+            termsOfService={!consentRequired && modalState.status !== MODAL_STATUS.CONSENT_REQUIRING ? tncLink : undefined}
+          />
 
           <RootBodySheets />
         </div>

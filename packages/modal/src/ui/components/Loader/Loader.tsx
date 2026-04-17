@@ -1,5 +1,5 @@
 import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 import { MODAL_STATUS } from "../../interfaces";
@@ -94,7 +94,7 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
   return (
     <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-between w3a--gap-y-6">
       <p className="w3a--p-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
-        {t("modal.loader.authorizing-header", { connector: externalWalletsConfig[connector].label })}
+        {t("modal.loader.authorizing-header", { connector: externalWalletsConfig[connector]?.label })}
       </p>
       <div className="w3a--flex w3a--justify-center">
         <SpinnerLoader width={95} height={95}>
@@ -108,6 +108,91 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
       >
         {t("modal.loader.authorizing-verify-btn")}
       </button>
+    </div>
+  );
+}
+
+function ConsentRequiredStatus(props: {
+  onAccept?: () => void | Promise<void>;
+  onDecline?: () => void | Promise<void>;
+  privacyPolicy?: string;
+  tncLink?: string;
+}) {
+  const { onAccept, onDecline, privacyPolicy, tncLink } = props;
+  const [t] = useTranslation(undefined, { i18n });
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleAccept = async () => {
+    setIsSubmitting(true);
+    try {
+      await onAccept?.();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDecline = async () => {
+    setIsSubmitting(true);
+    try {
+      await onDecline?.();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--gap-y-6 w3a--mt-8">
+      <div className="w3a--flex w3a--items-center w3a--justify-center w3a--p-3 w3a--bg-app-gray-100 dark:w3a--bg-app-gray-800 w3a--rounded-full w3a--text-app-gray-600 dark:w3a--text-app-white">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" className="w3a--size-10">
+          <path
+            stroke="currentColor"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth="2"
+            d="M9 12h6m-6 4h6m2 5H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5.586a1 1 0 0 1 .707.293l5.414 5.414a1 1 0 0 1 .293.707V19a2 2 0 0 1-2 2"
+          ></path>
+        </svg>
+      </div>
+      <div className="w3a--w-full w3a--px-8 w3a--text-center w3a--text-app-gray-900 dark:w3a--text-app-white">
+        {t("modal.consent.description", { defaultValue: "To proceed, please accept the terms and privacy policy" })}
+      </div>
+      {(tncLink || privacyPolicy) && (
+        <div className="w3a--flex w3a--w-full w3a--flex-col w3a--gap-y-2">
+          {tncLink && (
+            <a
+              href={tncLink}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w3a--btn !w3a--text-sm w3a--font-light !w3a--justify-start w3a--rounded-full w3a--border-app-gray-50 w3a--bg-app-gray-50 w3a--p-3 w3a--text-left w3a--text-app-gray-700 hover:w3a--border-app-gray-200 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--border-app-gray-800 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white dark:hover:w3a--border-app-gray-600 dark:hover:w3a--bg-app-gray-600"
+            >
+              {t("modal.consent.tnc", { defaultValue: "Terms of service" })}
+            </a>
+          )}
+          {privacyPolicy && (
+            <a
+              href={privacyPolicy}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="w3a--btn !w3a--text-sm w3a--font-light !w3a--justify-start w3a--rounded-full w3a--border-app-gray-50 w3a--bg-app-gray-50 w3a--p-3 w3a--text-left w3a--text-app-gray-700 hover:w3a--border-app-gray-200 hover:w3a--bg-app-gray-200 hover:w3a--text-app-gray-900 dark:w3a--border-app-gray-800 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white dark:hover:w3a--border-app-gray-600 dark:hover:w3a--bg-app-gray-600"
+            >
+              {t("modal.consent.privacy", { defaultValue: "Privacy Policy" })}
+            </a>
+          )}
+        </div>
+      )}
+      <div className="w3a--flex w3a--w-full w3a--gap-x-2">
+        <button type="button" disabled={isSubmitting} onClick={handleDecline} className="w3a--btn w3a--rounded-full disabled:w3a--opacity-60">
+          <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.consent.decline", { defaultValue: "Decline" })}</p>
+        </button>
+        <button
+          type="button"
+          disabled={isSubmitting}
+          onClick={handleAccept}
+          className="w3a--btn w3a--rounded-full w3a--border-app-primary-600 w3a--bg-app-primary-600 hover:w3a--border-app-primary-700 hover:w3a--bg-app-primary-700 disabled:w3a--opacity-60 dark:w3a--border-app-primary-600 dark:w3a--bg-app-primary-600 dark:hover:w3a--border-app-primary-700 dark:hover:w3a--bg-app-primary-700"
+        >
+          <p className="w3a--text-app-onPrimary">{t("modal.consent.accept", { defaultValue: "Accept" })}</p>
+        </button>
+      </div>
     </div>
   );
 }
@@ -128,6 +213,10 @@ function Loader(props: LoaderProps) {
     externalWalletsConfig,
     handleMobileVerifyConnect,
     hideSuccessScreen = false,
+    onAcceptConsent,
+    onDeclineConsent,
+    privacyPolicy,
+    tncLink,
   } = props;
 
   const isConnectedAccordingToAuthenticationMode = useMemo(
@@ -150,8 +239,16 @@ function Loader(props: LoaderProps) {
     }
   }, [isConnectedAccordingToAuthenticationMode, hideSuccessScreen, onClose]);
 
+  const isConsent = modalStatus === MODAL_STATUS.CONSENT_REQUIRING;
+
   return (
-    <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
+    <div
+      className={
+        isConsent
+          ? "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4"
+          : "w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4"
+      }
+    >
       {modalStatus === MODAL_STATUS.CONNECTING && <ConnectingStatus connector={connector} connectorName={connectorName} />}
 
       {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
@@ -165,6 +262,8 @@ function Loader(props: LoaderProps) {
           handleMobileVerifyConnect={handleMobileVerifyConnect}
         />
       )}
+
+      {isConsent && <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} privacyPolicy={privacyPolicy} tncLink={tncLink} />}
     </div>
   );
 }

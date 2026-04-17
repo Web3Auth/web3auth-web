@@ -33,7 +33,14 @@ import {
 import styles from "../styles/Home.module.css";
 import X402 from "./X402";
 
-const Main = () => {
+type ConsentConfigMode = "disabled" | "required";
+
+type MainProps = {
+  consentConfigMode: ConsentConfigMode;
+  onConsentConfigModeChange: (value: ConsentConfigMode) => void;
+};
+
+const Main = ({ consentConfigMode, onConsentConfigModeChange }: MainProps) => {
   const { isConnected, web3Auth, status } = useWeb3Auth();
   const { accounts: solanaAccounts } = useSolanaWallet();
   const { chainNamespace: currentChainNamespace, chainId: currentChainId } = useChain();
@@ -351,6 +358,22 @@ const Main = () => {
 
   const unloggedInView = (
     <>
+      <div className={styles.setting}>
+        <div className={styles.row}>
+          <label className={styles.label} htmlFor="consent-config-select">
+            Consent Config
+          </label>
+          <select
+            id="consent-config-select"
+            className={styles.select}
+            value={consentConfigMode}
+            onChange={(event) => onConsentConfigModeChange(event.target.value as ConsentConfigMode)}
+          >
+            <option value="disabled">Disabled</option>
+            <option value="required">Required</option>
+          </select>
+        </div>
+      </div>
       {connecting ? (
         <p>Connecting to {connectorName}...</p>
       ) : (

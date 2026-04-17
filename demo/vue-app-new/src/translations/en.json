@@ -10,6 +10,7 @@
     "loginProviders": "Login provider",
     "connectors": "Connectors",
     "initialAuthenticationMode": "Authentication Mode",
+    "consentConfig": "Consent Config",
     "showWalletDiscovery": "Show Wallet Discovery",
     "multiInjectedProviderDiscovery": "Multi Injected Provider Discovery",
     "externalWalletOnly": "External Wallet Only (Hide Social Login)",

@@ -20,14 +20,7 @@ import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import {
-  CookieStorage,
-  LocalStorageAdapter,
-  MemoryStorage,
-  SessionStorageAdapter,
-  WEB3AUTH_NETWORK,
-  type StorageConfig,
-} from "@web3auth/auth";
+import { CookieStorage, LocalStorageAdapter, MemoryStorage, SessionStorageAdapter, WEB3AUTH_NETWORK, type StorageConfig } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -132,11 +125,18 @@ const options = computed((): Web3AuthOptions => {
     }
   }
 
-  const { widget, targetId, externalWalletOnly } = formData;
+  const { widget, targetId, externalWalletOnly, consentConfigMode } = formData;
   const { hideSuccessScreen } = formData.whiteLabel;
   const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel
     ? { ...whiteLabel, widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) }
     : { widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) };
+  if (consentConfigMode === "required") {
+    uiConfig.consentConfig = {
+      required: true,
+      privacyPolicy: "https://example.com/privacy",
+      tncLink: "https://example.com/terms",
+    };
+  }
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {
@@ -254,6 +254,7 @@ onBeforeMount(() => {
         formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
         formData.defaultChainId = json.defaultChainId;
         formData.initialAuthenticationMode = json.initialAuthenticationMode;
+        formData.consentConfigMode = json.consentConfigMode || "required";
         formData.externalWalletOnly = json.externalWalletOnly || false;
         formData.tokenStorage = json.tokenStorage || "default";
       }
