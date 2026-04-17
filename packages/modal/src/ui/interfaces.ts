@@ -76,6 +76,17 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
   hideSuccessScreen?: boolean;
 
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
+
+  /**
+   * Config for consent required.
+   *
+   * @defaultValue `undefined`
+   */
+  consentConfig?: {
+    required: boolean;
+    privacyPolicy: string;
+    tncLink: string;
+  };
 }
 
 export type ModalLoginParams = Pick<

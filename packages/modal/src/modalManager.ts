@@ -70,13 +70,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
-
-    this.options.uiConfig.consentRequired = true;
-    this.options.uiConfig.privacyPolicy = "https://example.com/privacy";
-    this.options.uiConfig.tncLink = "https://example.com/terms";
-
-    const uiCfg = this.options.uiConfig;
-    this.consentRequired = uiCfg.consentRequired && Boolean(uiCfg.privacyPolicy) && Boolean(uiCfg.tncLink);
+    this.consentRequired = this.options.uiConfig.consentConfig?.required || false;
 
     log.info("modalConfig", this.modalConfig);
   }
@@ -140,7 +134,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           onDeclineConsent: this.onDeclineConsent,
         }
       );
-      this.consentRequired = this.loginModal.consentRequired;
+      this.consentRequired = this.options.uiConfig.consentConfig?.required || false;
       await withAbort(() => this.loginModal.initModal(), signal);
 
       // setup common JRPC provider
@@ -199,9 +193,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const handleCompletion = () => {
         this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
-        if (this.consentRequired) {
-          this.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
-        } else if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+        if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
           this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
         } else {
           this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
@@ -212,7 +204,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const handleError = (err: unknown) => {
         this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
         this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
-        this.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
         return reject(err);
       };
@@ -223,14 +214,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
           this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
           this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
-          this.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
           return reject(new Error("User closed the modal"));
         }
       };
 
       if (this.consentRequired) {
         this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
-      } else if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+      }
+      if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
         this.once(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
       } else {
         this.once(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
