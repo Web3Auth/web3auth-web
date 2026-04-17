@@ -13,7 +13,7 @@ export interface LoaderProps {
   handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
   hideSuccessScreen?: boolean;
   onAcceptConsent?: () => void | Promise<void>;
-  onDeclineConsent?: () => void;
+  onDeclineConsent?: () => void | Promise<void>;
   privacyPolicy?: string;
   tncLink?: string;
 }

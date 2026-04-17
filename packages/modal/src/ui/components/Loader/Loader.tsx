@@ -112,7 +112,12 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
   );
 }
 
-function ConsentRequiredStatus(props: { onAccept?: () => void | Promise<void>; onDecline?: () => void; privacyPolicy?: string; tncLink?: string }) {
+function ConsentRequiredStatus(props: {
+  onAccept?: () => void | Promise<void>;
+  onDecline?: () => void | Promise<void>;
+  privacyPolicy?: string;
+  tncLink?: string;
+}) {
   const { onAccept, onDecline, privacyPolicy, tncLink } = props;
   const [t] = useTranslation(undefined, { i18n });
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -121,6 +126,15 @@ function ConsentRequiredStatus(props: { onAccept?: () => void | Promise<void>; o
     setIsSubmitting(true);
     try {
       await onAccept?.();
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  const handleDecline = async () => {
+    setIsSubmitting(true);
+    try {
+      await onDecline?.();
     } finally {
       setIsSubmitting(false);
     }
@@ -167,7 +181,7 @@ function ConsentRequiredStatus(props: { onAccept?: () => void | Promise<void>; o
         </div>
       )}
       <div className="w3a--flex w3a--w-full w3a--gap-x-2">
-        <button type="button" disabled={isSubmitting} onClick={onDecline} className="w3a--btn w3a--rounded-full disabled:w3a--opacity-60">
+        <button type="button" disabled={isSubmitting} onClick={handleDecline} className="w3a--btn w3a--rounded-full disabled:w3a--opacity-60">
           <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.consent.decline", { defaultValue: "Decline" })}</p>
         </button>
         <button

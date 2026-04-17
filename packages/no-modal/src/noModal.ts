@@ -138,8 +138,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     this.loadState(initialState)
       .then((): undefined => {
-        if (this.state.idToken && this.coreOptions.ssr) {
-          // connect-only is the default authentication mode, so we need to set the status to connected if the idToken is present and ssr is enabled
+        if (this.state.idToken && this.coreOptions.ssr && !this.consentRequired) {
           this.status =
             this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN
               ? CONNECTOR_STATUS.AUTHORIZED
