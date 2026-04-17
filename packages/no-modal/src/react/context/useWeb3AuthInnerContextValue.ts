@@ -109,7 +109,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     return () => {
       provider.removeListener("chainChanged", handleChainChange);
     };
-  }, [web3Auth, connection]);
+  }, [web3Auth.currentChain, connection?.ethereumProvider]);
 
   useEffect(() => {
     const notReadyListener = () => {
@@ -156,19 +156,19 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     const mfaEnabledListener = (nextIsMFAEnabled: boolean) => {
       if (typeof nextIsMFAEnabled === "boolean") setIsMFAEnabled(nextIsMFAEnabled);
     };
-
-    setStatus(web3Auth.status);
-    web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
-    web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
-    web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
-    web3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
-    web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
-    web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
-    web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
-    web3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
-    web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
-
+    if (web3Auth) {
+      web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
+      web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+      web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
+      web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
+      web3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
+      web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+    }
     return () => {
+      if (!web3Auth) return;
       web3Auth.removeListener(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTED, connectedListener);

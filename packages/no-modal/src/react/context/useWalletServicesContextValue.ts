@@ -67,6 +67,7 @@ export function useWalletServicesContextValue<TWalletServicesPlugin>(
     plugin.on(PLUGIN_EVENTS.CONNECTING, connectingListener);
 
     return () => {
+      if (!plugin) return;
       plugin.removeListener(PLUGIN_EVENTS.CONNECTED, connectedListener);
       plugin.removeListener(PLUGIN_EVENTS.DISCONNECTED, disconnectedListener);
       plugin.removeListener(PLUGIN_EVENTS.CONNECTING, connectingListener);
