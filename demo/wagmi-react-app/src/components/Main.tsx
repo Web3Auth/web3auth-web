@@ -33,6 +33,7 @@ import {
 } from "wagmi";
 
 import styles from "../styles/Home.module.css";
+import X402 from "./X402";
 
 const Main = () => {
   const { connection, isConnected, web3Auth, status } = useWeb3Auth();
@@ -376,6 +377,9 @@ const Main = () => {
           )}
           {linkAccountError && <p style={{ color: "red" }}>Error: {linkAccountError.message}</p>}
         </div>
+
+        {/* X402 Payment Protocol */}
+        <X402 />
 
         {/* Disconnect */}
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>

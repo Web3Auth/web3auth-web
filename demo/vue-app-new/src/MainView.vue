@@ -20,11 +20,18 @@ import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { BUILD_ENV, CookieStorage, LocalStorageAdapter, MemoryStorage, SessionStorageAdapter, type StorageConfig } from "@web3auth/auth";
+import {
+  CookieStorage,
+  LocalStorageAdapter,
+  MemoryStorage,
+  SessionStorageAdapter,
+  WEB3AUTH_NETWORK,
+  type StorageConfig,
+} from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { clientIds } from "./config";
+import { clientIds, resolveBuildEnv } from "./config";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
 import { SmartAccountType } from "@toruslabs/ethereum-controllers";
@@ -142,7 +149,7 @@ const options = computed((): Web3AuthOptions => {
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
-    authBuildEnv: BUILD_ENV.TESTING, // Custom build env
+    authBuildEnv: formData.authBuildEnv,
     connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
@@ -155,13 +162,33 @@ const options = computed((): Web3AuthOptions => {
   };
 });
 
+// Note: authConnectionId may varies based on the project config and web3auth client id.
+// The following function return the authConnectionId relevant to the AuthBuildEnv and `clientIds` Map from `config.ts`
+// we may need to change the values every time we change the web3auth client id or build environment.
+const getAuthConnectionIds = (authConnectionStr: string): { authConnectionId: string; groupedAuthConnectionId?: string } => {
+  if (formData.network === WEB3AUTH_NETWORK.SAPPHIRE_MAINNET) {
+    return {
+      authConnectionId: "web3auth",
+      groupedAuthConnectionId: `web3auth-auth0-${authConnectionStr}-passwordless-sapphire`,
+    };
+  }
+  return {
+    authConnectionId: `w3a-custom-${authConnectionStr}-${formData.network.replace("_", "-")}`,
+  };
+};
+
 const loginMethodsConfig = computed(() => {
+  const { authConnectionId: customEmailAuthConnectionId, groupedAuthConnectionId: customEmailGroupedAuthConnectionId } =
+    getAuthConnectionIds("email");
+  const { authConnectionId: customSmsAuthConnectionId, groupedAuthConnectionId: customSmsGroupedAuthConnectionId } = getAuthConnectionIds("sms");
   const customConfig = {
     email_passwordless: {
-      authConnectionId: `w3a-custom-email-${formData.network.replace("_", "-")}`,
+      authConnectionId: customEmailAuthConnectionId,
+      groupedAuthConnectionId: customEmailGroupedAuthConnectionId,
     },
     sms_passwordless: {
-      authConnectionId: `w3a-custom-sms-${formData.network.replace("_", "-")}`,
+      authConnectionId: customSmsAuthConnectionId,
+      groupedAuthConnectionId: customSmsGroupedAuthConnectionId,
     },
   };
   if (formData.loginProviders.length === 0) return customConfig;
@@ -173,10 +200,12 @@ const loginMethodsConfig = computed(() => {
   }, {} as LoginMethodConfig);
 
   if (config.email_passwordless) {
-    config.email_passwordless.authConnectionId = `w3a-custom-email-${formData.network.replace("_", "-")}`;
+    config.email_passwordless.authConnectionId = customEmailAuthConnectionId;
+    config.email_passwordless.groupedAuthConnectionId = customEmailGroupedAuthConnectionId;
   }
   if (config.sms_passwordless) {
-    config.sms_passwordless.authConnectionId = `w3a-custom-sms-${formData.network.replace("_", "-")}`;
+    config.sms_passwordless.authConnectionId = customSmsAuthConnectionId;
+    config.sms_passwordless.groupedAuthConnectionId = customSmsGroupedAuthConnectionId;
   }
 
   const loginMethods: LoginMethodConfig = JSON.parse(JSON.stringify(config));
@@ -216,6 +245,7 @@ onBeforeMount(() => {
         formData.showWalletDiscovery = json.showWalletDiscovery;
         formData.multiInjectedProviderDiscovery = json.multiInjectedProviderDiscovery;
         formData.network = json.network;
+        formData.authBuildEnv = resolveBuildEnv(json.authBuildEnv);
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;

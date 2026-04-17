@@ -1,4 +1,4 @@
-import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, LANGUAGE_TYPE, LANGUAGES, WhiteLabelData } from "@web3auth/auth";
+import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, BUILD_ENV, type BUILD_ENV_TYPE, LANGUAGE_TYPE, LANGUAGES, WhiteLabelData } from "@web3auth/auth";
 import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
@@ -15,10 +15,24 @@ import {
 
 export const networkOptions = Object.values(WEB3AUTH_NETWORK).map((x) => ({ name: x, value: x }));
 
+const allBuildEnvs = Object.values(BUILD_ENV) as BUILD_ENV_TYPE[];
+
+export const buildEnvOptions: { name: string; value: BUILD_ENV_TYPE }[] = allBuildEnvs.map((value) => ({
+  name: value.toUpperCase(),
+  value,
+}));
+
+const buildEnvValues = new Set<BUILD_ENV_TYPE>(allBuildEnvs);
+
+export const resolveBuildEnv = (value?: string): BUILD_ENV_TYPE => {
+  if (value && buildEnvValues.has(value as BUILD_ENV_TYPE)) return value as BUILD_ENV_TYPE;
+  return BUILD_ENV.TESTING;
+};
+
 export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
 
 export const chainConfigs: Record<ChainNamespaceType, string[]> = {
-  [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x61", "0x13882"],
+  [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x14a34", "0x61", "0x13882"],
   [CHAIN_NAMESPACES.SOLANA]: ["0x65", "0x67"],
   [CHAIN_NAMESPACES.CASPER]: [],
   [CHAIN_NAMESPACES.XRPL]: [],
@@ -103,6 +117,7 @@ export const getDefaultBundlerUrl = (chainId: string): string => {
 export type FormData = {
   // authMode: string;
   network: WEB3AUTH_NETWORK_TYPE;
+  authBuildEnv: BUILD_ENV_TYPE;
   chainNamespaces: ChainNamespaceType[];
   chains: string[];
   defaultChainId?: string;

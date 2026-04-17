@@ -5,6 +5,7 @@ import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 import { getChainConfig } from "../utils/chainconfig";
 import {
+  buildEnvOptions,
   chainConfigs,
   chainNamespaceOptions,
   clientIds,
@@ -172,6 +173,15 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
           </Tab>
         </Tabs>
         <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
+          <Select
+            v-model="formData.authBuildEnv"
+            data-testid="selectBuildEnv"
+            label="Build Environment"
+            aria-label="Build Environment"
+            placeholder="Build Environment"
+            :options="buildEnvOptions"
+            matchParentsWidth
+          />
           <Select
             v-model="formData.network"
             data-testid="selectNetwork"

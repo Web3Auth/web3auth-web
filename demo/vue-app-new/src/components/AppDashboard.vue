@@ -35,6 +35,7 @@ import { createWalletTransactionSigner, toAddress } from "@solana/client";
 import { address as solanaAddress } from "@solana/kit";
 import { getTransferSolInstruction } from "@solana-program/system";
 import { computed, ref, watch } from "vue";
+import X402Tester from "./X402Tester.vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { formDataStore } from "../store/form";
 
@@ -646,6 +647,9 @@ const onSwitchChain = async () => {
           <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onRefetchCallsStatus">Refresh Calls Status</Button>
           <Button v-if="trackedCallsId" block size="xs" pill class="mb-2" @click="onShowCallsStatusInWallet">Show Calls Status in Wallet</Button>
         </Card>
+
+        <!-- x402 -->
+        <X402Tester v-if="isDisplay('ethServices') || isDisplay('solServices')" class="mb-2" @print-to-console="printToConsole" />
 
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">

@@ -20,13 +20,10 @@
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/no-modal#readme",
   "license": "ISC",
   "scripts": {
-    "test": "npm run test:node && npm run test:browsers",
-    "test:node": "vitest run --config test/configs/node.config.mts --coverage",
-    "test:browsers": "vitest run --config test/configs/browsers.config.mts --coverage",
-    "test-debugger": "vitest --config test/configs/node.config.mts",
+    "test": "vitest run --config test/configs/browsers.config.mts --coverage",
     "dev": "torus-scripts start",
     "build": "torus-scripts build",
-    "lint": "eslint --fix 'src/**/*.ts'",
+    "lint": "torus-scripts lint --fix",
     "prepack": "npm run build",
     "pre-commit": "lint-staged --cwd ."
   },
@@ -37,6 +34,9 @@
     "@babel/runtime": "^7.x",
     "@coinbase/wallet-sdk": "^4.3.x",
     "@solana/react-hooks": "^1.4.0",
+    "@x402/evm": "^2.7.0",
+    "@x402/fetch": "^2.7.0",
+    "@x402/svm": "^2.7.0",
     "react": ">=18",
     "viem": ">=2.45",
     "vue": "^3.x"
@@ -46,6 +46,15 @@
       "optional": true
     },
     "@solana/react-hooks": {
+      "optional": true
+    },
+    "@x402/evm": {
+      "optional": true
+    },
+    "@x402/fetch": {
+      "optional": true
+    },
+    "@x402/svm": {
       "optional": true
     },
     "react": {
@@ -80,7 +89,7 @@
     "@walletconnect/types": "^2.23.8",
     "@walletconnect/utils": "^2.23.8",
     "@web3auth/auth": "^11.5.0",
-    "@web3auth/ws-embed": "file:../../web3auth-ws-embed-5.6.5.tgz",
+    "@web3auth/ws-embed": "^6.0.0",
     "bignumber.js": "~9.3.1",
     "deepmerge": "^4.3.1",
     "ethers": "^6.16.0",
@@ -93,6 +102,9 @@
   "devDependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",
     "@solana/react-hooks": "^1.4.1",
+    "@x402/evm": "^2.7.0",
+    "@x402/fetch": "^2.7.0",
+    "@x402/svm": "^2.7.0",
     "@types/react": "^19.2.14",
     "@wagmi/core": "^3.4.1",
     "@wagmi/vue": "^0.5.1",
@@ -106,6 +118,21 @@
       "import": "./dist/lib.esm/index.js",
       "require": "./dist/lib.cjs/index.js",
       "types": "./dist/lib.cjs/types/index.d.ts"
+    },
+    "./x402": {
+      "import": "./dist/lib.esm/x402/index.js",
+      "require": "./dist/lib.cjs/x402/index.js",
+      "types": "./dist/lib.cjs/types/x402/index.d.ts"
+    },
+    "./x402/react": {
+      "import": "./dist/lib.esm/x402/react.js",
+      "require": "./dist/lib.cjs/x402/react.js",
+      "types": "./dist/lib.cjs/types/x402/react.d.ts"
+    },
+    "./x402/vue": {
+      "import": "./dist/lib.esm/x402/vue.js",
+      "require": "./dist/lib.cjs/x402/vue.js",
+      "types": "./dist/lib.cjs/types/x402/vue.d.ts"
     },
     "./react": {
       "import": "./dist/lib.esm/react/index.js",
@@ -150,6 +177,15 @@
   },
   "typesVersions": {
     "*": {
+      "x402": [
+        "./dist/lib.cjs/types/x402/index.d.ts"
+      ],
+      "x402/react": [
+        "./dist/lib.cjs/types/x402/react.d.ts"
+      ],
+      "x402/vue": [
+        "./dist/lib.cjs/types/x402/vue.d.ts"
+      ],
       "react": [
         "./dist/lib.cjs/types/react/index.d.ts"
       ],

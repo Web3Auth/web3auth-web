@@ -23,7 +23,7 @@
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/no-modal": "file:../../packages/no-modal",
     "@web3auth/sign-in-with-web3": "^6.1.0",
-    "@web3auth/ws-embed": "file:../../web3auth-ws-embed-5.6.5.tgz",
+    "@web3auth/ws-embed": "^6.0.0",
     "ethers": "^6.16.0",
     "ox": "^0.11.3",
     "petite-vue-i18n": "^11.3.0",
@@ -47,7 +47,7 @@
     "stream-browserify": "^3.0.0",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.9.3",
-    "vite": "^8.0.3",
+    "vite": "^8.0.8",
     "vue-tsc": "^3.2.6"
   },
   "optionalDependencies": {
