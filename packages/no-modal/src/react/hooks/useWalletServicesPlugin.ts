@@ -4,6 +4,7 @@ import { WalletServicesContext } from "../context/WalletServicesInnerContext";
 import { IWalletServicesContext } from "../interfaces";
 
 export const useWalletServicesPlugin = (): IWalletServicesContext => {
-  const { ready, plugin, connecting } = useContext(WalletServicesContext);
-  return { ready, plugin, connecting };
+  const context = useContext(WalletServicesContext);
+  if (!context) throw new TypeError("WalletServicesContext not found");
+  return context;
 };

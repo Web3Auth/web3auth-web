@@ -1,7 +1,7 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { WALLET_CONNECTORS } from "../../../base/wallet";
@@ -30,12 +30,17 @@ export type IUseSolanaWallet = {
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
-  const [accounts, setAccounts] = useState<string[] | null>(null);
 
   const solanaWallet = useMemo(() => {
     if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
     return connection?.solanaWallet ?? null;
   }, [connection, chainNamespace]);
+
+  const accounts = useMemo((): string[] | null => {
+    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA || !solanaWallet) return null;
+    const accts = solanaWallet.accounts.map((a) => a.address);
+    return accts.length > 0 ? accts : null;
+  }, [solanaWallet, chainNamespace]);
 
   const rpc = useMemo(() => {
     if (!web3Auth || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
@@ -53,15 +58,6 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     if (!privateKey) throw new Error("Failed to retrieve private key");
     return privateKey;
   }, [web3Auth, connection]);
-
-  useEffect(() => {
-    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA || !solanaWallet) {
-      setAccounts(null);
-      return;
-    }
-    const accts = solanaWallet.accounts.map((a) => a.address);
-    if (accts.length > 0) setAccounts(accts);
-  }, [solanaWallet, chainNamespace]);
 
   return { solanaWallet, accounts, rpc, getPrivateKey };
 };
