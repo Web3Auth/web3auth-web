@@ -236,7 +236,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   public async acceptConsent(): Promise<void> {
-    await super.completeConsentAcceptance({ persistDecision: true });
+    await super.completeConsentAcceptance();
   }
 
   protected initUIConfig(projectConfig: ProjectConfig) {
