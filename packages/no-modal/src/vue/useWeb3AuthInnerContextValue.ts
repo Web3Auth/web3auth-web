@@ -11,7 +11,6 @@ import {
   type IWeb3Auth,
   IWeb3AuthState,
   log,
-  WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
 } from "../base";
 
@@ -153,7 +152,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         }
       };
 
-      const consentAcceptedListener = (data: CONNECTED_EVENT_DATA) => {
+      const consentAcceptedListener = () => {
         status.value = web3Auth.value!.status;
         if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED || web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
           if (!isInitialized.value) isInitialized.value = true;
@@ -164,7 +163,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
           if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
             isAuthorized.value = true;
           }
-          web3Auth.value!.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
         }
       };
 

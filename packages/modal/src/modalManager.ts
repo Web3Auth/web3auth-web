@@ -241,6 +241,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
+  public async acceptConsent(): Promise<void> {
+    await super.completeConsentAcceptance({ persistDecision: true });
+  }
+
   protected initUIConfig(projectConfig: ProjectConfig) {
     super.initUIConfig(projectConfig);
     this.options.uiConfig = deepmerge(cloneDeep(projectConfig.whitelabel || {}), this.options.uiConfig || {});

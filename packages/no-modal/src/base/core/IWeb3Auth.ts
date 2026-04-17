@@ -232,7 +232,6 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   manageMFA<T>(params: T): Promise<void>;
   setAnalyticsProperties(properties: Record<string, unknown>): void;
   cleanup(): Promise<void>;
-  connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }): void;
 }
 
 export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType; pendingUserConsent?: boolean };

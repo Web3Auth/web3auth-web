@@ -94,7 +94,7 @@ function AuthorizingStatus(props: AuthorizingStatusType) {
   return (
     <div className="w3a--flex w3a--size-full w3a--flex-col w3a--items-center w3a--justify-between w3a--gap-y-6">
       <p className="w3a--p-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
-        {t("modal.loader.authorizing-header", { connector: externalWalletsConfig[connector].label })}
+        {t("modal.loader.authorizing-header", { connector: externalWalletsConfig[connector]?.label })}
       </p>
       <div className="w3a--flex w3a--justify-center">
         <SpinnerLoader width={95} height={95}>

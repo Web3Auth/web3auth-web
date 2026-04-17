@@ -498,10 +498,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     await this.connectedConnector.disconnect(options);
   }
 
-  async acceptConsent(): Promise<void> {
-    await this.completeConsentAcceptance({ persistDecision: true });
-  }
-
   async getUserInfo(): Promise<Partial<UserInfo>> {
     log.debug("Getting user info", this.status, this.connectedConnector?.name);
     if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
@@ -925,12 +921,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       };
       this.currentConnectionReconnected = data.reconnected;
       this.resetConsentContext();
-      const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
       let resolveConsentSetup: (() => void) | undefined;
       if (this.consentRequired) {
-        if (!isConnectAndSign) {
-          this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
-        }
         this.consentSetupComplete = new Promise<void>((resolve) => {
           resolveConsentSetup = resolve;
         });
@@ -992,6 +984,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.cacheWallet(data.connectorName);
 
       if (this.consentRequired) {
+        this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
         this.currentConsentUserAddress = await this.resolveConsentUserAddress({
           ethereumProvider: isSolanaOnly ? null : ethereumProvider,
           solanaWallet: solanaWallet ?? null,
@@ -1000,34 +993,27 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         resolveConsentSetup?.();
         this.consentSetupComplete = null;
 
-        if (isConnectAndSign) {
-          // In connect-and-sign mode, let the normal AUTHORIZING → AUTHORIZED flow complete first.
-          // CONSENT_REQUIRING will be set in the AUTHORIZED handler after authorization finishes.
-          this.status = CONNECTOR_STATUS.CONNECTED;
-          log.debug("connected (consent deferred to authorized)", this.status, this.connectedConnectorName);
-          this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent: true });
+        log.debug("consent_requiring", this.status, this.connectedConnectorName);
+        if (!this.isConsentPreApprovedForSession) {
+          this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, { ...data, loginMode: this.loginMode });
         } else {
-          log.debug("consent_requiring", this.status, this.connectedConnectorName);
-          if (!this.isConsentPreApprovedForSession) {
-            this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, { ...data, loginMode: this.loginMode });
-          }
+          // rehydration case, user has already consented, so we need to complete the consent acceptance
+          // complete the consent acceptance to set the status to CONNECTED/AUTHORIZED
+          await this.completeConsentAcceptance({ persistDecision: false });
           this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent: true });
-          if (this.isConsentPreApprovedForSession) {
-            await this.completeConsentAcceptance({ persistDecision: false });
-          }
         }
-        return;
+      } else {
+        this.status = CONNECTOR_STATUS.CONNECTED;
+        log.debug("connected", this.status, this.connectedConnectorName);
+        this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
+        this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
       }
-
-      this.status = CONNECTOR_STATUS.CONNECTED;
-      log.debug("connected", this.status, this.connectedConnectorName);
-      this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
-      this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
     });
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
       this.currentConnection = null;
       this.currentConnectionReconnected = false;
+      this.currentConsentUserAddress = null;
       this.resetConsentContext();
       // re-setup commonJRPCProvider
       this.commonJRPCProvider.removeAllListeners();
@@ -1055,7 +1041,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           });
         })
       );
-      await this.setState({ connectedConnectorName: null });
+      await this.setState({ connectedConnectorName: null, consentDecisions: null });
       this.emit(CONNECTOR_EVENTS.DISCONNECTED);
     });
     connector.on(CONNECTOR_EVENTS.CONNECTING, (data) => {
@@ -1120,23 +1106,25 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
       if (this.consentRequired && this.currentConnection) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
-        if (!this.isConsentPreApprovedForSession) {
+
+        this.isConsentPreApprovedForSession = this.currentConsentUserAddress ? this.getStoredConsentDecision(this.currentConsentUserAddress) : false;
+
+        if (this.isConsentPreApprovedForSession) {
+          await this.completeConsentAcceptance({ persistDecision: false });
+        } else {
           this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, {
             ...this.currentConnection,
             reconnected: this.currentConnectionReconnected,
             loginMode: this.loginMode,
           });
         }
-        this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
-        if (this.isConsentPreApprovedForSession) {
-          await this.completeConsentAcceptance({ persistDecision: false });
-        }
         log.debug("authorized (pending consent)", this.connectedConnectorName);
-        return;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
+      } else {
+        this.status = CONNECTOR_STATUS.AUTHORIZED;
+        this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
+        log.debug("authorized", this.status, this.connectedConnectorName);
       }
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
-      log.debug("authorized", this.status, this.connectedConnectorName);
     });
   }
 
@@ -1166,6 +1154,47 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return initialChain;
   }
 
+  protected async completeConsentAcceptance(options: { persistDecision: boolean }): Promise<void> {
+    const connection = this.currentConnection;
+    if (!connection) {
+      throw WalletLoginError.connectionError("Cannot accept consent: no active connection");
+    }
+
+    if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING) {
+      // throw WalletLoginError.connectionError("Cannot accept consent: not in consent_requiring state");
+      return;
+    }
+
+    const consentUserAddress = this.currentConsentUserAddress || (await this.resolveConsentUserAddress(connection));
+    if (consentUserAddress) {
+      this.currentConsentUserAddress = consentUserAddress;
+      if (options.persistDecision) {
+        await this.saveConsentDecision(consentUserAddress);
+      }
+    }
+
+    const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+    if (isConnectAndSign && this.state.idToken) {
+      this.status = CONNECTOR_STATUS.AUTHORIZED;
+      log.debug("consent accepted, authorized", this.status, this.connectedConnectorName);
+    } else {
+      this.status = CONNECTOR_STATUS.CONNECTED;
+      log.debug("consent accepted, connected", this.status, this.connectedConnectorName);
+    }
+
+    this.isConsentPreApprovedForSession = false;
+    this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, {
+      ...connection,
+      reconnected: this.currentConnectionReconnected,
+      loginMode: this.loginMode,
+      pendingUserConsent: false,
+    });
+
+    if (options.persistDecision && this.connectedConnectorName) {
+      this.connectToPlugins({ connector: this.connectedConnectorName });
+    }
+  }
+
   private async cacheWallet(walletName: string): Promise<void> {
     await this.setState({
       cachedConnector: walletName,
@@ -1183,6 +1212,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.currentConsentUserAddress = null;
     this.isConsentPreApprovedForSession = false;
     this.consentSetupComplete = null;
+    this.setState({
+      consentDecisions: {},
+    });
   }
 
   private normalizeConsentUserAddress(address: string): string {
@@ -1215,43 +1247,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
   }
 
-  private async completeConsentAcceptance(options: { persistDecision: boolean }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING) {
-      throw WalletLoginError.connectionError("Cannot accept consent: not in consent_requiring state");
-    }
-
-    const connection = this.currentConnection;
-    if (!connection) {
-      throw WalletLoginError.connectionError("Cannot accept consent: no active connection");
-    }
-
-    const consentUserAddress = this.currentConsentUserAddress || (await this.resolveConsentUserAddress(connection));
-    if (consentUserAddress) {
-      this.currentConsentUserAddress = consentUserAddress;
-      if (options.persistDecision) {
-        await this.saveConsentDecision(consentUserAddress);
-      }
-    }
-
-    const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
-    if (isConnectAndSign && this.state.idToken) {
-      this.status = CONNECTOR_STATUS.AUTHORIZED;
-      log.debug("consent accepted, authorized", this.status, this.connectedConnectorName);
-    } else {
-      this.status = CONNECTOR_STATUS.CONNECTED;
-      log.debug("consent accepted, connected", this.status, this.connectedConnectorName);
-    }
-
-    this.isConsentPreApprovedForSession = false;
-    this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, {
-      ...connection,
-      reconnected: this.currentConnectionReconnected,
-      loginMode: this.loginMode,
-      pendingUserConsent: false,
-    });
-  }
-
-  connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {
+  private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {
     Object.values(this.plugins).map(async (plugin) => {
       try {
         // skip if it's not compatible with the connector
