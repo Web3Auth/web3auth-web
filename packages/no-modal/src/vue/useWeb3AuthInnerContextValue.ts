@@ -7,12 +7,12 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
-  IWeb3AuthLike,
+  type IWeb3Auth,
   log,
   WalletInitializationError,
 } from "../base";
 
-export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike> = {
+export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth> = {
   web3Auth: ShallowRef<TWeb3Auth | null>;
   isConnected: Ref<boolean>;
   isAuthorized: Ref<boolean>;
@@ -28,14 +28,14 @@ export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike> = {
   setIsMFAEnabled: (isMfaEnabled: boolean) => void;
 };
 
-type UseWeb3AuthInnerContextValueOptions<TWeb3Auth extends IWeb3AuthLike, TWatchSource, TWeb3AuthOptions> = {
+type UseWeb3AuthInnerContextValueOptions<TWeb3Auth extends IWeb3Auth, TWatchSource, TWeb3AuthOptions> = {
   Web3AuthConstructor: new (options: TWeb3AuthOptions) => TWeb3Auth;
   watchSource: () => TWatchSource;
   getWeb3AuthOptions: (source: TWatchSource) => TWeb3AuthOptions;
   createConnectionRef?: () => Ref<Connection | null>;
 };
 
-export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike, TWatchSource, TWeb3AuthOptions>({
+export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatchSource, TWeb3AuthOptions>({
   Web3AuthConstructor,
   watchSource,
   getWeb3AuthOptions,

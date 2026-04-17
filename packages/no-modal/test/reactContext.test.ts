@@ -3,7 +3,15 @@ import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
 
-import { CONNECTOR_STATUS, type CONNECTOR_STATUS_TYPE, type IWeb3AuthLike, type IWeb3AuthState, type Web3AuthNoModalEvents } from "../src/base";
+import {
+  CONNECTOR_STATUS,
+  type CONNECTOR_STATUS_TYPE,
+  CustomChainConfig,
+  IPlugin,
+  IWeb3Auth,
+  type IWeb3AuthState,
+  type Web3AuthNoModalEvents,
+} from "../src/base";
 import { useWeb3AuthInnerContextValue } from "../src/react/context/useWeb3AuthInnerContextValue";
 
 type TestWeb3AuthOptions = {
@@ -16,14 +24,15 @@ type RenderSnapshot = {
   status: CONNECTOR_STATUS_TYPE | null;
 };
 
-class TestWeb3Auth extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3AuthLike {
+// @ts-expect-error - For testing purposes
+class TestWeb3Auth extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   public status: CONNECTOR_STATUS_TYPE;
 
   public currentChainId: string | null = null;
 
-  public currentChain: IWeb3AuthLike["currentChain"] = null;
+  public currentChain: CustomChainConfig | undefined = undefined;
 
-  public connection: IWeb3AuthLike["connection"] = null;
+  public connection: IWeb3Auth["connection"] = null;
 
   constructor(options: TestWeb3AuthOptions, _initialState?: IWeb3AuthState) {
     super();
@@ -34,11 +43,11 @@ class TestWeb3Auth extends SafeEventEmitter<Web3AuthNoModalEvents> implements IW
 
   public async init(_options?: { signal?: AbortSignal }) {}
 
-  public getPlugin(): unknown {
+  public getPlugin(_name: string): IPlugin | null {
     return null;
   }
 
-  public cleanup() {}
+  public async cleanup(): Promise<void> {}
 }
 
 type TestComponentProps = {
@@ -48,6 +57,7 @@ type TestComponentProps = {
 };
 
 function TestComponent({ renders, seedStateFromStatus, status }: TestComponentProps): null {
+  // @ts-expect-error - For testing purposes
   const value = useWeb3AuthInnerContextValue<TestWeb3Auth, TestWeb3AuthOptions>({
     Web3AuthConstructor: TestWeb3Auth,
     web3AuthOptions: { status },

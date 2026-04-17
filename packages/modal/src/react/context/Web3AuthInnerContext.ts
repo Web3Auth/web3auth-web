@@ -13,7 +13,6 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
     Web3AuthConstructor: Web3Auth,
     web3AuthOptions,
     initialState,
-    seedStateFromStatus: true,
     notReadyUsesCurrentStatus: true,
     cleanupOnUnmount: true,
     initEffectDependency: config,

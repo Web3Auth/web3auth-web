@@ -8,12 +8,12 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
-  type IWeb3AuthLike,
+  IWeb3Auth,
   type IWeb3AuthState,
   WalletInitializationError,
 } from "../../base";
 
-export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike> = {
+export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth> = {
   web3Auth: TWeb3Auth;
   isConnected: boolean;
   isInitialized: boolean;
@@ -29,43 +29,19 @@ export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike> = {
   isAuthorized: boolean;
 };
 
-type UseWeb3AuthInnerContextValueOptions<TWeb3Auth extends IWeb3AuthLike, TWeb3AuthOptions> = {
+type UseWeb3AuthInnerContextValueOptions<TWeb3Auth extends IWeb3Auth, TWeb3AuthOptions> = {
   Web3AuthConstructor: new (options: TWeb3AuthOptions, initialState?: IWeb3AuthState) => TWeb3Auth;
   web3AuthOptions: TWeb3AuthOptions;
   initialState?: IWeb3AuthState;
-  seedStateFromStatus?: boolean;
   notReadyUsesCurrentStatus?: boolean;
   cleanupOnUnmount?: boolean;
   initEffectDependency?: unknown;
 };
 
-type SeededStatusState = {
-  isConnected: boolean;
-  isAuthorized: boolean;
-  status: CONNECTOR_STATUS_TYPE | null;
-};
-
-function getSeededStatusState(web3AuthStatus: CONNECTOR_STATUS_TYPE, seedStateFromStatus: boolean): SeededStatusState {
-  if (!seedStateFromStatus) {
-    return {
-      isConnected: false,
-      isAuthorized: false,
-      status: null,
-    };
-  }
-
-  return {
-    isConnected: web3AuthStatus === CONNECTOR_STATUS.CONNECTED,
-    isAuthorized: web3AuthStatus === CONNECTOR_STATUS.AUTHORIZED,
-    status: web3AuthStatus,
-  };
-}
-
-export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike, TWeb3AuthOptions>({
+export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3AuthOptions>({
   Web3AuthConstructor,
   web3AuthOptions,
   initialState,
-  seedStateFromStatus = false,
   notReadyUsesCurrentStatus = false,
   cleanupOnUnmount = false,
   initEffectDependency,
@@ -81,17 +57,9 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3AuthLike, TW
     setConnection(null);
     return new Web3AuthConstructor(web3AuthOptions, initialState);
   }, [Web3AuthConstructor, web3AuthOptions, initialState]);
-  const seededStatusState = getSeededStatusState(web3Auth.status, seedStateFromStatus);
-  const [isConnected, setIsConnected] = useState<boolean>(seededStatusState.isConnected);
-  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(seededStatusState.status);
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(seededStatusState.isAuthorized);
-
-  useEffect(() => {
-    const nextSeededStatusState = getSeededStatusState(web3Auth.status, seedStateFromStatus);
-    setIsConnected(nextSeededStatusState.isConnected);
-    setIsAuthorized(nextSeededStatusState.isAuthorized);
-    setStatus(nextSeededStatusState.status);
-  }, [seedStateFromStatus, web3Auth]);
+  const [isConnected, setIsConnected] = useState<boolean>(false);
+  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(null);
+  const [isAuthorized, setIsAuthorized] = useState<boolean>(false);
 
   const getPlugin = useCallback(
     ((name: string) => {

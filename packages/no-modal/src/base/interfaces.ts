@@ -3,9 +3,7 @@ import type { SmartAccountEipStandardType, SmartAccountType } from "@toruslabs/e
 import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
-import { Connection, CONNECTOR_STATUS_TYPE } from "./connector";
 import { LOGIN_MODE, MODAL_SIGN_IN_METHODS, SMART_ACCOUNT_WALLET_SCOPE, WIDGET_TYPE } from "./constants";
-import { Web3AuthNoModalEvents } from "./core/IWeb3Auth";
 import { WALLET_CONNECTOR_TYPE } from "./wallet";
 
 export interface WhitelistResponse {
@@ -133,16 +131,3 @@ export interface WalletRegistryItem {
 export type LoginModeType = (typeof LOGIN_MODE)[keyof typeof LOGIN_MODE];
 
 export type WalletRegistry = { others: Record<string, WalletRegistryItem>; default: Record<string, WalletRegistryItem> };
-
-export type IWeb3AuthLike = {
-  status: CONNECTOR_STATUS_TYPE;
-  currentChainId: string | null;
-  currentChain?: { chainNamespace?: ChainNamespaceType | null } | null;
-  connection: Connection | null;
-  setAnalyticsProperties: (properties: Record<string, unknown>) => void;
-  init: (options?: { signal?: AbortSignal }) => Promise<void>;
-  getPlugin: (name: string) => unknown;
-  on: <TEvent extends keyof Web3AuthNoModalEvents>(event: TEvent, listener: Web3AuthNoModalEvents[TEvent]) => unknown;
-  removeListener: <TEvent extends keyof Web3AuthNoModalEvents>(event: TEvent, listener: Web3AuthNoModalEvents[TEvent]) => unknown;
-  cleanup: () => unknown;
-};
