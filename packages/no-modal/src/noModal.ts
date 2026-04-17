@@ -110,8 +110,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private isConsentPreApprovedForSession = false;
 
-  private consentSetupComplete: Promise<void> | null = null;
-
   private state: IWeb3AuthState = {
     connectedConnectorName: null,
     cachedConnector: null,
@@ -920,13 +918,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connectorName: data.connectorName,
       };
       this.currentConnectionReconnected = data.reconnected;
-      this.resetConsentContext();
-      let resolveConsentSetup: (() => void) | undefined;
-      if (this.consentRequired) {
-        this.consentSetupComplete = new Promise<void>((resolve) => {
-          resolveConsentSetup = resolve;
-        });
-      }
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
@@ -941,8 +932,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         } catch (error) {
           log.error(error);
           this.currentConnection = null;
-          resolveConsentSetup?.();
-          this.consentSetupComplete = null;
           this.status = CONNECTOR_STATUS.ERRORED;
           this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError, this.loginMode);
           return;
@@ -984,14 +973,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.cacheWallet(data.connectorName);
 
       if (this.consentRequired) {
+        const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+        if (isConnectAndSign) {
+          // if the authentication mode is connect and sign, we just emit the `CONNECTED` event instead of `CONSENT_REQUIRING` event
+          // we will only ask for consent after user has `AUTHORIZED`.
+          this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
+          return;
+        }
+
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
         this.currentConsentUserAddress = await this.resolveConsentUserAddress({
           ethereumProvider: isSolanaOnly ? null : ethereumProvider,
           solanaWallet: solanaWallet ?? null,
         });
         this.isConsentPreApprovedForSession = this.currentConsentUserAddress ? this.getStoredConsentDecision(this.currentConsentUserAddress) : false;
-        resolveConsentSetup?.();
-        this.consentSetupComplete = null;
 
         log.debug("consent_requiring", this.status, this.connectedConnectorName);
         if (!this.isConsentPreApprovedForSession) {
@@ -1097,16 +1092,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         accessToken: data.authTokenInfo.accessToken ?? null,
         refreshToken: data.authTokenInfo.refreshToken ?? null,
       });
-      // Wait for the CONNECTED handler to finish resolving the consent userId
-      // and pre-approval state before making consent decisions. This prevents a
-      // race where AUTHORIZED fires (e.g. social login) before the async
-      // CONNECTED handler has completed consent setup.
-      if (this.consentSetupComplete) {
-        await this.consentSetupComplete;
-      }
       if (this.consentRequired && this.currentConnection) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
-
+        this.currentConsentUserAddress = await this.resolveConsentUserAddress(this.currentConnection);
         this.isConsentPreApprovedForSession = this.currentConsentUserAddress ? this.getStoredConsentDecision(this.currentConsentUserAddress) : false;
 
         if (this.isConsentPreApprovedForSession) {
@@ -1161,8 +1149,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING) {
-      // throw WalletLoginError.connectionError("Cannot accept consent: not in consent_requiring state");
-      return;
+      throw WalletLoginError.connectionError("Cannot accept consent: not in consent_requiring state");
     }
 
     const consentUserAddress = this.currentConsentUserAddress || (await this.resolveConsentUserAddress(connection));
@@ -1211,7 +1198,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   private resetConsentContext(): void {
     this.currentConsentUserAddress = null;
     this.isConsentPreApprovedForSession = false;
-    this.consentSetupComplete = null;
     this.setState({
       consentDecisions: {},
     });
