@@ -8,6 +8,7 @@ export const formDataStore = reactive<FormData>({
   // authMode: "",
   connectors: [],
   initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+  consentConfigMode: "required",
   network: process.env.NODE_ENV === "production" ? WEB3AUTH_NETWORK.SAPPHIRE_MAINNET : WEB3AUTH_NETWORK.SAPPHIRE_DEVNET,
   authBuildEnv: resolveBuildEnv(import.meta.env.VITE_APP_AUTH_BUILD_ENV),
   chainNamespaces: [CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA],

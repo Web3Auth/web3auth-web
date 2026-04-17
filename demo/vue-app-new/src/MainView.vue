@@ -125,16 +125,18 @@ const options = computed((): Web3AuthOptions => {
     }
   }
 
-  const { widget, targetId, externalWalletOnly } = formData;
+  const { widget, targetId, externalWalletOnly, consentConfigMode } = formData;
   const { hideSuccessScreen } = formData.whiteLabel;
   const uiConfig: Web3AuthOptions["uiConfig"] = enabledWhiteLabel
     ? { ...whiteLabel, widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) }
     : { widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) };
-  uiConfig.consentConfig = {
-    required: true,
-    privacyPolicy: "https://example.com/privacy",
-    tncLink: "https://example.com/terms",
-  };
+  if (consentConfigMode === "required") {
+    uiConfig.consentConfig = {
+      required: true,
+      privacyPolicy: "https://example.com/privacy",
+      tncLink: "https://example.com/terms",
+    };
+  }
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
   return {
@@ -252,6 +254,7 @@ onBeforeMount(() => {
         formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
         formData.defaultChainId = json.defaultChainId;
         formData.initialAuthenticationMode = json.initialAuthenticationMode;
+        formData.consentConfigMode = json.consentConfigMode || "required";
         formData.externalWalletOnly = json.externalWalletOnly || false;
         formData.tokenStorage = json.tokenStorage || "default";
       }
