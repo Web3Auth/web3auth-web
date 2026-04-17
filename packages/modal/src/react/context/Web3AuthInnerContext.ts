@@ -1,11 +1,11 @@
 import {
   ANALYTICS_INTEGRATION_TYPE,
   type ChainNamespaceType,
-  type CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  type SDK_CONNECTED_EVENT_DATA,
   WalletInitializationError,
 } from "@web3auth/no-modal";
 import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
@@ -90,8 +90,9 @@ export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProvider
       setStatus(web3Auth.status);
       setIsInitialized(true);
     };
-    const connectedListener = (_data: CONNECTED_EVENT_DATA) => {
+    const connectedListener = (data: SDK_CONNECTED_EVENT_DATA) => {
       setStatus(web3Auth.status);
+      if (data.pendingUserConsent) return;
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);

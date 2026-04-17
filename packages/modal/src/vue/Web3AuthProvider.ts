@@ -6,6 +6,7 @@ import {
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
   log,
+  type SDK_CONNECTED_EVENT_DATA,
   WalletInitializationError,
   Web3AuthContextKey,
 } from "@web3auth/no-modal";
@@ -107,8 +108,9 @@ export const Web3AuthProvider = defineComponent({
           isInitialized.value = true;
         };
 
-        const connectedListener = () => {
+        const connectedListener = (data: SDK_CONNECTED_EVENT_DATA) => {
           status.value = web3Auth.value!.status;
+          if (data.pendingUserConsent) return;
           // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
           if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED) {
             if (!isInitialized.value) isInitialized.value = true;
