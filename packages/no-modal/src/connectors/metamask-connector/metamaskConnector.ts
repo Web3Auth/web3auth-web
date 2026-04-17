@@ -3,6 +3,7 @@ import { createMultichainClient, hasExtension, type MultichainCore, type Scope }
 import { createSolanaClient, type SolanaClient } from "@metamask/connect-solana";
 import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-controllers";
 import type { Wallet } from "@wallet-standard/base";
+import { StandardEvents, type StandardEventsChangeProperties, type StandardEventsFeature } from "@wallet-standard/features";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
@@ -281,8 +282,28 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.status = CONNECTOR_STATUS.CONNECTING;
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
+        let deferredResolve: (() => void) | null = null;
+        const ecosystemClientConnectedPromise = new Promise<void>((resolve) => {
+          deferredResolve = resolve;
+        });
+
+        // Wait for ecosystem clients to be ready
+        this.evmProvider?.once("connect", () => {
+          deferredResolve?.();
+        });
+
+        const eventsFeature = this.solanaProvider.features[StandardEvents] as StandardEventsFeature[typeof StandardEvents];
+        const removeListener = eventsFeature.on("change", (properties: StandardEventsChangeProperties) => {
+          if (properties.accounts) {
+            deferredResolve?.();
+            removeListener();
+          }
+        });
+
         // Connect using the multichain client
         await this.multichainClient.connect(scopes, []);
+
+        await ecosystemClientConnectedPromise;
       }
 
       // // Switch EVM chain if not connected to the right one (Solana chains are handled by the wallet-standard provider)
@@ -483,21 +504,21 @@ class MetaMaskConnector extends BaseConnector<void> {
   /**
    * Handles accounts changed events from the MetaMask provider
    */
-  private handleAccountsChanged = (accounts: string[]): void => {
-    if (accounts.length === 0) {
-      this.disconnect().catch(() => {
-        // Ignore disconnect errors during account change
-      });
-    }
+  private handleAccountsChanged = (_accounts: string[]): void => {
+    // if (accounts.length === 0) {
+    //   this.disconnect().catch(() => {
+    //     // Ignore disconnect errors during account change
+    //   });
+    // }
   };
 
   /**
    * Handles disconnect events from the MetaMask provider
    */
   private handleDisconnect = (): void => {
-    this.disconnect().catch(() => {
-      // Ignore disconnect errors
-    });
+    // this.disconnect().catch(() => {
+    //   // Ignore disconnect errors
+    // });
   };
 
   /**
