@@ -104,6 +104,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private currentConnection: Connection | null = null;
 
+  private currentConnectionReconnected = false;
+
   private currentConsentUserAddress: string | null = null;
 
   private isConsentPreApprovedForSession = false;
@@ -922,6 +924,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         solanaWallet: solanaWallet ?? null,
         connectorName: data.connectorName,
       };
+      this.currentConnectionReconnected = data.reconnected;
       this.resetConsentContext();
       const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
       let resolveConsentSetup: (() => void) | undefined;
@@ -1027,6 +1030,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async () => {
       this.currentConnection = null;
+      this.currentConnectionReconnected = false;
       this.resetConsentContext();
       // re-setup commonJRPCProvider
       this.commonJRPCProvider.removeAllListeners();
@@ -1244,7 +1248,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.isConsentPreApprovedForSession = false;
     this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, {
       ...connection,
-      reconnected: false,
+      reconnected: this.currentConnectionReconnected,
       loginMode: this.loginMode,
       pendingUserConsent: false,
     });

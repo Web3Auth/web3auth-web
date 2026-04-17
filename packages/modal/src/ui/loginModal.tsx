@@ -485,7 +485,11 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONNECTED_EVENT_DATA) => {
       if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
-        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true });
+        if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
+          this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true });
+        } else {
+          this.setState({ status: MODAL_STATUS.AUTHORIZED });
+        }
       } else if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
         this.setState({
           status: MODAL_STATUS.CONNECTED,
