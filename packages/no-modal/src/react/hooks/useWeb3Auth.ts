@@ -1,9 +1,6 @@
 import { IWeb3AuthInnerContext } from "../interfaces";
-import { type IUseWeb3AuthValue, pickWeb3AuthContextValue } from "./pickWeb3AuthContextValue";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
-export type IUseWeb3Auth = IUseWeb3AuthValue<IWeb3AuthInnerContext>;
-
-export const useWeb3Auth = (): IUseWeb3Auth => {
-  return pickWeb3AuthContextValue(useWeb3AuthInner());
+export const useWeb3Auth = (): IWeb3AuthInnerContext => {
+  return useWeb3AuthInner();
 };
