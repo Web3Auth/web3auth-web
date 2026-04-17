@@ -204,6 +204,7 @@ export type LoginParamMap = {
 };
 
 export interface IWeb3AuthCore extends SafeEventEmitter {
+  currentChainId: string | null;
   readonly coreOptions: IWeb3AuthCoreOptions;
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
@@ -229,6 +230,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   connectTo<T extends WALLET_CONNECTOR_TYPE>(walletName: T, loginParams?: LoginParamMap[T]): Promise<Connection | null>;
   enableMFA<T>(params: T): Promise<void>;
   manageMFA<T>(params: T): Promise<void>;
+  setAnalyticsProperties(properties: Record<string, unknown>): void;
   cleanup(): Promise<void>;
 }
 

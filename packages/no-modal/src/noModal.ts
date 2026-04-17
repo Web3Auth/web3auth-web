@@ -124,7 +124,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private loginMode: LoginModeType = LOGIN_MODE.NO_MODAL;
 
-  constructor(options: IWeb3AuthCoreOptions, initialState?: IWeb3AuthState) {
+  constructor(options: IWeb3AuthCoreOptions, initialState?: Partial<IWeb3AuthState>) {
     super();
     if (!options.clientId) throw WalletInitializationError.invalidParams("Please provide a valid clientId in constructor");
     if (options.enableLogging) log.enableAll();
@@ -1280,9 +1280,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     await this.storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify(this.state));
   }
 
-  private async loadState(initialState?: IWeb3AuthState): Promise<void> {
+  private async loadState(initialState?: Partial<IWeb3AuthState>): Promise<void> {
     if (initialState) {
-      this.state = initialState;
+      this.state = { ...this.state, ...initialState };
       return;
     }
     const state = await this.storage.get(WEB3AUTH_STATE_STORAGE_KEY);

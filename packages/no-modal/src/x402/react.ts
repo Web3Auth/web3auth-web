@@ -40,7 +40,7 @@ export const useX402Fetch = (address?: Address): IUseX402FetchReturnValues => {
         return createSolanaX402Fetch(solanaWallet, account.address)(url, options);
       }
 
-      if (chainNamespace === CHAIN_NAMESPACES.EIP155 && connection?.ethereumProvider) {
+      if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
         const provider = connection?.ethereumProvider;
         if (!provider) throw new Error("EVM provider not available");
 
