@@ -1125,7 +1125,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         if (!this.isConsentPreApprovedForSession) {
           this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, {
             ...this.currentConnection,
-            reconnected: false,
+            reconnected: this.currentConnectionReconnected,
             loginMode: this.loginMode,
           });
         }
