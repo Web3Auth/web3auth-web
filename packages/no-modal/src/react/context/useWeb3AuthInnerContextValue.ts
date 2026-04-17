@@ -30,9 +30,9 @@ export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth> = {
 };
 
 type UseWeb3AuthInnerContextValueOptions<TWeb3Auth extends IWeb3Auth, TWeb3AuthOptions> = {
-  Web3AuthConstructor: new (options: TWeb3AuthOptions, initialState?: IWeb3AuthState) => TWeb3Auth;
+  Web3AuthConstructor: new (options: TWeb3AuthOptions, initialState?: Partial<IWeb3AuthState>) => TWeb3Auth;
   web3AuthOptions: TWeb3AuthOptions;
-  initialState?: IWeb3AuthState;
+  initialState?: Partial<IWeb3AuthState>;
   notReadyUsesCurrentStatus?: boolean;
   cleanupOnUnmount?: boolean;
   initEffectDependency?: unknown;

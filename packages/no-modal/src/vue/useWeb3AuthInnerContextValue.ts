@@ -8,6 +8,7 @@ import {
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
   type IWeb3Auth,
+  IWeb3AuthState,
   log,
   WalletInitializationError,
 } from "../base";
@@ -29,16 +30,18 @@ export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth> = {
 };
 
 type UseWeb3AuthInnerContextValueOptions<TWeb3Auth extends IWeb3Auth, TWatchSource, TWeb3AuthOptions> = {
-  Web3AuthConstructor: new (options: TWeb3AuthOptions) => TWeb3Auth;
+  Web3AuthConstructor: new (options: TWeb3AuthOptions, initialState?: Partial<IWeb3AuthState>) => TWeb3Auth;
   watchSource: () => TWatchSource;
   getWeb3AuthOptions: (source: TWatchSource) => TWeb3AuthOptions;
   createConnectionRef?: () => Ref<Connection | null>;
+  initialState?: Partial<IWeb3AuthState>;
 };
 
 export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatchSource, TWeb3AuthOptions>({
   Web3AuthConstructor,
   watchSource,
   getWeb3AuthOptions,
+  initialState,
   createConnectionRef = () => ref<Connection | null>(null),
 }: UseWeb3AuthInnerContextValueOptions<TWeb3Auth, TWatchSource, TWeb3AuthOptions>): IWeb3AuthInnerContextValue<TWeb3Auth> {
   const web3Auth = shallowRef<TWeb3Auth | null>(null) as ShallowRef<TWeb3Auth | null>;
@@ -84,7 +87,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
       });
 
       resetHookState();
-      const web3AuthInstance = new Web3AuthConstructor(getWeb3AuthOptions(newSource));
+      const web3AuthInstance = new Web3AuthConstructor(getWeb3AuthOptions(newSource), initialState);
       web3AuthInstance.setAnalyticsProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.VUE_COMPOSABLES });
       web3Auth.value = web3AuthInstance;
     },
