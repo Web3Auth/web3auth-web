@@ -137,15 +137,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.loadState(initialState)
       .then((): undefined => {
         if (this.state.idToken && this.coreOptions.ssr) {
-          if (this.consentRequired) {
-            this.status = CONNECTOR_STATUS.CONSENT_REQUIRED;
-          } else {
-            // connect-only is the default authentication mode, so we need to set the status to connected if the idToken is present and ssr is enabled
-            this.status =
-              this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN
-                ? CONNECTOR_STATUS.AUTHORIZED
-                : CONNECTOR_STATUS.CONNECTED;
-          }
+          // connect-only is the default authentication mode, so we need to set the status to connected if the idToken is present and ssr is enabled
+          this.status =
+            this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN
+              ? CONNECTOR_STATUS.AUTHORIZED
+              : CONNECTOR_STATUS.CONNECTED;
         }
         return undefined;
       })
@@ -927,9 +923,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         connectorName: data.connectorName,
       };
       this.resetConsentContext();
+      const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
       let resolveConsentSetup: (() => void) | undefined;
       if (this.consentRequired) {
-        this.status = CONNECTOR_STATUS.CONSENT_REQUIRED;
+        if (!isConnectAndSign) {
+          this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
+        }
         this.consentSetupComplete = new Promise<void>((resolve) => {
           resolveConsentSetup = resolve;
         });
@@ -996,19 +995,26 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           solanaWallet: solanaWallet ?? null,
         });
         this.isConsentPreApprovedForSession = this.currentConsentUserAddress ? this.getStoredConsentDecision(this.currentConsentUserAddress) : false;
-        // Signal that consent userId + pre-approval are resolved; AUTHORIZED handler can proceed.
         resolveConsentSetup?.();
         this.consentSetupComplete = null;
 
         this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
-        log.debug("consent_required", this.status, this.connectedConnectorName);
-        const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
-        if (!isConnectAndSign && !this.isConsentPreApprovedForSession) {
-          this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRED, { ...data, loginMode: this.loginMode });
-        }
-        this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent: true });
-        if (!isConnectAndSign && this.isConsentPreApprovedForSession) {
-          await this.completeConsentAcceptance({ persistDecision: false });
+
+        if (isConnectAndSign) {
+          // In connect-and-sign mode, let the normal AUTHORIZING → AUTHORIZED flow complete first.
+          // CONSENT_REQUIRING will be set in the AUTHORIZED handler after authorization finishes.
+          this.status = CONNECTOR_STATUS.CONNECTED;
+          log.debug("connected (consent deferred to authorized)", this.status, this.connectedConnectorName);
+          this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent: true });
+        } else {
+          log.debug("consent_requiring", this.status, this.connectedConnectorName);
+          if (!this.isConsentPreApprovedForSession) {
+            this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, { ...data, loginMode: this.loginMode });
+          }
+          this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent: true });
+          if (this.isConsentPreApprovedForSession) {
+            await this.completeConsentAcceptance({ persistDecision: false });
+          }
         }
         return;
       }
@@ -1094,17 +1100,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.AUTHORIZING, (data) => {
-      if (this.status === CONNECTOR_STATUS.CONSENT_REQUIRED) {
-        // Only forward AUTHORIZING to the UI when consent setup is complete (userId + pre-approval
-        // resolved). Before that, the consent UI hasn't been shown yet so there's no screen to
-        // transition away from, and emitting AUTHORIZING would cause the modal to render
-        // AuthorizingStatus prematurely.
-        if (!this.consentSetupComplete) {
-          this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
-        }
-        log.debug("authorizing (pending consent)", this.connectedConnectorName);
-        return;
-      }
       this.status = CONNECTOR_STATUS.AUTHORIZING;
       this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
       log.debug("authorizing", this.status, this.connectedConnectorName);
@@ -1122,17 +1117,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (this.consentSetupComplete) {
         await this.consentSetupComplete;
       }
-      if (this.status === CONNECTOR_STATUS.CONSENT_REQUIRED) {
-        const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
-        if (isConnectAndSign && this.consentRequired && this.currentConnection && !this.isConsentPreApprovedForSession) {
-          this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRED, {
+      if (this.consentRequired && this.currentConnection) {
+        this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
+        if (!this.isConsentPreApprovedForSession) {
+          this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, {
             ...this.currentConnection,
             reconnected: false,
             loginMode: this.loginMode,
           });
         }
         this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
-        if (isConnectAndSign && this.isConsentPreApprovedForSession) {
+        if (this.isConsentPreApprovedForSession) {
           await this.completeConsentAcceptance({ persistDecision: false });
         }
         log.debug("authorized (pending consent)", this.connectedConnectorName);
@@ -1220,8 +1215,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private async completeConsentAcceptance(options: { persistDecision: boolean }): Promise<void> {
-    if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRED) {
-      throw WalletLoginError.connectionError("Cannot accept consent: not in consent_required state");
+    if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING) {
+      throw WalletLoginError.connectionError("Cannot accept consent: not in consent_requiring state");
     }
 
     const connection = this.currentConnection;

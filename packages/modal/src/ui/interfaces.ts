@@ -124,7 +124,7 @@ export const MODAL_STATUS = {
   ERRORED: "errored",
   AUTHORIZING: "authorizing",
   AUTHORIZED: "authorized",
-  CONSENT_REQUIRED: "consent_required",
+  CONSENT_REQUIRING: "consent_requiring",
 } as const;
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 

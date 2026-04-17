@@ -8,7 +8,7 @@ export const CONNECTOR_STATUS = {
   ERRORED: "errored",
   AUTHORIZED: "authorized",
   AUTHORIZING: "authorizing",
-  CONSENT_REQUIRED: "consent_required",
+  CONSENT_REQUIRING: "consent_requiring",
 } as const;
 
 export const CONNECTOR_EVENTS = {

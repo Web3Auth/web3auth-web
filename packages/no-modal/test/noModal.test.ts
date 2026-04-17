@@ -282,7 +282,7 @@ describe("Web3AuthNoModal", () => {
     });
     sdk.exposeSetConsentRequired(true);
     const consentRequiredListener = vi.fn();
-    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, consentRequiredListener);
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
 
     const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xAbC123"]) };
     const consentAcceptedListener = vi.fn();
@@ -302,7 +302,7 @@ describe("Web3AuthNoModal", () => {
       reconnected: false,
     });
     await vi.waitFor(() => {
-      expect(sdk.status).toBe(CONNECTOR_STATUS.CONSENT_REQUIRED);
+      expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
     });
     connector.emit(CONNECTOR_EVENTS.AUTHORIZED, {
       connector: WALLET_CONNECTORS.METAMASK,
@@ -325,7 +325,7 @@ describe("Web3AuthNoModal", () => {
     });
     sdk.exposeSetConsentRequired(true);
     const consentRequiredListener = vi.fn();
-    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, consentRequiredListener);
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
 
     const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xBEEF"]) };
     const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
@@ -362,7 +362,7 @@ describe("Web3AuthNoModal", () => {
     sdk.exposeSetConsentRequired(true);
 
     const consentRequiredListener = vi.fn();
-    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, consentRequiredListener);
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
     const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xFEEd"]) };
     const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
     connector.connect = vi.fn(async () => {

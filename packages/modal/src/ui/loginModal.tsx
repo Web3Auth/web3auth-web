@@ -40,6 +40,7 @@ import {
   LoginModalProps,
   MODAL_STATUS,
   ModalState,
+  ModalStatusType,
   os,
   platform,
   SocialLoginEventType,
@@ -79,6 +80,8 @@ export class LoginModal {
   private externalWalletsConfig: Record<string, BaseConnectorConfig>;
 
   private analytics: Analytics;
+
+  private modalStatus: ModalStatusType = MODAL_STATUS.INITIALIZED;
 
   constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
@@ -392,6 +395,7 @@ export class LoginModal {
   };
 
   private setState = (newState: Partial<ModalState>) => {
+    if (newState.status) this.modalStatus = newState.status;
     this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
@@ -469,14 +473,15 @@ export class LoginModal {
       this.handleConnectorData(connectorData);
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZING, () => {
+      if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.AUTHORIZING });
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
-      if (this.consentRequired) return;
+      if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.AUTHORIZED });
     });
-    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRED, () => {
-      this.setState({ status: MODAL_STATUS.CONSENT_REQUIRED, modalVisibility: true });
+    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, () => {
+      this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONNECTED_EVENT_DATA) => {
       if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {

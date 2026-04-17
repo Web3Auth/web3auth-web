@@ -189,7 +189,7 @@ function RootContent(props: RootProps) {
     return modalState.status !== MODAL_STATUS.INITIALIZED;
   }, [modalState.status]);
 
-  const isConsentRequired = modalState.status === MODAL_STATUS.CONSENT_REQUIRED;
+  const isConsentRequired = modalState.status === MODAL_STATUS.CONSENT_REQUIRING;
 
   return (
     <div className="w3a--relative w3a--flex w3a--flex-col">
@@ -246,8 +246,8 @@ function RootContent(props: RootProps) {
 
           {/* Footer */}
           <Footer
-            privacyPolicy={!consentRequired && modalState.status !== MODAL_STATUS.CONSENT_REQUIRED ? privacyPolicy : undefined}
-            termsOfService={!consentRequired && modalState.status !== MODAL_STATUS.CONSENT_REQUIRED ? tncLink : undefined}
+            privacyPolicy={!consentRequired && modalState.status !== MODAL_STATUS.CONSENT_REQUIRING ? privacyPolicy : undefined}
+            termsOfService={!consentRequired && modalState.status !== MODAL_STATUS.CONSENT_REQUIRING ? tncLink : undefined}
           />
 
           <RootBodySheets />

@@ -225,7 +225,7 @@ function Loader(props: LoaderProps) {
     }
   }, [isConnectedAccordingToAuthenticationMode, hideSuccessScreen, onClose]);
 
-  const isConsent = modalStatus === MODAL_STATUS.CONSENT_REQUIRED;
+  const isConsent = modalStatus === MODAL_STATUS.CONSENT_REQUIRING;
 
   return (
     <div
