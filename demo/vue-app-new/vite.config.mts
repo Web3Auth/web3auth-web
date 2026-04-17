@@ -14,6 +14,7 @@ export default defineConfig(({ mode }) => {
     mode,
     server: {
       port: 8080,
+      host: true,
     },
     plugins: [vue()],
     resolve: {
