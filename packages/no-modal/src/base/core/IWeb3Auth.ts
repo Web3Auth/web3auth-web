@@ -220,6 +220,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
 }
 
 export interface IWeb3Auth extends IWeb3AuthCore {
+  loginMode: LoginModeType;
   connected: boolean;
   cachedConnector: string | null;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;

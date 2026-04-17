@@ -26,6 +26,7 @@ import {
   log,
   LOGIN_MODE,
   type LoginMethodConfig,
+  LoginModeType,
   type ProjectConfig,
   sdkVersion,
   type WALLET_CONNECTOR_TYPE,
@@ -56,6 +57,8 @@ export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
 
 export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public loginModal: LoginModal;
+
+  public loginMode: LoginModeType = LOGIN_MODE.MODAL;
 
   readonly options: Web3AuthOptions;
 

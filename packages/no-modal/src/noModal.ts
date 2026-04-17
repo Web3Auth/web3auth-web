@@ -88,6 +88,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
+  public loginMode: LoginModeType = LOGIN_MODE.NO_MODAL;
+
   protected aaProvider: AccountAbstractionProvider | null = null;
 
   protected connectors: IConnector<unknown>[] = [];
@@ -114,8 +116,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     accessToken: null,
     refreshToken: null,
   };
-
-  private loginMode: LoginModeType = LOGIN_MODE.NO_MODAL;
 
   constructor(options: IWeb3AuthCoreOptions, initialState?: Partial<IWeb3AuthState>) {
     super();
