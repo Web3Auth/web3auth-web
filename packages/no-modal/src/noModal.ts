@@ -401,22 +401,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // track connection started event
     this.analytics.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
 
-    const consentGateActive = this.consentRequired;
-
     return new Promise((resolve, reject) => {
       let connectedEventCompleted = false;
       let authorizedEventReceived = false;
-      let consentEventReceived = !consentGateActive;
 
       const cleanup = () => {
         this.removeListener(CONNECTOR_EVENTS.CONNECTED, onConnected);
         this.removeListener(CONNECTOR_EVENTS.ERRORED, onErrored);
         this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
-        this.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, onConsentAccepted);
       };
 
       const checkCompletion = async () => {
-        if (!consentEventReceived) return;
         // In CONNECT_AND_SIGN mode, wait for both connected event and authorized event
         if (finalLoginParams.getAuthTokenInfo) {
           if (connectedEventCompleted && authorizedEventReceived) {
@@ -454,15 +449,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         await checkCompletion();
       };
 
-      const onConsentAccepted = async () => {
-        consentEventReceived = true;
-        await checkCompletion();
-        // connect to wallet-service plugin
-        if (this.connectedConnectorName === WALLET_CONNECTORS.AUTH) {
-          this.connectToPlugins({ connector: this.connectedConnectorName as WALLET_CONNECTOR_TYPE });
-        }
-      };
-
       const onErrored = async (err: Web3AuthError) => {
         // track connection failed event
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
@@ -477,9 +463,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
       if (finalLoginParams.getAuthTokenInfo) {
         this.once(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
-      }
-      if (consentGateActive) {
-        this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, onConsentAccepted);
       }
       this.once(CONNECTOR_EVENTS.ERRORED, onErrored);
       connector.connect(finalLoginParams);
@@ -1126,6 +1109,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     } else {
       this.status = CONNECTOR_STATUS.CONNECTED;
       log.debug("consent accepted, connected", this.status, this.connectedConnectorName);
+    }
+
+    // connect to wallet-service plugin
+    if (this.connectedConnectorName === WALLET_CONNECTORS.AUTH) {
+      this.connectToPlugins({ connector: this.connectedConnectorName as WALLET_CONNECTOR_TYPE });
     }
 
     this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, { reconnected: this.currentConnectionReconnected });
