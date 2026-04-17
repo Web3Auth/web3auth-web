@@ -17,6 +17,7 @@ import {
   LoginModeType,
   type MetaMaskConnectorData,
   type SDK_CONNECTED_EVENT_DATA,
+  SDK_CONSENT_ACCEPTED_EVENT_DATA,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
@@ -483,14 +484,10 @@ export class LoginModal {
     listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, () => {
       this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
     });
-    listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONNECTED_EVENT_DATA) => {
+    listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => {
       if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
-        if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
-          this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true });
-        } else {
-          this.setState({ status: MODAL_STATUS.AUTHORIZED });
-        }
-      } else if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
+        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true });
+      } else if (!data.reconnected) {
         this.setState({
           status: MODAL_STATUS.CONNECTED,
           modalVisibility: true,

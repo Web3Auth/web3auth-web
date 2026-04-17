@@ -235,12 +235,13 @@ export interface IWeb3Auth extends IWeb3AuthCore {
 }
 
 export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType; pendingUserConsent?: boolean };
+export type SDK_CONSENT_ACCEPTED_EVENT_DATA = { reconnected: boolean };
 
 export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready" | "consent_requiring" | "consent_accepted"> & {
   [CONNECTOR_EVENTS.READY]: () => void;
   [CONNECTOR_EVENTS.CONNECTED]: (data: SDK_CONNECTED_EVENT_DATA) => void;
-  [CONNECTOR_EVENTS.CONSENT_REQUIRING]: (data: SDK_CONNECTED_EVENT_DATA) => void;
-  [CONNECTOR_EVENTS.CONSENT_ACCEPTED]: (data: SDK_CONNECTED_EVENT_DATA) => void;
+  [CONNECTOR_EVENTS.CONSENT_REQUIRING]: () => void;
+  [CONNECTOR_EVENTS.CONSENT_ACCEPTED]: (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError, loginMode: LoginModeType) => void;
   MODAL_VISIBILITY: (visibility: boolean) => void;
 };
