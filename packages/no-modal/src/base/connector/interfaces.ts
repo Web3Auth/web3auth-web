@@ -114,6 +114,7 @@ export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
 export type CONNECTED_EVENT_DATA = Connection & {
   reconnected: boolean;
+  pendingUserConsent?: boolean;
 };
 
 export type AUTHORIZED_EVENT_DATA = {

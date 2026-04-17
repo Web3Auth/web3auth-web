@@ -71,6 +71,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
 
+    this.options.uiConfig.consentRequired = true;
+    this.options.uiConfig.privacyPolicy = "https://example.com/privacy";
+    this.options.uiConfig.tncLink = "https://example.com/terms";
+
     const uiCfg = this.options.uiConfig;
     this.consentRequired = uiCfg.consentRequired && Boolean(uiCfg.privacyPolicy) && Boolean(uiCfg.tncLink);
 

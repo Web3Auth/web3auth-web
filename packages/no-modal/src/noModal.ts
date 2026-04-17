@@ -1000,8 +1000,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         resolveConsentSetup?.();
         this.consentSetupComplete = null;
 
-        this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
-
         if (isConnectAndSign) {
           // In connect-and-sign mode, let the normal AUTHORIZING → AUTHORIZED flow complete first.
           // CONSENT_REQUIRING will be set in the AUTHORIZED handler after authorization finishes.
@@ -1253,7 +1251,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
   }
 
-  private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {
+  connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {
     Object.values(this.plugins).map(async (plugin) => {
       try {
         // skip if it's not compatible with the connector
