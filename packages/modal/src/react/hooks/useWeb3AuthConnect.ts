@@ -25,13 +25,15 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
     setActiveFlow("connect");
     setConnectLoading(true);
     setConnectError(null);
+    let connection: Connection | null = null;
     try {
-      return await web3Auth.connect();
+      connection = await web3Auth.connect();
     } catch (error) {
       setConnectError(error as Web3AuthError);
     } finally {
       setConnectLoading(false);
     }
+    return connection;
   }, [web3Auth]);
 
   const connectTo = useCallback(
