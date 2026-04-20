@@ -4,7 +4,6 @@ import { useWalletServicesInnerContextValue, WalletServicesContextKey } from "@w
 import { defineComponent, h, provide } from "vue";
 
 import { useWeb3AuthInner } from "./composables/useWeb3AuthInner";
-import { WalletServicesContextKey } from "./context/WalletServicesContext";
 import { IWalletServicesInnerContext } from "./interfaces";
 
 export const WalletServicesInnerProvider = defineComponent({

@@ -4,6 +4,7 @@ export * from "./useCheckout";
 export * from "./useEnableMFA";
 export * from "./useFunding";
 export { useInjectedWeb3AuthInnerContext } from "./useInjectedWeb3AuthInnerContext";
+export * from "./useLinkAccount";
 export * from "./useManageMFA";
 export * from "./useReceive";
 export * from "./useSwap";
