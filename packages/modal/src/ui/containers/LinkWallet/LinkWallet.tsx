@@ -1,7 +1,8 @@
-import { type BaseConnectorConfig, type ChainNamespaceType, log, WALLET_CONNECTORS } from "@web3auth/no-modal";
-import { FormEvent, useCallback, useMemo, useState } from "react";
+import { type BaseConnectorConfig, log } from "@web3auth/no-modal";
+import { useCallback, useState } from "react";
 
 import { useWidget } from "../../context/WidgetContext";
+import { useWalletFiltering } from "../../hooks/useWalletFiltering";
 import { ExternalButton } from "../../interfaces";
 import ConnectWalletChainFilter from "../ConnectWallet/ConnectWalletChainFilter";
 import ConnectWalletList from "../ConnectWallet/ConnectWalletList";
@@ -25,95 +26,27 @@ function LinkWallet(props: LinkWalletProps) {
   const { isDark, uiConfig } = useWidget();
   const { walletRegistry } = uiConfig;
 
+  const {
+    externalButtons,
+    totalExternalWalletsCount,
+    initialWalletCount,
+    walletSearch,
+    handleWalletSearch,
+    selectedChain,
+    setSelectedChain,
+    isShowAllWallets,
+    handleMoreWallets,
+  } = useWalletFiltering({
+    allRegistryButtons,
+    customConnectorButtons,
+    connectorVisibilityMap,
+    externalWalletsConfig: props.externalWalletsConfig,
+    walletRegistry,
+  });
+
   const [step, setStep] = useState<LinkWalletStep>("wallet_list");
   const [stepError, setStepError] = useState(false);
   const [selectedWallet, setSelectedWallet] = useState<ExternalButton | null>(null);
-  const [walletSearch, setWalletSearch] = useState("");
-  const [selectedChain, setSelectedChain] = useState("all");
-  const [isShowAllWallets, setIsShowAllWallets] = useState(false);
-
-  const config = useMemo(() => props.externalWalletsConfig ?? {}, [props.externalWalletsConfig]);
-
-  const walletDiscoverySupported = useMemo(
-    () => walletRegistry && (Object.keys(walletRegistry.default || {}).length > 0 || Object.keys(walletRegistry.others || {}).length > 0),
-    [walletRegistry]
-  );
-
-  const allUniqueButtons = useMemo(() => {
-    const seen = new Set<string>();
-    return customConnectorButtons.concat(allRegistryButtons).filter((b: ExternalButton) => {
-      if (seen.has(b.name)) return false;
-      seen.add(b.name);
-      return true;
-    });
-  }, [allRegistryButtons, customConnectorButtons]);
-
-  const defaultButtonKeys = useMemo(() => new Set(Object.keys(walletRegistry.default)), [walletRegistry]);
-
-  const defaultButtons = useMemo(() => {
-    const buttons = [
-      ...allRegistryButtons.filter((b: ExternalButton) => b.hasInjectedWallet && defaultButtonKeys.has(b.name)),
-      ...customConnectorButtons,
-      ...allRegistryButtons.filter((b: ExternalButton) => !b.hasInjectedWallet && defaultButtonKeys.has(b.name)),
-    ].sort((a: ExternalButton, b: ExternalButton) => {
-      if (a.name === WALLET_CONNECTORS.METAMASK && b.name !== WALLET_CONNECTORS.METAMASK) return -1;
-      if (b.name === WALLET_CONNECTORS.METAMASK && a.name !== WALLET_CONNECTORS.METAMASK) return 1;
-      return 0;
-    });
-
-    const seen = new Set<string>();
-    return buttons
-      .filter((b: ExternalButton) => {
-        if (seen.has(b.name)) return false;
-        seen.add(b.name);
-        return true;
-      })
-      .filter((b: ExternalButton) => selectedChain === "all" || b.chainNamespaces?.includes(selectedChain as ChainNamespaceType));
-  }, [allRegistryButtons, customConnectorButtons, defaultButtonKeys, selectedChain]);
-
-  const installedWalletButtons = useMemo(() => {
-    return Object.keys(config).reduce((acc: ExternalButton[], connector: string) => {
-      if (connector !== WALLET_CONNECTORS.WALLET_CONNECT_V2 && connectorVisibilityMap[connector]) {
-        acc.push({
-          name: connector,
-          displayName: config[connector].label || connector,
-          hasInjectedWallet: config[connector].isInjected || false,
-          hasWalletConnect: false,
-          hasInstallLinks: false,
-        });
-      }
-      return acc;
-    }, []);
-  }, [config, connectorVisibilityMap]);
-
-  const filteredButtons = useMemo(() => {
-    if (walletDiscoverySupported) {
-      return [
-        ...allUniqueButtons.filter((b: ExternalButton) => b.hasInjectedWallet),
-        ...allUniqueButtons.filter((b: ExternalButton) => !b.hasInjectedWallet),
-      ]
-        .sort((a: ExternalButton) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1))
-        .filter((b: ExternalButton) => selectedChain === "all" || b.chainNamespaces?.includes(selectedChain as ChainNamespaceType))
-        .filter((b: ExternalButton) => b.name.toLowerCase().includes(walletSearch.toLowerCase()));
-    }
-    return installedWalletButtons;
-  }, [walletDiscoverySupported, installedWalletButtons, walletSearch, allUniqueButtons, selectedChain]);
-
-  const externalButtons = useMemo(() => {
-    if (walletDiscoverySupported && !walletSearch && !isShowAllWallets) return defaultButtons;
-    return filteredButtons;
-  }, [walletDiscoverySupported, walletSearch, filteredButtons, defaultButtons, isShowAllWallets]);
-
-  const totalExternalWalletsCount = filteredButtons.length;
-
-  const initialWalletCount = useMemo(() => {
-    if (isShowAllWallets) return totalExternalWalletsCount;
-    return walletDiscoverySupported ? defaultButtons.length : installedWalletButtons.length;
-  }, [walletDiscoverySupported, defaultButtons, installedWalletButtons, isShowAllWallets, totalExternalWalletsCount]);
-
-  const handleWalletSearch = useCallback((e: FormEvent<HTMLInputElement>) => {
-    setWalletSearch((e.target as HTMLInputElement).value);
-  }, []);
 
   const handleWalletClick = useCallback((button: ExternalButton) => {
     log.info("linkWallet: wallet selected", {
@@ -126,10 +59,6 @@ function LinkWallet(props: LinkWalletProps) {
     setSelectedWallet(button);
     setStepError(false);
     setStep("connecting");
-  }, []);
-
-  const handleMoreWallets = useCallback(() => {
-    setIsShowAllWallets(true);
   }, []);
 
   const walletName = selectedWallet?.displayName || selectedWallet?.name || "Wallet";
