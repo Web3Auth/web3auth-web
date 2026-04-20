@@ -1194,7 +1194,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         await this.bindEthereumSigningProxy(ethereumProvider, data.connectorName);
       }
 
-      this.setState({ connectedConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE });
+      await this.setState({ connectedConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connectorName);
 
       this.assignCurrentConnection({
@@ -1371,7 +1371,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (chainId === this.currentChainId) return;
     const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
     if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
-    this.setState({ currentChainId: chainId });
+    await this.setState({ currentChainId: chainId });
   }
 
   private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {
