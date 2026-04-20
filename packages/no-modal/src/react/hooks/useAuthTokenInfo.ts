@@ -11,7 +11,7 @@ export interface IUseAuthTokenInfo {
 }
 
 export const useAuthTokenInfo = () => {
-  const { web3Auth, isConnected, isAuthorized } = useWeb3AuthInner();
+  const { web3Auth, isAuthorized } = useWeb3AuthInner();
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
@@ -41,7 +41,7 @@ export const useAuthTokenInfo = () => {
     if (isAuthorized && !token) {
       setToken(web3Auth.idToken);
     }
-  }, [isConnected, isAuthorized, token]);
+  }, [isAuthorized, token, web3Auth]);
 
   return { loading, error, token, getAuthTokenInfo };
 };

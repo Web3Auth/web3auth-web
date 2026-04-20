@@ -1,203 +1,22 @@
-import {
-  ANALYTICS_INTEGRATION_TYPE,
-  type ChainNamespaceType,
-  type CONNECTED_EVENT_DATA,
-  type Connection,
-  CONNECTOR_EVENTS,
-  CONNECTOR_STATUS,
-  type CONNECTOR_STATUS_TYPE,
-  WalletInitializationError,
-} from "@web3auth/no-modal";
-import { createContext, createElement, PropsWithChildren, useCallback, useEffect, useMemo, useState } from "react";
+import { useWeb3AuthInnerContextValue, Web3AuthInnerContext as Web3AuthInnerContextNoModal } from "@web3auth/no-modal/react";
+import { createElement, PropsWithChildren } from "react";
 
 import { Web3Auth } from "../../modalManager";
-import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
+import { Web3AuthProviderProps } from "../interfaces";
 
-export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
+export { Web3AuthInnerContextNoModal as Web3AuthInnerContext };
 
 export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProviderProps>) {
   const { children, config, initialState } = params;
   const { web3AuthOptions } = config;
+  const value = useWeb3AuthInnerContextValue({
+    Web3AuthConstructor: Web3Auth,
+    web3AuthOptions,
+    initialState,
+    notReadyUsesCurrentStatus: true,
+    cleanupOnUnmount: true,
+    initEffectDependency: config,
+  });
 
-  const [chainId, setChainId] = useState<string | null>(null);
-  const [chainNamespace, setChainNamespace] = useState<ChainNamespaceType | null>(null);
-  const [isInitializing, setIsInitializing] = useState<boolean>(false);
-  const [initError, setInitError] = useState<Error | null>(null);
-  const [connection, setConnection] = useState<Connection | null>(null);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
-  const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
-
-  const web3Auth = useMemo(() => {
-    setConnection(null);
-
-    return new Web3Auth(web3AuthOptions, initialState);
-  }, [web3AuthOptions, initialState]);
-
-  const [isConnected, setIsConnected] = useState<boolean>(web3Auth.status === CONNECTOR_STATUS.CONNECTED);
-  const [isAuthorized, setIsAuthorized] = useState<boolean>(web3Auth.status === CONNECTOR_STATUS.AUTHORIZED);
-  const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(web3Auth.status);
-
-  const getPlugin = useCallback(
-    (name: string) => {
-      if (!web3Auth) throw WalletInitializationError.notReady();
-      return web3Auth.getPlugin(name);
-    },
-    [web3Auth]
-  );
-
-  useEffect(() => {
-    const controller = new AbortController();
-    async function init() {
-      try {
-        setInitError(null);
-        setIsInitializing(true);
-        web3Auth.setAnalyticsProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.REACT_HOOKS });
-        await web3Auth.init({ signal: controller.signal });
-        setChainId(web3Auth.currentChainId);
-        setChainNamespace(web3Auth.currentChain?.chainNamespace);
-      } catch (error) {
-        setInitError(error as Error);
-      } finally {
-        setIsInitializing(false);
-      }
-    }
-
-    if (web3Auth) init();
-
-    return () => {
-      controller.abort();
-    };
-  }, [web3Auth, config]);
-
-  useEffect(() => {
-    const handleChainChange = async (chainId: string) => {
-      setChainId(chainId);
-      setChainNamespace(web3Auth?.currentChain?.chainNamespace);
-    };
-
-    const provider = connection?.ethereumProvider ?? null;
-    if (provider) {
-      provider.on("chainChanged", handleChainChange);
-      return () => {
-        provider.removeListener("chainChanged", handleChainChange);
-      };
-    }
-  }, [web3Auth, connection]);
-
-  useEffect(() => {
-    const notReadyListener = () => setStatus(web3Auth.status);
-    const readyListener = () => {
-      setStatus(web3Auth.status);
-      setIsInitialized(true);
-    };
-    const connectedListener = (_data: CONNECTED_EVENT_DATA) => {
-      setStatus(web3Auth.status);
-      // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
-      if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
-        setIsInitialized(true);
-        setIsConnected(true);
-        setConnection(web3Auth.connection);
-      }
-    };
-    const authorizedListener = (_data: { connector: string }) => {
-      setStatus(web3Auth.status);
-      if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
-        setIsConnected(true);
-        setIsAuthorized(true);
-      }
-    };
-    const disconnectedListener = () => {
-      setStatus(web3Auth.status);
-      setIsConnected(false);
-      setIsAuthorized(false);
-      setConnection(null);
-    };
-    const connectingListener = () => {
-      setStatus(web3Auth.status);
-    };
-    const errorListener = () => {
-      setStatus(web3Auth.status);
-    };
-
-    const rehydrationErrorListener = () => {
-      setStatus(web3Auth.status);
-      setIsConnected(false);
-      setIsAuthorized(false);
-      setConnection(null);
-    };
-
-    const mfaEnabledListener = (isMFAEnabled: boolean) => {
-      if (typeof isMFAEnabled === "boolean") setIsMFAEnabled(isMFAEnabled);
-    };
-
-    const signingConnectionUpdatedListener = () => {
-      setConnection(web3Auth.connection);
-    };
-
-    if (web3Auth) {
-      // web3Auth is initialized here.
-      setStatus(web3Auth.status);
-      web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
-      web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
-      web3Auth.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
-      web3Auth.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
-      web3Auth.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
-      web3Auth.on(CONNECTOR_EVENTS.CONNECTING, connectingListener);
-      web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
-      web3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
-      web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
-      web3Auth.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, signingConnectionUpdatedListener);
-    }
-
-    return () => {
-      if (web3Auth) {
-        web3Auth.removeListener(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTED, connectedListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.DISCONNECTED, disconnectedListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTING, connectingListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.ERRORED, errorListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
-        web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTION_UPDATED, signingConnectionUpdatedListener);
-
-        web3Auth.cleanup();
-      }
-    };
-  }, [web3Auth]);
-
-  const value = useMemo(() => {
-    return {
-      web3Auth,
-      isConnected,
-      isAuthorized,
-      isInitialized,
-      connection,
-      status,
-      isInitializing,
-      initError,
-      isMFAEnabled,
-      chainId,
-      chainNamespace,
-      getPlugin,
-      setIsMFAEnabled,
-    };
-  }, [
-    web3Auth,
-    isConnected,
-    isAuthorized,
-    isMFAEnabled,
-    setIsMFAEnabled,
-    isInitialized,
-    connection,
-    status,
-    getPlugin,
-    isInitializing,
-    initError,
-    chainId,
-    chainNamespace,
-  ]);
-
-  return createElement(Web3AuthInnerContext.Provider, { value }, children);
+  return createElement(Web3AuthInnerContextNoModal.Provider, { value }, children);
 }

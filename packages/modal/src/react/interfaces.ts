@@ -1,4 +1,5 @@
-import type { IBaseWeb3AuthHookContext, IWeb3AuthState, WalletServicesPluginType } from "@web3auth/no-modal";
+import type { IWeb3AuthState, WalletServicesPluginType } from "@web3auth/no-modal";
+import type { IWeb3AuthInnerContext as INoModalWeb3AuthInnerContext } from "@web3auth/no-modal/react";
 
 import type { Web3Auth, Web3AuthOptions } from "../modalManager";
 
@@ -11,7 +12,7 @@ export interface Web3AuthProviderProps {
   initialState?: IWeb3AuthState;
 }
 
-export interface IWeb3AuthInnerContext extends IBaseWeb3AuthHookContext {
+export interface IWeb3AuthInnerContext extends Omit<INoModalWeb3AuthInnerContext, "web3Auth"> {
   web3Auth: Web3Auth | null;
 }
 export interface IWalletServicesContext {

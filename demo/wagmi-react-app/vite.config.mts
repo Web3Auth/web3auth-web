@@ -11,7 +11,12 @@ export default defineConfig({
     port: 3000,
   },
   resolve: {
+    dedupe: ["react", "react-dom"],
     alias: {
+      react: resolve("./node_modules/react"),
+      "react-dom": resolve("./node_modules/react-dom"),
+      "react/jsx-runtime": resolve("./node_modules/react/jsx-runtime"),
+      "react/jsx-dev-runtime": resolve("./node_modules/react/jsx-dev-runtime"),
       wagmi: resolve("./node_modules/wagmi"),
       global: "globalThis",
     },
