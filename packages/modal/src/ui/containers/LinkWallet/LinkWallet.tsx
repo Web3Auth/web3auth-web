@@ -72,11 +72,6 @@ function LinkWallet(props: LinkWalletProps) {
         walletId={walletId}
         imgExtension={imgExtension}
         stepError={stepError}
-        onSimulateSuccess={() => {
-          setStepError(false);
-          setStep("sign_verify");
-        }}
-        onSimulateError={() => setStepError(true)}
         onRetry={() => setStepError(false)}
       />
     );
@@ -89,11 +84,6 @@ function LinkWallet(props: LinkWalletProps) {
         walletId={walletId}
         imgExtension={imgExtension}
         stepError={stepError}
-        onSimulateSuccess={() => {
-          setStepError(false);
-          setStep("success");
-        }}
-        onSimulateError={() => setStepError(true)}
         onRetry={() => setStepError(false)}
       />
     );

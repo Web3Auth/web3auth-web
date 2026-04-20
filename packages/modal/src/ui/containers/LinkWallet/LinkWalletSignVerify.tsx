@@ -6,13 +6,11 @@ export interface LinkWalletSignVerifyProps {
   walletId: string;
   imgExtension?: string;
   stepError: boolean;
-  onSimulateSuccess: () => void;
-  onSimulateError: () => void;
   onRetry: () => void;
 }
 
 function LinkWalletSignVerify(props: LinkWalletSignVerifyProps) {
-  const { walletName, walletId, imgExtension, stepError, onSimulateSuccess, onSimulateError, onRetry } = props;
+  const { walletName, walletId, imgExtension, stepError, onRetry } = props;
 
   return (
     <div className="w3a--flex w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--px-6 w3a--py-8 w3a--text-center">
@@ -52,23 +50,6 @@ function LinkWalletSignVerify(props: LinkWalletSignVerifyProps) {
           <p className="w3a--text-sm w3a--text-app-gray-400">Please sign the verification request in {walletName} to link your wallet.</p>
         </>
       )}
-      {/* TODO: remove -- temporary test buttons */}
-      <div className="w3a--mt-4 w3a--flex w3a--w-full w3a--gap-x-2">
-        <button
-          type="button"
-          onClick={onSimulateSuccess}
-          className="w3a--flex-1 w3a--rounded-xl w3a--bg-app-gray-50 w3a--p-2 w3a--text-xs w3a--text-app-gray-400 dark:w3a--bg-app-gray-700 dark:w3a--text-app-gray-300"
-        >
-          Simulate success
-        </button>
-        <button
-          type="button"
-          onClick={onSimulateError}
-          className="w3a--flex-1 w3a--rounded-xl w3a--bg-app-gray-50 w3a--p-2 w3a--text-xs w3a--text-app-gray-400 dark:w3a--bg-app-gray-700 dark:w3a--text-app-gray-300"
-        >
-          Simulate error
-        </button>
-      </div>
     </div>
   );
 }
