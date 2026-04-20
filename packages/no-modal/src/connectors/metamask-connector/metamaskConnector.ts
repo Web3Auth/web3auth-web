@@ -301,7 +301,9 @@ class MetaMaskConnector extends BaseConnector<void> {
         });
 
         // Connect using the multichain client
-        await this.multichainClient.connect(scopes, []);
+        await this.multichainClient.connect(scopes, [], {
+          solana_accountChanged_notifications: true,
+        });
 
         await ecosystemClientConnectedPromise;
       }
