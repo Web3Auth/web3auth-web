@@ -949,7 +949,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.commonJRPCProvider.updateProviderEngineProxy(finalProvider);
       }
 
-      this.setState({ connectedConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE });
+      await this.setState({ connectedConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE });
       this.cacheWallet(data.connectorName);
 
       const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
@@ -1100,7 +1100,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw WalletLoginError.connectionError("Cannot accept consent: not in consent_requiring state");
     }
 
-    this.setState({ hasUserConsent: true });
+    await this.setState({ hasUserConsent: true });
 
     const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
     if (isConnectAndSign && this.state.idToken) {
@@ -1129,7 +1129,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (chainId === this.currentChainId) return;
     const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
     if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
-    this.setState({ currentChainId: chainId });
+    await this.setState({ currentChainId: chainId });
   }
 
   private connectToPlugins(data: { connector: WALLET_CONNECTOR_TYPE }) {
