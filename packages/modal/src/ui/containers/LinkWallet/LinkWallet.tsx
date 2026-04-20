@@ -1,5 +1,5 @@
 import { type BaseConnectorConfig, log } from "@web3auth/no-modal";
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 
 import { useWidget } from "../../context/WidgetContext";
 import { useWalletFiltering } from "../../hooks/useWalletFiltering";
@@ -43,6 +43,11 @@ function LinkWallet(props: LinkWalletProps) {
     externalWalletsConfig: props.externalWalletsConfig,
     walletRegistry,
   });
+
+  const linkWalletButtons = useMemo(
+    () => (isShowAllWallets ? externalButtons : externalButtons.filter((b) => b.name !== "wallet-connect")),
+    [externalButtons, isShowAllWallets]
+  );
 
   const [step, setStep] = useState<LinkWalletStep>("wallet_list");
   const [stepError, setStepError] = useState(false);
@@ -107,7 +112,7 @@ function LinkWallet(props: LinkWalletProps) {
           handleWalletSearch={handleWalletSearch}
         />
         <ConnectWalletList
-          externalButtons={externalButtons}
+          externalButtons={linkWalletButtons}
           isLoading={false}
           totalExternalWalletsCount={totalExternalWalletsCount}
           initialWalletCount={initialWalletCount}
