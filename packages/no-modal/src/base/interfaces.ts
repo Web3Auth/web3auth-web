@@ -1,5 +1,5 @@
 import { type BUTTON_POSITION_TYPE } from "@toruslabs/base-controllers";
-import { type SmartAccountType } from "@toruslabs/ethereum-controllers";
+import type { SmartAccountEipStandardType, SmartAccountType } from "@toruslabs/ethereum-controllers";
 import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
@@ -16,6 +16,8 @@ export interface IWeb3AuthState {
   connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChainId: string;
   idToken: string | null;
+  accessToken: string | null;
+  refreshToken: string | null;
 }
 
 export type ChainsConfig = CustomChainConfig[];
@@ -29,6 +31,7 @@ export interface ExternalWalletsConfig {
 export type SmartAccountWalletScope = (typeof SMART_ACCOUNT_WALLET_SCOPE)[keyof typeof SMART_ACCOUNT_WALLET_SCOPE];
 
 export interface SmartAccountsConfig {
+  eipStandard: SmartAccountEipStandardType | undefined;
   smartAccountType: SmartAccountType;
   walletScope: SmartAccountWalletScope;
   chains: {

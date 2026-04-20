@@ -7,6 +7,7 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   CONNECTED_EVENT_DATA,
+  Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
   CONNECTOR_EVENTS,
@@ -17,7 +18,6 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
-  IdentityTokenInfo,
   IProvider,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
@@ -82,9 +82,9 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     try {
       if (options.autoConnect) {
         this.rehydrated = true;
-        const provider = await this.connect({ chainId: options.chainId, getIdentityToken: options.getIdentityToken });
+        const connection = await this.connect({ chainId: options.chainId, getAuthTokenInfo: options.getAuthTokenInfo });
         // the connect function could fail silently as well.
-        if (!provider) {
+        if (!connection) {
           this.rehydrated = false;
           throw WalletLoginError.connectionError("Failed to rehydrate.");
         }
@@ -94,7 +94,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     }
   }
 
-  async connect({ chainId, getIdentityToken }: BaseConnectorLoginParams): Promise<IProvider | null> {
+  async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
     if (!this.coinbaseProvider) throw WalletLoginError.notConnectedError("Connector is not initialized");
     this.status = CONNECTOR_STATUS.CONNECTING;
@@ -115,20 +115,18 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
         this.disconnect();
       });
 
-      let identityTokenInfo: IdentityTokenInfo | undefined;
-
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connector: WALLET_CONNECTORS.COINBASE,
+        connectorName: WALLET_CONNECTORS.COINBASE,
         reconnected: this.rehydrated,
-        provider: this.provider,
-        identityTokenInfo,
+        ethereumProvider: this.provider,
+        solanaWallet: null,
       } as CONNECTED_EVENT_DATA);
 
-      if (getIdentityToken) {
-        identityTokenInfo = await this.getIdentityToken();
+      if (getAuthTokenInfo) {
+        await this.getAuthTokenInfo();
       }
 
-      return this.provider;
+      return { ethereumProvider: this.provider, solanaWallet: null, connectorName: this.name };
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

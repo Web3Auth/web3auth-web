@@ -10,7 +10,6 @@ import {
   ChainNamespaceType,
   EVM_PLUGINS,
   IPlugin,
-  IProvider,
   IWeb3AuthCore,
   log,
   PLUGIN_EVENTS,
@@ -18,7 +17,6 @@ import {
   PLUGIN_STATUS,
   PLUGIN_STATUS_TYPE,
   PluginFn,
-  SafeEventEmitterProvider,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletServicesPluginError,
@@ -38,30 +36,20 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public wsEmbedInstance: WsEmbed;
 
-  private provider: IProvider | null = null;
-
   private web3auth: IWeb3AuthCore | null = null;
 
   private isInitialized = false;
 
   private analytics?: Analytics;
 
-  get proxyProvider(): SafeEventEmitterProvider | null {
-    return this.wsEmbedInstance?.provider ? (this.wsEmbedInstance.provider as unknown as SafeEventEmitterProvider) : null;
-  }
-
   async initWithWeb3Auth(web3auth: IWeb3AuthCore, _whiteLabel?: WhiteLabelData, analytics?: Analytics): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
-    if (web3auth.provider && !this.SUPPORTED_CONNECTORS.includes(web3auth.connectedConnectorName)) throw WalletServicesPluginError.notInitialized();
+    if (web3auth.connection && !this.SUPPORTED_CONNECTORS.includes(web3auth.connectedConnectorName)) throw WalletServicesPluginError.notInitialized();
     const currentChainConfig = web3auth.currentChain;
     if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(currentChainConfig?.chainNamespace))
       throw WalletServicesPluginError.unsupportedChainNamespace();
 
-    // Not connected yet to auth
-    if (web3auth.provider) {
-      this.provider = web3auth.provider;
-    }
     this.web3auth = web3auth;
     this.analytics = analytics;
 
@@ -75,25 +63,15 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     this.emit(PLUGIN_EVENTS.READY);
   }
 
-  initWithProvider(): Promise<void> {
-    throw new Error("Method not implemented.");
-  }
-
   async connect(): Promise<void> {
     // if web3auth is being used and connected to unsupported connector throw error
     if (!this.isInitialized) throw WalletServicesPluginError.notInitialized();
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
 
-    if (!this.provider) {
-      if (this.web3auth?.provider) {
-        this.provider = this.web3auth.provider;
-      }
-    }
-
     if (!CAN_AUTHORIZE_STATUSES.includes(this.web3auth.status)) {
       throw WalletServicesPluginError.web3AuthNotConnected();
-    } else if (!this.web3auth.provider) {
+    } else if (!this.web3auth.connection) {
       throw WalletServicesPluginError.providerRequired();
     }
 

@@ -1,6 +1,6 @@
 import { Ref, ref, watch } from "vue";
 
-import { IProvider, log, LoginParamMap, WALLET_CONNECTOR_TYPE, WalletInitializationError, Web3AuthError } from "../../base";
+import { Connection, log, LoginParamMap, WALLET_CONNECTOR_TYPE, WalletInitializationError, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseWeb3AuthConnect {
@@ -8,7 +8,7 @@ export interface IUseWeb3AuthConnect {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
   connectorName: Ref<WALLET_CONNECTOR_TYPE | null>;
-  connect: <T extends WALLET_CONNECTOR_TYPE>(connectorType: T, loginParams?: LoginParamMap[T]) => Promise<IProvider | null>;
+  connect: <T extends WALLET_CONNECTOR_TYPE>(connectorType: T, loginParams?: LoginParamMap[T]) => Promise<Connection | null>;
 }
 
 export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {

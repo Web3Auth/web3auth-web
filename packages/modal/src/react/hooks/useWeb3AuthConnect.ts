@@ -1,5 +1,6 @@
-import type { IProvider, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@web3auth/no-modal";
-import { useCallback, useEffect, useState } from "react";
+import type { Connection, LoginParamMap, WALLET_CONNECTOR_TYPE, Web3AuthError } from "@web3auth/no-modal";
+import { useWeb3AuthConnect as useSharedWeb3AuthConnect } from "@web3auth/no-modal/react";
+import { useCallback, useState } from "react";
 
 import { useWeb3AuthInner } from "../hooks/useWeb3AuthInner";
 
@@ -8,67 +9,47 @@ export interface IUseWeb3AuthConnect {
   loading: boolean;
   error: Web3AuthError | null;
   connectorName: WALLET_CONNECTOR_TYPE | null;
-  connect(): Promise<IProvider | null>;
-  connectTo<T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]): Promise<IProvider | null>;
+  connect(): Promise<Connection | null>;
+  connectTo<T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]): Promise<Connection | null>;
 }
 
 export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
-  const { web3Auth, isConnected } = useWeb3AuthInner();
+  const { web3Auth } = useWeb3AuthInner();
+  const { isConnected, loading: sharedLoading, error: sharedError, connectorName, connect: sharedConnectTo } = useSharedWeb3AuthConnect();
 
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Web3AuthError | null>(null);
-  const [connectorName, setConnectorName] = useState<WALLET_CONNECTOR_TYPE | null>(null);
-
-  useEffect(() => {
-    if (!web3Auth) return;
-    if (!isConnected && connectorName) {
-      setConnectorName(null);
-    }
-    if (isConnected && !connectorName) {
-      setConnectorName(web3Auth.connectedConnectorName);
-    }
-  }, [isConnected, connectorName, web3Auth]);
+  const [connectLoading, setConnectLoading] = useState(false);
+  const [connectError, setConnectError] = useState<Web3AuthError | null>(null);
+  const [activeFlow, setActiveFlow] = useState<"connect" | "connectTo" | null>(null);
 
   const connect = useCallback(async () => {
-    setLoading(true);
-    setError(null);
+    setActiveFlow("connect");
+    setConnectLoading(true);
+    setConnectError(null);
+    let connection: Connection | null = null;
     try {
-      const provider = await web3Auth.connect();
-      if (provider) {
-        setConnectorName(web3Auth.connectedConnectorName);
-      }
-      return provider;
+      connection = await web3Auth.connect();
     } catch (error) {
-      setError(error as Web3AuthError);
+      setConnectError(error as Web3AuthError);
     } finally {
-      setLoading(false);
+      setConnectLoading(false);
     }
+    return connection;
   }, [web3Auth]);
 
   const connectTo = useCallback(
     async <T extends WALLET_CONNECTOR_TYPE>(connector: T, params?: LoginParamMap[T]) => {
-      setLoading(true);
-      setError(null);
-      try {
-        const provider = await web3Auth.connectTo(connector, params);
-        if (provider) {
-          setConnectorName(web3Auth.connectedConnectorName);
-        }
-        return provider;
-      } catch (error) {
-        setError(error as Web3AuthError);
-      } finally {
-        setLoading(false);
-      }
+      setActiveFlow("connectTo");
+      setConnectError(null);
+      return sharedConnectTo(connector, params);
     },
-    [web3Auth]
+    [sharedConnectTo]
   );
 
   return {
     isConnected,
-    loading,
-    error,
-    connectorName,
+    loading: connectLoading || sharedLoading,
+    error: activeFlow === "connect" ? connectError : sharedError,
+    connectorName: connectorName,
     connect,
     connectTo,
   };

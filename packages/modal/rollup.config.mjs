@@ -1,4 +1,3 @@
-/* eslint-disable import/no-extraneous-dependencies */
 import json from "@rollup/plugin-json";
 import replace from "@rollup/plugin-replace";
 import url from "@rollup/plugin-url";
@@ -16,6 +15,9 @@ const allDeps = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peer
 export const baseConfig = {
   input: [
     "./src/index.ts",
+    "./src/x402/index.ts",
+    "./src/x402/react.ts",
+    "./src/x402/vue.ts",
     "./src/react/index.ts",
     "./src/vue/index.ts",
     "./src/react/wagmi/index.ts",

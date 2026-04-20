@@ -1,4 +1,5 @@
-import type { ChainNamespaceType, CONNECTOR_STATUS_TYPE, IPlugin, IProvider, WalletServicesPluginType } from "@web3auth/no-modal";
+import type { WalletServicesPluginType } from "@web3auth/no-modal";
+import type { IWeb3AuthInnerContext as INoModalWeb3AuthInnerContext } from "@web3auth/no-modal/vue";
 import { Ref, ShallowRef } from "vue";
 
 import type { Web3Auth, Web3AuthOptions } from "../modalManager";
@@ -11,22 +12,7 @@ export interface Web3AuthProviderProps {
   config: Web3AuthContextConfig;
 }
 
-interface IBaseWeb3AuthComposableContext {
-  isConnected: Ref<boolean>;
-  isAuthorized: Ref<boolean>;
-  provider: Ref<IProvider | null>;
-  isInitializing: Ref<boolean>;
-  initError: Ref<Error | null>;
-  isInitialized: Ref<boolean>;
-  status: Ref<CONNECTOR_STATUS_TYPE | null>;
-  isMFAEnabled: Ref<boolean>;
-  chainId: Ref<string | null>;
-  chainNamespace: Ref<ChainNamespaceType | null>;
-  getPlugin: (pluginName: string) => IPlugin | null;
-  setIsMFAEnabled: (isMfaEnabled: boolean) => void;
-}
-
-export interface IWeb3AuthInnerContext extends IBaseWeb3AuthComposableContext {
+export interface IWeb3AuthInnerContext extends Omit<INoModalWeb3AuthInnerContext, "web3Auth"> {
   web3Auth: ShallowRef<Web3Auth | null>;
 }
 

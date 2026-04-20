@@ -3,7 +3,7 @@ import {
   useChain,
   useCheckout,
   useEnableMFA,
-  useIdentityToken,
+  useAuthTokenInfo,
   useManageMFA,
   useSwitchChain as useWeb3AuthSwitchChain,
   useWalletConnectScanner,
@@ -17,12 +17,12 @@ import { useSolanaWallet } from "@web3auth/modal/react/solana";
 import { useMemo, useState } from "react";
 import { parseEther } from "viem";
 import {
+  useAccount,
   useBalance,
   useCallsStatus,
   useCapabilities,
   useChainId,
   useChains,
-  useConnection,
   useSendCalls,
   useShowCallsStatus,
   useSignMessage,
@@ -31,25 +31,26 @@ import {
 } from "wagmi";
 
 import styles from "../styles/Home.module.css";
+import X402 from "./X402";
 
 const Main = () => {
-  const { provider, isConnected, web3Auth, status } = useWeb3Auth();
+  const { isConnected, web3Auth, status } = useWeb3Auth();
   const { accounts: solanaAccounts } = useSolanaWallet();
   const { chainNamespace: currentChainNamespace, chainId: currentChainId } = useChain();
   const { loading: connecting, connect, error: connectingError, connectorName, connectTo } = useWeb3AuthConnect();
   const { disconnect } = useWeb3AuthDisconnect();
-  const { mutateAsync: signMessageAsync, data: signedMessageData } = useSignMessage();
-  const { address, isConnected: isWagmiConnected } = useConnection();
+  const { signMessageAsync, data: signedMessageData } = useSignMessage();
+  const { address, isConnected: isWagmiConnected } = useAccount();
   const { userInfo, isMFAEnabled } = useWeb3AuthUser();
   const { data: balance } = useBalance({ address });
-  const { mutate: signTypedData, data: signedTypedDataData } = useSignTypedData();
+  const { signTypedDataAsync, data: signedTypedDataData } = useSignTypedData();
   const { enableMFA, loading: isEnableMFALoading, error: enableMFAError } = useEnableMFA();
   const { manageMFA, loading: isManageMFALoading, error: manageMFAError } = useManageMFA();
   const { showCheckout, loading: isCheckoutLoading, error: checkoutError } = useCheckout();
   const { showWalletConnectScanner, loading: isWalletConnectScannerLoading, error: walletConnectScannerError } = useWalletConnectScanner();
   const { showWalletUI, loading: isWalletUILoading, error: walletUIError } = useWalletUI();
-  const { token, loading: isUserTokenLoading, error: userTokenError, getIdentityToken } = useIdentityToken();
-  const { mutateAsync: switchChainAsync } = useSwitchChain();
+  const { token, loading: isUserTokenLoading, error: userTokenError, getAuthTokenInfo } = useAuthTokenInfo();
+  const { switchChainAsync } = useSwitchChain();
   const chains = useChains();
   const { switchChain: switchWeb3AuthChain } = useWeb3AuthSwitchChain();
 
@@ -116,7 +117,7 @@ const Main = () => {
               {isUserTokenLoading ? (
                 <p>Authenticating...</p>
               ) : (
-                <button onClick={() => getIdentityToken()} className={styles.card}>
+                <button onClick={() => getAuthTokenInfo()} className={styles.card}>
                   Authenticate User
                 </button>
               )}
@@ -204,7 +205,7 @@ const Main = () => {
           {/* Sign Typed Data */}
           <button
             onClick={() =>
-              signTypedData({
+              signTypedDataAsync({
                 types: {
                   Person: [
                     { name: "name", type: "string" },
@@ -334,6 +335,9 @@ const Main = () => {
           ))}
         </div>
 
+        {/* X402 Payment Protocol */}
+        <X402 />
+
         {/* Disconnect */}
         <div style={{ marginTop: "16px", marginBottom: "16px" }}>
           <p>Logout</p>
@@ -354,8 +358,8 @@ const Main = () => {
           <button onClick={() => connect()} className={styles.card}>
             Login with Modal
           </button>
-          <button onClick={() => connectTo("auth", { authConnection: "facebook" })} className={styles.card}>
-            Login with Facebook
+          <button onClick={() => connectTo("auth", { authConnection: "github" })} className={styles.card}>
+            Login with Github
           </button>
         </>
       )}
@@ -367,7 +371,7 @@ const Main = () => {
     <div className={styles.grid}>
       <p>Web3Auth: {isConnected ? "Connected" : "Disconnected"}</p>
       <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p>
-      {provider || isWagmiConnected ? loggedInView : unloggedInView}
+      {isConnected || isWagmiConnected ? loggedInView : unloggedInView}
     </div>
   );
 };

@@ -1,0 +1,60 @@
+import { useCallback } from "react";
+import type { Address } from "viem";
+
+import { CHAIN_NAMESPACES } from "../base/chain/IChainInterface";
+import { useChain } from "../react/hooks/useChain";
+import { useWeb3Auth } from "../react/hooks/useWeb3Auth";
+import { createEvmX402Fetch, createProviderBackedEvmSigner, createSolanaX402Fetch, getEvmAddress } from "./index";
+import type { IUseX402FetchParams, IUseX402FetchReturnValues } from "./interfaces";
+
+export { createEvmX402Fetch, createProviderBackedEvmSigner, createSolanaX402Fetch, getEvmAddress };
+export type { IUseX402FetchParams, IUseX402FetchReturnValues };
+
+/**
+ * Web3Auth-integrated x402 fetch hook.
+ *
+ * Automatically selects the correct payment path based on the currently connected
+ * chain namespace:
+ *  - **Solana** - uses `createSolanaX402Fetch` backed by the web3auth Solana wallet.
+ *  - **EVM** - uses `createEvmX402Fetch` backed by the web3auth EIP-1193 provider.
+ *
+ * Callers do not need to pass a signer manually; it is sourced internally.
+ * When `address` is provided, it takes precedence over the provider's active account.
+ */
+export const useX402Fetch = (address?: Address): IUseX402FetchReturnValues => {
+  const { chainNamespace } = useChain();
+  const { web3Auth, isConnected, connection } = useWeb3Auth();
+  // const { solanaWallet, accounts } = useSolanaWallet();
+
+  const fetchWithPayment = useCallback(
+    async ({ url, options }: IUseX402FetchParams): Promise<Response> => {
+      if (!isConnected) throw new Error("Wallet not connected");
+
+      if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+        const { solanaWallet } = connection;
+        if (!solanaWallet || !solanaWallet.accounts?.[0]) throw new Error("Solana wallet not available");
+
+        const account = solanaWallet.accounts[0];
+        if (!account) throw new Error("Solana account not available");
+
+        return createSolanaX402Fetch(solanaWallet, account.address)(url, options);
+      }
+
+      if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+        const provider = connection?.ethereumProvider;
+        if (!provider) throw new Error("EVM provider not available");
+
+        const evmAddress = address ?? (await getEvmAddress(provider));
+        if (!evmAddress) throw new Error("EVM address not available");
+
+        const signer = createProviderBackedEvmSigner(provider, evmAddress);
+        return createEvmX402Fetch(signer)(url, options);
+      }
+
+      throw new Error("Unsupported chain namespace");
+    },
+    [web3Auth, isConnected, chainNamespace, address, connection]
+  );
+
+  return { fetchWithPayment };
+};

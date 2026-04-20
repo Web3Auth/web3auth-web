@@ -5,6 +5,7 @@ import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 import { getChainConfig } from "../utils/chainconfig";
 import {
+  buildEnvOptions,
   chainConfigs,
   chainNamespaceOptions,
   clientIds,
@@ -173,6 +174,15 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
         </Tabs>
         <Card v-if="isActiveTab(0)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
           <Select
+            v-model="formData.authBuildEnv"
+            data-testid="selectBuildEnv"
+            label="Build Environment"
+            aria-label="Build Environment"
+            placeholder="Build Environment"
+            :options="buildEnvOptions"
+            matchParentsWidth
+          />
+          <Select
             v-model="formData.network"
             data-testid="selectNetwork"
             :label="$t('app.network')"
@@ -261,6 +271,21 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :label-disabled="$t('app.externalWalletOnly')"
             :label-enabled="$t('app.externalWalletOnly')"
             class="mb-2"
+          />
+          <Select
+            v-model="formData.tokenStorage"
+            data-testid="selectTokenStorage"
+            label="Token Storage"
+            aria-label="Token Storage"
+            placeholder="Token Storage"
+            :options="[
+              { name: 'Default (AuthSessionManager)', value: 'default' },
+              { name: 'LocalStorage', value: 'local' },
+              { name: 'SessionStorage', value: 'session' },
+              { name: 'Cookies', value: 'cookies' },
+              { name: 'Memory (no persist)', value: 'memory' },
+            ]"
+            matchParentsWidth
           />
         </Card>
         <Card v-if="isActiveTab(1)" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-2" :shadow="false">

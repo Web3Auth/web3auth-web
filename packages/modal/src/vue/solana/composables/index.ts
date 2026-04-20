@@ -1,4 +1,3 @@
-export * from "./useSignAndSendTransaction";
-export * from "./useSignMessage";
-export * from "./useSignTransaction";
-export * from "./useSolanaWallet";
+export * from "./useSolanaClient";
+export type { IUseSignAndSendTransaction, IUseSignMessage, IUseSignTransaction, IUseSolanaWallet } from "@web3auth/no-modal/vue/solana";
+export { useSignAndSendTransaction, useSignMessage, useSignTransaction, useSolanaWallet } from "@web3auth/no-modal/vue/solana";
