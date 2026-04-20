@@ -209,6 +209,7 @@ function RootContent(props: RootProps) {
               externalWalletsConfig={modalState.externalWalletsConfig}
               handleMobileVerifyConnect={handleMobileVerifyConnect}
               hideSuccessScreen={hideSuccessScreen}
+              blockedUserConfig={modalState.blockedUserConfig}
             />
           ) : (
             <>

@@ -75,6 +75,16 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
    */
   hideSuccessScreen?: boolean;
 
+  /**
+   * Configuration for the blocked user screen shown when a user is blocked by the dapp.
+   * All fields are optional and have defaults.
+   */
+  blockedUserConfig?: {
+    primaryMessage?: string;
+    secondaryMessage?: string;
+    button?: { link?: string; title?: string };
+  };
+
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 }
 
@@ -120,6 +130,7 @@ export const MODAL_STATUS = {
   CONNECTED: "connected",
   CONNECTING: "connecting",
   ERRORED: "errored",
+  BLOCKED: "blocked",
   AUTHORIZING: "authorizing",
   AUTHORIZED: "authorized",
 } as const;
@@ -147,6 +158,15 @@ export interface ModalState {
   // Config State - set during initialization, rarely changes
   socialLoginsConfig: SocialLoginsConfig;
   externalWalletsConfig: Record<string, BaseConnectorConfig>;
+
+  // Blocked user state
+  blockedUserConfig?: BlockedUserConfig;
+}
+
+export interface BlockedUserConfig {
+  primaryMessage: string;
+  secondaryMessage: string;
+  button: { link: string; title: string };
 }
 
 export type SocialLoginEventType = { loginParams: ModalLoginParams };

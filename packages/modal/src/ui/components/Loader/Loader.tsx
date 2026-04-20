@@ -6,7 +6,7 @@ import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
 import Image from "../Image";
 import SpinnerLoader from "../SpinnerLoader";
-import { AuthorizingStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
+import { AuthorizingStatusType, BlockedStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
 
 /**
  * ConnectingStatus component
@@ -83,6 +83,32 @@ function ErroredStatus(props: ErroredStatusType) {
   );
 }
 
+function BlockedStatus(props: BlockedStatusType) {
+  const { primaryMessage, secondaryMessage, button } = props;
+  return (
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--error-logo">
+        <path
+          fill="currentColor"
+          fillRule="evenodd"
+          d="M18 10a8 8 0 1 1-16.001 0A8 8 0 0 1 18 10m-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1"
+          clipRule="evenodd"
+        />
+      </svg>
+      <p className="w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{primaryMessage}</p>
+      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{secondaryMessage}</p>
+      <a
+        href={button.link}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="w3a--rounded-xl w3a--bg-app-primary-600 w3a--px-6 w3a--py-3 w3a--text-center w3a--text-sm w3a--font-medium w3a--text-app-white hover:w3a--bg-app-primary-700"
+      >
+        {button.title}
+      </a>
+    </div>
+  );
+}
+
 function AuthorizingStatus(props: AuthorizingStatusType) {
   const [t] = useTranslation(undefined, { i18n });
   const { connector, externalWalletsConfig, handleMobileVerifyConnect } = props;
@@ -128,6 +154,7 @@ function Loader(props: LoaderProps) {
     externalWalletsConfig,
     handleMobileVerifyConnect,
     hideSuccessScreen = false,
+    blockedUserConfig,
   } = props;
 
   const isConnectedAccordingToAuthenticationMode = useMemo(
@@ -157,6 +184,14 @@ function Loader(props: LoaderProps) {
       {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
+
+      {modalStatus === MODAL_STATUS.BLOCKED && blockedUserConfig && (
+        <BlockedStatus
+          primaryMessage={blockedUserConfig.primaryMessage}
+          secondaryMessage={blockedUserConfig.secondaryMessage}
+          button={blockedUserConfig.button}
+        />
+      )}
 
       {modalStatus === MODAL_STATUS.AUTHORIZING && (
         <AuthorizingStatus
