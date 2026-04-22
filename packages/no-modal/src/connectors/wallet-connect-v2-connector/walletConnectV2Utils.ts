@@ -38,7 +38,16 @@ export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: st
 
   if (typeof window !== "undefined" && isMobileDevice()) {
     if (session.peer.metadata.redirect && session.peer.metadata.redirect.native) {
-      window.open(session.peer.metadata.redirect.native, "_blank");
+      const redirectUrl = session.peer.metadata.redirect.native;
+      try {
+        const parsedUrl = new URL(redirectUrl);
+        if (["javascript:", "data:", "vbscript:"].includes(parsedUrl.protocol)) {
+          throw new Error("Invalid redirect scheme");
+        }
+        window.open(parsedUrl.href, "_blank");
+      } catch (e) {
+        console.error("Invalid redirect URL", e);
+      }
     }
   }
 
