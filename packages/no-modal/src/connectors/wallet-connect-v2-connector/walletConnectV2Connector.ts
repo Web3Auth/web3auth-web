@@ -308,7 +308,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         address: accounts[0],
         chainId: parseInt(chainId, 16),
         version: "1",
-        nonce: Math.random().toString(36).slice(2),
+        nonce: crypto.randomUUID().replace(/-/g, ''),
         issuedAt: new Date().toISOString(),
       };
 
