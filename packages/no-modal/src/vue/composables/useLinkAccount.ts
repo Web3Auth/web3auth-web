@@ -26,8 +26,8 @@ export const useLinkAccount = (): IUseLinkAccount => {
   const linkedAccounts = ref<LinkedAccountInfo[]>([]);
 
   const linkAccount = async (params: LinkAccountParams): Promise<LinkAccountResult | void> => {
+    if (!web3Auth.value) throw WalletInitializationError.notReady();
     try {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
       error.value = null;
       loading.value = true;
       const result = await web3Auth.value.linkAccount(params);
@@ -42,8 +42,8 @@ export const useLinkAccount = (): IUseLinkAccount => {
   };
 
   const unlinkAccount = async (address: string): Promise<UnlinkAccountResult | void> => {
+    if (!web3Auth.value) throw WalletInitializationError.notReady();
     try {
-      if (!web3Auth.value) throw WalletInitializationError.notReady();
       error.value = null;
       loading.value = true;
       const result = await web3Auth.value.unlinkAccount(address);

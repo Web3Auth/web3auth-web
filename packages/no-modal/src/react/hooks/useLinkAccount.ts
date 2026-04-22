@@ -1,6 +1,13 @@
 import { useCallback, useState } from "react";
 
-import { type LinkAccountParams, type LinkAccountResult, LinkedAccountInfo, UnlinkAccountResult, Web3AuthError } from "../../base";
+import {
+  type LinkAccountParams,
+  type LinkAccountResult,
+  LinkedAccountInfo,
+  UnlinkAccountResult,
+  WalletInitializationError,
+  Web3AuthError,
+} from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseLinkAccount {
@@ -20,6 +27,7 @@ export const useLinkAccount = (): IUseLinkAccount => {
 
   const linkAccount = useCallback(
     async (params: LinkAccountParams): Promise<LinkAccountResult | void> => {
+      if (!web3Auth) throw WalletInitializationError.notReady();
       setLoading(true);
       setError(null);
       try {
@@ -37,6 +45,7 @@ export const useLinkAccount = (): IUseLinkAccount => {
 
   const unlinkAccount = useCallback(
     async (address: string): Promise<UnlinkAccountResult | void> => {
+      if (!web3Auth) throw WalletInitializationError.notReady();
       setLoading(true);
       setError(null);
       try {

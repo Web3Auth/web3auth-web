@@ -2,15 +2,21 @@ import { SafeEventEmitter } from "@web3auth/auth";
 
 import {
   CHAIN_NAMESPACES,
+  type ChainNamespaceType,
+  type ConnectedAccountInfo,
   CONNECTOR_CATEGORY,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CustomChainConfig,
   type IConnector,
   type IStorageAdapter,
+  type LinkAccountParams,
+  type LinkAccountResult,
   type ProjectConfig,
+  type UnlinkAccountResult,
   WALLET_CONNECTORS,
 } from "../src/base";
+import { type AuthConnectorAccountLinkingHandlers } from "../src/connectors/auth-connector";
 
 export function createChain(overrides: Partial<CustomChainConfig> = {}): CustomChainConfig {
   return {
@@ -78,6 +84,8 @@ export class MockConnector extends SafeEventEmitter implements IConnector<unknow
 
   public provider = null;
 
+  public solanaWallet = null;
+
   public icon = "";
 
   private connectEvents: ConnectorEventMap = {};
@@ -86,6 +94,10 @@ export class MockConnector extends SafeEventEmitter implements IConnector<unknow
     super();
     Object.assign(this, overrides);
     this.connectEvents = connectEvents;
+  }
+
+  get connected() {
+    return this.status === CONNECTOR_STATUS.CONNECTED;
   }
 
   setConnectEvents(events: ConnectorEventMap) {
@@ -132,6 +144,24 @@ export class MockConnector extends SafeEventEmitter implements IConnector<unknow
   async enableMFA() {}
 
   async manageMFA() {}
+
+  setAccountLinkingHandlers(_: AuthConnectorAccountLinkingHandlers) {}
+
+  async generateChallengeAndSign(): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    throw new Error("MockConnector.generateChallengeAndSign is not implemented.");
+  }
+
+  async switchAccount(_: ConnectedAccountInfo): Promise<void> {
+    throw new Error("MockConnector.switchAccount is not implemented.");
+  }
+
+  async linkAccount(_: LinkAccountParams): Promise<LinkAccountResult> {
+    throw new Error("MockConnector.linkAccount is not implemented.");
+  }
+
+  async unlinkAccount(_: string): Promise<UnlinkAccountResult> {
+    throw new Error("MockConnector.unlinkAccount is not implemented.");
+  }
 }
 
 export const MULTICHAIN_CONNECTOR_NAMESPACE = CONNECTOR_NAMESPACES.MULTICHAIN;

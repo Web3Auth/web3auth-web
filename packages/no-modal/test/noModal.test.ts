@@ -1,18 +1,34 @@
-import { describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("../src/base/account-linking", async () => {
+  const actual = await vi.importActual<typeof import("../src/base/account-linking")>("../src/base/account-linking");
+  return {
+    ...actual,
+    makeAccountUnlinkingRequest: vi.fn(),
+  };
+});
+
+if (typeof window === "undefined") {
+  vi.stubGlobal("window", { location: { origin: "http://localhost" } });
+}
 
 import {
+  Analytics,
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
+  type ConnectedAccountInfo,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
-  IConnector,
+  type IConnector,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
 } from "../src/base";
+import { makeAccountUnlinkingRequest } from "../src/base/account-linking";
+import { authConnector, type AuthConnectorType } from "../src/connectors/auth-connector";
 import { Web3AuthNoModal } from "../src/noModal";
 import { createChain, createMockStorage, createProjectConfig, MockConnector, MULTICHAIN_CONNECTOR_NAMESPACE } from "./helpers";
 
@@ -25,14 +41,19 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
     this.initAccountAbstractionConfig(projectConfig);
   }
 
-  public exposeSetConnectors(connectors: MockConnector[]) {
-    this.setConnectors(connectors as unknown as IConnector<unknown>[]);
+  public exposeSetConnectors(connectors: IConnector<unknown>[]) {
+    this.setConnectors(connectors);
   }
 
   public exposeCheckIfAutoConnect(connector: MockConnector) {
     return this.checkIfAutoConnect(connector as unknown as IConnector<unknown>);
   }
 }
+
+afterEach(() => {
+  vi.restoreAllMocks();
+  vi.clearAllMocks();
+});
 
 describe("Web3AuthNoModal", () => {
   it("throws when clientId is missing", () => {
@@ -297,6 +318,229 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.exposeCheckIfAutoConnect(nonMatching)).toBe(false);
     expect(sdk.exposeCheckIfAutoConnect(multichain)).toBe(true);
   });
+
+  it("switchAccount rejects when the connector is connected to a different linked account", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+      }
+    );
+    await Promise.resolve();
+
+    const targetAccount: ConnectedAccountInfo = {
+      id: "wallet-1",
+      accountType: "external_wallet",
+      address: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+      authConnectionId: null,
+      chainNamespace: "evm",
+      isPrimary: false,
+      eoaAddress: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+      connector: WALLET_CONNECTORS.METAMASK,
+      active: false,
+    };
+
+    const authConnector = createAuthConnectorForSdk(sdk);
+    authConnector.status = CONNECTOR_STATUS.CONNECTED;
+    vi.spyOn(authConnector, "getUserInfo").mockResolvedValue({
+      connectedAccounts: [targetAccount],
+    });
+
+    const provider = {
+      request: vi.fn().mockResolvedValue(["0x1234567890abcdef1234567890abcdef12345678"]),
+    };
+    const isolatedConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
+      provider,
+    } as never);
+    isolatedConnector.connect = vi.fn(async () => ({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: provider as never,
+      solanaWallet: null,
+    }));
+
+    vi.spyOn(
+      sdk as unknown as {
+        createIsolatedWalletConnector: (connectorName: string, chainId: string) => Promise<MockConnector>;
+      },
+      "createIsolatedWalletConnector"
+    ).mockResolvedValue(isolatedConnector);
+    sdk.exposeSetConnectors([authConnector]);
+    sdk.status = CONNECTED_STATUSES[0];
+
+    await expect(sdk.switchAccount(targetAccount)).rejects.toThrow(
+      `Connector "${WALLET_CONNECTORS.METAMASK}" is connected to "0x1234567890abcdef1234567890abcdef12345678" instead of linked account "${targetAccount.eoaAddress}".`
+    );
+  });
+
+  it("switchAccount rejects when the target connector is unavailable", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+      }
+    );
+    await Promise.resolve();
+
+    const targetAccount: ConnectedAccountInfo = {
+      id: "wallet-2",
+      accountType: "external_wallet",
+      address: "0x9999999999999999999999999999999999999999",
+      authConnectionId: null,
+      chainNamespace: "evm",
+      isPrimary: false,
+      eoaAddress: "0x9999999999999999999999999999999999999999",
+      connector: WALLET_CONNECTORS.METAMASK,
+      active: false,
+    };
+
+    const authConnector = createAuthConnectorForSdk(sdk);
+    authConnector.status = CONNECTOR_STATUS.CONNECTED;
+    vi.spyOn(authConnector, "getUserInfo").mockResolvedValue({
+      connectedAccounts: [targetAccount],
+    });
+
+    const isolatedConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
+    } as never);
+    isolatedConnector.connect = vi.fn(async () => {
+      throw WalletLoginError.connectionError("Injected provider is not available");
+    });
+
+    vi.spyOn(
+      sdk as unknown as {
+        createIsolatedWalletConnector: (connectorName: string, chainId: string) => Promise<MockConnector>;
+      },
+      "createIsolatedWalletConnector"
+    ).mockResolvedValue(isolatedConnector);
+    sdk.exposeSetConnectors([authConnector]);
+    sdk.status = CONNECTED_STATUSES[0];
+
+    await expect(sdk.switchAccount(targetAccount)).rejects.toThrow(
+      `Connector "${WALLET_CONNECTORS.METAMASK}" is not available for linked account "${targetAccount.eoaAddress}".`
+    );
+  });
+
+  it("unlinkAccount uses the target account namespace instead of the active chain", async () => {
+    const solanaChain = createChain({
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
+      chainId: "solana-mainnet",
+      rpcTarget: "https://api.mainnet-beta.solana.com",
+      displayName: "Solana Mainnet",
+      ticker: "SOL",
+      tickerName: "Solana",
+    });
+    const sdk = createSdk(
+      {
+        chains: [createChain(), solanaChain],
+      },
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: solanaChain.chainId,
+        idToken: "session-id-token",
+        accessToken: "access-token",
+      }
+    );
+    await Promise.resolve();
+
+    const authConnector = createAuthConnectorForSdk(sdk);
+    authConnector.status = CONNECTOR_STATUS.CONNECTED;
+    sdk.exposeSetConnectors([authConnector]);
+    sdk.status = CONNECTED_STATUSES[0];
+
+    vi.spyOn(authConnector, "getUserInfo").mockResolvedValue({
+      connectedAccounts: [
+        {
+          id: "wallet-1",
+          accountType: "external_wallet",
+          address: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+          authConnectionId: null,
+          chainNamespace: "evm",
+          isPrimary: false,
+          eoaAddress: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+          connector: WALLET_CONNECTORS.METAMASK,
+          active: false,
+        },
+      ],
+    });
+    vi.mocked(makeAccountUnlinkingRequest).mockResolvedValue({
+      success: true,
+      idToken: "refreshed-id-token",
+      linkedAccounts: [],
+    });
+
+    await sdk.unlinkAccount("0xAbCdEf0123456789aBCdEf0123456789abCDef01");
+
+    expect(makeAccountUnlinkingRequest).toHaveBeenCalledWith(
+      expect.any(String),
+      "access-token",
+      expect.objectContaining({
+        idToken: "session-id-token",
+        address: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+        network: "ethereum",
+      })
+    );
+  });
+
+  it("unlinkAccount matches solana addresses exactly and derives the solana network", async () => {
+    const sdk = createSdk(
+      {
+        chains: [
+          createChain(),
+          createChain({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: "solana-mainnet", rpcTarget: "https://api.mainnet-beta.solana.com" }),
+        ],
+      },
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        idToken: "session-id-token",
+        accessToken: "access-token",
+      }
+    );
+    await Promise.resolve();
+
+    const authConnector = createAuthConnectorForSdk(sdk);
+    authConnector.status = CONNECTOR_STATUS.CONNECTED;
+    sdk.exposeSetConnectors([authConnector]);
+    sdk.status = CONNECTED_STATUSES[0];
+
+    vi.spyOn(authConnector, "getUserInfo").mockResolvedValue({
+      connectedAccounts: [
+        {
+          id: "wallet-2",
+          accountType: "external_wallet",
+          address: "9xQeWvG816bUx9EPjHmaT23yvVMbJr8nnbtUb7h9V4Z",
+          authConnectionId: null,
+          chainNamespace: "solana",
+          isPrimary: false,
+          eoaAddress: "9xQeWvG816bUx9EPjHmaT23yvVMbJr8nnbtUb7h9V4Z",
+          connector: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+          active: false,
+        },
+      ],
+    });
+    vi.mocked(makeAccountUnlinkingRequest).mockResolvedValue({
+      success: true,
+      idToken: "refreshed-id-token",
+      linkedAccounts: [],
+    });
+
+    await sdk.unlinkAccount("9xQeWvG816bUx9EPjHmaT23yvVMbJr8nnbtUb7h9V4Z");
+
+    expect(makeAccountUnlinkingRequest).toHaveBeenCalledWith(
+      expect.any(String),
+      "access-token",
+      expect.objectContaining({
+        idToken: "session-id-token",
+        address: "9xQeWvG816bUx9EPjHmaT23yvVMbJr8nnbtUb7h9V4Z",
+        network: "solana",
+      })
+    );
+  });
 });
 
 function createSdk(overrides: Record<string, unknown> = {}, initialState?: Record<string, unknown>) {
@@ -311,4 +555,12 @@ function createSdk(overrides: Record<string, unknown> = {}, initialState?: Recor
     } as never,
     initialState as never
   );
+}
+
+function createAuthConnectorForSdk(sdk: Web3AuthNoModal): AuthConnectorType {
+  return authConnector()({
+    projectConfig: createProjectConfig({ chains: sdk.coreOptions.chains }),
+    coreOptions: sdk.coreOptions,
+    analytics: new Analytics(),
+  }) as AuthConnectorType;
 }

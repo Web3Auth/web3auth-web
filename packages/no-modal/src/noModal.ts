@@ -4,7 +4,6 @@ import {
   EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES,
   SMART_ACCOUNT_EIP_STANDARD,
 } from "@toruslabs/ethereum-controllers";
-import { Wallet } from "@wallet-standard/base";
 import {
   cloneDeep,
   CookieStorage,
@@ -30,7 +29,6 @@ import {
   CAN_AUTHORIZE_STATUSES,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
-  citadelServerUrl,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
   ConnectedAccountInfo,
@@ -84,10 +82,10 @@ import {
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
-import { makeAccountLinkingRequest, makeAccountUnlinkingRequest, UnlinkAccountResult } from "./base/account-linking";
+import { UnlinkAccountResult } from "./base/account-linking";
 import { deserialize } from "./base/deserialize";
 import { AccountLinkingError } from "./base/errors";
-import { authConnector, type AuthConnectorType } from "./connectors/auth-connector";
+import { assertAuthConnector, authConnector, type AuthConnectorType, isAuthConnector } from "./connectors/auth-connector";
 import { metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
@@ -100,6 +98,7 @@ type WalletLinkingProof = {
   signatureType: "eip191" | "sip99";
   network: "ethereum" | "solana";
 };
+
 export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   readonly coreOptions: IWeb3AuthCoreOptions;
 
@@ -595,221 +594,27 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async switchAccount(account: ConnectedAccountInfo): Promise<void> {
-    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
-      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before switching accounts.");
-    }
-
-    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH) {
-      throw WalletLoginError.unsupportedOperation("Account switching is only supported when connected with the AUTH connector.");
-    }
-
-    const trackData = {
-      connector: this.connectedConnector.name,
-      account_id: account.id,
-      account_type: account.accountType,
-      switched_to_address: account.eoaAddress ?? null,
-    };
-
-    try {
-      const userInfo = await this.getUserInfo();
-      const connectedAccounts = userInfo.connectedAccounts ?? [];
-      const targetAccount = connectedAccounts.find((a) => a.id === account.id);
-      if (!targetAccount) {
-        throw AccountLinkingError.requestFailed(`No connected wallet matches account id "${account.id}". Refresh user info and try again.`);
-      }
-
-      // if the target account is already the active account, do nothing
-      if (targetAccount.active) {
-        return;
-      }
-
-      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_STARTED, trackData);
-
-      let ethereumProvider: IProvider;
-      let solanaWallet: Wallet;
-      let newConnectorName: WALLET_CONNECTOR_TYPE;
-      let connectorNamespace: ConnectorNamespaceType;
-      let activeAccount: ConnectedAccountInfo | null = null;
-      let activeChainId: string;
-
-      // rebind to the primary connector if the target account is the primary account
-      if (targetAccount.connector === WALLET_CONNECTORS.AUTH && targetAccount.isPrimary) {
-        const primaryConnector = this.connectedConnector as AuthConnectorType;
-        activeChainId = this.getChainIdForConnectedAccount(targetAccount, primaryConnector.provider?.chainId ?? this.state.currentChainId);
-        ethereumProvider = primaryConnector.provider;
-        solanaWallet = primaryConnector.solanaWallet;
-        newConnectorName = primaryConnector.name;
-        connectorNamespace = primaryConnector.connectorNamespace;
-        if (!ethereumProvider && !solanaWallet) {
-          throw AccountLinkingError.requestFailed("Failed to restore the primary AUTH session for account switch.");
-        }
-        activeAccount = null; // primary account is not isolated
-      } else {
-        const targetChainId = this.getChainIdForConnectedAccount(targetAccount, this.state.currentChainId);
-        const walletConnector = await this.createIsolatedWalletConnector(targetAccount.connector, targetChainId);
-        const newConnection = await walletConnector.connect({ chainId: targetChainId });
-        if (!newConnection) {
-          throw AccountLinkingError.requestFailed(`Failed to connect isolated connector "${targetAccount.connector}" for account switch.`);
-        }
-
-        this.auxiliarySigningConnectorMap.set(targetAccount.id, walletConnector);
-
-        newConnectorName = newConnection.connectorName as WALLET_CONNECTOR_TYPE;
-        ethereumProvider = newConnection.ethereumProvider;
-        solanaWallet = newConnection.solanaWallet;
-        connectorNamespace = walletConnector.connectorNamespace;
-        activeAccount = targetAccount;
-        activeChainId = targetChainId;
-      }
-
-      if (ethereumProvider) {
-        await this.bindEthereumSigningProxy(ethereumProvider, newConnectorName);
-      }
-
-      this.assignCurrentConnection({
-        ethereumProvider,
-        solanaWallet,
-        connectorName: newConnectorName,
-        connectorNamespace,
-      });
-
-      await this.setCurrentChain(activeChainId);
-      await this.setState({ activeAccount });
-      this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED);
-
-      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_COMPLETED, {
-        ...trackData,
-        connector: targetAccount.connector,
-        account_type: targetAccount.accountType,
-        switched_to_address: targetAccount.eoaAddress ?? null,
-      });
-    } catch (error) {
-      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_FAILED, {
-        ...trackData,
-        ...getErrorAnalyticsProperties(error),
-      });
-      throw error;
-    }
+    const authConnector = this.getMainAuthConnector({
+      notConnectedMessage: "No wallet is connected. Connect with AUTH before switching accounts.",
+      unsupportedMessage: "Account switching is only supported when connected with the AUTH connector.",
+    });
+    await authConnector.switchAccount(account);
   }
 
   public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
-    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
-      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before linking an account.");
-    }
-
-    // linking is only supported when the primary connector is AUTH
-    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH) {
-      throw WalletLoginError.unsupportedOperation("Account linking is only supported when connected with the AUTH connector.");
-    }
-
-    const trackData = {
-      connector: this.connectedConnector.name,
-      linking_connector: params.connectorName,
-      chain_id: params.chainId || this.currentChainId,
-    };
-
-    try {
-      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
-
-      let accessToken = this.accessToken;
-      let idToken = this.idToken;
-      if (!accessToken || !idToken) {
-        const tokenInfo = await this.connectedConnector.getAuthTokenInfo();
-        accessToken = tokenInfo.accessToken;
-        idToken = tokenInfo.idToken;
-      }
-      if (!accessToken || !idToken) {
-        throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
-      }
-
-      const walletProof = await this.getLinkingWalletProof(params.connectorName, params.chainId);
-
-      const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
-      const result = await makeAccountLinkingRequest(authServerUrl, accessToken, {
-        idToken,
-        network: walletProof.network,
-        connector: params.connectorName,
-        message: walletProof.challenge,
-        signature: {
-          s: walletProof.signature,
-          t: walletProof.signatureType,
-        },
-      });
-      await this.setState({ idToken: result.idToken });
-
-      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_COMPLETED, {
-        ...trackData,
-        linked_address: walletProof.address,
-      });
-
-      return result;
-    } catch (error) {
-      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_FAILED, {
-        ...trackData,
-        ...getErrorAnalyticsProperties(error),
-      });
-      throw error;
-    }
+    const authConnector = this.getMainAuthConnector({
+      notConnectedMessage: "No wallet is connected. Connect with AUTH before linking an account.",
+      unsupportedMessage: "Account linking is only supported when connected with the AUTH connector.",
+    });
+    return authConnector.linkAccount(params);
   }
 
   public async unlinkAccount(address: string): Promise<UnlinkAccountResult> {
-    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
-      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before unlinking an account.");
-    }
-
-    // unlinking is only supported when the primary connector is AUTH
-    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH) {
-      throw WalletLoginError.unsupportedOperation("Account unlinking is only supported when connected with the AUTH connector.");
-    }
-
-    const trackData = {
-      connector: this.connectedConnector.name,
-      address,
-    };
-
-    this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_STARTED, trackData);
-
-    try {
-      let accessToken = this.accessToken;
-      let idToken = this.idToken;
-      if (!accessToken || !idToken) {
-        const tokenInfo = await this.connectedConnector.getAuthTokenInfo();
-        accessToken = tokenInfo.accessToken;
-        idToken = tokenInfo.idToken;
-      }
-      if (!accessToken || !idToken) {
-        throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
-      }
-
-      const chainNamespace = this.currentChain?.chainNamespace;
-      if (!chainNamespace) {
-        throw Error("Could not obtain the chain namespace from the current chain.");
-      }
-
-      const network = chainNamespace === CHAIN_NAMESPACES.EIP155 ? "ethereum" : "solana";
-      const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
-
-      const result = await makeAccountUnlinkingRequest(authServerUrl, accessToken, {
-        idToken,
-        address,
-        network,
-      });
-
-      await this.setState({ idToken: result.idToken });
-
-      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_COMPLETED, {
-        ...trackData,
-        linked_address: address,
-      });
-
-      return result;
-    } catch (error) {
-      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_FAILED, {
-        ...trackData,
-        ...getErrorAnalyticsProperties(error),
-      });
-      throw error;
-    }
+    const authConnector = this.getMainAuthConnector({
+      notConnectedMessage: "No wallet is connected. Connect with AUTH before unlinking an account.",
+      unsupportedMessage: "Account unlinking is only supported when connected with the AUTH connector.",
+    });
+    return authConnector.unlinkAccount(address);
   }
 
   public setAnalyticsProperties(properties: Record<string, unknown>) {
@@ -1142,6 +947,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         const key = getConnectorKey(connector);
         if (connectorSet.has(key)) return null;
         connectorSet.add(key);
+        this.bindAuthConnectorAccountLinkingHandlers(connector);
         return connector;
       })
       .filter((connector) => connector !== null);
@@ -1214,14 +1020,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const { activeAccount } = this.state;
       if (activeAccount && activeAccount.isPrimary) {
         // if primary account is disconnected, disconnect all auxiliary signing connectors
-        this.auxiliarySigningConnectorMap.forEach(async (connector) => {
-          try {
-            await connector.disconnect({ cleanup: true });
-            this.auxiliarySigningConnectorMap.delete(activeAccount.id);
-          } catch (e) {
-            log.debug("Auxiliary signing connector disconnect on primary disconnect", e);
-          }
-        });
+        await Promise.all(
+          Array.from(this.auxiliarySigningConnectorMap.entries()).map(async ([accountId, auxiliaryConnector]) => {
+            try {
+              await auxiliaryConnector.disconnect({ cleanup: true });
+            } catch (error) {
+              log.debug("Auxiliary signing connector disconnect on primary disconnect", error);
+            } finally {
+              this.auxiliarySigningConnectorMap.delete(accountId);
+            }
+          })
+        );
       }
 
       this.currentConnection = null;
@@ -1339,26 +1148,48 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return initialChain;
   }
 
-  private getChainIdForConnectedAccount(
-    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector">,
-    preferredChainId?: string | null
-  ): string {
-    if (preferredChainId) {
-      const preferredChain = this.coreOptions.chains.find((chain) => chain.chainId === preferredChainId);
-      if (preferredChain && (!account.chainNamespace || preferredChain.chainNamespace === account.chainNamespace)) {
-        return preferredChainId;
-      }
+  private getMainAuthConnector(params: { notConnectedMessage: string; unsupportedMessage: string }): AuthConnectorType {
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
+      throw WalletLoginError.notConnectedError(params.notConnectedMessage);
     }
 
-    if (account.chainNamespace) {
-      const parsedChainNamespace = parseChainNamespaceFromCitadelResponse(account.chainNamespace);
-      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === parsedChainNamespace);
-      if (namespaceChain) {
-        return namespaceChain.chainId;
-      }
-    }
+    const mainConnector = this.connectedConnector;
+    assertAuthConnector(mainConnector, params.unsupportedMessage);
+    return mainConnector;
+  }
 
-    throw WalletInitializationError.invalidParams(`No compatible chainId found for connector "${account.connector}".`);
+  private bindAuthConnectorAccountLinkingHandlers(connector: IConnector<unknown>): void {
+    if (!isAuthConnector(connector)) return;
+
+    connector.setAccountLinkingHandlers({
+      getCurrentChainId: () => this.currentChainId,
+      getStoredAuthSessionTokens: () => ({
+        accessToken: this.accessToken,
+        idToken: this.idToken,
+      }),
+      getActiveAccount: () => this.state.activeAccount,
+      setActiveAccount: async (activeAccount) => {
+        await this.setState({ activeAccount });
+      },
+      setCurrentChain: this.setCurrentChain.bind(this),
+      setIdToken: async (idToken) => {
+        await this.setState({ idToken });
+      },
+      bindEthereumSigningProxy: this.bindEthereumSigningProxy.bind(this),
+      assignCurrentConnection: this.assignCurrentConnection.bind(this),
+      setAuxiliarySigningConnector: (accountId, auxiliaryConnector) => {
+        this.auxiliarySigningConnectorMap.set(accountId, auxiliaryConnector);
+      },
+      getChainIdForConnectedAccount: this.getChainIdForConnectedAccount.bind(this),
+      assertSwitchAccountConnectorMatchesTarget: this.assertSwitchAccountConnectorMatchesTarget.bind(this),
+      toSwitchAccountConnectorError: this.toSwitchAccountConnectorError.bind(this),
+      getNetworkForUnlinkAddress: this.getNetworkForUnlinkAddress.bind(this),
+      getLinkingWalletProof: this.getLinkingWalletProof.bind(this),
+      createIsolatedWalletConnector: this.createIsolatedWalletConnector.bind(this),
+      emitConnectionUpdated: () => {
+        this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED);
+      },
+    });
   }
 
   private async cacheWallet(walletName: string): Promise<void> {
@@ -1439,6 +1270,119 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       solanaWallet: solanaWallet ?? null,
       connectorName,
     };
+  }
+
+  private getChainIdForConnectedAccount(
+    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector">,
+    preferredChainId?: string | null
+  ): string {
+    if (preferredChainId) {
+      const preferredChain = this.coreOptions.chains.find((chain) => chain.chainId === preferredChainId);
+      if (preferredChain && (!account.chainNamespace || preferredChain.chainNamespace === account.chainNamespace)) {
+        return preferredChainId;
+      }
+    }
+
+    if (account.chainNamespace) {
+      const parsedChainNamespace = parseChainNamespaceFromCitadelResponse(account.chainNamespace);
+      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === parsedChainNamespace);
+      if (namespaceChain) {
+        return namespaceChain.chainId;
+      }
+    }
+
+    throw WalletInitializationError.invalidParams(`No compatible chainId found for connector "${account.connector}".`);
+  }
+
+  private async assertSwitchAccountConnectorMatchesTarget(
+    connector: IConnector<unknown>,
+    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector" | "eoaAddress">
+  ): Promise<void> {
+    if (!account.chainNamespace) {
+      throw AccountLinkingError.requestFailed(`Could not determine the chain namespace for linked account "${account.eoaAddress}".`);
+    }
+
+    const chainNamespace = parseChainNamespaceFromCitadelResponse(account.chainNamespace);
+    let connectedAddress: string | null = null;
+
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      const accounts = connector.provider ? await connector.provider.request<never, string[]>({ method: "eth_accounts" }) : [];
+      connectedAddress = accounts?.[0] ?? null;
+    } else if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      connectedAddress = connector.solanaWallet?.accounts?.[0]?.address ?? null;
+    } else {
+      throw AccountLinkingError.requestFailed(`Unsupported chain namespace "${account.chainNamespace}" for linked account "${account.eoaAddress}".`);
+    }
+
+    if (!connectedAddress) {
+      throw AccountLinkingError.requestFailed(
+        `Connector "${account.connector}" is not connected to linked account "${account.eoaAddress}". Connect the intended wallet account and try again.`
+      );
+    }
+
+    const isExpectedAddress =
+      chainNamespace === CHAIN_NAMESPACES.EIP155
+        ? connectedAddress.toLowerCase() === account.eoaAddress.toLowerCase()
+        : connectedAddress === account.eoaAddress;
+
+    if (!isExpectedAddress) {
+      throw AccountLinkingError.requestFailed(
+        `Connector "${account.connector}" is connected to "${connectedAddress}" instead of linked account "${account.eoaAddress}". Connect the intended wallet account and try again.`
+      );
+    }
+  }
+
+  private toSwitchAccountConnectorError(account: Pick<ConnectedAccountInfo, "connector" | "eoaAddress">, error: unknown): AccountLinkingError {
+    if (error instanceof AccountLinkingError && error.code === 5401) {
+      return error;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    const isUnavailableConnectorError =
+      (error instanceof AccountLinkingError && error.code === 5405) || /not available|not initialized|not ready/i.test(message);
+
+    if (isUnavailableConnectorError) {
+      return AccountLinkingError.requestFailed(
+        `Connector "${account.connector}" is not available for linked account "${account.eoaAddress}". Make sure the wallet is installed, unlocked, and accessible, then try again.`,
+        error
+      );
+    }
+
+    return AccountLinkingError.requestFailed(
+      `Failed to connect connector "${account.connector}" for linked account "${account.eoaAddress}". ${message}`,
+      error
+    );
+  }
+
+  private getNetworkForUnlinkAddress(accounts: ConnectedAccountInfo[], address: string): "ethereum" | "solana" {
+    const exactMatch = accounts.find((account) => account.address === address || account.eoaAddress === address);
+    const matchedAccount =
+      exactMatch ??
+      accounts.find((account) => {
+        if (!account.chainNamespace || parseChainNamespaceFromCitadelResponse(account.chainNamespace) !== CHAIN_NAMESPACES.EIP155) {
+          return false;
+        }
+        const normalizedAddress = address.toLowerCase();
+        return account.address?.toLowerCase() === normalizedAddress || account.eoaAddress?.toLowerCase() === normalizedAddress;
+      });
+
+    if (!matchedAccount) {
+      throw AccountLinkingError.requestFailed(`No connected wallet matches address "${address}".`);
+    }
+
+    if (!matchedAccount.chainNamespace) {
+      throw AccountLinkingError.requestFailed(`Could not determine the chain namespace for address "${address}".`);
+    }
+
+    const chainNamespace = parseChainNamespaceFromCitadelResponse(matchedAccount.chainNamespace);
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      return "ethereum";
+    }
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      return "solana";
+    }
+
+    throw AccountLinkingError.requestFailed(`Unsupported chain namespace "${matchedAccount.chainNamespace}" for address "${address}".`);
   }
 
   private async getLinkingWalletProof(connectorName: WALLET_CONNECTOR_TYPE | string, chainId?: string): Promise<WalletLinkingProof> {

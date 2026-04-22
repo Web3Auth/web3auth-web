@@ -1,6 +1,6 @@
 import { useCallback, useState } from "react";
 
-import { ConnectedAccountInfo, Web3AuthError } from "../../base";
+import { ConnectedAccountInfo, WalletInitializationError, Web3AuthError } from "../../base";
 import { useWeb3AuthInner } from "./useWeb3AuthInner";
 
 export interface IUseSwitchAccount {
@@ -17,6 +17,7 @@ export const useSwitchAccount = (): IUseSwitchAccount => {
 
   const switchAccount = useCallback(
     async (account: ConnectedAccountInfo): Promise<void> => {
+      if (!web3Auth) throw WalletInitializationError.notReady();
       setLoading(true);
       setError(null);
       try {
