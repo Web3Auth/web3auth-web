@@ -10,7 +10,7 @@ import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import type { GetCapabilitiesReturnType, SendCallsReturnType, WalletGetCallsStatusReturnType } from "viem";
 
-import { AddEthereumChainConfig, WalletLoginError } from "../../base";
+import { AddEthereumChainConfig, log, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
 import { formatChainId } from "./utils";
 
@@ -46,7 +46,7 @@ export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: st
         }
         window.open(parsedUrl.href, "_blank");
       } catch (e) {
-        console.error("Invalid redirect URL", e);
+        log.error("Invalid redirect URL", e);
       }
     }
   }

@@ -60,9 +60,6 @@
     "react": {
       "optional": true
     },
-    "viem": {
-      "optional": true
-    },
     "vue": {
       "optional": true
     }

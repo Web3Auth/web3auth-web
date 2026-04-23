@@ -1,5 +1,6 @@
 import { signChallenge } from "@toruslabs/base-controllers";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
+import { generateSiweNonce } from "viem/siwe";
 
 import {
   AuthTokenInfo,
@@ -37,7 +38,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
         address: accounts[0],
         chainId: parseInt(chainId, 16),
         version: "1",
-        nonce: Math.random().toString(36).slice(2),
+        nonce: generateSiweNonce(),
         issuedAt: new Date().toISOString(),
       };
 
