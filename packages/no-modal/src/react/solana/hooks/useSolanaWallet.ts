@@ -1,7 +1,7 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo } from "react";
 
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { WALLET_CONNECTORS } from "../../../base/wallet";
@@ -30,35 +30,19 @@ export type IUseSolanaWallet = {
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
-  const [solanaWallet, setSolanaWallet] = useState<Wallet | null>(null);
-  const [accounts, setAccounts] = useState<string[] | null>(null);
 
-  useEffect(() => {
-    if (!connection?.solanaWallet) {
-      setSolanaWallet(null);
-      setAccounts(null);
-      return;
-    }
-    setSolanaWallet((prev) => {
-      const shouldSetup = prev === null || chainNamespace === CHAIN_NAMESPACES.SOLANA;
-      if (!shouldSetup) return prev;
-      return connection.solanaWallet;
-    });
-  }, [connection, chainNamespace]);
+  const solanaWallet = useMemo(() => {
+    return connection?.solanaWallet ?? null;
+  }, [connection]);
 
-  useEffect(() => {
-    if (!solanaWallet) {
-      setAccounts(null);
-      return;
-    }
+  const accounts = useMemo((): string[] | null => {
+    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA || !solanaWallet) return null;
     const accts = solanaWallet.accounts.map((a) => a.address);
-    setAccounts(accts.length > 0 ? accts : null);
-  }, [solanaWallet]);
+    return accts.length > 0 ? accts : null;
+  }, [solanaWallet, chainNamespace]);
 
   const rpc = useMemo(() => {
-    if (!web3Auth?.currentChain?.rpcTarget || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
-      return null;
-    }
+    if (!web3Auth || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
     return createSolanaRpc(web3Auth.currentChain.rpcTarget);
   }, [web3Auth, solanaWallet, chainNamespace]);
 

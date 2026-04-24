@@ -5,6 +5,7 @@ import { SessionTypes } from "@walletconnect/types";
 import { getSdkError, isValidArray } from "@walletconnect/utils";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
+import { generateSiweNonce } from "viem/siwe";
 
 import {
   type Analytics,
@@ -301,7 +302,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         address: accounts[0],
         chainId: parseInt(chainId, 16),
         version: "1",
-        nonce: Math.random().toString(36).slice(2),
+        nonce: generateSiweNonce(),
         issuedAt: new Date().toISOString(),
       };
 

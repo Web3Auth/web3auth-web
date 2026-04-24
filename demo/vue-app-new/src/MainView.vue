@@ -21,19 +21,17 @@ import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connec
 import { computed, onBeforeMount, ref, watch } from "vue";
 
 import {
-  BUILD_ENV,
   CookieStorage,
   LocalStorageAdapter,
   MemoryStorage,
   SessionStorageAdapter,
   WEB3AUTH_NETWORK,
-  type BUILD_ENV_TYPE,
   type StorageConfig,
 } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { clientIds } from "./config";
+import { clientIds, resolveBuildEnv } from "./config";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
 import { SmartAccountType } from "@toruslabs/ethereum-controllers";
@@ -42,12 +40,6 @@ import { WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 const formData = formDataStore;
 
 const externalConnectors = ref<ConnectorFn[]>([]);
-const buildEnvValues = new Set<BUILD_ENV_TYPE>(Object.values(BUILD_ENV));
-const envValue = import.meta.env.VITE_APP_AUTH_BUILD_ENV;
-let authBuildEnv: BUILD_ENV_TYPE = import.meta.env.DEV ? BUILD_ENV.TESTING : BUILD_ENV.PRODUCTION;
-if (envValue && buildEnvValues.has(envValue as BUILD_ENV_TYPE)) {
-  authBuildEnv = envValue as BUILD_ENV_TYPE;
-}
 
 function buildStorageConfig(): StorageConfig | undefined {
   const type = formData.tokenStorage;
@@ -157,7 +149,7 @@ const options = computed((): Web3AuthOptions => {
     chains,
     defaultChainId: formData.defaultChainId,
     enableLogging: true,
-    authBuildEnv,
+    authBuildEnv: formData.authBuildEnv,
     connectors: [...externalConnectors.value, authConnectorInstance],
     plugins,
     multiInjectedProviderDiscovery: formData.multiInjectedProviderDiscovery,
@@ -253,6 +245,7 @@ onBeforeMount(() => {
         formData.showWalletDiscovery = json.showWalletDiscovery;
         formData.multiInjectedProviderDiscovery = json.multiInjectedProviderDiscovery;
         formData.network = json.network;
+        formData.authBuildEnv = resolveBuildEnv(json.authBuildEnv);
         formData.whiteLabel = json.whiteLabel;
         formData.walletPlugin = json.walletPlugin;
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;

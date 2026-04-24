@@ -1,16 +1,33 @@
-export * from "./useAuthTokenInfo";
-export * from "./useChain";
-export * from "./useCheckout";
-export * from "./useEnableMFA";
-export * from "./useFunding";
-export * from "./useManageMFA";
-export * from "./useReceive";
-export * from "./useSwap";
-export * from "./useSwitchChain";
-export * from "./useWalletConnectScanner";
-export * from "./useWalletServicesPlugin";
-export * from "./useWalletUI";
 export * from "./useWeb3Auth";
 export * from "./useWeb3AuthConnect";
-export * from "./useWeb3AuthDisconnect";
-export * from "./useWeb3AuthUser";
+export type {
+  IUseAuthTokenInfo,
+  IUseChain,
+  IUseCheckout,
+  IUseEnableMFA,
+  IUseFunding,
+  IUseManageMFA,
+  IUseReceive,
+  IUseSwap,
+  IUseSwitchChain,
+  IUseWalletConnectScanner,
+  IUseWalletUI,
+  IUseWeb3AuthDisconnect,
+  IUseWeb3AuthUser,
+} from "@web3auth/no-modal/vue";
+export {
+  useAuthTokenInfo,
+  useChain,
+  useCheckout,
+  useEnableMFA,
+  useFunding,
+  useManageMFA,
+  useReceive,
+  useSwap,
+  useSwitchChain,
+  useWalletConnectScanner,
+  useWalletServicesPlugin,
+  useWalletUI,
+  useWeb3AuthDisconnect,
+  useWeb3AuthUser,
+} from "@web3auth/no-modal/vue";

@@ -34,7 +34,7 @@ import styles from "../styles/Home.module.css";
 import X402 from "./X402";
 
 const Main = () => {
-  const { provider, isConnected, web3Auth, status } = useWeb3Auth();
+  const { isConnected, web3Auth, status } = useWeb3Auth();
   const { accounts: solanaAccounts } = useSolanaWallet();
   const { chainNamespace: currentChainNamespace, chainId: currentChainId } = useChain();
   const { loading: connecting, connect, error: connectingError, connectorName, connectTo } = useWeb3AuthConnect();
@@ -371,7 +371,7 @@ const Main = () => {
     <div className={styles.grid}>
       <p>Web3Auth: {isConnected ? "Connected" : "Disconnected"}</p>
       <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p>
-      {provider || isWagmiConnected ? loggedInView : unloggedInView}
+      {isConnected || isWagmiConnected ? loggedInView : unloggedInView}
     </div>
   );
 };

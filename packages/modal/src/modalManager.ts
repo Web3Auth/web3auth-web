@@ -61,7 +61,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private modalConfig: ConnectorsModalConfig = cloneDeep(defaultConnectorsModalConfig);
 
-  constructor(options: Web3AuthOptions, initialState?: IWeb3AuthState) {
+  constructor(options: Web3AuthOptions, initialState?: Partial<IWeb3AuthState>) {
     super(options, initialState);
     this.options = { ...options };
     if (!this.options.initialAuthenticationMode) {
