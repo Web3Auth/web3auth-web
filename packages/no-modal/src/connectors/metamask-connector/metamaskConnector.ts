@@ -1,8 +1,9 @@
 import { createEVMClient, type Hex, type MetamaskConnectEVM } from "@metamask/connect-evm";
-import { createMultichainClient, type MultichainCore, type Scope } from "@metamask/connect-multichain";
+import { createMultichainClient, hasExtension, type MultichainCore, type Scope } from "@metamask/connect-multichain";
 import { createSolanaClient, type SolanaClient } from "@metamask/connect-solana";
 import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-controllers";
 import type { Wallet } from "@wallet-standard/base";
+import { StandardEvents, type StandardEventsChangeProperties, type StandardEventsFeature } from "@wallet-standard/features";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
@@ -28,6 +29,7 @@ import {
   type ConnectorNamespaceType,
   type ConnectorParams,
   getCaipChainId,
+  getSolanaChainByChainConfig,
   type IProvider,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
@@ -39,7 +41,7 @@ import {
 import { getSiteName } from "../utils";
 
 /**
- * Configuration options for the MetaMask connector using @metamask/connect-evm
+ * Configuration options for the MetaMask connector using \@metamask/connect-evm
  */
 export interface MetaMaskConnectorSettings {
   /** Dapp identification and branding settings */
@@ -102,57 +104,9 @@ class MetaMaskConnector extends BaseConnector<void> {
     return null;
   }
 
-  set provider(_: IProvider | null) {
-    throw new Error("Not implemented");
-  }
-
   get solanaWallet(): Wallet | null {
     return this.solanaProvider;
   }
-
-  /**
-   * Ensures the connector is initialized
-   */
-  private async ensureInitialized(): Promise<void> {
-    if (!this.initializationPromise) {
-      throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
-    }
-    await this.initializationPromise;
-  }
-
-  /**
-   * Handles accounts changed events from the MetaMask provider
-   */
-  private handleAccountsChanged = (accounts: string[]): void => {
-    if (accounts.length === 0) {
-      this.disconnect().catch(() => {
-        // Ignore disconnect errors during account change
-      });
-    }
-  };
-
-  /**
-   * Handles disconnect events from the MetaMask provider
-   */
-  private handleDisconnect = (): void => {
-    this.disconnect().catch(() => {
-      // Ignore disconnect errors
-    });
-  };
-
-  /**
-   * Handles chain changed events from the MetaMask provider
-   */
-  private handleChainChanged = (_chainId: string): void => {
-    // Chain change is handled internally by the provider
-  };
-
-  /**
-   * Handles connect events from the MetaMask provider
-   */
-  private handleConnect = (_result: { chainId: string; accounts: string[] }): void => {
-    // Connect is handled internally
-  };
 
   async init(options: ConnectorInitOptions): Promise<void> {
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
@@ -172,16 +126,14 @@ class MetaMaskConnector extends BaseConnector<void> {
       }
     }
 
-    // Build supported networks for Solana client (maps hex chainId to network name)
+    // Build supported networks for Solana client (MetaMask expects mainnet | testnet | devnet keys)
     const solanaSupportedNetworks: Record<string, string> = {};
-    const solanaChainIdToNetwork: Record<string, string> = { "0x65": "mainnet", "0x66": "testnet", "0x67": "devnet" };
     for (const chain of this.coreOptions.chains) {
-      if (chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        const networkName = solanaChainIdToNetwork[chain.chainId];
-        if (networkName) {
-          solanaSupportedNetworks[networkName] = chain.rpcTarget;
-        }
-      }
+      if (chain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) continue;
+      const solanaChainId = getSolanaChainByChainConfig(chain);
+      if (!solanaChainId) continue;
+      const networkName = solanaChainId.split(":")[1];
+      if (networkName) solanaSupportedNetworks[networkName] = chain.rpcTarget;
     }
 
     // Detect app metadata
@@ -250,18 +202,17 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.solanaClient = await createSolanaClient({
           dapp,
           api: { supportedNetworks: solanaSupportedNetworks },
-          debug: this.connectorSettings?.debug,
+          skipAutoRegister: true,
         });
         this.solanaProvider = this.solanaClient.getWallet();
       }
+
+      this.isInjected = await hasExtension();
 
       initResolve();
     } catch (error) {
       initReject(WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error));
     }
-
-    // TODO need to figure this out
-    this.isInjected = false;
 
     if (!this.multichainClient) {
       this.status = CONNECTOR_STATUS.ERRORED;
@@ -331,8 +282,30 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.status = CONNECTOR_STATUS.CONNECTING;
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
+        let deferredResolve: (() => void) | null = null;
+        const ecosystemClientConnectedPromise = new Promise<void>((resolve) => {
+          deferredResolve = resolve;
+        });
+
+        // Wait for ecosystem clients to be ready
+        this.evmProvider?.once("connect", () => {
+          deferredResolve?.();
+        });
+
+        const eventsFeature = this.solanaProvider.features[StandardEvents] as StandardEventsFeature[typeof StandardEvents];
+        const removeListener = eventsFeature.on("change", (properties: StandardEventsChangeProperties) => {
+          if (properties.accounts) {
+            deferredResolve?.();
+            removeListener();
+          }
+        });
+
         // Connect using the multichain client
-        await this.multichainClient.connect(scopes, []);
+        await this.multichainClient.connect(scopes, [], {
+          solana_accountChanged_notifications: true,
+        });
+
+        await ecosystemClientConnectedPromise;
       }
 
       // // Switch EVM chain if not connected to the right one (Solana chains are handled by the wallet-standard provider)
@@ -414,11 +387,12 @@ class MetaMaskConnector extends BaseConnector<void> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError();
 
     // Determine the active chain: prefer Solana if no EVM provider, otherwise use EVM provider's chain
+    const evmChainId = this.evmProvider?.chainId || this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155)?.chainId;
     const isSolanaOnly = !this.evmProvider && !!this.solanaProvider;
     const activeChainConfig = isSolanaOnly
       ? this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.SOLANA)
       : this.evmProvider
-        ? this.coreOptions.chains.find((x) => x.chainId === this.evmProvider!.chainId)
+        ? this.coreOptions.chains.find((x) => x.chainId === evmChainId)
         : undefined;
 
     if (!activeChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -477,11 +451,10 @@ class MetaMaskConnector extends BaseConnector<void> {
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
 
-    const namespaces = new Set(this.coreOptions.chains.map((c) => c.chainNamespace));
-    if (namespaces.size > 1) {
-      throw WalletLoginError.unsupportedOperation(
-        "switchChain is not supported when multiple chain namespaces are configured. Use connection.ethereumProvider and connection.solanaWallet directly."
-      );
+    const targetChainConfig = this.coreOptions.chains.find((c) => c.chainId === params.chainId);
+    if (targetChainConfig?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      // no need to switch chain for Solana
+      return;
     }
 
     await this.ensureInitialized();
@@ -519,6 +492,50 @@ class MetaMaskConnector extends BaseConnector<void> {
   public async manageMFA(): Promise<void> {
     throw new Error("Method Not implemented");
   }
+
+  /**
+   * Ensures the connector is initialized
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initializationPromise) {
+      throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
+    }
+    await this.initializationPromise;
+  }
+
+  /**
+   * Handles accounts changed events from the MetaMask provider
+   */
+  private handleAccountsChanged = (_accounts: string[]): void => {
+    // if (accounts.length === 0) {
+    //   this.disconnect().catch(() => {
+    //     // Ignore disconnect errors during account change
+    //   });
+    // }
+  };
+
+  /**
+   * Handles disconnect events from the MetaMask provider
+   */
+  private handleDisconnect = (): void => {
+    // this.disconnect().catch(() => {
+    //   // Ignore disconnect errors
+    // });
+  };
+
+  /**
+   * Handles chain changed events from the MetaMask provider
+   */
+  private handleChainChanged = (_chainId: string): void => {
+    // Chain change is handled internally by the provider
+  };
+
+  /**
+   * Handles connect events from the MetaMask provider
+   */
+  private handleConnect = (_result: { chainId: string; accounts: string[] }): void => {
+    // Connect is handled internally
+  };
 }
 
 /**

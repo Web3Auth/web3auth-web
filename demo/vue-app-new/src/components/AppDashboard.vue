@@ -13,7 +13,7 @@ import {
   useWeb3Auth,
   useWeb3AuthUser,
 } from "@web3auth/modal/vue";
-import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignMessage as useSolanaSignMessage, useSolanaWallet, useSolanaClient } from "@web3auth/modal/vue/solana";
@@ -40,10 +40,6 @@ const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
-const props = defineProps<{
-  chains: CustomChainConfig[];
-}>();
-
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
@@ -68,7 +64,7 @@ const balance = useBalance({
 const config = useConfig();
 const trackedCallsId = ref<string | undefined>();
 
-const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
+const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey, solanaWallet } = useSolanaWallet();
 const solanaClient = useSolanaClient();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 
@@ -347,7 +343,7 @@ const onSignSolMessage = async () => {
 const onGetSolBalance = async () => {
   const client = solanaClient.value;
   if (!client) throw new Error("Solana client not available");
-  const account = solanaAccounts.value?.[0];
+  const account = solanaWallet.value?.accounts[0]?.address;
   if (!account) throw new Error("No account connected");
 
   try {
@@ -369,7 +365,7 @@ const onGetSolPrivateKey = async () => {
 };
 
 // EVM-only: wagmi switchChain does not change Solana cluster; only show when multiple EIP-155 chains are configured.
-const eip155Chains = computed(() => props.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155));
+const eip155Chains = computed(() => web3Auth.value?.coreOptions.chains?.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155) || []);
 
 const canSwitchEvmChain = computed(() => {
   if (eip155Chains.value.length < 2) return false;

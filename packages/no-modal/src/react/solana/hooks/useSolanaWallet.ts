@@ -30,15 +30,35 @@ export type IUseSolanaWallet = {
 export const useSolanaWallet = (): IUseSolanaWallet => {
   const { connection, web3Auth } = useWeb3Auth();
   const { chainNamespace } = useChain();
+  const [solanaWallet, setSolanaWallet] = useState<Wallet | null>(null);
   const [accounts, setAccounts] = useState<string[] | null>(null);
 
-  const solanaWallet = useMemo(() => {
-    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
-    return connection?.solanaWallet ?? null;
+  useEffect(() => {
+    if (!connection?.solanaWallet) {
+      setSolanaWallet(null);
+      setAccounts(null);
+      return;
+    }
+    setSolanaWallet((prev) => {
+      const shouldSetup = prev === null || chainNamespace === CHAIN_NAMESPACES.SOLANA;
+      if (!shouldSetup) return prev;
+      return connection.solanaWallet;
+    });
   }, [connection, chainNamespace]);
 
+  useEffect(() => {
+    if (!solanaWallet) {
+      setAccounts(null);
+      return;
+    }
+    const accts = solanaWallet.accounts.map((a) => a.address);
+    setAccounts(accts.length > 0 ? accts : null);
+  }, [solanaWallet]);
+
   const rpc = useMemo(() => {
-    if (!web3Auth || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
+    if (!web3Auth?.currentChain?.rpcTarget || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+      return null;
+    }
     return createSolanaRpc(web3Auth.currentChain.rpcTarget);
   }, [web3Auth, solanaWallet, chainNamespace]);
 
@@ -53,15 +73,6 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     if (!privateKey) throw new Error("Failed to retrieve private key");
     return privateKey;
   }, [web3Auth, connection]);
-
-  useEffect(() => {
-    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA || !solanaWallet) {
-      setAccounts(null);
-      return;
-    }
-    const accts = solanaWallet.accounts.map((a) => a.address);
-    if (accts.length > 0) setAccounts(accts);
-  }, [solanaWallet, chainNamespace]);
 
   return { solanaWallet, accounts, rpc, getPrivateKey };
 };
