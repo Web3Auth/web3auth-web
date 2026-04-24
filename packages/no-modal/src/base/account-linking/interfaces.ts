@@ -12,15 +12,6 @@ export interface LinkAccountParams {
    * Defaults to the currently active chain if not specified.
    */
   chainId?: string;
-
-  /**
-   * Pre-obtained wallet identity token.
-   * When provided, the SDK skips the internal wallet-connection step
-   * and uses this token directly for the Citadel request.
-   * Obtain this token by connecting the external wallet separately and
-   * calling connector.getIdentityToken().
-   */
-  walletIdToken?: string;
 }
 
 export interface LinkedAccountInfo {

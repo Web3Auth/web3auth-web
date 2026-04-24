@@ -9,7 +9,6 @@ import {
   type IBaseProvider,
   type IConnector,
   type IProvider,
-  LinkAccountParams,
   LinkAccountResult,
   UnlinkAccountResult,
   type WALLET_CONNECTOR_TYPE,
@@ -21,40 +20,44 @@ export type PrivateKeyProvider = IBaseProvider<string>;
 
 export type WalletServicesSettings = Omit<WsEmbedParams, "chains" | "chainId"> & { modalZIndex?: number };
 
-export interface AuthConnectorAccountLinkingHandlers {
-  getCurrentChainId(): string | null;
-  getStoredAuthSessionTokens(): { accessToken: string | null; idToken: string | null };
-  getActiveAccount(): ConnectedAccountInfo | null;
-  setActiveAccount(account: ConnectedAccountInfo | null): Promise<void>;
-  setCurrentChain(chainId: string): Promise<void>;
-  setIdToken(idToken: string): Promise<void>;
-  bindEthereumSigningProxy(ethereumProvider: IProvider, connectorName: WALLET_CONNECTOR_TYPE | string): Promise<void>;
-  assignCurrentConnection(params: {
-    ethereumProvider: IProvider | null;
-    solanaWallet: Wallet | null;
-    connectorName: string;
-    connectorNamespace: ConnectorNamespaceType;
-  }): void;
-  setAuxiliarySigningConnector(accountId: string, connector: IConnector<unknown>): void;
-  getChainIdForConnectedAccount(account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector">, preferredChainId?: string | null): string;
-  assertSwitchAccountConnectorMatchesTarget(
-    connector: IConnector<unknown>,
-    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector" | "eoaAddress">
-  ): Promise<void>;
-  toSwitchAccountConnectorError(account: Pick<ConnectedAccountInfo, "connector" | "eoaAddress">, error: unknown): Error;
-  getNetworkForUnlinkAddress(accounts: ConnectedAccountInfo[], address: string): "ethereum" | "solana";
-  getLinkingWalletProof(
-    connectorName: WALLET_CONNECTOR_TYPE | string,
-    chainId?: string
-  ): Promise<{
-    address: string;
-    challenge: string;
-    signature: string;
-    signatureType: "eip191" | "sip99";
-    network: "ethereum" | "solana";
-  }>;
-  createIsolatedWalletConnector(connectorName: WALLET_CONNECTOR_TYPE | string, chainId: string): Promise<IConnector<unknown>>;
-  emitConnectionUpdated(): void;
+export interface AuthConnectorSessionTokens {
+  accessToken: string | null;
+  idToken: string | null;
+}
+
+export interface AuthConnectorLinkAccountParams {
+  authSessionTokens: AuthConnectorSessionTokens;
+  walletConnector: IConnector<unknown>;
+  connectorName: WALLET_CONNECTOR_TYPE | string;
+  chainId?: string;
+}
+
+export interface AuthConnectorSwitchAccountContext {
+  activeAccount: ConnectedAccountInfo | null;
+  currentChainId: string | null;
+}
+
+export type AuthConnectorSwitchAccountResult =
+  | {
+      kind: "primary";
+      targetAccount: ConnectedAccountInfo;
+      activeAccount: null;
+      activeChainId: string;
+      connectorName: WALLET_CONNECTOR_TYPE;
+      connectorNamespace: ConnectorNamespaceType;
+      ethereumProvider: IProvider | null;
+      solanaWallet: Wallet | null;
+    }
+  | {
+      kind: "external";
+      targetAccount: ConnectedAccountInfo;
+      activeAccount: ConnectedAccountInfo;
+      activeChainId: string;
+    };
+
+export interface AuthConnectorUnlinkAccountParams {
+  authSessionTokens: AuthConnectorSessionTokens;
+  address: string;
 }
 
 export interface AuthConnectorOptions extends BaseConnectorSettings {
@@ -62,7 +65,6 @@ export interface AuthConnectorOptions extends BaseConnectorSettings {
   loginSettings?: LoginSettings;
   walletServicesSettings?: WalletServicesSettings;
   authConnectionConfig?: (AuthConnectionConfigItem & { isDefault?: boolean })[];
-  accountLinkingHandlers?: AuthConnectorAccountLinkingHandlers;
 }
 
 export interface UserInfoWithConnectedAccounts {
@@ -110,38 +112,19 @@ export {
 
 export interface IAuthConnector {
   /**
-   * Switch the active connection to a linked wallet: connects an isolated
-   * instance of that wallet’s connector, updates `connection.ethereumProvider` / `solanaWallet`,
-   * and emits `connection_updated` so Wagmi/UI can resync.
-   * The auxiliary connector stays connected (not torn down after switch). The previous auxiliary
-   * connector is disconnected when starting another switch or when the primary session disconnects.
-   *
-   * Requires an AUTH primary session and a matching `userInfo.connectedAccounts` entry.
+   * Resolve the target account and connector-owned switch metadata.
+   * `noModal` applies the returned result to SDK state and providers.
    */
-  switchAccount(account: ConnectedAccountInfo): Promise<void>;
+  switchAccount(account: ConnectedAccountInfo, context: AuthConnectorSwitchAccountContext): Promise<AuthConnectorSwitchAccountResult>;
 
   /**
-   * Link an external wallet to the currently authenticated user account
-   * via the Citadel account-linking endpoint.
-   *
-   * Requires:
-   * - The user to be currently connected with the AUTH connector.
-   * - `accountLinking.serverUrl` to be set in the Web3Auth constructor options.
-   *
-   * @param params - Linking parameters including the target connector name.
-   * @returns A result object confirming the link, including the linked address.
+   * Link an external wallet to the authenticated user by using the
+   * `noModal`-provided isolated wallet connector to generate the proof.
    */
-  linkAccount(params: LinkAccountParams): Promise<LinkAccountResult>;
+  linkAccount(params: AuthConnectorLinkAccountParams): Promise<LinkAccountResult>;
 
   /**
-   * Unlink an external wallet from the currently authenticated user account
-   * via the Citadel account-unlinking endpoint.
-   *
-   * @param params - Unlinking parameters including the target account address.
-   * @returns A result object confirming the unlink.
+   * Unlink an external wallet from the authenticated user account.
    */
-  unlinkAccount(address: string): Promise<UnlinkAccountResult>;
-
-  /** @internal */
-  setAccountLinkingHandlers(handlers: AuthConnectorAccountLinkingHandlers): void;
+  unlinkAccount(params: AuthConnectorUnlinkAccountParams): Promise<UnlinkAccountResult>;
 }
