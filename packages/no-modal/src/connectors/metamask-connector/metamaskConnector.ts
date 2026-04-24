@@ -318,6 +318,11 @@ class MetaMaskConnector extends BaseConnector<void> {
       //   }
       // }
 
+      // check if connected
+      if (this.multichainClient.status !== "connected") {
+        throw WalletLoginError.notConnectedError("Failed to connect with MetaMask wallet");
+      }
+
       this.status = CONNECTOR_STATUS.CONNECTED;
 
       // Track connection events
