@@ -343,7 +343,7 @@ const onSignSolMessage = async () => {
 const onGetSolBalance = async () => {
   const client = solanaClient.value;
   if (!client) throw new Error("Solana client not available");
-  const account = solanaWallet.value?.accounts[0]?.address;
+  const account = solanaAccounts.value?.[0];
   if (!account) throw new Error("No account connected");
 
   try {

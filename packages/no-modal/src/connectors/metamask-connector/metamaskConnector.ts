@@ -3,7 +3,7 @@ import { createMultichainClient, hasExtension, type MultichainCore, type Scope }
 import { createSolanaClient, type SolanaClient } from "@metamask/connect-solana";
 import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-controllers";
 import type { Wallet } from "@wallet-standard/base";
-import { StandardEvents, type StandardEventsChangeProperties, type StandardEventsFeature } from "@wallet-standard/features";
+import { StandardConnect, StandardConnectFeature } from "@wallet-standard/features";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 
 import {
@@ -282,22 +282,11 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.status = CONNECTOR_STATUS.CONNECTING;
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
-        let deferredResolve: (() => void) | null = null;
-        const ecosystemClientConnectedPromise = new Promise<void>((resolve) => {
-          deferredResolve = resolve;
-        });
-
-        // Wait for ecosystem clients to be ready
-        this.evmProvider?.once("connect", () => {
-          deferredResolve?.();
-        });
-
-        const eventsFeature = this.solanaProvider.features[StandardEvents] as StandardEventsFeature[typeof StandardEvents];
-        const removeListener = eventsFeature.on("change", (properties: StandardEventsChangeProperties) => {
-          if (properties.accounts) {
-            deferredResolve?.();
-            removeListener();
-          }
+        const evmConnectedPromise = new Promise<void>((resolve) => {
+          // Wait for EVM provider to be ready
+          this.evmProvider?.once("connect", () => {
+            resolve();
+          });
         });
 
         // Connect using the multichain client
@@ -305,7 +294,16 @@ class MetaMaskConnector extends BaseConnector<void> {
           solana_accountChanged_notifications: true,
         });
 
-        await ecosystemClientConnectedPromise;
+        // Solana wallet-standard: `standard:events` change is not emitted from multichain
+        // connect alone — MetamaskWallet syncs accounts via `standard:connect` → updateSession.
+        if (this.solanaProvider) {
+          await (this.solanaProvider.features as StandardConnectFeature)[StandardConnect].connect();
+        }
+
+        // Wait for EVM provider to be ready
+        if (this.evmProvider) {
+          await evmConnectedPromise;
+        }
       }
 
       // // Switch EVM chain if not connected to the right one (Solana chains are handled by the wallet-standard provider)
