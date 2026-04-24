@@ -184,10 +184,14 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.evmClient = await createEVMClient({
           dapp,
           eventHandlers: {
-            accountsChanged: this.handleAccountsChanged,
-            chainChanged: this.handleChainChanged,
-            connect: this.handleConnect,
-            disconnect: this.handleDisconnect,
+            accountsChanged: (_accounts: string[]) => {
+              if (_accounts.length === 0) {
+                this.disconnect();
+              }
+            },
+            chainChanged: (_chainId: string) => {},
+            connect: (_result: { chainId: string; accounts: string[] }) => {},
+            disconnect: () => this.disconnect(),
           },
           api: { supportedNetworks: hexSupportedNetworks },
           ui,
@@ -500,40 +504,6 @@ class MetaMaskConnector extends BaseConnector<void> {
     }
     await this.initializationPromise;
   }
-
-  /**
-   * Handles accounts changed events from the MetaMask provider
-   */
-  private handleAccountsChanged = (_accounts: string[]): void => {
-    // if (accounts.length === 0) {
-    //   this.disconnect().catch(() => {
-    //     // Ignore disconnect errors during account change
-    //   });
-    // }
-  };
-
-  /**
-   * Handles disconnect events from the MetaMask provider
-   */
-  private handleDisconnect = (): void => {
-    // this.disconnect().catch(() => {
-    //   // Ignore disconnect errors
-    // });
-  };
-
-  /**
-   * Handles chain changed events from the MetaMask provider
-   */
-  private handleChainChanged = (_chainId: string): void => {
-    // Chain change is handled internally by the provider
-  };
-
-  /**
-   * Handles connect events from the MetaMask provider
-   */
-  private handleConnect = (_result: { chainId: string; accounts: string[] }): void => {
-    // Connect is handled internally
-  };
 }
 
 /**

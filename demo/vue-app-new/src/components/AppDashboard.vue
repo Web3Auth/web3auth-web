@@ -64,7 +64,7 @@ const balance = useBalance({
 const config = useConfig();
 const trackedCallsId = ref<string | undefined>();
 
-const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey, solanaWallet } = useSolanaWallet();
+const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
 const solanaClient = useSolanaClient();
 const { signMessage: signSolanaMessage } = useSolanaSignMessage();
 

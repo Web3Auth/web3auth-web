@@ -65,7 +65,6 @@
     }
   },
   "dependencies": {
-    "@ethereumjs/util": "^10.1.0",
     "@metamask/connect-evm": "^1.0.0",
     "@metamask/connect-multichain": "^0.12.1",
     "@metamask/connect-solana": "^1.0.0",

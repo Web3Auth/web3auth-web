@@ -72,8 +72,6 @@ export class AuthSolanaWallet implements Wallet {
 
   private _accounts: WalletAccount[] | null = null;
 
-  private _ensureAccountsPromise: Promise<void> | null = null;
-
   private readonly _listeners: { [E in keyof StandardEventsListeners]?: Set<StandardEventsListeners[E]> } = {};
 
   /**
@@ -181,15 +179,7 @@ export class AuthSolanaWallet implements Wallet {
       );
 
     if (this._accounts !== null) return;
-    if (!this._ensureAccountsPromise) {
-      this._ensureAccountsPromise = this.loadAccountsFromProvider().finally(() => {
-        this._ensureAccountsPromise = null;
-      });
-    }
-    await this._ensureAccountsPromise;
-  }
 
-  private async loadAccountsFromProvider(): Promise<void> {
     const addresses = (await this._provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS })) ?? [];
     const accountChains = this.chains;
     this._accounts = addresses.map((address) => ({
