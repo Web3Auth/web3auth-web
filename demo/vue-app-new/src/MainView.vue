@@ -293,7 +293,7 @@ const configs = computed<Web3AuthContextConfig>(() => {
         <div class="flex flex-col items-center justify-center">
           <main class="relative flex flex-col lg:h-[calc(100dvh_-_110px)]">
             <AppSettings />
-            <AppDashboard :chains="options.chains || []" />
+            <AppDashboard />
           </main>
         </div>
       </SolanaProvider>

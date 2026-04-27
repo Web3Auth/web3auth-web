@@ -10,7 +10,7 @@ import { type JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import type { GetCapabilitiesReturnType, SendCallsReturnType, WalletGetCallsStatusReturnType } from "viem";
 
-import { AddEthereumChainConfig, WalletLoginError } from "../../base";
+import { AddEthereumChainConfig, log, WalletLoginError } from "../../base";
 import type { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../providers/ethereum-provider";
 import { formatChainId } from "./utils";
 
@@ -38,7 +38,16 @@ export async function sendJrpcRequest<T, U>(signClient: ISignClient, chainId: st
 
   if (typeof window !== "undefined" && isMobileDevice()) {
     if (session.peer.metadata.redirect && session.peer.metadata.redirect.native) {
-      window.open(session.peer.metadata.redirect.native, "_blank");
+      const redirectUrl = session.peer.metadata.redirect.native;
+      try {
+        const parsedUrl = new URL(redirectUrl);
+        if (["javascript:", "data:", "vbscript:"].includes(parsedUrl.protocol)) {
+          throw new Error("Invalid redirect scheme");
+        }
+        window.open(parsedUrl.href, "_blank");
+      } catch (e) {
+        log.error("Invalid redirect URL", e);
+      }
     }
   }
 

@@ -1,15 +1,23 @@
-import { MetaMaskSDK, type MetaMaskSDKOptions } from "@metamask/sdk";
-import { getErrorAnalyticsProperties } from "@toruslabs/base-controllers";
-import deepmerge from "deepmerge";
+import { createEVMClient, type Hex, type MetamaskConnectEVM } from "@metamask/connect-evm";
+import { createMultichainClient, hasExtension, type MultichainCore, type Scope } from "@metamask/connect-multichain";
+import { createSolanaClient, type SolanaClient } from "@metamask/connect-solana";
+import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-controllers";
+import { bytesToHexPrefixedString, utf8ToBytes } from "@toruslabs/metadata-helpers";
+import type { Wallet } from "@wallet-standard/base";
+import { StandardConnect, StandardConnectFeature } from "@wallet-standard/features";
+import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
+import { generateSiweNonce } from "viem/siwe";
 
 import {
-  AddEthereumChainConfig,
   type Analytics,
   ANALYTICS_EVENTS,
+  type AuthTokenInfo,
+  BaseConnector,
   BaseConnectorLoginParams,
   type BaseConnectorSettings,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
+  citadelServerUrl,
   CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_CATEGORY,
@@ -22,27 +30,46 @@ import {
   type ConnectorInitOptions,
   type ConnectorNamespaceType,
   type ConnectorParams,
-  type CustomChainConfig,
   getCaipChainId,
+  getSolanaChainByChainConfig,
   type IProvider,
-  type MetaMaskConnectorData,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletLoginError,
+  walletSignMessage,
   Web3AuthError,
 } from "../../base";
-import { BaseEvmConnector } from "../base-evm-connector";
-import { getSiteIcon, getSiteName } from "../utils";
+import { getSiteName } from "../utils";
 
-export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
-  connectorSettings?: Partial<MetaMaskSDKOptions>;
+/**
+ * Configuration options for the MetaMask connector using \@metamask/connect-evm
+ */
+export interface MetaMaskConnectorSettings {
+  /** Dapp identification and branding settings */
+  dapp?: {
+    name?: string;
+    url?: string;
+    iconUrl?: string;
+  };
+  /** Enable debug logging for the MetaMask SDK */
+  debug?: boolean;
+  /** UI settings for the MetaMask connector */
+  ui?: {
+    preferExtension?: boolean;
+    showInstallModal?: boolean;
+    headless?: boolean;
+  };
 }
 
-class MetaMaskConnector extends BaseEvmConnector<void> {
-  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.EIP155;
+export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
+  connectorSettings?: MetaMaskConnectorSettings;
+}
 
-  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.EIP155;
+class MetaMaskConnector extends BaseConnector<void> {
+  readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
+
+  readonly currentChainNamespace: ChainNamespaceType = CHAIN_NAMESPACES.OTHER;
 
   readonly type: CONNECTOR_CATEGORY_TYPE = CONNECTOR_CATEGORY.EXTERNAL;
 
@@ -50,82 +77,202 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   public status: CONNECTOR_STATUS_TYPE = CONNECTOR_STATUS.NOT_READY;
 
-  private metamaskProvider: IProvider = null;
+  private evmClient: MetamaskConnectEVM | null = null;
 
-  private metamaskSDK: MetaMaskSDK = null;
+  private evmProvider: IProvider | null = null;
 
-  private metamaskOptions: Partial<MetaMaskSDKOptions>;
+  private solanaClient: SolanaClient | null = null;
+
+  private solanaProvider: Wallet | null = null;
+
+  private initializationPromise: Promise<void> | null = null;
+
+  private multichainClient: MultichainCore | null = null;
+
+  private connectorSettings?: MetaMaskConnectorSettings;
 
   private analytics?: Analytics;
 
   constructor(connectorOptions: MetaMaskConnectorOptions) {
     super(connectorOptions);
-    this.metamaskOptions = connectorOptions.connectorSettings;
+    this.connectorSettings = connectorOptions.connectorSettings;
     this.analytics = connectorOptions.analytics;
   }
 
   get provider(): IProvider | null {
-    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.metamaskProvider) {
-      return this.metamaskProvider as unknown as IProvider;
+    if (this.status !== CONNECTOR_STATUS.NOT_READY && this.evmProvider) {
+      return this.evmProvider as unknown as IProvider;
     }
     return null;
   }
 
-  set provider(_: IProvider | null) {
-    throw new Error("Not implemented");
+  get solanaWallet(): Wallet | null {
+    return this.solanaProvider;
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
-    await super.init(options);
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
+    // Build supported networks in CAIP-2 format for multichain client
+    const caipSupportedNetworks: Record<string, string> = {};
+    for (const chain of this.coreOptions.chains) {
+      caipSupportedNetworks[getCaipChainId(chain)] = chain.rpcTarget;
+    }
+
+    // Build supported networks in hex format for EVM client
+    const hexSupportedNetworks: Record<string, string> = {};
+    for (const chain of this.coreOptions.chains) {
+      if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+        hexSupportedNetworks[chain.chainId] = chain.rpcTarget;
+      }
+    }
+
+    // Build supported networks for Solana client (MetaMask expects mainnet | testnet | devnet keys)
+    const solanaSupportedNetworks: Record<string, string> = {};
+    for (const chain of this.coreOptions.chains) {
+      if (chain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) continue;
+      const solanaChainId = getSolanaChainByChainConfig(chain);
+      if (!solanaChainId) continue;
+      const networkName = solanaChainId.split(":")[1];
+      if (networkName) solanaSupportedNetworks[networkName] = chain.rpcTarget;
+    }
+
     // Detect app metadata
-    const iconUrl = await getSiteIcon(window);
-    // TODO: handle ssr
-    const appMetadata: MetaMaskSDKOptions["dappMetadata"] = {
-      name: getSiteName(window) || "web3auth",
-      url: window.location.origin || "https://web3auth.io",
-      iconUrl: iconUrl ?? undefined,
+    const appName = getSiteName(window) || this.connectorSettings?.dapp?.name || "web3auth";
+    const appUrl = this.connectorSettings?.dapp?.url || window.location.origin || "https://web3auth.io";
+    const appIconUrl = this.connectorSettings?.dapp?.iconUrl;
+
+    const dapp = {
+      name: appName,
+      url: appUrl,
+      ...(appIconUrl && { iconUrl: appIconUrl }),
+    };
+    const ui = {
+      preferExtension: this.connectorSettings?.ui?.preferExtension ?? true,
+      showInstallModal: this.connectorSettings?.ui?.showInstallModal ?? false,
+      headless: this.connectorSettings?.ui?.headless ?? true,
     };
 
-    // initialize the MetaMask SDK
-    const metamaskOptions = deepmerge(this.metamaskOptions || {}, { dappMetadata: appMetadata });
-    this.metamaskSDK = new MetaMaskSDK({ ...metamaskOptions, _source: "web3auth", preferDesktop: true });
-    // Work around: in case there is an existing SDK instance in memory (window.mmsdk exists), it won't initialize the new SDK instance again
-    // and return the existing instance instead of undefined (this is an assumption, not sure if it's a bug or feature of the MetaMask SDK)
-    const initResult = await this.metamaskSDK.init();
-    if (initResult) {
-      this.metamaskSDK = initResult;
-    }
-    this.isInjected = this.metamaskSDK.isExtensionActive();
+    let initResolve: () => void;
+    let initReject: (reason?: Error) => void;
+    this.initializationPromise = new Promise((resolve, reject) => {
+      initResolve = resolve;
+      initReject = reject;
+    });
 
-    this.status = CONNECTOR_STATUS.READY;
-    this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
+    const hasEvmChains = Object.keys(hexSupportedNetworks).length > 0;
+    const hasSolanaChains = Object.keys(solanaSupportedNetworks).length > 0;
+
     try {
-      if (options.autoConnect) {
-        this.rehydrated = true;
-        const connection = await this.connect({ chainId: options.chainId, getAuthTokenInfo: options.getAuthTokenInfo });
-        if (!connection) {
-          this.rehydrated = false;
-          throw WalletLoginError.connectionError("Failed to rehydrate.");
+      // Initialize the multichain client (singleton) first
+      this.multichainClient = await createMultichainClient({
+        dapp,
+        api: { supportedNetworks: caipSupportedNetworks },
+        ui,
+        debug: this.connectorSettings?.debug,
+      });
+
+      // Listen for QR code URI from the multichain client (for mobile wallet connection)
+      this.multichainClient.on("display_uri", (uri: string) => {
+        if (uri) {
+          this.updateConnectorData({ uri });
         }
+      });
+
+      // Create the EVM client only when EVM chains are configured
+      // (createEVMClient requires at least one entry in supportedNetworks)
+      if (hasEvmChains) {
+        this.evmClient = await createEVMClient({
+          dapp,
+          eventHandlers: {
+            accountsChanged: (_accounts: string[]) => {
+              if (_accounts.length === 0) {
+                this.disconnect();
+              }
+            },
+            chainChanged: (_chainId: string) => {},
+            connect: (_result: { chainId: string; accounts: string[] }) => {},
+            disconnect: () => this.disconnect(),
+          },
+          api: { supportedNetworks: hexSupportedNetworks },
+          ui,
+          debug: this.connectorSettings?.debug,
+        });
+
+        this.evmProvider = this.evmClient.getProvider() as unknown as IProvider;
       }
+
+      // Create the Solana client only when Solana chains are configured
+      if (hasSolanaChains) {
+        this.solanaClient = await createSolanaClient({
+          dapp,
+          api: { supportedNetworks: solanaSupportedNetworks },
+          skipAutoRegister: true,
+        });
+        this.solanaProvider = this.solanaClient.getWallet();
+      }
+
+      this.isInjected = await hasExtension();
+
+      initResolve();
     } catch (error) {
-      this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
+      initReject(WalletLoginError.connectionError("Failed to initialize MetaMask Connect SDK", error));
+    }
+
+    if (!this.multichainClient) {
+      this.status = CONNECTOR_STATUS.ERRORED;
+      this.emit(CONNECTOR_EVENTS.ERRORED, new Error("Failed to initialize MetaMask Connect.") as Web3AuthError);
+      return;
+    }
+
+    const coreStatus = this.multichainClient.status;
+    if (coreStatus === "connected") {
+      this.status = CONNECTOR_STATUS.CONNECTED;
+
+      this.rehydrated = true;
+
+      this.emit(CONNECTOR_EVENTS.CONNECTED, {
+        connectorName: WALLET_CONNECTORS.METAMASK,
+        reconnected: this.rehydrated,
+        ethereumProvider: this.evmProvider,
+        solanaWallet: this.solanaProvider,
+      } as CONNECTED_EVENT_DATA);
+
+      if (options.getAuthTokenInfo) {
+        await this.getAuthTokenInfo();
+      }
+    } else if (coreStatus === "loaded" || coreStatus === "disconnected") {
+      this.status = CONNECTOR_STATUS.READY;
+      this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
+    } else if (coreStatus === "pending") {
+      // 'pending' implies that a transport failed to resume the connection
+      // if (options.autoConnect) {
+      //   this.rehydrated = false;
+      //   this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, new Error("Failed to resume existing MetaMask Connect session.") as Web3AuthError);
+      // } else {
+      this.status = CONNECTOR_STATUS.READY;
+      this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
+      // }
+    } else {
+      // Something unexpected happened
+      this.status = CONNECTOR_STATUS.ERRORED;
+      this.emit(CONNECTOR_EVENTS.ERRORED, new Error("Failed to initialize MetaMask Connect.") as Web3AuthError);
     }
   }
 
   async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     super.checkConnectionRequirements();
-    if (!this.metamaskSDK) throw WalletLoginError.notConnectedError("Connector is not initialized");
+
+    await this.ensureInitialized();
+
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-    // Skip tracking for injected MetaMask since it's handled in connectTo
+    const scopes = this.coreOptions.chains.map((c) => getCaipChainId(c) as Scope);
+
     // Skip tracking for rehydration since only new connections are tracked
-    // Only track non-injected MetaMask when connection completes since it auto-initializes to generate QR code
-    const shouldTrack = !this.isInjected && !this.rehydrated;
+    const shouldTrack = !this.rehydrated;
     const startTime = Date.now();
     const eventData = {
       connector: this.name,
@@ -140,36 +287,47 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         this.status = CONNECTOR_STATUS.CONNECTING;
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
-        if (!this.metamaskSDK.isExtensionActive() && this.metamaskOptions?.headless) {
-          // when metamask is not injected and headless is true, broadcast the uri to the login modal
-          this.metamaskSDK.getProvider().on("display_uri", (uri) => {
-            this.updateConnectorData({ uri } as MetaMaskConnectorData);
+
+        const evmConnectedPromise = new Promise<void>((resolve) => {
+          // Wait for EVM provider to be ready
+          this.evmProvider?.once("connect", () => {
+            resolve();
           });
+        });
+
+        // Connect using the multichain client
+        await this.multichainClient.connect(scopes, [], {
+          solana_accountChanged_notifications: true,
+        });
+
+        // Solana wallet-standard: `standard:events` change is not emitted from multichain
+        // connect alone — MetamaskWallet syncs accounts via `standard:connect` → updateSession.
+        if (this.solanaProvider) {
+          await (this.solanaProvider.features as StandardConnectFeature)[StandardConnect].connect();
         }
-        await this.metamaskSDK.connect();
+
+        // Wait for EVM provider to be ready
+        if (this.evmProvider) {
+          await evmConnectedPromise;
+        }
       }
 
-      this.metamaskProvider = this.metamaskSDK.getProvider() as unknown as IProvider;
-      if (!this.metamaskProvider) throw WalletLoginError.notConnectedError("Failed to connect with provider");
+      // // Switch EVM chain if not connected to the right one (Solana chains are handled by the wallet-standard provider)
+      // if (chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      //   const currentChainId = this.evmClient!.getChainId();
+      //   if (currentChainId !== chainId) {
+      //     await this.switchChain(chainConfig, true);
+      //   }
+      // }
 
-      // switch chain if not connected to the right chain
-      const currentChainId = (await this.metamaskProvider.request({ method: "eth_chainId" })) as string;
-      if (currentChainId !== chainConfig.chainId) {
-        await this.switchChain(chainConfig, true);
+      // check if connected
+      if (this.multichainClient.status !== "connected") {
+        throw WalletLoginError.notConnectedError("Failed to connect with MetaMask wallet");
       }
-
-      // handle disconnect event
-      const accountDisconnectHandler = (accounts: string[]) => {
-        if (accounts.length === 0) this.disconnect();
-      };
-      this.metamaskProvider.on("accountsChanged", accountDisconnectHandler);
-      this.metamaskProvider.once("disconnect", () => {
-        this.disconnect();
-      });
 
       this.status = CONNECTOR_STATUS.CONNECTED;
 
-      // track connection events
+      // Track connection events
       if (shouldTrack) {
         this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
         this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
@@ -181,22 +339,22 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: this.rehydrated,
-        ethereumProvider: this.metamaskProvider,
-        solanaWallet: null,
+        ethereumProvider: this.evmProvider,
+        solanaWallet: this.solanaProvider,
       } as CONNECTED_EVENT_DATA);
 
       if (getAuthTokenInfo) {
         await this.getAuthTokenInfo();
       }
 
-      return { ethereumProvider: this.metamaskProvider, solanaWallet: null, connectorName: this.name };
+      return { ethereumProvider: this.evmProvider, solanaWallet: this.solanaProvider, connectorName: this.name };
     } catch (error) {
-      // ready again to be connected
+      // Ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
       if (!this.rehydrated) this.emit(CONNECTOR_EVENTS.ERRORED, error as Web3AuthError);
       this.rehydrated = false;
 
-      // track connection events
+      // Track connection events
       if (shouldTrack) {
         this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_STARTED, eventData);
         this.analytics?.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
@@ -211,20 +369,87 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
   }
 
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (!this.metamaskProvider) throw WalletLoginError.connectionError("MetaMask provider is not available");
-    await super.disconnectSession();
+    if (!this.multichainClient) throw WalletLoginError.connectionError("Multichain client is not available");
+    this.checkDisconnectionRequirements();
+    await this.clearWalletSession();
 
-    if (typeof this.metamaskProvider.removeAllListeners !== "undefined") this.metamaskProvider.removeAllListeners();
-    await this.metamaskSDK.terminate();
+    // Disconnect using the multichain client
+    await this.multichainClient.disconnect();
 
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
-      this.metamaskProvider = null;
+      this.initializationPromise = null;
+      this.multichainClient = null;
+      this.evmClient = null;
+      this.evmProvider = null;
+      this.solanaClient = null;
+      this.solanaProvider = null;
     } else {
-      // ready to be connected again
+      // Ready to be connected again
       this.status = CONNECTOR_STATUS.READY;
     }
-    await super.disconnect();
+    this.rehydrated = false;
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
+  }
+
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
+    if (!this.canAuthorize) throw WalletLoginError.notConnectedError();
+
+    // Determine the active chain: prefer Solana if no EVM provider, otherwise use EVM provider's chain
+    const evmChainId = this.evmProvider?.chainId || this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155)?.chainId;
+    const isSolanaOnly = !this.evmProvider && !!this.solanaProvider;
+    const activeChainConfig = isSolanaOnly
+      ? this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.SOLANA)
+      : this.evmProvider
+        ? this.coreOptions.chains.find((x) => x.chainId === evmChainId)
+        : undefined;
+
+    if (!activeChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
+    this.status = CONNECTOR_STATUS.AUTHORIZING;
+    this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.METAMASK });
+
+    const { chainNamespace } = activeChainConfig;
+    const accounts =
+      chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider
+        ? this.solanaProvider.accounts.map((a) => a.address)
+        : this.evmProvider
+          ? await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })
+          : [];
+
+    if (accounts && accounts.length > 0) {
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
+      if (cached) return cached;
+
+      const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
+      const payload = {
+        domain: window.location.origin,
+        uri: window.location.href,
+        address: accounts[0],
+        chainId: parseInt(activeChainConfig.chainId, 16),
+        version: "1",
+        nonce: generateSiweNonce(),
+        issuedAt: new Date().toISOString(),
+      };
+
+      const challenge = await signChallenge(payload, chainNamespace, authServer);
+
+      let signedMessage: string;
+      if (chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider) {
+        signedMessage = await walletSignMessage(this.solanaProvider, challenge, accounts[0]);
+      } else if (this.evmProvider) {
+        const hexChallenge = bytesToHexPrefixedString(utf8ToBytes(challenge));
+        signedMessage = await this.evmProvider.request<[string, string], string>({
+          method: EVM_METHOD_TYPES.PERSONAL_SIGN,
+          params: [hexChallenge, accounts[0]],
+        });
+      } else {
+        throw WalletLoginError.notConnectedError("No provider available for signing");
+      }
+
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage, challenge, authServer });
+    }
+    throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
@@ -234,21 +459,39 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
-    const requestSwitchChain = () => this.metamaskProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
-    try {
-      await requestSwitchChain();
-    } catch (error) {
-      // If the error code is 4902, the network needs to be added
-      if ((error as { code?: number })?.code === 4902) {
-        const chainConfig = this.coreOptions.chains.find(
-          (x) => x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
-        );
-        await this.addChain(chainConfig);
-        await requestSwitchChain();
-      } else {
-        throw error;
-      }
+
+    const targetChainConfig = this.coreOptions.chains.find((c) => c.chainId === params.chainId);
+    if (targetChainConfig?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      // no need to switch chain for Solana
+      return;
     }
+
+    await this.ensureInitialized();
+
+    if (!this.evmClient) {
+      throw WalletLoginError.unsupportedOperation("switchChain requires an EVM client, but no EVM chains are configured.");
+    }
+
+    const chainConfig = this.coreOptions.chains.find(
+      (x) => x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
+    );
+
+    const chainConfiguration = chainConfig
+      ? {
+          chainId: params.chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: chainConfig.blockExplorerUrl ? [chainConfig.blockExplorerUrl] : undefined,
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+          iconUrls: chainConfig.logo ? [chainConfig.logo] : undefined,
+        }
+      : undefined;
+
+    await this.evmClient.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
   }
 
   public async enableMFA(): Promise<void> {
@@ -259,25 +502,32 @@ class MetaMaskConnector extends BaseEvmConnector<void> {
     throw new Error("Method Not implemented");
   }
 
-  private async addChain(chainConfig: CustomChainConfig): Promise<void> {
-    if (!this.metamaskProvider) throw WalletLoginError.connectionError("Injected provider is not available");
-    await this.metamaskProvider.request<AddEthereumChainConfig[], void>({
-      method: "wallet_addEthereumChain",
-      params: [
-        {
-          chainId: chainConfig.chainId,
-          chainName: chainConfig.displayName,
-          rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: [chainConfig.blockExplorerUrl],
-          nativeCurrency: { name: chainConfig.tickerName, symbol: chainConfig.ticker, decimals: chainConfig.decimals || 18 },
-          iconUrls: [chainConfig.logo],
-        },
-      ],
-    });
+  /**
+   * Ensures the connector is initialized
+   */
+  private async ensureInitialized(): Promise<void> {
+    if (!this.initializationPromise) {
+      throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
+    }
+    await this.initializationPromise;
   }
 }
 
-export const metaMaskConnector = (params?: Partial<MetaMaskSDKOptions>): ConnectorFn => {
+/**
+ * Factory function to create a MetaMask connector
+ *
+ * @param params - Configuration options for the MetaMask SDK
+ * @returns A connector function that creates a MetaMaskConnector instance
+ *
+ * @example
+ * ```typescript
+ * const connector = metaMaskConnector({
+ *   dapp: { name: 'My DApp', url: 'https://mydapp.com' },
+ *   debug: true,
+ * });
+ * ```
+ */
+export const metaMaskConnector = (params?: MetaMaskConnectorSettings): ConnectorFn => {
   return ({ coreOptions, analytics }: ConnectorParams) => {
     return new MetaMaskConnector({ connectorSettings: params, coreOptions, analytics });
   };
