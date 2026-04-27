@@ -1053,7 +1053,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // if the user has not consented yet, we will ask for consent
       if (this.consentRequired && this.currentConnection && !this.state.hasUserConsent) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
-        this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
         this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING);
         log.debug("consent_requiring", this.status, this.connectedConnectorName);
       } else {

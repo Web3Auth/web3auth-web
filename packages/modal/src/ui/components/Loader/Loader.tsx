@@ -239,12 +239,12 @@ function Loader(props: LoaderProps) {
     }
   }, [isConnectedAccordingToAuthenticationMode, hideSuccessScreen, onClose]);
 
-  const isConsent = modalStatus === MODAL_STATUS.CONSENT_REQUIRING;
+  const isConsentRequiringStatus = modalStatus === MODAL_STATUS.CONSENT_REQUIRING;
 
   return (
     <div
       className={
-        isConsent
+        isConsentRequiringStatus
           ? "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4"
           : "w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4"
       }
@@ -263,7 +263,9 @@ function Loader(props: LoaderProps) {
         />
       )}
 
-      {isConsent && <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} privacyPolicy={privacyPolicy} tncLink={tncLink} />}
+      {isConsentRequiringStatus && (
+        <ConsentRequiredStatus onAccept={onAcceptConsent} onDecline={onDeclineConsent} privacyPolicy={privacyPolicy} tncLink={tncLink} />
+      )}
     </div>
   );
 }
