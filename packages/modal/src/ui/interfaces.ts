@@ -84,8 +84,6 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
    */
   consentConfig?: {
     required: boolean;
-    privacyPolicy: string;
-    tncLink: string;
   };
 }
 
