@@ -433,12 +433,9 @@ export class LoginModal {
           modalVisibility: true,
           status: MODAL_STATUS.BLOCKED,
           blockedUserConfig: {
-            primaryMessage: this.uiConfig.blockedUserConfig?.primaryMessage || "You cannot access the site",
-            secondaryMessage: this.uiConfig.blockedUserConfig?.secondaryMessage || "Please reach out to support",
-            button: {
-              link: this.uiConfig.blockedUserConfig?.button?.link || "http://www.google.com",
-              title: this.uiConfig.blockedUserConfig?.button?.title || "Support Link",
-            },
+            primaryMessage: this.uiConfig.blockedUserConfig?.primaryMessage || "You cannot access the site.",
+            secondaryMessage: this.uiConfig.blockedUserConfig?.secondaryMessage || "Access to the site is restricted",
+            buttonMessage: this.uiConfig.blockedUserConfig?.buttonMessage || "Change wallet",
           },
         });
         return;

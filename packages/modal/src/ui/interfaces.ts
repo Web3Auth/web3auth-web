@@ -82,7 +82,7 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
   blockedUserConfig?: {
     primaryMessage?: string;
     secondaryMessage?: string;
-    button?: { link?: string; title?: string };
+    buttonMessage?: string;
   };
 
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
@@ -166,7 +166,7 @@ export interface ModalState {
 export interface BlockedUserConfig {
   primaryMessage: string;
   secondaryMessage: string;
-  button: { link: string; title: string };
+  buttonMessage: string;
 }
 
 export type SocialLoginEventType = { loginParams: ModalLoginParams };

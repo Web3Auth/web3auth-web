@@ -1,4 +1,4 @@
-import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
+import { log, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -84,7 +84,13 @@ function ErroredStatus(props: ErroredStatusType) {
 }
 
 function BlockedStatus(props: BlockedStatusType) {
-  const { primaryMessage, secondaryMessage, button } = props;
+  const { primaryMessage, secondaryMessage, buttonMessage } = props;
+
+  const handleChangeWallet = () => {
+    // TODO: wire up real action in a follow-up commit
+    log.info("change wallet");
+  };
+
   return (
     <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--error-logo">
@@ -97,14 +103,13 @@ function BlockedStatus(props: BlockedStatusType) {
       </svg>
       <p className="w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{primaryMessage}</p>
       <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{secondaryMessage}</p>
-      <a
-        href={button.link}
-        target="_blank"
-        rel="noopener noreferrer"
+      <button
+        type="button"
+        onClick={handleChangeWallet}
         className="w3a--rounded-xl w3a--bg-app-primary-600 w3a--px-6 w3a--py-3 w3a--text-center w3a--text-sm w3a--font-medium w3a--text-app-white hover:w3a--bg-app-primary-700"
       >
-        {button.title}
-      </a>
+        {buttonMessage}
+      </button>
     </div>
   );
 }
@@ -189,7 +194,7 @@ function Loader(props: LoaderProps) {
         <BlockedStatus
           primaryMessage={blockedUserConfig.primaryMessage}
           secondaryMessage={blockedUserConfig.secondaryMessage}
-          button={blockedUserConfig.button}
+          buttonMessage={blockedUserConfig.buttonMessage}
         />
       )}
 
