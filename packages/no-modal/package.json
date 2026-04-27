@@ -65,7 +65,9 @@
     }
   },
   "dependencies": {
-    "@metamask/sdk": "^0.34.0",
+    "@metamask/connect-evm": "^1.0.0",
+    "@metamask/connect-multichain": "^0.12.1",
+    "@metamask/connect-solana": "^1.0.0",
     "@segment/analytics-next": "^1.82.0",
     "@solana/client": "^1.7.0",
     "@solana/kit": "^6.5.0",

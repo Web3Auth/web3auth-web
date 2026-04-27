@@ -1,4 +1,5 @@
 import { signChallenge } from "@toruslabs/base-controllers";
+import { bytesToHexPrefixedString, utf8ToBytes } from "@toruslabs/metadata-helpers";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import { generateSiweNonce } from "viem/siwe";
 
@@ -43,7 +44,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       };
 
       const challenge = await signChallenge(payload, chainNamespace, authServer);
-      const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
+      const hexChallenge = bytesToHexPrefixedString(utf8ToBytes(challenge));
 
       const signedMessage = await this.provider.request<[string, string], string>({
         method: EVM_METHOD_TYPES.PERSONAL_SIGN,

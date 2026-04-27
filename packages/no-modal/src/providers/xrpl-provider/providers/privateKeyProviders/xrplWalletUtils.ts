@@ -1,3 +1,4 @@
+import { hexToBytes } from "@toruslabs/metadata-helpers";
 import { JRPCRequest, providerErrors, rpcErrors } from "@web3auth/auth";
 import { generateSeed, sign } from "ripple-keypairs";
 import { Client, deriveAddress, SubmitResponse, Transaction, Wallet } from "xrpl";
@@ -7,7 +8,7 @@ import { CustomChainConfig } from "../../../../base";
 import { IXrplProviderHandlers, KeyPair } from "../../rpc/xrplRpcMiddlewares";
 
 const deriveKeypair = (web3authKey: string): { publicKey: string; privateKey: string } => {
-  const seed = generateSeed({ entropy: Buffer.from(web3authKey.padStart(64, "0"), "hex"), algorithm: "ecdsa-secp256k1" });
+  const seed = generateSeed({ entropy: hexToBytes(web3authKey.padStart(64, "0")), algorithm: "ecdsa-secp256k1" });
   const wallet = Wallet.fromSecret(seed, { algorithm: ECDSA.secp256k1 }); // web3auth network currently only supports the secp256k1 key
   return { privateKey: wallet.privateKey, publicKey: wallet.publicKey };
 };
