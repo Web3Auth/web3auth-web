@@ -129,12 +129,9 @@ function ConnectWalletList(props: ConnectWalletListProps) {
   return (
     <>
       <ul
-        className={cn(
-          "w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px] w3a--social-container -w3a--mx-5 w3a--pl-5 w3a--pr-1",
-          {
-            "w3a--h-[328px]": !showMoreWalletsButton,
-          }
-        )}
+        className={cn("w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px] w3a--social-container -w3a--mx-5 w3a--px-5", {
+          "w3a--h-[328px]": !showMoreWalletsButton,
+        })}
       >
         {externalButtons.length === 0 ? (
           <NoWalletsFound />

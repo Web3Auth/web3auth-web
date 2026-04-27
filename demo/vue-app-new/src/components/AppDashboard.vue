@@ -4,6 +4,7 @@ import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS } from "@web3auth/m
 import {
   useCheckout,
   useFunding,
+  useLinkWallet,
   useReceive,
   useEnableMFA,
   useAuthTokenInfo,
@@ -51,6 +52,7 @@ const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = u
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
 const { showFunding, loading: showFundingLoading } = useFunding();
 const { showReceive, loading: showReceiveLoading } = useReceive();
+const { linkWallet, loading: linkWalletLoading } = useLinkWallet();
 const { getAuthTokenInfo, loading: getAuthTokenInfoLoading } = useAuthTokenInfo();
 const { status, address } = useConnection();
 const { mutateAsync: signTypedDataAsync } = useSignTypedData();
@@ -399,7 +401,7 @@ const onSwitchChain = async () => {
           </Button>
         </div>
         <div class="mb-2">
-          <Button :loading="userInfoLoading" block size="xs" pill @click="onGetUserInfo">
+          <Button :loading="userInfoLoading.value" block size="xs" pill @click="onGetUserInfo">
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
 
@@ -420,23 +422,25 @@ const onSwitchChain = async () => {
           >
             {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
+
+          <Button :loading="linkWalletLoading.value" block size="xs" pill class="my-2" @click="() => linkWallet()">Link Wallet</Button>
         </div>
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
-          <Button :loading="showWalletUILoading" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
+          <Button :loading="showWalletUILoading.value" block size="xs" pill class="mb-2" @click="() => showWalletUI()">
             {{ $t("app.buttons.btnShowWalletUI") }}
           </Button>
-          <Button :loading="showWalletConnectScannerLoading" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
+          <Button :loading="showWalletConnectScannerLoading.value" block size="xs" pill class="mb-2" @click="() => showWalletConnectScanner()">
             {{ $t("app.buttons.btnShowWalletConnectScanner") }}
           </Button>
-          <Button :loading="showFundingLoading" block size="xs" pill class="mb-2" @click="() => showFunding()">
+          <Button :loading="showFundingLoading.value" block size="xs" pill class="mb-2" @click="() => showFunding()">
             {{ $t("app.buttons.btnShowFunding") }}
           </Button>
-          <Button :loading="showCheckoutLoading" block size="xs" pill class="mb-2" @click="() => showCheckout()">
+          <Button :loading="showCheckoutLoading.value" block size="xs" pill class="mb-2" @click="() => showCheckout()">
             {{ $t("app.buttons.btnShowCheckout") }}
           </Button>
-          <Button :loading="showReceiveLoading" block size="xs" pill class="mb-2" @click="() => showReceive()">
+          <Button :loading="showReceiveLoading.value" block size="xs" pill class="mb-2" @click="() => showReceive()">
             {{ $t("app.buttons.btnShowReceive") }}
           </Button>
           <!-- <Button v-if="isDisplay('ethServices')" block size="xs" pill class="mb-2" @click="onWalletSignPersonalMessage">
