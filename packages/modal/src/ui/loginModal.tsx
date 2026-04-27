@@ -298,7 +298,7 @@ export class LoginModal {
     externalWalletsConfig: Record<string, BaseConnectorConfig>,
     options?: { externalWalletsInitialized: boolean; externalWalletsVisibility: boolean; showExternalWalletsOnly: boolean }
   ): void => {
-    this.externalWalletsConfig = externalWalletsConfig;
+    this.externalWalletsConfig = { ...this.externalWalletsConfig, ...externalWalletsConfig };
     const isMMAvailable = !!externalWalletsConfig[WALLET_CONNECTORS.METAMASK];
     this.setState({
       externalWalletsConfig,

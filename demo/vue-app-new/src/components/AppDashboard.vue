@@ -13,7 +13,7 @@ import {
   useWeb3Auth,
   useWeb3AuthUser,
 } from "@web3auth/modal/vue";
-import { CONNECTOR_INITIAL_AUTHENTICATION_MODE, type CustomChainConfig } from "@web3auth/no-modal";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignMessage as useSolanaSignMessage, useSolanaWallet, useSolanaClient } from "@web3auth/modal/vue/solana";
@@ -39,10 +39,6 @@ import { formDataStore } from "../store/form";
 const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
-
-const props = defineProps<{
-  chains: CustomChainConfig[];
-}>();
 
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
 const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
@@ -369,7 +365,7 @@ const onGetSolPrivateKey = async () => {
 };
 
 // EVM-only: wagmi switchChain does not change Solana cluster; only show when multiple EIP-155 chains are configured.
-const eip155Chains = computed(() => props.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155));
+const eip155Chains = computed(() => web3Auth.value?.coreOptions.chains?.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155) || []);
 
 const canSwitchEvmChain = computed(() => {
   if (eip155Chains.value.length < 2) return false;

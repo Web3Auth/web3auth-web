@@ -37,9 +37,6 @@
     "@solana/react-hooks": {
       "optional": true
     },
-    "viem": {
-      "optional": true
-    },
     "vue": {
       "optional": true
     }

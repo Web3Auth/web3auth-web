@@ -1,7 +1,8 @@
 import { createSolanaRpc, type Rpc, type SolanaRpcApi } from "@solana/kit";
 import type { Wallet } from "@wallet-standard/base";
+import { StandardEvents, type StandardEventsFeature } from "@wallet-standard/features";
 import { SOLANA_METHOD_TYPES } from "@web3auth/ws-embed";
-import { computed, Ref, ref, ShallowRef, shallowRef, watch } from "vue";
+import { onScopeDispose, Ref, ref, ShallowRef, shallowRef, watch } from "vue";
 
 import { CHAIN_NAMESPACES } from "../../../base/chain/IChainInterface";
 import { WALLET_CONNECTORS } from "../../../base/wallet";
@@ -33,25 +34,39 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   const solanaWallet = shallowRef<Wallet | null>(null);
   const rpc = shallowRef<Rpc<SolanaRpcApi> | null>(null);
 
-  const isSolana = computed(() => chainNamespace.value === CHAIN_NAMESPACES.SOLANA);
+  let unsubscribeStandardEvents: (() => void) | null = null;
+
+  const teardownWalletListeners = () => {
+    unsubscribeStandardEvents?.();
+    unsubscribeStandardEvents = null;
+  };
+
+  const syncAccounts = () => {
+    const accts = solanaWallet.value?.accounts.map((a) => a.address) ?? [];
+    accounts.value = accts.length > 0 ? accts : null;
+  };
 
   const setupWallet = () => {
-    if (!isSolana.value) return;
+    teardownWalletListeners();
     const wallet = connection.value?.solanaWallet ?? null;
     if (!wallet) return;
+
     solanaWallet.value = wallet;
-    const accts = wallet.accounts.map((a) => a.address);
-    if (accts.length > 0) accounts.value = accts;
-    if (web3Auth.value?.currentChain?.rpcTarget) {
+    syncAccounts();
+    unsubscribeStandardEvents = (wallet.features as StandardEventsFeature)[StandardEvents].on("change", syncAccounts);
+    if (web3Auth.value?.currentChain?.rpcTarget && chainNamespace.value === CHAIN_NAMESPACES.SOLANA) {
       rpc.value = createSolanaRpc(web3Auth.value.currentChain.rpcTarget);
     }
   };
 
   const resetWallet = () => {
+    teardownWalletListeners();
     solanaWallet.value = null;
     accounts.value = null;
     rpc.value = null;
   };
+
+  onScopeDispose(teardownWalletListeners);
 
   const getPrivateKey = async (): Promise<string> => {
     if (!web3Auth.value) throw new Error("Web3Auth not initialized");
@@ -68,11 +83,12 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   watch(
     [connection, chainNamespace],
     ([newConnection, newChainNamespace]) => {
-      if (!newConnection?.solanaWallet || newChainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+      if (!newConnection?.solanaWallet) {
         if (solanaWallet.value) resetWallet();
         return;
       }
-      if (!solanaWallet.value) setupWallet();
+      // setup wallet if not setup or chain namespace is changed to solana
+      if (!solanaWallet.value || newChainNamespace === CHAIN_NAMESPACES.SOLANA) setupWallet();
     },
     { immediate: true }
   );

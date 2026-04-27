@@ -229,7 +229,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       }
 
       // show chain namespace selector if the button has multiple chain namespaces
-      if (button.chainNamespaces?.length > 1) {
+      if (button.chainNamespaces?.length > 1 && button.name !== WALLET_CONNECTORS.METAMASK) {
         setBodyState({
           ...bodyState,
           multiChainSelector: {
