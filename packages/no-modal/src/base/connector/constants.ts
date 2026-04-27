@@ -8,6 +8,7 @@ export const CONNECTOR_STATUS = {
   ERRORED: "errored",
   AUTHORIZED: "authorized",
   AUTHORIZING: "authorizing",
+  CONSENT_REQUIRING: "consent_requiring",
 } as const;
 
 export const CONNECTOR_EVENTS = {
@@ -17,6 +18,7 @@ export const CONNECTOR_EVENTS = {
   CONNECTORS_UPDATED: "connectors_updated",
   MFA_ENABLED: "mfa_enabled",
   REHYDRATION_ERROR: "rehydration_error",
+  CONSENT_ACCEPTED: "consent_accepted",
 } as const;
 
 export const CONNECTOR_CATEGORY = {

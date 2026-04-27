@@ -76,6 +76,15 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
   hideSuccessScreen?: boolean;
 
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
+
+  /**
+   * Config for consent required.
+   *
+   * @defaultValue `undefined`
+   */
+  consentConfig?: {
+    required: boolean;
+  };
 }
 
 export type ModalLoginParams = Pick<
@@ -104,6 +113,8 @@ export interface LoginModalCallbacks {
   }) => Promise<void>;
   onModalVisibility: (visibility: boolean) => Promise<void>;
   onMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => Promise<void>;
+  onAcceptConsent: () => Promise<void>;
+  onDeclineConsent: () => Promise<void>;
 }
 
 export const LOGIN_MODAL_EVENTS = {
@@ -122,6 +133,7 @@ export const MODAL_STATUS = {
   ERRORED: "errored",
   AUTHORIZING: "authorizing",
   AUTHORIZED: "authorized",
+  CONSENT_REQUIRING: "consent_requiring",
 } as const;
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 

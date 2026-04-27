@@ -18,6 +18,7 @@ export interface IWeb3AuthState {
   idToken: string | null;
   accessToken: string | null;
   refreshToken: string | null;
+  hasUserConsent?: boolean;
 }
 
 export type ChainsConfig = CustomChainConfig[];

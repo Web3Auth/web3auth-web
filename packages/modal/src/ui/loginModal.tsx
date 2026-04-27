@@ -17,6 +17,7 @@ import {
   LoginModeType,
   type MetaMaskConnectorData,
   type SDK_CONNECTED_EVENT_DATA,
+  SDK_CONSENT_ACCEPTED_EVENT_DATA,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
@@ -40,6 +41,7 @@ import {
   LoginModalProps,
   MODAL_STATUS,
   ModalState,
+  ModalStatusType,
   os,
   platform,
   SocialLoginEventType,
@@ -80,6 +82,8 @@ export class LoginModal {
 
   private analytics: Analytics;
 
+  private modalStatus: ModalStatusType = MODAL_STATUS.INITIALIZED;
+
   constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
 
@@ -111,6 +115,10 @@ export class LoginModal {
     this.callbacks = callbacks;
     this.analytics = uiConfig.analytics;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
+  }
+
+  get consentRequired(): boolean {
+    return this.uiConfig.consentConfig?.required || false;
   }
 
   get isDark(): boolean {
@@ -260,6 +268,8 @@ export class LoginModal {
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleMobileVerifyConnect={this.handleMobileVerifyConnect}
             handleSocialLoginClick={this.handleSocialLoginClick}
+            handleAcceptConsent={this.handleAcceptConsent}
+            handleDeclineConsent={this.handleDeclineConsent}
             closeModal={this.closeModal}
           >
             <Widget stateListener={this.stateEmitter} />
@@ -363,6 +373,14 @@ export class LoginModal {
     }
   };
 
+  private handleAcceptConsent = () => {
+    return this.callbacks.onAcceptConsent();
+  };
+
+  private handleDeclineConsent = () => {
+    return this.callbacks.onDeclineConsent();
+  };
+
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { loginParams } = params;
@@ -378,6 +396,7 @@ export class LoginModal {
   };
 
   private setState = (newState: Partial<ModalState>) => {
+    if (newState.status) this.modalStatus = newState.status;
     this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
@@ -410,6 +429,7 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.CONNECTED, (data: SDK_CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);
+      if (data.pendingUserConsent) return;
       // only show success if not being reconnected again.
       if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
         this.setState({
@@ -454,10 +474,29 @@ export class LoginModal {
       this.handleConnectorData(connectorData);
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZING, () => {
+      if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.AUTHORIZING });
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
+      if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.AUTHORIZED });
+    });
+    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, () => {
+      this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
+    });
+    listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => {
+      if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true });
+      } else if (!data.reconnected) {
+        this.setState({
+          status: MODAL_STATUS.CONNECTED,
+          modalVisibility: true,
+          postLoadingMessage: "modal.post-loading.connected",
+          currentPage: PAGES.LOGIN_OPTIONS,
+        });
+      } else {
+        this.setState({ status: MODAL_STATUS.CONNECTED });
+      }
     });
   };
 }
