@@ -2,9 +2,11 @@ import { createEVMClient, type Hex, type MetamaskConnectEVM } from "@metamask/co
 import { createMultichainClient, hasExtension, type MultichainCore, type Scope } from "@metamask/connect-multichain";
 import { createSolanaClient, type SolanaClient } from "@metamask/connect-solana";
 import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-controllers";
+import { bytesToHexPrefixedString, utf8ToBytes } from "@toruslabs/metadata-helpers";
 import type { Wallet } from "@wallet-standard/base";
 import { StandardConnect, StandardConnectFeature } from "@wallet-standard/features";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
+import { generateSiweNonce } from "viem/siwe";
 
 import {
   type Analytics,
@@ -426,7 +428,7 @@ class MetaMaskConnector extends BaseConnector<void> {
         address: accounts[0],
         chainId: parseInt(activeChainConfig.chainId, 16),
         version: "1",
-        nonce: Math.random().toString(36).slice(2),
+        nonce: generateSiweNonce(),
         issuedAt: new Date().toISOString(),
       };
 
@@ -436,7 +438,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       if (chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider) {
         signedMessage = await walletSignMessage(this.solanaProvider, challenge, accounts[0]);
       } else if (this.evmProvider) {
-        const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
+        const hexChallenge = bytesToHexPrefixedString(utf8ToBytes(challenge));
         signedMessage = await this.evmProvider.request<[string, string], string>({
           method: EVM_METHOD_TYPES.PERSONAL_SIGN,
           params: [hexChallenge, accounts[0]],
