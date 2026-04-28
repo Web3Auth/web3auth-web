@@ -14,12 +14,7 @@
     "sourceMap": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"],
-      "vue": ["./node_modules/vue"],
-      "@vue/reactivity": ["./node_modules/@vue/reactivity"],
-      "@vue/runtime-core": ["./node_modules/@vue/runtime-core"],
-      "@vue/runtime-dom": ["./node_modules/@vue/runtime-dom"],
-      "@vue/shared": ["./node_modules/@vue/shared"]
+      "@/*": ["src/*"]
     },
     "lib": ["esnext", "dom", "dom.iterable", "scripthost"]
   },
