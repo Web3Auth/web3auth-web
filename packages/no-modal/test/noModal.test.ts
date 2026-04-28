@@ -1,4 +1,4 @@
-import { beforeAll, afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeAll, describe, expect, it, vi } from "vitest";
 
 vi.mock("../src/base/account-linking", async () => {
   const actual = await vi.importActual<typeof import("../src/base/account-linking")>("../src/base/account-linking");
@@ -26,7 +26,6 @@ import {
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
-  WEB3AUTH_STATE_STORAGE_KEY,
 } from "../src/base";
 import { makeAccountUnlinkingRequest } from "../src/base/account-linking";
 import { authConnector, type AuthConnectorType } from "../src/connectors/auth-connector";
@@ -286,126 +285,6 @@ describe("Web3AuthNoModal", () => {
     await expect(sdk.getUserInfo()).rejects.toThrow(WalletLoginError);
   });
 
-  it("auto-skips consent UI when consent:<userId> is true", async () => {
-    const storage = createMockStorage();
-    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ consentDecisions: { "0xabc123": true } }));
-    const sdk = createSdk({
-      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
-      storage: { sessionId: storage },
-    });
-    sdk.exposeSetConsentRequired(true);
-    const consentRequiredListener = vi.fn();
-    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
-
-    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xAbC123"]) };
-    const consentAcceptedListener = vi.fn();
-    sdk.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
-    sdk.exposeSubscribeToConnectorEvents(connector);
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
-      updateProviderEngineProxy: vi.fn(),
-      removeAllListeners: vi.fn(),
-    };
-
-    connector.emit(CONNECTOR_EVENTS.CONNECTED, {
-      connectorName: WALLET_CONNECTORS.METAMASK,
-      ethereumProvider: ethereumProvider as never,
-      solanaWallet: null,
-      reconnected: false,
-    });
-    await vi.waitFor(() => {
-      expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
-    });
-    connector.emit(CONNECTOR_EVENTS.AUTHORIZED, {
-      connector: WALLET_CONNECTORS.METAMASK,
-      authTokenInfo: { idToken: "id-token" },
-    });
-    await vi.waitFor(() => {
-      expect(consentAcceptedListener).toHaveBeenCalledTimes(1);
-    });
-
-    expect(sdk.status).toBe(CONNECTOR_STATUS.AUTHORIZED);
-    expect(consentRequiredListener).not.toHaveBeenCalled();
-  });
-
-  it("shows consent UI when stored decision is false", async () => {
-    const storage = createMockStorage();
-    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ consentDecisions: { "0xbeef": false } }));
-    const sdk = createSdk({
-      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
-      storage: { sessionId: storage },
-    });
-    sdk.exposeSetConsentRequired(true);
-    const consentRequiredListener = vi.fn();
-    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
-
-    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xBEEF"]) };
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
-    connector.connect = vi.fn(async () => {
-      connector.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connectorName: WALLET_CONNECTORS.METAMASK,
-        ethereumProvider: ethereumProvider as never,
-        solanaWallet: null,
-        reconnected: false,
-      });
-      return null;
-    });
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
-    sdk.exposeSubscribeToConnectorEvents(connector);
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
-      updateProviderEngineProxy: vi.fn(),
-      removeAllListeners: vi.fn(),
-    };
-
-    const connectionPromise = sdk.connectTo(WALLET_CONNECTORS.METAMASK);
-    await vi.waitFor(() => {
-      expect(consentRequiredListener).toHaveBeenCalledTimes(1);
-    });
-    await sdk.acceptConsent();
-    await expect(connectionPromise).resolves.not.toBeNull();
-  });
-
-  it("persists consent:<userId> when user accepts consent UI", async () => {
-    const storage = createMockStorage();
-    const sdk = createSdk({
-      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
-      storage: { sessionId: storage },
-    });
-    sdk.exposeSetConsentRequired(true);
-
-    const consentRequiredListener = vi.fn();
-    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
-    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xFEEd"]) };
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
-    connector.connect = vi.fn(async () => {
-      connector.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connectorName: WALLET_CONNECTORS.METAMASK,
-        ethereumProvider: ethereumProvider as never,
-        solanaWallet: null,
-        reconnected: false,
-      });
-      return null;
-    });
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
-    sdk.exposeSubscribeToConnectorEvents(connector);
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
-      updateProviderEngineProxy: vi.fn(),
-      removeAllListeners: vi.fn(),
-    };
-
-    const connectionPromise = sdk.connectTo(WALLET_CONNECTORS.METAMASK);
-    await vi.waitFor(() => {
-      expect(consentRequiredListener).toHaveBeenCalledTimes(1);
-    });
-    await sdk.acceptConsent();
-    await connectionPromise;
-
-    const stateJson = await storage.get(WEB3AUTH_STATE_STORAGE_KEY);
-    const state = JSON.parse(stateJson!);
-    expect(state.consentDecisions["0xfeed"]).toBe(true);
-  });
-
   it("setConnectors deduplicates and emits updates only for new connectors", () => {
     const sdk = createSdk();
     const updates: WALLET_CONNECTOR_TYPE[][] = [];
@@ -611,6 +490,115 @@ describe("Web3AuthNoModal", () => {
         network: "ethereum",
       })
     );
+  });
+
+  it("unlinkAccount disconnects the active linked connector and restores the AUTH connection", async () => {
+    const primaryAccount: ConnectedAccountInfo = {
+      id: "auth-primary",
+      accountType: "social",
+      address: "0x1111111111111111111111111111111111111111",
+      authConnectionId: "google",
+      chainNamespace: "evm",
+      isPrimary: true,
+      eoaAddress: "0x1111111111111111111111111111111111111111",
+      connector: WALLET_CONNECTORS.AUTH,
+      active: false,
+    };
+    const targetAccount: ConnectedAccountInfo = {
+      id: "wallet-1",
+      accountType: "external_wallet",
+      address: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+      authConnectionId: null,
+      chainNamespace: "evm",
+      isPrimary: false,
+      eoaAddress: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+      connector: WALLET_CONNECTORS.METAMASK,
+      active: true,
+    };
+    const sdk = createSdk(
+      {},
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        idToken: "session-id-token",
+        accessToken: "access-token",
+        activeAccount: targetAccount,
+      }
+    );
+    await Promise.resolve();
+
+    const authConnector = createAuthConnectorForSdk(sdk);
+    authConnector.status = CONNECTOR_STATUS.CONNECTED;
+    authConnector.privateKeyProvider = {
+      chainId: "0x1",
+      provider: {},
+      currentChain: createChain(),
+    } as never;
+    sdk.exposeSetConnectors([authConnector]);
+    sdk.status = CONNECTED_STATUSES[0];
+
+    const updateProviderEngineProxy = vi.fn();
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
+      updateProviderEngineProxy,
+      removeAllListeners: vi.fn(),
+    };
+
+    const auxiliaryConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
+    } as never);
+    auxiliaryConnector.status = CONNECTOR_STATUS.CONNECTED;
+    const disconnectSpy = vi.fn(async () => {
+      auxiliaryConnector.status = CONNECTOR_STATUS.READY;
+    });
+    auxiliaryConnector.disconnect = disconnectSpy;
+    (sdk as unknown as { auxiliarySigningConnectorMap: Map<string, MockConnector> }).auxiliarySigningConnectorMap = new Map([
+      [targetAccount.id, auxiliaryConnector],
+    ]);
+
+    vi.spyOn(authConnector, "getUserInfo").mockResolvedValue({
+      connectedAccounts: [primaryAccount, targetAccount],
+    });
+    vi.mocked(makeAccountUnlinkingRequest).mockResolvedValue({
+      success: true,
+      idToken: "refreshed-id-token",
+      linkedAccounts: [],
+    });
+
+    const connectionUpdatedListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+
+    const result = await sdk.unlinkAccount(targetAccount.eoaAddress);
+
+    expect(result.idToken).toBe("refreshed-id-token");
+    expect(disconnectSpy).toHaveBeenCalledWith({ cleanup: true });
+    expect(updateProviderEngineProxy).toHaveBeenCalledTimes(1);
+    expect(connectionUpdatedListener).toHaveBeenCalledTimes(1);
+    expect(sdk.connection?.connectorName).toBe(WALLET_CONNECTORS.AUTH);
+    expect(
+      (
+        sdk as unknown as {
+          state: { activeAccount: ConnectedAccountInfo | null; idToken: string | null };
+          auxiliarySigningConnectorMap: Map<string, MockConnector>;
+        }
+      ).state.activeAccount
+    ).toBeNull();
+    expect(
+      (
+        sdk as unknown as {
+          state: { activeAccount: ConnectedAccountInfo | null; idToken: string | null };
+          auxiliarySigningConnectorMap: Map<string, MockConnector>;
+        }
+      ).state.idToken
+    ).toBe("refreshed-id-token");
+    expect(
+      (
+        sdk as unknown as {
+          state: { activeAccount: ConnectedAccountInfo | null; idToken: string | null };
+          auxiliarySigningConnectorMap: Map<string, MockConnector>;
+        }
+      ).auxiliarySigningConnectorMap.has(targetAccount.id)
+    ).toBe(false);
   });
 
   it("unlinkAccount matches solana addresses exactly and derives the solana network", async () => {

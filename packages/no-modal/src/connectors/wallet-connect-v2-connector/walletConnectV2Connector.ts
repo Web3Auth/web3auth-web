@@ -276,7 +276,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       this.status = CONNECTOR_STATUS.READY;
     }
     this.activeSession = null;
-    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
   }
 
   async getAuthTokenInfo(): Promise<AuthTokenInfo> {

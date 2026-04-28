@@ -1,3 +1,4 @@
+import { CaipAccountId } from "@metamask/connect-evm";
 import type { Wallet } from "@wallet-standard/base";
 import {
   AUTH_CONNECTION_TYPE,
@@ -114,7 +115,7 @@ export interface IConnector<T> extends SafeEventEmitter {
   icon?: string;
   init(options?: ConnectorInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
-  connect(params: T & { chainId: string }): Promise<Connection | null>;
+  connect(params: T & BaseConnectorLoginParams): Promise<Connection | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;
@@ -132,7 +133,17 @@ export type ConnectorParams = {
 
 export type BaseConnectorLoginParams = {
   chainId: string;
-  getAuthTokenInfo: boolean;
+  getAuthTokenInfo?: boolean;
+
+  /**
+   * for metamask connector, array of caip account ids to be used for connecting to the wallet
+   */
+  caipAccountIds?: CaipAccountId[];
+
+  /**
+   * Whether the connection is for the primary account or account linking
+   */
+  isAccountLinking?: boolean;
 };
 
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
@@ -140,6 +151,10 @@ export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 export type CONNECTED_EVENT_DATA = Connection & {
   reconnected: boolean;
   pendingUserConsent?: boolean;
+};
+
+export type DISCONNECTED_EVENT_DATA = {
+  connector: WALLET_CONNECTOR_TYPE | string;
 };
 
 export type AUTHORIZED_EVENT_DATA = {
@@ -156,7 +171,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.NOT_READY]: () => void;
   [CONNECTOR_EVENTS.READY]: (connector: WALLET_CONNECTOR_TYPE | string) => void;
   [CONNECTOR_EVENTS.CONNECTED]: (data: CONNECTED_EVENT_DATA) => void;
-  [CONNECTOR_EVENTS.DISCONNECTED]: () => void;
+  [CONNECTOR_EVENTS.DISCONNECTED]: (data?: DISCONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.CONNECTING]: (data: { connector: WALLET_CONNECTOR_TYPE | string }) => void;
   [CONNECTOR_EVENTS.AUTHORIZING]: (data: { connector: WALLET_CONNECTOR_TYPE | string }) => void;
   [CONNECTOR_EVENTS.AUTHORIZED]: (data: AUTHORIZED_EVENT_DATA) => void;

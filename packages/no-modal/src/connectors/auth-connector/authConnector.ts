@@ -309,7 +309,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
     this.rehydrated = false;
     this._solanaWallet = null;
-    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED, { connector: WALLET_CONNECTORS.AUTH });
   }
 
   async getAuthTokenInfo(): Promise<AuthTokenInfo> {
@@ -467,7 +467,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     const { connectorName, chainId, walletConnector } = params;
 
     try {
-      const connection = await walletConnector.connect({ chainId });
+      const connection = await walletConnector.connect({ chainId, isAccountLinking: true });
       if (!connection) {
         throw AccountLinkingError.walletProofFailed(`Failed to connect to "${params.connectorName}" for account linking.`);
       }
@@ -513,6 +513,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         ...trackData,
         ...getErrorAnalyticsProperties(error),
       });
+
+      // disconnect the wallet connector to avoid any leftover state
+      await walletConnector.disconnect({ cleanup: true });
       throw error;
     }
   }

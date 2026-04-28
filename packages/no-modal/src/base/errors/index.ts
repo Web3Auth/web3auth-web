@@ -236,6 +236,9 @@ export class AccountLinkingError extends Web3AuthError {
     5403: "Primary identity token is not available",
     5404: "Failed to obtain wallet proof token",
     5405: "Connector is not supported for wallet linking",
+    5406: "Cannot unlink active account",
+    5407: "Account not linked",
+    5408: "Cannot unlink primary account",
   };
 
   public constructor(code: number, message?: string, cause?: unknown) {
@@ -265,6 +268,18 @@ export class AccountLinkingError extends Web3AuthError {
 
   public static unsupportedConnector(extraMessage = "", cause?: unknown): AccountLinkingError {
     return AccountLinkingError.fromCode(5405, extraMessage, cause);
+  }
+
+  public static cannotUnlinkActiveAccount(): AccountLinkingError {
+    return AccountLinkingError.fromCode(5406);
+  }
+
+  public static accountNotLinked(message = "", cause?: unknown): AccountLinkingError {
+    return AccountLinkingError.fromCode(5407, message, cause);
+  }
+
+  public static cannotUnlinkPrimaryAccount(): AccountLinkingError {
+    return AccountLinkingError.fromCode(5408);
   }
 }
 

@@ -596,7 +596,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
       // initialize connectors
       // skip initializing cached connector here as it is already being initialized in initModal before.
-      if (connector.status === CONNECTOR_STATUS.NOT_READY && this.cachedConnector !== connectorName) {
+      if (
+        connector.status === CONNECTOR_STATUS.NOT_READY &&
+        this.cachedConnector !== connectorName &&
+        this.currentConnection?.connectorName !== connectorName
+      ) {
         try {
           this.subscribeToConnectorEvents(connector);
           const initialChain = this.getInitialChainIdForConnector(connector);
