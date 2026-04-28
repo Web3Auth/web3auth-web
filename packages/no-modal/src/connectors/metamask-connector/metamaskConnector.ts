@@ -238,10 +238,6 @@ class MetaMaskConnector extends BaseConnector<void> {
         ethereumProvider: this.evmProvider,
         solanaWallet: this.solanaProvider,
       } as CONNECTED_EVENT_DATA);
-
-      if (options.getAuthTokenInfo) {
-        await this.getAuthTokenInfo();
-      }
     } else if (coreStatus === "loaded" || coreStatus === "disconnected") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
@@ -265,7 +261,6 @@ class MetaMaskConnector extends BaseConnector<void> {
     super.checkConnectionRequirements();
 
     await this.ensureInitialized();
-
     const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 

@@ -1057,13 +1057,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         assertAuthConnector(accountLinkingConnector, "Account switching requires the AUTH connector to be available.");
         const targetChainId = accountLinkingConnector.getChainIdForConnectedAccount(activeAccount, connectedChainId);
         const walletConnector = await this.createIsolatedWalletConnector(activeAccount.connector as WALLET_CONNECTOR_TYPE, targetChainId);
-        const newConnection = await walletConnector.connect({ chainId: targetChainId });
-        if (!newConnection) {
-          throw AccountLinkingError.requestFailed(`Failed to connect isolated connector "${activeAccount.connector}" for account switch.`);
+
+        if (walletConnector.connected) {
+          ethereumProvider = walletConnector.provider;
+          solanaWallet = walletConnector.solanaWallet;
+        } else {
+          const newConnection = await walletConnector.connect({ chainId: targetChainId });
+          if (!newConnection) {
+            throw AccountLinkingError.requestFailed(`Failed to connect isolated connector "${activeAccount.connector}" for account switch.`);
+          }
+          ({ ethereumProvider, solanaWallet } = newConnection);
         }
 
         this.linkedSigningConnectorMap.set(activeAccount.id, walletConnector);
-        ({ ethereumProvider, solanaWallet } = newConnection);
       }
 
       if (ethereumProvider) {
