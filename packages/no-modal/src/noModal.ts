@@ -623,7 +623,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
             }
             const caipChainId = getCaipChainId(switchChainConfig);
             const caipAccountId = `${caipChainId}:${switchResult.targetAccount.eoaAddress}` as CaipAccountId;
-            const newConnection = await walletConnector.connect({ chainId: switchResult.activeChainId, caipAccountIds: [caipAccountId] });
+            newConnection = await walletConnector.connect({ chainId: switchResult.activeChainId, caipAccountIds: [caipAccountId] });
             if (!newConnection) {
               throw AccountLinkingError.requestFailed(
                 `Failed to connect isolated connector "${switchResult.targetAccount.connector}" for account switch.`
@@ -670,24 +670,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
-    const authConnector = this.getMainAuthConnector();
-    const chainId = params.chainId || this.state.currentChainId;
-    if (!chainId) {
-      throw AccountLinkingError.walletProofFailed(
-        "No chainId is available. Please specify chainId in LinkAccountParams or ensure the SDK has an active chain."
-      );
-    }
-
-    const isolatedConnector = await this.createIsolatedWalletConnector(params.connectorName, chainId);
-
-    const result = await authConnector.linkAccount({
-      connectorName: params.connectorName,
-      chainId,
-      walletConnector: isolatedConnector,
-      authSessionTokens: { accessToken: this.accessToken, idToken: this.idToken },
-    });
-    await this.setState({ idToken: result.idToken });
-    return result;
+    const chainId = this.resolveLinkAccountChainId(params.chainId);
+    const isolatedConnector = await this.createLinkingWalletConnector(params.connectorName, chainId);
+    return this.linkAccountWithConnector(params.connectorName, chainId, isolatedConnector);
   }
 
   public async unlinkAccount(address: string): Promise<UnlinkAccountResult> {
@@ -1321,6 +1306,36 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
 
     this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, { reconnected: this.currentConnectionReconnected });
+  }
+
+  protected resolveLinkAccountChainId(chainId?: string | null): string {
+    const finalChainId = chainId || this.state.currentChainId;
+    if (!finalChainId) {
+      throw AccountLinkingError.walletProofFailed(
+        "No chainId is available. Please specify chainId in LinkAccountParams or ensure the SDK has an active chain."
+      );
+    }
+    return finalChainId;
+  }
+
+  protected async createLinkingWalletConnector(connectorName: WALLET_CONNECTOR_TYPE | string, chainId: string): Promise<IConnector<unknown>> {
+    return this.createIsolatedWalletConnector(connectorName, chainId);
+  }
+
+  protected async linkAccountWithConnector(
+    connectorName: WALLET_CONNECTOR_TYPE | string,
+    chainId: string,
+    walletConnector: IConnector<unknown>
+  ): Promise<LinkAccountResult> {
+    const authConnector = this.getMainAuthConnector();
+    const result = await authConnector.linkAccount({
+      connectorName,
+      chainId,
+      walletConnector,
+      authSessionTokens: { accessToken: this.accessToken, idToken: this.idToken },
+    });
+    await this.setState({ idToken: result.idToken });
+    return result;
   }
 
   private getMainAuthConnector(): AuthConnectorType {

@@ -137,6 +137,34 @@ export const MODAL_STATUS = {
 } as const;
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 
+export const ACCOUNT_LINKING_STATUS = {
+  IDLE: "idle",
+  INITIALIZING: "initializing",
+  AWAITING_CONNECTION: "awaiting_connection",
+  WALLET_CONNECTED: "wallet_connected",
+  LINKING: "linking",
+  ERRORED: "errored",
+  COMPLETED: "completed",
+} as const;
+export type AccountLinkingStatusType = (typeof ACCOUNT_LINKING_STATUS)[keyof typeof ACCOUNT_LINKING_STATUS];
+
+export interface AccountLinkingState {
+  active: boolean;
+  connectorName: WALLET_CONNECTOR_TYPE | string | null;
+  chainId: string | null;
+  status: AccountLinkingStatusType;
+  walletConnectUri?: string;
+  errorMessage: string;
+}
+
+export const DEFAULT_ACCOUNT_LINKING_STATE: AccountLinkingState = {
+  active: false,
+  connectorName: null,
+  chainId: null,
+  status: ACCOUNT_LINKING_STATUS.IDLE,
+  errorMessage: "",
+};
+
 export interface ModalState {
   // UI State - changes frequently during user interaction
   status: ModalStatusType;
@@ -155,6 +183,7 @@ export interface ModalState {
   showExternalWalletsOnly: boolean;
   walletConnectUri: string;
   metamaskConnectUri: string;
+  accountLinking: AccountLinkingState;
 
   // Config State - set during initialization, rarely changes
   socialLoginsConfig: SocialLoginsConfig;

@@ -467,9 +467,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     const { connectorName, chainId, walletConnector } = params;
 
     try {
-      const connection = await walletConnector.connect({ chainId, isAccountLinking: true });
-      if (!connection) {
-        throw AccountLinkingError.walletProofFailed(`Failed to connect to "${params.connectorName}" for account linking.`);
+      if (!walletConnector.connected) {
+        const connection = await walletConnector.connect({ chainId, isAccountLinking: true });
+        if (!connection) {
+          throw AccountLinkingError.walletProofFailed(`Failed to connect to "${params.connectorName}" for account linking.`);
+        }
       }
     } catch (error) {
       if (error instanceof AccountLinkingError) {
@@ -502,24 +504,27 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         },
       });
 
-      await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_COMPLETED, {
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_COMPLETED, {
         ...trackData,
         linked_address: walletProof.address,
       });
 
       return result;
     } catch (error) {
-      await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_FAILED, {
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_FAILED, {
         ...trackData,
         ...getErrorAnalyticsProperties(error),
       });
 
       // disconnect the wallet connector to avoid any leftover state
-      await walletConnector.disconnect({ cleanup: true });
+      try {
+        await walletConnector.disconnect({ cleanup: true });
+      } catch (disconnectError) {
+        log.debug("Failed to disconnect wallet connector after linking failure", disconnectError);
+      }
       throw error;
     }
   }
-
   public async unlinkAccount(params: AuthConnectorUnlinkAccountParams): Promise<UnlinkAccountResult> {
     if (!CONNECTED_STATUSES.includes(this.status)) {
       throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before unlinking an account.");

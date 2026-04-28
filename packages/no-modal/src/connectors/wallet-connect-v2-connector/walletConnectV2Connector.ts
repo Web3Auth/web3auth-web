@@ -389,7 +389,6 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       }
 
       const { uri, approval } = await this.connector.connect(this.connectorOptions.loginSettings);
-
       const qrcodeModal = this.connectorOptions?.connectorSettings?.qrcodeModal;
       // Open QRCode modal if a URI was returned (i.e. we're not connecting with an existing pairing).
       if (uri) {

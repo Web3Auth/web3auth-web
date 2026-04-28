@@ -48,6 +48,18 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
   public exposeCheckIfAutoConnect(connector: MockConnector) {
     return this.checkIfAutoConnect(connector as unknown as IConnector<unknown>);
   }
+
+  public exposeResolveLinkAccountChainId(chainId?: string | null) {
+    return this.resolveLinkAccountChainId(chainId);
+  }
+
+  public exposeSubmitLinkAccountWithConnectedConnector(
+    connectorName: WALLET_CONNECTOR_TYPE | string,
+    chainId: string,
+    walletConnector: IConnector<unknown>
+  ) {
+    return this.submitLinkAccountWithConnectedConnector(connectorName, chainId, walletConnector);
+  }
 }
 
 afterEach(() => {
@@ -429,6 +441,128 @@ describe("Web3AuthNoModal", () => {
     await expect(sdk.switchAccount(targetAccount)).rejects.toThrow(
       `Connector "${WALLET_CONNECTORS.METAMASK}" is not available for linked account "${targetAccount.eoaAddress}".`
     );
+  });
+
+  it("linkAccount uses the active chain, isolated connector, and persists refreshed idToken", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        idToken: "session-id-token",
+        accessToken: "access-token",
+      }
+    );
+    await Promise.resolve();
+
+    const authConnector = createAuthConnectorForSdk(sdk);
+    authConnector.status = CONNECTOR_STATUS.CONNECTED;
+    sdk.exposeSetConnectors([authConnector]);
+    sdk.status = CONNECTED_STATUSES[0];
+
+    const isolatedConnector = new MockConnector({
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      connectorNamespace: CONNECTOR_NAMESPACES.MULTICHAIN,
+    } as never);
+
+    vi.spyOn(
+      sdk as unknown as {
+        createIsolatedWalletConnector: (connectorName: string, chainId: string) => Promise<MockConnector>;
+      },
+      "createIsolatedWalletConnector"
+    ).mockResolvedValue(isolatedConnector);
+
+    const linkAccountSpy = vi.spyOn(authConnector, "linkAccount").mockResolvedValue({
+      success: true,
+      idToken: "refreshed-id-token",
+      linkedAccounts: [],
+    });
+
+    const result = await sdk.linkAccount({ connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
+
+    expect(
+      (
+        sdk as unknown as {
+          state: { idToken: string | null };
+        }
+      ).state.idToken
+    ).toBe("refreshed-id-token");
+    expect(result).toEqual({
+      success: true,
+      idToken: "refreshed-id-token",
+      linkedAccounts: [],
+    });
+    expect(linkAccountSpy).toHaveBeenCalledWith({
+      connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      chainId: "0x1",
+      walletConnector: isolatedConnector,
+      authSessionTokens: {
+        accessToken: "access-token",
+        idToken: "session-id-token",
+      },
+    });
+  });
+
+  it("resolveLinkAccountChainId throws when no explicit or active chain is available", () => {
+    const sdk = createSdk({}, { currentChainId: null });
+
+    expect(() => sdk.exposeResolveLinkAccountChainId()).toThrow(
+      "No chainId is available. Please specify chainId in LinkAccountParams or ensure the SDK has an active chain."
+    );
+  });
+
+  it("submitLinkAccountWithConnectedConnector persists refreshed idToken from already-connected wallet flow", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        idToken: "session-id-token",
+        accessToken: "access-token",
+      }
+    );
+    await Promise.resolve();
+
+    const authConnector = createAuthConnectorForSdk(sdk);
+    authConnector.status = CONNECTOR_STATUS.CONNECTED;
+    sdk.exposeSetConnectors([authConnector]);
+    sdk.status = CONNECTED_STATUSES[0];
+
+    const connectedWalletConnector = new MockConnector({
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      connectorNamespace: CONNECTOR_NAMESPACES.MULTICHAIN,
+    } as never);
+    connectedWalletConnector.status = CONNECTOR_STATUS.CONNECTED;
+
+    const linkConnectedAccountSpy = vi.spyOn(authConnector, "linkConnectedAccount").mockResolvedValue({
+      success: true,
+      idToken: "connected-wallet-id-token",
+      linkedAccounts: [],
+    });
+
+    const result = await sdk.exposeSubmitLinkAccountWithConnectedConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, "0x1", connectedWalletConnector);
+
+    expect(linkConnectedAccountSpy).toHaveBeenCalledWith({
+      connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      chainId: "0x1",
+      walletConnector: connectedWalletConnector,
+      authSessionTokens: {
+        accessToken: "access-token",
+        idToken: "session-id-token",
+      },
+    });
+    expect(result).toEqual({
+      success: true,
+      idToken: "connected-wallet-id-token",
+      linkedAccounts: [],
+    });
+    expect(
+      (
+        sdk as unknown as {
+          state: { idToken: string | null };
+        }
+      ).state.idToken
+    ).toBe("connected-wallet-id-token");
   });
 
   it("unlinkAccount uses the target account namespace instead of the active chain", async () => {

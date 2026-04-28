@@ -5,12 +5,13 @@ import { twMerge } from "tailwind-merge";
 import Footer from "../../components/Footer/Footer";
 import Loader from "../../components/Loader";
 import Toast from "../../components/Toast";
-import { DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
+import { DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES, WALLET_CONNECT_LOGO } from "../../constants";
 import { useModalState } from "../../context/ModalStateContext";
 import { RootProvider } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
-import { ExternalButton, MODAL_STATUS } from "../../interfaces";
+import { ACCOUNT_LINKING_STATUS, ExternalButton, MODAL_STATUS } from "../../interfaces";
 import ConnectWallet from "../ConnectWallet";
+import ConnectWalletQrCode from "../ConnectWallet/ConnectWalletQrCode";
 import Login from "../Login";
 import { RootProps } from "./Root.type";
 import RootBodySheets from "./RootBodySheets/RootBodySheets";
@@ -19,8 +20,15 @@ function RootContent(props: RootProps) {
   const { onCloseLoader } = props;
 
   const { modalState, shouldShowLoginPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
-  const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect, handleAcceptConsent, handleDeclineConsent } =
-    useWidget();
+  const {
+    deviceDetails,
+    isDark,
+    uiConfig,
+    isConnectAndSignAuthenticationMode,
+    handleMobileVerifyConnect,
+    handleAcceptConsent,
+    handleDeclineConsent,
+  } = useWidget();
   const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen, consentRequired } = uiConfig;
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -185,9 +193,46 @@ function RootContent(props: RootProps) {
     return !showPasswordLessInput && !areSocialLoginsVisible;
   }, [areSocialLoginsVisible, showPasswordLessInput]);
 
+  const isWalletConnectAccountLinkingVisible = useMemo(() => {
+    return modalState.accountLinking.active && modalState.accountLinking.connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2;
+  }, [modalState.accountLinking.active, modalState.accountLinking.connectorName]);
+
+  const accountLinkingButton = useMemo<ExternalButton>(
+    () => ({
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      displayName: "WalletConnect",
+      hasInjectedWallet: false,
+      hasWalletConnect: true,
+      hasInstallLinks: false,
+      imgExtension: "svg",
+    }),
+    []
+  );
+
+  const accountLinkingMessage = useMemo(() => {
+    switch (modalState.accountLinking.status) {
+      case ACCOUNT_LINKING_STATUS.INITIALIZING:
+        return "Initializing WalletConnect...";
+      case ACCOUNT_LINKING_STATUS.AWAITING_CONNECTION:
+        return modalState.accountLinking.walletConnectUri
+          ? "Scan the QR code with a WalletConnect-compatible wallet."
+          : "Preparing WalletConnect QR code...";
+      case ACCOUNT_LINKING_STATUS.WALLET_CONNECTED:
+        return "Wallet connected. Preparing account linking...";
+      case ACCOUNT_LINKING_STATUS.LINKING:
+        return "Linking wallet...";
+      case ACCOUNT_LINKING_STATUS.COMPLETED:
+        return "Wallet linked.";
+      case ACCOUNT_LINKING_STATUS.ERRORED:
+        return modalState.accountLinking.errorMessage || "Failed to connect with WalletConnect.";
+      default:
+        return "";
+    }
+  }, [modalState.accountLinking.errorMessage, modalState.accountLinking.status, modalState.accountLinking.walletConnectUri]);
+
   const isShowLoader = useMemo(() => {
-    return modalState.status !== MODAL_STATUS.INITIALIZED;
-  }, [modalState.status]);
+    return !isWalletConnectAccountLinkingVisible && modalState.status !== MODAL_STATUS.INITIALIZED;
+  }, [isWalletConnectAccountLinkingVisible, modalState.status]);
 
   const isConsentRequiringStatus = modalState.status === MODAL_STATUS.CONSENT_REQUIRING;
 
@@ -225,16 +270,43 @@ function RootContent(props: RootProps) {
             />
           ) : (
             <>
-              {/* Login Screen */}
-              {modalState.currentPage === PAGES.LOGIN_OPTIONS && shouldShowLoginPage && modalState.status === MODAL_STATUS.INITIALIZED && (
-                <Login
-                  installedExternalWalletConfig={topInstalledConnectorButtons}
-                  totalExternalWallets={allExternalWallets.length}
-                  remainingUndisplayedWallets={remainingUndisplayedWallets}
-                />
+              {isWalletConnectAccountLinkingVisible && (
+                <div className="w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
+                  <div className="w3a--flex w3a--items-center w3a--justify-center">
+                    <p className="w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">WalletConnect</p>
+                  </div>
+                  {modalState.accountLinking.status === ACCOUNT_LINKING_STATUS.ERRORED ? (
+                    <div className="w3a--rounded-2xl w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--p-4 dark:w3a--border-app-gray-700 dark:w3a--bg-app-gray-800">
+                      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-700 dark:w3a--text-app-gray-200">{accountLinkingMessage}</p>
+                    </div>
+                  ) : (
+                    <ConnectWalletQrCode
+                      qrCodeValue={modalState.accountLinking.walletConnectUri}
+                      isDark={isDark}
+                      selectedButton={accountLinkingButton}
+                      logoImage={WALLET_CONNECT_LOGO}
+                      platform={deviceDetails.platform}
+                    />
+                  )}
+                  {accountLinkingMessage && modalState.accountLinking.status !== ACCOUNT_LINKING_STATUS.ERRORED && (
+                    <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-300">{accountLinkingMessage}</p>
+                  )}
+                </div>
               )}
+              {/* Login Screen */}
+              {!isWalletConnectAccountLinkingVisible &&
+                modalState.currentPage === PAGES.LOGIN_OPTIONS &&
+                shouldShowLoginPage &&
+                modalState.status === MODAL_STATUS.INITIALIZED && (
+                  <Login
+                    installedExternalWalletConfig={topInstalledConnectorButtons}
+                    totalExternalWallets={allExternalWallets.length}
+                    remainingUndisplayedWallets={remainingUndisplayedWallets}
+                  />
+                )}
               {/* Connect Wallet Screen */}
-              {modalState.currentPage === PAGES.WALLET_LIST &&
+              {!isWalletConnectAccountLinkingVisible &&
+                modalState.currentPage === PAGES.WALLET_LIST &&
                 (!shouldShowLoginPage || isExternalWalletModeOnly) &&
                 modalState.status === MODAL_STATUS.INITIALIZED && (
                   <ConnectWallet
