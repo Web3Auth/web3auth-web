@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "10.15.0",
+  "version": "11.0.0-beta.0",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -93,7 +93,7 @@
     "@toruslabs/base-controllers": "^9.5.0",
     "@toruslabs/http-helpers": "^9.0.0",
     "@web3auth/auth": "^11.6.0",
-    "@web3auth/no-modal": "^10.15.0",
+    "@web3auth/no-modal": "^11.0.0-beta.0",
     "@web3auth/ws-embed": "^6.0.0",
     "bowser": "^2.14.1",
     "classnames": "^2.5.1",

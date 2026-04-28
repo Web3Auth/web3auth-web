@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "10.15.0",
+  "version": "11.0.0-beta.0",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -101,12 +101,12 @@
   "devDependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",
     "@solana/react-hooks": "^1.4.1",
-    "@x402/evm": "^2.7.0",
-    "@x402/fetch": "^2.7.0",
-    "@x402/svm": "^2.7.0",
     "@types/react": "^19.2.14",
     "@wagmi/core": "^3.4.1",
     "@wagmi/vue": "^0.5.1",
+    "@x402/evm": "^2.7.0",
+    "@x402/fetch": "^2.7.0",
+    "@x402/svm": "^2.7.0",
     "react": "^19.2.4",
     "viem": "^2.47.6",
     "vue": "^3.x",
