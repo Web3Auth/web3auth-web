@@ -135,6 +135,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
     this.connectorOptions.connectorSettings = deepmerge(wc2Settings.connectorSettings || {}, this.connectorOptions.connectorSettings || {});
     const { connectorSettings } = this.connectorOptions;
+
     this.connector = await Client.init(connectorSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({
       config: { chain: chainConfig, chains: this.coreOptions.chains },

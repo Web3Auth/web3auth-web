@@ -4,6 +4,7 @@ import {
   ANALYTICS_EVENTS,
   ANALYTICS_SDK_TYPE,
   type AUTH_CONNECTION_TYPE,
+  AuthConnectorSwitchAccountResult,
   type AuthConnectorType,
   type AuthLoginParams,
   type BaseConnectorConfig,
@@ -11,6 +12,7 @@ import {
   cloneDeep,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  type ConnectedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
@@ -50,6 +52,7 @@ import deepmerge from "deepmerge";
 import { defaultConnectorsModalConfig } from "./config";
 import { type ConnectorsModalConfig, type IWeb3AuthModal, type ModalConfig } from "./interface";
 import {
+  ACCOUNT_LINKING_INTENT,
   ACCOUNT_LINKING_STATUS,
   type AccountLinkingState,
   AUTH_PROVIDERS,
@@ -261,96 +264,66 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await super.completeConsentAcceptance();
   }
 
+  public async switchAccount(account: ConnectedAccountInfo): Promise<void> {
+    const authConnector = this.getMainAuthConnector();
+    const switchResult = await authConnector.switchAccount(account, {
+      activeAccount: this.activeAccount,
+      currentChainId: this.currentChainId,
+    });
+    if (!switchResult) {
+      return;
+    }
+
+    try {
+      const existingConnector = switchResult.kind === "external" ? this.getLinkedSigningConnector(switchResult.targetAccount.id) : null;
+      // check if the existing connector is connected and usable, then we can switch to it without re-connecting again
+      const isExistingConnectorConnected = Boolean(existingConnector && this.hasUsableConnectedSwitchConnector(existingConnector));
+      const projectConfig =
+        switchResult.kind === "external" && !isExistingConnectorConnected ? (await this.getProjectAndWalletConfig())?.projectConfig : undefined;
+
+      if (
+        switchResult.kind !== "external" ||
+        switchResult.targetAccount.connector !== WALLET_CONNECTORS.WALLET_CONNECT_V2 ||
+        isExistingConnectorConnected
+      ) {
+        await super.processSwitchAccountResult(authConnector, switchResult, {
+          walletConnector: isExistingConnectorConnected && existingConnector ? existingConnector : undefined,
+          projectConfig,
+        });
+        await authConnector.trackSwitchAccountCompleted(switchResult.targetAccount);
+        return;
+      }
+
+      await this.switchToWalletConnectV2Account(switchResult, projectConfig);
+    } catch (error) {
+      await authConnector.trackSwitchAccountFailed(switchResult.targetAccount, error);
+      throw error;
+    }
+  }
+
   public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
     if (params.connectorName !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
       return super.linkAccount(params);
     }
 
-    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
-
     const chainId = this.resolveLinkAccountChainId(params.chainId);
-    this.clearAccountLinkingResetOnCloseListener();
-    const connector = await this.prepareWalletConnectAccountLinkingConnector(chainId);
-    let connectCancelled = false;
-    let removeConnectPhaseVisibilityListener = () => {};
+    const connectorToLink = await this.prepareWalletConnectAccountLinkingConnector(chainId);
 
-    const closeDuringConnectPromise = new Promise<never>((_resolve, reject) => {
-      const handleVisibility = (visibility: boolean) => {
-        if (!visibility) {
-          connectCancelled = true;
-          reject(WalletLoginError.popupClosed("User closed the modal"));
-        }
-      };
-
-      this.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
-      removeConnectPhaseVisibilityListener = () => {
-        this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
-      };
+    return this.runWalletConnectV2AccountAction({
+      connector: connectorToLink,
+      connectParams: { chainId, isAccountLinking: true },
+      onConnected: async (connector) => ({
+        result: await super.linkAccountWithConnector(params.connectorName, chainId, connector),
+      }),
+      intent: ACCOUNT_LINKING_INTENT.LINK,
     });
-
-    const connectPromise = connector.connect({ chainId, isAccountLinking: true });
-    void connectPromise
-      .then(async (connection): Promise<void> => {
-        if (!connectCancelled || !connection || !connector.connected) return undefined;
-        try {
-          await connector.disconnect({ cleanup: true });
-        } catch (error) {
-          log.debug("Failed to disconnect cancelled WalletConnect account-linking connector", error);
-        }
-        return undefined;
-      })
-      .catch(() => {});
-
-    try {
-      const connection = await Promise.race([connectPromise, closeDuringConnectPromise]);
-      if (!connection) {
-        throw AccountLinkingError.walletProofFailed(`Failed to connect to "${params.connectorName}" for account linking.`);
-      }
-
-      removeConnectPhaseVisibilityListener();
-      this.updateAccountLinkingModalSession({
-        status: ACCOUNT_LINKING_STATUS.LINKING,
-        walletConnectUri: "",
-        errorMessage: "",
-      });
-
-      const result = await super.linkAccountWithConnector(params.connectorName, chainId, connector);
-      this.updateAccountLinkingModalSession({
-        status: ACCOUNT_LINKING_STATUS.COMPLETED,
-        walletConnectUri: "",
-        errorMessage: "",
-      });
-      this.loginModal.closeModal();
-      this.resetAccountLinkingModalSession();
-      return result;
-    } catch (error) {
-      const isPopupClosed = error instanceof Web3AuthError && error.code === 5114;
-
-      if (isPopupClosed) {
-        this.resetAccountLinkingModalSession();
-      } else {
-        this.updateAccountLinkingModalSession({
-          status: ACCOUNT_LINKING_STATUS.ERRORED,
-          errorMessage: (error as Error)?.message || "Failed to link wallet with WalletConnect.",
-        });
-        this.installAccountLinkingResetOnCloseListener();
-      }
-
-      throw error;
-    } finally {
-      removeConnectPhaseVisibilityListener();
-      this.clearAccountLinkingConnectorListeners();
-      try {
-        if (connector.connected) {
-          await connector.disconnect({ cleanup: true });
-        }
-      } catch (error) {
-        log.debug("Failed to disconnect WalletConnect account-linking connector during cleanup", error);
-      }
-    }
   }
 
-  protected startAccountLinkingModalSession(params: { connectorName: WALLET_CONNECTOR_TYPE | string; chainId: string }): void {
+  protected startAccountLinkingModalSession(params: {
+    connectorName: WALLET_CONNECTOR_TYPE | string;
+    chainId: string;
+    intent: (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
+  }): void {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     this.loginModal.startAccountLinkingSession(params);
   }
@@ -367,10 +340,22 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   protected async prepareWalletConnectAccountLinkingConnector(chainId: string): Promise<IConnector<unknown>> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
-    const connector = await super.createLinkingWalletConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, chainId);
+    const { projectConfig } = await this.getProjectAndWalletConfig();
+    const connector = await super.createLinkingWalletConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, chainId, projectConfig);
     this.clearAccountLinkingConnectorListeners();
     this.removeAccountLinkingConnectorListeners = this.subscribeToAccountLinkingConnectorEvents(connector);
-    this.startAccountLinkingModalSession({ connectorName: connector.name, chainId });
+    this.startAccountLinkingModalSession({ connectorName: connector.name, chainId, intent: ACCOUNT_LINKING_INTENT.LINK });
+    this.loginModal.open();
+    return connector;
+  }
+
+  protected async prepareWalletConnectAccountSwitchConnector(chainId: string, projectConfig?: ProjectConfig): Promise<IConnector<unknown>> {
+    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
+    const finalProjectConfig = projectConfig ?? (await this.getProjectAndWalletConfig()).projectConfig;
+    const connector = await super.createSwitchingWalletConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, chainId, finalProjectConfig);
+    this.clearAccountLinkingConnectorListeners();
+    this.removeAccountLinkingConnectorListeners = this.subscribeToAccountLinkingConnectorEvents(connector);
+    this.startAccountLinkingModalSession({ connectorName: connector.name, chainId, intent: ACCOUNT_LINKING_INTENT.SWITCH });
     this.loginModal.open();
     return connector;
   }
@@ -880,6 +865,122 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   private getChainNamespaces = (): ChainNamespaceType[] => {
     return [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])];
   };
+
+  private async switchToWalletConnectV2Account(switchResult: AuthConnectorSwitchAccountResult, projectConfig: ProjectConfig) {
+    const authConnector = this.getMainAuthConnector();
+    const connectorToSwitchTo = await this.prepareWalletConnectAccountSwitchConnector(switchResult.activeChainId, projectConfig);
+    try {
+      await this.runWalletConnectV2AccountAction({
+        connector: connectorToSwitchTo,
+        connectParams: { chainId: switchResult.activeChainId },
+        onConnected: async (connector) => {
+          await super.processSwitchAccountResult(authConnector, switchResult, {
+            walletConnector: connector,
+            projectConfig,
+          });
+          await authConnector.trackSwitchAccountCompleted(switchResult.targetAccount);
+          return { result: undefined, retainConnector: true };
+        },
+        intent: ACCOUNT_LINKING_INTENT.SWITCH,
+      });
+    } catch (error) {
+      await authConnector.trackSwitchAccountFailed(switchResult.targetAccount, error);
+      this.updateAccountLinkingModalSession({
+        status: ACCOUNT_LINKING_STATUS.ERRORED,
+        errorMessage: (error as Error)?.message || "Failed to switch wallet with WalletConnect.",
+      });
+      throw error;
+    }
+  }
+
+  private async runWalletConnectV2AccountAction<T>(params: {
+    connector: IConnector<unknown>;
+    connectParams: { chainId: string; isAccountLinking?: boolean };
+    onConnected: (connector: IConnector<unknown>, connection: Connection) => Promise<{ result: T; retainConnector?: boolean }>;
+    intent: (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
+  }): Promise<T> {
+    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
+
+    this.clearAccountLinkingResetOnCloseListener();
+    let retainConnector = false;
+    let connectCancelled = false;
+    let removeConnectPhaseVisibilityListener = () => {};
+
+    const closeDuringConnectPromise = new Promise<never>((_resolve, reject) => {
+      const handleVisibility = (visibility: boolean) => {
+        if (!visibility) {
+          connectCancelled = true;
+          reject(WalletLoginError.popupClosed("User closed the modal"));
+        }
+      };
+
+      this.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
+      removeConnectPhaseVisibilityListener = () => {
+        this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
+      };
+    });
+
+    const connector = params.connector;
+    const connectPromise = connector.connect(params.connectParams);
+    void connectPromise
+      .then(async (connection): Promise<void> => {
+        if (!connectCancelled || !connection || !connector.connected || retainConnector) return undefined;
+        try {
+          await connector.disconnect({ cleanup: true });
+        } catch (error) {
+          log.debug("Failed to disconnect cancelled WalletConnect connector during cleanup", error);
+        }
+        return undefined;
+      })
+      .catch(() => {});
+
+    try {
+      const connection = await Promise.race([connectPromise, closeDuringConnectPromise]);
+      if (!connection) {
+        throw AccountLinkingError.requestFailed(`Failed to connect to WalletConnect`);
+      }
+
+      removeConnectPhaseVisibilityListener();
+      this.updateAccountLinkingModalSession({
+        status: ACCOUNT_LINKING_STATUS.LINKING,
+        intent: params.intent,
+        walletConnectUri: "",
+        errorMessage: "",
+      });
+
+      const { result, retainConnector: shouldRetainConnector = false } = await params.onConnected(connector, connection);
+      retainConnector = shouldRetainConnector;
+
+      this.updateAccountLinkingModalSession({
+        status: ACCOUNT_LINKING_STATUS.COMPLETED,
+        intent: params.intent,
+        walletConnectUri: "",
+        errorMessage: "",
+      });
+      this.loginModal.closeModal();
+      this.resetAccountLinkingModalSession();
+      return result;
+    } catch (error) {
+      const isPopupClosed = error instanceof Web3AuthError && error.code === 5114;
+
+      if (isPopupClosed) {
+        this.resetAccountLinkingModalSession();
+      }
+
+      this.installAccountLinkingResetOnCloseListener();
+      throw error;
+    } finally {
+      removeConnectPhaseVisibilityListener();
+      this.clearAccountLinkingConnectorListeners();
+      try {
+        if (!retainConnector && connector.connected) {
+          await connector.disconnect({ cleanup: true });
+        }
+      } catch (error) {
+        log.debug("Failed to disconnect WalletConnect connector during cleanup", error);
+      }
+    }
+  }
 
   private subscribeToAccountLinkingConnectorEvents(connector: IConnector<unknown>): () => void {
     const handleConnecting = () => {

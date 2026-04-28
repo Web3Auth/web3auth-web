@@ -1,6 +1,8 @@
 import {
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
+  type ConnectedAccountInfo,
+  Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   type ProjectConfig,
@@ -50,6 +52,21 @@ function createSdk(overrides: Partial<Web3AuthOptions> = {}) {
     },
     ...overrides,
   } as never);
+}
+
+function createConnectedWalletAccount(overrides: Partial<ConnectedAccountInfo> = {}): ConnectedAccountInfo {
+  return {
+    id: "wallet-1",
+    accountType: "external_wallet",
+    address: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+    authConnectionId: null,
+    chainNamespace: "evm",
+    isPrimary: false,
+    eoaAddress: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+    connector: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+    active: false,
+    ...overrides,
+  };
 }
 
 describe("Web3Auth (modal)", () => {
@@ -144,12 +161,7 @@ describe("Web3Auth (modal)", () => {
     const promise = sdk.connect();
     expect(open).toHaveBeenCalledOnce();
     sdk.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, {
-      connectorName: WALLET_CONNECTORS.AUTH,
-      ethereumProvider: null,
-      solanaWallet: null,
       reconnected: false,
-      loginMode: "modal",
-      pendingUserConsent: false,
     });
     await expect(promise).resolves.toBeNull();
   });
@@ -170,6 +182,130 @@ describe("Web3Auth (modal)", () => {
     const promise = sdk.connect();
     sdk.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
     await expect(promise).rejects.toThrow("User closed the modal");
+  });
+
+  it("switchAccount reuses an already-connected WalletConnect signer without reopening modal", async () => {
+    const sdk = createSdk();
+    const targetAccount = createConnectedWalletAccount();
+    const switchResult = {
+      kind: "external" as const,
+      targetAccount,
+      activeAccount: { ...targetAccount, active: true },
+      activeChainId: "0x1",
+    };
+    const authConnector = {
+      switchAccount: vi.fn().mockResolvedValue(switchResult),
+      trackSwitchAccountCompleted: vi.fn(),
+      trackSwitchAccountFailed: vi.fn(),
+    };
+    const existingConnector = {
+      connected: true,
+      provider: {},
+      solanaWallet: null as unknown as Connection["solanaWallet"],
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+    };
+
+    const applySwitchAccountResultSpy = vi
+      .spyOn(sdk as unknown as { applySwitchAccountResult: (typeof sdk)["switchAccount"] }, "applySwitchAccountResult")
+      .mockResolvedValue(undefined);
+    const getProjectAndWalletConfigSpy = vi.spyOn(
+      sdk as unknown as { getProjectAndWalletConfig: () => Promise<unknown> },
+      "getProjectAndWalletConfig"
+    );
+
+    vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
+    vi.spyOn(sdk as unknown as { getLinkedSigningConnector: (accountId: string) => unknown }, "getLinkedSigningConnector").mockReturnValue(
+      existingConnector as never
+    );
+
+    await sdk.switchAccount(targetAccount);
+
+    expect(getProjectAndWalletConfigSpy).not.toHaveBeenCalled();
+    expect(applySwitchAccountResultSpy).toHaveBeenCalledWith(authConnector, switchResult, { walletConnector: existingConnector });
+    expect(authConnector.trackSwitchAccountCompleted).toHaveBeenCalledWith(targetAccount);
+  });
+
+  it("switchAccount opens WalletConnect modal flow when the isolated signer is not reusable", async () => {
+    const sdk = createSdk();
+    const closeModal = vi.fn();
+    const resetAccountLinkingSession = vi.fn();
+    const updateAccountLinkingState = vi.fn();
+    (
+      sdk as unknown as {
+        loginModal: {
+          closeModal: () => void;
+          resetAccountLinkingSession: () => void;
+          updateAccountLinkingState: (state: unknown) => void;
+        };
+      }
+    ).loginModal = {
+      closeModal,
+      resetAccountLinkingSession,
+      updateAccountLinkingState,
+    };
+
+    const targetAccount = createConnectedWalletAccount({ id: "wallet-2" });
+    const switchResult = {
+      kind: "external" as const,
+      targetAccount,
+      activeAccount: { ...targetAccount, active: true },
+      activeChainId: "0x1",
+    };
+    const authConnector = {
+      switchAccount: vi.fn().mockResolvedValue(switchResult),
+      trackSwitchAccountCompleted: vi.fn(),
+      trackSwitchAccountFailed: vi.fn(),
+    };
+    const projectConfig = createModalProjectConfig({
+      externalWalletAuth: {} as never,
+    });
+    const connector = {
+      connected: false,
+      connect: vi.fn().mockResolvedValue({
+        connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+        ethereumProvider: {},
+        solanaWallet: null,
+      }),
+      disconnect: vi.fn(),
+      on: vi.fn(),
+      removeListener: vi.fn(),
+    };
+
+    const applySwitchAccountResultSpy = vi
+      .spyOn(sdk as unknown as { applySwitchAccountResult: (typeof sdk)["switchAccount"] }, "applySwitchAccountResult")
+      .mockResolvedValue(undefined);
+    const getProjectAndWalletConfigSpy = vi.spyOn(
+      sdk as unknown as { getProjectAndWalletConfig: () => Promise<{ projectConfig: ProjectConfig }> },
+      "getProjectAndWalletConfig"
+    );
+    getProjectAndWalletConfigSpy.mockResolvedValue({
+      projectConfig,
+      walletRegistry: createWalletRegistry(),
+    } as never);
+    const prepareWalletConnectAccountSwitchConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        prepareWalletConnectAccountSwitchConnector: (chainId: string, config?: ProjectConfig) => Promise<unknown>;
+      },
+      "prepareWalletConnectAccountSwitchConnector"
+    );
+    prepareWalletConnectAccountSwitchConnectorSpy.mockResolvedValue(connector as never);
+
+    vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
+    vi.spyOn(sdk as unknown as { getLinkedSigningConnector: (accountId: string) => unknown }, "getLinkedSigningConnector").mockReturnValue(null);
+
+    await sdk.switchAccount(targetAccount);
+
+    expect(getProjectAndWalletConfigSpy).toHaveBeenCalledOnce();
+    expect(prepareWalletConnectAccountSwitchConnectorSpy).toHaveBeenCalledWith("0x1", projectConfig);
+    expect(connector.connect).toHaveBeenCalledWith({ chainId: "0x1" });
+    expect(applySwitchAccountResultSpy).toHaveBeenCalledWith(authConnector, switchResult, {
+      walletConnector: connector,
+      projectConfig,
+    });
+    expect(closeModal).toHaveBeenCalledOnce();
+    expect(resetAccountLinkingSession).toHaveBeenCalledOnce();
+    expect(updateAccountLinkingState).toHaveBeenCalled();
+    expect(authConnector.trackSwitchAccountCompleted).toHaveBeenCalledWith(targetAccount);
   });
 
   it("initUIConfig merges whitelabel + ui config and deduplicates loginMethodsOrder", () => {

@@ -148,10 +148,17 @@ export const ACCOUNT_LINKING_STATUS = {
 } as const;
 export type AccountLinkingStatusType = (typeof ACCOUNT_LINKING_STATUS)[keyof typeof ACCOUNT_LINKING_STATUS];
 
+export const ACCOUNT_LINKING_INTENT = {
+  LINK: "link",
+  SWITCH: "switch",
+} as const;
+export type AccountLinkingIntentType = (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
+
 export interface AccountLinkingState {
   active: boolean;
   connectorName: WALLET_CONNECTOR_TYPE | string | null;
   chainId: string | null;
+  intent: AccountLinkingIntentType;
   status: AccountLinkingStatusType;
   walletConnectUri?: string;
   errorMessage: string;
@@ -161,6 +168,7 @@ export const DEFAULT_ACCOUNT_LINKING_STATE: AccountLinkingState = {
   active: false,
   connectorName: null,
   chainId: null,
+  intent: ACCOUNT_LINKING_INTENT.LINK,
   status: ACCOUNT_LINKING_STATUS.IDLE,
   errorMessage: "",
 };

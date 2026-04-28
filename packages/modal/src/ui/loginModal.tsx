@@ -35,6 +35,7 @@ import Widget from "./containers/Widget";
 import { AnalyticsContext } from "./context/AnalyticsContext";
 import { WidgetProvider } from "./context/WidgetContext";
 import {
+  ACCOUNT_LINKING_INTENT,
   ACCOUNT_LINKING_STATUS,
   type AccountLinkingState,
   browser,
@@ -323,12 +324,17 @@ export class LoginModal {
     });
   };
 
-  startAccountLinkingSession = (params: { connectorName: WALLET_CONNECTOR_TYPE | string; chainId: string }): void => {
+  startAccountLinkingSession = (params: {
+    connectorName: WALLET_CONNECTOR_TYPE | string;
+    chainId: string;
+    intent?: (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
+  }): void => {
     this.accountLinkingState = {
       ...DEFAULT_ACCOUNT_LINKING_STATE,
       active: true,
       connectorName: params.connectorName,
       chainId: params.chainId,
+      intent: params.intent ?? ACCOUNT_LINKING_INTENT.LINK,
       status: ACCOUNT_LINKING_STATUS.INITIALIZING,
     };
     this.setState({

@@ -9,7 +9,7 @@ import { DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES, WALLET_CONNECT_LOGO } fro
 import { useModalState } from "../../context/ModalStateContext";
 import { RootProvider } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
-import { ACCOUNT_LINKING_STATUS, ExternalButton, MODAL_STATUS } from "../../interfaces";
+import { ACCOUNT_LINKING_INTENT, ACCOUNT_LINKING_STATUS, ExternalButton, MODAL_STATUS } from "../../interfaces";
 import ConnectWallet from "../ConnectWallet";
 import ConnectWalletQrCode from "../ConnectWallet/ConnectWalletQrCode";
 import Login from "../Login";
@@ -209,6 +209,8 @@ function RootContent(props: RootProps) {
     []
   );
 
+  const isSwitchAccountIntent = modalState.accountLinking.intent === ACCOUNT_LINKING_INTENT.SWITCH;
+
   const accountLinkingMessage = useMemo(() => {
     switch (modalState.accountLinking.status) {
       case ACCOUNT_LINKING_STATUS.INITIALIZING:
@@ -218,17 +220,20 @@ function RootContent(props: RootProps) {
           ? "Scan the QR code with a WalletConnect-compatible wallet."
           : "Preparing WalletConnect QR code...";
       case ACCOUNT_LINKING_STATUS.WALLET_CONNECTED:
-        return "Wallet connected. Preparing account linking...";
+        return isSwitchAccountIntent ? "Wallet connected. Preparing account switch..." : "Wallet connected. Preparing account linking...";
       case ACCOUNT_LINKING_STATUS.LINKING:
-        return "Linking wallet...";
+        return isSwitchAccountIntent ? "Switching wallet..." : "Linking wallet...";
       case ACCOUNT_LINKING_STATUS.COMPLETED:
-        return "Wallet linked.";
+        return isSwitchAccountIntent ? "Wallet switched." : "Wallet linked.";
       case ACCOUNT_LINKING_STATUS.ERRORED:
-        return modalState.accountLinking.errorMessage || "Failed to connect with WalletConnect.";
+        return (
+          modalState.accountLinking.errorMessage ||
+          (isSwitchAccountIntent ? "Failed to switch wallet with WalletConnect." : "Failed to connect with WalletConnect.")
+        );
       default:
         return "";
     }
-  }, [modalState.accountLinking.errorMessage, modalState.accountLinking.status, modalState.accountLinking.walletConnectUri]);
+  }, [isSwitchAccountIntent, modalState.accountLinking.errorMessage, modalState.accountLinking.status, modalState.accountLinking.walletConnectUri]);
 
   const isShowLoader = useMemo(() => {
     return !isWalletConnectAccountLinkingVisible && modalState.status !== MODAL_STATUS.INITIALIZED;
