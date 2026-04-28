@@ -5,6 +5,7 @@ import { SessionTypes } from "@walletconnect/types";
 import { getSdkError, isValidArray } from "@walletconnect/utils";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
+import { generateSiweNonce } from "viem/siwe";
 
 import {
   type Analytics,
@@ -242,13 +243,6 @@ class WalletConnectV2Connector extends BaseConnector<void> {
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
 
-    const namespaces = new Set(this.coreOptions.chains.map((c) => c.chainNamespace));
-    if (namespaces.size > 1) {
-      throw WalletLoginError.unsupportedOperation(
-        "switchChain is not supported when multiple chain namespaces are configured. Use connection.ethereumProvider and connection.solanaWallet directly."
-      );
-    }
-
     if (!this.wcProvider) throw WalletInitializationError.notReady("Wallet Connect provider is not ready yet");
     try {
       await this.wcProvider.switchChain({ chainId: params.chainId });
@@ -331,7 +325,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       address: accounts[0],
       chainId: parseInt(chainId, 16),
       version: "1",
-      nonce: Math.random().toString(36).slice(2),
+      nonce: generateSiweNonce(),
       issuedAt: new Date().toISOString(),
     };
 

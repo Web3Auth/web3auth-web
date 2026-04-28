@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/no-modal",
-  "version": "10.15.0",
+  "version": "11.0.0-beta.0",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/no-modal",
@@ -60,15 +60,14 @@
     "react": {
       "optional": true
     },
-    "viem": {
-      "optional": true
-    },
     "vue": {
       "optional": true
     }
   },
   "dependencies": {
-    "@metamask/sdk": "^0.34.0",
+    "@metamask/connect-evm": "^1.0.0",
+    "@metamask/connect-multichain": "^0.12.1",
+    "@metamask/connect-solana": "^1.0.0",
     "@segment/analytics-next": "^1.82.0",
     "@solana/client": "^1.7.0",
     "@solana/kit": "^6.5.0",
@@ -88,7 +87,7 @@
     "@walletconnect/sign-client": "^2.23.8",
     "@walletconnect/types": "^2.23.8",
     "@walletconnect/utils": "^2.23.8",
-    "@web3auth/auth": "^11.5.0",
+    "@web3auth/auth": "^11.6.0",
     "@web3auth/ws-embed": "^6.0.0",
     "bignumber.js": "~9.3.1",
     "deepmerge": "^4.3.1",
@@ -102,12 +101,12 @@
   "devDependencies": {
     "@coinbase/wallet-sdk": "^4.3.7",
     "@solana/react-hooks": "^1.4.1",
-    "@x402/evm": "^2.7.0",
-    "@x402/fetch": "^2.7.0",
-    "@x402/svm": "^2.7.0",
     "@types/react": "^19.2.14",
     "@wagmi/core": "^3.4.1",
     "@wagmi/vue": "^0.5.1",
+    "@x402/evm": "^2.7.0",
+    "@x402/fetch": "^2.7.0",
+    "@x402/svm": "^2.7.0",
     "react": "^19.2.4",
     "viem": "^2.47.6",
     "vue": "^3.x",

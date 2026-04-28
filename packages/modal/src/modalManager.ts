@@ -26,6 +26,7 @@ import {
   log,
   LOGIN_MODE,
   type LoginMethodConfig,
+  LoginModeType,
   type ProjectConfig,
   sdkVersion,
   type WALLET_CONNECTOR_TYPE,
@@ -57,6 +58,8 @@ export interface Web3AuthOptions extends IWeb3AuthCoreOptions {
 export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public loginModal: LoginModal;
 
+  public loginMode: LoginModeType = LOGIN_MODE.MODAL;
+
   readonly options: Web3AuthOptions;
 
   private modalConfig: ConnectorsModalConfig = cloneDeep(defaultConnectorsModalConfig);
@@ -70,6 +73,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
+    this.consentRequired = this.options.uiConfig.consentConfig?.required || false;
 
     log.info("modalConfig", this.modalConfig);
   }
@@ -129,8 +133,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           onExternalWalletLogin: this.onExternalWalletLogin,
           onModalVisibility: this.onModalVisibility,
           onMobileVerifyConnect: this.onMobileVerifyConnect,
+          onAcceptConsent: this.onAcceptConsent,
+          onDeclineConsent: this.onDeclineConsent,
         }
       );
+      this.consentRequired = this.options.uiConfig.consentConfig?.required || false;
       await withAbort(() => this.loginModal.initModal(), signal);
 
       // setup common JRPC provider
@@ -186,15 +193,20 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     return new Promise((resolve, reject) => {
       // remove all listeners when promise is resolved or rejected.
       // this is to prevent memory leaks if user clicks connect button multiple times.
-      const handleConnected = () => {
+      const handleCompletion = () => {
         this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
+        if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+          this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
+        } else {
+          this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
+        }
         return resolve(this.connection);
       };
 
       const handleError = (err: unknown) => {
-        this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
-        this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
+        this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
+        this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
         this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
         return reject(err);
       };
@@ -202,22 +214,29 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const handleVisibility = (visibility: boolean) => {
         // modal is closed but user is not connected to any wallet.
         if (!visibility && !CONNECTED_STATUSES.includes(this.status)) {
-          this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+          this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
           this.removeListener(CONNECTOR_EVENTS.ERRORED, handleError);
-          this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
+          this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
           return reject(new Error("User closed the modal"));
         }
       };
 
+      if (this.consentRequired) {
+        this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
+      }
       if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
-        this.once(CONNECTOR_EVENTS.AUTHORIZED, handleConnected);
+        this.once(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
       } else {
-        this.once(CONNECTOR_EVENTS.CONNECTED, handleConnected);
+        this.once(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
       }
 
       this.once(CONNECTOR_EVENTS.ERRORED, handleError);
       this.once(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
     });
+  }
+
+  public async acceptConsent(): Promise<void> {
+    await super.completeConsentAcceptance();
   }
 
   protected initUIConfig(projectConfig: ProjectConfig) {
@@ -693,6 +712,24 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       await connector.getAuthTokenInfo();
     } catch (error) {
       log.error(`Error while connecting to connector: ${params.connector}`, error);
+    }
+  };
+
+  private onAcceptConsent = async (): Promise<void> => {
+    try {
+      await this.acceptConsent();
+    } catch (error) {
+      log.error("Error while accepting consent", error);
+    }
+  };
+
+  private onDeclineConsent = async (): Promise<void> => {
+    try {
+      await this.logout();
+    } catch (error) {
+      log.error("Error while declining consent", error);
+    } finally {
+      this.loginModal.closeModal();
     }
   };
 

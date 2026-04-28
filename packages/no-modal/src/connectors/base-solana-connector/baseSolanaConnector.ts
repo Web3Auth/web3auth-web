@@ -1,4 +1,5 @@
 import { ChainNamespaceType, signChallenge } from "@toruslabs/base-controllers";
+import { generateSiweNonce } from "viem/siwe";
 
 import {
   AuthTokenInfo,
@@ -61,7 +62,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
       address: accounts[0],
       chainId: parseInt(chainId, 16),
       version: "1",
-      nonce: Math.random().toString(36).slice(2),
+      nonce: generateSiweNonce(),
       issuedAt: new Date().toISOString(),
     };
 

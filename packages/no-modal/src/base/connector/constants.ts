@@ -8,6 +8,7 @@ export const CONNECTOR_STATUS = {
   ERRORED: "errored",
   AUTHORIZED: "authorized",
   AUTHORIZING: "authorizing",
+  CONSENT_REQUIRING: "consent_requiring",
 } as const;
 
 export const CONNECTOR_EVENTS = {
@@ -19,6 +20,7 @@ export const CONNECTOR_EVENTS = {
   REHYDRATION_ERROR: "rehydration_error",
   /** Emitted when `currentConnection` signing providers change without a full reconnect (e.g. account switch). */
   CONNECTION_UPDATED: "connection_updated",
+  CONSENT_ACCEPTED: "consent_accepted",
 } as const;
 
 export const CONNECTOR_CATEGORY = {

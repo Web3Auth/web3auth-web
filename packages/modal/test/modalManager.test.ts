@@ -130,6 +130,30 @@ describe("Web3Auth (modal)", () => {
     await expect(promise).resolves.toBeNull();
   });
 
+  it("connect resolves on CONSENT_ACCEPTED when consent is required", async () => {
+    const sdk = createSdk({
+      uiConfig: {
+        consentRequired: true,
+        privacyPolicy: "https://example.com/privacy",
+        tncLink: "https://example.com/terms",
+      } as never,
+    });
+    const open = vi.fn();
+    (sdk as unknown as { loginModal: { open: () => void } }).loginModal = { open };
+
+    const promise = sdk.connect();
+    expect(open).toHaveBeenCalledOnce();
+    sdk.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, {
+      connectorName: WALLET_CONNECTORS.AUTH,
+      ethereumProvider: null,
+      solanaWallet: null,
+      reconnected: false,
+      loginMode: "modal",
+      pendingUserConsent: false,
+    });
+    await expect(promise).resolves.toBeNull();
+  });
+
   it("connect rejects on ERRORED event", async () => {
     const sdk = createSdk();
     (sdk as unknown as { loginModal: { open: () => void } }).loginModal = { open: vi.fn() };

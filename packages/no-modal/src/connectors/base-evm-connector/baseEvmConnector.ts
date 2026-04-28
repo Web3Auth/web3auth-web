@@ -1,5 +1,7 @@
 import { ChainNamespaceType, signChallenge } from "@toruslabs/base-controllers";
+import { bytesToHexPrefixedString, utf8ToBytes } from "@toruslabs/metadata-helpers";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
+import { generateSiweNonce } from "viem/siwe";
 
 import {
   AuthTokenInfo,
@@ -49,12 +51,12 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       address: accounts[0],
       chainId: parseInt(chainId, 16),
       version: "1",
-      nonce: Math.random().toString(36).slice(2),
+      nonce: generateSiweNonce(),
       issuedAt: new Date().toISOString(),
     };
 
     const challenge = await signChallenge(payload, chainNamespace, authServer);
-    const hexChallenge = `0x${Buffer.from(challenge, "utf8").toString("hex")}`;
+    const hexChallenge = bytesToHexPrefixedString(utf8ToBytes(challenge));
 
     const signature = await this.provider.request<[string, string], string>({
       method: EVM_METHOD_TYPES.PERSONAL_SIGN,

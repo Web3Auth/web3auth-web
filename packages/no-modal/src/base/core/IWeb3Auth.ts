@@ -222,6 +222,7 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
 }
 
 export interface IWeb3Auth extends IWeb3AuthCore {
+  loginMode: LoginModeType;
   connected: boolean;
   cachedConnector: string | null;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;
@@ -269,11 +270,14 @@ export interface IWeb3Auth extends IWeb3AuthCore {
   unlinkAccount(address: string): Promise<UnlinkAccountResult>;
 }
 
-export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType };
+export type SDK_CONNECTED_EVENT_DATA = CONNECTED_EVENT_DATA & { loginMode: LoginModeType; pendingUserConsent?: boolean };
+export type SDK_CONSENT_ACCEPTED_EVENT_DATA = { reconnected: boolean };
 
-export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready" | "signing_connection_updated"> & {
+export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored" | "ready" | "consent_requiring" | "consent_accepted"> & {
   [CONNECTOR_EVENTS.READY]: () => void;
   [CONNECTOR_EVENTS.CONNECTED]: (data: SDK_CONNECTED_EVENT_DATA) => void;
+  [CONNECTOR_EVENTS.CONSENT_REQUIRING]: () => void;
+  [CONNECTOR_EVENTS.CONSENT_ACCEPTED]: (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError, loginMode: LoginModeType) => void;
   [CONNECTOR_EVENTS.CONNECTION_UPDATED]: () => void;
   MODAL_VISIBILITY: (visibility: boolean) => void;

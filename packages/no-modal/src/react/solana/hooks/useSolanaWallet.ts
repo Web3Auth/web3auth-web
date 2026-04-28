@@ -32,9 +32,8 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
   const { chainNamespace } = useChain();
 
   const solanaWallet = useMemo(() => {
-    if (chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
     return connection?.solanaWallet ?? null;
-  }, [connection, chainNamespace]);
+  }, [connection]);
 
   const accounts = useMemo((): string[] | null => {
     if (chainNamespace !== CHAIN_NAMESPACES.SOLANA || !solanaWallet) return null;

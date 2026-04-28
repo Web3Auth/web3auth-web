@@ -12,6 +12,10 @@ export interface LoaderProps {
   isConnectAndSignAuthenticationMode: boolean;
   handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
   hideSuccessScreen?: boolean;
+  onAcceptConsent?: () => void | Promise<void>;
+  onDeclineConsent?: () => void | Promise<void>;
+  privacyPolicy?: string;
+  tncLink?: string;
 }
 
 export type ConnectingStatusType = Pick<LoaderProps, "connectorName" | "connector">;
