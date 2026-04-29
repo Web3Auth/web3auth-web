@@ -43,7 +43,7 @@ export interface ConnectedAccountInfo extends LinkedAccountInfo {
   aaProvider?: string;
 
   /** Connector name of the account */
-  connector: string;
+  connector: WALLET_CONNECTOR_TYPE;
 
   /** Indicates if the account is the active account */
   active: boolean;

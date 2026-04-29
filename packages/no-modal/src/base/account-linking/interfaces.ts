@@ -37,6 +37,9 @@ export interface LinkAccountResult {
 
   /** Linked account info */
   linkedAccounts: LinkedAccountInfo[];
+
+  /** Error message from the Citadel server */
+  message?: string;
 }
 
 /**
@@ -51,6 +54,9 @@ export interface UnlinkAccountResult {
 
   /** Remaining linked account info */
   linkedAccounts: LinkedAccountInfo[];
+
+  /** Error message from the Citadel server */
+  message?: string;
 }
 
 export interface CitadelLinkAccountPayload {

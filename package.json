@@ -9,20 +9,20 @@
     "@toruslabs/eslint-config-typescript": "^5.0.1",
     "@toruslabs/torus-scripts": "^8.0.1",
     "@types/node": "^24",
-    "@vitest/browser-playwright": "^4.0.17",
-    "@vitest/coverage-istanbul": "^4.0.17",
+    "@vitest/browser-playwright": "^4.1.5",
+    "@vitest/coverage-istanbul": "^4.1.5",
     "cross-env": "^10.1.0",
-    "dotenv": "^17.3.1",
+    "dotenv": "^17.4.2",
     "eslint": "^9.39.2",
     "husky": "^9.1.7",
     "lerna": "^9.0.7",
     "lint-staged": "^16.4.0",
     "ox": "^0.11.3",
-    "playwright": "^1.57.0",
-    "prettier": "^3.8.1",
+    "playwright": "^1.59.1",
+    "prettier": "^3.8.3",
     "rimraf": "^6.1.3",
     "typescript": "~5.9.3",
-    "vitest": "^4.1.2"
+    "vitest": "^4.1.5"
   },
   "engines": {
     "node": ">=22.x",
@@ -46,8 +46,8 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^22.6.1",
-    "@rollup/rollup-linux-x64-gnu": "^4.60.0"
+    "@nx/nx-linux-x64-gnu": "^22.7.1",
+    "@rollup/rollup-linux-x64-gnu": "^4.60.2"
   },
   "private": true,
   "repository": {

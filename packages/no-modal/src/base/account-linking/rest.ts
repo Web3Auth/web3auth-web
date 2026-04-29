@@ -15,21 +15,25 @@ export async function makeAccountLinkingRequest(
   payload: CitadelLinkAccountPayload
 ): Promise<LinkAccountResult> {
   const url = `${authServerUrl}/v1/link/wallet`;
+  let result: LinkAccountResult;
 
   try {
-    const result = await post<LinkAccountResult>(url, payload, {
+    result = await post<LinkAccountResult>(url, payload, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    if (!result.success) {
-      throw AccountLinkingError.requestFailed("Failed to link account");
-    }
-    return result;
   } catch (cause: unknown) {
     const message = cause instanceof Error ? cause.message : String(cause);
     throw AccountLinkingError.requestFailed(message, cause);
   }
+
+  if (!result.success) {
+    const errMessage = result.message ?? "Failed to link account";
+    throw AccountLinkingError.requestFailed(errMessage);
+  }
+
+  return result;
 }
 
 export async function makeAccountUnlinkingRequest(
@@ -38,18 +42,23 @@ export async function makeAccountUnlinkingRequest(
   payload: UnlinkAccountPayload
 ): Promise<UnlinkAccountResult> {
   const url = `${authServerUrl}/v1/unlink`;
+  let result: UnlinkAccountResult;
+
   try {
-    const result = await post<UnlinkAccountResult>(url, payload, {
+    result = await post<UnlinkAccountResult>(url, payload, {
       headers: {
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    if (!result.success) {
-      throw AccountLinkingError.requestFailed("Failed to unlink account");
-    }
-    return result;
   } catch (cause: unknown) {
     const message = cause instanceof Error ? cause.message : String(cause);
     throw AccountLinkingError.requestFailed(message, cause);
   }
+
+  if (!result.success) {
+    const errMessage = result.message ?? "Failed to unlink account";
+    throw AccountLinkingError.requestFailed(errMessage);
+  }
+
+  return result;
 }
