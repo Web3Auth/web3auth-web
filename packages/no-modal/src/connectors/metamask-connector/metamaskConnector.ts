@@ -238,6 +238,10 @@ class MetaMaskConnector extends BaseConnector<void> {
         ethereumProvider: this.evmProvider,
         solanaWallet: this.solanaProvider,
       } as CONNECTED_EVENT_DATA);
+
+      if (options.getAuthTokenInfo) {
+        await this.getAuthTokenInfo();
+      }
     } else if (coreStatus === "loaded" || coreStatus === "disconnected") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
@@ -402,11 +406,23 @@ class MetaMaskConnector extends BaseConnector<void> {
 
     if (!activeChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
+    const { chainNamespace } = activeChainConfig;
+    const accounts =
+      chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider
+        ? this.solanaProvider.accounts.map((a) => a.address)
+        : this.evmProvider
+          ? await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })
+          : [];
+    if (accounts && accounts.length > 0) {
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
+      if (cached) return cached;
+    }
+
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.METAMASK });
 
     const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
-    const { challenge, signature, chainNamespace } = await this.generateChallengeAndSign(authServer);
+    const { challenge, signature } = await this.generateChallengeAndSign(authServer);
     return this.verifyAndAuthorize({ chainNamespace, signedMessage: signature, challenge, authServer });
   }
 

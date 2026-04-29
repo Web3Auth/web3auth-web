@@ -1294,7 +1294,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected hasUsableConnectedSwitchConnector(connector: IConnector<unknown> | null): boolean {
-    return Boolean(connector?.connected && (connector.provider || connector.solanaWallet));
+    const isConnected = connector?.connected || connector.status === CONNECTOR_STATUS.CONNECTED;
+    return Boolean(isConnected && (connector.provider || connector.solanaWallet));
   }
 
   protected async linkAccountWithConnector(
@@ -1355,7 +1356,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.getLinkedSigningConnector(switchResult.targetAccount.id) ??
         (await this.createSwitchingWalletConnector(switchResult.targetAccount.connector, switchResult.activeChainId, options.projectConfig));
       let newConnection: Connection;
-
       try {
         if (this.hasUsableConnectedSwitchConnector(walletConnector)) {
           newConnection = {
