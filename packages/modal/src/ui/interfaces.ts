@@ -156,7 +156,18 @@ export type AccountLinkingIntentType = (typeof ACCOUNT_LINKING_INTENT)[keyof typ
 
 export interface AccountLinkingState {
   active: boolean;
+  /**
+   * The name of the wallet to be linked to.
+   */
   connectorName: WALLET_CONNECTOR_TYPE | string | null;
+  /**
+   * The underlying actual connector that is used to connect to the target account.
+   * This is different from the connectorName coz except for Metamask, others wallet can be used to connect with injectedEvmConnector/solanaStandardWalletConnector if installed.
+   * Otherwise, will fallback to the wallet-connect connector.
+   *
+   * This is useful when we want to rehydrate the linked account, using this transport connector to connect back to the target account.
+   **/
+  transportConnectorName: WALLET_CONNECTOR_TYPE | string | null;
   chainId: string | null;
   intent: AccountLinkingIntentType;
   status: AccountLinkingStatusType;
@@ -167,6 +178,7 @@ export interface AccountLinkingState {
 export const DEFAULT_ACCOUNT_LINKING_STATE: AccountLinkingState = {
   active: false,
   connectorName: null,
+  transportConnectorName: null,
   chainId: null,
   intent: ACCOUNT_LINKING_INTENT.LINK,
   status: ACCOUNT_LINKING_STATUS.IDLE,

@@ -8,8 +8,32 @@ vi.mock("../src/base/account-linking", async () => {
   };
 });
 
+vi.mock("@metamask/connect-evm", () => ({
+  createEVMClient: vi.fn(),
+}));
+
+vi.mock("@metamask/connect-multichain", () => ({
+  createMultichainClient: vi.fn(),
+  hasExtension: vi.fn(async () => false),
+}));
+
+vi.mock("@metamask/connect-solana", () => ({
+  createSolanaClient: vi.fn(),
+}));
+
+vi.mock("@paulmillr/qr", () => ({}));
+
 if (typeof window === "undefined") {
-  vi.stubGlobal("window", { location: { origin: "http://localhost" } });
+  vi.stubGlobal("window", {
+    location: { origin: "http://localhost" },
+  });
+}
+
+if (typeof document === "undefined") {
+  vi.stubGlobal("document", {
+    querySelector: (): null => null,
+    querySelectorAll: (): [] => [],
+  });
 }
 
 import {
@@ -53,12 +77,16 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
     return this.resolveLinkAccountChainId(chainId);
   }
 
-  public exposeSubmitLinkAccountWithConnectedConnector(
+  public exposeCreateLinkingWalletConnector(
     connectorName: WALLET_CONNECTOR_TYPE | string,
     chainId: string,
-    walletConnector: IConnector<unknown>
+    projectConfig?: ReturnType<typeof createProjectConfig>
   ) {
-    return this.submitLinkAccountWithConnectedConnector(connectorName, chainId, walletConnector);
+    return this.createLinkingWalletConnector(connectorName, chainId, projectConfig);
+  }
+
+  public exposeLinkAccountWithConnector(connectorName: WALLET_CONNECTOR_TYPE | string, chainId: string, walletConnector: IConnector<unknown>) {
+    return this.linkAccountWithConnector(connectorName, chainId, walletConnector);
   }
 }
 
@@ -71,6 +99,10 @@ describe("Web3AuthNoModal", () => {
   beforeAll(() => {
     vi.stubGlobal("window", {
       location: { origin: "http://localhost:3000" },
+    });
+    vi.stubGlobal("document", {
+      querySelector: (): null => null,
+      querySelectorAll: (): [] => [],
     });
   });
 
@@ -511,7 +543,83 @@ describe("Web3AuthNoModal", () => {
     );
   });
 
-  it("submitLinkAccountWithConnectedConnector persists refreshed idToken from already-connected wallet flow", async () => {
+  it("createLinkingWalletConnector resolves phantom to an installed injected EVM connector on EVM chains", async () => {
+    const sdk = createSdk();
+    const projectConfig = createProjectConfig({ externalWalletAuth: {} as never });
+    const phantomConnector = new MockConnector({
+      name: "phantom",
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
+    } as never);
+    const injectedEvmModule = await import("../src/connectors/injected-evm-connector");
+    const walletConnectModule = await import("../src/connectors/wallet-connect-v2-connector");
+
+    vi.spyOn(injectedEvmModule, "createMipd").mockReturnValue({
+      getProviders: () => [{ info: { name: "Phantom" }, provider: {} }],
+    } as never);
+    vi.spyOn(injectedEvmModule, "injectedEvmConnector").mockReturnValue(() => phantomConnector);
+    const walletConnectSpy = vi.spyOn(walletConnectModule, "walletConnectV2Connector");
+
+    const connector = await sdk.exposeCreateLinkingWalletConnector("phantom", "0x1", projectConfig);
+
+    expect(connector).toBe(phantomConnector);
+    expect(walletConnectSpy).not.toHaveBeenCalled();
+  });
+
+  it("createLinkingWalletConnector resolves phantom to an installed Wallet Standard connector on Solana chains", async () => {
+    const solanaChain = createChain({
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
+      chainId: "0x2",
+      rpcTarget: "https://api.mainnet-beta.solana.com",
+      displayName: "Solana",
+      ticker: "SOL",
+      tickerName: "Solana",
+    });
+    const sdk = createSdk({ chains: [solanaChain] });
+    const projectConfig = createProjectConfig({ chains: [solanaChain], externalWalletAuth: {} as never });
+    const phantomConnector = new MockConnector({
+      name: "phantom",
+      connectorNamespace: CHAIN_NAMESPACES.SOLANA,
+    } as never);
+    const solanaModule = await import("../src/connectors/injected-solana-connector");
+    const walletConnectModule = await import("../src/connectors/wallet-connect-v2-connector");
+    const phantomWallet = { name: "Phantom" };
+
+    vi.spyOn(solanaModule, "createSolanaMipd").mockReturnValue({
+      get: () => [phantomWallet],
+    } as never);
+    vi.spyOn(solanaModule, "hasSolanaWalletStandardFeatures").mockImplementation((wallet) => wallet === phantomWallet);
+    vi.spyOn(solanaModule, "walletStandardConnector").mockReturnValue(() => phantomConnector);
+    const walletConnectSpy = vi.spyOn(walletConnectModule, "walletConnectV2Connector");
+
+    const connector = await sdk.exposeCreateLinkingWalletConnector("phantom", "0x2", projectConfig);
+
+    expect(connector).toBe(phantomConnector);
+    expect(walletConnectSpy).not.toHaveBeenCalled();
+  });
+
+  it("createLinkingWalletConnector falls back to WalletConnect for phantom when no installed connector is available", async () => {
+    const sdk = createSdk();
+    const projectConfig = createProjectConfig({ externalWalletAuth: {} as never });
+    const walletConnectConnector = new MockConnector({
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      connectorNamespace: CONNECTOR_NAMESPACES.MULTICHAIN,
+    } as never);
+    const injectedEvmModule = await import("../src/connectors/injected-evm-connector");
+    const walletConnectModule = await import("../src/connectors/wallet-connect-v2-connector");
+
+    vi.spyOn(injectedEvmModule, "createMipd").mockReturnValue({
+      getProviders: (): unknown[] => [],
+    } as never);
+    vi.spyOn(injectedEvmModule, "injectedEvmConnector");
+    vi.spyOn(walletConnectModule, "walletConnectV2Connector").mockReturnValue(() => walletConnectConnector);
+
+    const connector = await sdk.exposeCreateLinkingWalletConnector("phantom", "0x1", projectConfig);
+
+    expect(connector).toBe(walletConnectConnector);
+    expect(connector.name).toBe(WALLET_CONNECTORS.WALLET_CONNECT_V2);
+  });
+
+  it("linkAccountWithConnector persists refreshed idToken from already-connected wallet flow", async () => {
     const sdk = createSdk(
       {},
       {
@@ -534,15 +642,15 @@ describe("Web3AuthNoModal", () => {
     } as never);
     connectedWalletConnector.status = CONNECTOR_STATUS.CONNECTED;
 
-    const linkConnectedAccountSpy = vi.spyOn(authConnector, "linkConnectedAccount").mockResolvedValue({
+    const linkAccountSpy = vi.spyOn(authConnector, "linkAccount").mockResolvedValue({
       success: true,
       idToken: "connected-wallet-id-token",
       linkedAccounts: [],
     });
 
-    const result = await sdk.exposeSubmitLinkAccountWithConnectedConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, "0x1", connectedWalletConnector);
+    const result = await sdk.exposeLinkAccountWithConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, "0x1", connectedWalletConnector);
 
-    expect(linkConnectedAccountSpy).toHaveBeenCalledWith({
+    expect(linkAccountSpy).toHaveBeenCalledWith({
       connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       chainId: "0x1",
       walletConnector: connectedWalletConnector,

@@ -173,8 +173,7 @@ const formatAddress = (address?: string | null): string => {
     <div class="mb-2 text-xl font-bold leading-tight text-left">Link Wallet</div>
     <select v-model="linkConnector" class="w-full mb-2 px-3 py-2 border border-gray-300 rounded-lg text-sm">
       <option :value="WALLET_CONNECTORS.METAMASK">MetaMask</option>
-      <!-- TODO: Add Phantom support for injectedEvm connector and Solana Standard Wallet Connector -->
-      <!-- <option value="phantom">Phantom</option> -->
+      <option value="phantom">Phantom</option>
       <option :value="WALLET_CONNECTORS.WALLET_CONNECT_V2">WalletConnect</option>
     </select>
     <Button :loading="accountLinkingLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">Link Wallet</Button>

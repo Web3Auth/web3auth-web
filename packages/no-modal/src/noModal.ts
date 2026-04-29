@@ -1497,6 +1497,87 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     };
   }
 
+  private getChainConfigForIsolatedConnector(chainId: string): CustomChainConfig {
+    const chainConfig = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
+    if (!chainConfig) {
+      throw WalletInitializationError.invalidParams(`Chain config is not available for chain ${chainId}`);
+    }
+    return chainConfig;
+  }
+
+  private async resolveInstalledDiscoveredWalletConnector(params: {
+    connectorName: string;
+    chainConfig: CustomChainConfig;
+    config: ConnectorParams;
+    isMipdEnabled: boolean;
+  }): Promise<IConnector<unknown> | null> {
+    const { connectorName, chainConfig, config, isMipdEnabled } = params;
+
+    if (!isBrowser() || !isMipdEnabled) return null;
+
+    if (chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      const { createMipd, injectedEvmConnector } = await import("./connectors/injected-evm-connector");
+      const providerDetail = createMipd()
+        .getProviders()
+        .find((detail) => normalizeWalletName(detail.info.name) === connectorName);
+
+      if (providerDetail) {
+        return injectedEvmConnector(providerDetail)(config);
+      }
+      return null;
+    }
+
+    if (chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      const { createSolanaMipd, hasSolanaWalletStandardFeatures, walletStandardConnector } = await import("./connectors/injected-solana-connector");
+      const wallet = createSolanaMipd()
+        .get()
+        .find((candidate) => hasSolanaWalletStandardFeatures(candidate) && normalizeWalletName(candidate.name) === connectorName);
+
+      if (wallet) {
+        return walletStandardConnector(wallet)(config);
+      }
+    }
+
+    return null;
+  }
+
+  private async resolveDiscoveredWalletConnector(
+    connectorName: string,
+    chainId: string,
+    config: ConnectorParams,
+    effectiveProjectConfig?: ProjectConfig
+  ): Promise<IConnector<unknown>> {
+    const chainConfig = this.getChainConfigForIsolatedConnector(chainId);
+    const isExternalWalletEnabled = Boolean(effectiveProjectConfig?.externalWalletAuth);
+    const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
+    const installedConnector = await this.resolveInstalledDiscoveredWalletConnector({
+      connectorName,
+      chainConfig,
+      config,
+      isMipdEnabled,
+    });
+
+    if (installedConnector) {
+      return installedConnector;
+    }
+
+    const isBuiltInConnectorName = (Object.values(WALLET_CONNECTORS) as string[]).includes(connectorName);
+    const supportsWalletConnectFallback =
+      chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155 || chainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA;
+
+    // Named discovered wallets (for example Phantom) can reuse WalletConnect as a transport fallback
+    // when an injected connector for the target chain namespace is unavailable.
+    if (!isBuiltInConnectorName && isExternalWalletEnabled && supportsWalletConnectFallback) {
+      const { walletConnectV2Connector } = await import("./connectors/wallet-connect-v2-connector");
+      return walletConnectV2Connector()(config);
+    }
+
+    throw AccountLinkingError.unsupportedConnector(
+      `Connector "${connectorName}" does not support automatic wallet linking. ` +
+        `Use ${WALLET_CONNECTORS.METAMASK}, ${WALLET_CONNECTORS.WALLET_CONNECT_V2}, or an installed compatible wallet.`
+    );
+  }
+
   /**
    * Create a new connector instance that is NOT registered in this.connectors and NOT
    * subscribed to the main SDK event loop. Its lifecycle events are therefore isolated
@@ -1528,26 +1609,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       case WALLET_CONNECTORS.AUTH:
         throw AccountLinkingError.unsupportedConnector(`Connector "${connectorName}" does not support automatic wallet linking.`);
       default: {
-        const isExternalWalletEnabled = Boolean(effectiveProjectConfig?.externalWalletAuth);
-        const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
-        const isEip155Configured = this.coreOptions.chains.some((chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155);
-
-        if (connectorName !== WALLET_CONNECTORS.AUTH && isBrowser() && isMipdEnabled && isEip155Configured) {
-          const { createMipd, injectedEvmConnector } = await import("./connectors/injected-evm-connector");
-          const providerDetail = createMipd()
-            .getProviders()
-            .find((detail) => normalizeWalletName(detail.info.name) === connectorName);
-
-          if (providerDetail) {
-            connector = injectedEvmConnector(providerDetail)(config);
-            break;
-          }
-        }
-
-        throw AccountLinkingError.unsupportedConnector(
-          `Connector "${connectorName}" does not support automatic wallet linking. ` +
-            `Use ${WALLET_CONNECTORS.METAMASK} or ${WALLET_CONNECTORS.WALLET_CONNECT_V2}.`
-        );
+        connector = await this.resolveDiscoveredWalletConnector(connectorName, chainId, config, effectiveProjectConfig);
+        break;
       }
     }
 

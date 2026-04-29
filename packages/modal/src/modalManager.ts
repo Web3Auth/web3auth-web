@@ -281,11 +281,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const projectConfig =
         switchResult.kind === "external" && !isExistingConnectorConnected ? (await this.getProjectAndWalletConfig())?.projectConfig : undefined;
 
-      if (
-        switchResult.kind !== "external" ||
-        switchResult.targetAccount.connector !== WALLET_CONNECTORS.WALLET_CONNECT_V2 ||
-        isExistingConnectorConnected
-      ) {
+      if (switchResult.kind !== "external" || isExistingConnectorConnected) {
         await super.processSwitchAccountResult(authConnector, switchResult, {
           walletConnector: isExistingConnectorConnected && existingConnector ? existingConnector : undefined,
           projectConfig,
@@ -294,7 +290,22 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         return;
       }
 
-      await this.switchToWalletConnectV2Account(switchResult, projectConfig);
+      const connectorToSwitchTo = await this.prepareAccountSwitchConnector(
+        switchResult.targetAccount.connector,
+        switchResult.activeChainId,
+        projectConfig
+      );
+
+      if (connectorToSwitchTo.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
+        await super.processSwitchAccountResult(authConnector, switchResult, {
+          walletConnector: connectorToSwitchTo,
+          projectConfig,
+        });
+        await authConnector.trackSwitchAccountCompleted(switchResult.targetAccount);
+        return;
+      }
+
+      await this.switchToWalletConnectV2Account(switchResult, connectorToSwitchTo, projectConfig);
     } catch (error) {
       await authConnector.trackSwitchAccountFailed(switchResult.targetAccount, error);
       throw error;
@@ -302,12 +313,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
-    if (params.connectorName !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-      return super.linkAccount(params);
-    }
-
     const chainId = this.resolveLinkAccountChainId(params.chainId);
-    const connectorToLink = await this.prepareWalletConnectAccountLinkingConnector(chainId);
+    const connectorToLink = await this.prepareAccountLinkingConnector(params.connectorName, chainId);
+
+    if (connectorToLink.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
+      return super.linkAccountWithConnector(params.connectorName, chainId, connectorToLink);
+    }
 
     return this.runWalletConnectV2AccountAction({
       connector: connectorToLink,
@@ -321,6 +332,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   protected startAccountLinkingModalSession(params: {
     connectorName: WALLET_CONNECTOR_TYPE | string;
+    transportConnectorName?: WALLET_CONNECTOR_TYPE | string;
     chainId: string;
     intent: (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
   }): void {
@@ -338,24 +350,46 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.resetAccountLinkingSession();
   }
 
-  protected async prepareWalletConnectAccountLinkingConnector(chainId: string): Promise<IConnector<unknown>> {
-    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
+  protected async prepareAccountLinkingConnector(connectorName: WALLET_CONNECTOR_TYPE | string, chainId: string): Promise<IConnector<unknown>> {
     const { projectConfig } = await this.getProjectAndWalletConfig();
-    const connector = await super.createLinkingWalletConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, chainId, projectConfig);
+    const connector = await super.createLinkingWalletConnector(connectorName, chainId, projectConfig);
+    if (connector.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
+      return connector;
+    }
+
+    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     this.clearAccountLinkingConnectorListeners();
     this.removeAccountLinkingConnectorListeners = this.subscribeToAccountLinkingConnectorEvents(connector);
-    this.startAccountLinkingModalSession({ connectorName: connector.name, chainId, intent: ACCOUNT_LINKING_INTENT.LINK });
+    this.startAccountLinkingModalSession({
+      connectorName,
+      transportConnectorName: connector.name,
+      chainId,
+      intent: ACCOUNT_LINKING_INTENT.LINK,
+    });
     this.loginModal.open();
     return connector;
   }
 
-  protected async prepareWalletConnectAccountSwitchConnector(chainId: string, projectConfig?: ProjectConfig): Promise<IConnector<unknown>> {
-    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
+  protected async prepareAccountSwitchConnector(
+    connectorName: WALLET_CONNECTOR_TYPE | string,
+    chainId: string,
+    projectConfig?: ProjectConfig
+  ): Promise<IConnector<unknown>> {
     const finalProjectConfig = projectConfig ?? (await this.getProjectAndWalletConfig()).projectConfig;
-    const connector = await super.createSwitchingWalletConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, chainId, finalProjectConfig);
+    const connector = await super.createSwitchingWalletConnector(connectorName, chainId, finalProjectConfig);
+    if (connector.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
+      return connector;
+    }
+
+    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     this.clearAccountLinkingConnectorListeners();
     this.removeAccountLinkingConnectorListeners = this.subscribeToAccountLinkingConnectorEvents(connector);
-    this.startAccountLinkingModalSession({ connectorName: connector.name, chainId, intent: ACCOUNT_LINKING_INTENT.SWITCH });
+    this.startAccountLinkingModalSession({
+      connectorName,
+      transportConnectorName: connector.name,
+      chainId,
+      intent: ACCOUNT_LINKING_INTENT.SWITCH,
+    });
     this.loginModal.open();
     return connector;
   }
@@ -866,9 +900,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     return [...new Set(this.coreOptions.chains?.map((x) => x.chainNamespace) || [])];
   };
 
-  private async switchToWalletConnectV2Account(switchResult: AuthConnectorSwitchAccountResult, projectConfig: ProjectConfig) {
+  private async switchToWalletConnectV2Account(
+    switchResult: AuthConnectorSwitchAccountResult,
+    connectorToSwitchTo: IConnector<unknown>,
+    projectConfig?: ProjectConfig
+  ) {
     const authConnector = this.getMainAuthConnector();
-    const connectorToSwitchTo = await this.prepareWalletConnectAccountSwitchConnector(switchResult.activeChainId, projectConfig);
     try {
       await this.runWalletConnectV2AccountAction({
         connector: connectorToSwitchTo,
@@ -887,7 +924,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       await authConnector.trackSwitchAccountFailed(switchResult.targetAccount, error);
       this.updateAccountLinkingModalSession({
         status: ACCOUNT_LINKING_STATUS.ERRORED,
-        errorMessage: (error as Error)?.message || "Failed to switch wallet with WalletConnect.",
+        errorMessage: (error as Error)?.message || "Failed to switch wallet.",
       });
       throw error;
     }
@@ -937,7 +974,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     try {
       const connection = await Promise.race([connectPromise, closeDuringConnectPromise]);
       if (!connection) {
-        throw AccountLinkingError.requestFailed(`Failed to connect to WalletConnect`);
+        throw AccountLinkingError.requestFailed("Failed to connect wallet.");
       }
 
       removeConnectPhaseVisibilityListener();
@@ -1012,7 +1049,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const handleErrored = (error: Web3AuthError) => {
       this.updateAccountLinkingModalSession({
         status: ACCOUNT_LINKING_STATUS.ERRORED,
-        errorMessage: error.message || "Failed to connect with WalletConnect.",
+        errorMessage: error.message || "Failed to connect wallet.",
       });
     };
 

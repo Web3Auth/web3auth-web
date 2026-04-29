@@ -326,6 +326,7 @@ export class LoginModal {
 
   startAccountLinkingSession = (params: {
     connectorName: WALLET_CONNECTOR_TYPE | string;
+    transportConnectorName?: WALLET_CONNECTOR_TYPE | string;
     chainId: string;
     intent?: (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
   }): void => {
@@ -333,6 +334,7 @@ export class LoginModal {
       ...DEFAULT_ACCOUNT_LINKING_STATE,
       active: true,
       connectorName: params.connectorName,
+      transportConnectorName: params.transportConnectorName ?? params.connectorName,
       chainId: params.chainId,
       intent: params.intent ?? ACCOUNT_LINKING_INTENT.LINK,
       status: ACCOUNT_LINKING_STATUS.INITIALIZING,

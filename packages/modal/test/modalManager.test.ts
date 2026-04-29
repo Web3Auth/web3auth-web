@@ -1,3 +1,25 @@
+import { describe, expect, it, vi } from "vitest";
+
+vi.mock("@metamask/connect-evm", () => ({
+  createEVMClient: vi.fn(),
+}));
+
+vi.mock("@metamask/connect-multichain", () => ({
+  createMultichainClient: vi.fn(),
+  hasExtension: vi.fn(async () => false),
+}));
+
+vi.mock("@metamask/connect-solana", () => ({
+  createSolanaClient: vi.fn(),
+}));
+
+vi.mock("@paulmillr/qr", () => ({}));
+
+vi.mock("@web3auth/no-modal", async () => {
+  const actual = await vi.importActual<typeof import("../../no-modal/src")>("../../no-modal/src");
+  return actual;
+});
+
 import {
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
@@ -5,13 +27,13 @@ import {
   Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
+  type LinkAccountResult,
   type ProjectConfig,
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthNoModal,
 } from "@web3auth/no-modal";
-import { describe, expect, it, vi } from "vitest";
 
 import { Web3Auth, type Web3AuthOptions } from "../src/modalManager";
 import { LOGIN_MODAL_EVENTS } from "../src/ui";
@@ -205,8 +227,8 @@ describe("Web3Auth (modal)", () => {
       name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
     };
 
-    const applySwitchAccountResultSpy = vi
-      .spyOn(sdk as unknown as { applySwitchAccountResult: (typeof sdk)["switchAccount"] }, "applySwitchAccountResult")
+    const processSwitchAccountResultSpy = vi
+      .spyOn(sdk as unknown as { processSwitchAccountResult: (typeof sdk)["switchAccount"] }, "processSwitchAccountResult")
       .mockResolvedValue(undefined);
     const getProjectAndWalletConfigSpy = vi.spyOn(
       sdk as unknown as { getProjectAndWalletConfig: () => Promise<unknown> },
@@ -221,11 +243,11 @@ describe("Web3Auth (modal)", () => {
     await sdk.switchAccount(targetAccount);
 
     expect(getProjectAndWalletConfigSpy).not.toHaveBeenCalled();
-    expect(applySwitchAccountResultSpy).toHaveBeenCalledWith(authConnector, switchResult, { walletConnector: existingConnector });
+    expect(processSwitchAccountResultSpy).toHaveBeenCalledWith(authConnector, switchResult, { walletConnector: existingConnector });
     expect(authConnector.trackSwitchAccountCompleted).toHaveBeenCalledWith(targetAccount);
   });
 
-  it("switchAccount opens WalletConnect modal flow when the isolated signer is not reusable", async () => {
+  it("switchAccount opens WalletConnect modal flow when phantom resolves to WalletConnect transport", async () => {
     const sdk = createSdk();
     const closeModal = vi.fn();
     const resetAccountLinkingSession = vi.fn();
@@ -244,7 +266,7 @@ describe("Web3Auth (modal)", () => {
       updateAccountLinkingState,
     };
 
-    const targetAccount = createConnectedWalletAccount({ id: "wallet-2" });
+    const targetAccount = createConnectedWalletAccount({ id: "wallet-2", connector: "phantom" });
     const switchResult = {
       kind: "external" as const,
       targetAccount,
@@ -260,6 +282,7 @@ describe("Web3Auth (modal)", () => {
       externalWalletAuth: {} as never,
     });
     const connector = {
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
       connected: false,
       connect: vi.fn().mockResolvedValue({
         connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
@@ -271,8 +294,8 @@ describe("Web3Auth (modal)", () => {
       removeListener: vi.fn(),
     };
 
-    const applySwitchAccountResultSpy = vi
-      .spyOn(sdk as unknown as { applySwitchAccountResult: (typeof sdk)["switchAccount"] }, "applySwitchAccountResult")
+    const processSwitchAccountResultSpy = vi
+      .spyOn(sdk as unknown as { processSwitchAccountResult: (typeof sdk)["switchAccount"] }, "processSwitchAccountResult")
       .mockResolvedValue(undefined);
     const getProjectAndWalletConfigSpy = vi.spyOn(
       sdk as unknown as { getProjectAndWalletConfig: () => Promise<{ projectConfig: ProjectConfig }> },
@@ -282,13 +305,13 @@ describe("Web3Auth (modal)", () => {
       projectConfig,
       walletRegistry: createWalletRegistry(),
     } as never);
-    const prepareWalletConnectAccountSwitchConnectorSpy = vi.spyOn(
+    const prepareAccountSwitchConnectorSpy = vi.spyOn(
       sdk as unknown as {
-        prepareWalletConnectAccountSwitchConnector: (chainId: string, config?: ProjectConfig) => Promise<unknown>;
+        prepareAccountSwitchConnector: (connectorName: string, chainId: string, config?: ProjectConfig) => Promise<unknown>;
       },
-      "prepareWalletConnectAccountSwitchConnector"
+      "prepareAccountSwitchConnector"
     );
-    prepareWalletConnectAccountSwitchConnectorSpy.mockResolvedValue(connector as never);
+    prepareAccountSwitchConnectorSpy.mockResolvedValue(connector as never);
 
     vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
     vi.spyOn(sdk as unknown as { getLinkedSigningConnector: (accountId: string) => unknown }, "getLinkedSigningConnector").mockReturnValue(null);
@@ -296,9 +319,9 @@ describe("Web3Auth (modal)", () => {
     await sdk.switchAccount(targetAccount);
 
     expect(getProjectAndWalletConfigSpy).toHaveBeenCalledOnce();
-    expect(prepareWalletConnectAccountSwitchConnectorSpy).toHaveBeenCalledWith("0x1", projectConfig);
+    expect(prepareAccountSwitchConnectorSpy).toHaveBeenCalledWith("phantom", "0x1", projectConfig);
     expect(connector.connect).toHaveBeenCalledWith({ chainId: "0x1" });
-    expect(applySwitchAccountResultSpy).toHaveBeenCalledWith(authConnector, switchResult, {
+    expect(processSwitchAccountResultSpy).toHaveBeenCalledWith(authConnector, switchResult, {
       walletConnector: connector,
       projectConfig,
     });
@@ -306,6 +329,86 @@ describe("Web3Auth (modal)", () => {
     expect(resetAccountLinkingSession).toHaveBeenCalledOnce();
     expect(updateAccountLinkingState).toHaveBeenCalled();
     expect(authConnector.trackSwitchAccountCompleted).toHaveBeenCalledWith(targetAccount);
+  });
+
+  it("linkAccount routes phantom through WalletConnect modal flow when the resolved transport is WalletConnect", async () => {
+    const sdk = createSdk();
+    const walletConnectConnector = {
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+    };
+    const result: LinkAccountResult = {
+      success: true,
+      idToken: "linked-id-token",
+      linkedAccounts: [],
+    };
+
+    const prepareAccountLinkingConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        prepareAccountLinkingConnector: (connectorName: string, chainId: string) => Promise<unknown>;
+      },
+      "prepareAccountLinkingConnector"
+    );
+    prepareAccountLinkingConnectorSpy.mockResolvedValue(walletConnectConnector as never);
+    const runWalletConnectV2AccountActionSpy = vi.spyOn(
+      sdk as unknown as {
+        runWalletConnectV2AccountAction: (params: unknown) => Promise<LinkAccountResult>;
+      },
+      "runWalletConnectV2AccountAction"
+    );
+    runWalletConnectV2AccountActionSpy.mockResolvedValue(result);
+    const linkAccountWithConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        linkAccountWithConnector: (connectorName: string, chainId: string, connector: unknown) => Promise<LinkAccountResult>;
+      },
+      "linkAccountWithConnector"
+    );
+
+    const response = await sdk.linkAccount({ connectorName: "phantom" });
+
+    expect(prepareAccountLinkingConnectorSpy).toHaveBeenCalledWith("phantom", "0x1");
+    expect(runWalletConnectV2AccountActionSpy).toHaveBeenCalledOnce();
+    expect(linkAccountWithConnectorSpy).not.toHaveBeenCalled();
+    expect(response).toEqual(result);
+  });
+
+  it("linkAccount links phantom directly when the resolved transport is installed", async () => {
+    const sdk = createSdk();
+    const phantomConnector = {
+      name: "phantom",
+    };
+    const result: LinkAccountResult = {
+      success: true,
+      idToken: "linked-id-token",
+      linkedAccounts: [],
+    };
+
+    const prepareAccountLinkingConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        prepareAccountLinkingConnector: (connectorName: string, chainId: string) => Promise<unknown>;
+      },
+      "prepareAccountLinkingConnector"
+    );
+    prepareAccountLinkingConnectorSpy.mockResolvedValue(phantomConnector as never);
+    const runWalletConnectV2AccountActionSpy = vi.spyOn(
+      sdk as unknown as {
+        runWalletConnectV2AccountAction: (params: unknown) => Promise<LinkAccountResult>;
+      },
+      "runWalletConnectV2AccountAction"
+    );
+    const linkAccountWithConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        linkAccountWithConnector: (connectorName: string, chainId: string, connector: unknown) => Promise<LinkAccountResult>;
+      },
+      "linkAccountWithConnector"
+    );
+    linkAccountWithConnectorSpy.mockResolvedValue(result);
+
+    const response = await sdk.linkAccount({ connectorName: "phantom" });
+
+    expect(prepareAccountLinkingConnectorSpy).toHaveBeenCalledWith("phantom", "0x1");
+    expect(linkAccountWithConnectorSpy).toHaveBeenCalledWith("phantom", "0x1", phantomConnector);
+    expect(runWalletConnectV2AccountActionSpy).not.toHaveBeenCalled();
+    expect(response).toEqual(result);
   });
 
   it("initUIConfig merges whitelabel + ui config and deduplicates loginMethodsOrder", () => {
