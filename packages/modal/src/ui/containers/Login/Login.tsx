@@ -185,7 +185,9 @@ function Login(props: LoginProps) {
       });
 
       let token: string | undefined = undefined;
-      if (!isTestAccountPattern(authConnection, loginHint)) {
+      const isDev = process.env.NODE_ENV !== "production";
+      const requiresCaptcha = !(isDev && isTestAccountPattern(authConnection, loginHint));
+      if (requiresCaptcha) {
         const res = await captchaRef.current?.execute({ async: true });
         if (!res) {
           throw WalletLoginError.connectionError("Captcha token is required");
