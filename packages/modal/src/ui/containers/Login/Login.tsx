@@ -67,10 +67,6 @@ function Login(props: LoginProps) {
   const [passwordlessErrorMessage, setPasswordlessErrorMessage] = useState<string>("");
   const [otpErrorMessage, setOtpErrorMessage] = useState<string>("");
   const [expandSocialLogins, setExpandSocialLogins] = useState(false);
-  const [canShowMore, setCanShowMore] = useState(false);
-  const [visibleRow, setVisibleRow] = useState<rowType[]>([]);
-  const [otherRow, setOtherRow] = useState<rowType[]>([]);
-  const [mainOptionsRow, setMainOptionsRow] = useState<rowType[]>([]);
   const [isPasswordLessCtaClicked, setIsPasswordLessCtaClicked] = useState(false);
   const [showOtpFlow, setShowOtpFlow] = useState(false);
   const [authConnection, setAuthConnection] = useState<AUTH_CONNECTION_TYPE | undefined>(undefined);
@@ -86,7 +82,7 @@ function Login(props: LoginProps) {
     setIsPasswordLessCtaClicked(false);
   };
 
-  useEffect(() => {
+  const { visibleRow, otherRow, mainOptionsRow, canShowMore } = useMemo(() => {
     const maxOptions = Object.keys(socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
       return socialLoginsConfig.loginMethods[loginMethodKey as AUTH_CONNECTION_TYPE].showOnModal && !restrictedLoginMethods.includes(loginMethodKey);
     });
@@ -167,11 +163,13 @@ function Login(props: LoginProps) {
       otherRows.push(rows);
     });
 
-    setVisibleRow(visibleRows);
-    setOtherRow(otherRows);
-    setMainOptionsRow(mainOptionsRows);
-    setCanShowMore(maxOptions.length > 4); // Update the state based on the condition
-  }, [socialLoginsConfig, isDark, buttonRadius]);
+    return {
+      visibleRow: visibleRows,
+      otherRow: otherRows,
+      mainOptionsRow: mainOptionsRows,
+      canShowMore: maxOptions.length > 4,
+    };
+  }, [socialLoginsConfig, isDark]);
 
   const handleCustomLogin = async (authConnection: AUTH_CONNECTION_TYPE, loginHint: string) => {
     try {
@@ -256,7 +254,7 @@ function Login(props: LoginProps) {
       }
     }
 
-    setPasswordlessErrorMessage(invalidInputErrorMessage);
+    setPasswordlessErrorMessage(getInvalidInputErrorMessage());
     setIsPasswordLessLoading(false);
     return undefined;
   };
@@ -273,11 +271,11 @@ function Login(props: LoginProps) {
     return "+(00)123456";
   }, [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible]);
 
-  const invalidInputErrorMessage = useMemo(() => {
+  const getInvalidInputErrorMessage = () => {
     if (isEmailPasswordLessLoginVisible && isSmsPasswordLessLoginVisible) return t("modal.errors-invalid-number-email");
     if (isEmailPasswordLessLoginVisible) return t("modal.errors-invalid-email");
     return t("modal.errors-invalid-number");
-  }, [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible, t]);
+  };
 
   useEffect(() => {
     const getLocation = async () => {
@@ -401,6 +399,7 @@ function Login(props: LoginProps) {
 
   useEffect(() => {
     if (showExternalWalletButton && !areSocialLoginsVisible && !showPasswordLessInput) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       handleConnectWallet();
     }
   }, [showExternalWalletButton, areSocialLoginsVisible, showPasswordLessInput, handleConnectWallet]);
