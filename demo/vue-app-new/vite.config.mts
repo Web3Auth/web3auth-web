@@ -25,6 +25,42 @@ export default defineConfig(({ mode }) => {
       },
       dedupe: ["react", "react-dom", "viem", "ox", "abitype"],
     },
+    optimizeDeps: {
+      include: [
+        "@web3auth/modal",
+        "@web3auth/no-modal",
+      ],
+    },
+    build: {
+      sourcemap: true,
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            const norm = id.replace(/\\/g, "/");
+            if (
+              norm.includes("/node_modules/viem/") ||
+              norm.includes("/node_modules/ox/") ||
+              norm.includes("/node_modules/abitype/") ||
+              norm.includes("/node_modules/@noble/") ||
+              norm.includes("/node_modules/@scure/") ||
+              norm.includes("/node_modules/@wagmi/") ||
+              norm.includes("/node_modules/wagmi/") ||
+              norm.includes("/node_modules/@walletconnect/") ||
+              norm.includes("/node_modules/@coinbase/") ||
+              norm.includes("/node_modules/@metamask/") ||
+              norm.includes("/node_modules/@solana/") ||
+              norm.includes("/node_modules/@solana-program/") ||
+              norm.includes("/node_modules/@web3auth/") ||
+              norm.includes("/node_modules/@toruslabs/") ||
+              norm.includes("/node_modules/permissionless/") ||
+              norm.includes("/node_modules/ethers/")
+            ) {
+              return "web3";
+            }
+          },
+        },
+      },
+    },
     define: {
       global: "globalThis",
       "process.env.NODE_ENV": JSON.stringify(process.env.NODE_ENV),
