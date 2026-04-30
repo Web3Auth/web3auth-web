@@ -50,7 +50,7 @@
     "source-map-explorer": "^2.5.3",
     "tailwindcss": "^4.2.4",
     "typescript": "^5.9.3",
-    "vite": "^8.0.10",
+    "vite": "8.0.9",
     "vue-tsc": "^3.2.7"
   },
   "optionalDependencies": {
