@@ -37,7 +37,6 @@ jobs:
           aws-region: ${{ secrets.AWS_REGION_US }}
 
       - name: Build new vue demo app
-        if: github.ref == 'refs/heads/master'
         run: |
           cd demo/vue-app-new
           npm install
