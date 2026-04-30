@@ -46,6 +46,15 @@ const onLinkAccount = async () => {
   }
 };
 
+const onLinkAccountWithPicker = async () => {
+  lastUnlinkedAddress.value = null;
+  const result = await linkAccount();
+  if (result) {
+    await props.refreshUserInfo();
+    props.printToConsole("Link Wallet (picker) Result", result);
+  }
+};
+
 const onUnlinkAccount = async (address: string) => {
   lastUnlinkedAddress.value = null;
   pendingUnlinkAddress.value = address;
@@ -177,5 +186,6 @@ const formatAddress = (address?: string | null): string => {
       <option :value="WALLET_CONNECTORS.WALLET_CONNECT_V2">WalletConnect</option>
     </select>
     <Button :loading="accountLinkingLoading" block size="xs" pill class="mb-2" @click="onLinkAccount">Link Wallet</Button>
+    <Button :loading="accountLinkingLoading" block size="xs" pill @click="onLinkAccountWithPicker">Link with another wallet (modal picker)</Button>
   </Card>
 </template>

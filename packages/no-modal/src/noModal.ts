@@ -618,7 +618,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
+  public async linkAccount(params?: LinkAccountParams): Promise<LinkAccountResult> {
+    if (!params?.connectorName) {
+      throw WalletInitializationError.invalidParams("connectorName is required when calling linkAccount on the no-modal SDK");
+    }
     const chainId = this.resolveLinkAccountChainId(params.chainId);
     const isolatedConnector = await this.createLinkingWalletConnector(params.connectorName, chainId);
     return this.linkAccountWithConnector(params.connectorName, chainId, isolatedConnector);

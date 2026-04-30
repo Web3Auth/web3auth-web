@@ -89,6 +89,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private removeAccountLinkingResetOnCloseListener: (() => void) | null = null;
 
+  private accountLinkingPickerResolver: ((connectorName: WALLET_CONNECTOR_TYPE | string) => void) | null = null;
+
+  private removeAccountLinkingPickerCloseListener: (() => void) | null = null;
+
   constructor(options: Web3AuthOptions, initialState?: Partial<IWeb3AuthState>) {
     super(options, initialState);
     this.options = { ...options };
@@ -316,26 +320,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
-    const chainId = this.resolveLinkAccountChainId(params.chainId);
-    const connectorToLink = await this.prepareAccountLinkingConnector(params.connectorName, chainId);
+  public async linkAccount(params?: LinkAccountParams): Promise<LinkAccountResult> {
+    // Pre-flight: ensure user is connected via AUTH so we fail fast before opening the modal.
+    this.getMainAuthConnector();
 
-    if (connectorToLink.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-      return this.runNonWalletConnectAccountAction(
-        params.connectorName,
-        () => super.linkAccountWithConnector(params.connectorName, chainId, connectorToLink),
-        { connector: connectorToLink }
-      );
+    const chainId = this.resolveLinkAccountChainId(params?.chainId);
+
+    if (!params?.connectorName) {
+      const pickedConnector = await this.pickWalletForAccountLinking(chainId);
+      return this.linkAccountWithChosenConnector(pickedConnector, chainId);
     }
 
-    return this.runWalletConnectV2AccountAction({
-      connector: connectorToLink,
-      connectParams: { chainId, isAccountLinking: true },
-      onConnected: async (connector) => ({
-        result: await super.linkAccountWithConnector(params.connectorName, chainId, connector),
-      }),
-      intent: ACCOUNT_LINKING_INTENT.LINK,
-    });
+    return this.linkAccountWithChosenConnector(params.connectorName, chainId);
   }
 
   protected startAccountLinkingModalSession(params: {
@@ -827,6 +823,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     connector: WALLET_CONNECTOR_TYPE | string;
     loginParams: { chainNamespace: ChainNamespaceType };
   }): Promise<void> => {
+    // If the modal is in account-linking picker mode, hand off the selected connector
+    // to the linking flow instead of running the regular login `connectTo`.
+    if (this.accountLinkingPickerResolver) {
+      const resolver = this.accountLinkingPickerResolver;
+      resolver(params.connector);
+      return;
+    }
     try {
       const connector = this.getConnector(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams?.chainNamespace);
       // auto-connect WalletConnect in background to generate QR code URI without interfering with user's selected connection
@@ -1025,6 +1028,60 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         log.debug("Failed to disconnect WalletConnect connector during cleanup", error);
       }
     }
+  }
+
+  private async linkAccountWithChosenConnector(connectorName: WALLET_CONNECTOR_TYPE | string, chainId: string): Promise<LinkAccountResult> {
+    const connectorToLink = await this.prepareAccountLinkingConnector(connectorName, chainId);
+
+    if (connectorToLink.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
+      return this.runNonWalletConnectAccountAction(connectorName, () => super.linkAccountWithConnector(connectorName, chainId, connectorToLink), {
+        connector: connectorToLink,
+      });
+    }
+
+    return this.runWalletConnectV2AccountAction({
+      connector: connectorToLink,
+      connectParams: { chainId, isAccountLinking: true },
+      onConnected: async (connector) => ({
+        result: await super.linkAccountWithConnector(connectorName, chainId, connector),
+      }),
+      intent: ACCOUNT_LINKING_INTENT.LINK,
+    });
+  }
+
+  private pickWalletForAccountLinking(chainId: string): Promise<WALLET_CONNECTOR_TYPE | string> {
+    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
+    if (this.accountLinkingPickerResolver) {
+      throw AccountLinkingError.requestFailed("Another account linking picker is already in progress.");
+    }
+
+    this.loginModal.startAccountLinkingPicker({ chainId });
+
+    return new Promise<WALLET_CONNECTOR_TYPE | string>((resolve, reject) => {
+      const cleanup = () => {
+        this.accountLinkingPickerResolver = null;
+        if (this.removeAccountLinkingPickerCloseListener) {
+          this.removeAccountLinkingPickerCloseListener();
+          this.removeAccountLinkingPickerCloseListener = null;
+        }
+        this.loginModal.endAccountLinkingPicker();
+      };
+
+      const handleVisibility = (visible: boolean) => {
+        if (visible) return;
+        cleanup();
+        reject(WalletLoginError.popupClosed("User closed the modal"));
+      };
+
+      this.accountLinkingPickerResolver = (connector) => {
+        cleanup();
+        resolve(connector);
+      };
+      this.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
+      this.removeAccountLinkingPickerCloseListener = () => {
+        this.removeListener(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
+      };
+    });
   }
 
   private async runNonWalletConnectAccountAction<T>(

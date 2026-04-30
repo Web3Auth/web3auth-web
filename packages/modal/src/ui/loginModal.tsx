@@ -358,6 +358,30 @@ export class LoginModal {
     return this.accountLinkingState.active;
   };
 
+  startAccountLinkingPicker = (params: { chainId: string }): void => {
+    this.accountLinkingState = {
+      ...DEFAULT_ACCOUNT_LINKING_STATE,
+      active: true,
+      pickerActive: true,
+      chainId: params.chainId,
+      intent: ACCOUNT_LINKING_INTENT.LINK,
+    };
+    this.setState({
+      accountLinking: this.accountLinkingState,
+      currentPage: PAGES.WALLET_LIST,
+      modalVisibility: true,
+      status: MODAL_STATUS.INITIALIZED,
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
+  };
+
+  endAccountLinkingPicker = (): void => {
+    this.accountLinkingState = { ...this.accountLinkingState, pickerActive: false };
+    this.setState({ accountLinking: this.accountLinkingState });
+  };
+
   startConnectingLoader = (params: { connector: WALLET_CONNECTOR_TYPE | string; connectorName: string }): void => {
     this.setState({
       status: MODAL_STATUS.CONNECTING,

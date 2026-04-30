@@ -333,6 +333,7 @@ function RootContent(props: RootProps) {
               )}
               {/* Login Screen */}
               {!isWalletConnectAccountLinkingVisible &&
+                !modalState.accountLinking.pickerActive &&
                 modalState.currentPage === PAGES.LOGIN_OPTIONS &&
                 shouldShowLoginPage &&
                 modalState.status === MODAL_STATUS.INITIALIZED && (
@@ -345,7 +346,7 @@ function RootContent(props: RootProps) {
               {/* Connect Wallet Screen */}
               {!isWalletConnectAccountLinkingVisible &&
                 modalState.currentPage === PAGES.WALLET_LIST &&
-                (!shouldShowLoginPage || isExternalWalletModeOnly) &&
+                (!shouldShowLoginPage || isExternalWalletModeOnly || modalState.accountLinking.pickerActive) &&
                 modalState.status === MODAL_STATUS.INITIALIZED && (
                   <ConnectWallet
                     allRegistryButtons={allRegistryButtons}

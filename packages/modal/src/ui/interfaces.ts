@@ -157,6 +157,12 @@ export type AccountLinkingIntentType = (typeof ACCOUNT_LINKING_INTENT)[keyof typ
 export interface AccountLinkingState {
   active: boolean;
   /**
+   * True when the modal is showing the wallet picker for `linkAccount()` called
+   * without a `connectorName`. The user's selection in the ConnectWallet UI will
+   * be routed to the linking flow instead of the regular login flow.
+   */
+  pickerActive: boolean;
+  /**
    * The name of the wallet to be linked to.
    */
   connectorName: WALLET_CONNECTOR_TYPE | string | null;
@@ -177,6 +183,7 @@ export interface AccountLinkingState {
 
 export const DEFAULT_ACCOUNT_LINKING_STATE: AccountLinkingState = {
   active: false,
+  pickerActive: false,
   connectorName: null,
   transportConnectorName: null,
   chainId: null,

@@ -258,7 +258,7 @@ export interface IWeb3Auth extends IWeb3AuthCore {
    * @param params - Linking parameters including the target connector name.
    * @returns A result object confirming the link, including the linked address.
    */
-  linkAccount(params: LinkAccountParams): Promise<LinkAccountResult>;
+  linkAccount(params?: LinkAccountParams): Promise<LinkAccountResult>;
 
   /**
    * Unlink an external wallet from the currently authenticated user account
