@@ -133,8 +133,6 @@ const options = computed((): Web3AuthOptions => {
   if (consentConfigMode === "required") {
     uiConfig.consentConfig = {
       required: true,
-      privacyPolicy: "https://example.com/privacy",
-      tncLink: "https://example.com/terms",
     };
   }
   const authConnectorInstance = authConnector({ connectorSettings: {} });
