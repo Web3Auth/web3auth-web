@@ -68,7 +68,7 @@ describe("LoginModal (real UI)", () => {
 
     await vi.waitFor(
       () => {
-        expect(document.querySelector(".w3a--fixed.w3a--w-screen")).not.toBeNull();
+        expect(document.querySelector(".wta\\:fixed.wta\\:w-screen")).not.toBeNull();
       },
       { timeout: 3000, interval: 50 }
     );

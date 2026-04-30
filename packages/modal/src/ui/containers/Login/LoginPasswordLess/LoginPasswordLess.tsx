@@ -61,20 +61,20 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
     return (
       <button
         type="button"
-        className={cn("w3a--btn !w3a--justify-between w3a--relative w3a--group w3a--overflow-hidden", {
-          "w3a--rounded-full": buttonRadius === "pill",
-          "w3a--rounded-lg": buttonRadius === "rounded",
-          "w3a--rounded-none": buttonRadius === "square",
+        className={cn("w3a--btn wta:justify-between! wta:relative wta:group wta:overflow-hidden", {
+          "wta:rounded-full": buttonRadius === "pill",
+          "wta:rounded-lg": buttonRadius === "rounded",
+          "wta:rounded-none": buttonRadius === "square",
         })}
         onClick={() => {
           setIsPasswordLessCtaClicked(true);
         }}
       >
-        <p className="w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.passwordless.title", { title })}</p>
+        <p className="wta:text-app-gray-900 wta:dark:text-app-white">{t("modal.passwordless.title", { title })}</p>
         <img
           id="passwordless-arrow"
-          className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-6 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
-          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+          className="wta:absolute wta:right-4 wta:top-1/2 wta:-translate-x-6 wta:-translate-y-1/2 wta:opacity-0 wta:transition-all wta:duration-300
+          wta:group-hover:translate-x-0 wta:group-hover:opacity-100"
           src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
           alt="arrow"
         />
@@ -85,10 +85,10 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
   return (
     <>
       <div
-        className={cn("w3a--input", isInputFocused && "!w3a--border-app-primary-600", {
-          "w3a--rounded-full": buttonRadius === "pill",
-          "w3a--rounded-lg": buttonRadius === "rounded",
-          "w3a--rounded-none": buttonRadius === "square",
+        className={cn("w3a--input", isInputFocused && "wta:border-app-primary-600!", {
+          "wta:rounded-full": buttonRadius === "pill",
+          "wta:rounded-lg": buttonRadius === "rounded",
+          "wta:rounded-none": buttonRadius === "square",
         })}
       >
         <input
@@ -105,20 +105,20 @@ function LoginPasswordLess(props: LoginPasswordLessProps) {
           }}
           type="text"
           className={cn(
-            "w3a--w-full w3a--appearance-none w3a--bg-transparent w3a--text-app-gray-900 w3a--outline-none placeholder:w3a--text-xs placeholder:w3a--text-app-gray-400 focus:w3a--outline-none active:w3a--outline-none dark:w3a--text-app-white dark:placeholder:w3a--text-app-gray-500"
+            "wta:w-full wta:appearance-none wta:bg-transparent wta:text-app-gray-900 wta:outline-none wta:placeholder:text-xs wta:placeholder:text-app-gray-400 wta:focus:outline-none wta:active:outline-none wta:dark:text-app-white wta:dark:placeholder:text-app-gray-500"
           )}
           onKeyDown={(e) => handleEnter(e)}
           disabled={isPasswordLessLoading}
         />
         {isPasswordLessLoading && <PulseLoader />}
         {inputValue && !isPasswordLessLoading && (
-          <button type="button" className="w3a--appearance-none" onClick={onFormSubmit}>
+          <button type="button" className="wta:appearance-none" onClick={onFormSubmit}>
             <img src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")} alt="arrow" />
           </button>
         )}
       </div>
       {errorMessage && !isInputFocused && isPasswordLessCtaClicked && (
-        <p className="w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
+        <p className="wta:w-full wta:pl-6 wta:text-start wta:text-xs wta:font-normal wta:text-app-red-500 wta:dark:text-app-red-400">
           {errorMessage}
         </p>
       )}

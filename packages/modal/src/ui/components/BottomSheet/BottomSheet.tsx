@@ -15,10 +15,10 @@ function BottomSheet({ isShown, onClose, children, sheetClassName, showCloseButt
     <>
       {/* Backdrop */}
       <div
-        className={cn("w3a--bottom-sheet-bg w3a--fixed w3a--left-0 w3a--top-0 w3a--size-full w3a--transition-opacity w3a--duration-300", {
-          "w3a--rounded-[30px]": borderRadiusType === "large",
-          "w3a--rounded-2xl": borderRadiusType === "medium",
-          "w3a--rounded-none": borderRadiusType === "small",
+        className={cn("w3a--bottom-sheet-bg wta:fixed wta:left-0 wta:top-0 wta:size-full wta:transition-opacity wta:duration-300", {
+          "wta:rounded-[30px]": borderRadiusType === "large",
+          "wta:rounded-2xl": borderRadiusType === "medium",
+          "wta:rounded-none": borderRadiusType === "small",
         })}
         onClick={handleClose}
         aria-hidden="true"
@@ -27,20 +27,20 @@ function BottomSheet({ isShown, onClose, children, sheetClassName, showCloseButt
       {/* Bottom Sheet */}
       <div
         className={cn(
-          `w3a--fixed w3a--bottom-2 w3a--left-2 w3a--mx-auto w3a--flex w3a--w-[96%] w3a--flex-col
-      w3a--gap-y-2 w3a--border w3a--border-app-gray-100 w3a--bg-app-white w3a--p-4 w3a--shadow-lg w3a--transition-transform w3a--duration-500 
-      w3a--ease-out dark:w3a--border-app-gray-600 dark:w3a--bg-app-dark-surface-main
-      ${isShown ? "w3a--translate-y-0 w3a--delay-700" : "w3a--translate-y-full"}`,
+          `wta:fixed wta:bottom-2 wta:left-2 wta:mx-auto wta:flex wta:w-[96%] wta:flex-col
+      wta:gap-y-2 wta:border wta:border-app-gray-100 wta:bg-app-white wta:p-4 wta:shadow-lg wta:transition-transform wta:duration-500 
+      wta:ease-out wta:dark:border-app-gray-600 wta:dark:bg-app-dark-surface-main
+      ${isShown ? "wta:translate-y-0 wta:delay-700" : "wta:translate-y-full"}`,
           {
-            "w3a--rounded-[30px]": borderRadiusType === "large",
-            "w3a--rounded-2xl": borderRadiusType === "medium",
-            "w3a--rounded-none": borderRadiusType === "small",
+            "wta:rounded-[30px]": borderRadiusType === "large",
+            "wta:rounded-2xl": borderRadiusType === "medium",
+            "wta:rounded-none": borderRadiusType === "small",
           },
           sheetClassName
         )}
       >
         {showCloseButton && (
-          <div className="w3a--absolute w3a--right-4 w3a--top-[16px] w3a--z-10 w3a--cursor-pointer">
+          <div className="wta:absolute wta:right-4 wta:top-[16px] wta:z-10 wta:cursor-pointer">
             <svg
               width="13"
               height="13"
@@ -48,7 +48,7 @@ function BottomSheet({ isShown, onClose, children, sheetClassName, showCloseButt
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               onClick={onClose}
-              className="w3a--text-app-gray-500 hover:w3a--text-app-gray-900 dark:w3a--text-app-gray-200 dark:hover:w3a--text-app-white"
+              className="wta:text-app-gray-500 wta:hover:text-app-gray-900 wta:dark:text-app-gray-200 wta:dark:hover:text-app-white"
             >
               <path
                 fillRule="evenodd"

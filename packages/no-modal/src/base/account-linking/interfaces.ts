@@ -70,7 +70,7 @@ export interface CitadelLinkAccountPayload {
   idToken: string;
 
   /** Network of the account being linked */
-  network: "ethereum" | "solana";
+  network: CITADEL_NETWORK;
 
   /** Name of the connector being linked */
   connector: string;

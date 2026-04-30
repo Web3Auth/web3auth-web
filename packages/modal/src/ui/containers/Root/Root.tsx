@@ -271,15 +271,15 @@ function RootContent(props: RootProps) {
   }, [isWalletConnectAccountLinkingVisible, modalState.status]);
 
   return (
-    <div className="w3a--relative w3a--flex w3a--flex-col">
+    <div className="wta:relative wta:flex wta:flex-col">
       <div
-        className="w3a-modal-container w3a--relative w3a--flex w3a--flex-col w3a--overflow-hidden"
+        className="w3a-modal-container wta:relative wta:flex wta:flex-col wta:overflow-hidden"
         style={{
           height: containerHeight,
         }}
       >
         <div className="w3a--modal-curtain" />
-        <div ref={contentRef} className="w3a--relative w3a--flex w3a--flex-none w3a--flex-col w3a--p-6">
+        <div ref={contentRef} className="wta:relative wta:flex wta:flex-none wta:flex-col wta:p-6">
           {/* Content */}
           {isShowLoader ? (
             <Loader

@@ -254,7 +254,7 @@ function Login(props: LoginProps) {
       }
     }
 
-    setPasswordlessErrorMessage(invalidInputErrorMessage);
+    setPasswordlessErrorMessage(getInvalidInputErrorMessage());
     setIsPasswordLessLoading(false);
     return undefined;
   };
@@ -271,12 +271,11 @@ function Login(props: LoginProps) {
     return "+(00)123456";
   }, [isEmailPasswordLessLoginVisible, isSmsPasswordLessLoginVisible]);
 
-  const invalidInputErrorMessage =
-    isEmailPasswordLessLoginVisible && isSmsPasswordLessLoginVisible
-      ? t("modal.errors-invalid-number-email")
-      : isEmailPasswordLessLoginVisible
-        ? t("modal.errors-invalid-email")
-        : t("modal.errors-invalid-number");
+  const getInvalidInputErrorMessage = () => {
+    if (isEmailPasswordLessLoginVisible && isSmsPasswordLessLoginVisible) return t("modal.errors-invalid-number-email");
+    if (isEmailPasswordLessLoginVisible) return t("modal.errors-invalid-email");
+    return t("modal.errors-invalid-number");
+  };
 
   useEffect(() => {
     const getLocation = async () => {
@@ -398,17 +397,12 @@ function Login(props: LoginProps) {
     [analytics, handleExternalWalletBtnClick, installedExternalWallets.length, totalExternalWallets]
   );
 
-  const shouldAutoOpenExternalWallets = showExternalWalletButton && !areSocialLoginsVisible && !showPasswordLessInput;
-
   useEffect(() => {
-    if (!shouldAutoOpenExternalWallets) return undefined;
-
-    const timeoutId = setTimeout(() => {
+    if (showExternalWalletButton && !areSocialLoginsVisible && !showPasswordLessInput) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional
       handleConnectWallet();
-    }, 0);
-
-    return () => clearTimeout(timeoutId);
-  }, [shouldAutoOpenExternalWallets, handleConnectWallet]);
+    }
+  }, [showExternalWalletButton, areSocialLoginsVisible, showPasswordLessInput, handleConnectWallet]);
 
   if (showOtpFlow) {
     return (
@@ -461,33 +455,33 @@ function Login(props: LoginProps) {
 
   const externalWalletSection = () => {
     return (
-      <div key="external-wallets-section" className={cn("w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-2")}>
+      <div key="external-wallets-section" className={cn("wta:flex wta:w-full wta:flex-col wta:items-start wta:justify-start wta:gap-y-2")}>
         {/* INSTALLED EXTERNAL WALLETS */}
         {installedExternalWallets.length > 0 &&
           installedExternalWallets.map((wallet) => (
             <button
               key={wallet.name}
               type="button"
-              className={cn("w3a--btn !w3a--justify-between w3a--group w3a--relative w3a--overflow-hidden", {
-                "w3a--rounded-full": buttonRadius === "pill",
-                "w3a--rounded-lg": buttonRadius === "rounded",
-                "w3a--rounded-none": buttonRadius === "square",
+              className={cn("w3a--btn wta:justify-between! wta:group wta:relative wta:overflow-hidden", {
+                "wta:rounded-full": buttonRadius === "pill",
+                "wta:rounded-lg": buttonRadius === "rounded",
+                "wta:rounded-none": buttonRadius === "square",
               })}
               onClick={() => handleInstalledWalletClick(wallet)}
             >
-              <p className="w3a--max-w-[180px] w3a--truncate w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">
+              <p className="wta:max-w-[180px] wta:truncate wta:text-base wta:font-normal wta:text-app-gray-700 wta:dark:text-app-white">
                 {wallet.displayName}
               </p>
-              <div className="w3a--absolute w3a--right-4 w3a--top-1/2 w3a--flex w3a--w-auto -w3a--translate-y-1/2 w3a--items-center w3a--gap-x-2 w3a--transition-all w3a--duration-300 group-hover:w3a--translate-x-6 group-hover:w3a--opacity-0">
+              <div className="wta:absolute wta:right-4 wta:top-1/2 wta:flex wta:w-auto wta:-translate-y-1/2 wta:items-center wta:gap-x-2 wta:transition-all wta:duration-300 wta:group-hover:translate-x-6 wta:group-hover:opacity-0">
                 {wallet.hasInjectedWallet && (
                   <span
-                    className="w3a--inline-flex w3a--items-center w3a--rounded-md w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 
-                  dark:w3a--border dark:w3a--border-app-primary-400 dark:w3a--bg-transparent dark:w3a--text-app-primary-400"
+                    className="wta:inline-flex wta:items-center wta:rounded-md wta:bg-app-primary-100 wta:px-2 wta:py-1 wta:text-xs wta:font-medium wta:text-app-primary-800 
+                  wta:dark:border wta:dark:border-app-primary-400 wta:dark:bg-transparent wta:dark:text-app-primary-400"
                   >
                     {t("modal.external.installed")}
                   </span>
                 )}
-                <figure className="w3a--size-5">
+                <figure className="wta:size-5">
                   <Image
                     imageData={wallet.icon}
                     imageId={`login-${wallet.name}`}
@@ -502,8 +496,8 @@ function Login(props: LoginProps) {
               </div>
               <img
                 id="injected-wallet-arrow"
-                className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-10 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
-          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+                className="wta:absolute wta:right-4 wta:top-1/2 wta:-translate-x-10 wta:-translate-y-1/2 wta:opacity-0 wta:transition-all wta:duration-300
+          wta:group-hover:translate-x-0 wta:group-hover:opacity-100"
                 src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
                 alt="arrow"
               />
@@ -514,26 +508,26 @@ function Login(props: LoginProps) {
         {remainingUndisplayedWallets > 0 && (
           <button
             type="button"
-            className={cn("w3a--btn !w3a--justify-between w3a--group w3a--relative w3a--overflow-hidden", {
-              "w3a--rounded-full": buttonRadius === "pill",
-              "w3a--rounded-lg": buttonRadius === "rounded",
-              "w3a--rounded-none": buttonRadius === "square",
+            className={cn("w3a--btn wta:justify-between! wta:group wta:relative wta:overflow-hidden", {
+              "wta:rounded-full": buttonRadius === "pill",
+              "wta:rounded-lg": buttonRadius === "rounded",
+              "wta:rounded-none": buttonRadius === "square",
             })}
             onClick={handleConnectWallet}
           >
-            <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{t("modal.external.all-wallets")}</p>
+            <p className="wta:text-base wta:font-normal wta:text-app-gray-900 wta:dark:text-app-white">{t("modal.external.all-wallets")}</p>
             {showExternalWalletCount && (
               <div
                 id="external-wallet-count"
-                className="w3a--absolute w3a--right-4 w3a--top-1/2 w3a--w-auto -w3a--translate-y-1/2 w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2.5 w3a--py-0.5 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 w3a--transition-all w3a--delay-300 w3a--duration-300 group-hover:w3a--translate-x-6 group-hover:w3a--opacity-0 group-hover:w3a--delay-0 dark:w3a--border dark:w3a--border-app-primary-500 dark:w3a--bg-transparent dark:w3a--text-app-primary-500"
+                className="wta:absolute wta:right-4 wta:top-1/2 wta:w-auto wta:-translate-y-1/2 wta:rounded-full wta:bg-app-primary-100 wta:px-2.5 wta:py-0.5 wta:text-xs wta:font-medium wta:text-app-primary-800 wta:transition-all wta:delay-300 wta:duration-300 wta:group-hover:translate-x-6 wta:group-hover:opacity-0 wta:group-hover:delay-0 wta:dark:border wta:dark:border-app-primary-500 wta:dark:bg-transparent wta:dark:text-app-primary-500"
               >
                 {remainingUndisplayedWallets}
               </div>
             )}
             <img
               id="external-wallet-arrow"
-              className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-10 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
-          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+              className="wta:absolute wta:right-4 wta:top-1/2 wta:-translate-x-10 wta:-translate-y-1/2 wta:opacity-0 wta:transition-all wta:duration-300
+          wta:group-hover:translate-x-0 wta:group-hover:opacity-100"
               src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
               alt="arrow"
             />
@@ -548,12 +542,12 @@ function Login(props: LoginProps) {
   const delimiter = (index: number) => {
     return (
       <div
-        className={cn("w3a--flex w3a--w-full w3a--items-center w3a--gap-x-2", headerLogo ? "w3a--my-2" : "w3a--my-4")}
+        className={cn("wta:flex wta:w-full wta:items-center wta:gap-x-2", headerLogo ? "wta:my-2" : "wta:my-4")}
         key={`section-delimiter-${index}`}
       >
-        <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
-        <p className="w3a--text-xs w3a--font-normal w3a--uppercase w3a--text-app-gray-400 dark:w3a--text-app-gray-400">or</p>
-        <div className="w3a--h-px w3a--w-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-500" />
+        <div className="wta:h-px wta:w-full wta:bg-app-gray-200 wta:dark:bg-app-gray-500" />
+        <p className="wta:text-xs wta:font-normal wta:uppercase wta:text-app-gray-400 wta:dark:text-app-gray-400">or</p>
+        <div className="wta:h-px wta:w-full wta:bg-app-gray-200 wta:dark:bg-app-gray-500" />
       </div>
     );
   };
@@ -606,28 +600,28 @@ function Login(props: LoginProps) {
   const socialLoginExpandedView = () => socialLoginSection(otherRow);
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4 w3a--p-2">
+    <div className="wta:flex wta:flex-col wta:items-center wta:gap-y-4 wta:p-2">
       <div
         className={cn(
-          "w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2 w3a--pt-6",
-          logoAlignment === "center" ? "" : "w3a--w-full"
+          "wta:flex wta:flex-col wta:items-center wta:justify-center wta:gap-y-2 wta:pt-6",
+          logoAlignment === "center" ? "" : "wta:w-full"
         )}
       >
         {headerLogo && (
           <figure
             className={cn(
-              "w3a--mx-auto w3a--h-12 w3a--w-[200px]",
-              logoAlignment === "center" ? "w3a--flex w3a--justify-center w3a--items-center" : "w3a--ml-0 w3a--w-auto"
+              "wta:mx-auto wta:h-12 wta:w-[200px]",
+              logoAlignment === "center" ? "wta:flex wta:justify-center wta:items-center" : "wta:ml-0 wta:w-auto"
             )}
           >
-            <img src={headerLogo} alt="Logo" className="w3a--size-full w3a--object-contain" />
+            <img src={headerLogo} alt="Logo" className="wta:size-full wta:object-contain" />
           </figure>
         )}
         <p
           className={cn(
-            "w3a--text-app-gray-900 dark:w3a--text-app-white",
-            logoAlignment === "center" ? "w3a--text-center" : "w3a--text-left w3a--w-full w3a--ml-4",
-            headerLogo ? "w3a--text-lg w3a--font-semibold" : "w3a--text-3xl w3a--font-medium"
+            "wta:text-app-gray-900 wta:dark:text-app-white",
+            logoAlignment === "center" ? "wta:text-center" : "wta:text-left wta:w-full wta:ml-4",
+            headerLogo ? "wta:text-lg wta:font-semibold" : "wta:text-3xl wta:font-medium"
           )}
         >
           {t("modal.social.sign-in")}
@@ -647,13 +641,13 @@ function Login(props: LoginProps) {
       />
 
       {captchaError && showCaptcha && (
-        <p className="-w3a--mt-2 w3a--w-full w3a--pl-6 w3a--text-start w3a--text-xs w3a--font-normal w3a--text-app-red-500 dark:w3a--text-app-red-400">
+        <p className="wta:-mt-2 wta:w-full wta:pl-6 wta:text-start wta:text-xs wta:font-normal wta:text-app-red-500 wta:dark:text-app-red-400">
           {t(captchaError)}
         </p>
       )}
 
       {!showCaptcha && (
-        <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
+        <div className="wta:flex wta:w-full wta:flex-col wta:items-center wta:justify-center wta:gap-y-2">
           {/* DEFAULT VIEW */}
           {!expandSocialLogins && defaultView()}
 

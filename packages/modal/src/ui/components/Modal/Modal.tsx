@@ -40,11 +40,11 @@ function Modal(props: ModalProps) {
 
   const positions: Record<string, string> = useMemo(
     () => ({
-      center: "w3a--top-0 w3a--left-0 w3a--items-center w3a--justify-center",
-      "top-center": "w3a--top-8 w3a--left-0 w3a--items-start w3a--justify-center",
-      "bottom-center": "w3a--bottom-8 w3a--left-0 w3a--items-end w3a--justify-center",
-      left: "sm:w3a--left-8 w3a--flex w3a--items-center w3a--justify-center sm:w3a--justify-start",
-      right: "sm:w3a--right-8 w3a--flex w3a--items-center w3a--justify-center sm:w3a--justify-end",
+      center: "wta:top-0 wta:left-0 wta:items-center wta:justify-center",
+      "top-center": "wta:top-8 wta:left-0 wta:items-start wta:justify-center",
+      "bottom-center": "wta:bottom-8 wta:left-0 wta:items-end wta:justify-center",
+      left: "wta:sm:left-8 wta:flex wta:items-center wta:justify-center wta:sm:justify-start",
+      right: "wta:sm:right-8 wta:flex wta:items-center wta:justify-center wta:sm:justify-end",
     }),
     []
   );
@@ -57,28 +57,28 @@ function Modal(props: ModalProps) {
 
   return (
     <div
-      className={cn("w3a--fixed w3a--z-50 w3a--overflow-hidden w3a--flex w3a--transition-all", placementClass, {
-        "w3a--w-screen w3a--h-screen": isOpen,
-        "w3a--w-0 w3a--h-0 w3a--delay-500": !isOpen,
+      className={cn("wta:fixed wta:z-50 wta:overflow-hidden wta:flex wta:transition-all", placementClass, {
+        "wta:w-screen wta:h-screen": isOpen,
+        "wta:w-0 wta:h-0 wta:delay-500": !isOpen,
       })}
     >
       <div
         className={cn(
-          "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--w-[356px] [@media(min-width:375px)]:w3a--w-[393px] w3a--h-auto w3a--flex w3a--flex-col w3a--duration-500",
+          "wta:bg-app-light-surface1 wta:dark:bg-app-dark-surface-main wta:w-[356px] wta:[@media(min-width:375px)]:w-[393px] wta:h-auto wta:flex wta:flex-col wta:duration-500",
           {
-            "w3a--translate-y-0 w3a--delay-100": isOpen,
-            "w3a--translate-y-[100vh]": !isOpen,
-            "w3a--p-4": padding,
-            "w3a--shadow-xl sm:w3a--shadow-lg": shadow,
-            "w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-800": border,
-            "w3a--rounded-[30px]": borderRadius === "large",
-            "w3a--rounded-2xl": borderRadius === "medium",
-            "w3a--rounded-none": borderRadius === "small",
+            "wta:translate-y-0 wta:delay-100": isOpen,
+            "wta:translate-y-[100vh]": !isOpen,
+            "wta:p-4": padding,
+            "wta:shadow-xl wta:sm:shadow-lg": shadow,
+            "wta:border wta:border-app-gray-100 wta:dark:border-app-gray-800": border,
+            "wta:rounded-[30px]": borderRadius === "large",
+            "wta:rounded-2xl": borderRadius === "medium",
+            "wta:rounded-none": borderRadius === "small",
           }
         )}
       >
         {showCloseIcon && (
-          <div className="w3a--absolute w3a--right-6 w3a--top-[30px] w3a--z-10 w3a--cursor-pointer">
+          <div className="wta:absolute wta:right-6 wta:top-[30px] wta:z-10 wta:cursor-pointer">
             <svg
               width="13"
               height="13"
@@ -86,7 +86,7 @@ function Modal(props: ModalProps) {
               fill="none"
               xmlns="http://www.w3.org/2000/svg"
               onClick={onCloseHandler}
-              className="w3a--text-app-gray-500 hover:w3a--text-app-gray-900 dark:w3a--text-app-gray-200 dark:hover:w3a--text-app-white"
+              className="wta:text-app-gray-500 wta:hover:text-app-gray-900 wta:dark:text-app-gray-200 wta:dark:hover:text-app-white"
             >
               <path
                 fillRule="evenodd"

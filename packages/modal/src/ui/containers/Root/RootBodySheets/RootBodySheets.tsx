@@ -30,16 +30,16 @@ export default function RootBodySheets() {
       const logoLight = `${osKey}-light`;
       const logoDark = `${osKey}-dark`;
       acc.push(
-        <li key={appUrl} className="w3a--w-full">
+        <li key={appUrl} className="wta:w-full">
           <a href={appUrl} rel="noopener noreferrer" target="_blank">
             <button
               type="button"
               className={cn(
-                "w3a--group w3a--relative w3a--overflow-hidden w3a--h-11 w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800",
+                "wta:group wta:relative wta:overflow-hidden wta:h-11 wta:flex wta:w-full wta:items-center wta:justify-start wta:gap-x-2 wta:border wta:border-app-gray-200 wta:bg-app-gray-50 wta:px-5 wta:py-2.5 wta:hover:translate-y-[0.5px] wta:hover:border-app-gray-50 wta:dark:border-app-gray-500 wta:dark:bg-app-gray-800 wta:dark:hover:border-app-gray-800",
                 {
-                  "w3a--rounded-full": buttonRadiusType === "pill",
-                  "w3a--rounded-lg": buttonRadiusType === "rounded",
-                  "w3a--rounded-none": buttonRadiusType === "square",
+                  "wta:rounded-full": buttonRadiusType === "pill",
+                  "wta:rounded-lg": buttonRadiusType === "rounded",
+                  "wta:rounded-none": buttonRadiusType === "square",
                 }
               )}
             >
@@ -52,13 +52,13 @@ export default function RootBodySheets() {
                 width="28"
                 isButton
               />
-              <span className="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
+              <span className="wta:text-sm wta:font-medium wta:text-app-gray-900 wta:dark:text-app-white">
                 {t("modal.external.install-mobile-app", { os: getOsName(osKey as mobileOs) })}
               </span>
               <img
                 id="install-links-arrow"
-                className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-6 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
-          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+                className="wta:absolute wta:right-4 wta:top-1/2 wta:-translate-x-6 wta:-translate-y-1/2 wta:opacity-0 wta:transition-all wta:duration-300
+          wta:group-hover:translate-x-0 wta:group-hover:opacity-100"
                 src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
                 alt="arrow"
               />
@@ -85,11 +85,11 @@ export default function RootBodySheets() {
           <button
             type="button"
             className={cn(
-              "w3a--group w3a--relative w3a--overflow-hidden w3a--h-11 w3a--flex w3a--w-full w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--px-5 w3a--py-2.5 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:w3a--border-app-gray-500 dark:w3a--bg-app-gray-800 dark:hover:w3a--border-app-gray-800",
+              "wta:group wta:relative wta:overflow-hidden wta:h-11 wta:flex wta:w-full wta:items-center wta:justify-start wta:gap-x-2 wta:border wta:border-app-gray-200 wta:bg-app-gray-50 wta:px-5 wta:py-2.5 wta:hover:translate-y-[0.5px] wta:hover:border-app-gray-50 wta:dark:border-app-gray-500 wta:dark:bg-app-gray-800 wta:dark:hover:border-app-gray-800",
               {
-                "w3a--rounded-full": buttonRadiusType === "pill",
-                "w3a--rounded-lg": buttonRadiusType === "rounded",
-                "w3a--rounded-none": buttonRadiusType === "square",
+                "wta:rounded-full": buttonRadiusType === "pill",
+                "wta:rounded-lg": buttonRadiusType === "rounded",
+                "wta:rounded-none": buttonRadiusType === "square",
               }
             )}
           >
@@ -102,13 +102,13 @@ export default function RootBodySheets() {
               width="30"
               isButton
             />
-            <span className="w3a--text-sm w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
+            <span className="wta:text-sm wta:font-medium wta:text-app-gray-900 wta:dark:text-app-white">
               {t("modal.external.install-browser-extension", { browser: getBrowserName(deviceDetails.browser) })}
             </span>
             <img
               id="install-links-arrow"
-              className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-6 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
-          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+              className="wta:absolute wta:right-4 wta:top-1/2 wta:-translate-x-6 wta:-translate-y-1/2 wta:opacity-0 wta:transition-all wta:duration-300
+          wta:group-hover:translate-x-0 wta:group-hover:opacity-100"
               src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
               alt="arrow"
             />
@@ -154,10 +154,10 @@ export default function RootBodySheets() {
           isShown={bodyState.installLinks.show}
           onClose={() => setBodyState({ ...bodyState, installLinks: { show: false, wallet: null } })}
         >
-          <p className="w3a--mb-2 w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">
+          <p className="wta:mb-2 wta:text-center wta:text-base wta:font-semibold wta:text-app-gray-900 wta:dark:text-app-white">
             {t("modal.getWallet")}
           </p>
-          <div className="w3a--my-4 w3a--flex w3a--justify-center">
+          <div className="wta:my-4 wta:flex wta:justify-center">
             <Image
               imageId={`login-${bodyState.installLinks.wallet.name}`}
               hoverImageId={`login-${bodyState.installLinks.wallet.name}`}
@@ -168,7 +168,7 @@ export default function RootBodySheets() {
               extension={bodyState.installLinks.wallet.imgExtension}
             />
           </div>
-          <ul className="w3a--flex w3a--flex-col w3a--gap-y-2">{deviceDetails.platform === "desktop" ? desktopInstallLinks : mobileInstallLinks}</ul>
+          <ul className="wta:flex wta:flex-col wta:gap-y-2">{deviceDetails.platform === "desktop" ? desktopInstallLinks : mobileInstallLinks}</ul>
         </BottomSheet>
       )}
     </>

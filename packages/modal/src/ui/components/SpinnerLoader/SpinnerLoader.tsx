@@ -8,7 +8,7 @@ const SpinnerLoader = (props: SpinnerLoaderProps) => {
 
   return (
     <div className={cn("w3a--spinner-loader", className)} style={{ width, height }}>
-      <div className={cn("w3a--spinner-loader-ring w3a--animate-spin", classes?.spinner)} />
+      <div className={cn("w3a--spinner-loader-ring wta:animate-spin", classes?.spinner)} />
 
       {children && <div className="w3a--spinner-loader-image">{children}</div>}
     </div>

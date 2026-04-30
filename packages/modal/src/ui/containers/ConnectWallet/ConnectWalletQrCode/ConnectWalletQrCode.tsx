@@ -37,12 +37,12 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
   const qrColor = primaryColor && primaryColor.toLowerCase() === "#ffffff" ? "#000000" : primaryColor;
 
   return (
-    <div className="w3a--contents">
+    <div className="wta:contents">
       {qrCodeValue ? (
-        <div className="w3a--flex w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--rounded-2xl w3a--border w3a--border-app-gray-200 w3a--p-4 dark:w3a--border-app-gray-700">
+        <div className="wta:flex wta:flex-col wta:items-center wta:justify-center wta:gap-y-4 wta:rounded-2xl wta:border wta:border-app-gray-200 wta:p-4 wta:dark:border-app-gray-700">
           <button
             type="button"
-            className="w3a--relative w3a--flex w3a--size-[300px] w3a--appearance-none w3a--items-center w3a--justify-center w3a--rounded-2xl"
+            className="wta:relative wta:flex wta:size-[300px] wta:appearance-none wta:items-center wta:justify-center wta:rounded-2xl"
             onClick={() => {
               navigator.clipboard.writeText(qrCodeValue);
               setToast({
@@ -66,12 +66,12 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
               fgColor={isDark ? whiteColor : blackColor}
             />
           </button>
-          <p className="w3a--text-center w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
+          <p className="wta:text-center wta:text-sm wta:font-normal wta:text-app-gray-500 wta:dark:text-app-gray-300">
             {t("modal.external.walletconnect-copy")}
           </p>
         </div>
       ) : (
-        <div className="w3a--mx-auto w3a--flex w3a--size-[300px] w3a--animate-pulse w3a--items-center w3a--justify-center w3a--rounded-lg w3a--bg-app-gray-200 w3a--p-2 dark:w3a--bg-app-gray-700">
+        <div className="wta:mx-auto wta:flex wta:size-[300px] wta:animate-pulse wta:items-center wta:justify-center wta:rounded-lg wta:bg-app-gray-200 wta:p-2 wta:dark:bg-app-gray-700">
           <Image
             imageId={`login-${selectedButton.name}`}
             hoverImageId={`login-${selectedButton.name}`}
@@ -86,15 +86,15 @@ function ConnectWalletQrCode(props: ConnectWalletQrCodeProps) {
 
       {showGetWalletComponent && (
         <div
-          className="w3a--flex w3a--w-full w3a--items-center w3a--justify-between w3a--rounded-2xl w3a--bg-app-gray-50 
-      w3a--px-4 w3a--py-2 w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:w3a--text-app-white"
+          className="wta:flex wta:w-full wta:items-center wta:justify-between wta:rounded-2xl wta:bg-app-gray-50 
+      wta:px-4 wta:py-2 wta:text-app-gray-900 wta:dark:bg-app-gray-800 wta:dark:text-app-white"
         >
-          <p className="w3a--text-sm w3a--text-app-gray-900 dark:w3a--text-app-white">
+          <p className="wta:text-sm wta:text-app-gray-900 wta:dark:text-app-white">
             {t("modal.external.dont-have")} <span>{selectedButton?.displayName}</span>?
           </p>
           <button
             type="button"
-            className="w3a--appearance-none w3a--rounded-full w3a--border w3a--border-app-gray-200 w3a--bg-transparent w3a--px-5 w3a--py-2 w3a--text-base w3a--font-normal w3a--text-app-gray-700 w3a--transition-all w3a--duration-150 hover:w3a--border-transparent hover:w3a--shadow-light active:w3a--scale-95 dark:w3a--border-app-gray-700 dark:w3a--text-app-gray-300 dark:hover:w3a--border-transparent dark:hover:w3a--shadow-dark"
+            className="wta:appearance-none wta:rounded-full wta:border wta:border-app-gray-200 wta:bg-transparent wta:px-5 wta:py-2 wta:text-base wta:font-normal wta:text-app-gray-700 wta:transition-all wta:duration-150 wta:hover:border-transparent wta:hover:shadow-light wta:active:scale-95 wta:dark:border-app-gray-700 wta:dark:text-app-gray-300 wta:dark:hover:border-transparent wta:dark:hover:shadow-dark"
             onClick={() => {
               setBodyState({
                 ...bodyState,
