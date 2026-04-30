@@ -4,6 +4,7 @@ import {
   ANALYTICS_INTEGRATION_TYPE,
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
+  CONNECTED_STATUSES,
   type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
@@ -50,7 +51,7 @@ type InitialWeb3AuthState = {
 };
 
 function getInitialState(web3Auth: IWeb3Auth): InitialWeb3AuthState {
-  const isConnected = web3Auth.status === CONNECTOR_STATUS.CONNECTED || web3Auth.status === CONNECTOR_STATUS.AUTHORIZED;
+  const isConnected = CONNECTED_STATUSES.includes(web3Auth.status);
   const isAuthorized = web3Auth.status === CONNECTOR_STATUS.AUTHORIZED;
 
   return {
