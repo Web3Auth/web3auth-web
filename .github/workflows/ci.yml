@@ -27,10 +27,13 @@ jobs:
       - name: Build
         run: npm run build
 
+      - name: Test
+        run: npm run test
+
       # Set the credentials from repository settings/secrets
       - name: Configure AWS credentials
         if: github.ref == 'refs/heads/master'
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -62,7 +65,7 @@ jobs:
         # Invalidate Cloudfront (this action)
       - name: invalidate vue app new s3
         if: github.ref == 'refs/heads/master'
-        uses: chaitanyapotti/cloudfront-update-distribution@v4
+        uses: chaitanyapotti/cloudfront-update-distribution@v5
         with:
           cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_NEW_DEMO_APP_DISTRIBUTION_ID }}
           cloudfront-invalidation-path: "/*"
