@@ -188,6 +188,12 @@ export interface IWeb3AuthCoreOptions {
    * @defaultValue "connect-only"
    */
   initialAuthenticationMode?: ConnectorInitialAuthenticationModeType;
+
+  /**
+   * Whether to disable analytics
+   * @defaultValue false
+   */
+  disableAnalytics?: boolean;
 }
 
 export type LoginParamMap = {
