@@ -23,7 +23,7 @@ function ConnectingStatus(props: ConnectingStatusType) {
   );
 
   return (
-    <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
+    <div className="w3a--flex w3a--h-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4 w3a--pt-6">
       <SpinnerLoader width={95} height={95}>
         {providerIcon}
       </SpinnerLoader>
@@ -69,7 +69,7 @@ function ConnectedStatus(props: ConnectedStatusType) {
 function ErroredStatus(props: ErroredStatusType) {
   const { message } = props;
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-2">
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-2 w3a--pt-6">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--error-logo">
         <path
           fill="currentColor"

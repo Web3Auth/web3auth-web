@@ -1,6 +1,5 @@
 import { WALLET_CONNECTORS, type WalletRegistryItem } from "@web3auth/no-modal";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { twMerge } from "tailwind-merge";
 
 import Footer from "../../components/Footer/Footer";
 import Loader from "../../components/Loader";
@@ -271,8 +270,6 @@ function RootContent(props: RootProps) {
     return !isWalletConnectAccountLinkingVisible && modalState.status !== MODAL_STATUS.INITIALIZED;
   }, [isWalletConnectAccountLinkingVisible, modalState.status]);
 
-  const isConsentRequiringStatus = modalState.status === MODAL_STATUS.CONSENT_REQUIRING;
-
   return (
     <div className="w3a--relative w3a--flex w3a--flex-col">
       <div
@@ -282,13 +279,7 @@ function RootContent(props: RootProps) {
         }}
       >
         <div className="w3a--modal-curtain" />
-        <div
-          ref={contentRef}
-          className={twMerge(
-            "w3a--relative w3a--flex w3a--flex-col w3a--p-6",
-            isShowLoader && !isConsentRequiringStatus ? "w3a--flex-1" : "w3a--flex-none"
-          )}
-        >
+        <div ref={contentRef} className="w3a--relative w3a--flex w3a--flex-none w3a--flex-col w3a--p-6">
           {/* Content */}
           {isShowLoader ? (
             <Loader
