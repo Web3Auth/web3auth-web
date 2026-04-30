@@ -15,11 +15,11 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
   };
 
   return (
-    <div className="w3a--flex w3a--items-center w3a--justify-between">
+    <div className="wta:flex wta:items-center wta:justify-between">
       {!hideBackButton ? (
         <button
           type="button"
-          className="w3a--z-20 w3a--flex w3a--size-5 w3a--cursor-pointer w3a--items-center w3a--justify-center w3a--rounded-full"
+          className="wta:z-20 wta:flex wta:size-5 wta:cursor-pointer wta:items-center wta:justify-center wta:rounded-full"
           onClick={handleBack}
           disabled={disableBackButton}
         >
@@ -27,7 +27,7 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
             xmlns="http://www.w3.org/2000/svg"
             fill="none"
             viewBox="0 0 20 20"
-            className={`w3a--text-app-gray-500 dark:w3a--text-app-gray-200 ${disableBackButton ? "w3a--cursor-not-allowed w3a--opacity-50" : "hover:w3a--text-app-gray-900 dark:hover:w3a--text-app-white"}`}
+            className={`wta:text-app-gray-500 wta:dark:text-app-gray-200 ${disableBackButton ? "wta:cursor-not-allowed wta:opacity-50" : "wta:hover:text-app-gray-900 wta:dark:hover:text-app-white"}`}
           >
             <path
               fill="currentColor"
@@ -40,14 +40,14 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
       ) : (
         <div />
       )}
-      <p className="w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">
+      <p className="wta:text-base wta:font-medium wta:text-app-gray-900 wta:dark:text-app-white">
         {currentPage === CONNECT_WALLET_PAGES.SELECTED_WALLET
           ? selectedButton?.displayName
           : currentPage === CONNECT_WALLET_PAGES.CONNECT_WALLET
             ? t("modal.connectYourWallet")
             : currentPage}
       </p>
-      <div className="w3a--z-[-1] w3a--size-5" />
+      <div className="wta:z-[-1] wta:size-5" />
     </div>
   );
 }

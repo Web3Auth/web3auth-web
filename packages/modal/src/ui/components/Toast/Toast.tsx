@@ -17,24 +17,24 @@ const Toast = () => {
   if (!toast.message) return null;
 
   const toastClass = {
-    success: "w3a--border-app-green-200 w3a--bg-app-green-100 w3a--text-app-green-900",
-    error: "w3a--border-app-red-200 w3a--bg-app-red-100 w3a--text-app-red-900",
-    warning: "w3a--border-app-yellow-200 w3a--bg-app-yellow-100 w3a--text-app-yellow-900",
-    info: "w3a--border-app-blue-200 w3a--bg-app-blue-100 w3a--text-app-blue-900",
+    success: "wta:border-app-green-200 wta:bg-app-green-100 wta:text-app-green-900",
+    error: "wta:border-app-red-200 wta:bg-app-red-100 wta:text-app-red-900",
+    warning: "wta:border-app-yellow-200 wta:bg-app-yellow-100 wta:text-app-yellow-900",
+    info: "wta:border-app-blue-200 wta:bg-app-blue-100 wta:text-app-blue-900",
   };
 
   const toastIconClass = {
-    success: "w3a--text-app-green-900",
-    error: "w3a--text-app-red-900",
-    warning: "w3a--text-app-yellow-900",
-    info: "w3a--text-app-blue-900",
+    success: "wta:text-app-green-900",
+    error: "wta:text-app-red-900",
+    warning: "wta:text-app-yellow-900",
+    info: "wta:text-app-blue-900",
   };
 
   return (
     <div
-      className={`w3a--absolute w3a--inset-x-4 w3a--bottom-4 w3a--z-[60] w3a--mx-auto w3a--w-[90%] w3a--rounded-md w3a--border w3a--p-4 w3a--text-sm ${toastClass[toast.type]}`}
+      className={`wta:absolute wta:inset-x-4 wta:bottom-4 wta:z-[60] wta:mx-auto wta:w-[90%] wta:rounded-md wta:border wta:p-4 wta:text-sm ${toastClass[toast.type]}`}
     >
-      <div className="w3a--absolute w3a--right-4 w3a--top-4 w3a--z-10 w3a--cursor-pointer">
+      <div className="wta:absolute wta:right-4 wta:top-4 wta:z-10 wta:cursor-pointer">
         <svg
           width="13"
           height="13"
@@ -52,7 +52,7 @@ const Toast = () => {
           />
         </svg>
       </div>
-      <div className="w3a--flex w3a--items-center w3a--gap-2">
+      <div className="wta:flex wta:items-center wta:gap-2">
         {/* TODO: add icon */}
         {/* <img src="" alt="toast-icon" /> */}
         {/* <p className={toastIconClass[toast.type]}>x</p> */}

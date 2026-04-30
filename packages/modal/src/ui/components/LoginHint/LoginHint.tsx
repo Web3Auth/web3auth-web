@@ -29,7 +29,7 @@ const LoginHint = ({ children, content, isDark = false, hideHint = false }: Logi
 
   return (
     <div
-      className="w3a--relative"
+      className="wta:relative"
       aria-hidden
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -43,12 +43,12 @@ const LoginHint = ({ children, content, isDark = false, hideHint = false }: Logi
           data-popover
           role="tooltip"
           className={cn(
-            "w3a--absolute w3a--z-[45] w3a--shadow-2xl w3a--rounded-lg w3a--bottom-[100%] w3a--left-[50%] w3a--w-max w3a--text-xs w3a--px-[6px] w3a--py-[3px]",
-            isDark ? "w3a--bg-app-white w3a--text-app-gray-900" : "w3a--bg-app-gray-800 w3a--text-app-gray-100"
+            "wta:absolute wta:z-[45] wta:shadow-2xl wta:rounded-lg wta:bottom-[100%] wta:left-[50%] wta:w-max wta:text-xs wta:px-[6px] wta:py-[3px]",
+            isDark ? "wta:bg-app-white wta:text-app-gray-900" : "wta:bg-app-gray-800 wta:text-app-gray-100"
           )}
         >
           {content}
-          <div className="w3a--absolute" style={triangleStyle}></div>
+          <div className="wta:absolute" style={triangleStyle}></div>
         </div>
       )}
     </div>
