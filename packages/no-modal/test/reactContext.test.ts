@@ -160,7 +160,7 @@ describe("useWeb3AuthInnerContextValue", () => {
     ({ root, container } = rendered);
 
     expect(rendered.renders[0]).toEqual({
-      isConnected: false,
+      isConnected: true,
       isAuthorized: true,
       status: CONNECTOR_STATUS.AUTHORIZED,
     });

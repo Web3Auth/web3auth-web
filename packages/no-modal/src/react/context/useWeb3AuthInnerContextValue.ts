@@ -45,11 +45,12 @@ type InitialWeb3AuthState = {
   connection: Connection | null;
   isAuthorized: boolean;
   isConnected: boolean;
+  isInitialized: boolean;
   status: CONNECTOR_STATUS_TYPE | null;
 };
 
 function getInitialState(web3Auth: IWeb3Auth): InitialWeb3AuthState {
-  const isConnected = web3Auth.status === CONNECTOR_STATUS.CONNECTED;
+  const isConnected = web3Auth.status === CONNECTOR_STATUS.CONNECTED || web3Auth.status === CONNECTOR_STATUS.AUTHORIZED;
   const isAuthorized = web3Auth.status === CONNECTOR_STATUS.AUTHORIZED;
 
   return {
@@ -58,6 +59,7 @@ function getInitialState(web3Auth: IWeb3Auth): InitialWeb3AuthState {
     connection: isConnected ? web3Auth.connection : null,
     isAuthorized,
     isConnected,
+    isInitialized: isConnected,
     status: web3Auth.status,
   };
 }
@@ -79,7 +81,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
   const [isInitializing, setIsInitializing] = useState<boolean>(false);
   const [initError, setInitError] = useState<Error | null>(null);
   const [connection, setConnection] = useState<Connection | null>(() => initialWeb3AuthState.connection);
-  const [isInitialized, setIsInitialized] = useState<boolean>(false);
+  const [isInitialized, setIsInitialized] = useState<boolean>(initialWeb3AuthState.isInitialized);
   const [isMFAEnabled, setIsMFAEnabled] = useState<boolean>(false);
   const [isConnected, setIsConnected] = useState<boolean>(initialWeb3AuthState.isConnected);
   const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(initialWeb3AuthState.status);
@@ -92,19 +94,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     }) as TWeb3Auth["getPlugin"],
     [web3Auth]
   );
-
-  // Reset derived hook state when a new SDK instance is created.
-  useEffect(() => {
-    const nextState = getInitialState(web3Auth);
-
-    setConnection(nextState.connection);
-    setIsMFAEnabled(false);
-    setIsConnected(nextState.isConnected);
-    setIsAuthorized(nextState.isAuthorized);
-    setStatus(nextState.status);
-    setChainId(nextState.chainId);
-    setChainNamespace(nextState.chainNamespace);
-  }, [web3Auth]);
 
   useEffect(() => {
     const controller = new AbortController();
