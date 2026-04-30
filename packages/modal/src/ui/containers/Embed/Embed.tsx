@@ -34,21 +34,21 @@ function Embed(props: EmbedProps) {
   return (
     <div
       className={cn(
-        "w3a--bg-app-light-surface1 dark:w3a--bg-app-dark-surface-main w3a--rounded-3xl w3a--w-[356px] [@media(min-width:375px)]:w3a--w-[393px] w3a--h-auto w3a--flex w3a--flex-col w3a--duration-500",
+        "wta:bg-app-light-surface1 wta:dark:bg-app-dark-surface-main wta:rounded-3xl wta:w-[356px] wta:[@media(min-width:375px)]:w-[393px] wta:h-auto wta:flex wta:flex-col wta:duration-500",
         {
-          "w3a--translate-y-0 w3a--delay-100": isOpen,
-          "w3a--translate-y-[100vh]": !isOpen,
-          "w3a--p-4": padding,
-          "w3a--shadow-xl sm:w3a--shadow-lg": shadow,
-          "w3a--border w3a--border-app-gray-100 dark:w3a--border-app-gray-800": border,
-          "w3a--rounded-[30px]": borderRadius === "large",
-          "w3a--rounded-2xl": borderRadius === "medium",
-          "w3a--rounded-none": borderRadius === "small",
+          "wta:translate-y-0 wta:delay-100": isOpen,
+          "wta:translate-y-[100vh]": !isOpen,
+          "wta:p-4": padding,
+          "wta:shadow-xl wta:sm:shadow-lg": shadow,
+          "wta:border wta:border-app-gray-100 wta:dark:border-app-gray-800": border,
+          "wta:rounded-[30px]": borderRadius === "large",
+          "wta:rounded-2xl": borderRadius === "medium",
+          "wta:rounded-none": borderRadius === "small",
         }
       )}
     >
       {showCloseIcon && (
-        <div className="w3a--absolute w3a--right-6 w3a--top-[30px] w3a--z-10 w3a--cursor-pointer">
+        <div className="wta:absolute wta:right-6 wta:top-[30px] wta:z-10 wta:cursor-pointer">
           <svg
             width="13"
             height="13"
@@ -56,7 +56,7 @@ function Embed(props: EmbedProps) {
             fill="none"
             xmlns="http://www.w3.org/2000/svg"
             onClick={onCloseHandler}
-            className="w3a--text-app-gray-900 dark:w3a--text-app-white"
+            className="wta:text-app-gray-900 wta:dark:text-app-white"
           >
             <path
               fillRule="evenodd"

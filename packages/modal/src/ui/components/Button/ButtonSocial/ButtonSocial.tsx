@@ -21,14 +21,14 @@ function SocialLoginButton(props: ButtonSocialProps) {
       type="button"
       onClick={(e) => onClick && onClick(e)}
       className={cn("w3a--btn", btnStyle, {
-        "w3a--rounded-full": buttonRadius === "pill",
-        "w3a--rounded-lg": buttonRadius === "rounded",
-        "w3a--rounded-none": buttonRadius === "square",
+        "wta:rounded-full": buttonRadius === "pill",
+        "wta:rounded-lg": buttonRadius === "rounded",
+        "wta:rounded-none": buttonRadius === "square",
       })}
     >
       {showIcon && getProviderIcon(method, isDark, isPrimaryBtn)}
       {children}
-      {showText && <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{text}</p>}
+      {showText && <p className="wta:text-base wta:font-normal wta:text-app-gray-900 wta:dark:text-app-white">{text}</p>}
     </button>
   );
 }

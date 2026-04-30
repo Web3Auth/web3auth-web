@@ -15,13 +15,13 @@ function getProviderIcon(method: string, isDark: boolean, extension: string) {
         id="active-login-img"
         src={`https://images.web3auth.io/${hoverId}${extension}`}
         alt="active-login-img"
-        className="w3a--hidden w3a--size-5 w3a--object-contain group-hover:w3a--block"
+        className="wta:hidden wta:size-5 wta:object-contain wta:group-hover:block"
       />
       <img
         id="login-img"
         src={`https://images.web3auth.io/${imageId}${extension}`}
         alt="login-img"
-        className="w3a--block w3a--size-5 w3a--object-contain group-hover:w3a--hidden"
+        className="wta:block wta:size-5 wta:object-contain wta:group-hover:hidden"
       />
     </>
   );
@@ -32,20 +32,20 @@ function SocialLoginList(props: SocialLoginListProps) {
 
   const getGridRowFromVisibleLogin = () => {
     if (visibleRow.length === 1) {
-      return "w3a--grid-cols-1";
+      return "wta:grid-cols-1";
     } else if (visibleRow.length === 2) {
-      return "w3a--grid-cols-2";
+      return "wta:grid-cols-2";
     } else if (visibleRow.length === 3) {
-      return "w3a--grid-cols-3";
+      return "wta:grid-cols-3";
     } else {
-      return "w3a--grid-cols-4";
+      return "wta:grid-cols-4";
     }
   };
 
   if ((visibleRow.length !== 0 || mainOptionsRow.length !== 0) && otherRow?.length === 0) {
     return (
-      <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
-        <div className="w3a--grid w3a--w-full w3a--gap-y-2">
+      <div className="wta:flex wta:w-full wta:flex-col wta:items-center wta:justify-center wta:gap-y-2">
+        <div className="wta:grid wta:w-full wta:gap-y-2">
           {mainOptionsRow.map((row) => (
             <Button
               type={BUTTON_TYPE.SOCIAL}
@@ -56,7 +56,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                 method: row.method,
                 isDark,
                 isPrimaryBtn: false,
-                btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11 w3a--group",
+                btnStyle: "wta:flex wta:items-center wta:justify-center! wta:w-full wta:h-11 wta:group",
                 children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
                 onClick: () => handleSocialLoginClick({ loginParams: row.loginParams }),
                 buttonRadius,
@@ -64,7 +64,7 @@ function SocialLoginList(props: SocialLoginListProps) {
             />
           ))}
         </div>
-        <div className={cn("w3a--grid w3a--w-full w3a--gap-x-2", getGridRowFromVisibleLogin())}>
+        <div className={cn("wta:grid wta:w-full wta:gap-x-2", getGridRowFromVisibleLogin())}>
           {visibleRow
             .filter((_, index) => (visibleRow.length === 4 ? index <= 3 : index < 3))
             .map((row) => (
@@ -77,7 +77,7 @@ function SocialLoginList(props: SocialLoginListProps) {
                     method: row.method,
                     isDark,
                     isPrimaryBtn: false,
-                    btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11 w3a--group",
+                    btnStyle: "wta:flex wta:items-center wta:justify-center! wta:w-full wta:h-11 wta:group",
                     children: <>{getProviderIcon(row.method, isDark, ".svg")}</>,
                     onClick: () => handleSocialLoginClick({ loginParams: row.loginParams }),
                     buttonRadius,
@@ -92,10 +92,8 @@ function SocialLoginList(props: SocialLoginListProps) {
                 isDark,
                 showIcon: false,
                 onClick: handleExpandSocialLogins,
-                btnStyle: "w3a--flex w3a--items-center !w3a--justify-center w3a--w-full w3a--h-11",
-                children: (
-                  <img src={getIcons(isDark ? "dots-dark-horizontal" : "dots-light-horizontal")} alt="Logo" className="w3a--object-contain" />
-                ),
+                btnStyle: "wta:flex wta:items-center wta:justify-center! wta:w-full wta:h-11",
+                children: <img src={getIcons(isDark ? "dots-dark-horizontal" : "dots-light-horizontal")} alt="Logo" className="wta:object-contain" />,
                 buttonRadius,
               }}
             />
@@ -106,13 +104,13 @@ function SocialLoginList(props: SocialLoginListProps) {
   }
 
   return (
-    <div className="w3a--flex w3a--w-full w3a--flex-col w3a--items-start w3a--justify-start w3a--gap-y-4">
-      <button type="button" className="w3a--appearance-none" onClick={() => handleExpandSocialLogins()}>
-        <img src={getIcons(isDark ? "arrow-left-dark" : "arrow-left-light")} alt="Logo" className="w3a--object-contain" />
+    <div className="wta:flex wta:w-full wta:flex-col wta:items-start wta:justify-start wta:gap-y-4">
+      <button type="button" className="wta:appearance-none" onClick={() => handleExpandSocialLogins()}>
+        <img src={getIcons(isDark ? "arrow-left-dark" : "arrow-left-light")} alt="Logo" className="wta:object-contain" />
       </button>
-      <div className="w3a--social-container w3a--grid w3a--h-[300px] w3a--w-full w3a--auto-rows-min w3a--grid-cols-1 w3a--gap-y-2 w3a--overflow-y-auto w3a--pl-2 w3a--pr-3">
+      <div className="w3a--social-container wta:grid wta:h-[300px] wta:w-full wta:auto-rows-min wta:grid-cols-1 wta:gap-y-2 wta:overflow-y-auto wta:pl-2 wta:pr-3">
         {otherRow.map((row) => (
-          <div className="w3a--h-11 w3a--w-full" key={row.method}>
+          <div className="wta:h-11 wta:w-full" key={row.method}>
             <Button
               type={BUTTON_TYPE.SOCIAL}
               props={{
@@ -120,16 +118,16 @@ function SocialLoginList(props: SocialLoginListProps) {
                 isDark,
                 isPrimaryBtn: false,
                 onClick: () => handleSocialLoginClick({ loginParams: row.loginParams }),
-                btnStyle: "w3a--group w3a--relative w3a--overflow-hidden w3a--flex w3a--items-center !w3a--justify-start w3a--w-full w3a--h-11",
+                btnStyle: "wta:group wta:relative wta:overflow-hidden wta:flex wta:items-center wta:justify-start! wta:w-full wta:h-11",
                 buttonRadius,
                 children: (
                   <>
                     {getProviderIcon(row.method, isDark, ".svg")}
-                    <p className="w3a--text-sm w3a--font-normal w3a--text-app-gray-900 dark:w3a--text-app-white">{row.name}</p>
+                    <p className="wta:text-sm wta:font-normal wta:text-app-gray-900 wta:dark:text-app-white">{row.name}</p>
                     <img
                       id="login-arrow"
-                      className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-10 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
-          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+                      className="wta:absolute wta:right-4 wta:top-1/2 wta:-translate-x-10 wta:-translate-y-1/2 wta:opacity-0 wta:transition-all wta:duration-300
+          wta:group-hover:translate-x-0 wta:group-hover:opacity-100"
                       src={getIcons(isDark ? "chevron-right-dark" : "chevron-right-light")}
                       alt="arrow"
                     />
