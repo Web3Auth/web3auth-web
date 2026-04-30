@@ -213,43 +213,47 @@ describe("Web3AuthNoModal", () => {
   it("connectTo resolves in connect-only mode on CONNECTED", async () => {
     const sdk = createSdk({ initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY });
     (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {};
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never, { connected: { connectorName: WALLET_CONNECTORS.METAMASK } });
-    connector.connect = vi.fn(async () => {
-      sdk.emit(CONNECTOR_EVENTS.CONNECTED, {
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never, {
+      connected: {
         connectorName: WALLET_CONNECTORS.METAMASK,
         ethereumProvider: null,
         solanaWallet: null,
         reconnected: false,
-        loginMode: "no-modal",
-      });
-      return null;
+      },
     });
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+    sdk.exposeSubscribeToConnectorEvents(connector);
 
-    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toBeNull();
+    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toEqual({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: null,
+      solanaWallet: null,
+    });
   });
 
   it("connectTo resolves in connect-and-sign mode after CONNECTED and AUTHORIZED", async () => {
     const sdk = createSdk({ initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN });
     (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {};
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
-    connector.connect = vi.fn(async () => {
-      sdk.emit(CONNECTOR_EVENTS.CONNECTED, {
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never, {
+      connected: {
         connectorName: WALLET_CONNECTORS.METAMASK,
-        ethereumProvider: undefined,
-        solanaWallet: undefined,
+        ethereumProvider: null,
+        solanaWallet: null,
         reconnected: false,
-        loginMode: "modal",
-      });
-      sdk.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      },
+      authorized: {
         authTokenInfo: { idToken: "id-token" },
-        connector: "",
-      });
-      return null;
+        connector: WALLET_CONNECTORS.METAMASK,
+      },
     });
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+    sdk.exposeSubscribeToConnectorEvents(connector);
 
-    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toBeNull();
+    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toEqual({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: null,
+      solanaWallet: null,
+    });
   });
 
   it("connectTo rejects on ERRORED event", async () => {

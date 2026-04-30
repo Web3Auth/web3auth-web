@@ -1,5 +1,6 @@
 import { resolve } from "node:path";
 
+import tailwindcss from "@tailwindcss/vite";
 import vue from "@vitejs/plugin-vue";
 import { defineConfig, loadEnv } from "vite";
 
@@ -16,7 +17,7 @@ export default defineConfig(({ mode }) => {
       port: 8080,
       host: true,
     },
-    plugins: [vue()],
+    plugins: [vue(), tailwindcss()],
     resolve: {
       alias: {
         "@": "/src",
