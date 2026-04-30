@@ -274,9 +274,9 @@ function RootContent(props: RootProps) {
   const isConsentRequiringStatus = modalState.status === MODAL_STATUS.CONSENT_REQUIRING;
 
   return (
-    <div className="w3a--relative w3a--flex w3a--flex-col">
+    <div className="wta:relative wta:flex wta:flex-col">
       <div
-        className="w3a-modal-container w3a--relative w3a--flex w3a--flex-col w3a--overflow-hidden"
+        className="w3a-modal-container wta:relative wta:flex wta:flex-col wta:overflow-hidden"
         style={{
           height: containerHeight,
         }}
@@ -285,8 +285,8 @@ function RootContent(props: RootProps) {
         <div
           ref={contentRef}
           className={twMerge(
-            "w3a--relative w3a--flex w3a--flex-col w3a--p-6",
-            isShowLoader && !isConsentRequiringStatus ? "w3a--flex-1" : "w3a--flex-none"
+            "wta:relative wta:flex wta:flex-col wta:p-6",
+            isShowLoader && !isConsentRequiringStatus ? "wta:flex-1" : "wta:flex-none"
           )}
         >
           {/* Content */}

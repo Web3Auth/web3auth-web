@@ -22,22 +22,27 @@ jobs:
           cache: "npm"
 
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium firefox webkit
 
       - name: Build
         run: npm run build
 
+      - name: Test
+        run: npm run test
+
       # Set the credentials from repository settings/secrets
       - name: Configure AWS credentials
         if: github.ref == 'refs/heads/master'
-        uses: aws-actions/configure-aws-credentials@v4
+        uses: aws-actions/configure-aws-credentials@v6
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: ${{ secrets.AWS_REGION_US }}
 
       - name: Build new vue demo app
-        if: github.ref == 'refs/heads/master'
         run: |
           cd demo/vue-app-new
           npm install
@@ -63,7 +68,7 @@ jobs:
         # Invalidate Cloudfront (this action)
       - name: invalidate vue app new s3
         if: github.ref == 'refs/heads/master'
-        uses: chaitanyapotti/cloudfront-update-distribution@v4
+        uses: chaitanyapotti/cloudfront-update-distribution@v5
         with:
           cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_NEW_DEMO_APP_DISTRIBUTION_ID }}
           cloudfront-invalidation-path: "/*"

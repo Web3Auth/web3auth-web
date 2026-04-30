@@ -10,7 +10,7 @@ function NoWalletsFound() {
   const [t] = useTranslation(undefined, { i18n });
 
   return (
-    <div className="w3a--flex w3a--w-full w3a--items-center w3a--justify-center w3a--py-6 w3a--text-center w3a--text-app-gray-400 dark:w3a--text-app-gray-500">
+    <div className="wta:flex wta:w-full wta:items-center wta:justify-center wta:py-6 wta:text-center wta:text-app-gray-400 wta:dark:text-app-gray-500">
       {t("modal.external.no-wallets-found")}
     </div>
   );
@@ -23,14 +23,14 @@ function WalletsFound(props: WalletsFoundProps) {
 
   if (isLoading) {
     return (
-      <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
+      <div className="wta:flex wta:flex-col wta:gap-y-2">
         {Array.from({ length: 6 }).map((_, index) => (
           <div
             key={`loader-${index}`}
-            className={cn("w3a--h-12 w3a--w-full w3a--animate-pulse w3a--rounded-2xl w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700", {
-              "w3a--rounded-full": buttonRadius === "pill",
-              "w3a--rounded-lg": buttonRadius === "rounded",
-              "w3a--rounded-none": buttonRadius === "square",
+            className={cn("wta:h-12 wta:w-full wta:animate-pulse wta:rounded-2xl wta:bg-app-gray-200 wta:dark:bg-app-gray-700", {
+              "wta:rounded-full": buttonRadius === "pill",
+              "wta:rounded-lg": buttonRadius === "rounded",
+              "wta:rounded-none": buttonRadius === "square",
             })}
           />
         ))}
@@ -39,7 +39,7 @@ function WalletsFound(props: WalletsFoundProps) {
   }
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
+    <div className="wta:flex wta:flex-col wta:gap-y-2">
       {externalButtons.map((button) => (
         <Button
           key={button.name}
@@ -73,10 +73,10 @@ function MoreWalletsButton(props: MoreWalletsButtonProps) {
   if (isLoading && initialWalletCount < totalExternalWalletsCount) {
     return (
       <div
-        className={cn("w3a--h-12 w3a--w-full w3a--animate-pulse w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700", {
-          "w3a--rounded-full": buttonRadius === "pill",
-          "w3a--rounded-lg": buttonRadius === "rounded",
-          "w3a--rounded-none": buttonRadius === "square",
+        className={cn("wta:h-12 wta:w-full wta:animate-pulse wta:bg-app-gray-200 wta:dark:bg-app-gray-700", {
+          "wta:rounded-full": buttonRadius === "pill",
+          "wta:rounded-lg": buttonRadius === "rounded",
+          "wta:rounded-none": buttonRadius === "square",
         })}
       />
     );
@@ -86,20 +86,20 @@ function MoreWalletsButton(props: MoreWalletsButtonProps) {
     <button
       type="button"
       className={cn(
-        "w3a--flex w3a--items-center w3a--justify-start w3a--gap-x-2 w3a--bg-app-gray-50 w3a--p-3 hover:w3a--bg-app-gray-200 dark:w3a--bg-app-gray-800 dark:hover:w3a--bg-app-gray-600 active:w3a--scale-95 w3a--transition-all w3a--duration-150",
+        "wta:flex wta:items-center wta:justify-start wta:gap-x-2 wta:bg-app-gray-50 wta:p-3 wta:hover:bg-app-gray-200 wta:dark:bg-app-gray-800 wta:dark:hover:bg-app-gray-600 wta:active:scale-95 wta:transition-all wta:duration-150",
         {
-          "w3a--rounded-full": buttonRadius === "pill",
-          "w3a--rounded-lg": buttonRadius === "rounded",
-          "w3a--rounded-none": buttonRadius === "square",
+          "wta:rounded-full": buttonRadius === "pill",
+          "wta:rounded-lg": buttonRadius === "rounded",
+          "wta:rounded-none": buttonRadius === "square",
         }
       )}
       onClick={onMoreWalletsClick}
     >
       <img src={getIcons(isDark ? "view-dark" : "view-light")} alt="view" height="24" width="24" />
-      <p className="w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{t("modal.connect-wallet.more-wallets")}</p>
+      <p className="wta:text-base wta:font-normal wta:text-app-gray-700 wta:dark:text-app-white">{t("modal.connect-wallet.more-wallets")}</p>
       <span
-        className="w3a--inline-flex w3a--items-center w3a--rounded-full w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 
-        dark:w3a--border dark:w3a--border-app-primary-400 dark:w3a--bg-transparent dark:w3a--text-app-primary-400"
+        className="wta:inline-flex wta:items-center wta:rounded-full wta:bg-app-primary-100 wta:px-2 wta:py-1 wta:text-xs wta:font-medium wta:text-app-primary-800 
+        wta:dark:border wta:dark:border-app-primary-400 wta:dark:bg-transparent wta:dark:text-app-primary-400"
       >
         {totalExternalWalletsCount - initialWalletCount}
       </span>
@@ -129,12 +129,9 @@ function ConnectWalletList(props: ConnectWalletListProps) {
   return (
     <>
       <ul
-        className={cn(
-          "w3a--overflow-y-auto w3a--flex w3a--flex-col w3a--gap-y-2 w3a--h-[280px] w3a--social-container -w3a--mx-5 w3a--pl-5 w3a--pr-1",
-          {
-            "w3a--h-[328px]": !showMoreWalletsButton,
-          }
-        )}
+        className={cn("wta:overflow-y-auto wta:flex wta:flex-col wta:gap-y-2 wta:h-[280px] w3a--social-container wta:-mx-5 wta:pl-5 wta:pr-1", {
+          "wta:h-[328px]": !showMoreWalletsButton,
+        })}
       >
         {externalButtons.length === 0 ? (
           <NoWalletsFound />

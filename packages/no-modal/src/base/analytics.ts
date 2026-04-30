@@ -12,6 +12,9 @@ export class Analytics {
   private enabled: boolean = true;
 
   public init(): void {
+    if (!this.enabled) {
+      return;
+    }
     if (this.isSkipped()) {
       return;
     }
@@ -88,7 +91,7 @@ export class Analytics {
   private isSkipped() {
     const dappOrigin = window.location.origin;
 
-    // skip if the protocol is not http or https
+    // skip if the protocol is http
     if (dappOrigin.startsWith("http://")) {
       return true;
     }

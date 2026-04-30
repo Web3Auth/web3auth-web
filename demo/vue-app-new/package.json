@@ -3,6 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "scripts": {
+    "analyze": "source-map-explorer dist/assets/*.js dist/assets/*.map --no-border-checks",
     "type-check": "vue-tsc --noEmit -p tsconfig.json",
     "dev": "vite",
     "serve": "vite preview",
@@ -38,13 +39,12 @@
   },
   "devDependencies": {
     "@toruslabs/eslint-config-vue": "^5.0.1",
-    "@vitejs/plugin-vue": "^6.0.5",
-    "autoprefixer": "^10.4.27",
+    "@vitejs/plugin-vue": "^6.0.6",
     "eslint": "^9.39.2",
     "globals": "^17.4.0",
     "postcss": "^8.5.8",
     "prettier": "^3.8.1",
-    "stream-browserify": "^3.0.0",
+    "source-map-explorer": "^2.5.3",
     "tailwindcss": "^3.4.13",
     "typescript": "^5.9.3",
     "vite": "^8.0.8",
