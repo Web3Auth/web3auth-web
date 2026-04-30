@@ -86,9 +86,8 @@ export class Analytics {
   }
 
   private isSkipped() {
-    const dappOrigin = window.location.origin;
-
     if (!this.enabled) return true;
+    const dappOrigin = window.location.origin;
 
     // skip if the protocol is not http or https
     if (dappOrigin.startsWith("http://")) {
