@@ -9,10 +9,11 @@ import { DEFAULT_METAMASK_WALLET_REGISTRY_ITEM, PAGES } from "../../constants";
 import { useModalState } from "../../context/ModalStateContext";
 import { RootProvider } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
-import { ExternalButton, MODAL_STATUS } from "../../interfaces";
+import { type ExternalButton, MODAL_STATUS } from "../../interfaces";
+import AccountLinking from "../AccountLinking";
 import ConnectWallet from "../ConnectWallet";
 import Login from "../Login";
-import { RootProps } from "./Root.type";
+import type { RootProps } from "./Root.type";
 import RootBodySheets from "./RootBodySheets/RootBodySheets";
 
 function RootContent(props: RootProps) {
@@ -185,9 +186,13 @@ function RootContent(props: RootProps) {
     return !showPasswordLessInput && !areSocialLoginsVisible;
   }, [areSocialLoginsVisible, showPasswordLessInput]);
 
+  const isWalletConnectAccountLinkingVisible = useMemo(() => {
+    return modalState.accountLinking.active && modalState.accountLinking.transportConnectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2;
+  }, [modalState.accountLinking.active, modalState.accountLinking.transportConnectorName]);
+
   const isShowLoader = useMemo(() => {
-    return modalState.status !== MODAL_STATUS.INITIALIZED;
-  }, [modalState.status]);
+    return !isWalletConnectAccountLinkingVisible && modalState.status !== MODAL_STATUS.INITIALIZED;
+  }, [isWalletConnectAccountLinkingVisible, modalState.status]);
 
   const isConsentRequiringStatus = modalState.status === MODAL_STATUS.CONSENT_REQUIRING;
 
@@ -225,16 +230,21 @@ function RootContent(props: RootProps) {
             />
           ) : (
             <>
+              {isWalletConnectAccountLinkingVisible && <AccountLinking allExternalWallets={allExternalWallets} />}
               {/* Login Screen */}
-              {modalState.currentPage === PAGES.LOGIN_OPTIONS && shouldShowLoginPage && modalState.status === MODAL_STATUS.INITIALIZED && (
-                <Login
-                  installedExternalWalletConfig={topInstalledConnectorButtons}
-                  totalExternalWallets={allExternalWallets.length}
-                  remainingUndisplayedWallets={remainingUndisplayedWallets}
-                />
-              )}
+              {!isWalletConnectAccountLinkingVisible &&
+                modalState.currentPage === PAGES.LOGIN_OPTIONS &&
+                shouldShowLoginPage &&
+                modalState.status === MODAL_STATUS.INITIALIZED && (
+                  <Login
+                    installedExternalWalletConfig={topInstalledConnectorButtons}
+                    totalExternalWallets={allExternalWallets.length}
+                    remainingUndisplayedWallets={remainingUndisplayedWallets}
+                  />
+                )}
               {/* Connect Wallet Screen */}
-              {modalState.currentPage === PAGES.WALLET_LIST &&
+              {!isWalletConnectAccountLinkingVisible &&
+                modalState.currentPage === PAGES.WALLET_LIST &&
                 (!shouldShowLoginPage || isExternalWalletModeOnly) &&
                 modalState.status === MODAL_STATUS.INITIALIZED && (
                   <ConnectWallet

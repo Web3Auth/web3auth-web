@@ -1,6 +1,6 @@
-import { type ProviderConfig } from "@toruslabs/base-controllers";
+import { ChainNamespaceType, type ProviderConfig } from "@toruslabs/base-controllers";
 import { CITADEL_SERVER_MAP } from "@toruslabs/constants";
-import { put } from "@toruslabs/http-helpers";
+import { get, put } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
 import type { Wallet } from "@wallet-standard/base";
 import {
@@ -25,14 +25,19 @@ import { type default as WsEmbed, WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed
 import deepmerge from "deepmerge";
 
 import {
+  AccountLinkingError,
+  Analytics,
+  ANALYTICS_EVENTS,
   AuthLoginParams,
   AuthTokenInfo,
   BaseConnector,
   BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
+  citadelServerUrl,
   cloneDeep,
   CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  ConnectedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
@@ -45,8 +50,13 @@ import {
   ConnectorNamespaceType,
   ConnectorParams,
   getCaipChainId,
+  getErrorAnalyticsProperties,
+  IConnector,
   IProvider,
+  LinkAccountResult,
   log,
+  parseChainNamespaceFromCitadelResponse,
+  UnlinkAccountResult,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -54,11 +64,24 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
+import { CITADEL_NETWORK, makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../../base/account-linking";
 import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
-import type { AuthConnectorOptions, LoginSettings, PrivateKeyProvider, WalletServicesSettings } from "./interface";
+import {
+  type AuthConnectorLinkAccountParams,
+  type AuthConnectorOptions,
+  type AuthConnectorSessionTokens,
+  type AuthConnectorSwitchAccountContext,
+  type AuthConnectorSwitchAccountResult,
+  type AuthConnectorUnlinkAccountParams,
+  IAuthConnector,
+  type LoginSettings,
+  type PrivateKeyProvider,
+  UserInfoWithConnectedAccounts,
+  type WalletServicesSettings,
+} from "./interface";
 
-class AuthConnector extends BaseConnector<AuthLoginParams> {
+class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConnector {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
 
   readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
@@ -85,6 +108,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
   private _solanaWallet: Wallet | null = null;
 
+  private analytics: Analytics;
+
   constructor(params: AuthConnectorOptions) {
     super(params);
 
@@ -92,6 +117,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     this.loginSettings = params.loginSettings || { authConnection: "" };
     this.wsSettings = params.walletServicesSettings || { loginMode: WS_EMBED_LOGIN_MODE.PLUGIN };
     this.authConnectionConfig = params.authConnectionConfig || [];
+    this.analytics = params.analytics || new Analytics();
   }
 
   get provider(): IProvider | null {
@@ -283,7 +309,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
 
     this.rehydrated = false;
     this._solanaWallet = null;
-    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED, { connector: WALLET_CONNECTORS.AUTH });
   }
 
   async getAuthTokenInfo(): Promise<AuthTokenInfo> {
@@ -310,8 +336,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
-    const userInfo = this.authInstance.getUserInfo();
-    return userInfo;
+    const [userInfo, connectedAccounts] = await Promise.all([this.authInstance.getUserInfo(), this.getConnectedAccounts()]);
+    return {
+      ...userInfo,
+      connectedAccounts,
+    };
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
@@ -357,6 +386,391 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
       return x.authConnection === authConnection && x.isDefault;
     });
     return providerConfig;
+  }
+
+  public async generateChallengeAndSign(): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    // we do not support this for auth connector, as of now.
+    throw new Error("Not implemented");
+  }
+
+  public async switchAccount(account: ConnectedAccountInfo, context: AuthConnectorSwitchAccountContext): Promise<AuthConnectorSwitchAccountResult> {
+    if (!CONNECTED_STATUSES.includes(this.status)) {
+      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before switching accounts.");
+    }
+
+    try {
+      const userInfo = await this.getUserInfo();
+      const connectedAccounts = userInfo.connectedAccounts ?? [];
+      const targetAccount = connectedAccounts.find((candidate) => candidate.id === account.id);
+      if (!targetAccount) {
+        throw AccountLinkingError.requestFailed(`No connected wallet matches account id "${account.id}". Refresh user info and try again.`);
+      }
+
+      const currentActiveAccount = context.activeAccount;
+      const isTargetAlreadyActive = currentActiveAccount ? currentActiveAccount.id === targetAccount.id : targetAccount.isPrimary;
+      if (isTargetAlreadyActive) {
+        return;
+      }
+
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_STARTED, this.getSwitchAccountTrackData(targetAccount));
+
+      if (targetAccount.connector === WALLET_CONNECTORS.AUTH && targetAccount.isPrimary) {
+        const activeChainId = this.getChainIdForConnectedAccount(targetAccount, this.provider?.chainId ?? context.currentChainId);
+        const ethereumProvider = this.provider;
+        const solanaWallet = this.solanaWallet;
+        if (!ethereumProvider && !solanaWallet) {
+          throw AccountLinkingError.requestFailed("Failed to restore the primary AUTH session for account switch.");
+        }
+
+        return {
+          kind: "primary",
+          targetAccount,
+          activeAccount: null,
+          activeChainId,
+          connectorName: this.name,
+          connectorNamespace: this.connectorNamespace,
+          ethereumProvider,
+          solanaWallet,
+        };
+      }
+
+      return {
+        kind: "external",
+        targetAccount,
+        activeAccount: targetAccount,
+        activeChainId: this.getChainIdForConnectedAccount(targetAccount, context.currentChainId),
+      };
+    } catch (error) {
+      await this.trackSwitchAccountFailed(account, error);
+      throw error;
+    }
+  }
+
+  public async trackSwitchAccountCompleted(account: ConnectedAccountInfo): Promise<void> {
+    await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_COMPLETED, {
+      ...this.getSwitchAccountTrackData(account),
+      connector: account.connector,
+    });
+  }
+
+  public async trackSwitchAccountFailed(account: Pick<ConnectedAccountInfo, "id" | "accountType" | "eoaAddress">, error: unknown): Promise<void> {
+    await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_FAILED, {
+      ...this.getSwitchAccountTrackData(account),
+      ...getErrorAnalyticsProperties(error),
+    });
+  }
+
+  public async linkAccount(params: AuthConnectorLinkAccountParams): Promise<LinkAccountResult> {
+    if (!CONNECTED_STATUSES.includes(this.status)) {
+      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before linking an account.");
+    }
+    const { connectorName, chainId, walletConnector } = params;
+
+    try {
+      if (!walletConnector.connected) {
+        const connection = await walletConnector.connect({ chainId, isAccountLinking: true });
+        if (!connection) {
+          throw AccountLinkingError.walletProofFailed(`Failed to connect to "${params.connectorName}" for account linking.`);
+        }
+      }
+    } catch (error) {
+      if (error instanceof AccountLinkingError) {
+        throw error;
+      }
+      throw AccountLinkingError.walletProofFailed(error instanceof Error ? error.message : String(error), error);
+    }
+
+    const trackData = {
+      connector: this.name,
+      linking_connector: connectorName,
+      chain_id: params.chainId,
+    };
+
+    try {
+      await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
+
+      const { accessToken, idToken } = await this.getPrimaryAuthSession(params.authSessionTokens);
+      const walletProof = await this.createWalletLinkingProof(params.walletConnector);
+
+      const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
+      const result = await makeAccountLinkingRequest(authServerUrl, accessToken, {
+        idToken,
+        network: walletProof.network,
+        connector: params.connectorName,
+        message: walletProof.challenge,
+        signature: {
+          s: walletProof.signature,
+          t: walletProof.signatureType,
+        },
+      });
+
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_COMPLETED, {
+        ...trackData,
+        linked_address: walletProof.address,
+      });
+
+      return result;
+    } catch (error) {
+      this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+      });
+
+      // disconnect the wallet connector to avoid any leftover state
+      try {
+        await walletConnector.disconnect({ cleanup: true });
+      } catch (disconnectError) {
+        log.debug("Failed to disconnect wallet connector after linking failure", disconnectError);
+        throw disconnectError;
+      }
+      throw error;
+    }
+  }
+  public async unlinkAccount(params: AuthConnectorUnlinkAccountParams): Promise<UnlinkAccountResult> {
+    if (!CONNECTED_STATUSES.includes(this.status)) {
+      throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before unlinking an account.");
+    }
+    const { address, authSessionTokens } = params;
+    const trackData = {
+      connector: this.name,
+      address,
+    };
+
+    await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_STARTED, trackData);
+
+    try {
+      const { accessToken, idToken, connectedAccounts } = await this.getPrimaryAuthSession(authSessionTokens, {
+        includeConnectedAccounts: true,
+      });
+
+      const network = this.getNetworkForUnlinkAddress(connectedAccounts, address);
+      const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
+      const result = await makeAccountUnlinkingRequest(authServerUrl, accessToken, {
+        idToken,
+        address,
+        network,
+      });
+
+      await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_COMPLETED, {
+        ...trackData,
+        linked_address: address,
+      });
+
+      return result;
+    } catch (error) {
+      await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_FAILED, {
+        ...trackData,
+        ...getErrorAnalyticsProperties(error),
+      });
+      throw error;
+    }
+  }
+
+  public getChainIdForConnectedAccount(
+    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector">,
+    preferredChainId?: string | null
+  ): string {
+    if (preferredChainId) {
+      const preferredChain = this.coreOptions.chains.find((chain) => chain.chainId === preferredChainId);
+      if (preferredChain && (!account.chainNamespace || preferredChain.chainNamespace === account.chainNamespace)) {
+        return preferredChainId;
+      }
+    }
+
+    if (account.chainNamespace) {
+      const parsedChainNamespace = parseChainNamespaceFromCitadelResponse(account.chainNamespace);
+      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === parsedChainNamespace);
+      if (namespaceChain) {
+        return namespaceChain.chainId;
+      }
+    }
+
+    throw WalletInitializationError.invalidParams(`No compatible chainId found for connector "${account.connector}".`);
+  }
+
+  public async assertSwitchAccountConnectorMatchesTarget(
+    connector: IConnector<unknown>,
+    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector" | "eoaAddress">
+  ): Promise<void> {
+    if (!account.chainNamespace) {
+      throw AccountLinkingError.requestFailed(`Could not determine the chain namespace for linked account "${account.eoaAddress}".`);
+    }
+
+    const chainNamespace = parseChainNamespaceFromCitadelResponse(account.chainNamespace);
+    let connectedAddress: string | null = null;
+
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      const accounts = connector.provider ? await connector.provider.request<never, string[]>({ method: "eth_accounts" }) : [];
+      connectedAddress = accounts?.[0] ?? null;
+    } else if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      connectedAddress = connector.solanaWallet?.accounts?.[0]?.address ?? null;
+    } else {
+      throw AccountLinkingError.requestFailed(`Unsupported chain namespace "${account.chainNamespace}" for linked account "${account.eoaAddress}".`);
+    }
+
+    if (!connectedAddress) {
+      throw AccountLinkingError.requestFailed(
+        `Connector "${account.connector}" is not connected to linked account "${account.eoaAddress}". Connect the intended wallet account and try again.`
+      );
+    }
+
+    const isExpectedAddress =
+      chainNamespace === CHAIN_NAMESPACES.EIP155
+        ? connectedAddress.toLowerCase() === account.eoaAddress.toLowerCase()
+        : connectedAddress === account.eoaAddress;
+
+    if (!isExpectedAddress) {
+      throw AccountLinkingError.requestFailed(
+        `Connector "${account.connector}" is connected to "${connectedAddress}" instead of linked account "${account.eoaAddress}". Connect the intended wallet account and try again.`
+      );
+    }
+  }
+
+  public toSwitchAccountConnectorError(account: Pick<ConnectedAccountInfo, "connector" | "eoaAddress">, error: unknown): AccountLinkingError {
+    if (error instanceof AccountLinkingError && error.code === 5401) {
+      return error;
+    }
+
+    const message = error instanceof Error ? error.message : String(error);
+    const isUnavailableConnectorError =
+      (error instanceof AccountLinkingError && error.code === 5405) || /not available|not initialized|not ready/i.test(message);
+
+    if (isUnavailableConnectorError) {
+      return AccountLinkingError.requestFailed(
+        `Connector "${account.connector}" is not available for linked account "${account.eoaAddress}". Make sure the wallet is installed, unlocked, and accessible, then try again.`,
+        error
+      );
+    }
+
+    return AccountLinkingError.requestFailed(
+      `Failed to connect connector "${account.connector}" for linked account "${account.eoaAddress}". ${message}`,
+      error
+    );
+  }
+
+  private getSwitchAccountTrackData(account: Pick<ConnectedAccountInfo, "id" | "accountType" | "eoaAddress">) {
+    return {
+      connector: this.name,
+      account_id: account.id,
+      account_type: account.accountType,
+      switched_to_address: account.eoaAddress ?? null,
+    };
+  }
+
+  private async getPrimaryAuthSession(
+    authSessionTokens: AuthConnectorSessionTokens,
+    options: { includeConnectedAccounts?: boolean } = {}
+  ): Promise<{ accessToken: string; idToken: string; connectedAccounts: ConnectedAccountInfo[] }> {
+    const { accessToken: cachedAccessToken, idToken: cachedIdToken } = authSessionTokens;
+    const { includeConnectedAccounts = false } = options;
+    let accessToken = cachedAccessToken;
+    let idToken = cachedIdToken;
+    let connectedAccounts: ConnectedAccountInfo[] = [];
+
+    if (includeConnectedAccounts) {
+      const userInfoPromise = this.getUserInfo();
+      if (!accessToken || !idToken) {
+        const [tokenInfo, userInfo] = await Promise.all([this.getAuthTokenInfo(), userInfoPromise]);
+        accessToken = tokenInfo.accessToken;
+        idToken = tokenInfo.idToken;
+        connectedAccounts = userInfo.connectedAccounts ?? [];
+      } else {
+        const userInfo = await userInfoPromise;
+        connectedAccounts = userInfo.connectedAccounts ?? [];
+      }
+    } else if (!accessToken || !idToken) {
+      const tokenInfo = await this.getAuthTokenInfo();
+      accessToken = tokenInfo.accessToken;
+      idToken = tokenInfo.idToken;
+    }
+
+    if (!accessToken || !idToken) {
+      throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
+    }
+
+    return { accessToken, idToken, connectedAccounts };
+  }
+
+  private getNetworkForUnlinkAddress(accounts: ConnectedAccountInfo[], address: string): CITADEL_NETWORK {
+    const matchedAccount = accounts.find((account) => {
+      if (!account.chainNamespace || parseChainNamespaceFromCitadelResponse(account.chainNamespace) !== CHAIN_NAMESPACES.EIP155) {
+        return false;
+      }
+      const normalizedAddress = address.toLowerCase();
+      return account.address?.toLowerCase() === normalizedAddress || account.eoaAddress?.toLowerCase() === normalizedAddress;
+    });
+
+    if (!matchedAccount) {
+      throw AccountLinkingError.requestFailed(`No connected wallet matches address "${address}".`);
+    }
+
+    if (!matchedAccount.chainNamespace) {
+      throw AccountLinkingError.requestFailed(`Could not determine the chain namespace for address "${address}".`);
+    }
+
+    const chainNamespace = parseChainNamespaceFromCitadelResponse(matchedAccount.chainNamespace);
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      return "ethereum";
+    }
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      return "solana";
+    }
+
+    throw AccountLinkingError.requestFailed(`Unsupported chain namespace "${matchedAccount.chainNamespace}" for address "${address}".`);
+  }
+
+  private async createWalletLinkingProof(connector: IConnector<unknown>): Promise<{
+    address: string;
+    challenge: string;
+    signature: string;
+    signatureType: "eip191" | "sip99";
+    network: CITADEL_NETWORK;
+  }> {
+    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign();
+    const address = await this.getLinkingWalletAddress(connector, chainNamespace);
+
+    if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
+      return {
+        address,
+        challenge,
+        signature,
+        signatureType: "eip191",
+        network: "ethereum",
+      };
+    }
+
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      return {
+        address,
+        challenge,
+        signature,
+        signatureType: "sip99",
+        network: "solana",
+      };
+    }
+
+    throw AccountLinkingError.unsupportedConnector(`Connector "${connector.name}" returned unsupported chain namespace "${chainNamespace}".`);
+  }
+
+  private async getLinkingWalletAddress(connector: IConnector<unknown>, chainNamespace: ChainNamespaceType): Promise<string> {
+    if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      const address = connector.solanaWallet?.accounts?.[0]?.address;
+      if (!address) {
+        throw AccountLinkingError.walletProofFailed("No connected Solana account found for account linking.");
+      }
+      return address;
+    }
+
+    if (!connector.provider) {
+      throw AccountLinkingError.walletProofFailed("No connected EVM account found for account linking.");
+    }
+
+    const accounts = await connector.provider.request<never, string[]>({ method: "eth_accounts" });
+    if (!accounts?.length) {
+      throw AccountLinkingError.walletProofFailed("No connected EVM account found for account linking.");
+    }
+
+    return accounts[0];
   }
 
   private setupSolanaWallet(): void {
@@ -679,6 +1093,23 @@ class AuthConnector extends BaseConnector<AuthLoginParams> {
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
   }
 
+  private async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
+    const accessToken = await this.authInstance.authSessionManager.getAccessToken();
+    if (!accessToken) throw WalletLoginError.connectionError("Could not obtain an access token from the current AUTH session.");
+
+    const citadelUserInfo = await get<UserInfoWithConnectedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const connectedAccounts = citadelUserInfo?.accounts || [];
+    return connectedAccounts.map((account) => ({
+      ...account,
+      // by default, the primary account is the active account
+      active: account.isPrimary,
+    }));
+  }
+
   private async auditOAuditProgress(
     loginParams: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId" | "recordId" | "loginSource">,
     status?: "failed" | "completed"
@@ -719,7 +1150,7 @@ type AuthConnectorFuncParams = Omit<AuthConnectorOptions, "coreOptions" | "authC
 };
 
 export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => {
-  return ({ projectConfig, coreOptions }: ConnectorParams) => {
+  return ({ projectConfig, coreOptions, analytics }: ConnectorParams) => {
     // Connector settings
     const connectorSettings: AuthConnectorOptions["connectorSettings"] = {};
     const { whitelist, sessionTime } = projectConfig;
@@ -759,9 +1190,32 @@ export const authConnector = (params?: AuthConnectorFuncParams): ConnectorFn => 
       walletServicesSettings: finalWsSettings,
       loginSettings: { ...(params?.loginSettings || {}), mfaLevel: coreOptions.mfaLevel },
       coreOptions,
+      analytics,
       authConnectionConfig: projectConfig.embeddedWalletAuth,
     });
   };
 };
+
+export function isAuthConnector(connector: IConnector<unknown> | null | undefined): connector is AuthConnectorType {
+  if (!connector || connector.name !== WALLET_CONNECTORS.AUTH) {
+    return false;
+  }
+
+  const maybeAuthConnector = connector as unknown as Partial<IAuthConnector>;
+  return (
+    typeof maybeAuthConnector.switchAccount === "function" &&
+    typeof maybeAuthConnector.linkAccount === "function" &&
+    typeof maybeAuthConnector.unlinkAccount === "function"
+  );
+}
+
+export function assertAuthConnector(
+  connector: IConnector<unknown> | null | undefined,
+  errorMessage = "Account linking is only supported when connected with the AUTH connector."
+): asserts connector is AuthConnectorType {
+  if (!isAuthConnector(connector)) {
+    throw WalletLoginError.unsupportedOperation(errorMessage);
+  }
+}
 
 export type AuthConnectorType = AuthConnector;

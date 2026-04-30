@@ -1,14 +1,23 @@
-import { SafeEventEmitter } from "@web3auth/auth";
+import type { Wallet } from "@wallet-standard/base";
+import { type IStorageAdapter, SafeEventEmitter } from "@web3auth/auth";
 
 import {
+  type AuthTokenInfo,
   CHAIN_NAMESPACES,
+  type ChainNamespaceType,
+  type ConnectedAccountInfo,
+  type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CustomChainConfig,
   type IConnector,
-  type IStorageAdapter,
+  type IProvider,
+  type LinkAccountParams,
+  type LinkAccountResult,
   type ProjectConfig,
+  type UnlinkAccountResult,
+  type UserInfo,
   WALLET_CONNECTORS,
 } from "../src/base";
 
@@ -17,6 +26,8 @@ export function createChain(overrides: Partial<CustomChainConfig> = {}): CustomC
     chainNamespace: CHAIN_NAMESPACES.EIP155,
     chainId: "0x1",
     rpcTarget: "https://rpc.ankr.com/eth",
+    blockExplorerUrl: "https://etherscan.io",
+    logo: "",
     displayName: "Ethereum Mainnet",
     ticker: "ETH",
     tickerName: "Ethereum",
@@ -39,6 +50,7 @@ export function createProjectConfig(overrides: Partial<ProjectConfig> = {}): Pro
 
 export function createMockStorage(): IStorageAdapter & {
   data: Record<string, string>;
+  resetStore(): Promise<void>;
 } {
   const data: Record<string, string> = {};
   return {
@@ -48,6 +60,9 @@ export function createMockStorage(): IStorageAdapter & {
     },
     async set(key: string, value: string) {
       data[key] = value;
+    },
+    async remove(key: string) {
+      delete data[key];
     },
     async resetStore() {
       Object.keys(data).forEach((key) => {
@@ -64,19 +79,21 @@ type ConnectorEventMap = {
 };
 
 export class MockConnector extends SafeEventEmitter implements IConnector<unknown> {
-  public connectorNamespace = CHAIN_NAMESPACES.EIP155;
+  public connectorNamespace: IConnector<unknown>["connectorNamespace"] = CHAIN_NAMESPACES.EIP155;
 
-  public name = WALLET_CONNECTORS.AUTH;
+  public name: IConnector<unknown>["name"] = WALLET_CONNECTORS.AUTH;
 
-  public type = CONNECTOR_CATEGORY.IN_APP;
+  public type: IConnector<unknown>["type"] = CONNECTOR_CATEGORY.IN_APP;
 
-  public status = CONNECTOR_STATUS.NOT_READY;
+  public status: IConnector<unknown>["status"] = CONNECTOR_STATUS.NOT_READY;
 
   public isInjected = false;
 
-  public chainConfig = undefined;
+  public chainConfig: CustomChainConfig | undefined = undefined;
 
-  public provider = null;
+  public provider: IProvider | null = null;
+
+  public solanaWallet: Wallet | null = null;
 
   public icon = "";
 
@@ -88,15 +105,19 @@ export class MockConnector extends SafeEventEmitter implements IConnector<unknow
     this.connectEvents = connectEvents;
   }
 
+  get connected() {
+    return this.status === CONNECTOR_STATUS.CONNECTED;
+  }
+
   setConnectEvents(events: ConnectorEventMap) {
     this.connectEvents = events;
   }
 
-  async init() {
+  async init(): Promise<void> {
     this.status = CONNECTOR_STATUS.READY;
   }
 
-  async connect() {
+  async connect(_: { chainId: string }): Promise<Connection | null> {
     this.status = CONNECTOR_STATUS.CONNECTING;
     queueMicrotask(() => {
       if (this.connectEvents.connected) {
@@ -112,26 +133,42 @@ export class MockConnector extends SafeEventEmitter implements IConnector<unknow
     return null;
   }
 
-  async disconnect() {
+  async disconnect(): Promise<void> {
     this.status = CONNECTOR_STATUS.READY;
     this.emit("disconnected");
   }
 
-  async cleanup() {}
+  async cleanup(): Promise<void> {}
 
-  async switchChain() {}
+  async switchChain(): Promise<void> {}
 
-  async getUserInfo() {
+  async getUserInfo(): Promise<Partial<UserInfo>> {
     return {};
   }
 
-  async getAuthTokenInfo() {
+  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
     return { idToken: "id-token" };
   }
 
-  async enableMFA() {}
+  async enableMFA(): Promise<void> {}
 
-  async manageMFA() {}
+  async manageMFA(): Promise<void> {}
+
+  async generateChallengeAndSign(): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    throw new Error("MockConnector.generateChallengeAndSign is not implemented.");
+  }
+
+  async switchAccount(_: ConnectedAccountInfo): Promise<void> {
+    throw new Error("MockConnector.switchAccount is not implemented.");
+  }
+
+  async linkAccount(_: LinkAccountParams): Promise<LinkAccountResult> {
+    throw new Error("MockConnector.linkAccount is not implemented.");
+  }
+
+  async unlinkAccount(_: string): Promise<UnlinkAccountResult> {
+    throw new Error("MockConnector.unlinkAccount is not implemented.");
+  }
 }
 
 export const MULTICHAIN_CONNECTOR_NAMESPACE = CONNECTOR_NAMESPACES.MULTICHAIN;

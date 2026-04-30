@@ -1,3 +1,4 @@
+import { CaipAccountId } from "@metamask/connect-evm";
 import type { Wallet } from "@wallet-standard/base";
 import {
   AUTH_CONNECTION_TYPE,
@@ -15,6 +16,7 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 
+import { LinkedAccountInfo } from "../account-linking/interfaces";
 import { type Analytics } from "../analytics";
 import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
@@ -24,7 +26,30 @@ import type { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProv
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
 
-export type UserInfo = AuthUserInfo;
+export interface ConnectedAccountInfo extends LinkedAccountInfo {
+  /** Linked account id */
+  id: string;
+
+  /** Whether the account is the primary account for the user */
+  isPrimary: boolean;
+
+  /** Wallet address of the connected account */
+  eoaAddress: string;
+
+  /** Address of the account abstraction for the account */
+  aaAddress?: string;
+
+  /** Provider of the account abstraction for the account */
+  aaProvider?: string;
+
+  /** Connector name of the account */
+  connector: string;
+
+  /** Indicates if the account is the active account */
+  active: boolean;
+}
+
+export type UserInfo = AuthUserInfo & { connectedAccounts?: ConnectedAccountInfo[] };
 
 export { UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE };
 
@@ -90,12 +115,16 @@ export interface IConnector<T> extends SafeEventEmitter {
   icon?: string;
   init(options?: ConnectorInitOptions): Promise<void>;
   disconnect(options?: { cleanup: boolean }): Promise<void>;
-  connect(params: T & { chainId: string }): Promise<Connection | null>;
+  connect(params: T & BaseConnectorLoginParams): Promise<Connection | null>;
   getUserInfo(): Promise<Partial<UserInfo>>;
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
   getAuthTokenInfo(): Promise<AuthTokenInfo>;
+  generateChallengeAndSign(
+    authServerUrl?: string,
+    accounts?: string[]
+  ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
   cleanup?(): Promise<void>;
 }
 
@@ -107,7 +136,17 @@ export type ConnectorParams = {
 
 export type BaseConnectorLoginParams = {
   chainId: string;
-  getAuthTokenInfo: boolean;
+  getAuthTokenInfo?: boolean;
+
+  /**
+   * for metamask connector, array of caip account ids to be used for connecting to the wallet
+   */
+  caipAccountIds?: CaipAccountId[];
+
+  /**
+   * Whether the connection is for the primary account or account linking
+   */
+  isAccountLinking?: boolean;
 };
 
 export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
@@ -115,6 +154,10 @@ export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 export type CONNECTED_EVENT_DATA = Connection & {
   reconnected: boolean;
   pendingUserConsent?: boolean;
+};
+
+export type DISCONNECTED_EVENT_DATA = {
+  connector: WALLET_CONNECTOR_TYPE | string;
 };
 
 export type AUTHORIZED_EVENT_DATA = {
@@ -131,7 +174,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.NOT_READY]: () => void;
   [CONNECTOR_EVENTS.READY]: (connector: WALLET_CONNECTOR_TYPE | string) => void;
   [CONNECTOR_EVENTS.CONNECTED]: (data: CONNECTED_EVENT_DATA) => void;
-  [CONNECTOR_EVENTS.DISCONNECTED]: () => void;
+  [CONNECTOR_EVENTS.DISCONNECTED]: (data?: DISCONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.CONNECTING]: (data: { connector: WALLET_CONNECTOR_TYPE | string }) => void;
   [CONNECTOR_EVENTS.AUTHORIZING]: (data: { connector: WALLET_CONNECTOR_TYPE | string }) => void;
   [CONNECTOR_EVENTS.AUTHORIZED]: (data: AUTHORIZED_EVENT_DATA) => void;
@@ -143,6 +186,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.MFA_ENABLED]: (isMFAEnabled: boolean) => void;
   [CONNECTOR_EVENTS.CONSENT_REQUIRING]: (data: CONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.CONSENT_ACCEPTED]: (data: CONNECTED_EVENT_DATA & { loginMode: LoginModeType }) => void;
+  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: () => void;
 };
 
 export interface BaseConnectorConfig {

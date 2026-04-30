@@ -137,6 +137,54 @@ export const MODAL_STATUS = {
 } as const;
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
 
+export const ACCOUNT_LINKING_STATUS = {
+  IDLE: "idle",
+  INITIALIZING: "initializing",
+  AWAITING_CONNECTION: "awaiting_connection",
+  WALLET_CONNECTED: "wallet_connected",
+  LINKING: "linking",
+  ERRORED: "errored",
+  COMPLETED: "completed",
+} as const;
+export type AccountLinkingStatusType = (typeof ACCOUNT_LINKING_STATUS)[keyof typeof ACCOUNT_LINKING_STATUS];
+
+export const ACCOUNT_LINKING_INTENT = {
+  LINK: "link",
+  SWITCH: "switch",
+} as const;
+export type AccountLinkingIntentType = (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
+
+export interface AccountLinkingState {
+  active: boolean;
+  /**
+   * The name of the wallet to be linked to.
+   */
+  connectorName: WALLET_CONNECTOR_TYPE | string | null;
+  /**
+   * The underlying actual connector that is used to connect to the target account.
+   * This is different from the connectorName coz except for Metamask, others wallet can be used to connect with injectedEvmConnector/solanaStandardWalletConnector if installed.
+   * Otherwise, will fallback to the wallet-connect connector.
+   *
+   * This is useful when we want to rehydrate the linked account, using this transport connector to connect back to the target account.
+   **/
+  transportConnectorName: WALLET_CONNECTOR_TYPE | string | null;
+  chainId: string | null;
+  intent: AccountLinkingIntentType;
+  status: AccountLinkingStatusType;
+  walletConnectUri?: string;
+  errorMessage: string;
+}
+
+export const DEFAULT_ACCOUNT_LINKING_STATE: AccountLinkingState = {
+  active: false,
+  connectorName: null,
+  transportConnectorName: null,
+  chainId: null,
+  intent: ACCOUNT_LINKING_INTENT.LINK,
+  status: ACCOUNT_LINKING_STATUS.IDLE,
+  errorMessage: "",
+};
+
 export interface ModalState {
   // UI State - changes frequently during user interaction
   status: ModalStatusType;
@@ -155,6 +203,7 @@ export interface ModalState {
   showExternalWalletsOnly: boolean;
   walletConnectUri: string;
   metamaskConnectUri: string;
+  accountLinking: AccountLinkingState;
 
   // Config State - set during initialization, rarely changes
   socialLoginsConfig: SocialLoginsConfig;

@@ -1,47 +1,48 @@
 <script setup lang="ts">
-import { createWalletTransactionSigner, toAddress } from "@solana/client";
-import { address as solanaAddress } from "@solana/kit";
-import { getTransferSolInstruction } from "@solana-program/system";
 import { Button, Card } from "@toruslabs/vue-components";
-import { getCallsStatus, getCapabilities, sendCalls, showCallsStatus } from "@wagmi/core";
-import {
-  useBalance,
-  useChainId,
-  useConfig,
-  useConnection,
-  useSignMessage,
-  useSignTypedData,
-  useSwitchChain as useWagmiSwitchChain,
-} from "@wagmi/vue";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS } from "@web3auth/modal";
 import {
-  useAuthTokenInfo,
   useCheckout,
-  useEnableMFA,
   useFunding,
-  useManageMFA,
   useReceive,
+  useEnableMFA,
+  useAuthTokenInfo,
+  useManageMFA,
   useWalletConnectScanner,
   useWalletUI,
   useWeb3Auth,
   useWeb3AuthUser,
 } from "@web3auth/modal/vue";
-import { useSignMessage as useSolanaSignMessage, useSolanaClient, useSolanaWallet } from "@web3auth/modal/vue/solana";
 import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
-import { parseEther } from "viem";
-import { computed, ref, watch } from "vue";
 
+import { useSignMessage as useSolanaSignMessage, useSolanaWallet, useSolanaClient } from "@web3auth/modal/vue/solana";
+import {
+  useConnection,
+  useBalance,
+  useChainId,
+  useSignMessage,
+  useSignTypedData,
+  useSwitchChain as useWagmiSwitchChain,
+  useConfig,
+} from "@wagmi/vue";
+import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
+import { parseEther } from "viem";
+import { createWalletTransactionSigner, toAddress } from "@solana/client";
+import { address as solanaAddress } from "@solana/kit";
+import { getTransferSolInstruction } from "@solana-program/system";
+import { computed, ref, watch } from "vue";
+import AccountLinkingSection from "./AccountLinkingSection.vue";
+import X402Tester from "./X402Tester.vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { formDataStore } from "../store/form";
-import X402Tester from "./X402Tester.vue";
 
 const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
-const { userInfo, loading: userInfoLoading } = useWeb3AuthUser();
+const { userInfo, loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
 const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
@@ -152,7 +153,8 @@ watch(
 
 // Ethereum Provider
 const onGetUserInfo = async () => {
-  printToConsole("User Info", userInfo.value);
+  const result = await getUserInfo();
+  printToConsole("User Info", result);
 };
 
 const onGetAuthTokenInfo = async () => {
@@ -250,7 +252,7 @@ const onSendBatchCalls = async () => {
         { to: addr as `0x${string}`, value: parseEther("0.0001") },
         { to: addr as `0x${string}`, value: parseEther("0.0002") },
       ],
-      version: "2.0",
+      version: "2.0.0",
     });
     trackedCallsId.value = result.id;
     printToConsole("sendCalls result", result);
@@ -421,6 +423,12 @@ const onSwitchChain = async () => {
             {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
         </div>
+        <AccountLinkingSection
+          :connected-wallets="userInfo?.connectedAccounts ?? []"
+          :show-link-wallet="isDisplay('walletServices')"
+          :refresh-user-info="getUserInfo"
+          :print-to-console="printToConsole"
+        />
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>
@@ -467,21 +475,13 @@ const onSwitchChain = async () => {
           <Button block size="xs" pill class="mb-2" @click="onGetBalance">
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
-          <Button v-if="canSwitchEvmChain" block size="xs" pill class="mb-2" @click="onSwitchChain">
-            {{ t("app.buttons.btnSwitchChain") }}
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSendEth">
-            {{ t("app.buttons.btnSendEth") }}
-          </Button>
-          <Button v-if="isSmartAccount" block size="xs" pill class="mb-2" @click="onSendAATx">
-            {{ t("app.buttons.btnSendAATx") }}
-          </Button>
+          <Button v-if="canSwitchEvmChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+          <Button v-if="isSmartAccount" block size="xs" pill class="mb-2" @click="onSendAATx">{{ t("app.buttons.btnSendAATx") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
             {{ t("app.buttons.btnSignTransaction") }}
           </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSignEthMessage">
-            {{ t("app.buttons.btnSignEthMessage") }}
-          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onSignEthMessage">{{ t("app.buttons.btnSignEthMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="getConnectedChainId">
             {{ t("app.buttons.btnGetConnectedChainId") }}
           </Button>
@@ -507,15 +507,9 @@ const onSwitchChain = async () => {
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Solana Transaction</div>
-          <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">
-            {{ t("app.buttons.btnGetPrivateKey") }}
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">
-            {{ t("app.buttons.btnGetBalance") }}
-          </Button>
-          <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">
-            {{ t("app.buttons.btnSignMessage") }}
-          </Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
+          <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignAndSendTransaction">
             {{ t("app.buttons.btnSignAndSendTransaction") }}
           </Button>

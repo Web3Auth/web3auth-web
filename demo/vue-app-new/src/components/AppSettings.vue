@@ -3,7 +3,7 @@ import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@torusl
 import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_STATUS, log } from "@web3auth/modal";
 import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
-
+import { getChainConfig } from "../utils/chainconfig";
 import {
   buildEnvOptions,
   chainConfigs,
@@ -18,7 +18,6 @@ import {
   SmartAccountOptions,
 } from "../config";
 import { formDataStore } from "../store/form";
-import { getChainConfig } from "../utils/chainconfig";
 
 const formData = formDataStore;
 
@@ -134,16 +133,14 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
       <Card
         class="h-auto p-4 sm:p-8 col-span-8 sm:col-span-6 lg:col-span-4 max-sm:!shadow-none max-sm:!border-0 !w-full [@media(min-width:900px)]:!min-w-[700px] [@media(min-width:1200px)]:!min-w-[800px] [@media(min-width:1500px)]:!w-[800px]"
       >
-        <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">
-          {{ $t("app.greeting") }}
-        </div>
+        <div class="text-2xl font-bold leading-tight text-center sm:text-3xl">{{ $t("app.greeting") }}</div>
         <div class="my-4 font-extrabold leading-tight text-center flex items-center justify-center gap-2">
           <Select
             v-model="formData.widget"
             data-testid="selectWidget"
             :aria-label="$t('app.widget.title')"
             :placeholder="$t('app.widget.title')"
-            match-parents-width
+            matchParentsWidth
             :options="[
               { name: $t('app.widget.embed'), value: 'embed' },
               { name: $t('app.widget.modal'), value: 'modal' },
@@ -184,7 +181,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             aria-label="Build Environment"
             placeholder="Build Environment"
             :options="buildEnvOptions"
-            match-parents-width
+            matchParentsWidth
           />
           <Select
             v-model="formData.network"
@@ -193,7 +190,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.network')"
             :placeholder="$t('app.network')"
             :options="networkOptions"
-            match-parents-width
+            matchParentsWidth
           />
           <Select
             v-model="formData.chainNamespaces"
@@ -203,7 +200,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.chainNamespaces')"
             :options="chainNamespaceOptions"
             :multiple="true"
-            match-parents-width
+            matchParentsWidth
             @update:model-value="onChainNamespaceChange"
           />
           <Select
@@ -213,7 +210,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.chains')"
             :placeholder="$t('app.chains')"
             :multiple="true"
-            match-parents-width
+            matchParentsWidth
             :options="chainOptions"
             @update:model-value="onChainChange"
           />
@@ -223,7 +220,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :label="$t('app.defaultChainId')"
             :aria-label="$t('app.defaultChainId')"
             :placeholder="$t('app.defaultChainId')"
-            match-parents-width
+            matchParentsWidth
             :options="defaultChainOptions"
           />
           <Select
@@ -234,7 +231,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.connectors')"
             :options="connectorOptions"
             multiple
-            match-parents-width
+            matchParentsWidth
             :show-check-box="true"
           />
           <Select
@@ -247,7 +244,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
               { name: 'Connect Only', value: 'connect-only' },
               { name: 'Connect and Sign', value: 'connect-and-sign' },
             ]"
-            match-parents-width
+            matchParentsWidth
           />
           <Select
             v-model="formData.consentConfigMode"
@@ -256,7 +253,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.consentConfig')"
             :placeholder="$t('app.consentConfig')"
             :options="consentConfigOptions"
-            match-parents-width
+            matchParentsWidth
           />
           <Toggle
             v-model="formData.showWalletDiscovery"
@@ -298,7 +295,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
               { name: 'Cookies', value: 'cookies' },
               { name: 'Memory (no persist)', value: 'memory' },
             ]"
-            match-parents-width
+            matchParentsWidth
           />
         </Card>
         <Card v-if="isActiveTab(1)" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-2" :shadow="false">
@@ -342,7 +339,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.whiteLabel.defaultLanguage')"
             :placeholder="$t('app.whiteLabel.defaultLanguage')"
             :options="languageOptions"
-            match-parents-width
+            matchParentsWidth
             :disabled="isDisabled('whiteLabelSettings')"
           />
           <TextField
@@ -422,13 +419,11 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.loginProviders')"
             :options="loginProviderOptions"
             multiple
-            match-parents-width
+            matchParentsWidth
             class=""
           />
           <Card v-for="p in formData.loginProviders" :key="p" :shadow="false" class="grid grid-cols-1 gap-2 px-4 py-4 sm:grid-cols-3">
-            <div class="font-bold leading-tight text-left">
-              {{ p }}
-            </div>
+            <div class="font-bold leading-tight text-left">{{ p }}</div>
             <Toggle
               v-model="formData.loginMethods[p]!.mainOption"
               :show-label="true"
@@ -493,7 +488,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.walletPlugin.confirmationStrategy')"
             :placeholder="$t('app.walletPlugin.confirmationStrategy')"
             :options="confirmationStrategyOptions"
-            match-parents-width
+            matchParentsWidth
             class=""
           />
         </Card>
@@ -525,7 +520,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.accountAbstractionProvider.smartAccountType')"
             :options="SmartAccountOptions"
             :disabled="isDisabled('smartAccountType')"
-            match-parents-width
+            matchParentsWidth
           />
           <Select
             v-model="formData.smartAccountChains"
@@ -535,25 +530,23 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.chains')"
             :options="aaSupportedChains"
             multiple
-            match-parents-width
+            matchParentsWidth
             :disabled="isDisabled('smartAccountChains')"
             @update:model-value="onSmartAccountChainChange"
           />
           <Card v-for="c in formData.smartAccountChains" :key="c" :shadow="false" class="gap-2 px-4 py-4">
-            <div class="font-bold leading-tight text-left sm:col-span-2">
-              {{ c }}
-            </div>
+            <div class="font-bold leading-tight text-left sm:col-span-2">{{ c }}</div>
             <TextField
-              v-model="formData.smartAccountChainsConfig[c].bundlerUrl"
               class="mt-3"
+              v-model="formData.smartAccountChainsConfig[c].bundlerUrl"
               :label="$t('app.accountAbstractionProvider.bundlerUrl')"
               :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
               :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
               :disabled="isDisabled('bundlerUrl')"
             />
             <TextField
-              v-model="formData.smartAccountChainsConfig[c].paymasterUrl"
               class="mt-3"
+              v-model="formData.smartAccountChainsConfig[c].paymasterUrl"
               :label="$t('app.accountAbstractionProvider.paymasterUrl')"
               :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
               :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"

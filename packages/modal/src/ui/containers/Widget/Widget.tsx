@@ -63,6 +63,7 @@ function WidgetContent() {
   useEffect(() => {
     // TODO: maybe move this inside root
     if (!modalState.modalVisibility) return;
+    if (modalState.accountLinking.active) return;
     if (typeof modalState.externalWalletsConfig === "object") {
       // auto connect to WC if not injected to generate QR code URI for mobile connection
       const wcAvailable = (modalState.externalWalletsConfig[WALLET_CONNECTORS.WALLET_CONNECT_V2]?.showOnModal || false) !== false;

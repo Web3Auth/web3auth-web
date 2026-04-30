@@ -1,15 +1,39 @@
+import { afterEach, describe, expect, it, vi } from "vitest";
+
+vi.mock("@metamask/connect-evm", () => ({
+  createEVMClient: vi.fn(),
+}));
+
+vi.mock("@metamask/connect-multichain", () => ({
+  createMultichainClient: vi.fn(),
+  hasExtension: vi.fn(async () => false),
+}));
+
+vi.mock("@metamask/connect-solana", () => ({
+  createSolanaClient: vi.fn(),
+}));
+
+vi.mock("@paulmillr/qr", () => ({}));
+
+vi.mock("@web3auth/no-modal", async () => {
+  const actual = await vi.importActual<typeof import("../../no-modal/src")>("../../no-modal/src");
+  return actual;
+});
+
 import {
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
+  type ConnectedAccountInfo,
+  Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
+  type LinkAccountResult,
   type ProjectConfig,
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
   Web3AuthNoModal,
 } from "@web3auth/no-modal";
-import { describe, expect, it, vi } from "vitest";
 
 import { Web3Auth, type Web3AuthOptions } from "../src/modalManager";
 import { LOGIN_MODAL_EVENTS } from "../src/ui";
@@ -52,7 +76,26 @@ function createSdk(overrides: Partial<Web3AuthOptions> = {}) {
   } as never);
 }
 
+function createConnectedWalletAccount(overrides: Partial<ConnectedAccountInfo> = {}): ConnectedAccountInfo {
+  return {
+    id: "wallet-1",
+    accountType: "external_wallet",
+    address: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+    authConnectionId: null,
+    chainNamespace: "evm",
+    isPrimary: false,
+    eoaAddress: "0xAbCdEf0123456789aBCdEf0123456789abCDef01",
+    connector: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+    active: false,
+    ...overrides,
+  };
+}
+
 describe("Web3Auth (modal)", () => {
+  afterEach(() => {
+    vi.restoreAllMocks();
+  });
+
   it("extends Web3AuthNoModal and sets constructor defaults", () => {
     const sdk = createSdk();
     expect(sdk).toBeInstanceOf(Web3AuthNoModal);
@@ -144,12 +187,7 @@ describe("Web3Auth (modal)", () => {
     const promise = sdk.connect();
     expect(open).toHaveBeenCalledOnce();
     sdk.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, {
-      connectorName: WALLET_CONNECTORS.AUTH,
-      ethereumProvider: null,
-      solanaWallet: null,
       reconnected: false,
-      loginMode: "modal",
-      pendingUserConsent: false,
     });
     await expect(promise).resolves.toBeNull();
   });
@@ -170,6 +208,214 @@ describe("Web3Auth (modal)", () => {
     const promise = sdk.connect();
     sdk.emit(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, false);
     await expect(promise).rejects.toThrow("User closed the modal");
+  });
+
+  it("switchAccount reuses an already-connected WalletConnect signer without reopening modal", async () => {
+    const sdk = createSdk();
+    const targetAccount = createConnectedWalletAccount();
+    const switchResult = {
+      kind: "external" as const,
+      targetAccount,
+      activeAccount: { ...targetAccount, active: true },
+      activeChainId: "0x1",
+    };
+    const authConnector = {
+      switchAccount: vi.fn().mockResolvedValue(switchResult),
+      trackSwitchAccountCompleted: vi.fn(),
+      trackSwitchAccountFailed: vi.fn(),
+    };
+    const existingConnector = {
+      connected: true,
+      provider: {},
+      solanaWallet: null as unknown as Connection["solanaWallet"],
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+    };
+
+    const processSwitchAccountResultSpy = vi
+      // @ts-expect-error - processSwitchAccountResult is a protected method of Web3AuthNoModal, we need to mock it for testing
+      .spyOn(Web3AuthNoModal.prototype as Web3AuthNoModal, "processSwitchAccountResult")
+      .mockResolvedValue(undefined);
+    const getProjectAndWalletConfigSpy = vi.spyOn(
+      sdk as unknown as { getProjectAndWalletConfig: () => Promise<unknown> },
+      "getProjectAndWalletConfig"
+    );
+
+    vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
+    vi.spyOn(sdk as unknown as { getLinkedSigningConnector: (accountId: string) => unknown }, "getLinkedSigningConnector").mockReturnValue(
+      existingConnector as never
+    );
+
+    await sdk.switchAccount(targetAccount);
+
+    expect(getProjectAndWalletConfigSpy).not.toHaveBeenCalled();
+    expect(processSwitchAccountResultSpy).toHaveBeenCalledWith(
+      authConnector,
+      switchResult,
+      expect.objectContaining({ walletConnector: existingConnector })
+    );
+    expect(authConnector.trackSwitchAccountCompleted).toHaveBeenCalledWith(targetAccount);
+  });
+
+  it("switchAccount opens WalletConnect modal flow when phantom resolves to WalletConnect transport", async () => {
+    const sdk = createSdk();
+    const closeModal = vi.fn();
+    const resetAccountLinkingSession = vi.fn();
+    const updateAccountLinkingState = vi.fn();
+    (
+      sdk as unknown as {
+        loginModal: {
+          closeModal: () => void;
+          resetAccountLinkingSession: () => void;
+          updateAccountLinkingState: (state: unknown) => void;
+        };
+      }
+    ).loginModal = {
+      closeModal,
+      resetAccountLinkingSession,
+      updateAccountLinkingState,
+    };
+
+    const targetAccount = createConnectedWalletAccount({ id: "wallet-2", connector: "phantom" });
+    const switchResult = {
+      kind: "external" as const,
+      targetAccount,
+      activeAccount: { ...targetAccount, active: true },
+      activeChainId: "0x1",
+    };
+    const authConnector = {
+      switchAccount: vi.fn().mockResolvedValue(switchResult),
+      trackSwitchAccountCompleted: vi.fn(),
+      trackSwitchAccountFailed: vi.fn(),
+    };
+    const projectConfig = createModalProjectConfig({
+      externalWalletAuth: {} as never,
+    });
+    const connector = {
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+      connected: false,
+      connect: vi.fn().mockResolvedValue({
+        connectorName: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+        ethereumProvider: {},
+        solanaWallet: null,
+      }),
+      disconnect: vi.fn(),
+      on: vi.fn(),
+      removeListener: vi.fn(),
+    };
+
+    const processSwitchAccountResultSpy = vi
+      // @ts-expect-error - processSwitchAccountResult is a protected method of Web3AuthNoModal, we need to mock it for testing
+      .spyOn(Web3AuthNoModal.prototype as Web3AuthNoModal, "processSwitchAccountResult")
+      .mockResolvedValue(undefined);
+    const getProjectAndWalletConfigSpy = vi.spyOn(
+      sdk as unknown as { getProjectAndWalletConfig: () => Promise<{ projectConfig: ProjectConfig }> },
+      "getProjectAndWalletConfig"
+    );
+    getProjectAndWalletConfigSpy.mockResolvedValue({
+      projectConfig,
+      walletRegistry: createWalletRegistry(),
+    } as never);
+    const prepareAccountSwitchConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        prepareAccountSwitchConnector: (connectorName: string, chainId: string, config?: ProjectConfig) => Promise<unknown>;
+      },
+      "prepareAccountSwitchConnector"
+    );
+    prepareAccountSwitchConnectorSpy.mockResolvedValue(connector as never);
+
+    vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
+    vi.spyOn(sdk as unknown as { getLinkedSigningConnector: (accountId: string) => unknown }, "getLinkedSigningConnector").mockReturnValue(null);
+
+    await sdk.switchAccount(targetAccount);
+
+    expect(getProjectAndWalletConfigSpy).toHaveBeenCalledOnce();
+    expect(prepareAccountSwitchConnectorSpy).toHaveBeenCalledWith("phantom", "0x1", projectConfig);
+    expect(connector.connect).toHaveBeenCalledWith({ chainId: "0x1" });
+    expect(processSwitchAccountResultSpy).toHaveBeenCalledWith(
+      authConnector,
+      switchResult,
+      expect.objectContaining({
+        walletConnector: connector,
+        projectConfig,
+      })
+    );
+    expect(closeModal).toHaveBeenCalledOnce();
+    expect(resetAccountLinkingSession).toHaveBeenCalledOnce();
+    expect(updateAccountLinkingState).toHaveBeenCalled();
+    expect(authConnector.trackSwitchAccountCompleted).toHaveBeenCalledWith(targetAccount);
+  });
+
+  it("linkAccount routes phantom through WalletConnect modal flow when the resolved transport is WalletConnect", async () => {
+    const sdk = createSdk();
+    const walletConnectConnector = {
+      name: WALLET_CONNECTORS.WALLET_CONNECT_V2,
+    };
+    const result: LinkAccountResult = {
+      success: true,
+      idToken: "linked-id-token",
+      linkedAccounts: [],
+    };
+
+    const prepareAccountLinkingConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        prepareAccountLinkingConnector: (connectorName: string, chainId: string) => Promise<unknown>;
+      },
+      "prepareAccountLinkingConnector"
+    );
+    prepareAccountLinkingConnectorSpy.mockResolvedValue(walletConnectConnector as never);
+    const runWalletConnectV2AccountActionSpy = vi.spyOn(
+      sdk as unknown as {
+        runWalletConnectV2AccountAction: (params: unknown) => Promise<LinkAccountResult>;
+      },
+      "runWalletConnectV2AccountAction"
+    );
+    runWalletConnectV2AccountActionSpy.mockResolvedValue(result);
+    // @ts-expect-error - linkAccountWithConnector is a protected method of Web3AuthNoModal
+    const linkAccountWithConnectorSpy = vi.spyOn(Web3AuthNoModal.prototype as Web3AuthNoModal, "linkAccountWithConnector");
+
+    const response = await sdk.linkAccount({ connectorName: "phantom", chainId: "0x1" });
+
+    expect(prepareAccountLinkingConnectorSpy).toHaveBeenCalledWith("phantom", "0x1");
+    expect(runWalletConnectV2AccountActionSpy).toHaveBeenCalledOnce();
+    expect(linkAccountWithConnectorSpy).not.toHaveBeenCalled();
+    expect(response).toEqual(result);
+  });
+
+  it("linkAccount links phantom directly when the resolved transport is installed", async () => {
+    const sdk = createSdk();
+    const phantomConnector = {
+      name: "phantom",
+    };
+    const result: LinkAccountResult = {
+      success: true,
+      idToken: "linked-id-token",
+      linkedAccounts: [],
+    };
+
+    const prepareAccountLinkingConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        prepareAccountLinkingConnector: (connectorName: string, chainId: string) => Promise<unknown>;
+      },
+      "prepareAccountLinkingConnector"
+    );
+    prepareAccountLinkingConnectorSpy.mockResolvedValue(phantomConnector as never);
+    const runWalletConnectV2AccountActionSpy = vi.spyOn(
+      sdk as unknown as {
+        runWalletConnectV2AccountAction: (params: unknown) => Promise<LinkAccountResult>;
+      },
+      "runWalletConnectV2AccountAction"
+    );
+    // @ts-expect-error - linkAccountWithConnector is a private method of Web3AuthNoModal
+    const linkAccountWithConnectorSpy = vi.spyOn(Web3AuthNoModal.prototype as Web3AuthNoModal, "linkAccountWithConnector");
+    // @ts-expect-error - mock for testing
+    linkAccountWithConnectorSpy.mockResolvedValue(result);
+
+    const response = await sdk.linkAccount({ connectorName: "phantom", chainId: "0x1" });
+
+    expect(prepareAccountLinkingConnectorSpy).toHaveBeenCalledWith("phantom", "0x1");
+    expect(linkAccountWithConnectorSpy).toHaveBeenCalledWith("phantom", "0x1", phantomConnector);
+    expect(runWalletConnectV2AccountActionSpy).not.toHaveBeenCalled();
+    expect(response).toEqual(result);
   });
 
   it("initUIConfig merges whitelabel + ui config and deduplicates loginMethodsOrder", () => {

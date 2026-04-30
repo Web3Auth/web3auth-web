@@ -35,7 +35,11 @@ import Widget from "./containers/Widget";
 import { AnalyticsContext } from "./context/AnalyticsContext";
 import { WidgetProvider } from "./context/WidgetContext";
 import {
+  ACCOUNT_LINKING_INTENT,
+  ACCOUNT_LINKING_STATUS,
+  type AccountLinkingState,
   browser,
+  DEFAULT_ACCOUNT_LINKING_STATE,
   ExternalWalletEventType,
   LoginModalCallbacks,
   LoginModalProps,
@@ -83,6 +87,8 @@ export class LoginModal {
   private analytics: Analytics;
 
   private modalStatus: ModalStatusType = MODAL_STATUS.INITIALIZED;
+
+  private accountLinkingState: AccountLinkingState = { ...DEFAULT_ACCOUNT_LINKING_STATE };
 
   constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
@@ -316,6 +322,40 @@ export class LoginModal {
       showExternalWalletsOnly: !!options.showExternalWalletsOnly,
       externalWalletsVisibility: isMMAvailable ? false : !!options.externalWalletsVisibility,
     });
+  };
+
+  startAccountLinkingSession = (params: {
+    connectorName: WALLET_CONNECTOR_TYPE | string;
+    transportConnectorName?: WALLET_CONNECTOR_TYPE | string;
+    chainId: string;
+    intent?: (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
+  }): void => {
+    this.accountLinkingState = {
+      ...DEFAULT_ACCOUNT_LINKING_STATE,
+      active: true,
+      connectorName: params.connectorName,
+      transportConnectorName: params.transportConnectorName ?? params.connectorName,
+      chainId: params.chainId,
+      intent: params.intent ?? ACCOUNT_LINKING_INTENT.LINK,
+      status: ACCOUNT_LINKING_STATUS.INITIALIZING,
+    };
+    this.setState({
+      accountLinking: this.accountLinkingState,
+    });
+  };
+
+  updateAccountLinkingState = (accountLinking: Partial<AccountLinkingState>): void => {
+    this.accountLinkingState = { ...this.accountLinkingState, ...accountLinking };
+    this.setState({ accountLinking: this.accountLinkingState });
+  };
+
+  resetAccountLinkingSession = (): void => {
+    this.accountLinkingState = { ...DEFAULT_ACCOUNT_LINKING_STATE };
+    this.setState({ accountLinking: this.accountLinkingState });
+  };
+
+  hasActiveAccountLinkingSession = (): boolean => {
+    return this.accountLinkingState.active;
   };
 
   open = () => {
