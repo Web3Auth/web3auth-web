@@ -1,5 +1,5 @@
 import { SafeEventEmitter } from "@web3auth/auth";
-import { act, createElement } from "react";
+import { act, createElement, useMemo } from "react";
 import { createRoot, type Root } from "react-dom/client";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -41,6 +41,8 @@ let latestInstance: TestWeb3Auth | null = null;
 class TestWeb3Auth extends SafeEventEmitter<Web3AuthNoModalEvents> implements IWeb3Auth {
   public status: CONNECTOR_STATUS_TYPE;
 
+  public loginMode = LOGIN_MODE.MODAL;
+
   public currentChainId: string | null = null;
 
   public currentChain: CustomChainConfig | undefined = undefined;
@@ -68,16 +70,16 @@ class TestWeb3Auth extends SafeEventEmitter<Web3AuthNoModalEvents> implements IW
 type TestComponentProps = {
   renders: RenderSnapshot[];
   onValue?: (value: LiveSnapshot) => void;
-  seedStateFromStatus: boolean;
   status: CONNECTOR_STATUS_TYPE;
 };
 
-function TestComponent({ renders, onValue, seedStateFromStatus, status }: TestComponentProps): null {
+function TestComponent({ renders, onValue, status }: TestComponentProps): null {
+  const web3AuthOptions = useMemo(() => ({ status }), [status]);
+
   // @ts-expect-error - For testing purposes
   const value = useWeb3AuthInnerContextValue<TestWeb3Auth, TestWeb3AuthOptions>({
     Web3AuthConstructor: TestWeb3Auth,
-    web3AuthOptions: { status },
-    seedStateFromStatus,
+    web3AuthOptions,
   });
 
   const snapshot: LiveSnapshot = {
@@ -99,7 +101,7 @@ function TestComponent({ renders, onValue, seedStateFromStatus, status }: TestCo
   return null;
 }
 
-async function renderHook(options: TestWeb3AuthOptions & { seedStateFromStatus: boolean }) {
+async function renderHook(options: TestWeb3AuthOptions) {
   const renders: RenderSnapshot[] = [];
   const latestValue: { current: LiveSnapshot | null } = { current: null };
   const container = document.createElement("div");
@@ -113,7 +115,6 @@ async function renderHook(options: TestWeb3AuthOptions & { seedStateFromStatus: 
         onValue: (value: LiveSnapshot) => {
           latestValue.current = value;
         },
-        seedStateFromStatus: options.seedStateFromStatus,
         status: options.status,
       })
     );
@@ -139,9 +140,8 @@ describe("useWeb3AuthInnerContextValue", () => {
     latestInstance = null;
   });
 
-  it("seeds a connected first render from sdk status when enabled", async () => {
+  it("seeds a connected first render from sdk status", async () => {
     const rendered = await renderHook({
-      seedStateFromStatus: true,
       status: CONNECTOR_STATUS.CONNECTED,
     });
     ({ root, container } = rendered);
@@ -153,9 +153,8 @@ describe("useWeb3AuthInnerContextValue", () => {
     });
   });
 
-  it("seeds an authorized first render from sdk status when enabled", async () => {
+  it("seeds an authorized first render from sdk status", async () => {
     const rendered = await renderHook({
-      seedStateFromStatus: true,
       status: CONNECTOR_STATUS.AUTHORIZED,
     });
     ({ root, container } = rendered);
@@ -167,23 +166,8 @@ describe("useWeb3AuthInnerContextValue", () => {
     });
   });
 
-  it("keeps the first render disconnected when seeding is disabled", async () => {
-    const rendered = await renderHook({
-      seedStateFromStatus: false,
-      status: CONNECTOR_STATUS.CONNECTED,
-    });
-    ({ root, container } = rendered);
-
-    expect(rendered.renders[0]).toEqual({
-      isConnected: false,
-      isAuthorized: false,
-      status: null,
-    });
-  });
-
   it("waits for consent acceptance before marking the hook connected", async () => {
     const rendered = await renderHook({
-      seedStateFromStatus: false,
       status: CONNECTOR_STATUS.CONNECTING,
     });
     ({ root, container } = rendered);

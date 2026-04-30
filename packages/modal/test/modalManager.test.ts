@@ -133,7 +133,7 @@ describe("Web3Auth (modal)", () => {
   it("connect resolves on CONSENT_ACCEPTED when consent is required", async () => {
     const sdk = createSdk({
       uiConfig: {
-        consentRequired: true,
+        consentConfig: { required: true },
         privacyPolicy: "https://example.com/privacy",
         tncLink: "https://example.com/terms",
       } as never,
