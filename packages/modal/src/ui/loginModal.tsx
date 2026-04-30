@@ -358,6 +358,50 @@ export class LoginModal {
     return this.accountLinkingState.active;
   };
 
+  startConnectingLoader = (params: { connector: WALLET_CONNECTOR_TYPE | string; connectorName: string }): void => {
+    this.setState({
+      status: MODAL_STATUS.CONNECTING,
+      modalVisibility: true,
+      detailedLoaderConnector: params.connector,
+      detailedLoaderConnectorName: params.connectorName,
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
+  };
+
+  markLoaderAuthorizing = (): void => {
+    this.setState({ status: MODAL_STATUS.AUTHORIZING });
+  };
+
+  endConnectingLoader = (params: { success: boolean; errorMessage?: string }): void => {
+    if (params.success) {
+      this.setState({
+        status: MODAL_STATUS.CONNECTED,
+        postLoadingMessage: "modal.post-loading.connected",
+      });
+      // Loader auto-closes after 1s on CONNECTED for non CONNECT_AND_SIGN modes.
+      // For CONNECT_AND_SIGN, the Loader does not auto-close on CONNECTED, so close explicitly.
+      if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+        const delay = this.uiConfig.hideSuccessScreen ? 0 : 1000;
+        setTimeout(() => this.closeModal(), delay);
+      }
+      return;
+    }
+
+    if (this.uiConfig.displayErrorsOnModal) {
+      this.setState({
+        modalVisibility: true,
+        status: MODAL_STATUS.ERRORED,
+        postLoadingMessage: params.errorMessage || "modal.post-loading.something-wrong",
+      });
+    } else {
+      this.setState({
+        modalVisibility: false,
+      });
+    }
+  };
+
   open = () => {
     this.setState({
       modalVisibility: true,

@@ -728,6 +728,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     signatureType: "eip191" | "sip99";
     network: "ethereum" | "solana";
   }> {
+    // Notify listeners that the linking wallet is about to be asked for a signature so the UI
+    // (e.g. modal) can switch from a "connecting" loader to an "authorizing" prompt while the
+    // user reviews the signature request inside their wallet. Emitted on the isolated wallet
+    // connector (not the auth connector) so it doesn't mutate the global SDK status.
+    connector.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: connector.name as WALLET_CONNECTOR_TYPE });
     const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign();
     const address = await this.getLinkingWalletAddress(connector, chainNamespace);
 

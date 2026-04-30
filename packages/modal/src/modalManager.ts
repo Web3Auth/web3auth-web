@@ -282,10 +282,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         switchResult.kind === "external" && !isExistingConnectorConnected ? (await this.getProjectAndWalletConfig())?.projectConfig : undefined;
 
       if (switchResult.kind !== "external" || isExistingConnectorConnected) {
-        await super.processSwitchAccountResult(authConnector, switchResult, {
-          walletConnector: isExistingConnectorConnected && existingConnector ? existingConnector : undefined,
-          projectConfig,
-        });
+        await this.runNonWalletConnectAccountAction(switchResult.targetAccount.connector, () =>
+          super.processSwitchAccountResult(authConnector, switchResult, {
+            walletConnector: isExistingConnectorConnected && existingConnector ? existingConnector : undefined,
+            projectConfig,
+          })
+        );
         await authConnector.trackSwitchAccountCompleted(switchResult.targetAccount);
         return;
       }
@@ -297,10 +299,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       );
 
       if (connectorToSwitchTo.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-        await super.processSwitchAccountResult(authConnector, switchResult, {
-          walletConnector: connectorToSwitchTo,
-          projectConfig,
-        });
+        await this.runNonWalletConnectAccountAction(switchResult.targetAccount.connector, () =>
+          super.processSwitchAccountResult(authConnector, switchResult, {
+            walletConnector: connectorToSwitchTo,
+            projectConfig,
+          })
+        );
         await authConnector.trackSwitchAccountCompleted(switchResult.targetAccount);
         return;
       }
@@ -317,7 +321,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     const connectorToLink = await this.prepareAccountLinkingConnector(params.connectorName, chainId);
 
     if (connectorToLink.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-      return super.linkAccountWithConnector(params.connectorName, chainId, connectorToLink);
+      return this.runNonWalletConnectAccountAction(
+        params.connectorName,
+        () => super.linkAccountWithConnector(params.connectorName, chainId, connectorToLink),
+        { connector: connectorToLink }
+      );
     }
 
     return this.runWalletConnectV2AccountAction({
@@ -1015,6 +1023,38 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         }
       } catch (error) {
         log.debug("Failed to disconnect WalletConnect connector during cleanup", error);
+      }
+    }
+  }
+
+  private async runNonWalletConnectAccountAction<T>(
+    connectorName: WALLET_CONNECTOR_TYPE | string,
+    fn: () => Promise<T>,
+    options: { connector?: IConnector<unknown> } = {}
+  ): Promise<T> {
+    if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
+    const displayName = CONNECTOR_NAMES[connectorName as WALLET_CONNECTOR_TYPE] || connectorName;
+    this.loginModal.startConnectingLoader({ connector: connectorName, connectorName: displayName });
+
+    // Forward the AUTHORIZING event from the linking wallet connector to the modal so we can
+    // swap the loader from "connecting" to "authorizing" while the user reviews the signature
+    // request inside their wallet.
+    const handleAuthorizing = () => this.loginModal?.markLoaderAuthorizing();
+    if (options.connector) {
+      options.connector.on(CONNECTOR_EVENTS.AUTHORIZING, handleAuthorizing);
+    }
+
+    try {
+      const result = await fn();
+      this.loginModal.endConnectingLoader({ success: true });
+      return result;
+    } catch (error) {
+      const message = (error as Error)?.message;
+      this.loginModal.endConnectingLoader({ success: false, errorMessage: message });
+      throw error;
+    } finally {
+      if (options.connector) {
+        options.connector.removeListener(CONNECTOR_EVENTS.AUTHORIZING, handleAuthorizing);
       }
     }
   }
