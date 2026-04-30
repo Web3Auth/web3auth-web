@@ -298,32 +298,34 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       if (cached) return cached;
 
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
-      const { challenge, signature } = await this.generateChallengeAndSign(authServer);
+      const { challenge, signature } = await this.generateChallengeAndSign(authServer, accounts);
       return this.verifyAndAuthorize({ chainNamespace, signedMessage: signature, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
   public async generateChallengeAndSign(
-    authServerUrl?: string
+    authServerUrl?: string,
+    accounts?: string[]
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
     const { chainId } = this.provider;
     const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     const { chainNamespace } = currentChainConfig;
-    const accounts =
-      chainNamespace === CHAIN_NAMESPACES.SOLANA && this._solanaWallet
+    const accountsToUse =
+      accounts ||
+      (chainNamespace === CHAIN_NAMESPACES.SOLANA && this._solanaWallet
         ? this._solanaWallet.accounts.map((a) => a.address)
-        : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
-    if (!accounts || accounts.length === 0) {
+        : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS }));
+    if (!accountsToUse || accountsToUse.length === 0) {
       throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
     }
 
     const payload = {
       domain: window.location.origin,
       uri: window.location.href,
-      address: accounts[0],
+      address: accountsToUse[0],
       chainId: parseInt(chainId, 16),
       version: "1",
       nonce: generateSiweNonce(),
@@ -332,7 +334,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
     const challenge = await signChallenge(payload, chainNamespace, authServer);
-    const signature = await this._getSignedMessage(challenge, accounts, chainNamespace);
+    const signature = await this._getSignedMessage(challenge, accountsToUse, chainNamespace);
     return { challenge, signature, chainNamespace };
   }
 

@@ -121,7 +121,10 @@ export interface IConnector<T> extends SafeEventEmitter {
   manageMFA(params?: T): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
   getAuthTokenInfo(): Promise<AuthTokenInfo>;
-  generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
+  generateChallengeAndSign(
+    authServerUrl?: string,
+    accounts?: string[]
+  ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
   cleanup?(): Promise<void>;
 }
 

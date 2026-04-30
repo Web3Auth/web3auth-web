@@ -29,15 +29,18 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       if (cached) return cached;
 
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
-      const { challenge, signature, chainNamespace } = await this.generateChallengeAndSign(authServer);
+      const { challenge, signature, chainNamespace } = await this.generateChallengeAndSign(authServer, accounts);
       return this.verifyAndAuthorize({ chainNamespace, signedMessage: signature, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
-  async generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
-    const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
-    if (!accounts || accounts.length === 0) {
+  async generateChallengeAndSign(
+    authServerUrl?: string,
+    accounts?: string[]
+  ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    const accountsToUse = accounts || (await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS }));
+    if (!accountsToUse || accountsToUse.length === 0) {
       throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
     }
     const chainId = await this.provider.request<never, string>({ method: "eth_chainId" });
@@ -48,7 +51,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     const payload = {
       domain: window.location.origin,
       uri: window.location.href,
-      address: accounts[0],
+      address: accountsToUse[0],
       chainId: parseInt(chainId, 16),
       version: "1",
       nonce: generateSiweNonce(),
@@ -60,7 +63,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
 
     const signature = await this.provider.request<[string, string], string>({
       method: EVM_METHOD_TYPES.PERSONAL_SIGN,
-      params: [hexChallenge, accounts[0]],
+      params: [hexChallenge, accountsToUse[0]],
     });
     return { challenge, signature, chainNamespace };
   }

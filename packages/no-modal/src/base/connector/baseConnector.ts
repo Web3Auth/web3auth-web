@@ -212,6 +212,9 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
   abstract getAuthTokenInfo(): Promise<AuthTokenInfo>;
-  abstract generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
+  abstract generateChallengeAndSign(
+    authServerUrl?: string,
+    accounts?: string[]
+  ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }
