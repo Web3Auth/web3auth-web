@@ -127,6 +127,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.coreOptions = options;
     this.storage = this.getStorageMethod();
     this.analytics = new Analytics();
+    if (options.disableAnalytics) {
+      this.analytics.disable();
+    }
     this.analytics.setGlobalProperties({ integration_type: ANALYTICS_INTEGRATION_TYPE.NATIVE_SDK });
 
     this.loadState(initialState)

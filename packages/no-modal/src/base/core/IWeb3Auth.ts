@@ -194,6 +194,12 @@ export interface IWeb3AuthCoreOptions {
    * @defaultValue "connect-and-sign"
    */
   initialAuthenticationMode?: ConnectorInitialAuthenticationModeType;
+
+  /**
+   * Whether to disable analytics
+   * @defaultValue false
+   */
+  disableAnalytics?: boolean;
 }
 
 export type LoginParamMap = {
