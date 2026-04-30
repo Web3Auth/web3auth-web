@@ -1,5 +1,7 @@
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
 
+export type CITADEL_NETWORK = "ethereum" | "solana";
+
 export interface LinkAccountParams {
   /**
    * Name of the external wallet connector to link.
@@ -96,5 +98,5 @@ export interface UnlinkAccountPayload {
   address: string;
 
   /** Network of the account being unlinked */
-  network: "ethereum" | "solana";
+  network: CITADEL_NETWORK;
 }

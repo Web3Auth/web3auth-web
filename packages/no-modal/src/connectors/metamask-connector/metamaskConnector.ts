@@ -422,7 +422,7 @@ class MetaMaskConnector extends BaseConnector<void> {
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: WALLET_CONNECTORS.METAMASK });
 
     const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
-    const { challenge, signature } = await this.generateChallengeAndSign(authServer);
+    const { challenge, signature } = await this.generateChallengeAndSign(authServer, accounts);
     return this.verifyAndAuthorize({ chainNamespace, signedMessage: signature, challenge, authServer });
   }
 
@@ -469,7 +469,8 @@ class MetaMaskConnector extends BaseConnector<void> {
   }
 
   public async generateChallengeAndSign(
-    authServerUrl?: string
+    authServerUrl?: string,
+    accounts?: string[]
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
     const evmChainId = this.evmProvider?.chainId || this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155)?.chainId;
     const isSolanaOnly = !this.evmProvider && !!this.solanaProvider;
@@ -481,13 +482,14 @@ class MetaMaskConnector extends BaseConnector<void> {
     if (!activeChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     const { chainNamespace } = activeChainConfig;
-    const accounts =
-      chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider
+    const accountsToUse =
+      accounts ||
+      (chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider
         ? this.solanaProvider.accounts.map((a) => a.address)
         : this.evmProvider
           ? await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })
-          : [];
-    if (!accounts || accounts.length === 0) {
+          : []);
+    if (!accountsToUse || accountsToUse.length === 0) {
       throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
     }
 
@@ -495,7 +497,7 @@ class MetaMaskConnector extends BaseConnector<void> {
     const payload = {
       domain: window.location.origin,
       uri: window.location.href,
-      address: accounts[0],
+      address: accountsToUse[0],
       chainId: parseInt(activeChainConfig.chainId, 16),
       version: "1",
       nonce: generateSiweNonce(),
@@ -506,12 +508,12 @@ class MetaMaskConnector extends BaseConnector<void> {
 
     let signedMessage: string;
     if (chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider) {
-      signedMessage = await walletSignMessage(this.solanaProvider, challenge, accounts[0]);
+      signedMessage = await walletSignMessage(this.solanaProvider, challenge, accountsToUse[0]);
     } else if (this.evmProvider) {
       const hexChallenge = bytesToHexPrefixedString(utf8ToBytes(challenge));
       signedMessage = await this.evmProvider.request<[string, string], string>({
         method: EVM_METHOD_TYPES.PERSONAL_SIGN,
-        params: [hexChallenge, accounts[0]],
+        params: [hexChallenge, accountsToUse[0]],
       });
     } else {
       throw WalletLoginError.notConnectedError("No provider available for signing");

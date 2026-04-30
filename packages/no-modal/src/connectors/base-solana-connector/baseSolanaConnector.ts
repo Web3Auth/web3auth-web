@@ -39,9 +39,12 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
   }
 
-  async generateChallengeAndSign(authServerUrl?: string): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
-    const accounts = this.solanaWallet.accounts.map((a) => a.address);
-    if (!accounts || accounts.length === 0) {
+  async generateChallengeAndSign(
+    authServerUrl?: string,
+    accounts?: string[]
+  ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    const accountsToUse = accounts || this.solanaWallet.accounts.map((a) => a.address);
+    if (!accountsToUse || accountsToUse.length === 0) {
       throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
     }
     const walletChains = new Set(this.solanaWallet.chains);
@@ -59,7 +62,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     const payload = {
       domain: window.location.origin,
       uri: window.location.href,
-      address: accounts[0],
+      address: accountsToUse[0],
       chainId: parseInt(chainId, 16),
       version: "1",
       nonce: generateSiweNonce(),
@@ -67,7 +70,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     };
 
     const challenge = await signChallenge(payload, chainNamespace, authServer);
-    const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accounts[0]);
+    const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accountsToUse[0]);
     return { challenge, signature: signedMessage, chainNamespace };
   }
 

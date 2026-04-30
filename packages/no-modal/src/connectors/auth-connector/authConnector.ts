@@ -64,7 +64,7 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
-import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../../base/account-linking";
+import { CITADEL_NETWORK, makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../../base/account-linking";
 import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
 import {
@@ -521,6 +521,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         await walletConnector.disconnect({ cleanup: true });
       } catch (disconnectError) {
         log.debug("Failed to disconnect wallet connector after linking failure", disconnectError);
+        throw disconnectError;
       }
       throw error;
     }
@@ -690,17 +691,14 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     return { accessToken, idToken, connectedAccounts };
   }
 
-  private getNetworkForUnlinkAddress(accounts: ConnectedAccountInfo[], address: string): "ethereum" | "solana" {
-    const exactMatch = accounts.find((account) => account.address === address || account.eoaAddress === address);
-    const matchedAccount =
-      exactMatch ??
-      accounts.find((account) => {
-        if (!account.chainNamespace || parseChainNamespaceFromCitadelResponse(account.chainNamespace) !== CHAIN_NAMESPACES.EIP155) {
-          return false;
-        }
-        const normalizedAddress = address.toLowerCase();
-        return account.address?.toLowerCase() === normalizedAddress || account.eoaAddress?.toLowerCase() === normalizedAddress;
-      });
+  private getNetworkForUnlinkAddress(accounts: ConnectedAccountInfo[], address: string): CITADEL_NETWORK {
+    const matchedAccount = accounts.find((account) => {
+      if (!account.chainNamespace || parseChainNamespaceFromCitadelResponse(account.chainNamespace) !== CHAIN_NAMESPACES.EIP155) {
+        return false;
+      }
+      const normalizedAddress = address.toLowerCase();
+      return account.address?.toLowerCase() === normalizedAddress || account.eoaAddress?.toLowerCase() === normalizedAddress;
+    });
 
     if (!matchedAccount) {
       throw AccountLinkingError.requestFailed(`No connected wallet matches address "${address}".`);
@@ -726,7 +724,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     challenge: string;
     signature: string;
     signatureType: "eip191" | "sip99";
-    network: "ethereum" | "solana";
+    network: CITADEL_NETWORK;
   }> {
     // Notify listeners that the linking wallet is about to be asked for a signature so the UI
     // (e.g. modal) can switch from a "connecting" loader to an "authorizing" prompt while the
