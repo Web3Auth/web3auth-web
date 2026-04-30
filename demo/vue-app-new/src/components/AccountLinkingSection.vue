@@ -88,10 +88,10 @@ const formatAddress = (address?: string | null): string => {
 
 const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
   if (account.active) {
-    return "border-emerald-300 bg-emerald-50/80 ring-1 ring-emerald-200 shadow-md dark:border-emerald-800 dark:bg-emerald-950/30 dark:ring-emerald-900/70";
+    return "border-app-green-200 bg-app-green-50 shadow-md ring-1 ring-app-green-200 dark:border-app-green-700 dark:bg-app-gray-800 dark:ring-app-green-700";
   }
 
-  return "border-slate-200 bg-slate-50/70 dark:border-slate-700 dark:bg-slate-900/40";
+  return "border-app-gray-200 bg-app-white shadow-sm dark:border-app-gray-700 dark:bg-app-gray-800";
 };
 </script>
 
@@ -99,18 +99,18 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
   <Card class="mb-2 !h-auto gap-4 overflow-hidden px-4 py-4" :shadow="false">
     <div class="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
       <div class="min-w-0">
-        <div class="text-left text-xl font-bold leading-tight text-slate-900 dark:text-slate-100">Connected Wallets</div>
-        <p class="mt-1 break-all text-xs leading-5 text-slate-500 dark:text-slate-300">
+        <div class="text-left text-xl font-bold leading-tight text-app-gray-900 dark:text-app-white">Connected Wallets</div>
+        <p class="mt-1 break-all text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
           Loaded from
-          <code class="rounded-md bg-slate-100 px-1.5 py-0.5 font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+          <code class="rounded-md bg-app-gray-100 px-1.5 py-0.5 font-medium text-app-gray-700 dark:bg-app-gray-800 dark:text-app-gray-200">
             useWeb3AuthUser().userInfo.connectedAccounts
           </code>
         </p>
-        <p class="mt-1 break-all text-xs leading-5 text-slate-500 dark:text-slate-300">
+        <p class="mt-1 break-all text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
           Switch the active wallet here. Non-primary inactive wallets can also be unlinked.
         </p>
       </div>
-      <p class="inline-flex self-start rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+      <p class="inline-flex self-start rounded-full bg-app-gray-100 px-3 py-1 text-xs font-semibold text-app-gray-700 dark:bg-app-gray-800 dark:text-app-gray-200">
         Total: {{ connectedWallets.length }}
       </p>
     </div>
@@ -118,25 +118,25 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
     <div class="flex flex-col gap-2">
       <p
         v-if="lastSwitchAuthConnectionId"
-        class="break-all rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+        class="break-all rounded-xl border border-app-green-200 bg-app-green-50 px-3 py-2 text-xs leading-5 text-app-green-700 dark:border-app-green-700 dark:bg-app-gray-800 dark:text-app-green-400"
       >
         Switched active wallet (accountId: {{ lastSwitchAuthConnectionId }}).
       </p>
       <p
         v-if="lastUnlinkedAddress"
-        class="break-all rounded-xl border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs leading-5 text-emerald-700 dark:border-emerald-900 dark:bg-emerald-950/40 dark:text-emerald-300"
+        class="break-all rounded-xl border border-app-green-200 bg-app-green-50 px-3 py-2 text-xs leading-5 text-app-green-700 dark:border-app-green-700 dark:bg-app-gray-800 dark:text-app-green-400"
       >
         Unlinked wallet: {{ lastUnlinkedAddress }}.
       </p>
       <p
         v-if="switchAccountError"
-        class="break-all rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-600 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+        class="break-all rounded-xl border border-app-red-200 bg-app-red-50 px-3 py-2 text-xs leading-5 text-app-red-700 dark:border-app-red-700 dark:bg-app-gray-800 dark:text-app-red-400"
       >
         Switch account: {{ switchAccountError.message }}
       </p>
       <p
         v-if="accountLinkingError"
-        class="break-all rounded-xl border border-red-200 bg-red-50 px-3 py-2 text-xs leading-5 text-red-600 dark:border-red-900 dark:bg-red-950/40 dark:text-red-300"
+        class="break-all rounded-xl border border-app-red-200 bg-app-red-50 px-3 py-2 text-xs leading-5 text-app-red-700 dark:border-app-red-700 dark:bg-app-gray-800 dark:text-app-red-400"
       >
         Link or unlink wallet: {{ accountLinkingError.message }}
       </p>
@@ -151,10 +151,10 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
       >
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0 flex-1">
-            <p class="truncate text-sm font-semibold text-slate-800 dark:text-slate-100" :title="account.eoaAddress || undefined">
+            <p class="truncate text-sm font-semibold text-app-gray-900 dark:text-app-white" :title="account.eoaAddress || undefined">
               {{ formatAddress(account.eoaAddress) }}
             </p>
-            <p class="mt-1 break-all text-xs leading-5 text-slate-500 dark:text-slate-300">
+            <p class="mt-1 break-all text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
               {{ account.connector }}
               <span v-if="account.accountType">· {{ account.accountType }}</span>
               <span v-if="account.chainNamespace">· {{ account.chainNamespace }}</span>
@@ -163,13 +163,13 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
           <div class="flex shrink-0 flex-wrap items-center gap-1">
             <span
               v-if="account.active"
-              class="rounded-full bg-emerald-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
+              class="rounded-full bg-app-green-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-app-green-700 dark:bg-app-green-900 dark:text-app-green-300"
             >
               Active
             </span>
             <span
               v-if="account.isPrimary"
-              class="rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-blue-600 dark:bg-blue-950 dark:text-blue-300"
+              class="rounded-full bg-app-blue-100 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-app-blue-700 dark:bg-app-blue-900 dark:text-app-blue-300"
             >
               Primary
             </span>
@@ -178,23 +178,23 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
 
         <p
           v-if="account.authConnectionId"
-          class="mt-2 truncate text-xs leading-5 text-slate-400 dark:text-slate-400"
+          class="mt-2 truncate text-xs leading-5 text-app-gray-400 dark:text-app-gray-400"
           :title="`authConnectionId: ${account.authConnectionId}`"
         >
           authConnectionId: {{ account.authConnectionId }}
         </p>
-        <p v-if="account.aaAddress" class="mt-2 truncate text-xs leading-5 text-slate-400 dark:text-slate-400" :title="`Smart account: ${account.aaAddress}`">
+        <p v-if="account.aaAddress" class="mt-2 truncate text-xs leading-5 text-app-gray-400 dark:text-app-gray-400" :title="`Smart account: ${account.aaAddress}`">
           Smart account: {{ account.aaAddress }}
         </p>
 
-        <p v-if="account.active" class="mt-3 text-xs leading-5 font-medium text-emerald-700 dark:text-emerald-300">
+        <p v-if="account.active" class="mt-3 text-xs leading-5 font-medium text-app-green-700 dark:text-app-green-400">
           Currently used for wallet actions
           <span v-if="!account.isPrimary">. Switch to another wallet before unlinking it.</span>
         </p>
-        <p v-else-if="account.isPrimary" class="mt-3 text-xs leading-5 text-blue-600 dark:text-blue-300">
+        <p v-else-if="account.isPrimary" class="mt-3 text-xs leading-5 text-app-blue-700 dark:text-app-blue-400">
           Primary AUTH account stays linked and can be switched back to at any time.
         </p>
-        <p v-else-if="!account.address" class="mt-3 text-xs leading-5 text-slate-500 dark:text-slate-300">
+        <p v-else-if="!account.address" class="mt-3 text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
           This wallet does not expose an unlinkable address.
         </p>
 
@@ -226,12 +226,12 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
       </div>
     </div>
 
-    <p v-else class="text-xs leading-5 text-slate-500 dark:text-slate-300">No connected wallets found in user info yet.</p>
+    <p v-else class="text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">No connected wallets found in user info yet.</p>
   </Card>
 
   <Card v-if="showLinkWallet" class="mb-2 !h-auto gap-4 overflow-hidden px-4 py-4" :shadow="false">
-    <div class="text-left text-xl font-bold leading-tight text-slate-900 dark:text-slate-100">Link Wallet</div>
-    <p class="mt-1 break-all text-xs leading-5 text-slate-500 dark:text-slate-300">
+    <div class="text-left text-xl font-bold leading-tight text-app-gray-900 dark:text-app-white">Link Wallet</div>
+    <p class="mt-1 break-all text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
       Choose a wallet connector to start the account-linking flow.
     </p>
     <div class="w-full">

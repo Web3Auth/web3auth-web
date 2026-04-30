@@ -20,7 +20,7 @@ import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
-import { CookieStorage, LocalStorageAdapter, MemoryStorage, SessionStorageAdapter, WEB3AUTH_NETWORK, type StorageConfig } from "@web3auth/auth";
+import { CookieStorage, LocalStorageAdapter, log, MemoryStorage, SessionStorageAdapter, WEB3AUTH_NETWORK, type StorageConfig } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
@@ -256,7 +256,9 @@ onBeforeMount(() => {
         formData.externalWalletOnly = json.externalWalletOnly || false;
         formData.tokenStorage = json.tokenStorage || "default";
       }
-    } catch (error) {}
+    } catch (error) {
+      log.error(error);
+    }
   }
 });
 
