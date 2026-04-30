@@ -246,6 +246,14 @@ function ConnectWallet(props: ConnectWalletProps) {
     } else {
       // show QR code if wallet connect v2 is supported
       if (button.hasWalletConnect) {
+        // In account-linking picker mode, hand off to the WC v2 account-linking flow in
+        // modalManager (via the picker resolver in onExternalWalletLogin) instead of showing
+        // the regular inline QR — the regular QR uses a connector owned by the login flow,
+        // which is not what we want for linking.
+        if (modalState.accountLinking.pickerActive) {
+          handleExternalWalletClick({ connector: button.name });
+          return;
+        }
         setSelectedButton(button);
         setSelectedWallet(true);
         setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
