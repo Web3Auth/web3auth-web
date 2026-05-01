@@ -2,13 +2,12 @@ import { CHAIN_NAMESPACES, cloneDeep } from "@toruslabs/base-controllers";
 import { CITADEL_SERVER_MAP, DASHBOARD_PUBLIC_API_MAP } from "@toruslabs/constants";
 import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
 import { get } from "@toruslabs/http-helpers";
-import { BUILD_ENV, type BUILD_ENV_TYPE } from "@web3auth/auth";
+import { BUILD_ENV, type BUILD_ENV_TYPE, type WEB3AUTH_NETWORK_TYPE } from "@web3auth/auth";
 import { type Chain } from "viem";
 
 import { type CustomChainConfig } from "./chain/IChainInterface";
-import { type WEB3AUTH_NETWORK_TYPE } from "./connector";
 import { SOLANA_CAIP_CHAIN_MAP, WALLET_REGISTRY_URL } from "./constants";
-import { type UIConfig, type WalletServicesConfig } from "./core/IWeb3Auth";
+import { type UIConfig, type WalletServicesConfig } from "./core/IWeb3AuthOptions";
 import { Web3AuthError } from "./errors";
 import type { ProjectConfig, WalletRegistry } from "./interfaces";
 

@@ -4,19 +4,18 @@ import type { Wallet } from "@wallet-standard/base";
 import { SafeEventEmitter } from "@web3auth/auth";
 
 import { CHAIN_NAMESPACES, type ChainNamespaceType, CONNECTOR_NAMESPACES, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
+import { type BaseConnectorSettings } from "../core/IWeb3AuthOptions";
 import { WalletInitializationError, WalletLoginError } from "../errors";
 import { log } from "../loglevel";
 import { citadelServerUrl } from "../utils";
 import { WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
 import { CAN_AUTHORIZE_STATUSES, CONNECTED_STATUSES } from "./connectorStatus";
-import { CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
+import { CONNECTOR_EVENTS, CONNECTOR_STATUS, type CONNECTOR_STATUS_TYPE } from "./constants";
 import type {
   AuthTokenInfo,
   BaseConnectorLoginParams,
-  BaseConnectorSettings,
   Connection,
   CONNECTOR_CATEGORY_TYPE,
-  CONNECTOR_STATUS_TYPE,
   ConnectorEvents,
   ConnectorInitOptions,
   IConnector,

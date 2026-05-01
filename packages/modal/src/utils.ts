@@ -1,4 +1,4 @@
-import { type UIConfig } from "./ui";
+import { type UIConfig } from "./ui/interfaces";
 
 export const getLoginModalAnalyticsProperties = (uiConfig?: UIConfig) => {
   return {

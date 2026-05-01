@@ -11,6 +11,8 @@ export const CONNECTOR_STATUS = {
   CONSENT_REQUIRING: "consent_requiring",
 } as const;
 
+export type CONNECTOR_STATUS_TYPE = (typeof CONNECTOR_STATUS)[keyof typeof CONNECTOR_STATUS];
+
 export const CONNECTOR_EVENTS = {
   ...CONNECTOR_STATUS,
   CONNECTOR_DATA_UPDATED: "connector_data_updated",

@@ -1,36 +1,15 @@
-import { type AccountAbstractionMultiChainConfig } from "@toruslabs/ethereum-controllers";
-import {
-  type BUILD_ENV_TYPE,
-  type CookieOptions,
-  type LoginParams,
-  MfaLevelType,
-  MfaSettings,
-  SafeEventEmitter,
-  type StorageConfig,
-  UX_MODE_TYPE,
-  type WhiteLabelData,
-} from "@web3auth/auth";
-import { type WsEmbedParams } from "@web3auth/ws-embed";
+import { type LoginParams, SafeEventEmitter } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
-import {
-  type AuthTokenInfo,
-  CONNECTED_EVENT_DATA,
-  type Connection,
-  CONNECTOR_EVENTS,
-  CONNECTOR_INITIAL_AUTHENTICATION_MODE,
-  type CONNECTOR_STATUS_TYPE,
-  ConnectorEvents,
-  type ConnectorFn,
-  type IBaseProvider,
-  type IConnector,
-  type UserInfo,
-  type WEB3AUTH_NETWORK_TYPE,
-} from "../connector";
+import { CONNECTOR_EVENTS, type CONNECTOR_STATUS_TYPE } from "../connector/constants";
+import type { AuthTokenInfo, CONNECTED_EVENT_DATA, Connection, ConnectorEvents, IConnector, UserInfo } from "../connector/interfaces";
 import { Web3AuthError } from "../errors";
 import { LoginModeType } from "../interfaces";
-import { type IPlugin, type PluginFn } from "../plugin";
+import type { IPlugin } from "../plugin/IPlugin";
 import { type WALLET_CONNECTOR_TYPE, WALLET_CONNECTORS } from "../wallet";
+import type { IWeb3AuthCoreOptions } from "./IWeb3AuthOptions";
+
+export * from "./IWeb3AuthOptions";
 
 export type AuthLoginParams = LoginParams & {
   // to maintain backward compatibility
@@ -38,163 +17,6 @@ export type AuthLoginParams = LoginParams & {
 
   idToken?: string;
 };
-
-export type WalletServicesConfig = Omit<
-  WsEmbedParams,
-  "buildEnv" | "enableLogging" | "chainId" | "chains" | "confirmationStrategy" | "accountAbstractionConfig"
-> & {
-  /**
-   * Determines how to show confirmation screens
-   * @defaultValue default
-   *
-   * default & auto-approve
-   * - use auto-approve as default
-   * - if wallet connect request use modal
-   *
-   * modal
-   * - use modal always
-   */
-  confirmationStrategy?: Exclude<WsEmbedParams["confirmationStrategy"], "popup">;
-  modalZIndex?: number;
-};
-
-export interface UIConfig extends WhiteLabelData {
-  /**
-   * UX Mode for the auth connector
-   */
-  uxMode?: UX_MODE_TYPE;
-}
-
-export type ConnectorInitialAuthenticationModeType =
-  (typeof CONNECTOR_INITIAL_AUTHENTICATION_MODE)[keyof typeof CONNECTOR_INITIAL_AUTHENTICATION_MODE];
-
-export interface IWeb3AuthCoreOptions {
-  /**
-   * Client id for web3auth.
-   * You can obtain your client id from the web3auth developer dashboard.
-   * You can set any random string for this on localhost.
-   */
-  clientId: string;
-
-  /**
-   * multiple chain configurations,
-   * only provided chains will be used
-   */
-  chains?: CustomChainConfig[];
-
-  /**
-   * default chain Id to use
-   */
-  defaultChainId?: string;
-
-  /**
-   * setting to true will enable logs
-   *
-   * @defaultValue false
-   */
-  enableLogging?: boolean;
-
-  /**
-   * Custom storage adapters for auth tokens (sessionId, accessToken, refreshToken, idToken).
-   * @defaultValue localStorage-based adapters
-   */
-  storage?: StorageConfig;
-
-  /**
-   * Cookie configuration used when storage adapters are cookie-based.
-   */
-  cookieOptions?: CookieOptions;
-
-  /**
-   * sessionTime (in seconds) for idToken issued by Web3Auth for server side verification.
-   * @defaultValue 7 * 86400
-   *
-   * Note: max value can be 30 days (86400 * 30) and min can be  1 sec (1)
-   */
-  sessionTime?: number;
-
-  /**
-   * Web3Auth Network to use for the session.
-   */
-  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE;
-
-  /**
-   * Uses core-kit key with web3auth provider
-   * @defaultValue false
-   */
-  useSFAKey?: boolean;
-
-  /**
-   * WhiteLabel options for web3auth
-   */
-  uiConfig?: UIConfig;
-
-  /**
-   * Account abstraction config for your chain namespace
-   */
-  accountAbstractionConfig?: AccountAbstractionMultiChainConfig;
-
-  /**
-   * Whether to use AA with external wallet
-   */
-  useAAWithExternalWallet?: boolean;
-
-  /**
-   * Connectors to use
-   */
-  connectors?: ConnectorFn[];
-
-  /**
-   * Plugins to use
-   */
-  plugins?: PluginFn[];
-
-  /**
-   * Whether to enable multi injected provider discovery
-   * @defaultValue true
-   */
-  multiInjectedProviderDiscovery?: boolean;
-
-  /**
-   * Wallet services config
-   */
-  walletServicesConfig?: WalletServicesConfig;
-
-  /**
-   * Private key provider for xrpl cases
-   */
-  privateKeyProvider?: IBaseProvider<string>;
-
-  /**
-   * Whether to enable SSR mode
-   *
-   * @defaultValue false
-   */
-  ssr?: boolean;
-
-  /**
-   * Build environment for Auth connector
-   * @internal
-   * @defaultValue BUILD_ENV.PRODUCTION
-   */
-  authBuildEnv?: BUILD_ENV_TYPE;
-
-  /**
-   * MFA settings for the auth connector
-   */
-  mfaSettings?: MfaSettings;
-
-  /**
-   * MFA level for the auth connector
-   */
-  mfaLevel?: MfaLevelType;
-
-  /**
-   * Initial authentication mode for the auth connector.
-   * @defaultValue "connect-and-sign"
-   */
-  initialAuthenticationMode?: ConnectorInitialAuthenticationModeType;
-}
 
 export type LoginParamMap = {
   [WALLET_CONNECTORS.AUTH]: Partial<AuthLoginParams>;
@@ -246,5 +68,3 @@ export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError, loginMode: LoginModeType) => void;
   MODAL_VISIBILITY: (visibility: boolean) => void;
 };
-
-export type Web3AuthNoModalOptions = IWeb3AuthCoreOptions;

@@ -10,7 +10,7 @@ import {
   ChainNamespaceType,
   EVM_PLUGINS,
   IPlugin,
-  IWeb3AuthCore,
+  type IWeb3AuthPluginHost,
   log,
   PLUGIN_EVENTS,
   PLUGIN_NAMESPACES,
@@ -36,13 +36,13 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   public wsEmbedInstance: WsEmbed;
 
-  private web3auth: IWeb3AuthCore | null = null;
+  private web3auth: IWeb3AuthPluginHost | null = null;
 
   private isInitialized = false;
 
   private analytics?: Analytics;
 
-  async initWithWeb3Auth(web3auth: IWeb3AuthCore, _whiteLabel?: WhiteLabelData, analytics?: Analytics): Promise<void> {
+  async initWithWeb3Auth(web3auth: IWeb3AuthPluginHost, _whiteLabel?: WhiteLabelData, analytics?: Analytics): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
     if (web3auth.connection && !this.SUPPORTED_CONNECTORS.includes(web3auth.connectedConnectorName)) throw WalletServicesPluginError.notInitialized();

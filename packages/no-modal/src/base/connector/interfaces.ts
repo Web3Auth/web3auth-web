@@ -15,14 +15,14 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 
-import { type Analytics } from "../analytics";
 import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
-import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
 import { Web3AuthError } from "../errors";
-import type { LoginModeType, ProjectConfig } from "../interfaces";
+import type { LoginModeType } from "../interfaces";
 import type { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
-import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
+import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, type CONNECTOR_STATUS_TYPE } from "./constants";
+
+export type { CONNECTOR_STATUS_TYPE } from "./constants";
 
 export type UserInfo = AuthUserInfo;
 
@@ -45,14 +45,7 @@ export interface ConnectorInitOptions {
   getAuthTokenInfo?: boolean;
 }
 
-export type CONNECTOR_STATUS_TYPE = (typeof CONNECTOR_STATUS)[keyof typeof CONNECTOR_STATUS];
-
 export type AuthTokenInfo = { idToken: string; accessToken?: string; refreshToken?: string };
-
-export interface BaseConnectorSettings {
-  coreOptions: IWeb3AuthCoreOptions;
-  analytics?: Analytics;
-}
 
 export interface IProvider extends SafeEventEmitter<ProviderEvents> {
   get chainId(): string;
@@ -99,18 +92,10 @@ export interface IConnector<T> extends SafeEventEmitter {
   cleanup?(): Promise<void>;
 }
 
-export type ConnectorParams = {
-  projectConfig?: ProjectConfig;
-  coreOptions: IWeb3AuthCoreOptions;
-  analytics: Analytics;
-};
-
 export type BaseConnectorLoginParams = {
   chainId: string;
   getAuthTokenInfo: boolean;
 };
-
-export type ConnectorFn = (params: ConnectorParams) => IConnector<unknown>;
 
 export type CONNECTED_EVENT_DATA = Connection & {
   reconnected: boolean;

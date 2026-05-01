@@ -1,5 +1,4 @@
-import { CONNECTOR_STATUS } from "./constants";
-import { CONNECTOR_STATUS_TYPE } from "./interfaces";
+import { CONNECTOR_STATUS, type CONNECTOR_STATUS_TYPE } from "./constants";
 
 export const CONNECTED_STATUSES: CONNECTOR_STATUS_TYPE[] = [CONNECTOR_STATUS.CONNECTED, CONNECTOR_STATUS.AUTHORIZED];
 
