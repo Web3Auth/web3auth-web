@@ -286,20 +286,8 @@ describe("Web3AuthNoModal", () => {
     const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xAbC123"]) };
     const authorizedListener = vi.fn();
     sdk.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
-    sdk.exposeSubscribeToConnectorEvents(connector);
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
-      updateProviderEngineProxy: vi.fn(),
-      removeAllListeners: vi.fn(),
-    };
 
-    connector.emit(CONNECTOR_EVENTS.CONNECTED, {
-      connectorName: WALLET_CONNECTORS.METAMASK,
-      ethereumProvider: ethereumProvider as never,
-      solanaWallet: null,
-      reconnected: false,
-    });
+    const connector = emitMetaMaskConnected(sdk, ethereumProvider);
     await vi.waitFor(() => {
       expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
     });
@@ -328,29 +316,15 @@ describe("Web3AuthNoModal", () => {
     sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
 
     const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xBEEF"]) };
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
-    connector.connect = vi.fn(async () => {
-      connector.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connectorName: WALLET_CONNECTORS.METAMASK,
-        ethereumProvider: ethereumProvider as never,
-        solanaWallet: null,
-        reconnected: false,
-      });
-      return null;
-    });
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
-    sdk.exposeSubscribeToConnectorEvents(connector);
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
-      updateProviderEngineProxy: vi.fn(),
-      removeAllListeners: vi.fn(),
-    };
 
-    const connectionPromise = sdk.connectTo(WALLET_CONNECTORS.METAMASK);
+    emitMetaMaskConnected(sdk, ethereumProvider);
     await vi.waitFor(() => {
       expect(consentRequiredListener).toHaveBeenCalledTimes(1);
     });
+
+    expect(sdk.status).toBe(CONNECTOR_STATUS.CONSENT_REQUIRING);
     await sdk.exposeCompleteConsentAcceptance();
-    await expect(connectionPromise).resolves.not.toBeNull();
+    expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
   });
 
   it("persists user consent when user accepts consent UI", async () => {
@@ -364,29 +338,12 @@ describe("Web3AuthNoModal", () => {
     const consentRequiredListener = vi.fn();
     sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
     const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xFEEd"]) };
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
-    connector.connect = vi.fn(async () => {
-      connector.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connectorName: WALLET_CONNECTORS.METAMASK,
-        ethereumProvider: ethereumProvider as never,
-        solanaWallet: null,
-        reconnected: false,
-      });
-      return null;
-    });
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
-    sdk.exposeSubscribeToConnectorEvents(connector);
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
-      updateProviderEngineProxy: vi.fn(),
-      removeAllListeners: vi.fn(),
-    };
 
-    const connectionPromise = sdk.connectTo(WALLET_CONNECTORS.METAMASK);
+    emitMetaMaskConnected(sdk, ethereumProvider);
     await vi.waitFor(() => {
       expect(consentRequiredListener).toHaveBeenCalledTimes(1);
     });
     await sdk.exposeCompleteConsentAcceptance();
-    await connectionPromise;
 
     const stateJson = await storage.get(WEB3AUTH_STATE_STORAGE_KEY);
     const state = JSON.parse(stateJson!);
@@ -434,16 +391,36 @@ describe("Web3AuthNoModal", () => {
   });
 });
 
-function createSdk(overrides: Record<string, unknown> = {}, initialState?: Record<string, unknown>) {
+function createSdk(overrides: Record<string, unknown> = {}, initialState?: Record<string, unknown>): TestWeb3AuthNoModal {
   const storage = createMockStorage();
   return new TestWeb3AuthNoModal(
     {
       clientId: "test-client-id",
       web3AuthNetwork: "sapphire_devnet",
       chains: [createChain()],
+      disableAnalytics: true,
       storage: { sessionId: storage },
       ...overrides,
     } as never,
     initialState as never
   );
+}
+
+function emitMetaMaskConnected(sdk: TestWeb3AuthNoModal, ethereumProvider: unknown): MockConnector {
+  const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+  (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+  sdk.exposeSubscribeToConnectorEvents(connector);
+  (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
+    updateProviderEngineProxy: vi.fn(),
+    removeAllListeners: vi.fn(),
+  };
+
+  connector.emit(CONNECTOR_EVENTS.CONNECTED, {
+    connectorName: WALLET_CONNECTORS.METAMASK,
+    ethereumProvider: ethereumProvider as never,
+    solanaWallet: null,
+    reconnected: false,
+  });
+
+  return connector;
 }
