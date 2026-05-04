@@ -244,7 +244,7 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
     <p v-else class="text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">No connected wallets found in user info yet.</p>
   </Card>
 
-  <Card v-if="showLinkWallet" class="mb-2 !h-auto gap-4 overflow-hidden px-4 py-4" :shadow="false">
+  <Card v-if="showLinkWallet" class="mb-2 !h-auto gap-2 overflow-hidden px-4 py-4 flex flex-col" :shadow="false">
     <div class="text-left text-xl font-bold leading-tight text-app-gray-900 dark:text-app-white">Link Wallet</div>
     <p class="mt-1 break-all text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
       Choose a wallet connector to start the account-linking flow.
