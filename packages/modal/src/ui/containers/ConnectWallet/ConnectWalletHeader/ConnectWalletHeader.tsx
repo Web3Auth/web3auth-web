@@ -5,7 +5,7 @@ import i18n from "../../../localeImport";
 import { ConnectWalletHeaderProps } from "./ConnectWalletHeader.type";
 
 function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
-  const { hideBackButton, disableBackButton, onBackClick, currentPage, selectedButton } = props;
+  const { hideBackButton, disableBackButton, onBackClick, currentPage, selectedButton, isLinking } = props;
   const [t] = useTranslation(undefined, { i18n });
 
   const handleBack = () => {
@@ -44,7 +44,9 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
         {currentPage === CONNECT_WALLET_PAGES.SELECTED_WALLET
           ? selectedButton?.displayName
           : currentPage === CONNECT_WALLET_PAGES.CONNECT_WALLET
-            ? t("modal.connectYourWallet")
+            ? isLinking
+              ? t("modal.linkYourWallet")
+              : t("modal.connectYourWallet")
             : currentPage}
       </p>
       <div className="wta:z-[-1] wta:size-5" />

@@ -6,4 +6,5 @@ export interface ConnectWalletHeaderProps {
   currentPage: string;
   selectedButton: ExternalButton;
   hideBackButton?: boolean;
+  isLinking?: boolean;
 }

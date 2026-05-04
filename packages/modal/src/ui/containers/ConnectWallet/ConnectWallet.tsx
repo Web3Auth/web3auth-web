@@ -300,6 +300,7 @@ function ConnectWallet(props: ConnectWalletProps) {
         onBackClick={handleBack}
         currentPage={currentPage}
         selectedButton={selectedButton}
+        isLinking={modalState.accountLinking.pickerActive}
       />
       {/* Body */}
       {selectedWallet ? (
