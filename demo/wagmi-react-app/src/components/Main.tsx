@@ -1,9 +1,9 @@
 import { CHAIN_NAMESPACES, WALLET_CONNECTORS } from "@web3auth/modal";
 import {
+  useAuthTokenInfo,
   useChain,
   useCheckout,
   useEnableMFA,
-  useAuthTokenInfo,
   useLinkAccount,
   useManageMFA,
   useSwitchChain as useWeb3AuthSwitchChain,

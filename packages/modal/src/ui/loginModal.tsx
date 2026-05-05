@@ -330,7 +330,7 @@ export class LoginModal {
     chainId: string;
     intent?: (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
   }): void => {
-    this.accountLinkingState = {
+    this.updateAccountLinkingState({
       ...DEFAULT_ACCOUNT_LINKING_STATE,
       active: true,
       connectorName: params.connectorName,
@@ -338,9 +338,6 @@ export class LoginModal {
       chainId: params.chainId,
       intent: params.intent ?? ACCOUNT_LINKING_INTENT.LINK,
       status: ACCOUNT_LINKING_STATUS.INITIALIZING,
-    };
-    this.setState({
-      accountLinking: this.accountLinkingState,
     });
   };
 
