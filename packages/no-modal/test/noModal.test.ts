@@ -3,6 +3,7 @@ import { describe, expect, it, vi } from "vitest";
 import {
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
+  type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
@@ -125,6 +126,79 @@ describe("Web3AuthNoModal", () => {
     expect(state.idToken).toBeNull();
     expect(state.accessToken).toBeNull();
     expect(state.refreshToken).toBeNull();
+  });
+
+  it("ignores inactive connector lifecycle events without clearing the active AUTH session", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        cachedConnector: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        idToken: "id-token",
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+        activeAccount: null,
+      }
+    );
+    await Promise.resolve();
+    sdk.status = CONNECTED_STATUSES[0];
+
+    const currentConnection: Connection = {
+      connectorName: WALLET_CONNECTORS.AUTH,
+      ethereumProvider: null,
+      solanaWallet: null,
+    };
+    (sdk as unknown as { currentConnection: typeof currentConnection | null }).currentConnection = currentConnection;
+
+    const authConnector = new MockConnector({ name: WALLET_CONNECTORS.AUTH } as never);
+    const inactiveConnector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector, inactiveConnector];
+    sdk.exposeSubscribeToConnectorEvents(authConnector);
+    sdk.exposeSubscribeToConnectorEvents(inactiveConnector);
+
+    inactiveConnector.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.connectionError("User rejected request"));
+    inactiveConnector.emit(CONNECTOR_EVENTS.DISCONNECTED, { connector: WALLET_CONNECTORS.METAMASK });
+    inactiveConnector.emit(CONNECTOR_EVENTS.CACHE_CLEAR);
+    inactiveConnector.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, WalletLoginError.connectionError("rehydration failed"));
+    await Promise.resolve();
+
+    expect(sdk.status).toBe(CONNECTED_STATUSES[0]);
+    expect(sdk.connectedConnectorName).toBe(WALLET_CONNECTORS.AUTH);
+    expect(sdk.idToken).toBe("id-token");
+    expect(sdk.accessToken).toBe("access-token");
+    expect(sdk.refreshToken).toBe("refresh-token");
+    expect(sdk.connection).toEqual(currentConnection);
+  });
+
+  it("still clears the session when the active connector errors", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        cachedConnector: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        idToken: "id-token",
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+      }
+    );
+    await Promise.resolve();
+    sdk.status = CONNECTED_STATUSES[0];
+
+    const authConnector = new MockConnector({ name: WALLET_CONNECTORS.AUTH } as never);
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
+    sdk.exposeSubscribeToConnectorEvents(authConnector);
+
+    authConnector.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.connectionError("active connector failed"));
+    await vi.waitFor(() => {
+      expect(sdk.status).toBe(CONNECTOR_STATUS.ERRORED);
+    });
+
+    expect(sdk.connectedConnectorName).toBeNull();
+    expect(sdk.idToken).toBeNull();
+    expect(sdk.accessToken).toBeNull();
+    expect(sdk.refreshToken).toBeNull();
   });
 
   it("initChainsConfig merges project and user chains with user precedence", () => {
