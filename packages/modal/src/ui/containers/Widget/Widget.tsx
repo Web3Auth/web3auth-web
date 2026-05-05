@@ -61,7 +61,9 @@ function WidgetContent() {
   }, [modalState.status]);
 
   useEffect(() => {
-    // TODO: maybe move this inside root
+    // Prewarm WalletConnect for the regular connect flow so mobile users get a QR URI
+    // as soon as the modal opens. Skip this during account linking because that flow
+    // owns its own WalletConnect session and stores its URI in `accountLinking.walletConnectUri`.
     if (!modalState.modalVisibility) return;
     if (modalState.accountLinking.active) return;
     if (typeof modalState.externalWalletsConfig === "object") {
