@@ -339,9 +339,6 @@ export class LoginModal {
       intent: params.intent ?? ACCOUNT_LINKING_INTENT.LINK,
       status: ACCOUNT_LINKING_STATUS.INITIALIZING,
     });
-    this.setState({
-      accountLinking: this.accountLinkingState,
-    });
   };
 
   updateAccountLinkingState = (accountLinking: Partial<AccountLinkingState>): void => {
