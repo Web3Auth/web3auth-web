@@ -1,5 +1,6 @@
 import { WALLET_CONNECTORS, type WalletRegistryItem } from "@web3auth/no-modal";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 
 import Footer from "../../components/Footer/Footer";
 import Loader from "../../components/Loader";
@@ -9,6 +10,7 @@ import { useModalState } from "../../context/ModalStateContext";
 import { RootProvider } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
 import { type ExternalButton, MODAL_STATUS } from "../../interfaces";
+import i18n from "../../localeImport";
 import AccountLinking from "../AccountLinking";
 import ConnectWallet from "../ConnectWallet";
 import Login from "../Login";
@@ -18,6 +20,7 @@ import RootBodySheets from "./RootBodySheets/RootBodySheets";
 function RootContent(props: RootProps) {
   const { onCloseLoader } = props;
 
+  const [t] = useTranslation(undefined, { i18n });
   const { modalState, shouldShowLoginPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
   const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect, handleAcceptConsent, handleDeclineConsent } =
     useWidget();
@@ -193,6 +196,12 @@ function RootContent(props: RootProps) {
     return !isWalletConnectAccountLinkingVisible && modalState.status !== MODAL_STATUS.INITIALIZED;
   }, [isWalletConnectAccountLinkingVisible, modalState.status]);
 
+  const loaderMessage = useMemo(() => {
+    const message = modalState.postLoadingMessage;
+    if (!message) return undefined;
+    return i18n.exists(message) ? t(message) : message;
+  }, [modalState.postLoadingMessage, t]);
+
   return (
     <div className="wta:relative wta:flex wta:flex-col">
       <div
@@ -209,6 +218,7 @@ function RootContent(props: RootProps) {
               connector={modalState.detailedLoaderConnector}
               connectorName={modalState.detailedLoaderConnectorName}
               modalStatus={modalState.status}
+              message={loaderMessage}
               onClose={onCloseLoader}
               isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
               externalWalletsConfig={modalState.externalWalletsConfig}

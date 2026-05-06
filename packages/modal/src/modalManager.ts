@@ -1106,7 +1106,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.loginModal.endConnectingLoader({ success: true });
       return result;
     } catch (error) {
-      const message = (error as Error)?.message;
+      let message = (error as Error)?.message;
+      if (error instanceof AccountLinkingError) {
+        const isUnlink = error.code >= 5406 && error.code <= 5408;
+        message = isUnlink ? `[${error.code}] Account unlinking failed` : `[${error.code}] Account linking failed`;
+      }
       this.loginModal.endConnectingLoader({ success: false, errorMessage: message });
       throw error;
     } finally {
