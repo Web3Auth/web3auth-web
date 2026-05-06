@@ -197,6 +197,23 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.getConnector(this.connectedConnectorName, this.currentChain?.chainNamespace);
   }
 
+  private isActiveConnectorEventSource(connector: IConnector<unknown>): boolean {
+    if (!this.connectedConnectorName) return true;
+    const activeConnector = this.connectedConnector;
+    if (activeConnector) return activeConnector === connector;
+    return connector.name === this.connectedConnectorName;
+  }
+
+  private shouldIgnoreInactiveConnectorEvent(connector: IConnector<unknown>, event: string): boolean {
+    if (this.isActiveConnectorEventSource(connector)) return false;
+    log.debug("Ignoring connector lifecycle event from inactive connector", {
+      event,
+      sourceConnector: connector.name,
+      activeConnector: this.connectedConnectorName,
+    });
+    return true;
+  }
+
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
     return this.aaProvider;
   }
@@ -1107,6 +1124,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.DISCONNECTED, async (data?: DISCONNECTED_EVENT_DATA) => {
+      if (this.shouldIgnoreInactiveConnectorEvent(connector, CONNECTOR_EVENTS.DISCONNECTED)) return;
       const disconnectedConnector = data?.connector;
       const { activeAccount } = this.state;
       if (!activeAccount || (activeAccount && activeAccount.isPrimary) || disconnectedConnector === WALLET_CONNECTORS.AUTH) {
@@ -1162,6 +1180,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       log.debug("connecting", this.status, this.connectedConnectorName);
     });
     connector.on(CONNECTOR_EVENTS.ERRORED, async (data) => {
+      if (this.shouldIgnoreInactiveConnectorEvent(connector, CONNECTOR_EVENTS.ERRORED)) {
+        log.error("Inactive connector emitted errored event", {
+          connector: connector.name,
+          error: data,
+        });
+        return;
+      }
       this.status = CONNECTOR_STATUS.ERRORED;
       await this.clearCache();
       this.emit(CONNECTOR_EVENTS.ERRORED, data, this.loginMode);
@@ -1169,6 +1194,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, async (error: Web3AuthError) => {
+      if (this.shouldIgnoreInactiveConnectorEvent(connector, CONNECTOR_EVENTS.REHYDRATION_ERROR)) {
+        log.error("Inactive connector emitted rehydration error", {
+          connector: connector.name,
+          error,
+        });
+        return;
+      }
       this.status = CONNECTOR_STATUS.READY;
       await this.clearCache();
       this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error);
@@ -1180,6 +1212,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     connector.on(CONNECTOR_EVENTS.CACHE_CLEAR, async (data) => {
+      if (this.shouldIgnoreInactiveConnectorEvent(connector, CONNECTOR_EVENTS.CACHE_CLEAR)) return;
       log.debug("connector cache clear", data);
       await this.clearCache();
     });
