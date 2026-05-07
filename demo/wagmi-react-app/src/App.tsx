@@ -34,12 +34,6 @@ const chains: Web3AuthContextConfig["web3AuthOptions"]["chains"] = [
   },
 ];
 
-const consentConfig = {
-  required: true,
-  privacyPolicy: "https://example.com/privacy",
-  tncLink: "https://example.com/terms",
-};
-
 type ConsentConfigMode = "disabled" | "required";
 
 function App() {
@@ -55,9 +49,11 @@ function App() {
     };
 
     if (consentConfigMode === "required") {
-      web3AuthOptions.uiConfig!.consentRequired = true;
-      web3AuthOptions.uiConfig!.privacyPolicy = consentConfig.privacyPolicy;
-      web3AuthOptions.uiConfig!.tncLink = consentConfig.tncLink;
+      web3AuthOptions.uiConfig = {
+        consentRequired: true,
+        privacyPolicy: "https://example.com/privacy",
+        tncLink: "https://example.com/terms",
+      };
     }
 
     return { web3AuthOptions };
