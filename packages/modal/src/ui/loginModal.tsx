@@ -118,7 +118,8 @@ export class LoginModal {
   }
 
   get consentRequired(): boolean {
-    return this.uiConfig.consentConfig?.required || false;
+    // consent required is true if the consent required is true and the privacy policy and tnc link are set
+    return (this.uiConfig.consentRequired && Boolean(this.uiConfig.privacyPolicy) && Boolean(this.uiConfig.tncLink)) || false;
   }
 
   get isDark(): boolean {

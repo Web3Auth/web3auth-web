@@ -73,7 +73,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
-    this.consentRequired = this.options.uiConfig.consentConfig?.required || false;
+    // consent required is true if the consent required is true and the privacy policy and tnc link are set
+    this.consentRequired =
+      (this.options.uiConfig.consentRequired && Boolean(this.options.uiConfig.privacyPolicy) && Boolean(this.options.uiConfig.tncLink)) || false;
 
     log.info("modalConfig", this.modalConfig);
   }
@@ -137,7 +139,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           onDeclineConsent: this.onDeclineConsent,
         }
       );
-      this.consentRequired = this.options.uiConfig.consentConfig?.required || false;
+      this.consentRequired = this.loginModal.consentRequired;
       await withAbort(() => this.loginModal.initModal(), signal);
 
       // setup common JRPC provider

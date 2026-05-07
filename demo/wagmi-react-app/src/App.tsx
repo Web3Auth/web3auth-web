@@ -55,9 +55,9 @@ function App() {
     };
 
     if (consentConfigMode === "required") {
-      web3AuthOptions.uiConfig = {
-        consentConfig,
-      };
+      web3AuthOptions.uiConfig!.consentRequired = true;
+      web3AuthOptions.uiConfig!.privacyPolicy = consentConfig.privacyPolicy;
+      web3AuthOptions.uiConfig!.tncLink = consentConfig.tncLink;
     }
 
     return { web3AuthOptions };
