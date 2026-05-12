@@ -195,23 +195,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.getConnector(this.connectedConnectorName, this.currentChain?.chainNamespace);
   }
 
-  private isActiveConnectorEventSource(connector: IConnector<unknown>): boolean {
-    if (!this.connectedConnectorName) return true;
-    const activeConnector = this.connectedConnector;
-    if (activeConnector) return activeConnector === connector;
-    return connector.name === this.connectedConnectorName;
-  }
-
-  private shouldIgnoreInactiveConnectorEvent(connector: IConnector<unknown>, event: string): boolean {
-    if (this.isActiveConnectorEventSource(connector)) return false;
-    log.debug("Ignoring connector lifecycle event from inactive connector", {
-      event,
-      sourceConnector: connector.name,
-      activeConnector: this.connectedConnectorName,
-    });
-    return true;
-  }
-
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
     return this.aaProvider;
   }
@@ -1444,7 +1427,28 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
     await this.setCurrentChain(switchResult.activeChainId);
     await this.setState({ activeAccount: switchResult.activeAccount });
-    this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED);
+    this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, {
+      ethereumProvider,
+      solanaWallet,
+      connectorName,
+    });
+  }
+
+  private isActiveConnectorEventSource(connector: IConnector<unknown>): boolean {
+    if (!this.connectedConnectorName) return true;
+    const activeConnector = this.connectedConnector;
+    if (activeConnector) return activeConnector === connector;
+    return connector.name === this.connectedConnectorName;
+  }
+
+  private shouldIgnoreInactiveConnectorEvent(connector: IConnector<unknown>, event: string): boolean {
+    if (this.isActiveConnectorEventSource(connector)) return false;
+    log.debug("Ignoring connector lifecycle event from inactive connector", {
+      event,
+      sourceConnector: connector.name,
+      activeConnector: this.connectedConnectorName,
+    });
+    return true;
   }
 
   private findConnectedAccountByAddress(connectedAccounts: ConnectedAccountInfo[], address: string): ConnectedAccountInfo | null {

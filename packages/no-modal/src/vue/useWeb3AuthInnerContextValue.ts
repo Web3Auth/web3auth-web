@@ -188,7 +188,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
       };
 
       const connectionUpdatedListener = () => {
-        status.value = newWeb3Auth.status;
+        status.value = web3Auth.value!.status;
         connection.value = newWeb3Auth.connection;
         chainId.value = newWeb3Auth.currentChainId;
         chainNamespace.value = newWeb3Auth.currentChain?.chainNamespace ?? null;

@@ -170,6 +170,8 @@ export interface IConnectorDataEvent {
   data: unknown;
 }
 
+export type CONNECTION_UPDATED_EVENT_DATA = Connection;
+
 export type ConnectorEvents = {
   [CONNECTOR_EVENTS.NOT_READY]: () => void;
   [CONNECTOR_EVENTS.READY]: (connector: WALLET_CONNECTOR_TYPE | string) => void;
@@ -186,7 +188,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.MFA_ENABLED]: (isMFAEnabled: boolean) => void;
   [CONNECTOR_EVENTS.CONSENT_REQUIRING]: (data: CONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.CONSENT_ACCEPTED]: (data: CONNECTED_EVENT_DATA & { loginMode: LoginModeType }) => void;
-  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: () => void;
+  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: (data: CONNECTION_UPDATED_EVENT_DATA) => void;
 };
 
 export interface BaseConnectorConfig {
