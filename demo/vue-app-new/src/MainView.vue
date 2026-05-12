@@ -131,9 +131,10 @@ const options = computed((): Web3AuthOptions => {
     ? { ...whiteLabel, widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) }
     : { widgetType: widget, targetId, hideSuccessScreen, ...(externalWalletOnly && { primaryButton: "externalLogin" }) };
   if (consentConfigMode === "required") {
-    uiConfig.consentConfig = {
-      required: true,
-    };
+    uiConfig.consentRequired = true;
+    // required links to make the consent required work
+    uiConfig.privacyPolicy = "https://web3auth.io/privacy";
+    uiConfig.tncLink = "https://web3auth.io/terms";
   }
   const authConnectorInstance = authConnector({ connectorSettings: {} });
 
