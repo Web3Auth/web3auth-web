@@ -12,7 +12,7 @@ import {
 } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
-import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "../account-linking";
+import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "../../account-linking";
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   type AuthTokenInfo,

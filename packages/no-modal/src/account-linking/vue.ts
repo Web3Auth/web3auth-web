@@ -1,15 +1,20 @@
 import { Ref, ref } from "vue";
 
-import {
-  type LinkAccountParams,
-  type LinkAccountResult,
+import { type ConnectedAccountInfo, log, WalletInitializationError, Web3AuthError } from "../base";
+import { useWeb3AuthInner } from "../vue/composables/useWeb3AuthInner";
+import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "./index";
+import type { LinkAccountParams, LinkAccountResult, LinkedAccountInfo, UnlinkAccountResult } from "./interfaces";
+
+export { makeAccountLinkingRequest, makeAccountUnlinkingRequest };
+export type {
+  CITADEL_NETWORK,
+  CitadelLinkAccountPayload,
+  LinkAccountParams,
+  LinkAccountResult,
   LinkedAccountInfo,
-  log,
+  UnlinkAccountPayload,
   UnlinkAccountResult,
-  WalletInitializationError,
-  Web3AuthError,
-} from "../../base";
-import { useWeb3AuthInner } from "./useWeb3AuthInner";
+} from "./interfaces";
 
 export interface IUseLinkAccount {
   loading: Ref<boolean>;
@@ -17,6 +22,12 @@ export interface IUseLinkAccount {
   linkedAccounts: Ref<LinkedAccountInfo[]>;
   linkAccount(params: LinkAccountParams): Promise<LinkAccountResult | void>;
   unlinkAccount(address: string): Promise<UnlinkAccountResult | void>;
+}
+
+export interface IUseSwitchAccount {
+  loading: Ref<boolean>;
+  error: Ref<Web3AuthError | null>;
+  switchAccount(account: ConnectedAccountInfo): Promise<void>;
 }
 
 export const useLinkAccount = (): IUseLinkAccount => {
@@ -63,5 +74,31 @@ export const useLinkAccount = (): IUseLinkAccount => {
     linkAccount,
     unlinkAccount,
     linkedAccounts,
+  };
+};
+
+export const useSwitchAccount = (): IUseSwitchAccount => {
+  const { web3Auth } = useWeb3AuthInner();
+  const loading = ref(false);
+  const error = ref<Web3AuthError | null>(null);
+
+  const switchAccount = async (account: ConnectedAccountInfo): Promise<void> => {
+    if (!web3Auth.value) throw WalletInitializationError.notReady();
+    error.value = null;
+    loading.value = true;
+    try {
+      await web3Auth.value.switchAccount(account);
+    } catch (err) {
+      log.error("Error switching account", err);
+      error.value = err as Web3AuthError;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  return {
+    loading,
+    error,
+    switchAccount,
   };
 };

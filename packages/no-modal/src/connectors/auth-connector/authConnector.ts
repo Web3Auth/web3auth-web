@@ -25,6 +25,13 @@ import { type default as WsEmbed, WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed
 import deepmerge from "deepmerge";
 
 import {
+  CITADEL_NETWORK,
+  LinkAccountResult,
+  makeAccountLinkingRequest,
+  makeAccountUnlinkingRequest,
+  UnlinkAccountResult,
+} from "../../account-linking";
+import {
   AccountLinkingError,
   Analytics,
   ANALYTICS_EVENTS,
@@ -53,10 +60,8 @@ import {
   getErrorAnalyticsProperties,
   IConnector,
   IProvider,
-  LinkAccountResult,
   log,
   parseChainNamespaceFromCitadelResponse,
-  UnlinkAccountResult,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -64,7 +69,6 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
-import { CITADEL_NETWORK, makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../../base/account-linking";
 import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
 import {

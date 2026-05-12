@@ -2,6 +2,7 @@ import type { Wallet } from "@wallet-standard/base";
 import { type AuthConnectionConfigItem, type AuthOptions, type LoginParams, type WEB3AUTH_NETWORK_TYPE } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
+import { LinkAccountResult, UnlinkAccountResult } from "../../account-linking";
 import {
   type BaseConnectorSettings,
   type ConnectedAccountInfo,
@@ -9,8 +10,6 @@ import {
   type IBaseProvider,
   type IConnector,
   type IProvider,
-  LinkAccountResult,
-  UnlinkAccountResult,
   type WALLET_CONNECTOR_TYPE,
 } from "../../base";
 

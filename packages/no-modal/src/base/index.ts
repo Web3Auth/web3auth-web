@@ -1,4 +1,3 @@
-export * from "./account-linking";
 export * from "./analytics";
 export * from "./chain/IChainInterface";
 export * from "./composables";

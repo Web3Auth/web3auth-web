@@ -1,5 +1,3 @@
-export * from "./useLinkAccount";
-export * from "./useSwitchAccount";
 export * from "./useWeb3Auth";
 export * from "./useWeb3AuthConnect";
 export type {

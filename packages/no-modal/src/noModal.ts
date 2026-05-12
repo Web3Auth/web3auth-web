@@ -19,6 +19,7 @@ import {
 import { WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
+import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "./account-linking";
 import {
   Analytics,
   ANALYTICS_EVENTS,
@@ -60,8 +61,6 @@ import {
   type IWeb3Auth,
   type IWeb3AuthCoreOptions,
   IWeb3AuthState,
-  type LinkAccountParams,
-  type LinkAccountResult,
   log,
   LOGIN_MODE,
   LoginModeType,
@@ -85,7 +84,6 @@ import {
   type Web3AuthNoModalEvents,
   withAbort,
 } from "./base";
-import { UnlinkAccountResult } from "./base/account-linking";
 import { deserialize } from "./base/deserialize";
 import { AccountLinkingError } from "./base/errors";
 import {

@@ -16,7 +16,7 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 
-import { LinkedAccountInfo } from "../account-linking/interfaces";
+import { LinkedAccountInfo } from "../../account-linking/interfaces";
 import { type Analytics } from "../analytics";
 import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";

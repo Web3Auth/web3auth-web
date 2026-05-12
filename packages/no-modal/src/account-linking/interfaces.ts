@@ -1,4 +1,4 @@
-import { WALLET_CONNECTOR_TYPE } from "../wallet";
+import type { WALLET_CONNECTOR_TYPE } from "../base/wallet";
 
 export type CITADEL_NETWORK = "ethereum" | "solana";
 
@@ -23,6 +23,8 @@ export interface LinkedAccountInfo {
   address: string | null;
   /** Auth connection id of the account */
   authConnectionId: string | null;
+  /** Grouped auth connection id of the account */
+  groupedAuthConnectionId: string | null;
   /** Chain namespace of the account */
   chainNamespace: string | null;
 }
@@ -62,7 +64,7 @@ export interface UnlinkAccountResult {
 }
 
 export interface CitadelLinkAccountPayload {
-  /** Access token to authenticate the request */
+  /** Current idToken to refresh with updated linked accounts */
   idToken: string;
 
   /** Network of the account being linked */
@@ -87,7 +89,7 @@ export interface CitadelLinkAccountPayload {
  * Payload sent to the Citadel account-unlinking endpoint.
  */
 export interface UnlinkAccountPayload {
-  /** Access token to authenticate the request */
+  /** Current idToken to refresh with updated linked accounts */
   idToken: string;
 
   /** Address of the account to unlink */
