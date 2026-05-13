@@ -46,6 +46,10 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
   public exposeCompleteConsentAcceptance() {
     return this.completeConsentAcceptance();
   }
+
+  public exposeHasUsableConnectedSwitchConnector(connector: IConnector<unknown> | null) {
+    return this.hasUsableConnectedSwitchConnector(connector);
+  }
 }
 
 describe("Web3AuthNoModal", () => {
@@ -105,6 +109,12 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.getConnector(WALLET_CONNECTORS.METAMASK)).toBe(evm);
     expect(sdk.getConnector(WALLET_CONNECTORS.METAMASK, CHAIN_NAMESPACES.SOLANA)).toBeNull();
     expect(sdk.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, CHAIN_NAMESPACES.SOLANA)).toBe(solana);
+  });
+
+  it("treats a missing switch connector as unusable", () => {
+    const sdk = createSdk();
+
+    expect(sdk.exposeHasUsableConnectedSwitchConnector(null)).toBe(false);
   });
 
   it("clearCache resets persisted state fields", async () => {

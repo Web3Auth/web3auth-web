@@ -1319,7 +1319,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected hasUsableConnectedSwitchConnector(connector: IConnector<unknown> | null): boolean {
-    const isConnected = connector?.connected || connector.status === CONNECTOR_STATUS.CONNECTED;
+    if (!connector) return false;
+
+    const isConnected = connector.connected || connector.status === CONNECTOR_STATUS.CONNECTED;
     return Boolean(isConnected && (connector.provider || connector.solanaWallet));
   }
 
