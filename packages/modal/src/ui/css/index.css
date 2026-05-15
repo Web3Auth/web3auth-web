@@ -1,7 +1,14 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss" prefix(wta);
+@import "@toruslabs/vue-components/web3auth-theme.css";
+@config "../../../tailwind.config.js";
+@custom-variant dark (&:is(.w3a--dark *));
+
+@theme {
+  --color-app-primary-950: #2d4874;
+  --shadow-light: 0px 2px 8px 2px #e5e7eb;
+  --shadow-dark: 0px 2px 8px 2px #111928;
+}
 
 @layer base {
   body {
@@ -44,35 +51,35 @@
 
 @layer utilities {
   .w3a--bottom {
-    @apply w3a--bottom-1 w3a--left-[50%] w3a--translate-x-[-50%];
+    @apply wta:bottom-1 wta:left-[50%] wta:translate-x-[-50%];
   }
 
   .w3a--bottom-sheet-bg {
-    @apply w3a--bg-app-gray-600 w3a--opacity-50;
+    @apply wta:bg-app-gray-600 wta:opacity-50;
   }
 
   .w3a--bottom-sheet-width {
-    @apply w3a--w-[98%];
+    @apply wta:w-[98%];
   }
 
   .w3a--connected-logo {
-    @apply w3a--size-16 w3a--text-app-green-500 dark:w3a--text-app-green-400;
+    @apply wta:size-16 wta:text-app-green-500 wta:dark:text-app-green-400;
   }
 
   .w3a--error-logo {
-    @apply w3a--w-16 w3a--h-16 w3a--text-app-red-500 dark:w3a--text-app-red-400;
+    @apply wta:w-16 wta:h-16 wta:text-app-red-500 wta:dark:text-app-red-400;
   }
 
   .w3a--btn {
-    @apply w3a--appearance-none w3a--text-app-gray-700 w3a--text-base w3a--font-normal w3a--w-full 
-    w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500
-    w3a--px-5 w3a--py-3 w3a--flex w3a--items-center w3a--justify-center 
-    hover:w3a--shadow-light dark:hover:w3a--shadow-dark
-    w3a--gap-x-2 hover:w3a--bg-app-gray-50 dark:hover:w3a--bg-app-gray-800 hover:w3a--translate-y-[0.5px] hover:w3a--border-app-gray-50 dark:hover:w3a--border-app-gray-800;
+    @apply wta:appearance-none wta:text-app-gray-700 wta:text-base wta:font-normal wta:w-full 
+    wta:border wta:border-app-gray-200 wta:dark:border-app-gray-500
+    wta:px-5 wta:py-3 wta:flex wta:items-center wta:justify-center 
+    wta:hover:shadow-light wta:dark:hover:shadow-dark
+    wta:gap-x-2 wta:hover:bg-app-gray-50 wta:dark:hover:bg-app-gray-800 wta:hover:translate-y-[0.5px] wta:hover:border-app-gray-50 wta:dark:hover:border-app-gray-800;
   }
 
   .w3a--input {
-    @apply w3a--flex w3a--items-center w3a--justify-between w3a--gap-x-2 w3a--w-full
-    w3a--px-5 w3a--py-3 w3a--border w3a--border-app-gray-200 dark:w3a--border-app-gray-500;
+    @apply wta:flex wta:items-center wta:justify-between wta:gap-x-2 wta:w-full
+    wta:px-5 wta:py-3 wta:border wta:border-app-gray-200 wta:dark:border-app-gray-500;
   }
 }

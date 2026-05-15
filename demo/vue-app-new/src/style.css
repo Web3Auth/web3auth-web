@@ -1,10 +1,33 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap");
+@import "tailwindcss";
+@import "@toruslabs/vue-components/web3auth-theme.css";
+@custom-variant dark (&:is(.dark *));
+@source "../index.html";
+@source "./";
+@source "../node_modules/@toruslabs/vue-components";
 
-body {
-  @apply h-dvh min-h-dvh w-full flex flex-col;
+@layer base {
+  html body {
+    font-family: Inter, sans-serif;
+  }
+
+  button:not(:disabled),
+  [role="button"]:not(:disabled) {
+    cursor: pointer;
+  }
+
+  body {
+    min-height: 100vh;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply h-dvh min-h-dvh w-full flex flex-col;
+  }
+  #app {
+    @apply h-full w-full;
+  }
 }
- #app {
-  @apply h-full w-full;
- }

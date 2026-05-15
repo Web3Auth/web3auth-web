@@ -21,7 +21,7 @@ function ConnectWalletSearch(props: ConnectWalletSearchProps) {
   // const isShowSearch = totalExternalWalletCount > 15 && !isLoading;
 
   // if (!isShowSearch) {
-  //   return <div className="w3a--h-[50px] w3a--w-full w3a--animate-pulse w3a--rounded-full w3a--bg-app-gray-200 dark:w3a--bg-app-gray-700" />;
+  //   return <div className="wta:h-[50px] wta:w-full wta:animate-pulse wta:rounded-full wta:bg-app-gray-200 wta:dark:bg-app-gray-700" />;
   // }
 
   return (
@@ -40,12 +40,12 @@ function ConnectWalletSearch(props: ConnectWalletSearchProps) {
       placeholder={isLoading ? t("modal.external.search-wallet-loading") : t("modal.external.search-wallet", { count: totalExternalWalletCount })}
       disabled={isLoading}
       className={cn(
-        "w3a--input w3a--appearance-none w3a--outline-none active:w3a--outline-none focus:w3a--outline-none w3a--bg-transparent placeholder:w3a--text-app-gray-400 dark:placeholder:w3a--text-app-gray-500 w3a--text-app-gray-900 dark:w3a--text-app-white",
-        isInputFocused && "!w3a--border-app-primary-600",
+        "w3a--input wta:appearance-none wta:outline-none wta:active:outline-none wta:focus:outline-none wta:bg-transparent wta:placeholder:text-app-gray-400 wta:dark:placeholder:text-app-gray-500 wta:text-app-gray-900 wta:dark:text-app-white",
+        isInputFocused && "wta:border-app-primary-600!",
         {
-          "w3a--rounded-full": buttonRadius === "pill",
-          "w3a--rounded-lg": buttonRadius === "rounded",
-          "w3a--rounded-none": buttonRadius === "square",
+          "wta:rounded-full": buttonRadius === "pill",
+          "wta:rounded-lg": buttonRadius === "rounded",
+          "wta:rounded-none": buttonRadius === "square",
         }
       )}
     />

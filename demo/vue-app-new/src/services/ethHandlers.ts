@@ -1,23 +1,42 @@
 import { IProvider, log, type Web3Auth } from "@web3auth/modal";
 import { eipVerifyMessage } from "@web3auth/sign-in-with-web3";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
-import { BrowserProvider, parseEther, Transaction } from "ethers";
+import {
+  createPublicClient,
+  createWalletClient,
+  custom,
+  parseEther,
+  parseTransaction,
+  stringToHex,
+  type EIP1193Provider,
+} from "viem";
 
 import { getV4TypedData } from "../config";
 import { formDataStore } from "../store/form";
 
+function createClients(provider: IProvider) {
+  const transport = custom(provider as EIP1193Provider);
+  return {
+    walletClient: createWalletClient({ transport }),
+    publicClient: createPublicClient({ transport }),
+  };
+}
+
+function serializeParsedTxForLog(tx: ReturnType<typeof parseTransaction>) {
+  return JSON.parse(JSON.stringify(tx, (_, v) => (typeof v === "bigint" ? v.toString() : v)));
+}
+
 export const sendEth = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
-    const ethProvider = new BrowserProvider(provider);
-    const signer = await ethProvider.getSigner();
-    const account = await signer.getAddress();
-    const txRes = await signer.sendTransaction({
-      from: account,
+    const { walletClient } = createClients(provider);
+    const [account] = await walletClient.getAddresses();
+    const txHash = await walletClient.sendTransaction({
+      chain: null,
+      account,
       to: account,
       value: parseEther("0.01"),
     });
-    // check for big int before logging to not break the stringify
-    uiConsole("txRes", txRes.toJSON());
+    uiConsole("txRes", { hash: txHash });
   } catch (error) {
     log.info("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);
@@ -51,14 +70,15 @@ export const sendEthWithSmartAccount = async (web3Auth: Web3Auth | null, uiConso
 
 export const signEthMessage = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
-    const ethProvider = new BrowserProvider(provider);
-    const signer = await ethProvider.getSigner();
-    const account = await signer.getAddress();
-    const fromAddress = account;
+    const { walletClient } = createClients(provider);
+    const [fromAddress] = await walletClient.getAddresses();
     log.info("fromAddress", fromAddress);
 
     const message = "Some string";
-    const sig = await ethProvider.send(EVM_METHOD_TYPES.ETH_SIGN, [fromAddress, message]);
+    const sig = await walletClient.request({
+      method: EVM_METHOD_TYPES.ETH_SIGN,
+      params: [fromAddress, stringToHex(message)],
+    });
     uiConsole("eth sign", sig);
   } catch (error) {
     log.error("error", error);
@@ -68,9 +88,8 @@ export const signEthMessage = async (provider: IProvider, uiConsole: (name: stri
 
 export const getAccounts = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void): Promise<string[] | undefined> => {
   try {
-    const ethProvider = new BrowserProvider(provider);
-    const signer = await ethProvider.getSigner();
-    const account = await signer.getAddress();
+    const { walletClient } = createClients(provider);
+    const [account] = await walletClient.getAddresses();
     uiConsole("accounts", account);
     return [account];
   } catch (error) {
@@ -97,10 +116,6 @@ export const getPrivateKey = async (provider: IProvider, uiConsole: (name: strin
 
 export const getChainId = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void): Promise<string | undefined> => {
   try {
-    const ethProvider = new BrowserProvider(provider);
-    const req = ethProvider.getRpcRequest({ method: "chainId" });
-    const res = await provider.request(req!);
-    log.info("res", res);
     const { chainId } = provider;
     uiConsole("chainId", chainId.toString());
     return chainId.toString();
@@ -113,10 +128,9 @@ export const getChainId = async (provider: IProvider, uiConsole: (name: string, 
 
 export const getBalance = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
-    const ethProvider = new BrowserProvider(provider);
-    const signer = await ethProvider.getSigner();
-    const account = await signer.getAddress();
-    const balance = await ethProvider.getBalance(account);
+    const { walletClient, publicClient } = createClients(provider);
+    const [account] = await walletClient.getAddresses();
+    const balance = await publicClient.getBalance({ address: account });
     uiConsole("balance", balance.toString());
   } catch (error) {
     log.error("Error", error);
@@ -126,12 +140,12 @@ export const getBalance = async (provider: IProvider, uiConsole: (name: string, 
 
 export const signTransaction = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
-    const ethProvider = new BrowserProvider(provider);
-    const signer = await ethProvider.getSigner();
-    const account = await signer.getAddress();
+    const { walletClient } = createClients(provider);
+    const [account] = await walletClient.getAddresses();
     // only supported with social logins (openlogin adapter)
-    const serializedTx = await signer.signTransaction({
-      from: account,
+    const serializedTx = await walletClient.signTransaction({
+      chain: null,
+      account,
       to: account,
       value: parseEther("0.01"),
     });
@@ -139,9 +153,8 @@ export const signTransaction = async (provider: IProvider, uiConsole: (name: str
       // serialized user operation can't be parsed like transaction
       uiConsole("serialized user operation", serializedTx);
     } else {
-      const tx = Transaction.from(serializedTx);
-      // check for big int before logging to not break the stringify
-      uiConsole("txRes", tx.toJSON());
+      const tx = parseTransaction(serializedTx);
+      uiConsole("txRes", serializeParsedTxForLog(tx));
     }
   } catch (error) {
     log.info("error", error);
@@ -151,15 +164,17 @@ export const signTransaction = async (provider: IProvider, uiConsole: (name: str
 
 export const signPersonalMessage = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
-    const ethProvider = new BrowserProvider(provider);
-    const signer = await ethProvider.getSigner();
-    const account = await signer.getAddress();
+    const { walletClient } = createClients(provider);
+    const [account] = await walletClient.getAddresses();
     const from = account;
     const rpcUrl = (provider as unknown as { currentChain: { rpcTarget: string } }).currentChain.rpcTarget;
 
     const originalMessage = "Example `personal_sign` messages";
 
-    const signedMessage = await signer.signMessage(originalMessage);
+    const signedMessage = await walletClient.signMessage({
+      account,
+      message: originalMessage,
+    });
 
     const valid = await eipVerifyMessage({
       rpcUrl,
@@ -177,13 +192,24 @@ export const signPersonalMessage = async (provider: IProvider, uiConsole: (name:
 
 export const signTypedMessage = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
   try {
-    const ethProvider = new BrowserProvider(provider);
-    const signer = await ethProvider.getSigner();
-    const account = await signer.getAddress();
+    const { walletClient } = createClients(provider);
+    const [account] = await walletClient.getAddresses();
     const from = account;
     const typedData = getV4TypedData(provider.chainId);
 
-    const signedMessage = await signer.signTypedData(typedData.domain, typedData.types, typedData.message);
+    const signedMessage = await walletClient.signTypedData({
+      account,
+      domain: {
+        name: typedData.domain.name ?? undefined,
+        version: typedData.domain.version ?? undefined,
+        chainId: typedData.domain.chainId != null ? BigInt(typedData.domain.chainId) : undefined,
+        verifyingContract: (typedData.domain.verifyingContract ?? undefined) as `0x${string}` | undefined,
+        salt: (typedData.domain.salt ?? undefined) as `0x${string}` | undefined,
+      },
+      types: typedData.types,
+      primaryType: "Mail",
+      message: typedData.message,
+    });
 
     const rpcUrl = (provider as unknown as { currentChain: { rpcTarget: string } }).currentChain.rpcTarget;
     const valid = await eipVerifyMessage({

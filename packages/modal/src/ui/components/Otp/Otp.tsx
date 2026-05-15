@@ -135,10 +135,10 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
     }, [autoFocus]);
 
     const helperTextClass = cn(
-      "w3a--text-xs w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-white w3a--mt-2",
+      "wta:text-xs wta:font-normal wta:text-app-gray-500 wta:dark:text-app-white wta:mt-2",
       {
-        "w3a--text-app-red-500 dark:w3a--text-app-red-400": error,
-        "w3a--text-app-green-500 dark:w3a--text-app-green-400": success,
+        "wta:text-app-red-500 wta:dark:text-app-red-400": error,
+        "wta:text-app-green-500 wta:dark:text-app-green-400": success,
       },
       classes?.helperText
     );
@@ -146,8 +146,8 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
     const inputKey = new Date().getFullYear();
 
     return (
-      <div className={cn("w3a--flex w3a--flex-col w3a--items-center", classes?.root)} ref={ref}>
-        <form className={cn("w3a--flex w3a--space-x-2", classes?.inputContainer)}>
+      <div className={cn("wta:flex wta:flex-col wta:items-center", classes?.root)} ref={ref}>
+        <form className={cn("wta:flex wta:space-x-2", classes?.inputContainer)}>
           {otpArray.map((digit, index) => (
             <input
               id={`${inputKey + index}`}
@@ -161,16 +161,16 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
               onKeyUp={(e) => handleKeyDown(e, index)}
               onPaste={handlePaste}
               className={cn(
-                "w3a--w-12 w3a--h-[42px] w3a--rounded-full w3a--border w3a--text-center w3a--text-xl w3a--focus:outline-none w3a--active:outline-none w3a--focus:border-app-primary-600 dark:w3a--focus:border-app-primary-500 w3a--border-app-gray-300 dark:w3a--border-app-gray-500 w3a--bg-app-gray-50 dark:w3a--bg-app-gray-700 w3a--text-app-gray-900 dark:w3a--text-app-white",
+                "wta:w-12 wta:h-[42px] wta:rounded-full wta:border wta:text-center wta:text-xl wta:focus:outline-none wta:active:outline-none wta:focus:border-app-primary-600 wta:dark:focus:border-app-primary-500 wta:border-app-gray-300 wta:dark:border-app-gray-500 wta:bg-app-gray-50 wta:dark:bg-app-gray-700 wta:text-app-gray-900 wta:dark:text-app-white",
                 success &&
                   (classes?.success ??
-                    "w3a--border-app-green-400 dark:w3a--border-app-green-500 w3a--focus:w3a--border-app-green-400 dark:w3a--focus:w3a--border-app-green-500"),
+                    "wta:border-app-green-400 wta:dark:border-app-green-500 wta:focus:border-app-green-400 wta:dark:focus:border-app-green-500"),
                 error &&
                   (classes?.error ??
-                    "w3a--border-app-red-600 dark:w3a--border-app-red-500 w3a--focus:w3a--border-app-red-600 dark:w3a--focus:w3a--border-app-red-500"),
+                    "wta:border-app-red-600 wta:dark:border-app-red-500 wta:focus:border-app-red-600 wta:dark:focus:border-app-red-500"),
                 disabled &&
                   (classes?.disabled ??
-                    "w3a--border-app-gray-200 w3a--bg-app-gray-200 dark:w3a--border-app-gray-700 w3a--focus:w3a--border-app-gray-200 dark:w3a--focus:w3a--border-app-gray-700 w3a--cursor-not-allowed"),
+                    "wta:border-app-gray-200 wta:bg-app-gray-200 wta:dark:border-app-gray-700 wta:focus:border-app-gray-200 wta:dark:focus:border-app-gray-700 wta:cursor-not-allowed"),
                 classes?.input
               )}
               ref={(el) => {
@@ -182,20 +182,20 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
         </form>
         {helperText && <p className={helperTextClass}>{helperText}</p>}
         {loading && (
-          <div className="w3a--mt-3">
+          <div className="wta:mt-3">
             <PulseLoader />
           </div>
         )}
         {showCta && !loading && (
-          <div className={cn("w3a--flex w3a--items-center w3a--mt-3", classes?.ctaContainer)}>
+          <div className={cn("wta:flex wta:items-center wta:mt-3", classes?.ctaContainer)}>
             {timer > 0 && showTimer ? (
-              <span className={cn("w3a--text-xs w3a--text-app-gray-500 dark:w3a--text-app-gray-400", classes?.timerText)}>
+              <span className={cn("wta:text-xs wta:text-app-gray-500 wta:dark:text-app-gray-400", classes?.timerText)}>
                 {t("modal.resendTimer", { timer: timer })}
               </span>
             ) : (
               <button
                 type="button"
-                className={cn("w3a--text-xs w3a--p-0 w3a--text-app-primary-600 dark:w3a--text-app-primary-500", classes?.resendBtnText)}
+                className={cn("wta:text-xs wta:p-0 wta:text-app-primary-600 wta:dark:text-app-primary-500", classes?.resendBtnText)}
                 onClick={handleResendClick}
                 disabled={timer > 0 && showTimer}
               >

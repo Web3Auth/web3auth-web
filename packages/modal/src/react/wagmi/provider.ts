@@ -209,7 +209,6 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     }
 
     return createWagmiConfig(finalConfig);
-    // eslint-disable-next-line react-hooks/preserve-manual-memoization
   }, [config, web3Auth, isInitialized]);
 
   return createElement(

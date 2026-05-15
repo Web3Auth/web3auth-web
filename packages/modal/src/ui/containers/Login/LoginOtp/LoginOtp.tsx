@@ -27,13 +27,13 @@ function OtpInput(props: OtpInputProps) {
 
   return (
     <>
-      <div className="w3a--mr-auto w3a--flex w3a--w-full w3a--items-start w3a--justify-start">
+      <div className="wta:mr-auto wta:flex wta:w-full wta:items-start wta:justify-start">
         <button
           type="button"
-          className="w3a--z-20 w3a--flex w3a--size-5 w3a--cursor-pointer w3a--items-center w3a--justify-center w3a--rounded-full"
+          className="wta:z-20 wta:flex wta:size-5 wta:cursor-pointer wta:items-center wta:justify-center wta:rounded-full"
           onClick={() => setShowOtpFlow(false)}
         >
-          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--text-app-gray-900 dark:w3a--text-app-white">
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="wta:text-app-gray-900 wta:dark:text-app-white">
             <path
               fill="currentColor"
               fillRule="evenodd"
@@ -43,17 +43,17 @@ function OtpInput(props: OtpInputProps) {
           </svg>
         </button>
       </div>
-      <div className="-w3a--mt-10 w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
-        <img src={getIcons(isMobileOtp ? "sms-otp-light" : "email-otp-light")} alt="otp" className="w3a--size-auto" />
-        <div className="w3a--mx-auto -w3a--mt-6 w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-2">
-          <p className="w3a--text-lg w3a--font-bold w3a--text-app-gray-900 dark:w3a--text-app-white">
+      <div className="wta:-mt-10 wta:flex wta:size-full wta:flex-1 wta:flex-col wta:items-center wta:justify-center wta:gap-y-4">
+        <img src={getIcons(isMobileOtp ? "sms-otp-light" : "email-otp-light")} alt="otp" className="wta:size-auto" />
+        <div className="wta:mx-auto wta:-mt-6 wta:flex wta:w-full wta:flex-col wta:items-center wta:justify-center wta:gap-y-2">
+          <p className="wta:text-lg wta:font-bold wta:text-app-gray-900 wta:dark:text-app-white">
             {isMobileOtp ? t("modal.otp.mobile-title") : t("modal.otp.email-title")}
           </p>
-          <div className="w3a--mx-auto w3a--flex w3a--w-full w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-1">
-            <p className="w3a--text-center w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
+          <div className="wta:mx-auto wta:flex wta:w-full wta:flex-col wta:items-center wta:justify-center wta:gap-y-1">
+            <p className="wta:text-center wta:text-sm wta:font-normal wta:text-app-gray-500 wta:dark:text-app-gray-300">
               {isMobileOtp ? t("modal.otp.mobile-subtext") : t("modal.otp.email-subtext")}
             </p>
-            <p className="w3a--text-center w3a--text-sm w3a--font-normal w3a--text-app-gray-500 dark:w3a--text-app-gray-300">
+            <p className="wta:text-center wta:text-sm wta:font-normal wta:text-app-gray-500 wta:dark:text-app-gray-300">
               {isMobileOtp ? parsedLoginHint : t("modal.otp.email-subtext-example", { email: parsedLoginHint })}
             </p>
           </div>
@@ -80,7 +80,7 @@ function LoginOtp(props: LoginOtpProps) {
   const { otpLoading, setShowOtpFlow, handleOtpComplete, authConnection, loginHint, errorMessage, countryFlag } = props;
 
   return (
-    <div className="w3a--flex w3a--size-full w3a--flex-1 w3a--flex-col w3a--items-center w3a--justify-center w3a--gap-y-4">
+    <div className="wta:flex wta:size-full wta:flex-1 wta:flex-col wta:items-center wta:justify-center wta:gap-y-4">
       <OtpInput
         errorMessage={errorMessage}
         setShowOtpFlow={setShowOtpFlow}

@@ -1,4 +1,4 @@
-import { beforeAll, describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 
 import {
   CHAIN_NAMESPACES,
@@ -41,15 +41,13 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
   public exposeSubscribeToConnectorEvents(connector: MockConnector) {
     this.subscribeToConnectorEvents(connector as unknown as IConnector<unknown>);
   }
+
+  public exposeCompleteConsentAcceptance() {
+    return this.completeConsentAcceptance();
+  }
 }
 
 describe("Web3AuthNoModal", () => {
-  beforeAll(() => {
-    vi.stubGlobal("window", {
-      location: { origin: "http://localhost:3000" },
-    });
-  });
-
   it("throws when clientId is missing", () => {
     expect(
       () =>
@@ -273,20 +271,21 @@ describe("Web3AuthNoModal", () => {
     await expect(sdk.getUserInfo()).rejects.toThrow(WalletLoginError);
   });
 
-  it("auto-skips consent UI when consent:<userId> is true", async () => {
+  it("auto-skips consent UI when prior consent is true", async () => {
     const storage = createMockStorage();
-    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ consentDecisions: { "0xabc123": true } }));
+    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ hasUserConsent: true }));
     const sdk = createSdk({
       initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
       storage: { sessionId: storage },
     });
+    await Promise.resolve();
     sdk.exposeSetConsentRequired(true);
     const consentRequiredListener = vi.fn();
     sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
 
     const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xAbC123"]) };
-    const consentAcceptedListener = vi.fn();
-    sdk.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
+    const authorizedListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
     const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
     sdk.exposeSubscribeToConnectorEvents(connector);
@@ -309,20 +308,21 @@ describe("Web3AuthNoModal", () => {
       authTokenInfo: { idToken: "id-token" },
     });
     await vi.waitFor(() => {
-      expect(consentAcceptedListener).toHaveBeenCalledTimes(1);
+      expect(authorizedListener).toHaveBeenCalledTimes(1);
     });
 
     expect(sdk.status).toBe(CONNECTOR_STATUS.AUTHORIZED);
     expect(consentRequiredListener).not.toHaveBeenCalled();
   });
 
-  it("shows consent UI when stored decision is false", async () => {
+  it("shows consent UI when prior consent is false", async () => {
     const storage = createMockStorage();
-    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ consentDecisions: { "0xbeef": false } }));
+    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ hasUserConsent: false }));
     const sdk = createSdk({
       initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
       storage: { sessionId: storage },
     });
+    await Promise.resolve();
     sdk.exposeSetConsentRequired(true);
     const consentRequiredListener = vi.fn();
     sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
@@ -349,11 +349,11 @@ describe("Web3AuthNoModal", () => {
     await vi.waitFor(() => {
       expect(consentRequiredListener).toHaveBeenCalledTimes(1);
     });
-    await sdk.acceptConsent();
+    await sdk.exposeCompleteConsentAcceptance();
     await expect(connectionPromise).resolves.not.toBeNull();
   });
 
-  it("persists consent:<userId> when user accepts consent UI", async () => {
+  it("persists user consent when user accepts consent UI", async () => {
     const storage = createMockStorage();
     const sdk = createSdk({
       initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
@@ -385,12 +385,12 @@ describe("Web3AuthNoModal", () => {
     await vi.waitFor(() => {
       expect(consentRequiredListener).toHaveBeenCalledTimes(1);
     });
-    await sdk.acceptConsent();
+    await sdk.exposeCompleteConsentAcceptance();
     await connectionPromise;
 
     const stateJson = await storage.get(WEB3AUTH_STATE_STORAGE_KEY);
     const state = JSON.parse(stateJson!);
-    expect(state.consentDecisions["0xfeed"]).toBe(true);
+    expect(state.hasUserConsent).toBe(true);
   });
 
   it("setConnectors deduplicates and emits updates only for new connectors", () => {

@@ -38,7 +38,7 @@ export default function Image(props: ImageProps) {
           height={height}
           width={width}
           alt={hoverImageId}
-          className={cn("w3a--object-contain", `w3a--h-${height} w3a--w-${width}`)}
+          className={cn("wta:object-contain", `wta:h-${height} wta:w-${width}`)}
         />
       );
     }
@@ -49,7 +49,7 @@ export default function Image(props: ImageProps) {
         height={height}
         width={width}
         alt={hoverImageId}
-        className={cn("w3a--rounded w3a--object-contain", `w3a--h-${height} w3a--w-${width}`)}
+        className={cn("wta:rounded wta:object-contain", `wta:h-${height} wta:w-${width}`)}
       />
     );
   }
@@ -62,7 +62,7 @@ export default function Image(props: ImageProps) {
         height={height}
         width={width}
         alt={imageId}
-        className={cn("w3a--object-contain", `w3a--h-${height} w3a--w-${width}`)}
+        className={cn("wta:object-contain", `wta:h-${height} wta:w-${width}`)}
         onError={({ currentTarget }) => {
           if (fallbackImageId) {
             const img = currentTarget;
@@ -81,7 +81,7 @@ export default function Image(props: ImageProps) {
       height={height}
       width={width}
       alt={imageId}
-      className={cn("w3a--rounded w3a--object-contain", `w3a--h-${height} w3a--w-${width}`)}
+      className={cn("wta:rounded wta:object-contain", `wta:h-${height} wta:w-${width}`)}
       onError={({ currentTarget }) => {
         if (fallbackImageId) {
           const img = currentTarget;
