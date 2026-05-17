@@ -232,15 +232,17 @@ class MetaMaskConnector extends BaseConnector<void> {
 
       this.rehydrated = true;
 
-      this.emit(CONNECTOR_EVENTS.CONNECTED, {
-        connectorName: WALLET_CONNECTORS.METAMASK,
-        reconnected: this.rehydrated,
-        ethereumProvider: this.evmProvider,
-        solanaWallet: this.solanaProvider,
-      } as CONNECTED_EVENT_DATA);
+      if (options.autoConnect) {
+        this.emit(CONNECTOR_EVENTS.CONNECTED, {
+          connectorName: WALLET_CONNECTORS.METAMASK,
+          reconnected: this.rehydrated,
+          ethereumProvider: this.evmProvider,
+          solanaWallet: this.solanaProvider,
+        } as CONNECTED_EVENT_DATA);
 
-      if (options.getAuthTokenInfo) {
-        await this.getAuthTokenInfo();
+        if (options.getAuthTokenInfo) {
+          await this.getAuthTokenInfo();
+        }
       }
     } else if (coreStatus === "loaded" || coreStatus === "disconnected") {
       this.status = CONNECTOR_STATUS.READY;

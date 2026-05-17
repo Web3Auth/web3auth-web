@@ -525,7 +525,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         await walletConnector.disconnect({ cleanup: true });
       } catch (disconnectError) {
         log.debug("Failed to disconnect wallet connector after linking failure", disconnectError);
-        throw disconnectError;
       }
       throw error;
     }

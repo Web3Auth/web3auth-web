@@ -24,7 +24,7 @@ export interface LinkedAccountInfo {
   /** Auth connection id of the account */
   authConnectionId: string | null;
   /** Grouped auth connection id of the account */
-  groupedAuthConnectionId: string | null;
+  groupedAuthConnectionId?: string | null;
   /** Chain namespace of the account */
   chainNamespace: string | null;
 }

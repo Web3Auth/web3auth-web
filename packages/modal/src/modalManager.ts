@@ -277,7 +277,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     try {
-      const existingConnector = switchResult.kind === "external" ? this.getLinkedSigningConnector(switchResult.targetAccount.id) : null;
+      const existingConnector = switchResult.kind === "external" ? this.getConnectedWalletConnector(switchResult.targetAccount) : null;
       // check if the existing connector is connected and usable, then we can switch to it without re-connecting again
       const isExistingConnectorConnected = Boolean(existingConnector && this.hasUsableConnectedSwitchConnector(existingConnector));
       const projectConfig =
@@ -756,7 +756,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (
         connector.status === CONNECTOR_STATUS.NOT_READY &&
         this.cachedConnector !== connectorName &&
-        this.currentConnection?.connectorName !== connectorName
+        this.connection?.connectorName !== connectorName
       ) {
         try {
           this.subscribeToConnectorEvents(connector);
