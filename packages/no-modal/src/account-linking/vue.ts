@@ -30,6 +30,13 @@ export interface IUseSwitchAccount {
   switchAccount(account: ConnectedAccountInfo): Promise<void>;
 }
 
+export interface IUseWallets {
+  loading: Ref<boolean>;
+  error: Ref<Web3AuthError | null>;
+  wallets: Ref<ConnectedAccountInfo[]>;
+  getWallets(): Promise<void>;
+}
+
 export const useLinkAccount = (): IUseLinkAccount => {
   const { web3Auth } = useWeb3AuthInner();
   const loading = ref(false);
@@ -100,5 +107,34 @@ export const useSwitchAccount = (): IUseSwitchAccount => {
     loading,
     error,
     switchAccount,
+  };
+};
+
+export const useWallets = (): IUseWallets => {
+  const { web3Auth } = useWeb3AuthInner();
+  const loading = ref(false);
+  const error = ref<Web3AuthError | null>(null);
+  const wallets = ref<ConnectedAccountInfo[]>([]);
+
+  const getWallets = async (): Promise<void> => {
+    if (!web3Auth.value) throw WalletInitializationError.notReady();
+    error.value = null;
+    loading.value = true;
+    try {
+      const result = await web3Auth.value.getConnectedAccounts();
+      wallets.value = result;
+    } catch (err) {
+      log.error("Error getting wallets", err);
+      error.value = err as Web3AuthError;
+    } finally {
+      loading.value = false;
+    }
+  };
+
+  return {
+    loading,
+    error,
+    wallets,
+    getWallets,
   };
 };

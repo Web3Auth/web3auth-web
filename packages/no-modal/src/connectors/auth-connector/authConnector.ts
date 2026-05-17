@@ -347,6 +347,23 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     };
   }
 
+  async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
+    const accessToken = await this.authInstance.authSessionManager.getAccessToken();
+    if (!accessToken) throw WalletLoginError.connectionError("Could not obtain an access token from the current AUTH session.");
+
+    const citadelUserInfo = await get<UserInfoWithConnectedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const connectedAccounts = citadelUserInfo?.accounts || [];
+    return connectedAccounts.map((account) => ({
+      ...account,
+      // by default, the primary account is the active account
+      active: account.isPrimary,
+    }));
+  }
+
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
 
@@ -1094,23 +1111,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
-  }
-
-  private async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
-    const accessToken = await this.authInstance.authSessionManager.getAccessToken();
-    if (!accessToken) throw WalletLoginError.connectionError("Could not obtain an access token from the current AUTH session.");
-
-    const citadelUserInfo = await get<UserInfoWithConnectedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const connectedAccounts = citadelUserInfo?.accounts || [];
-    return connectedAccounts.map((account) => ({
-      ...account,
-      // by default, the primary account is the active account
-      active: account.isPrimary,
-    }));
   }
 
   private async auditOAuditProgress(

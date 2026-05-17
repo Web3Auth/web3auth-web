@@ -42,7 +42,7 @@ const { t } = useI18n({ useScope: "global" });
 const formData = formDataStore;
 
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
-const { userInfo, loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
+const { loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
 const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
@@ -423,12 +423,7 @@ const onSwitchChain = async () => {
             {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
         </div>
-        <AccountLinkingSection
-          :connected-wallets="userInfo?.connectedAccounts ?? []"
-          :show-link-wallet="isDisplay('walletServices')"
-          :refresh-user-info="getUserInfo"
-          :print-to-console="printToConsole"
-        />
+        <AccountLinkingSection :show-link-wallet="isDisplay('walletServices')" :print-to-console="printToConsole" />
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>

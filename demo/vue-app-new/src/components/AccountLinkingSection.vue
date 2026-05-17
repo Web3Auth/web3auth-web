@@ -3,17 +3,17 @@ import { Button, Card, Select } from "@toruslabs/vue-components";
 import { WALLET_CONNECTORS } from "@web3auth/modal";
 import { useLinkAccount, useSwitchAccount } from "@web3auth/modal/account-linking/vue";
 import type { ConnectedAccountInfo } from "@web3auth/no-modal";
-import { computed, ref } from "vue";
+import { useWallets } from "@web3auth/no-modal/account-linking/vue";
+import { computed, onMounted, ref } from "vue";
 
 const props = defineProps<{
-  connectedWallets: ConnectedAccountInfo[];
   showLinkWallet: boolean;
-  refreshUserInfo: () => Promise<unknown>;
   printToConsole: (title: string, payload: unknown) => void;
 }>();
 
 const { linkAccount, unlinkAccount, loading: accountLinkingLoading, error: accountLinkingError } = useLinkAccount();
 const { switchAccount, loading: switchAccountLoading, error: switchAccountError } = useSwitchAccount();
+const { wallets, getWallets } = useWallets();
 
 const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
 const lastUnlinkedAddress = ref<string | null>(null);
@@ -33,7 +33,7 @@ const onSwitchToConnectedWallet = async (account: ConnectedAccountInfo) => {
   await switchAccount(account);
   pendingSwitchAccountId.value = null;
   if (!switchAccountError.value) {
-    await props.refreshUserInfo();
+    await getWallets();
     lastSwitchAuthConnectionId.value = account.id;
     props.printToConsole("Switch connected wallet", {
       accountId: account.id,
@@ -47,7 +47,7 @@ const onLinkAccount = async () => {
   lastUnlinkedAddress.value = null;
   const result = await linkAccount({ connectorName: linkConnector.value });
   if (result) {
-    await props.refreshUserInfo();
+    await getWallets();
     props.printToConsole("Link Wallet Result", result);
   }
 };
@@ -60,7 +60,7 @@ const onUnlinkAccount = async (address: string) => {
   pendingUnlinkAddress.value = null;
 
   if (result) {
-    await props.refreshUserInfo();
+    await getWallets();
     lastUnlinkedAddress.value = address;
     props.printToConsole("Unlink Wallet Result", result);
   }
@@ -93,6 +93,10 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
 
   return "border-app-gray-200 bg-app-white shadow-sm dark:border-app-gray-700 dark:bg-app-gray-800";
 };
+
+onMounted(async () => {
+  await getWallets();
+});
 </script>
 
 <template>
@@ -103,15 +107,17 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
         <p class="mt-1 break-all text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
           Loaded from
           <code class="rounded-md bg-app-gray-100 px-1.5 py-0.5 font-medium text-app-gray-700 dark:bg-app-gray-800 dark:text-app-gray-200">
-            useWeb3AuthUser().userInfo.connectedAccounts
+            wallets
           </code>
         </p>
         <p class="mt-1 break-all text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
           Switch the active wallet here. Non-primary inactive wallets can also be unlinked.
         </p>
       </div>
-      <p class="inline-flex self-start rounded-full bg-app-gray-100 px-3 py-1 text-xs font-semibold text-app-gray-700 dark:bg-app-gray-800 dark:text-app-gray-200">
-        Total: {{ connectedWallets.length }}
+      <p
+        class="inline-flex self-start rounded-full bg-app-gray-100 px-3 py-1 text-xs font-semibold text-app-gray-700 dark:bg-app-gray-800 dark:text-app-gray-200"
+      >
+        Total: {{ wallets.length }}
       </p>
     </div>
 
@@ -142,13 +148,8 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
       </p>
     </div>
 
-    <div v-if="connectedWallets.length" class="mt-2 space-y-3">
-      <div
-        v-for="account in connectedWallets"
-        :key="account.id"
-        class="rounded-2xl border p-4 transition-colors"
-        :class="getWalletCardClasses(account)"
-      >
+    <div v-if="wallets.length" class="mt-2 space-y-3">
+      <div v-for="account in wallets" :key="account.id" class="rounded-2xl border p-4 transition-colors" :class="getWalletCardClasses(account)">
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-semibold text-app-gray-900 dark:text-app-white" :title="account.eoaAddress || undefined">
@@ -183,7 +184,11 @@ const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
         >
           authConnectionId: {{ account.authConnectionId }}
         </p>
-        <p v-if="account.aaAddress" class="mt-2 truncate text-xs leading-5 text-app-gray-400 dark:text-app-gray-400" :title="`Smart account: ${account.aaAddress}`">
+        <p
+          v-if="account.aaAddress"
+          class="mt-2 truncate text-xs leading-5 text-app-gray-400 dark:text-app-gray-400"
+          :title="`Smart account: ${account.aaAddress}`"
+        >
           Smart account: {{ account.aaAddress }}
         </p>
 

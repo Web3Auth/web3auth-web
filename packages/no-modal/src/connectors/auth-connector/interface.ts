@@ -126,4 +126,9 @@ export interface IAuthConnector {
    * Unlink an external wallet from the authenticated user account.
    */
   unlinkAccount(params: AuthConnectorUnlinkAccountParams): Promise<UnlinkAccountResult>;
+
+  /**
+   * Get the connected accounts for the authenticated user.
+   */
+  getConnectedAccounts(): Promise<ConnectedAccountInfo[]>;
 }

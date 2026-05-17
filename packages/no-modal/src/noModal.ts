@@ -571,6 +571,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     };
   }
 
+  async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+
+    assertAuthConnector(this.connectedConnector, "Connected accounts can only be fetched when connected with the AUTH connector.");
+
+    const connectedAccounts = await this.connectedConnector.getConnectedAccounts();
+    return connectedAccounts.map((account) => ({
+      ...account,
+      active: this.state.activeAccount ? account.id === this.state.activeAccount.id : account.isPrimary,
+    }));
+  }
+
   async enableMFA<T>(loginParams?: T): Promise<void> {
     if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
     if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
@@ -1656,7 +1668,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         return;
       }
 
-      const connectedAccounts = (await authConnector.getUserInfo()).connectedAccounts ?? [];
+      const connectedAccounts = (await authConnector.getConnectedAccounts()) ?? [];
       const connectedAccount = this.findConnectedAccountByWalletAddress(connectedAccounts, connectedWalletAddress);
       if (connectedAccount && !connectedAccount.isPrimary) {
         const connectedWalletState = await this.resolveConnectedWalletConnectorState({
