@@ -73,7 +73,7 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
     if (connection.value?.connectorName !== WALLET_CONNECTORS.AUTH) {
       throw new Error("getPrivateKey is only supported with the Auth connector");
     }
-    const provider = web3Auth.value.connectedConnector?.provider;
+    const provider = web3Auth.value.primaryConnector?.provider;
     if (!provider) throw new Error("Provider not available");
     const privateKey = await provider.request<never, string>({ method: SOLANA_METHOD_TYPES.SOLANA_PRIVATE_KEY });
     if (!privateKey) throw new Error("Failed to retrieve private key");

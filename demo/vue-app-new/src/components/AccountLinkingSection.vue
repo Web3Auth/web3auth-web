@@ -2,7 +2,7 @@
 import { Button, Card, Select } from "@toruslabs/vue-components";
 import { WALLET_CONNECTORS } from "@web3auth/modal";
 import { useLinkAccount, useSwitchAccount } from "@web3auth/modal/account-linking/vue";
-import type { ConnectedAccountInfo } from "@web3auth/no-modal";
+import type { LinkedAccountInfo } from "@web3auth/no-modal";
 import { useWallets } from "@web3auth/no-modal/account-linking/vue";
 import { computed, onMounted, ref } from "vue";
 
@@ -27,7 +27,7 @@ const linkConnectorOptions = computed(() => [
   { name: "WalletConnect", value: WALLET_CONNECTORS.WALLET_CONNECT_V2 },
 ]);
 
-const onSwitchToConnectedWallet = async (account: ConnectedAccountInfo) => {
+const onSwitchToConnectedWallet = async (account: LinkedAccountInfo) => {
   lastSwitchAuthConnectionId.value = null;
   pendingSwitchAccountId.value = account.id;
   await switchAccount(account);
@@ -66,7 +66,7 @@ const onUnlinkAccount = async (address: string) => {
   }
 };
 
-const canUnlinkConnectedWallet = (account: ConnectedAccountInfo): boolean => {
+const canUnlinkConnectedWallet = (account: LinkedAccountInfo): boolean => {
   return !account.isPrimary && !account.active && Boolean(account.eoaAddress);
 };
 
@@ -86,7 +86,7 @@ const formatAddress = (address?: string | null): string => {
   return address;
 };
 
-const getWalletCardClasses = (account: ConnectedAccountInfo): string => {
+const getWalletCardClasses = (account: LinkedAccountInfo): string => {
   if (account.active) {
     return "border-app-green-200 bg-app-green-50 shadow-md ring-1 ring-app-green-200 dark:border-app-green-700 dark:bg-app-gray-800 dark:ring-app-green-700";
   }

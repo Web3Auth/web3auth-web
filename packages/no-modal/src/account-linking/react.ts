@@ -1,9 +1,9 @@
 import { useCallback, useState } from "react";
 
-import { type ConnectedAccountInfo, WalletInitializationError, Web3AuthError } from "../base";
+import { type LinkedAccountInfo, WalletInitializationError, Web3AuthError } from "../base";
 import { useWeb3AuthInner } from "../react/hooks/useWeb3AuthInner";
 import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "./index";
-import type { LinkAccountParams, LinkAccountResult, LinkedAccountInfo, UnlinkAccountResult } from "./interfaces";
+import type { BaseLinkedAccountInfo, LinkAccountParams, LinkAccountResult, UnlinkAccountResult } from "./interfaces";
 
 export { makeAccountLinkingRequest, makeAccountUnlinkingRequest };
 export type {
@@ -11,7 +11,7 @@ export type {
   CitadelLinkAccountPayload,
   LinkAccountParams,
   LinkAccountResult,
-  LinkedAccountInfo,
+  BaseLinkedAccountInfo as LinkedAccountInfo,
   UnlinkAccountPayload,
   UnlinkAccountResult,
 } from "./interfaces";
@@ -19,7 +19,7 @@ export type {
 export interface IUseLinkAccount {
   loading: boolean;
   error: Web3AuthError | null;
-  linkedAccounts: LinkedAccountInfo[];
+  linkedAccounts: BaseLinkedAccountInfo[];
   linkAccount(params: LinkAccountParams): Promise<LinkAccountResult | void>;
   unlinkAccount(address: string): Promise<UnlinkAccountResult | void>;
 }
@@ -27,13 +27,13 @@ export interface IUseLinkAccount {
 export interface IUseSwitchAccount {
   loading: boolean;
   error: Web3AuthError | null;
-  switchAccount(account: ConnectedAccountInfo): Promise<void>;
+  switchAccount(account: LinkedAccountInfo): Promise<void>;
 }
 
 export interface IUseWallets {
   loading: boolean;
   error: Web3AuthError | null;
-  wallets: ConnectedAccountInfo[];
+  wallets: LinkedAccountInfo[];
   getWallets(): Promise<void>;
 }
 
@@ -42,7 +42,7 @@ export const useLinkAccount = (): IUseLinkAccount => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
-  const [linkedAccounts, setLinkedAccounts] = useState<LinkedAccountInfo[]>([]);
+  const [linkedAccounts, setLinkedAccounts] = useState<BaseLinkedAccountInfo[]>([]);
 
   const linkAccount = useCallback(
     async (params: LinkAccountParams): Promise<LinkAccountResult | void> => {
@@ -90,7 +90,7 @@ export const useSwitchAccount = (): IUseSwitchAccount => {
   const [error, setError] = useState<Web3AuthError | null>(null);
 
   const switchAccount = useCallback(
-    async (account: ConnectedAccountInfo): Promise<void> => {
+    async (account: LinkedAccountInfo): Promise<void> => {
       if (!web3Auth) throw WalletInitializationError.notReady();
       setLoading(true);
       setError(null);
@@ -113,14 +113,14 @@ export const useWallets = (): IUseWallets => {
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<Web3AuthError | null>(null);
-  const [wallets, setWallets] = useState<ConnectedAccountInfo[]>([]);
+  const [wallets, setWallets] = useState<LinkedAccountInfo[]>([]);
 
   const getWallets = useCallback(async (): Promise<void> => {
     if (!web3Auth) throw WalletInitializationError.notReady();
     setLoading(true);
     setError(null);
     try {
-      const result = await web3Auth.getConnectedAccounts();
+      const result = await web3Auth.getLinkedAccounts();
       setWallets(result);
     } catch (err) {
       setError(err as Web3AuthError);

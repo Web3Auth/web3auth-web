@@ -34,7 +34,6 @@ import {
   type ChainNamespaceType,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
-  ConnectedAccountInfo,
   type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
@@ -60,6 +59,7 @@ import {
   type IWeb3Auth,
   type IWeb3AuthCoreOptions,
   IWeb3AuthState,
+  LinkedAccountInfo,
   log,
   LOGIN_MODE,
   LoginModeType,
@@ -137,7 +137,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   private activeWalletConnectorKey = PRIMARY_CONNECTED_WALLET_KEY;
 
   private state: IWeb3AuthState = {
-    connectedConnectorName: null,
+    primaryConnectorName: null,
     cachedConnector: null,
     currentChainId: null,
     idToken: null,
@@ -180,7 +180,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get connected(): boolean {
-    return Boolean(this.connectedConnector);
+    return Boolean(this.primaryConnector);
   }
 
   get connection(): Connection | null {
@@ -196,8 +196,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return null;
   }
 
-  get connectedConnectorName(): WALLET_CONNECTOR_TYPE | null {
-    return this.state.connectedConnectorName;
+  get primaryConnectorName(): WALLET_CONNECTOR_TYPE | null {
+    return this.state.primaryConnectorName;
   }
 
   get cachedConnector(): string | null {
@@ -208,8 +208,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.state.currentChainId || this.coreOptions.defaultChainId || this.coreOptions.chains?.[0]?.chainId || null;
   }
 
-  get connectedConnector(): IConnector<unknown> | null {
-    return this.getConnector(this.connectedConnectorName, this.currentChain?.chainNamespace);
+  /**
+   * This is always the primary connector that is connected to the user.
+   */
+  get primaryConnector(): IConnector<unknown> | null {
+    return this.getConnector(this.primaryConnectorName, this.currentChain?.chainNamespace);
   }
 
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
@@ -228,11 +231,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.state.refreshToken || null;
   }
 
-  protected get activeAccount(): ConnectedAccountInfo | null {
+  protected get activeAccount(): LinkedAccountInfo | null {
     return this.state.activeAccount;
   }
 
-  private get signingConnector(): IConnector<unknown> | null {
+  /**
+   * This is the current active connector.
+   */
+  private get activeConnector(): IConnector<unknown> | null {
     const activeConnectedWallet = this.getConnectedWalletConnectorStateByKey(this.activeWalletConnectorKey);
     if (activeConnectedWallet) {
       return activeConnectedWallet.connector;
@@ -242,7 +248,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       throw new Error(`Signing connector not found for account "${this.activeWalletConnectorKey}".`);
     }
 
-    return this.connectedConnector;
+    return this.primaryConnector;
   }
 
   set provider(_: IProvider | null) {
@@ -363,7 +369,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.activeWalletConnectorKey = PRIMARY_CONNECTED_WALLET_KEY;
     this.connectionReconnected = false;
     await this.setState({
-      connectedConnectorName: null,
+      primaryConnectorName: null,
       cachedConnector: null,
       currentChainId: null,
       idToken: null,
@@ -386,21 +392,21 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
     if (CONNECTED_STATUSES.includes(this.status)) {
-      const signingConnector = this.signingConnector;
-      if (!signingConnector) throw WalletInitializationError.notReady("Active signing connector is not ready");
+      const activeConnector = this.activeConnector;
+      if (!activeConnector) throw WalletInitializationError.notReady("Active signing connector is not ready");
 
       // Single-namespace connectors cannot cross namespace boundaries — MULTICHAIN connectors
       // (Auth, WC) enforce their own switchChain policy internally.
       if (
-        signingConnector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN &&
-        signingConnector.connectorNamespace !== newChainConfig.chainNamespace
+        activeConnector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN &&
+        activeConnector.connectorNamespace !== newChainConfig.chainNamespace
       ) {
         throw WalletLoginError.connectionError(
-          `Cannot switch between chain namespaces with ${signingConnector.name}. Disconnect and reconnect with the target chain.`
+          `Cannot switch between chain namespaces with ${activeConnector.name}. Disconnect and reconnect with the target chain.`
         );
       }
 
-      await signingConnector.switchChain(params);
+      await activeConnector.switchChain(params);
       return;
     }
 
@@ -553,46 +559,46 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async logout(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
-    if (!CAN_LOGOUT_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    if (this.connectedConnector.status === CONNECTOR_STATUS.DISCONNECTING) return;
-    await this.connectedConnector.disconnect(options);
+    if (!CAN_LOGOUT_STATUSES.includes(this.status) || !this.primaryConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.primaryConnector.status === CONNECTOR_STATUS.DISCONNECTING) return;
+    await this.primaryConnector.disconnect(options);
   }
 
   async getUserInfo(): Promise<Partial<UserInfo>> {
-    log.debug("Getting user info", this.status, this.connectedConnector?.name);
-    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    const userInfo = await this.connectedConnector.getUserInfo();
+    log.debug("Getting user info", this.status, this.primaryConnector?.name);
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.primaryConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    const userInfo = await this.primaryConnector.getUserInfo();
     return {
       ...userInfo,
-      connectedAccounts: userInfo.connectedAccounts?.map((account) => ({
+      linkedAccounts: userInfo.linkedAccounts?.map((account) => ({
         ...account,
         active: this.state.activeAccount ? account.id === this.state.activeAccount.id : account.isPrimary,
       })),
     };
   }
 
-  async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
-    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+  async getLinkedAccounts(): Promise<LinkedAccountInfo[]> {
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.primaryConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
 
-    assertAuthConnector(this.connectedConnector, "Connected accounts can only be fetched when connected with the AUTH connector.");
+    assertAuthConnector(this.primaryConnector, "Linked accounts can only be fetched when connected with the AUTH connector.");
 
-    const connectedAccounts = await this.connectedConnector.getConnectedAccounts();
-    return connectedAccounts.map((account) => ({
+    const linkedAccounts = await this.primaryConnector.getLinkedAccounts();
+    return linkedAccounts.map((account) => ({
       ...account,
       active: this.state.activeAccount ? account.id === this.state.activeAccount.id : account.isPrimary,
     }));
   }
 
   async enableMFA<T>(loginParams?: T): Promise<void> {
-    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.primaryConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.primaryConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`EnableMFA is not supported for this connector.`);
 
-    const authConnector = this.connectedConnector as AuthConnectorType;
-    const trackData = { connector: this.connectedConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
+    const authConnector = this.primaryConnector as AuthConnectorType;
+    const trackData = { connector: this.primaryConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
     try {
       this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_STARTED, trackData);
-      await this.connectedConnector.enableMFA(loginParams);
+      await this.primaryConnector.enableMFA(loginParams);
     } catch (error) {
       this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_FAILED, {
         ...trackData,
@@ -603,15 +609,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async manageMFA<T>(loginParams?: T): Promise<void> {
-    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
-    if (this.connectedConnector.name !== WALLET_CONNECTORS.AUTH)
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.primaryConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (this.primaryConnector.name !== WALLET_CONNECTORS.AUTH)
       throw WalletLoginError.unsupportedOperation(`ManageMFA is not supported for this connector.`);
 
-    const authConnector = this.connectedConnector as AuthConnectorType;
-    const trackData = { connector: this.connectedConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
+    const authConnector = this.primaryConnector as AuthConnectorType;
+    const trackData = { connector: this.primaryConnector.name, auth_ux_mode: authConnector.authInstance?.options?.uxMode };
     try {
       this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_SELECTED, trackData);
-      await this.connectedConnector.manageMFA(loginParams);
+      await this.primaryConnector.manageMFA(loginParams);
     } catch (error) {
       this.analytics.track(ANALYTICS_EVENTS.MFA_MANAGEMENT_FAILED, {
         ...trackData,
@@ -622,12 +628,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   async getAuthTokenInfo(): Promise<Pick<AuthTokenInfo, "idToken">> {
-    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.connectedConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.status) || !this.primaryConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
 
-    const trackData = { connector: this.connectedConnector.name };
+    const trackData = { connector: this.primaryConnector.name };
     try {
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_STARTED, trackData);
-      const authTokenInfo = await this.connectedConnector.getAuthTokenInfo();
+      const authTokenInfo = await this.primaryConnector.getAuthTokenInfo();
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
       return { idToken: authTokenInfo.idToken };
     } catch (error) {
@@ -643,7 +649,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.plugins[name] || null;
   }
 
-  public async switchAccount(account: ConnectedAccountInfo): Promise<void> {
+  public async switchAccount(account: LinkedAccountInfo): Promise<void> {
     const authConnector = this.getMainAuthConnector();
     const switchResult = await authConnector.switchAccount(account, {
       activeAccount: this.state.activeAccount,
@@ -670,8 +676,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public async unlinkAccount(address: string): Promise<UnlinkAccountResult> {
     const authConnector = this.getMainAuthConnector();
-    const connectedAccounts = (await authConnector.getUserInfo()).connectedAccounts ?? [];
-    const targetAccount = this.findConnectedAccountByAddress(connectedAccounts, address);
+    const linkedAccounts = (await authConnector.getUserInfo()).linkedAccounts ?? [];
+    const targetAccount = this.findLinkedAccountByAddress(linkedAccounts, address);
 
     if (!targetAccount) {
       throw AccountLinkingError.accountNotLinked(`Account with address "${address}" is not linked`);
@@ -797,7 +803,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected initAccountAbstractionConfig(projectConfig?: ProjectConfig) {
-    const isAAEnabled = Boolean(this.coreOptions.accountAbstractionConfig && projectConfig?.smartAccounts);
+    const isAAEnabled = Boolean(this.coreOptions.accountAbstractionConfig || projectConfig?.smartAccounts);
     if (!isAAEnabled) return;
 
     // merge smart account config from project config with core options, core options will take precedence over project config
@@ -1052,15 +1058,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected subscribeToConnectorEvents(connector: IConnector<unknown>): void {
     connector.on(CONNECTOR_EVENTS.CONNECTED, async (data: CONNECTED_EVENT_DATA) => {
-      if (this.connectedConnectorName && this.connectedConnectorName !== data.connectorName) {
+      if (this.primaryConnectorName && this.primaryConnectorName !== data.connectorName) {
         // Ignore registered connectors that are not the active primary session connector.
         return;
       }
 
       if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
       const { ethereumProvider, solanaWallet } = data;
-      connector.status = CONNECTOR_STATUS.CONNECTED;
-
       // Seed the primary connector synchronously so AUTHORIZED can resolve a connection
       // even while we are still restoring a previously active linked wallet.
       this.setConnectedWalletConnectorState(
@@ -1094,13 +1098,14 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           return;
         }
       }
+      // The following block only hits during rehydration
 
       const { activeAccount } = this.state;
       // if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
       if (activeAccount && !activeAccount.isPrimary && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
         const accountLinkingConnector = isAuthConnector(connector) ? connector : this.getConnector(WALLET_CONNECTORS.AUTH);
         assertAuthConnector(accountLinkingConnector, "Account switching requires the AUTH connector to be available.");
-        const targetChainId = accountLinkingConnector.getChainIdForConnectedAccount(activeAccount, connectedChainId);
+        const targetChainId = accountLinkingConnector.getChainIdForLinkedAccount(activeAccount, connectedChainId);
         const walletConnector = await this.createIsolatedWalletConnector(activeAccount.connector as WALLET_CONNECTOR_TYPE, targetChainId);
         let linkedAccountConnection: Connection | null = null;
 
@@ -1133,17 +1138,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       });
       this.setConnectedWalletConnectorState(primaryConnectedWalletState);
 
-      await this.setState({ connectedConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE, currentChainId: connectedChainId });
+      await this.setState({ primaryConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE, currentChainId: connectedChainId });
       this.cacheWallet(data.connectorName);
 
       const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
       if (this.consentRequired && !isConnectAndSign && !this.state.hasUserConsent) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
         this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING);
-        log.debug("consent_requiring", this.status, this.connectedConnectorName);
+        log.debug("consent_requiring", this.status, this.primaryConnectorName);
       } else {
         this.status = CONNECTOR_STATUS.CONNECTED;
-        log.debug("connected", this.status, this.connectedConnectorName);
+        log.debug("connected", this.status, this.primaryConnectorName);
         this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
         this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
       }
@@ -1186,11 +1191,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // get back to ready state for rehydrating.
       this.status = CONNECTOR_STATUS.READY;
       const cachedConnector = this.state.cachedConnector;
-      if (this.connectedConnectorName === cachedConnector) {
+      if (this.primaryConnectorName === cachedConnector) {
         await this.clearCache();
       }
 
-      log.debug("disconnected", this.status, this.connectedConnectorName);
+      log.debug("disconnected", this.status, this.primaryConnectorName);
       await Promise.all(
         Object.values(this.plugins).map(async (plugin) => {
           if (!plugin.SUPPORTED_CONNECTORS.includes(connector.name as WALLET_CONNECTOR_TYPE)) return;
@@ -1205,13 +1210,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           });
         })
       );
-      await this.setState({ connectedConnectorName: null, hasUserConsent: undefined, activeAccount: null });
+      await this.setState({ primaryConnectorName: null, hasUserConsent: undefined, activeAccount: null });
       this.emit(CONNECTOR_EVENTS.DISCONNECTED);
     });
     connector.on(CONNECTOR_EVENTS.CONNECTING, (data) => {
       this.status = CONNECTOR_STATUS.CONNECTING;
       this.emit(CONNECTOR_EVENTS.CONNECTING, data);
-      log.debug("connecting", this.status, this.connectedConnectorName);
+      log.debug("connecting", this.status, this.primaryConnectorName);
     });
     connector.on(CONNECTOR_EVENTS.ERRORED, async (data) => {
       if (this.shouldIgnoreInactiveConnectorEvent(connector, CONNECTOR_EVENTS.ERRORED)) {
@@ -1224,7 +1229,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.status = CONNECTOR_STATUS.ERRORED;
       await this.clearCache();
       this.emit(CONNECTOR_EVENTS.ERRORED, data, this.loginMode);
-      log.debug("errored", this.status, this.connectedConnectorName);
+      log.debug("errored", this.status, this.primaryConnectorName);
     });
 
     connector.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, async (error: Web3AuthError) => {
@@ -1253,12 +1258,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     connector.on(CONNECTOR_EVENTS.MFA_ENABLED, (isMFAEnabled: boolean) => {
       log.debug("mfa enabled", isMFAEnabled);
-      const authConnector = this.connectedConnector as AuthConnectorType;
+      const authConnector = this.primaryConnector as AuthConnectorType;
 
       // mfa_enabled event is only emitted when using "popup" ux_mode
       // TODO: handle mfa_enabled event when using "redirect" ux_mode
       this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_COMPLETED, {
-        connector: this.connectedConnector.name,
+        connector: this.primaryConnector.name,
         auth_ux_mode: authConnector.authInstance?.options?.uxMode,
         is_mfa_enabled: isMFAEnabled,
       });
@@ -1268,7 +1273,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     connector.on(CONNECTOR_EVENTS.AUTHORIZING, (data) => {
       this.status = CONNECTOR_STATUS.AUTHORIZING;
       this.emit(CONNECTOR_EVENTS.AUTHORIZING, data);
-      log.debug("authorizing", this.status, this.connectedConnectorName);
+      log.debug("authorizing", this.status, this.primaryConnectorName);
     });
     connector.on(CONNECTOR_EVENTS.AUTHORIZED, async (data: AUTHORIZED_EVENT_DATA) => {
       await this.setState({
@@ -1280,11 +1285,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (this.consentRequired && this.connection && !this.state.hasUserConsent) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
         this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING);
-        log.debug("consent_requiring", this.status, this.connectedConnectorName);
+        log.debug("consent_requiring", this.status, this.primaryConnectorName);
       } else {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
         this.emit(CONNECTOR_EVENTS.AUTHORIZED, data);
-        log.debug("authorized", this.status, this.connectedConnectorName);
+        log.debug("authorized", this.status, this.primaryConnectorName);
       }
     });
   }
@@ -1330,15 +1335,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
     if (isConnectAndSign && this.state.idToken) {
       this.status = CONNECTOR_STATUS.AUTHORIZED;
-      log.debug("consent accepted, authorized", this.status, this.connectedConnectorName);
+      log.debug("consent accepted, authorized", this.status, this.primaryConnectorName);
     } else {
       this.status = CONNECTOR_STATUS.CONNECTED;
-      log.debug("consent accepted, connected", this.status, this.connectedConnectorName);
+      log.debug("consent accepted, connected", this.status, this.primaryConnectorName);
     }
 
     // connect to wallet-service plugin
-    if (this.connectedConnectorName === WALLET_CONNECTORS.AUTH) {
-      this.connectToPlugins({ connector: this.connectedConnectorName as WALLET_CONNECTOR_TYPE });
+    if (this.primaryConnectorName === WALLET_CONNECTORS.AUTH) {
+      this.connectToPlugins({ connector: this.primaryConnectorName as WALLET_CONNECTOR_TYPE });
     }
 
     this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, { reconnected: this.connectionReconnected });
@@ -1388,22 +1393,22 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return this.createIsolatedWalletConnector(connectorName, chainId, config);
   }
 
-  protected getConnectedWalletConnector(account?: Pick<ConnectedAccountInfo, "id" | "isPrimary"> | null): IConnector<unknown> | null {
+  protected getConnectedWalletConnector(account?: Pick<LinkedAccountInfo, "id" | "isPrimary"> | null): IConnector<unknown> | null {
     return this.getConnectedWalletConnectorState(account)?.connector ?? null;
   }
 
-  protected getConnectedWalletConnectorState(account?: Pick<ConnectedAccountInfo, "id" | "isPrimary"> | null): ConnectedWalletConnectorState | null {
+  protected getConnectedWalletConnectorState(account?: Pick<LinkedAccountInfo, "id" | "isPrimary"> | null): ConnectedWalletConnectorState | null {
     return this.getConnectedWalletConnectorStateByKey(this.getConnectedWalletConnectorKey(account));
   }
 
   protected setConnectedWalletConnectorState(
     connectedWallet: ConnectedWalletConnectorState,
-    account?: Pick<ConnectedAccountInfo, "id" | "isPrimary"> | null
+    account?: Pick<LinkedAccountInfo, "id" | "isPrimary"> | null
   ): void {
     this.connectedWalletConnectorMap.set(this.getConnectedWalletConnectorKey(account), connectedWallet);
   }
 
-  protected setConnectedWalletConnector(connector: IConnector<unknown>, account?: Pick<ConnectedAccountInfo, "id" | "isPrimary"> | null): void {
+  protected setConnectedWalletConnector(connector: IConnector<unknown>, account?: Pick<LinkedAccountInfo, "id" | "isPrimary"> | null): void {
     this.setConnectedWalletConnectorState(
       {
         connector,
@@ -1415,11 +1420,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     );
   }
 
-  protected deleteConnectedWalletConnector(account?: Pick<ConnectedAccountInfo, "id" | "isPrimary"> | null): void {
+  protected deleteConnectedWalletConnector(account?: Pick<LinkedAccountInfo, "id" | "isPrimary"> | null): void {
     this.connectedWalletConnectorMap.delete(this.getConnectedWalletConnectorKey(account));
   }
 
-  protected getConnectedWalletConnection(account?: Pick<ConnectedAccountInfo, "id" | "isPrimary"> | null): Connection | null {
+  protected getConnectedWalletConnection(account?: Pick<LinkedAccountInfo, "id" | "isPrimary"> | null): Connection | null {
     return this.getConnectedWalletConnectionByKey(this.getConnectedWalletConnectorKey(account));
   }
 
@@ -1430,11 +1435,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return Boolean(isConnected && (connector.provider || connector.solanaWallet));
   }
 
-  protected setActiveWalletConnectorKey(account?: Pick<ConnectedAccountInfo, "id" | "isPrimary"> | null): void {
+  protected setActiveWalletConnectorKey(account?: Pick<LinkedAccountInfo, "id" | "isPrimary"> | null): void {
     this.activeWalletConnectorKey = this.getConnectedWalletConnectorKey(account);
   }
 
-  protected getConnectedWalletConnectorKey(account?: Pick<ConnectedAccountInfo, "id" | "isPrimary"> | null): string {
+  protected getConnectedWalletConnectorKey(account?: Pick<LinkedAccountInfo, "id" | "isPrimary"> | null): string {
     return !account || account.isPrimary ? PRIMARY_CONNECTED_WALLET_KEY : account.id;
   }
 
@@ -1520,11 +1525,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected getMainAuthConnector(): AuthConnectorType {
-    if (!CONNECTED_STATUSES.includes(this.status) || !this.connectedConnector) {
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.primaryConnector) {
       throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before unlinking an account.");
     }
 
-    const mainConnector = this.connectedConnector;
+    const mainConnector = this.primaryConnector;
     assertAuthConnector(mainConnector, "Account linking is only supported when connected with the AUTH connector.");
     return mainConnector;
   }
@@ -1617,10 +1622,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private isActiveConnectorEventSource(connector: IConnector<unknown>): boolean {
-    if (!this.connectedConnectorName) return true;
-    const activeConnector = this.connectedConnector;
+    if (!this.primaryConnectorName) return true;
+    const activeConnector = this.primaryConnector;
     if (activeConnector) return activeConnector === connector;
-    return connector.name === this.connectedConnectorName;
+    return connector.name === this.primaryConnectorName;
   }
 
   private shouldIgnoreInactiveConnectorEvent(connector: IConnector<unknown>, event: string): boolean {
@@ -1628,15 +1633,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     log.debug("Ignoring connector lifecycle event from inactive connector", {
       event,
       sourceConnector: connector.name,
-      activeConnector: this.connectedConnectorName,
+      activeConnector: this.primaryConnectorName,
     });
     return true;
   }
 
-  private findConnectedAccountByAddress(connectedAccounts: ConnectedAccountInfo[], address: string): ConnectedAccountInfo | null {
+  private findLinkedAccountByAddress(linkedAccounts: LinkedAccountInfo[], address: string): LinkedAccountInfo | null {
     const normalizedAddress = address.toLowerCase();
     return (
-      connectedAccounts.find((account) => {
+      linkedAccounts.find((account) => {
         if (!account.chainNamespace || parseChainNamespaceFromCitadelResponse(account.chainNamespace) !== CHAIN_NAMESPACES.EIP155) {
           return false;
         }
@@ -1645,9 +1650,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     );
   }
 
-  private findConnectedAccountByWalletAddress(connectedAccounts: ConnectedAccountInfo[], address: string): ConnectedAccountInfo | null {
+  private findLinkedAccountByWalletAddress(linkedAccounts: LinkedAccountInfo[], address: string): LinkedAccountInfo | null {
     return (
-      connectedAccounts.find((account) => {
+      linkedAccounts.find((account) => {
         if (!account.chainNamespace) {
           return false;
         }
@@ -1688,16 +1693,16 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         return;
       }
 
-      const connectedAccounts = (await authConnector.getConnectedAccounts()) ?? [];
-      const connectedAccount = this.findConnectedAccountByWalletAddress(connectedAccounts, connectedWalletAddress);
-      if (connectedAccount && !connectedAccount.isPrimary) {
+      const linkedAccounts = (await authConnector.getLinkedAccounts()) ?? [];
+      const linkedAccount = this.findLinkedAccountByWalletAddress(linkedAccounts, connectedWalletAddress);
+      if (linkedAccount && !linkedAccount.isPrimary) {
         const connectedWalletState = await this.resolveConnectedWalletConnectorState({
           connector: walletConnector,
           ethereumProvider: walletConnector.provider,
           solanaWallet: walletConnector.solanaWallet,
           usePrimaryProxy: false,
         });
-        this.setConnectedWalletConnectorState(connectedWalletState, connectedAccount);
+        this.setConnectedWalletConnectorState(connectedWalletState, linkedAccount);
       }
     } catch (error) {
       log.debug("Failed to cache connected linked wallet connector", error);
