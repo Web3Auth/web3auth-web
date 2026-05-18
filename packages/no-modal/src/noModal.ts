@@ -582,6 +582,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   getConnectedAccountsWithProviders(): ConnectedAccountsWithProviders[] {
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.primaryConnector) throw WalletLoginError.notConnectedError(`No wallet is connected`);
+
     const connectedAccounts: ConnectedAccountsWithProviders[] = [];
     for (const [, value] of this.connectedWalletConnectorMap.entries()) {
       const hasWalletProvider = Boolean(value.signingProvider || value.solanaWallet);
