@@ -215,7 +215,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async connect(): Promise<Connection | null> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     // if already connected return connection
-    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
+    if (CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
       // remove all listeners when promise is resolved or rejected.

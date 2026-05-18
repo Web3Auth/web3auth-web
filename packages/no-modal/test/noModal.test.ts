@@ -16,6 +16,7 @@ import {
   WalletLoginError,
   WEB3AUTH_STATE_STORAGE_KEY,
 } from "../src/base";
+import { authConnector } from "../src/connectors/auth-connector";
 import { Web3AuthNoModal } from "../src/noModal";
 import { createChain, createMockStorage, createProjectConfig, MockConnector, MULTICHAIN_CONNECTOR_NAMESPACE } from "./helpers";
 
@@ -91,7 +92,7 @@ describe("Web3AuthNoModal", () => {
     const sdk = createSdk(
       {},
       {
-        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
         cachedConnector: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
         idToken: "id-token",
@@ -139,7 +140,7 @@ describe("Web3AuthNoModal", () => {
     const sdk = createSdk(
       {},
       {
-        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
         activeAccount,
       }
@@ -166,7 +167,7 @@ describe("Web3AuthNoModal", () => {
     const sdk = createSdk(
       {},
       {
-        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
       }
     );
@@ -224,12 +225,35 @@ describe("Web3AuthNoModal", () => {
     });
   });
 
+  it("keeps the preferred chain when the linked account stays in the same namespace", () => {
+    const connector = authConnector()({
+      projectConfig: createProjectConfig(),
+      coreOptions: {
+        clientId: "test-client-id",
+        web3AuthNetwork: "sapphire_devnet",
+        chains: [
+          createChain({
+            chainId: "0xaa36a7",
+            rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+            displayName: "Ethereum Sepolia",
+          }),
+          createChain(),
+        ],
+      } as never,
+      analytics: { track: vi.fn() } as never,
+    }) as unknown as {
+      getChainIdForLinkedAccount: (account: Pick<LinkedAccountInfo, "chainNamespace" | "connector">, preferredChainId?: string | null) => string;
+    };
+
+    expect(connector.getChainIdForLinkedAccount(createExternalAccount({ chainNamespace: "evm" }), "0xaa36a7")).toBe("0xaa36a7");
+  });
+
   it("switches back to the primary account without rebinding the AUTH provider proxy", async () => {
     const activeAccount = createExternalAccount();
     const sdk = createSdk(
       {},
       {
-        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
       }
     );
@@ -301,12 +325,67 @@ describe("Web3AuthNoModal", () => {
     });
   });
 
+  it("reuses the current chain when switching linked accounts within the same namespace", async () => {
+    const sdk = createSdk(
+      {
+        chains: [
+          createChain({
+            chainId: "0xaa36a7",
+            rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+            displayName: "Ethereum Sepolia",
+          }),
+          createChain(),
+        ],
+      },
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0xaa36a7",
+      }
+    );
+    await Promise.resolve();
+
+    const targetAccount = createExternalAccount({ chainNamespace: "evm" });
+    const linkedProvider = { request: vi.fn() };
+    const walletConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.READY,
+    } as never);
+    walletConnector.connect = vi.fn().mockResolvedValue({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: linkedProvider as never,
+      solanaWallet: null,
+    });
+
+    const authConnector = {
+      assertSwitchAccountConnectorMatchesTarget: vi.fn().mockResolvedValue(undefined),
+      toSwitchAccountConnectorError: vi.fn((_: unknown, error: unknown) => error),
+    } as never;
+
+    await sdk.exposeProcessSwitchAccountResult(
+      authConnector,
+      {
+        kind: "external",
+        targetAccount,
+        activeAccount: targetAccount,
+        activeChainId: "0x1",
+      },
+      { walletConnector }
+    );
+
+    expect(walletConnector.connect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chainId: "0xaa36a7",
+      })
+    );
+    expect(sdk.currentChainId).toBe("0xaa36a7");
+  });
+
   it("rehydrates an active linked account without rebinding the AUTH proxy to the linked wallet", async () => {
     const activeAccount = createExternalAccount();
     const sdk = createSdk(
       {},
       {
-        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
         cachedConnector: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
         activeAccount,
@@ -364,7 +443,7 @@ describe("Web3AuthNoModal", () => {
   it("clearCache resets persisted state fields", async () => {
     const sdk = createSdk();
     (sdk as unknown as { state: Record<string, unknown> }).state = {
-      connectedConnectorName: WALLET_CONNECTORS.AUTH,
+      primaryConnectorName: WALLET_CONNECTORS.AUTH,
       cachedConnector: WALLET_CONNECTORS.AUTH,
       currentChainId: "0x1",
       idToken: "id-token",
@@ -374,7 +453,7 @@ describe("Web3AuthNoModal", () => {
 
     await sdk.clearCache();
     const state = (sdk as unknown as { state: Record<string, unknown> }).state;
-    expect(state.connectedConnectorName).toBeNull();
+    expect(state.primaryConnectorName).toBeNull();
     expect(state.cachedConnector).toBeNull();
     expect(state.currentChainId).toBeNull();
     expect(state.idToken).toBeNull();
@@ -386,7 +465,7 @@ describe("Web3AuthNoModal", () => {
     const sdk = createSdk(
       {},
       {
-        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
         cachedConnector: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
         idToken: "id-token",
@@ -434,7 +513,7 @@ describe("Web3AuthNoModal", () => {
     const sdk = createSdk(
       {},
       {
-        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
         cachedConnector: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
         idToken: "id-token",
@@ -522,7 +601,7 @@ describe("Web3AuthNoModal", () => {
     } as never);
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
     (sdk as unknown as { state: Record<string, unknown> }).state = {
-      connectedConnectorName: WALLET_CONNECTORS.METAMASK,
+      primaryConnectorName: WALLET_CONNECTORS.METAMASK,
       cachedConnector: null,
       currentChainId: "0x1",
       idToken: null,
@@ -755,7 +834,7 @@ describe("Web3AuthNoModal", () => {
   it("checkIfAutoConnect returns true only for cached matching connector", () => {
     const sdk = createSdk();
     (sdk as unknown as { state: Record<string, unknown> }).state = {
-      connectedConnectorName: null,
+      primaryConnectorName: null,
       cachedConnector: WALLET_CONNECTORS.METAMASK,
       currentChainId: "0x1",
       idToken: null,

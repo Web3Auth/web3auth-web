@@ -17,15 +17,7 @@ import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignMessage as useSolanaSignMessage, useSolanaWallet, useSolanaClient } from "@web3auth/modal/vue/solana";
-import {
-  useConnection,
-  useBalance,
-  useChainId,
-  useSignMessage,
-  useSignTypedData,
-  useSwitchChain as useWagmiSwitchChain,
-  useConfig,
-} from "@wagmi/vue";
+import { useConnection, useBalance, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain, useConfig } from "@wagmi/vue";
 import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
 import { parseEther } from "viem";
 import { createWalletTransactionSigner, toAddress } from "@solana/client";
@@ -56,7 +48,6 @@ const { getAuthTokenInfo, loading: getAuthTokenInfoLoading } = useAuthTokenInfo(
 const { status, address } = useConnection();
 const { mutateAsync: signTypedDataAsync } = useSignTypedData();
 const { mutateAsync: signMessageAsync } = useSignMessage();
-const wagmiChainId = useChainId();
 const balance = useBalance({
   address: address,
 });
@@ -105,7 +96,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return Boolean(conn?.solanaWallet);
 
     case "walletServices":
-      return web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
+      return web3Auth.value?.primaryConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
 
     default: {
       return false;
@@ -182,7 +173,7 @@ const onGetPrivateKey = async () => {
 };
 
 const getConnectedChainId = async () => {
-  printToConsole("chainId", wagmiChainId.value);
+  printToConsole("chainId", web3Auth.value?.currentChain?.chainId);
 };
 
 const onGetBalance = async () => {
