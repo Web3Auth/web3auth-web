@@ -12,6 +12,7 @@ import {
   cloneDeep,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
+  type ConnectedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
@@ -29,7 +30,6 @@ import {
   IWeb3AuthState,
   type LinkAccountParams,
   type LinkAccountResult,
-  type LinkedAccountInfo,
   log,
   LOGIN_MODE,
   type LoginMethodConfig,
@@ -215,7 +215,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async connect(): Promise<Connection | null> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     // if already connected return connection
-    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
+    if (CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
       // remove all listeners when promise is resolved or rejected.
@@ -266,7 +266,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await super.completeConsentAcceptance();
   }
 
-  public async switchAccount(account: LinkedAccountInfo): Promise<void> {
+  public async switchAccount(account: ConnectedAccountInfo): Promise<void> {
     const authConnector = this.getMainAuthConnector();
     const switchResult = await authConnector.switchAccount(account, {
       activeAccount: this.activeAccount,
