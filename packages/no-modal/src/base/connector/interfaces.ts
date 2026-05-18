@@ -265,3 +265,10 @@ export type LoginMethodConfig = Partial<
 export type WalletConnectV2Data = { uri: string };
 
 export type MetaMaskConnectorData = { uri: string };
+
+export type ConnectedAccountsWithProviders = {
+  connector: IConnector<unknown>;
+  signingProvider: IProvider | null;
+  solanaWallet: Connection["solanaWallet"];
+  connected: boolean;
+};

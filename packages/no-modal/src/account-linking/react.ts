@@ -30,13 +30,6 @@ export interface IUseSwitchAccount {
   switchAccount(account: LinkedAccountInfo): Promise<void>;
 }
 
-export interface IUseWallets {
-  loading: boolean;
-  error: Web3AuthError | null;
-  wallets: LinkedAccountInfo[];
-  getWallets(): Promise<void>;
-}
-
 export const useLinkAccount = (): IUseLinkAccount => {
   const { web3Auth } = useWeb3AuthInner();
 
@@ -106,28 +99,4 @@ export const useSwitchAccount = (): IUseSwitchAccount => {
   );
 
   return { loading, error, switchAccount };
-};
-
-export const useWallets = (): IUseWallets => {
-  const { web3Auth } = useWeb3AuthInner();
-
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<Web3AuthError | null>(null);
-  const [wallets, setWallets] = useState<LinkedAccountInfo[]>([]);
-
-  const getWallets = useCallback(async (): Promise<void> => {
-    if (!web3Auth) throw WalletInitializationError.notReady();
-    setLoading(true);
-    setError(null);
-    try {
-      const result = await web3Auth.getLinkedAccounts();
-      setWallets(result);
-    } catch (err) {
-      setError(err as Web3AuthError);
-    } finally {
-      setLoading(false);
-    }
-  }, [web3Auth]);
-
-  return { loading, error, wallets, getWallets };
 };

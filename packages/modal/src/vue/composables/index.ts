@@ -1,3 +1,4 @@
+export * from "./useWallets";
 export * from "./useWeb3Auth";
 export * from "./useWeb3AuthConnect";
 export type {
