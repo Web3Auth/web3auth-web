@@ -96,7 +96,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return Boolean(conn?.solanaWallet);
 
     case "walletServices":
-      return web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
+      return web3Auth.value?.primaryConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
 
     default: {
       return false;

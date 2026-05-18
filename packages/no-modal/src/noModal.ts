@@ -1368,7 +1368,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * @param activeChainId - The current active chain ID.
    * @returns The resolved chain ID.
    */
-  protected resolveSwitchAccountChainId(account: Pick<ConnectedAccountInfo, "chainNamespace">, activeChainId: string): string {
+  protected resolveSwitchAccountChainId(account: Pick<LinkedAccountInfo, "chainNamespace">, activeChainId: string): string {
     const targetChainNamespace = account.chainNamespace ? parseChainNamespaceFromCitadelResponse(account.chainNamespace) : null;
     if (targetChainNamespace && this.currentChain.chainNamespace === targetChainNamespace) {
       return this.currentChain.chainId;
