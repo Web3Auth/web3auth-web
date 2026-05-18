@@ -97,7 +97,7 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 }
 
 function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
-  const { isConnected, connection } = useWeb3Auth();
+  const { isConnected, connection, web3Auth } = useWeb3Auth();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
   const { mutate: reconnect } = useReconnect();
@@ -121,7 +121,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
     (async () => {
       const newConnection = connection ?? null;
       const newEth = connection?.ethereumProvider ?? null;
-      if (isConnected && newConnection && newEth) {
+      if (isConnected && newConnection && newEth && newConnection.connectorName === web3Auth?.primaryConnectorName) {
         // `ethereumProvider` is a stable proxy (`commonJRPCProvider`) across account switches,
         // so key wagmi resyncs off the Web3Auth connection object instead of provider identity.
         if (lastSyncedWeb3AuthConnection.current !== newConnection) {

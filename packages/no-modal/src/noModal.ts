@@ -178,16 +178,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   get connection(): Connection | null {
-    const connection = this.getConnectedWalletConnectionByKey(this.activeWalletConnectorKey);
-    if (connection) {
-      return connection;
-    }
-
-    if (this.activeWalletConnectorKey !== PRIMARY_CONNECTED_WALLET_KEY) {
-      throw new Error(`Connected connection not found for account "${this.activeWalletConnectorKey}".`);
-    }
-
-    return null;
+    return this.getConnectedWalletConnectionByKey(this.activeWalletConnectorKey);
   }
 
   get primaryConnectorName(): WALLET_CONNECTOR_TYPE | null {
