@@ -20,6 +20,7 @@ const modalOptimizeDepsInclude = [
   "@babel/runtime/helpers/objectSpread2",
   "@babel/runtime/helpers/objectWithoutProperties",
   "@hcaptcha/react-hcaptcha",
+  "@paulmillr/qr",
   "bowser",
   "classnames",
   "clsx",
