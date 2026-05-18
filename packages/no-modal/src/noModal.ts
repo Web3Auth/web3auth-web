@@ -583,7 +583,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }));
   }
 
-  async getConnectedAccountsWithProviders(): Promise<ConnectedAccountsWithProviders[]> {
+  getConnectedAccountsWithProviders(): ConnectedAccountsWithProviders[] {
     const connectedAccounts: ConnectedAccountsWithProviders[] = [];
     for (const [, value] of this.connectedWalletConnectorMap.entries()) {
       const hasWalletProvider = Boolean(value.signingProvider || value.solanaWallet);

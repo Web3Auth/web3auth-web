@@ -2,8 +2,8 @@
 import { Button, Card, Select } from "@toruslabs/vue-components";
 import { WALLET_CONNECTORS } from "@web3auth/modal";
 import { useLinkAccount, useSwitchAccount } from "@web3auth/modal/account-linking/vue";
+import { useWeb3AuthUser } from "@web3auth/modal/vue";
 import type { LinkedAccountInfo } from "@web3auth/no-modal";
-import { useWallets } from "@web3auth/no-modal/account-linking/vue";
 import { computed, onMounted, ref } from "vue";
 
 const props = defineProps<{
@@ -13,7 +13,7 @@ const props = defineProps<{
 
 const { linkAccount, unlinkAccount, loading: accountLinkingLoading, error: accountLinkingError } = useLinkAccount();
 const { switchAccount, loading: switchAccountLoading, error: switchAccountError } = useSwitchAccount();
-const { wallets, getWallets } = useWallets();
+const { userInfo, getUserInfo } = useWeb3AuthUser();
 
 const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
 const lastUnlinkedAddress = ref<string | null>(null);
@@ -33,7 +33,7 @@ const onSwitchToConnectedWallet = async (account: LinkedAccountInfo) => {
   await switchAccount(account);
   pendingSwitchAccountId.value = null;
   if (!switchAccountError.value) {
-    await getWallets();
+    await getUserInfo();
     lastSwitchAuthConnectionId.value = account.id;
     props.printToConsole("Switch connected wallet", {
       accountId: account.id,
@@ -47,7 +47,7 @@ const onLinkAccount = async () => {
   lastUnlinkedAddress.value = null;
   const result = await linkAccount({ connectorName: linkConnector.value });
   if (result) {
-    await getWallets();
+    await getUserInfo();
     props.printToConsole("Link Wallet Result", result);
   }
 };
@@ -60,7 +60,7 @@ const onUnlinkAccount = async (address: string) => {
   pendingUnlinkAddress.value = null;
 
   if (result) {
-    await getWallets();
+    await getUserInfo();
     lastUnlinkedAddress.value = address;
     props.printToConsole("Unlink Wallet Result", result);
   }
@@ -95,7 +95,7 @@ const getWalletCardClasses = (account: LinkedAccountInfo): string => {
 };
 
 onMounted(async () => {
-  await getWallets();
+  await getUserInfo();
 });
 </script>
 
@@ -117,7 +117,7 @@ onMounted(async () => {
       <p
         class="inline-flex self-start rounded-full bg-app-gray-100 px-3 py-1 text-xs font-semibold text-app-gray-700 dark:bg-app-gray-800 dark:text-app-gray-200"
       >
-        Total: {{ wallets.length }}
+        Total: {{ userInfo?.linkedAccounts?.length ?? 0 }}
       </p>
     </div>
 
@@ -148,8 +148,13 @@ onMounted(async () => {
       </p>
     </div>
 
-    <div v-if="wallets.length" class="mt-2 space-y-3">
-      <div v-for="account in wallets" :key="account.id" class="rounded-2xl border p-4 transition-colors" :class="getWalletCardClasses(account)">
+    <div v-if="userInfo?.linkedAccounts && userInfo?.linkedAccounts?.length" class="mt-2 space-y-3">
+      <div
+        v-for="account in userInfo?.linkedAccounts"
+        :key="account.id"
+        class="rounded-2xl border p-4 transition-colors"
+        :class="getWalletCardClasses(account)"
+      >
         <div class="flex items-start justify-between gap-3">
           <div class="min-w-0 flex-1">
             <p class="truncate text-sm font-semibold text-app-gray-900 dark:text-app-white" :title="account.eoaAddress || undefined">
