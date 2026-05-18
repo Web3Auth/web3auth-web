@@ -264,18 +264,6 @@ class MetaMaskConnector extends BaseConnector<void> {
   }
 
   async connect({ chainId, getAuthTokenInfo, caipAccountIds: caipAccountIdsFromParams }: BaseConnectorLoginParams): Promise<Connection | null> {
-    // if (this.connected && caipAccountIdsFromParams.length > 0) {
-    //   const currentSession = await this.multichainClient?.provider.getSession();
-    //   const scope: Scope = getCaipChainId(this.coreOptions.chains.find((x) => x.chainId === chainId)) as Scope;
-    //   // if the scope is already in the connected session
-    //   if (scope && Object.keys(currentSession?.sessionScopes ?? {}).includes(scope)) {
-    //     const caipAccountId = caipAccountIdsFromParams[0];
-    //     if (caipAccountId && currentSession.sessionScopes[scope]?.accounts.includes(caipAccountId)) {
-    //       this.switchChain({ chainId });
-    //     }
-    //   }
-    // }
-
     super.checkConnectionRequirements();
 
     await this.ensureInitialized();
