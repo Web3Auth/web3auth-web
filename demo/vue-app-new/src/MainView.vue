@@ -1,34 +1,34 @@
 <script setup lang="ts">
-import { SmartAccountType } from "@toruslabs/ethereum-controllers";
-import { CookieStorage, LocalStorageAdapter, MemoryStorage, SessionStorageAdapter, type StorageConfig, WEB3AUTH_NETWORK } from "@web3auth/auth";
 import {
-  type AccountAbstractionMultiChainConfig,
   authConnector,
   CHAIN_NAMESPACES,
   type ConnectorFn,
-  type ConnectorsModalConfig,
   type CustomChainConfig,
-  log,
-  type LoginMethodConfig,
   type PluginFn,
   storageAvailable,
   WALLET_CONNECTORS,
   walletServicesPlugin,
+  type AccountAbstractionMultiChainConfig,
   type Web3AuthOptions,
+  type ConnectorsModalConfig,
+  type LoginMethodConfig,
 } from "@web3auth/modal";
+
 import { type Web3AuthContextConfig, Web3AuthProvider } from "@web3auth/modal/vue";
 import { SolanaProvider } from "@web3auth/modal/vue/solana";
 import { WagmiProvider } from "@web3auth/modal/vue/wagmi";
 import { coinbaseConnector } from "@web3auth/no-modal/connectors/coinbase-connector";
-import { WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 import { computed, onBeforeMount, ref, watch } from "vue";
 
+import { CookieStorage, LocalStorageAdapter, log, MemoryStorage, SessionStorageAdapter, WEB3AUTH_NETWORK, type StorageConfig } from "@web3auth/auth";
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
 import { clientIds, resolveBuildEnv } from "./config";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
+import { SmartAccountType } from "@toruslabs/ethereum-controllers";
+import { WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 
 const formData = formDataStore;
 

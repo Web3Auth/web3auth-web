@@ -1,8 +1,8 @@
 <script setup lang="ts">
 import { Button, Card } from "@toruslabs/vue-components";
 import { useSwitchChain } from "@wagmi/vue";
-import { useChain, useWeb3Auth } from "@web3auth/modal/vue";
 import { useX402Fetch } from "@web3auth/modal/x402/vue";
+import { useChain, useWeb3Auth } from "@web3auth/modal/vue";
 import { CHAIN_NAMESPACES } from "@web3auth/no-modal";
 import { ref, watch } from "vue";
 
