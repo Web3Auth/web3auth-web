@@ -1,10 +1,12 @@
 import { WALLET_CONNECTORS } from "@web3auth/no-modal";
 import { useMemo } from "react";
+import { useTranslation } from "react-i18next";
 
 import { WALLET_CONNECT_LOGO } from "../../constants";
 import { useModalState } from "../../context/ModalStateContext";
 import { useWidget } from "../../context/WidgetContext";
 import { ACCOUNT_LINKING_INTENT, ACCOUNT_LINKING_STATUS, type ExternalButton } from "../../interfaces";
+import i18n from "../../localeImport";
 import ConnectWalletQrCode from "../ConnectWallet/ConnectWalletQrCode";
 
 interface AccountLinkingProps {
@@ -25,6 +27,7 @@ function AccountLinking(props: AccountLinkingProps) {
 
   const { modalState } = useModalState();
   const { deviceDetails, isDark } = useWidget();
+  const [t] = useTranslation(undefined, { i18n });
 
   const accountLinkingButton = useMemo<ExternalButton>(() => {
     const requestedConnectorName = modalState.accountLinking.connectorName;
@@ -44,44 +47,44 @@ function AccountLinking(props: AccountLinkingProps) {
   }, [accountLinkingButton.imgExtension, accountLinkingButton.name]);
 
   const isSwitchAccountIntent = modalState.accountLinking.intent === ACCOUNT_LINKING_INTENT.SWITCH;
+  const isWalletConnectConnector = accountLinkingButton.name === WALLET_CONNECTORS.WALLET_CONNECT_V2;
 
   const accountLinkingMessage = useMemo(() => {
     switch (modalState.accountLinking.status) {
       case ACCOUNT_LINKING_STATUS.INITIALIZING:
-        return accountLinkingButton.name === WALLET_CONNECTORS.WALLET_CONNECT_V2
-          ? "Initializing WalletConnect..."
-          : `Initializing ${accountLinkingDisplayName}...`;
+        return t("modal.account-linking.initializing-wallet", { wallet: accountLinkingDisplayName });
       case ACCOUNT_LINKING_STATUS.AWAITING_CONNECTION:
         return modalState.accountLinking.walletConnectUri
-          ? accountLinkingButton.name === WALLET_CONNECTORS.WALLET_CONNECT_V2
-            ? "Scan the QR code with a WalletConnect-compatible wallet."
-            : `Scan the QR code with ${accountLinkingDisplayName}.`
-          : accountLinkingButton.name === WALLET_CONNECTORS.WALLET_CONNECT_V2
-            ? "Preparing WalletConnect QR code..."
-            : `Preparing ${accountLinkingDisplayName} QR code...`;
+          ? isWalletConnectConnector
+            ? t("modal.account-linking.scan-walletconnect")
+            : t("modal.account-linking.scan-wallet", { wallet: accountLinkingDisplayName })
+          : t("modal.account-linking.preparing-wallet-qr", { wallet: accountLinkingDisplayName });
       case ACCOUNT_LINKING_STATUS.WALLET_CONNECTED:
-        return isSwitchAccountIntent ? "Wallet connected. Preparing account switch..." : "Wallet connected. Preparing account linking...";
+        return isSwitchAccountIntent
+          ? t("modal.account-linking.wallet-connected-preparing-switch")
+          : t("modal.account-linking.wallet-connected-preparing-linking");
       case ACCOUNT_LINKING_STATUS.LINKING:
-        return isSwitchAccountIntent ? "Switching wallet..." : "Linking wallet...";
+        return isSwitchAccountIntent ? t("modal.account-linking.switching-wallet") : t("modal.account-linking.linking-wallet");
       case ACCOUNT_LINKING_STATUS.COMPLETED:
-        return isSwitchAccountIntent ? "Wallet switched." : "Wallet linked.";
+        return isSwitchAccountIntent ? t("modal.account-linking.wallet-switched") : t("modal.account-linking.wallet-linked");
       case ACCOUNT_LINKING_STATUS.ERRORED:
         return (
           modalState.accountLinking.errorMessage ||
           (isSwitchAccountIntent
-            ? `Failed to switch wallet with ${accountLinkingDisplayName}.`
-            : `Failed to connect with ${accountLinkingDisplayName}.`)
+            ? t("modal.account-linking.failed-switch-wallet", { wallet: accountLinkingDisplayName })
+            : t("modal.account-linking.failed-connect-wallet", { wallet: accountLinkingDisplayName }))
         );
       default:
         return "";
     }
   }, [
-    accountLinkingButton.name,
     accountLinkingDisplayName,
     isSwitchAccountIntent,
+    isWalletConnectConnector,
     modalState.accountLinking.errorMessage,
     modalState.accountLinking.status,
     modalState.accountLinking.walletConnectUri,
+    t,
   ]);
 
   return (
