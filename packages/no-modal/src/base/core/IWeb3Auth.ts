@@ -215,7 +215,7 @@ export type LoginParamMap = {
 export interface IWeb3AuthCore extends SafeEventEmitter {
   currentChainId: string | null;
   readonly coreOptions: IWeb3AuthCoreOptions;
-  connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
+  primaryConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
   connection: Connection | null;

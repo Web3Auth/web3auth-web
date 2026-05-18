@@ -100,7 +100,7 @@ describe("Web3AuthNoModal", () => {
       }
     );
     await Promise.resolve();
-    expect(sdk.connectedConnectorName).toBe(WALLET_CONNECTORS.AUTH);
+    expect(sdk.primaryConnectorName).toBe(WALLET_CONNECTORS.AUTH);
     expect(sdk.cachedConnector).toBe(WALLET_CONNECTORS.AUTH);
     expect(sdk.idToken).toBe("id-token");
   });
@@ -423,7 +423,7 @@ describe("Web3AuthNoModal", () => {
     await Promise.resolve();
 
     expect(sdk.status).toBe(CONNECTED_STATUSES[0]);
-    expect(sdk.connectedConnectorName).toBe(WALLET_CONNECTORS.AUTH);
+    expect(sdk.primaryConnectorName).toBe(WALLET_CONNECTORS.AUTH);
     expect(sdk.idToken).toBe("id-token");
     expect(sdk.accessToken).toBe("access-token");
     expect(sdk.refreshToken).toBe("refresh-token");
@@ -454,7 +454,7 @@ describe("Web3AuthNoModal", () => {
       expect(sdk.status).toBe(CONNECTOR_STATUS.ERRORED);
     });
 
-    expect(sdk.connectedConnectorName).toBeNull();
+    expect(sdk.primaryConnectorName).toBeNull();
     expect(sdk.idToken).toBeNull();
     expect(sdk.accessToken).toBeNull();
     expect(sdk.refreshToken).toBeNull();
