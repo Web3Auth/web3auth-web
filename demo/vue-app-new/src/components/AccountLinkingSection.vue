@@ -2,7 +2,7 @@
 import { Button, Card, Select } from "@toruslabs/vue-components";
 import { WALLET_CONNECTORS } from "@web3auth/modal";
 import { useLinkAccount, useSwitchAccount } from "@web3auth/modal/account-linking/vue";
-import { useWeb3AuthUser } from "@web3auth/modal/vue";
+import { useWallets, useWeb3AuthUser } from "@web3auth/modal/vue";
 import type { LinkedAccountInfo } from "@web3auth/no-modal";
 import { computed, onMounted, ref } from "vue";
 
@@ -13,6 +13,7 @@ const props = defineProps<{
 
 const { linkAccount, unlinkAccount, loading: accountLinkingLoading, error: accountLinkingError } = useLinkAccount();
 const { switchAccount, loading: switchAccountLoading, error: switchAccountError } = useSwitchAccount();
+const { wallets: connectedWallets, syncWallets } = useWallets();
 const { userInfo, getUserInfo } = useWeb3AuthUser();
 
 const linkConnector = ref<string>(WALLET_CONNECTORS.METAMASK);
@@ -27,13 +28,23 @@ const linkConnectorOptions = computed(() => [
   { name: "WalletConnect", value: WALLET_CONNECTORS.WALLET_CONNECT_V2 },
 ]);
 
-const onSwitchToConnectedWallet = async (account: LinkedAccountInfo) => {
+const connectedWalletIds = computed(() => new Set(connectedWallets.value.map((wallet) => wallet.id)));
+
+const syncAccountState = async (): Promise<void> => {
+  await Promise.all([getUserInfo(), syncWallets()]);
+};
+
+const getSwitchButtonText = (account: LinkedAccountInfo): string => {
+  return connectedWalletIds.value.has(account.id) ? "Switch to this wallet" : "Connect this wallet";
+};
+
+const onActivateWallet = async (account: LinkedAccountInfo) => {
   lastSwitchAuthConnectionId.value = null;
   pendingSwitchAccountId.value = account.id;
   await switchAccount(account);
   pendingSwitchAccountId.value = null;
   if (!switchAccountError.value) {
-    await getUserInfo();
+    await syncAccountState();
     lastSwitchAuthConnectionId.value = account.id;
     props.printToConsole("Switch connected wallet", {
       accountId: account.id,
@@ -47,7 +58,7 @@ const onLinkAccount = async () => {
   lastUnlinkedAddress.value = null;
   const result = await linkAccount({ connectorName: linkConnector.value });
   if (result) {
-    await getUserInfo();
+    await syncAccountState();
     props.printToConsole("Link Wallet Result", result);
   }
 };
@@ -60,7 +71,7 @@ const onUnlinkAccount = async (address: string) => {
   pendingUnlinkAddress.value = null;
 
   if (result) {
-    await getUserInfo();
+    await syncAccountState();
     lastUnlinkedAddress.value = address;
     props.printToConsole("Unlink Wallet Result", result);
   }
@@ -95,7 +106,7 @@ const getWalletCardClasses = (account: LinkedAccountInfo): string => {
 };
 
 onMounted(async () => {
-  await getUserInfo();
+  await syncAccountState();
 });
 </script>
 
@@ -216,9 +227,9 @@ onMounted(async () => {
             size="xs"
             pill
             class="!mb-0"
-            @click="onSwitchToConnectedWallet(account)"
+            @click="onActivateWallet(account)"
           >
-            Switch to this wallet
+            {{ getSwitchButtonText(account) }}
           </Button>
           <Button
             v-if="canUnlinkConnectedWallet(account)"
