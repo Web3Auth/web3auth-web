@@ -590,16 +590,17 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector">,
     preferredChainId?: string | null
   ): string {
+    const accountChainNamespace = account.chainNamespace ? parseChainNamespaceFromCitadelResponse(account.chainNamespace) : null;
+
     if (preferredChainId) {
       const preferredChain = this.coreOptions.chains.find((chain) => chain.chainId === preferredChainId);
-      if (preferredChain && (!account.chainNamespace || preferredChain.chainNamespace === account.chainNamespace)) {
+      if (preferredChain && (!accountChainNamespace || preferredChain.chainNamespace === accountChainNamespace)) {
         return preferredChainId;
       }
     }
 
-    if (account.chainNamespace) {
-      const parsedChainNamespace = parseChainNamespaceFromCitadelResponse(account.chainNamespace);
-      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === parsedChainNamespace);
+    if (accountChainNamespace) {
+      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === accountChainNamespace);
       if (namespaceChain) {
         return namespaceChain.chainId;
       }

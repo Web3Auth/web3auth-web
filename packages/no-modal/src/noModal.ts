@@ -1354,6 +1354,24 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return finalChainId;
   }
 
+  /**
+   * Resolves the chain ID for a switch account operation.
+   * If the account's chain namespace is the same as the current chain namespace, return the current chain ID.
+   * If the account's chain namespace is different from the current chain namespace, return the chainId the account was linked in.
+   *
+   * @param account - The account to switch to.
+   * @param activeChainId - The current active chain ID.
+   * @returns The resolved chain ID.
+   */
+  protected resolveSwitchAccountChainId(account: Pick<ConnectedAccountInfo, "chainNamespace">, activeChainId: string): string {
+    const targetChainNamespace = account.chainNamespace ? parseChainNamespaceFromCitadelResponse(account.chainNamespace) : null;
+    if (targetChainNamespace && this.currentChain.chainNamespace === targetChainNamespace) {
+      return this.currentChain.chainId;
+    }
+
+    return activeChainId;
+  }
+
   protected async createLinkingWalletConnector(
     connectorName: WALLET_CONNECTOR_TYPE | string,
     chainId: string,
@@ -1527,6 +1545,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     switchResult: AuthConnectorSwitchAccountResult,
     options: { walletConnector?: IConnector<unknown>; projectConfig?: ProjectConfig } = {}
   ): Promise<void> {
+    const resolvedSwitchChainId = this.resolveSwitchAccountChainId(switchResult.targetAccount, switchResult.activeChainId);
+
     if (switchResult.kind === "primary") {
       const existingPrimaryConnectedWalletState = this.getConnectedWalletConnectorState();
       const primaryConnectedWalletState =
@@ -1551,17 +1571,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const walletConnector =
         options.walletConnector ??
         this.getConnectedWalletConnector(switchResult.targetAccount) ??
-        (await this.createSwitchingWalletConnector(switchResult.targetAccount.connector, switchResult.activeChainId, options.projectConfig));
+        (await this.createSwitchingWalletConnector(switchResult.targetAccount.connector, resolvedSwitchChainId, options.projectConfig));
       let linkedAccountConnection: Connection | null = null;
       try {
         if (!this.hasUsableConnectedSwitchConnector(walletConnector)) {
-          const switchChainConfig = this.coreOptions.chains.find((c) => c.chainId === switchResult.activeChainId);
+          const switchChainConfig = this.coreOptions.chains.find((c) => c.chainId === resolvedSwitchChainId);
           if (!switchChainConfig) {
-            throw WalletLoginError.connectionError(`Chain config is not available for chain ${switchResult.activeChainId}`);
+            throw WalletLoginError.connectionError(`Chain config is not available for chain ${resolvedSwitchChainId}`);
           }
           const caipChainId = getCaipChainId(switchChainConfig);
           const caipAccountId = `${caipChainId}:${switchResult.targetAccount.eoaAddress}` as CaipAccountId;
-          linkedAccountConnection = await walletConnector.connect({ chainId: switchResult.activeChainId, caipAccountIds: [caipAccountId] });
+          linkedAccountConnection = await walletConnector.connect({ chainId: resolvedSwitchChainId, caipAccountIds: [caipAccountId] });
           if (!linkedAccountConnection) {
             throw AccountLinkingError.requestFailed(
               `Failed to connect isolated connector "${switchResult.targetAccount.connector}" for account switch.`
@@ -1583,7 +1603,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
     }
 
-    await this.setCurrentChain(switchResult.activeChainId);
+    await this.setCurrentChain(resolvedSwitchChainId);
     await this.setState({ activeAccount: switchResult.activeAccount });
     const connection = this.connection;
     if (!connection) {

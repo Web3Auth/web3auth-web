@@ -16,6 +16,7 @@ import {
   WalletLoginError,
   WEB3AUTH_STATE_STORAGE_KEY,
 } from "../src/base";
+import { authConnector } from "../src/connectors/auth-connector";
 import { Web3AuthNoModal } from "../src/noModal";
 import { createChain, createMockStorage, createProjectConfig, MockConnector, MULTICHAIN_CONNECTOR_NAMESPACE } from "./helpers";
 
@@ -224,6 +225,32 @@ describe("Web3AuthNoModal", () => {
     });
   });
 
+  it("keeps the preferred chain when the linked account stays in the same namespace", () => {
+    const connector = authConnector()({
+      projectConfig: createProjectConfig(),
+      coreOptions: {
+        clientId: "test-client-id",
+        web3AuthNetwork: "sapphire_devnet",
+        chains: [
+          createChain({
+            chainId: "0xaa36a7",
+            rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+            displayName: "Ethereum Sepolia",
+          }),
+          createChain(),
+        ],
+      } as never,
+      analytics: { track: vi.fn() } as never,
+    }) as unknown as {
+      getChainIdForConnectedAccount: (
+        account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector">,
+        preferredChainId?: string | null
+      ) => string;
+    };
+
+    expect(connector.getChainIdForConnectedAccount(createExternalAccount({ chainNamespace: "evm" }), "0xaa36a7")).toBe("0xaa36a7");
+  });
+
   it("switches back to the primary account without rebinding the AUTH provider proxy", async () => {
     const activeAccount = createExternalAccount();
     const sdk = createSdk(
@@ -299,6 +326,61 @@ describe("Web3AuthNoModal", () => {
       ethereumProvider: (sdk as unknown as { commonJRPCProvider: unknown }).commonJRPCProvider,
       solanaWallet: null,
     });
+  });
+
+  it("reuses the current chain when switching linked accounts within the same namespace", async () => {
+    const sdk = createSdk(
+      {
+        chains: [
+          createChain({
+            chainId: "0xaa36a7",
+            rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+            displayName: "Ethereum Sepolia",
+          }),
+          createChain(),
+        ],
+      },
+      {
+        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0xaa36a7",
+      }
+    );
+    await Promise.resolve();
+
+    const targetAccount = createExternalAccount({ chainNamespace: "evm" });
+    const linkedProvider = { request: vi.fn() };
+    const walletConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.READY,
+    } as never);
+    walletConnector.connect = vi.fn().mockResolvedValue({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: linkedProvider as never,
+      solanaWallet: null,
+    });
+
+    const authConnector = {
+      assertSwitchAccountConnectorMatchesTarget: vi.fn().mockResolvedValue(undefined),
+      toSwitchAccountConnectorError: vi.fn((_: unknown, error: unknown) => error),
+    } as never;
+
+    await sdk.exposeProcessSwitchAccountResult(
+      authConnector,
+      {
+        kind: "external",
+        targetAccount,
+        activeAccount: targetAccount,
+        activeChainId: "0x1",
+      },
+      { walletConnector }
+    );
+
+    expect(walletConnector.connect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chainId: "0xaa36a7",
+      })
+    );
+    expect(sdk.currentChainId).toBe("0xaa36a7");
   });
 
   it("rehydrates an active linked account without rebinding the AUTH proxy to the linked wallet", async () => {
