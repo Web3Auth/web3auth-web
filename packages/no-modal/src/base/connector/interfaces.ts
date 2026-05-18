@@ -16,7 +16,7 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 
-import { LinkedAccountInfo } from "../../account-linking/interfaces";
+import { BaseLinkedAccountInfo } from "../../account-linking/interfaces";
 import { type Analytics } from "../analytics";
 import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
@@ -25,8 +25,10 @@ import type { LoginModeType, ProjectConfig } from "../interfaces";
 import type { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
-
-export interface ConnectedAccountInfo extends LinkedAccountInfo {
+/**
+ *
+ */
+export interface LinkedAccountInfo extends BaseLinkedAccountInfo {
   /** Linked account id */
   id: string;
 
@@ -49,7 +51,7 @@ export interface ConnectedAccountInfo extends LinkedAccountInfo {
   active: boolean;
 }
 
-export type UserInfo = AuthUserInfo & { connectedAccounts?: ConnectedAccountInfo[] };
+export type UserInfo = AuthUserInfo & { linkedAccounts?: LinkedAccountInfo[] };
 
 export { UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE };
 

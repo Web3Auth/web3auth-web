@@ -3,13 +3,13 @@ import { describe, expect, it, vi } from "vitest";
 import {
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
-  type ConnectedAccountInfo,
   type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   IConnector,
+  type LinkedAccountInfo,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -52,15 +52,15 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
     return this.hasUsableConnectedSwitchConnector(connector);
   }
 
-  public exposeGetConnectedWalletConnector(account?: ConnectedAccountInfo | null) {
+  public exposeGetConnectedWalletConnector(account?: LinkedAccountInfo | null) {
     return this.getConnectedWalletConnector(account);
   }
 
-  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: ConnectedAccountInfo | null) {
+  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: LinkedAccountInfo | null) {
     this.setConnectedWalletConnector(connector, account);
   }
 
-  public exposeSetActiveWalletConnectorKey(account?: ConnectedAccountInfo | null) {
+  public exposeSetActiveWalletConnectorKey(account?: LinkedAccountInfo | null) {
     this.setActiveWalletConnectorKey(account);
   }
 
@@ -322,14 +322,14 @@ describe("Web3AuthNoModal", () => {
       status: CONNECTOR_STATUS.CONNECTED,
       provider: authProvider as never,
     } as never) as MockConnector & {
-      getChainIdForConnectedAccount: ReturnType<typeof vi.fn>;
+      getChainIdForLinkedAccount: ReturnType<typeof vi.fn>;
     };
     const linkedConnector = new MockConnector({
       name: WALLET_CONNECTORS.METAMASK,
       status: CONNECTOR_STATUS.CONNECTED,
       provider: linkedProvider as never,
     } as never);
-    authConnector.getChainIdForConnectedAccount = vi.fn().mockReturnValue("0x1");
+    authConnector.getChainIdForLinkedAccount = vi.fn().mockReturnValue("0x1");
 
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
     (sdk as unknown as { commonJRPCProvider: { updateProviderEngineProxy: ReturnType<typeof vi.fn> } }).commonJRPCProvider = {
@@ -789,7 +789,7 @@ function createSdk(overrides: Record<string, unknown> = {}, initialState?: Recor
   );
 }
 
-function createExternalAccount(overrides: Partial<ConnectedAccountInfo> = {}): ConnectedAccountInfo {
+function createExternalAccount(overrides: Partial<LinkedAccountInfo> = {}): LinkedAccountInfo {
   return {
     id: "linked-account-id",
     isPrimary: false,
@@ -805,7 +805,7 @@ function createExternalAccount(overrides: Partial<ConnectedAccountInfo> = {}): C
   };
 }
 
-function createPrimaryAccount(overrides: Partial<ConnectedAccountInfo> = {}): ConnectedAccountInfo {
+function createPrimaryAccount(overrides: Partial<LinkedAccountInfo> = {}): LinkedAccountInfo {
   return {
     id: "primary-account-id",
     isPrimary: true,

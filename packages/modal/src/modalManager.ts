@@ -12,7 +12,6 @@ import {
   cloneDeep,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
-  type ConnectedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
@@ -30,6 +29,7 @@ import {
   IWeb3AuthState,
   type LinkAccountParams,
   type LinkAccountResult,
+  type LinkedAccountInfo,
   log,
   LOGIN_MODE,
   type LoginMethodConfig,
@@ -266,7 +266,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await super.completeConsentAcceptance();
   }
 
-  public async switchAccount(account: ConnectedAccountInfo): Promise<void> {
+  public async switchAccount(account: LinkedAccountInfo): Promise<void> {
     const authConnector = this.getMainAuthConnector();
     const switchResult = await authConnector.switchAccount(account, {
       activeAccount: this.activeAccount,

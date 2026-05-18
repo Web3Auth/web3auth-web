@@ -3,7 +3,7 @@ import type { SmartAccountEipStandardType, SmartAccountType } from "@toruslabs/e
 import { AuthConnectionConfigItem, type WhiteLabelData } from "@web3auth/auth";
 
 import { type ChainNamespaceType, type CustomChainConfig } from "./chain/IChainInterface";
-import { ConnectedAccountInfo } from "./connector";
+import { LinkedAccountInfo } from "./connector";
 import { LOGIN_MODE, MODAL_SIGN_IN_METHODS, SMART_ACCOUNT_WALLET_SCOPE, WIDGET_TYPE } from "./constants";
 import { WALLET_CONNECTOR_TYPE } from "./wallet";
 
@@ -19,7 +19,7 @@ export interface IWeb3AuthState {
   idToken: string | null;
   accessToken: string | null;
   refreshToken: string | null;
-  activeAccount: ConnectedAccountInfo | null;
+  activeAccount: LinkedAccountInfo | null;
   hasUserConsent?: boolean;
 }
 

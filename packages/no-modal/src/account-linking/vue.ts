@@ -1,9 +1,9 @@
 import { Ref, ref } from "vue";
 
-import { type ConnectedAccountInfo, log, WalletInitializationError, Web3AuthError } from "../base";
+import { type LinkedAccountInfo, log, WalletInitializationError, Web3AuthError } from "../base";
 import { useWeb3AuthInner } from "../vue/composables/useWeb3AuthInner";
 import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "./index";
-import type { LinkAccountParams, LinkAccountResult, LinkedAccountInfo, UnlinkAccountResult } from "./interfaces";
+import type { BaseLinkedAccountInfo, LinkAccountParams, LinkAccountResult, UnlinkAccountResult } from "./interfaces";
 
 export { makeAccountLinkingRequest, makeAccountUnlinkingRequest };
 export type {
@@ -11,7 +11,7 @@ export type {
   CitadelLinkAccountPayload,
   LinkAccountParams,
   LinkAccountResult,
-  LinkedAccountInfo,
+  BaseLinkedAccountInfo as LinkedAccountInfo,
   UnlinkAccountPayload,
   UnlinkAccountResult,
 } from "./interfaces";
@@ -19,7 +19,7 @@ export type {
 export interface IUseLinkAccount {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
-  linkedAccounts: Ref<LinkedAccountInfo[]>;
+  linkedAccounts: Ref<BaseLinkedAccountInfo[]>;
   linkAccount(params: LinkAccountParams): Promise<LinkAccountResult | void>;
   unlinkAccount(address: string): Promise<UnlinkAccountResult | void>;
 }
@@ -27,13 +27,13 @@ export interface IUseLinkAccount {
 export interface IUseSwitchAccount {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
-  switchAccount(account: ConnectedAccountInfo): Promise<void>;
+  switchAccount(account: LinkedAccountInfo): Promise<void>;
 }
 
 export interface IUseWallets {
   loading: Ref<boolean>;
   error: Ref<Web3AuthError | null>;
-  wallets: Ref<ConnectedAccountInfo[]>;
+  wallets: Ref<LinkedAccountInfo[]>;
   getWallets(): Promise<void>;
 }
 
@@ -41,7 +41,7 @@ export const useLinkAccount = (): IUseLinkAccount => {
   const { web3Auth } = useWeb3AuthInner();
   const loading = ref(false);
   const error = ref<Web3AuthError | null>(null);
-  const linkedAccounts = ref<LinkedAccountInfo[]>([]);
+  const linkedAccounts = ref<BaseLinkedAccountInfo[]>([]);
 
   const linkAccount = async (params: LinkAccountParams): Promise<LinkAccountResult | void> => {
     if (!web3Auth.value) throw WalletInitializationError.notReady();
@@ -89,7 +89,7 @@ export const useSwitchAccount = (): IUseSwitchAccount => {
   const loading = ref(false);
   const error = ref<Web3AuthError | null>(null);
 
-  const switchAccount = async (account: ConnectedAccountInfo): Promise<void> => {
+  const switchAccount = async (account: LinkedAccountInfo): Promise<void> => {
     if (!web3Auth.value) throw WalletInitializationError.notReady();
     error.value = null;
     loading.value = true;
@@ -114,14 +114,14 @@ export const useWallets = (): IUseWallets => {
   const { web3Auth } = useWeb3AuthInner();
   const loading = ref(false);
   const error = ref<Web3AuthError | null>(null);
-  const wallets = ref<ConnectedAccountInfo[]>([]);
+  const wallets = ref<LinkedAccountInfo[]>([]);
 
   const getWallets = async (): Promise<void> => {
     if (!web3Auth.value) throw WalletInitializationError.notReady();
     error.value = null;
     loading.value = true;
     try {
-      const result = await web3Auth.value.getConnectedAccounts();
+      const result = await web3Auth.value.getLinkedAccounts();
       wallets.value = result;
     } catch (err) {
       log.error("Error getting wallets", err);

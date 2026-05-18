@@ -5,11 +5,11 @@ import { type WsEmbedParams } from "@web3auth/ws-embed";
 import { LinkAccountResult, UnlinkAccountResult } from "../../account-linking";
 import {
   type BaseConnectorSettings,
-  type ConnectedAccountInfo,
   type ConnectorNamespaceType,
   type IBaseProvider,
   type IConnector,
   type IProvider,
+  type LinkedAccountInfo,
   type WALLET_CONNECTOR_TYPE,
 } from "../../base";
 
@@ -32,14 +32,14 @@ export interface AuthConnectorLinkAccountParams {
 }
 
 export interface AuthConnectorSwitchAccountContext {
-  activeAccount: ConnectedAccountInfo | null;
+  activeAccount: LinkedAccountInfo | null;
   currentChainId: string | null;
 }
 
 export type AuthConnectorSwitchAccountResult =
   | {
       kind: "primary";
-      targetAccount: ConnectedAccountInfo;
+      targetAccount: LinkedAccountInfo;
       activeAccount: null;
       activeChainId: string;
       connectorName: WALLET_CONNECTOR_TYPE;
@@ -49,8 +49,8 @@ export type AuthConnectorSwitchAccountResult =
     }
   | {
       kind: "external";
-      targetAccount: ConnectedAccountInfo;
-      activeAccount: ConnectedAccountInfo;
+      targetAccount: LinkedAccountInfo;
+      activeAccount: LinkedAccountInfo;
       activeChainId: string;
     };
 
@@ -66,7 +66,7 @@ export interface AuthConnectorOptions extends BaseConnectorSettings {
   authConnectionConfig?: (AuthConnectionConfigItem & { isDefault?: boolean })[];
 }
 
-export interface UserInfoWithConnectedAccounts {
+export interface UserInfoWithLinkedAccounts {
   /** User id from the Citadel Server */
   id: string;
 
@@ -86,7 +86,7 @@ export interface UserInfoWithConnectedAccounts {
   userType: string;
 
   /** Connected accounts info, including the primary account */
-  accounts: ConnectedAccountInfo[];
+  accounts: LinkedAccountInfo[];
 
   /** Created at timestamp of the user */
   createdAt: string;
@@ -114,7 +114,7 @@ export interface IAuthConnector {
    * Resolve the target account and connector-owned switch metadata.
    * `noModal` applies the returned result to SDK state and providers.
    */
-  switchAccount(account: ConnectedAccountInfo, context: AuthConnectorSwitchAccountContext): Promise<AuthConnectorSwitchAccountResult>;
+  switchAccount(account: LinkedAccountInfo, context: AuthConnectorSwitchAccountContext): Promise<AuthConnectorSwitchAccountResult>;
 
   /**
    * Link an external wallet to the authenticated user by using the
@@ -130,5 +130,5 @@ export interface IAuthConnector {
   /**
    * Get the connected accounts for the authenticated user.
    */
-  getConnectedAccounts(): Promise<ConnectedAccountInfo[]>;
+  getLinkedAccounts(): Promise<LinkedAccountInfo[]>;
 }

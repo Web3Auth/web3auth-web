@@ -16,7 +16,10 @@ export interface LinkAccountParams {
   chainId?: string;
 }
 
-export interface LinkedAccountInfo {
+/**
+ * Linked account info returned from the Citadel server
+ */
+export interface BaseLinkedAccountInfo {
   /** Type of the account (e.g. "social", "external_wallet", "account_abstraction") */
   accountType: string;
   /** Address of the account */
@@ -40,7 +43,7 @@ export interface LinkAccountResult {
   idToken: string;
 
   /** Linked account info */
-  linkedAccounts: LinkedAccountInfo[];
+  linkedAccounts: BaseLinkedAccountInfo[];
 
   /** Error message from the Citadel server */
   message?: string;
@@ -57,12 +60,15 @@ export interface UnlinkAccountResult {
   idToken: string;
 
   /** Remaining linked account info */
-  linkedAccounts: LinkedAccountInfo[];
+  linkedAccounts: BaseLinkedAccountInfo[];
 
   /** Error message from the Citadel server */
   message?: string;
 }
 
+/**
+ * Payload sent to the Citadel account-linking endpoint.
+ */
 export interface CitadelLinkAccountPayload {
   /** Current idToken to refresh with updated linked accounts */
   idToken: string;

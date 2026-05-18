@@ -5,7 +5,7 @@ import {
   type AuthTokenInfo,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
-  type ConnectedAccountInfo,
+  type LinkedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_NAMESPACES,
@@ -158,7 +158,7 @@ export class MockConnector extends SafeEventEmitter implements IConnector<unknow
     throw new Error("MockConnector.generateChallengeAndSign is not implemented.");
   }
 
-  async switchAccount(_: ConnectedAccountInfo): Promise<void> {
+  async switchAccount(_: LinkedAccountInfo): Promise<void> {
     throw new Error("MockConnector.switchAccount is not implemented.");
   }
 
