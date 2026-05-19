@@ -218,6 +218,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     if (CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
+      // track connection started event
+      const startTime = Date.now();
       // remove all listeners when promise is resolved or rejected.
       // this is to prevent memory leaks if user clicks connect button multiple times.
       const handleCompletion = () => {
@@ -229,6 +231,23 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
         }
         return resolve(this.connection);
+      };
+
+      const handleConsentAccepted = async () => {
+        try {
+          // track connection completed event
+          const userInfo = await this.getUserInfo();
+          // TODO: correct event data
+          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+            connector: this.primaryConnector?.name,
+            is_mfa_enabled: userInfo?.isMfaEnabled,
+            duration: Date.now() - startTime,
+          });
+        } catch (error) {
+          log.error("Failed to track connection completed event after consent acceptance", error);
+        }
+
+        handleCompletion();
       };
 
       const handleError = (err: unknown) => {
@@ -249,7 +268,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       };
 
       if (this.consentRequired) {
-        this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
+        this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleConsentAccepted);
       }
       if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
         this.once(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
