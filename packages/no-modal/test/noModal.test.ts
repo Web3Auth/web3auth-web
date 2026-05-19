@@ -440,6 +440,78 @@ describe("Web3AuthNoModal", () => {
     });
   });
 
+  it("returns no connected accounts with providers before authorization", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+      }
+    );
+    await Promise.resolve();
+    sdk.status = CONNECTOR_STATUS.CONNECTED;
+
+    const primaryAccount = createPrimaryAccount();
+    const authProvider = { request: vi.fn() };
+    const authConnector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: authProvider as never,
+    } as never);
+
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
+    sdk.exposeSetConnectedWalletConnector(authConnector, primaryAccount);
+
+    expect(sdk.getConnectedAccountsWithProviders()).toEqual([]);
+  });
+
+  it("returns only usable connected accounts with providers after authorization", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+      }
+    );
+    await Promise.resolve();
+    sdk.status = CONNECTOR_STATUS.AUTHORIZED;
+
+    const primaryAccount = createPrimaryAccount();
+    const inactiveLinkedAccount = createExternalAccount({
+      id: "inactive-linked-account-id",
+      active: false,
+    });
+    const authProvider = { request: vi.fn() };
+    const inactiveLinkedProvider = { request: vi.fn() };
+    const authConnector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: authProvider as never,
+    } as never);
+    const inactiveLinkedConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.READY,
+      provider: inactiveLinkedProvider as never,
+    } as never);
+
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector, inactiveLinkedConnector];
+    sdk.exposeSetConnectedWalletConnector(authConnector, primaryAccount);
+    sdk.exposeSetConnectedWalletConnector(inactiveLinkedConnector, inactiveLinkedAccount);
+
+    expect(sdk.getConnectedAccountsWithProviders()).toEqual([
+      expect.objectContaining({
+        id: primaryAccount.id,
+        isPrimary: true,
+        eoaAddress: primaryAccount.eoaAddress,
+        accountType: primaryAccount.accountType,
+        active: true,
+        connector: authConnector,
+        signingProvider: authProvider,
+        connected: true,
+      }),
+    ]);
+  });
+
   it("clearCache resets persisted state fields", async () => {
     const sdk = createSdk();
     (sdk as unknown as { state: Record<string, unknown> }).state = {
@@ -685,10 +757,11 @@ describe("Web3AuthNoModal", () => {
     await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).rejects.toThrow(WalletLoginError);
   });
 
-  it("logout and getUserInfo throw when not connected", async () => {
+  it("logout, getUserInfo, and getConnectedAccountsWithProviders throw when not connected", async () => {
     const sdk = createSdk();
     await expect(sdk.logout()).rejects.toThrow(WalletLoginError);
     await expect(sdk.getUserInfo()).rejects.toThrow(WalletLoginError);
+    expect(() => sdk.getConnectedAccountsWithProviders()).toThrow(WalletLoginError);
   });
 
   it("auto-skips consent UI when prior consent is true", async () => {

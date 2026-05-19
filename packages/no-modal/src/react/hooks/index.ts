@@ -8,6 +8,7 @@ export * from "./useReceive";
 export * from "./useSwap";
 export * from "./useSwitchChain";
 export * from "./useWalletConnectScanner";
+export * from "./useWallets";
 export * from "./useWalletServicesPlugin";
 export * from "./useWalletUI";
 export * from "./useWeb3Auth";
