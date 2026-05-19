@@ -396,8 +396,12 @@ export class LoginModal {
     this.setState({ status: MODAL_STATUS.AUTHORIZING });
   };
 
-  endConnectingLoader = (params: { success: boolean; errorMessage?: string; successMessage?: string }): void => {
+  endConnectingLoader = (params: { success: boolean; errorMessage?: string; successMessage?: string; skipSuccessScreen?: boolean }): void => {
     if (params.success) {
+      if (params.skipSuccessScreen) {
+        this.setState({ modalVisibility: false });
+        return;
+      }
       // Account-linking success is terminal regardless of authentication mode (no signing step),
       // so emit the mode's terminal success status so the Loader renders the success UI and auto-closes:
       // - CONNECT_AND_SIGN expects AUTHORIZED as terminal success.

@@ -307,11 +307,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         switchResult.kind === "external" && !isExistingConnectorConnected ? (await this.getProjectAndWalletConfig())?.projectConfig : undefined;
 
       if (switchResult.kind !== "external" || isExistingConnectorConnected) {
-        await this.runNonWalletConnectAccountAction(switchResult.targetAccount.connector, () =>
-          super.processSwitchAccountResult(authConnector, switchResult, {
-            walletConnector: isExistingConnectorConnected && existingConnector ? existingConnector : undefined,
-            projectConfig,
-          })
+        await this.runNonWalletConnectAccountAction(
+          switchResult.targetAccount.connector,
+          () =>
+            super.processSwitchAccountResult(authConnector, switchResult, {
+              walletConnector: isExistingConnectorConnected && existingConnector ? existingConnector : undefined,
+              projectConfig,
+            }),
+          { skipSuccessScreen: true }
         );
         await authConnector.trackSwitchAccountCompleted(switchResult.targetAccount);
         return;
@@ -324,11 +327,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       );
 
       if (connectorToSwitchTo.name !== WALLET_CONNECTORS.WALLET_CONNECT_V2) {
-        await this.runNonWalletConnectAccountAction(switchResult.targetAccount.connector, () =>
-          super.processSwitchAccountResult(authConnector, switchResult, {
-            walletConnector: connectorToSwitchTo,
-            projectConfig,
-          })
+        await this.runNonWalletConnectAccountAction(
+          switchResult.targetAccount.connector,
+          () =>
+            super.processSwitchAccountResult(authConnector, switchResult, {
+              walletConnector: connectorToSwitchTo,
+              projectConfig,
+            }),
+          { skipSuccessScreen: true }
         );
         await authConnector.trackSwitchAccountCompleted(switchResult.targetAccount);
         return;
@@ -1025,7 +1031,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       retainConnector = shouldRetainConnector;
 
       this.resetAccountLinkingModalSession();
-      this.loginModal.endConnectingLoader({ success: true, successMessage: "" });
+      this.loginModal.endConnectingLoader({ success: true, successMessage: "", skipSuccessScreen: params.intent === ACCOUNT_LINKING_INTENT.SWITCH });
       return result;
     } catch (error) {
       const isPopupClosed = error instanceof Web3AuthError && error.code === 5114;
@@ -1111,7 +1117,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   private async runNonWalletConnectAccountAction<T>(
     connectorName: WALLET_CONNECTOR_TYPE | string,
     fn: () => Promise<T>,
-    options: { connector?: IConnector<unknown> } = {}
+    options: { connector?: IConnector<unknown>; skipSuccessScreen?: boolean } = {}
   ): Promise<T> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     const displayName = CONNECTOR_NAMES[connectorName as WALLET_CONNECTOR_TYPE] || connectorName;
@@ -1128,7 +1134,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     try {
       const result = await fn();
       this.resetAccountLinkingModalSession();
-      this.loginModal.endConnectingLoader({ success: true });
+      this.loginModal.endConnectingLoader({ success: true, skipSuccessScreen: options.skipSuccessScreen });
       return result;
     } catch (error) {
       const message = this.formatAccountLinkingErrorMessage(error);
