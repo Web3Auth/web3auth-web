@@ -234,14 +234,18 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       };
 
       const handleConsentAccepted = async () => {
-        // track connection completed event
-        const userInfo = await this.getUserInfo();
-        // TODO: correct event data
-        this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
-          connector: this.primaryConnector.name,
-          is_mfa_enabled: userInfo?.isMfaEnabled,
-          duration: Date.now() - startTime,
-        });
+        try {
+          // track connection completed event
+          const userInfo = await this.getUserInfo();
+          // TODO: correct event data
+          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+            connector: this.primaryConnector?.name,
+            is_mfa_enabled: userInfo?.isMfaEnabled,
+            duration: Date.now() - startTime,
+          });
+        } catch (error) {
+          log.error("Failed to track connection completed event after consent acceptance", error);
+        }
 
         handleCompletion();
       };
