@@ -67,7 +67,7 @@ const onLinkAccountWithPicker = async () => {
   lastUnlinkedAddress.value = null;
   const result = await linkAccount();
   if (result) {
-    await props.refreshUserInfo();
+    await syncAccountState();
     props.printToConsole("Link Wallet (picker) Result", result);
   }
 };

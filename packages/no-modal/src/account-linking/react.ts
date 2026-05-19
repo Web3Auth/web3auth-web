@@ -20,7 +20,7 @@ export interface IUseLinkAccount {
   loading: boolean;
   error: Web3AuthError | null;
   linkedAccounts: BaseLinkedAccountInfo[];
-  linkAccount(params: LinkAccountParams): Promise<LinkAccountResult | void>;
+  linkAccount(params?: LinkAccountParams): Promise<LinkAccountResult | void>;
   unlinkAccount(address: string): Promise<UnlinkAccountResult | void>;
 }
 

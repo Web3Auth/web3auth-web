@@ -375,6 +375,14 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     this.loginModal.resetAccountLinkingSession();
   }
 
+  protected formatAccountLinkingErrorMessage(error: unknown): string | undefined {
+    if (error instanceof AccountLinkingError) {
+      const isUnlink = error.code >= 5406 && error.code <= 5408;
+      return isUnlink ? `[${error.code}] Account unlinking failed` : `[${error.code}] Account linking failed`;
+    }
+    return (error as Error)?.message;
+  }
+
   protected async prepareAccountLinkingConnector(connectorName: WALLET_CONNECTOR_TYPE | string, chainId: string): Promise<IConnector<unknown>> {
     const { projectConfig } = await this.getProjectAndWalletConfig();
     const connector = await super.createLinkingWalletConnector(connectorName, chainId, projectConfig);
@@ -954,10 +962,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       });
     } catch (error) {
       await authConnector.trackSwitchAccountFailed(switchResult.targetAccount, error);
-      this.updateAccountLinkingModalSession({
-        status: ACCOUNT_LINKING_STATUS.ERRORED,
-        errorMessage: (error as Error)?.message || "Failed to switch wallet.",
-      });
       throw error;
     }
   }
@@ -1034,6 +1038,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
       if (isPopupClosed) {
         this.resetAccountLinkingModalSession();
+      } else {
+        const fallbackMessage = params.intent === ACCOUNT_LINKING_INTENT.SWITCH ? "Failed to switch wallet." : undefined;
+        const errorMessage = this.formatAccountLinkingErrorMessage(error) || fallbackMessage;
+        this.resetAccountLinkingModalSession();
+        this.loginModal.endConnectingLoader({ success: false, errorMessage });
       }
 
       this.installAccountLinkingResetOnCloseListener();
@@ -1127,11 +1136,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.loginModal.endConnectingLoader({ success: true });
       return result;
     } catch (error) {
-      let message = (error as Error)?.message;
-      if (error instanceof AccountLinkingError) {
-        const isUnlink = error.code >= 5406 && error.code <= 5408;
-        message = isUnlink ? `[${error.code}] Account unlinking failed` : `[${error.code}] Account linking failed`;
-      }
+      const message = this.formatAccountLinkingErrorMessage(error);
       this.loginModal.endConnectingLoader({ success: false, errorMessage: message });
       throw error;
     } finally {
