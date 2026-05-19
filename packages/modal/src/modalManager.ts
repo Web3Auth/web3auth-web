@@ -1127,10 +1127,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     try {
       const result = await fn();
+      this.resetAccountLinkingModalSession();
       this.loginModal.endConnectingLoader({ success: true });
       return result;
     } catch (error) {
       const message = this.formatAccountLinkingErrorMessage(error);
+      this.resetAccountLinkingModalSession();
       this.loginModal.endConnectingLoader({ success: false, errorMessage: message });
       throw error;
     } finally {

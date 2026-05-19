@@ -376,7 +376,7 @@ export class LoginModal {
   };
 
   endAccountLinkingPicker = (): void => {
-    this.accountLinkingState = { ...this.accountLinkingState, pickerActive: false };
+    this.accountLinkingState = { ...this.accountLinkingState, pickerActive: false, active: false };
     this.setState({ accountLinking: this.accountLinkingState });
   };
 
