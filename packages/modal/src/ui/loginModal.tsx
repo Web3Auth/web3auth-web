@@ -400,6 +400,9 @@ export class LoginModal {
     if (params.success) {
       if (params.skipSuccessScreen) {
         this.setState({ modalVisibility: false });
+        if (this.callbacks.onModalVisibility) {
+          this.callbacks.onModalVisibility(false);
+        }
         return;
       }
       // Account-linking success is terminal regardless of authentication mode (no signing step),
@@ -424,6 +427,9 @@ export class LoginModal {
       this.setState({
         modalVisibility: false,
       });
+      if (this.callbacks.onModalVisibility) {
+        this.callbacks.onModalVisibility(false);
+      }
     }
   };
 
