@@ -1024,14 +1024,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       const { result, retainConnector: shouldRetainConnector = false } = await params.onConnected(connector, connection);
       retainConnector = shouldRetainConnector;
 
-      this.updateAccountLinkingModalSession({
-        status: ACCOUNT_LINKING_STATUS.COMPLETED,
-        intent: params.intent,
-        walletConnectUri: "",
-        errorMessage: "",
-      });
-      this.loginModal.closeModal();
       this.resetAccountLinkingModalSession();
+      this.loginModal.endConnectingLoader({ success: true, successMessage: "" });
       return result;
     } catch (error) {
       const isPopupClosed = error instanceof Web3AuthError && error.code === 5114;

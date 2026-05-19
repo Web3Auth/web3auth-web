@@ -16,7 +16,7 @@ function ConnectWalletHeader(props: ConnectWalletHeaderProps) {
 
   return (
     <div className="wta:flex wta:items-center wta:justify-between">
-      {!hideBackButton ? (
+      {!hideBackButton && !isLinking ? (
         <button
           type="button"
           className="wta:z-20 wta:flex wta:size-5 wta:cursor-pointer wta:items-center wta:justify-center wta:rounded-full"

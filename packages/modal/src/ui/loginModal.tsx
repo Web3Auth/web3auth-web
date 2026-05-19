@@ -396,18 +396,17 @@ export class LoginModal {
     this.setState({ status: MODAL_STATUS.AUTHORIZING });
   };
 
-  endConnectingLoader = (params: { success: boolean; errorMessage?: string }): void => {
+  endConnectingLoader = (params: { success: boolean; errorMessage?: string; successMessage?: string }): void => {
     if (params.success) {
+      // Account-linking success is terminal regardless of authentication mode (no signing step),
+      // so emit the mode's terminal success status so the Loader renders the success UI and auto-closes:
+      // - CONNECT_AND_SIGN expects AUTHORIZED as terminal success.
+      // - Other modes expect CONNECTED.
+      const isConnectAndSign = this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
       this.setState({
-        status: MODAL_STATUS.CONNECTED,
-        postLoadingMessage: "modal.post-loading.connected",
+        status: isConnectAndSign ? MODAL_STATUS.AUTHORIZED : MODAL_STATUS.CONNECTED,
+        postLoadingMessage: params.successMessage ?? "modal.post-loading.connected",
       });
-      // Loader auto-closes after 1s on CONNECTED for non CONNECT_AND_SIGN modes.
-      // For CONNECT_AND_SIGN, the Loader does not auto-close on CONNECTED, so close explicitly.
-      if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
-        const delay = this.uiConfig.hideSuccessScreen ? 0 : 1000;
-        setTimeout(() => this.closeModal(), delay);
-      }
       return;
     }
 
