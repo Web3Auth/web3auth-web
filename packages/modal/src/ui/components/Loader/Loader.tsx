@@ -78,7 +78,7 @@ function ErroredStatus(props: ErroredStatusType) {
           clipRule="evenodd"
         />
       </svg>
-      <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-400">{message}</p>
+      {message && <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-400">{message}</p>}
     </div>
   );
 }
