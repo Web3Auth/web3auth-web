@@ -125,7 +125,7 @@ const Web3AuthWagmiProvider = defineComponent({
         const newConnection = connection.value;
         const newEth = newConnection?.ethereumProvider ?? null;
         if (newIsConnected && newConnection && newEth) {
-          // `ethereumProvider` is a stable proxy (`commonJRPCProvider`) across account switches,
+          // Linked-account switches can reuse or replace the underlying wallet provider,
           // so key wagmi resyncs off the Web3Auth connection object instead of provider identity.
           if (lastSyncedWeb3AuthConnection.value !== newConnection) {
             if (getWeb3authConnector(wagmiConfig)) {

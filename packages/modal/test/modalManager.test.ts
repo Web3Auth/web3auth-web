@@ -27,6 +27,7 @@ import {
   Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
+  type IConnector,
   type LinkAccountResult,
   type ProjectConfig,
   WALLET_CONNECTORS,
@@ -46,6 +47,14 @@ class TestWeb3Auth extends Web3Auth {
 
   public exposeGetInitializationTrackData() {
     return this.getInitializationTrackData();
+  }
+
+  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: ConnectedAccountInfo | null) {
+    this.setConnectedWalletConnector(connector, account);
+  }
+
+  public exposeSetActiveWalletConnectorKey(account?: ConnectedAccountInfo | null) {
+    this.setActiveWalletConnectorKey(account);
   }
 }
 
@@ -122,22 +131,29 @@ describe("Web3Auth (modal)", () => {
     const open = vi.fn();
     (sdk as unknown as { loginModal: { open: () => void } }).loginModal = { open };
     (sdk as unknown as { state: Record<string, unknown> }).state = {
-      connectedConnectorName: WALLET_CONNECTORS.AUTH,
+      primaryConnectorName: WALLET_CONNECTORS.AUTH,
       cachedConnector: null,
       currentChainId: "0x1",
       idToken: null,
       accessToken: null,
       refreshToken: null,
     };
-    (sdk as unknown as { currentConnection: Record<string, unknown> }).currentConnection = {
+    const currentConnection = {
       ethereumProvider: {},
+      // @ts-expect-error - solanaWallet is not used in this test
       solanaWallet: null,
       connectorName: WALLET_CONNECTORS.AUTH,
     };
+    sdk.exposeSetConnectedWalletConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      connected: true,
+      provider: currentConnection.ethereumProvider,
+      solanaWallet: currentConnection.solanaWallet,
+    } as never);
     sdk.status = CONNECTED_STATUSES[0];
 
     const connection = await sdk.connect();
-    expect(connection).toEqual((sdk as unknown as { currentConnection: Record<string, unknown> }).currentConnection);
+    expect(connection).toEqual(currentConnection);
     expect(open).not.toHaveBeenCalled();
   });
 
@@ -176,7 +192,7 @@ describe("Web3Auth (modal)", () => {
   it("connect resolves on CONSENT_ACCEPTED when consent is required", async () => {
     const sdk = createSdk({
       uiConfig: {
-        consentConfig: { required: true },
+        consentRequired: true,
         privacyPolicy: "https://example.com/privacy",
         tncLink: "https://example.com/terms",
       } as never,
@@ -241,9 +257,10 @@ describe("Web3Auth (modal)", () => {
     );
 
     vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
-    vi.spyOn(sdk as unknown as { getLinkedSigningConnector: (accountId: string) => unknown }, "getLinkedSigningConnector").mockReturnValue(
-      existingConnector as never
-    );
+    vi.spyOn(
+      sdk as unknown as { getConnectedWalletConnector: (account?: ConnectedAccountInfo | null) => unknown },
+      "getConnectedWalletConnector"
+    ).mockReturnValue(existingConnector as never);
 
     await sdk.switchAccount(targetAccount);
 
@@ -324,7 +341,10 @@ describe("Web3Auth (modal)", () => {
     prepareAccountSwitchConnectorSpy.mockResolvedValue(connector as never);
 
     vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
-    vi.spyOn(sdk as unknown as { getLinkedSigningConnector: (accountId: string) => unknown }, "getLinkedSigningConnector").mockReturnValue(null);
+    vi.spyOn(
+      sdk as unknown as { getConnectedWalletConnector: (account?: ConnectedAccountInfo | null) => unknown },
+      "getConnectedWalletConnector"
+    ).mockReturnValue(null);
 
     await sdk.switchAccount(targetAccount);
 

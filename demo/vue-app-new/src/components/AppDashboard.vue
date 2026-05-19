@@ -17,15 +17,7 @@ import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignMessage as useSolanaSignMessage, useSolanaWallet, useSolanaClient } from "@web3auth/modal/vue/solana";
-import {
-  useConnection,
-  useBalance,
-  useChainId,
-  useSignMessage,
-  useSignTypedData,
-  useSwitchChain as useWagmiSwitchChain,
-  useConfig,
-} from "@wagmi/vue";
+import { useConnection, useBalance, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain, useConfig } from "@wagmi/vue";
 import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
 import { parseEther } from "viem";
 import { createWalletTransactionSigner, toAddress } from "@solana/client";
@@ -42,7 +34,7 @@ const { t } = useI18n({ useScope: "global" });
 const formData = formDataStore;
 
 const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
-const { userInfo, loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
+const { loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
 const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
@@ -56,7 +48,6 @@ const { getAuthTokenInfo, loading: getAuthTokenInfoLoading } = useAuthTokenInfo(
 const { status, address } = useConnection();
 const { mutateAsync: signTypedDataAsync } = useSignTypedData();
 const { mutateAsync: signMessageAsync } = useSignMessage();
-const wagmiChainId = useChainId();
 const balance = useBalance({
   address: address,
 });
@@ -105,7 +96,7 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return Boolean(conn?.solanaWallet);
 
     case "walletServices":
-      return web3Auth.value?.connectedConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
+      return web3Auth.value?.primaryConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
 
     default: {
       return false;
@@ -182,7 +173,7 @@ const onGetPrivateKey = async () => {
 };
 
 const getConnectedChainId = async () => {
-  printToConsole("chainId", wagmiChainId.value);
+  printToConsole("chainId", web3Auth.value?.currentChain?.chainId);
 };
 
 const onGetBalance = async () => {
@@ -423,12 +414,7 @@ const onSwitchChain = async () => {
             {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
         </div>
-        <AccountLinkingSection
-          :connected-wallets="userInfo?.connectedAccounts ?? []"
-          :show-link-wallet="isDisplay('walletServices')"
-          :refresh-user-info="getUserInfo"
-          :print-to-console="printToConsole"
-        />
+        <AccountLinkingSection :show-link-wallet="isDisplay('walletServices')" :print-to-console="printToConsole" />
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>

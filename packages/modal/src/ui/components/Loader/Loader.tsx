@@ -188,7 +188,7 @@ function ConsentRequiredStatus(props: {
           type="button"
           disabled={isSubmitting}
           onClick={handleAccept}
-          className="w3a--btn wta:rounded-full wta:border-app-primary-600 wta:bg-app-primary-600 wta:hover:border-app-primary-700 wta:hover:bg-app-primary-700 wta:disabled:opacity-60 wta:dark:border-app-primary-600 wta:dark:bg-app-primary-600 wta:dark:hover:border-app-primary-700 wta:dark:hover:bg-app-primary-700"
+          className="w3a--btn wta:rounded-full wta:border-app-primary-600! wta:bg-app-primary-600 wta:hover:border-app-primary-700! wta:hover:bg-app-primary-700! wta:disabled:opacity-60 wta:dark:border-app-primary-600! wta:dark:bg-app-primary-600 wta:dark:hover:border-app-primary-700! wta:dark:hover:bg-app-primary-700!"
         >
           <p className="wta:text-app-onPrimary">{t("modal.consent.accept", { defaultValue: "Accept" })}</p>
         </button>

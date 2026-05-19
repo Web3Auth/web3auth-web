@@ -25,6 +25,13 @@ import { type default as WsEmbed, WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed
 import deepmerge from "deepmerge";
 
 import {
+  CITADEL_NETWORK,
+  LinkAccountResult,
+  makeAccountLinkingRequest,
+  makeAccountUnlinkingRequest,
+  UnlinkAccountResult,
+} from "../../account-linking";
+import {
   AccountLinkingError,
   Analytics,
   ANALYTICS_EVENTS,
@@ -37,7 +44,6 @@ import {
   cloneDeep,
   CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
-  ConnectedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
@@ -53,10 +59,9 @@ import {
   getErrorAnalyticsProperties,
   IConnector,
   IProvider,
-  LinkAccountResult,
+  LinkedAccountInfo,
   log,
   parseChainNamespaceFromCitadelResponse,
-  UnlinkAccountResult,
   UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -64,7 +69,6 @@ import {
   WalletLoginError,
   Web3AuthError,
 } from "../../base";
-import { CITADEL_NETWORK, makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../../base/account-linking";
 import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
 import {
@@ -77,7 +81,7 @@ import {
   IAuthConnector,
   type LoginSettings,
   type PrivateKeyProvider,
-  UserInfoWithConnectedAccounts,
+  UserInfoWithLinkedAccounts,
   type WalletServicesSettings,
 } from "./interface";
 
@@ -336,11 +340,28 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   async getUserInfo(): Promise<Partial<UserInfo>> {
     if (!this.canAuthorize) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
-    const [userInfo, connectedAccounts] = await Promise.all([this.authInstance.getUserInfo(), this.getConnectedAccounts()]);
+    const [userInfo, linkedAccounts] = await Promise.all([this.authInstance.getUserInfo(), this.getLinkedAccounts()]);
     return {
       ...userInfo,
-      connectedAccounts,
+      linkedAccounts,
     };
+  }
+
+  async getLinkedAccounts(): Promise<LinkedAccountInfo[]> {
+    const accessToken = await this.authInstance.authSessionManager.getAccessToken();
+    if (!accessToken) throw WalletLoginError.connectionError("Could not obtain an access token from the current AUTH session.");
+
+    const citadelUserInfo = await get<UserInfoWithLinkedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    });
+    const linkedAccounts = citadelUserInfo?.accounts || [];
+    return linkedAccounts.map((account) => ({
+      ...account,
+      // by default, the primary account is the active account
+      active: account.isPrimary,
+    }));
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
@@ -389,19 +410,19 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   public async generateChallengeAndSign(): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
-    // we do not support this for auth connector, as of now.
+    // we do not support this for auth connector, as of now. since auth login returns a valid idToken
     throw new Error("Not implemented");
   }
 
-  public async switchAccount(account: ConnectedAccountInfo, context: AuthConnectorSwitchAccountContext): Promise<AuthConnectorSwitchAccountResult> {
+  public async switchAccount(account: LinkedAccountInfo, context: AuthConnectorSwitchAccountContext): Promise<AuthConnectorSwitchAccountResult> {
     if (!CONNECTED_STATUSES.includes(this.status)) {
       throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before switching accounts.");
     }
 
     try {
       const userInfo = await this.getUserInfo();
-      const connectedAccounts = userInfo.connectedAccounts ?? [];
-      const targetAccount = connectedAccounts.find((candidate) => candidate.id === account.id);
+      const linkedAccounts = userInfo.linkedAccounts ?? [];
+      const targetAccount = linkedAccounts.find((candidate) => candidate.id === account.id);
       if (!targetAccount) {
         throw AccountLinkingError.requestFailed(`No connected wallet matches account id "${account.id}". Refresh user info and try again.`);
       }
@@ -415,7 +436,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_STARTED, this.getSwitchAccountTrackData(targetAccount));
 
       if (targetAccount.connector === WALLET_CONNECTORS.AUTH && targetAccount.isPrimary) {
-        const activeChainId = this.getChainIdForConnectedAccount(targetAccount, this.provider?.chainId ?? context.currentChainId);
+        const activeChainId = this.getChainIdForLinkedAccount(targetAccount, this.provider?.chainId ?? context.currentChainId);
         const ethereumProvider = this.provider;
         const solanaWallet = this.solanaWallet;
         if (!ethereumProvider && !solanaWallet) {
@@ -438,7 +459,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         kind: "external",
         targetAccount,
         activeAccount: targetAccount,
-        activeChainId: this.getChainIdForConnectedAccount(targetAccount, context.currentChainId),
+        activeChainId: this.getChainIdForLinkedAccount(targetAccount, context.currentChainId),
       };
     } catch (error) {
       await this.trackSwitchAccountFailed(account, error);
@@ -446,14 +467,14 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     }
   }
 
-  public async trackSwitchAccountCompleted(account: ConnectedAccountInfo): Promise<void> {
+  public async trackSwitchAccountCompleted(account: LinkedAccountInfo): Promise<void> {
     await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_COMPLETED, {
       ...this.getSwitchAccountTrackData(account),
       connector: account.connector,
     });
   }
 
-  public async trackSwitchAccountFailed(account: Pick<ConnectedAccountInfo, "id" | "accountType" | "eoaAddress">, error: unknown): Promise<void> {
+  public async trackSwitchAccountFailed(account: Pick<LinkedAccountInfo, "id" | "accountType" | "eoaAddress">, error: unknown): Promise<void> {
     await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_SWITCH_FAILED, {
       ...this.getSwitchAccountTrackData(account),
       ...getErrorAnalyticsProperties(error),
@@ -521,11 +542,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         await walletConnector.disconnect({ cleanup: true });
       } catch (disconnectError) {
         log.debug("Failed to disconnect wallet connector after linking failure", disconnectError);
-        throw disconnectError;
       }
       throw error;
     }
   }
+
   public async unlinkAccount(params: AuthConnectorUnlinkAccountParams): Promise<UnlinkAccountResult> {
     if (!CONNECTED_STATUSES.includes(this.status)) {
       throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before unlinking an account.");
@@ -539,11 +560,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_UNLINKING_STARTED, trackData);
 
     try {
-      const { accessToken, idToken, connectedAccounts } = await this.getPrimaryAuthSession(authSessionTokens, {
-        includeConnectedAccounts: true,
+      const { accessToken, idToken, linkedAccounts } = await this.getPrimaryAuthSession(authSessionTokens, {
+        includeLinkedAccounts: true,
       });
 
-      const network = this.getNetworkForUnlinkAddress(connectedAccounts, address);
+      const network = this.getNetworkForUnlinkAddress(linkedAccounts, address);
       const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
       const result = await makeAccountUnlinkingRequest(authServerUrl, accessToken, {
         idToken,
@@ -566,20 +587,18 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     }
   }
 
-  public getChainIdForConnectedAccount(
-    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector">,
-    preferredChainId?: string | null
-  ): string {
+  public getChainIdForLinkedAccount(account: Pick<LinkedAccountInfo, "chainNamespace" | "connector">, preferredChainId?: string | null): string {
+    const accountChainNamespace = account.chainNamespace ? parseChainNamespaceFromCitadelResponse(account.chainNamespace) : null;
+
     if (preferredChainId) {
       const preferredChain = this.coreOptions.chains.find((chain) => chain.chainId === preferredChainId);
-      if (preferredChain && (!account.chainNamespace || preferredChain.chainNamespace === account.chainNamespace)) {
+      if (preferredChain && (!accountChainNamespace || preferredChain.chainNamespace === accountChainNamespace)) {
         return preferredChainId;
       }
     }
 
-    if (account.chainNamespace) {
-      const parsedChainNamespace = parseChainNamespaceFromCitadelResponse(account.chainNamespace);
-      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === parsedChainNamespace);
+    if (accountChainNamespace) {
+      const namespaceChain = this.coreOptions.chains.find((chain) => chain.chainNamespace === accountChainNamespace);
       if (namespaceChain) {
         return namespaceChain.chainId;
       }
@@ -590,7 +609,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   public async assertSwitchAccountConnectorMatchesTarget(
     connector: IConnector<unknown>,
-    account: Pick<ConnectedAccountInfo, "chainNamespace" | "connector" | "eoaAddress">
+    account: Pick<LinkedAccountInfo, "chainNamespace" | "connector" | "eoaAddress">
   ): Promise<void> {
     if (!account.chainNamespace) {
       throw AccountLinkingError.requestFailed(`Could not determine the chain namespace for linked account "${account.eoaAddress}".`);
@@ -626,7 +645,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     }
   }
 
-  public toSwitchAccountConnectorError(account: Pick<ConnectedAccountInfo, "connector" | "eoaAddress">, error: unknown): AccountLinkingError {
+  public toSwitchAccountConnectorError(account: Pick<LinkedAccountInfo, "connector" | "eoaAddress">, error: unknown): AccountLinkingError {
     if (error instanceof AccountLinkingError && error.code === 5401) {
       return error;
     }
@@ -648,7 +667,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     );
   }
 
-  private getSwitchAccountTrackData(account: Pick<ConnectedAccountInfo, "id" | "accountType" | "eoaAddress">) {
+  private getSwitchAccountTrackData(account: Pick<LinkedAccountInfo, "id" | "accountType" | "eoaAddress">) {
     return {
       connector: this.name,
       account_id: account.id,
@@ -659,24 +678,24 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   private async getPrimaryAuthSession(
     authSessionTokens: AuthConnectorSessionTokens,
-    options: { includeConnectedAccounts?: boolean } = {}
-  ): Promise<{ accessToken: string; idToken: string; connectedAccounts: ConnectedAccountInfo[] }> {
+    options: { includeLinkedAccounts?: boolean } = {}
+  ): Promise<{ accessToken: string; idToken: string; linkedAccounts: LinkedAccountInfo[] }> {
     const { accessToken: cachedAccessToken, idToken: cachedIdToken } = authSessionTokens;
-    const { includeConnectedAccounts = false } = options;
+    const { includeLinkedAccounts = false } = options;
     let accessToken = cachedAccessToken;
     let idToken = cachedIdToken;
-    let connectedAccounts: ConnectedAccountInfo[] = [];
+    let linkedAccounts: LinkedAccountInfo[] = [];
 
-    if (includeConnectedAccounts) {
+    if (includeLinkedAccounts) {
       const userInfoPromise = this.getUserInfo();
       if (!accessToken || !idToken) {
         const [tokenInfo, userInfo] = await Promise.all([this.getAuthTokenInfo(), userInfoPromise]);
         accessToken = tokenInfo.accessToken;
         idToken = tokenInfo.idToken;
-        connectedAccounts = userInfo.connectedAccounts ?? [];
+        linkedAccounts = userInfo.linkedAccounts ?? [];
       } else {
         const userInfo = await userInfoPromise;
-        connectedAccounts = userInfo.connectedAccounts ?? [];
+        linkedAccounts = userInfo.linkedAccounts ?? [];
       }
     } else if (!accessToken || !idToken) {
       const tokenInfo = await this.getAuthTokenInfo();
@@ -688,10 +707,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       throw AccountLinkingError.primaryTokenNotAvailable("Could not obtain an identity token from the current AUTH session.");
     }
 
-    return { accessToken, idToken, connectedAccounts };
+    return { accessToken, idToken, linkedAccounts };
   }
 
-  private getNetworkForUnlinkAddress(accounts: ConnectedAccountInfo[], address: string): CITADEL_NETWORK {
+  private getNetworkForUnlinkAddress(accounts: LinkedAccountInfo[], address: string): CITADEL_NETWORK {
     const matchedAccount = accounts.find((account) => {
       if (!account.chainNamespace || parseChainNamespaceFromCitadelResponse(account.chainNamespace) !== CHAIN_NAMESPACES.EIP155) {
         return false;
@@ -1096,23 +1115,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     delete loginParams.chainId;
 
     return this.authInstance.postLoginInitiatedMessage(loginParams as LoginParams);
-  }
-
-  private async getConnectedAccounts(): Promise<ConnectedAccountInfo[]> {
-    const accessToken = await this.authInstance.authSessionManager.getAccessToken();
-    if (!accessToken) throw WalletLoginError.connectionError("Could not obtain an access token from the current AUTH session.");
-
-    const citadelUserInfo = await get<UserInfoWithConnectedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    const connectedAccounts = citadelUserInfo?.accounts || [];
-    return connectedAccounts.map((account) => ({
-      ...account,
-      // by default, the primary account is the active account
-      active: account.isPrimary,
-    }));
   }
 
   private async auditOAuditProgress(

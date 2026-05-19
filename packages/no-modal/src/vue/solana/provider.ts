@@ -51,6 +51,9 @@ export const SolanaProvider = defineComponent({
           if (!chainConfig) return;
         }
 
+        // only reconnect for the primary connector
+        if (newConnection.connectorName !== web3Auth.value?.primaryConnectorName) return;
+
         const prevClient = clientRef.value;
         try {
           // create a wallet standard connector from connected wallet

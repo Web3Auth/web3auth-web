@@ -139,7 +139,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED) {
           if (!isInitialized.value) isInitialized.value = true;
           isConnected.value = true;
-          connection.value = newWeb3Auth.connection;
+          connection.value = web3Auth.value!.connection;
           chainId.value = web3Auth.value!.currentChainId;
           chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
         }
@@ -158,7 +158,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED || web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
           if (!isInitialized.value) isInitialized.value = true;
           isConnected.value = true;
-          connection.value = newWeb3Auth.connection;
+          connection.value = web3Auth.value!.connection;
           chainId.value = web3Auth.value!.currentChainId;
           chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
           if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
@@ -188,10 +188,10 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
       };
 
       const connectionUpdatedListener = () => {
-        status.value = newWeb3Auth.status;
-        connection.value = newWeb3Auth.connection;
-        chainId.value = newWeb3Auth.currentChainId;
-        chainNamespace.value = newWeb3Auth.currentChain?.chainNamespace ?? null;
+        status.value = web3Auth.value!.status;
+        connection.value = web3Auth.value!.connection;
+        chainId.value = web3Auth.value!.currentChainId;
+        chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
       };
 
       if (prevWeb3Auth && newWeb3Auth !== prevWeb3Auth) {

@@ -16,7 +16,7 @@ import {
   type WEB3AUTH_NETWORK_TYPE,
 } from "@web3auth/auth";
 
-import { LinkedAccountInfo } from "../account-linking/interfaces";
+import { BaseLinkedAccountInfo } from "../../account-linking/interfaces";
 import { type Analytics } from "../analytics";
 import type { ChainNamespaceType, ConnectorNamespaceType, CustomChainConfig } from "../chain/IChainInterface";
 import type { IWeb3AuthCoreOptions } from "../core/IWeb3Auth";
@@ -25,8 +25,10 @@ import type { LoginModeType, ProjectConfig } from "../interfaces";
 import type { ProviderEvents, SafeEventEmitterProvider } from "../provider/IProvider";
 import { WALLET_CONNECTOR_TYPE } from "../wallet";
 import { CONNECTOR_CATEGORY, CONNECTOR_EVENTS, CONNECTOR_STATUS } from "./constants";
-
-export interface ConnectedAccountInfo extends LinkedAccountInfo {
+/**
+ *
+ */
+export interface LinkedAccountInfo extends BaseLinkedAccountInfo {
   /** Linked account id */
   id: string;
 
@@ -49,7 +51,7 @@ export interface ConnectedAccountInfo extends LinkedAccountInfo {
   active: boolean;
 }
 
-export type UserInfo = AuthUserInfo & { connectedAccounts?: ConnectedAccountInfo[] };
+export type UserInfo = AuthUserInfo & { linkedAccounts?: LinkedAccountInfo[] };
 
 export { UX_MODE, UX_MODE_TYPE, WEB3AUTH_NETWORK, WEB3AUTH_NETWORK_TYPE };
 
@@ -170,6 +172,8 @@ export interface IConnectorDataEvent {
   data: unknown;
 }
 
+export type CONNECTION_UPDATED_EVENT_DATA = Connection;
+
 export type ConnectorEvents = {
   [CONNECTOR_EVENTS.NOT_READY]: () => void;
   [CONNECTOR_EVENTS.READY]: (connector: WALLET_CONNECTOR_TYPE | string) => void;
@@ -186,7 +190,7 @@ export type ConnectorEvents = {
   [CONNECTOR_EVENTS.MFA_ENABLED]: (isMFAEnabled: boolean) => void;
   [CONNECTOR_EVENTS.CONSENT_REQUIRING]: (data: CONNECTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.CONSENT_ACCEPTED]: (data: CONNECTED_EVENT_DATA & { loginMode: LoginModeType }) => void;
-  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: () => void;
+  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: (data: CONNECTION_UPDATED_EVENT_DATA) => void;
 };
 
 export interface BaseConnectorConfig {
@@ -261,3 +265,10 @@ export type LoginMethodConfig = Partial<
 export type WalletConnectV2Data = { uri: string };
 
 export type MetaMaskConnectorData = { uri: string };
+
+export type ConnectedAccountsWithProviders = Omit<LinkedAccountInfo, "connector"> & {
+  connector: IConnector<unknown>;
+  signingProvider: IProvider | null;
+  solanaWallet: Connection["solanaWallet"];
+  connected: boolean;
+};

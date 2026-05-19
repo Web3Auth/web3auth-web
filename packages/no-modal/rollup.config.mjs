@@ -9,6 +9,9 @@ const allDeps = [...Object.keys(pkg.dependencies || {}), ...Object.keys(pkg.peer
 export const baseConfig = {
   input: [
     "./src/index.ts",
+    "./src/account-linking/index.ts",
+    "./src/account-linking/react.ts",
+    "./src/account-linking/vue.ts",
     "./src/x402/index.ts",
     "./src/x402/react.ts",
     "./src/x402/vue.ts",

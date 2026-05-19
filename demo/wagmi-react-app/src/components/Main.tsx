@@ -1,10 +1,10 @@
 import { CHAIN_NAMESPACES, WALLET_CONNECTORS } from "@web3auth/modal";
+import { useLinkAccount } from "@web3auth/modal/account-linking/react";
 import {
   useAuthTokenInfo,
   useChain,
   useCheckout,
   useEnableMFA,
-  useLinkAccount,
   useManageMFA,
   useSwitchChain as useWeb3AuthSwitchChain,
   useWalletConnectScanner,

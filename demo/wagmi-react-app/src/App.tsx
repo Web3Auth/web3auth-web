@@ -34,12 +34,6 @@ const chains: Web3AuthContextConfig["web3AuthOptions"]["chains"] = [
   },
 ];
 
-const consentConfig = {
-  required: true,
-  privacyPolicy: "https://example.com/privacy",
-  tncLink: "https://example.com/terms",
-};
-
 type ConsentConfigMode = "disabled" | "required";
 
 function App() {
@@ -56,7 +50,9 @@ function App() {
 
     if (consentConfigMode === "required") {
       web3AuthOptions.uiConfig = {
-        consentConfig,
+        consentRequired: true,
+        privacyPolicy: "https://example.com/privacy",
+        tncLink: "https://example.com/terms",
       };
     }
 

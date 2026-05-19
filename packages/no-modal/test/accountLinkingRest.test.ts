@@ -1,7 +1,7 @@
 import { post } from "@toruslabs/http-helpers";
 import { afterEach, describe, expect, it, vi } from "vitest";
 
-import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../src/base/account-linking/rest";
+import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../src/account-linking/rest";
 
 vi.mock("@toruslabs/http-helpers", () => ({
   post: vi.fn(),

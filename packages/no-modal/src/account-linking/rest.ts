@@ -1,6 +1,6 @@
 import { post } from "@toruslabs/http-helpers";
 
-import { AccountLinkingError } from "../errors";
+import { AccountLinkingError } from "../base/errors";
 import { CitadelLinkAccountPayload, LinkAccountResult, UnlinkAccountPayload, UnlinkAccountResult } from "./interfaces";
 
 /**

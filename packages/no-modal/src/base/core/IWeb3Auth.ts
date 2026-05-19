@@ -12,13 +12,13 @@ import {
 } from "@web3auth/auth";
 import { type WsEmbedParams } from "@web3auth/ws-embed";
 
-import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "../account-linking";
+import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "../../account-linking";
 import { type ChainNamespaceType, type CustomChainConfig } from "../chain/IChainInterface";
 import {
   type AuthTokenInfo,
   CONNECTED_EVENT_DATA,
-  ConnectedAccountInfo,
   type Connection,
+  CONNECTION_UPDATED_EVENT_DATA,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   type CONNECTOR_STATUS_TYPE,
@@ -26,6 +26,7 @@ import {
   type ConnectorFn,
   type IBaseProvider,
   type IConnector,
+  LinkedAccountInfo,
   type UserInfo,
   type WEB3AUTH_NETWORK_TYPE,
 } from "../connector";
@@ -214,7 +215,7 @@ export type LoginParamMap = {
 export interface IWeb3AuthCore extends SafeEventEmitter {
   currentChainId: string | null;
   readonly coreOptions: IWeb3AuthCoreOptions;
-  connectedConnectorName: WALLET_CONNECTOR_TYPE | null;
+  primaryConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
   connection: Connection | null;
@@ -249,9 +250,9 @@ export interface IWeb3Auth extends IWeb3AuthCore {
    * The auxiliary connector stays connected (not torn down after switch). The previous auxiliary
    * connector is disconnected when starting another switch or when the primary session disconnects.
    *
-   * Requires an AUTH primary session and a matching `userInfo.connectedAccounts` entry.
+   * Requires an AUTH primary session and a matching `userInfo.linkedAccounts` entry.
    */
-  switchAccount(account: ConnectedAccountInfo): Promise<void>;
+  switchAccount(account: LinkedAccountInfo): Promise<void>;
 
   /**
    * Link an external wallet to the currently authenticated user account
@@ -285,7 +286,7 @@ export type Web3AuthNoModalEvents = Omit<ConnectorEvents, "connected" | "errored
   [CONNECTOR_EVENTS.CONSENT_REQUIRING]: () => void;
   [CONNECTOR_EVENTS.CONSENT_ACCEPTED]: (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => void;
   [CONNECTOR_EVENTS.ERRORED]: (error: Web3AuthError, loginMode: LoginModeType) => void;
-  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: () => void;
+  [CONNECTOR_EVENTS.CONNECTION_UPDATED]: (data: CONNECTION_UPDATED_EVENT_DATA) => void;
   MODAL_VISIBILITY: (visibility: boolean) => void;
 };
 

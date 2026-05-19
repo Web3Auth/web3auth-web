@@ -12,7 +12,6 @@ import {
   cloneDeep,
   type CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
-  type ConnectedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_EVENTS,
@@ -30,6 +29,7 @@ import {
   IWeb3AuthState,
   type LinkAccountParams,
   type LinkAccountResult,
+  type LinkedAccountInfo,
   log,
   LOGIN_MODE,
   type LoginMethodConfig,
@@ -102,7 +102,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     if (!this.options.uiConfig) this.options.uiConfig = {};
     if (this.options.modalConfig) this.modalConfig = this.options.modalConfig;
-    this.consentRequired = this.options.uiConfig.consentConfig?.required || false;
+    // consent required is true if the consent required is true and the privacy policy and tnc link are set
+    this.consentRequired =
+      (this.options.uiConfig.consentRequired && Boolean(this.options.uiConfig.privacyPolicy) && Boolean(this.options.uiConfig.tncLink)) || false;
 
     log.info("modalConfig", this.modalConfig);
   }
@@ -166,7 +168,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           onDeclineConsent: this.onDeclineConsent,
         }
       );
-      this.consentRequired = this.options.uiConfig.consentConfig?.required || false;
+      this.consentRequired = this.loginModal.consentRequired;
       await withAbort(() => this.loginModal.initModal(), signal);
 
       // setup common JRPC provider
@@ -217,9 +219,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   public async connect(): Promise<Connection | null> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     // if already connected return connection
-    if (this.connectedConnectorName && CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
+    if (CONNECTED_STATUSES.includes(this.status) && this.connection) return this.connection;
     this.loginModal.open();
     return new Promise((resolve, reject) => {
+      // track connection started event
+      const startTime = Date.now();
       // remove all listeners when promise is resolved or rejected.
       // this is to prevent memory leaks if user clicks connect button multiple times.
       const handleCompletion = () => {
@@ -231,6 +235,23 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
           this.removeListener(CONNECTOR_EVENTS.CONNECTED, handleCompletion);
         }
         return resolve(this.connection);
+      };
+
+      const handleConsentAccepted = async () => {
+        try {
+          // track connection completed event
+          const userInfo = await this.getUserInfo();
+          // TODO: correct event data
+          this.analytics.track(ANALYTICS_EVENTS.CONNECTION_COMPLETED, {
+            connector: this.primaryConnector?.name,
+            is_mfa_enabled: userInfo?.isMfaEnabled,
+            duration: Date.now() - startTime,
+          });
+        } catch (error) {
+          log.error("Failed to track connection completed event after consent acceptance", error);
+        }
+
+        handleCompletion();
       };
 
       const handleError = (err: unknown) => {
@@ -251,7 +272,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       };
 
       if (this.consentRequired) {
-        this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleCompletion);
+        this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, handleConsentAccepted);
       }
       if (this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
         this.once(CONNECTOR_EVENTS.AUTHORIZED, handleCompletion);
@@ -268,7 +289,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     await super.completeConsentAcceptance();
   }
 
-  public async switchAccount(account: ConnectedAccountInfo): Promise<void> {
+  public async switchAccount(account: LinkedAccountInfo): Promise<void> {
     const authConnector = this.getMainAuthConnector();
     const switchResult = await authConnector.switchAccount(account, {
       activeAccount: this.activeAccount,
@@ -279,7 +300,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
 
     try {
-      const existingConnector = switchResult.kind === "external" ? this.getLinkedSigningConnector(switchResult.targetAccount.id) : null;
+      const existingConnector = switchResult.kind === "external" ? this.getConnectedWalletConnector(switchResult.targetAccount) : null;
       // check if the existing connector is connected and usable, then we can switch to it without re-connecting again
       const isExistingConnectorConnected = Boolean(existingConnector && this.hasUsableConnectedSwitchConnector(existingConnector));
       const projectConfig =
@@ -758,7 +779,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       if (
         connector.status === CONNECTOR_STATUS.NOT_READY &&
         this.cachedConnector !== connectorName &&
-        this.currentConnection?.connectorName !== connectorName
+        this.connection?.connectorName !== connectorName
       ) {
         try {
           this.subscribeToConnectorEvents(connector);

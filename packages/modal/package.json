@@ -112,6 +112,21 @@
       "require": "./dist/lib.cjs/packages/modal/src/index.js",
       "types": "./dist/lib.cjs/types/index.d.ts"
     },
+    "./account-linking": {
+      "import": "./dist/lib.esm/packages/modal/src/account-linking/index.js",
+      "require": "./dist/lib.cjs/packages/modal/src/account-linking/index.js",
+      "types": "./dist/lib.cjs/types/account-linking/index.d.ts"
+    },
+    "./account-linking/react": {
+      "import": "./dist/lib.esm/packages/modal/src/account-linking/react.js",
+      "require": "./dist/lib.cjs/packages/modal/src/account-linking/react.js",
+      "types": "./dist/lib.cjs/types/account-linking/react.d.ts"
+    },
+    "./account-linking/vue": {
+      "import": "./dist/lib.esm/packages/modal/src/account-linking/vue.js",
+      "require": "./dist/lib.cjs/packages/modal/src/account-linking/vue.js",
+      "types": "./dist/lib.cjs/types/account-linking/vue.d.ts"
+    },
     "./x402": {
       "import": "./dist/lib.esm/packages/modal/src/x402/index.js",
       "require": "./dist/lib.cjs/packages/modal/src/x402/index.js",
@@ -170,6 +185,15 @@
   },
   "typesVersions": {
     "*": {
+      "account-linking": [
+        "./dist/lib.cjs/types/account-linking/index.d.ts"
+      ],
+      "account-linking/react": [
+        "./dist/lib.cjs/types/account-linking/react.d.ts"
+      ],
+      "account-linking/vue": [
+        "./dist/lib.cjs/types/account-linking/vue.d.ts"
+      ],
       "x402": [
         "./dist/lib.cjs/types/x402/index.d.ts"
       ],
