@@ -15,7 +15,14 @@ import {
 } from "react";
 
 import { PAGES } from "../constants";
-import { type ExternalWalletEventType, MODAL_STATUS, ModalState, type SocialLoginEventType, StateEmitterEvents } from "../interfaces";
+import {
+  DEFAULT_ACCOUNT_LINKING_STATE,
+  type ExternalWalletEventType,
+  MODAL_STATUS,
+  ModalState,
+  type SocialLoginEventType,
+  StateEmitterEvents,
+} from "../interfaces";
 import { useWidget } from "./WidgetContext";
 
 type StateListener = {
@@ -62,6 +69,7 @@ const initialModalState: ModalState = {
   showExternalWalletsOnly: false,
   walletConnectUri: "",
   metamaskConnectUri: "",
+  accountLinking: DEFAULT_ACCOUNT_LINKING_STATE,
 
   // Config State
   socialLoginsConfig: {

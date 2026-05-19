@@ -135,6 +135,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
     this.connectorOptions.connectorSettings = deepmerge(wc2Settings.connectorSettings || {}, this.connectorOptions.connectorSettings || {});
     const { connectorSettings } = this.connectorOptions;
+
     this.connector = await Client.init(connectorSettings?.walletConnectInitOptions);
     this.wcProvider = new WalletConnectV2Provider({
       config: { chain: chainConfig, chains: this.coreOptions.chains },
@@ -276,7 +277,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       this.status = CONNECTOR_STATUS.READY;
     }
     this.activeSession = null;
-    this.emit(CONNECTOR_EVENTS.DISCONNECTED);
+    this.emit(CONNECTOR_EVENTS.DISCONNECTED, { connector: WALLET_CONNECTORS.WALLET_CONNECT_V2 });
   }
 
   async getAuthTokenInfo(): Promise<AuthTokenInfo> {
@@ -296,22 +297,45 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
       if (cached) return cached;
 
-      const payload = {
-        domain: window.location.origin,
-        uri: window.location.href,
-        address: accounts[0],
-        chainId: parseInt(chainId, 16),
-        version: "1",
-        nonce: generateSiweNonce(),
-        issuedAt: new Date().toISOString(),
-      };
-
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
-      const challenge = await signChallenge(payload, chainNamespace, authServer);
-      const signedMessage = await this._getSignedMessage(challenge, accounts, chainNamespace);
-      return this.verifyAndAuthorize({ chainNamespace, signedMessage: signedMessage as string, challenge, authServer });
+      const { challenge, signature } = await this.generateChallengeAndSign(authServer, accounts);
+      return this.verifyAndAuthorize({ chainNamespace, signedMessage: signature, challenge, authServer });
     }
     throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
+  }
+
+  public async generateChallengeAndSign(
+    authServerUrl?: string,
+    accounts?: string[]
+  ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    const { chainId } = this.provider;
+    const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+    if (!currentChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
+    const { chainNamespace } = currentChainConfig;
+    const accountsToUse =
+      accounts ||
+      (chainNamespace === CHAIN_NAMESPACES.SOLANA && this._solanaWallet
+        ? this._solanaWallet.accounts.map((a) => a.address)
+        : await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS }));
+    if (!accountsToUse || accountsToUse.length === 0) {
+      throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
+    }
+
+    const payload = {
+      domain: window.location.origin,
+      uri: window.location.href,
+      address: accountsToUse[0],
+      chainId: parseInt(chainId, 16),
+      version: "1",
+      nonce: generateSiweNonce(),
+      issuedAt: new Date().toISOString(),
+    };
+
+    const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
+    const challenge = await signChallenge(payload, chainNamespace, authServer);
+    const signature = await this._getSignedMessage(challenge, accountsToUse, chainNamespace);
+    return { challenge, signature, chainNamespace };
   }
 
   public async enableMFA(): Promise<void> {
@@ -368,7 +392,6 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       }
 
       const { uri, approval } = await this.connector.connect(this.connectorOptions.loginSettings);
-
       const qrcodeModal = this.connectorOptions?.connectorSettings?.qrcodeModal;
       // Open QRCode modal if a URI was returned (i.e. we're not connecting with an existing pairing).
       if (uri) {

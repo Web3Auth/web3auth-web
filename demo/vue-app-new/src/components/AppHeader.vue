@@ -1,11 +1,10 @@
 <script setup lang="ts">
 import { Button } from "@toruslabs/vue-components";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "@web3auth/modal/vue";
-import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 import { watch } from "vue";
-
 import { formDataStore } from "../store/form";
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 
 const { log } = console;
 const { t } = useI18n({ useScope: "global" });
@@ -49,12 +48,8 @@ watch(status, () => {
       </div>
       <div id="navbar-sticky" class="items-center justify-between w-full md:flex md:w-auto md:order-1 text-center">
         <div v-if="isDisplay('appHeading')" class="max-sm:w-full max-sm:mt-4">
-          <h1 class="leading-tight text-2xl sm:text-3xl font-bold">
-            {{ $t("app.title") }}
-          </h1>
-          <p class="leading-tight text-lg sm:text-xl">
-            {{ $t("app.description") }}
-          </p>
+          <h1 class="leading-tight text-2xl sm:text-3xl font-bold">{{ $t("app.title") }}</h1>
+          <p class="leading-tight text-lg sm:text-xl">{{ $t("app.description") }}</p>
         </div>
       </div>
     </div>
