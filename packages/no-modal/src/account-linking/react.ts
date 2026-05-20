@@ -20,7 +20,7 @@ export interface IUseLinkAccount {
   loading: boolean;
   error: Web3AuthError | null;
   linkedAccounts: BaseLinkedAccountInfo[];
-  linkAccount(params: LinkAccountParams): Promise<LinkAccountResult | void>;
+  linkAccount(params?: LinkAccountParams): Promise<LinkAccountResult | void>;
   unlinkAccount(address: string): Promise<UnlinkAccountResult | void>;
 }
 
@@ -38,7 +38,7 @@ export const useLinkAccount = (): IUseLinkAccount => {
   const [linkedAccounts, setLinkedAccounts] = useState<BaseLinkedAccountInfo[]>([]);
 
   const linkAccount = useCallback(
-    async (params: LinkAccountParams): Promise<LinkAccountResult | void> => {
+    async (params?: LinkAccountParams): Promise<LinkAccountResult | void> => {
       if (!web3Auth) throw WalletInitializationError.notReady();
       setLoading(true);
       setError(null);

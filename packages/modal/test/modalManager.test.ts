@@ -228,6 +228,23 @@ describe("Web3Auth (modal)", () => {
 
   it("switchAccount reuses an already-connected WalletConnect signer without reopening modal", async () => {
     const sdk = createSdk();
+    const startConnectingLoader = vi.fn();
+    const endConnectingLoader = vi.fn();
+    const resetAccountLinkingSession = vi.fn();
+    (
+      sdk as unknown as {
+        loginModal: {
+          startConnectingLoader: (params: unknown) => void;
+          endConnectingLoader: (params: unknown) => void;
+          resetAccountLinkingSession: () => void;
+        };
+      }
+    ).loginModal = {
+      startConnectingLoader,
+      endConnectingLoader,
+      resetAccountLinkingSession,
+    };
+
     const targetAccount = createConnectedWalletAccount();
     const switchResult = {
       kind: "external" as const,
@@ -271,23 +288,25 @@ describe("Web3Auth (modal)", () => {
       expect.objectContaining({ walletConnector: existingConnector })
     );
     expect(authConnector.trackSwitchAccountCompleted).toHaveBeenCalledWith(targetAccount);
+    expect(startConnectingLoader).toHaveBeenCalledOnce();
+    expect(endConnectingLoader).toHaveBeenCalledWith(expect.objectContaining({ success: true, skipSuccessScreen: true }));
   });
 
   it("switchAccount opens WalletConnect modal flow when phantom resolves to WalletConnect transport", async () => {
     const sdk = createSdk();
-    const closeModal = vi.fn();
+    const endConnectingLoader = vi.fn();
     const resetAccountLinkingSession = vi.fn();
     const updateAccountLinkingState = vi.fn();
     (
       sdk as unknown as {
         loginModal: {
-          closeModal: () => void;
+          endConnectingLoader: (params: unknown) => void;
           resetAccountLinkingSession: () => void;
           updateAccountLinkingState: (state: unknown) => void;
         };
       }
     ).loginModal = {
-      closeModal,
+      endConnectingLoader,
       resetAccountLinkingSession,
       updateAccountLinkingState,
     };
@@ -359,7 +378,7 @@ describe("Web3Auth (modal)", () => {
         projectConfig,
       })
     );
-    expect(closeModal).toHaveBeenCalledOnce();
+    expect(endConnectingLoader).toHaveBeenCalledWith(expect.objectContaining({ success: true, skipSuccessScreen: true }));
     expect(resetAccountLinkingSession).toHaveBeenCalledOnce();
     expect(updateAccountLinkingState).toHaveBeenCalled();
     expect(authConnector.trackSwitchAccountCompleted).toHaveBeenCalledWith(targetAccount);
@@ -375,6 +394,8 @@ describe("Web3Auth (modal)", () => {
       idToken: "linked-id-token",
       linkedAccounts: [],
     };
+
+    vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue({} as never);
 
     const prepareAccountLinkingConnectorSpy = vi.spyOn(
       sdk as unknown as {
@@ -405,11 +426,28 @@ describe("Web3Auth (modal)", () => {
     const sdk = createSdk();
     const phantomConnector = {
       name: "phantom",
+      on: vi.fn(),
+      removeListener: vi.fn(),
     };
     const result: LinkAccountResult = {
       success: true,
       idToken: "linked-id-token",
       linkedAccounts: [],
+    };
+
+    vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue({} as never);
+    (
+      sdk as unknown as {
+        loginModal: {
+          startConnectingLoader: (params: unknown) => void;
+          endConnectingLoader: (params: unknown) => void;
+          resetAccountLinkingSession: () => void;
+        };
+      }
+    ).loginModal = {
+      startConnectingLoader: vi.fn(),
+      endConnectingLoader: vi.fn(),
+      resetAccountLinkingSession: vi.fn(),
     };
 
     const prepareAccountLinkingConnectorSpy = vi.spyOn(

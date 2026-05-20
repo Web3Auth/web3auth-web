@@ -503,7 +503,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         this.removeListener(CONNECTOR_EVENTS.CONNECTED, onConnected);
         this.removeListener(CONNECTOR_EVENTS.ERRORED, onErrored);
         this.removeListener(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
-        this.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, onConsentAccepted);
       };
 
       const checkCompletion = async () => {
@@ -544,10 +543,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         await checkCompletion();
       };
 
-      const onConsentAccepted = async () => {
-        await completeConnection();
-      };
-
       const onErrored = async (err: Web3AuthError) => {
         // track connection failed event
         this.analytics.track(ANALYTICS_EVENTS.CONNECTION_FAILED, {
@@ -562,9 +557,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.once(CONNECTOR_EVENTS.CONNECTED, onConnected);
       if (finalLoginParams.getAuthTokenInfo) {
         this.once(CONNECTOR_EVENTS.AUTHORIZED, onAuthorized);
-      }
-      if (this.consentRequired) {
-        this.once(CONNECTOR_EVENTS.CONSENT_ACCEPTED, onConsentAccepted);
       }
       this.once(CONNECTOR_EVENTS.ERRORED, onErrored);
       connector.connect(finalLoginParams);
@@ -706,7 +698,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  public async linkAccount(params: LinkAccountParams): Promise<LinkAccountResult> {
+  public async linkAccount(params?: LinkAccountParams): Promise<LinkAccountResult> {
+    if (!params?.connectorName) {
+      throw WalletInitializationError.invalidParams("connectorName is required when calling linkAccount on the no-modal SDK");
+    }
     const chainId = this.resolveLinkAccountChainId(params.chainId);
     const isolatedConnector = await this.createLinkingWalletConnector(params.connectorName, chainId);
     return this.linkAccountWithConnector(params.connectorName, chainId, isolatedConnector);

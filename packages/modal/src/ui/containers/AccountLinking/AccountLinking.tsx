@@ -88,13 +88,13 @@ function AccountLinking(props: AccountLinkingProps) {
   ]);
 
   return (
-    <div className="w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
-      <div className="w3a--flex w3a--items-center w3a--justify-center">
-        <p className="w3a--text-base w3a--font-medium w3a--text-app-gray-900 dark:w3a--text-app-white">{accountLinkingDisplayName}</p>
+    <div className="wta:flex wta:flex-1 wta:flex-col wta:gap-y-4">
+      <div className="wta:flex wta:items-center wta:justify-center">
+        <p className="wta:text-base wta:font-medium wta:text-app-gray-900 wta:dark:text-app-white">{accountLinkingDisplayName}</p>
       </div>
       {modalState.accountLinking.status === ACCOUNT_LINKING_STATUS.ERRORED ? (
-        <div className="w3a--rounded-2xl w3a--border w3a--border-app-gray-200 w3a--bg-app-gray-50 w3a--p-4 dark:w3a--border-app-gray-700 dark:w3a--bg-app-gray-800">
-          <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-700 dark:w3a--text-app-gray-200">{accountLinkingMessage}</p>
+        <div className="wta:rounded-2xl wta:border wta:border-app-gray-200 wta:bg-app-gray-50 wta:p-4 wta:dark:border-app-gray-700 wta:dark:bg-app-gray-800">
+          <p className="wta:text-center wta:text-sm wta:text-app-gray-700 wta:dark:text-app-gray-200">{accountLinkingMessage}</p>
         </div>
       ) : (
         <ConnectWalletQrCode
@@ -107,7 +107,7 @@ function AccountLinking(props: AccountLinkingProps) {
         />
       )}
       {accountLinkingMessage && modalState.accountLinking.status !== ACCOUNT_LINKING_STATUS.ERRORED && (
-        <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-300">{accountLinkingMessage}</p>
+        <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-300">{accountLinkingMessage}</p>
       )}
     </div>
   );

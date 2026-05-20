@@ -129,7 +129,7 @@ function ConnectWalletList(props: ConnectWalletListProps) {
   return (
     <>
       <ul
-        className={cn("wta:overflow-y-auto wta:flex wta:flex-col wta:gap-y-2 wta:h-[280px] w3a--social-container wta:-mx-5 wta:pl-5 wta:pr-1", {
+        className={cn("wta:overflow-y-auto wta:flex wta:flex-col wta:gap-y-2 wta:h-[280px] w3a--social-container wta:-mx-5 wta:px-5", {
           "wta:h-[328px]": !showMoreWalletsButton,
         })}
       >
