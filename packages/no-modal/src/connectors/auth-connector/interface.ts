@@ -27,7 +27,17 @@ export interface AuthConnectorProviderState {
 
 export interface AuthConnectorData {
   providerState: AuthConnectorProviderState | null;
+  /**
+   * Get Provider State Syncing status for the primary connector.
+   * On init or after chain namespace change, the provider state might not be ready yet, with the accounts still loading.
+   * During this time, the provider state syncing status will be true.
+   */
   isProviderStateSyncing: boolean;
+  /**
+   * Get Account Ready status for the primary connector.
+   * On init or after chain namespace change, the accounts might not be ready yet, with the accounts still loading.
+   * After the accounts are loaded, the account ready status will be true.
+   */
   isAccountReady: boolean;
 }
 
