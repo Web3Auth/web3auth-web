@@ -135,17 +135,8 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.exposeHasUsableConnectedSwitchConnector(null)).toBe(false);
   });
 
-  it("exposes provider sync and account readiness from the active AUTH connector", async () => {
-    const sdk = createSdk(
-      {},
-      {
-        primaryConnectorName: WALLET_CONNECTORS.AUTH,
-        currentChainId: "0x1",
-      }
-    );
-    await Promise.resolve();
-    sdk.status = CONNECTOR_STATUS.CONNECTED;
-
+  it("exposes provider sync and account readiness from the active AUTH connector", () => {
+    const sdk = createSdk();
     const authConnector = new MockConnector({
       name: WALLET_CONNECTORS.AUTH,
       status: CONNECTOR_STATUS.CONNECTED,
@@ -157,6 +148,17 @@ describe("Web3AuthNoModal", () => {
 
     authConnector.isProviderStateSyncing = true;
     authConnector.isAccountReady = false;
+    (sdk as unknown as { state: Record<string, unknown> }).state = {
+      primaryConnectorName: WALLET_CONNECTORS.AUTH,
+      cachedConnector: null,
+      currentChainId: "0x1",
+      idToken: null,
+      accessToken: null,
+      refreshToken: null,
+      activeAccount: null,
+    };
+    sdk.exposeSetConnectors([authConnector]);
+    sdk.status = CONNECTOR_STATUS.CONNECTED;
     sdk.exposeSetConnectedWalletConnector(authConnector);
 
     expect(sdk.isProviderStateSyncing).toBe(true);

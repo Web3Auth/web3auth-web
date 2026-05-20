@@ -23,6 +23,7 @@ import {
 } from "@web3auth/auth";
 import { type default as WsEmbed, WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
+import { numberToHex } from "viem";
 
 import {
   CITADEL_NETWORK,
@@ -55,7 +56,6 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
-  getCaipChainId,
   getErrorAnalyticsProperties,
   IConnector,
   IProvider,
@@ -446,8 +446,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
     if (newChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA || newChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       if (!this.wsEmbedInstance?.provider) throw WalletInitializationError.notReady("Wallet embed is not ready");
-      const fullChainId = getCaipChainId(newChainConfig);
-      await this.wsEmbedInstance.provider.request({ method: "wallet_switchChain", params: { chainId: fullChainId } });
+      const chainIdNum = parseInt(newChainConfig.chainId, 16);
+      // WsEmbed expects the chainId in hex format
+      const chainIdHex = numberToHex(chainIdNum);
+      await this.wsEmbedInstance.provider.request({ method: "wallet_switchChain", params: { chainId: chainIdHex } });
     } else {
       await this.privateKeyProvider?.switchChain(params);
     }
