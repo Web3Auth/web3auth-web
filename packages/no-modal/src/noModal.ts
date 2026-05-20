@@ -178,6 +178,34 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     return Boolean(this.primaryConnector);
   }
 
+  /**
+   * Get Provider State Syncing status for the primary connector.
+   */
+  get isProviderStateSyncing(): boolean {
+    // only auth connectors have provider state syncing
+    if (!isAuthConnector(this.primaryConnector)) {
+      return false;
+    }
+
+    return this.primaryConnector.isProviderStateSyncing;
+  }
+
+  /**
+   * Get Account Ready status for the primary connector.
+   */
+  get isAccountReady(): boolean {
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.primaryConnector) {
+      return false;
+    }
+
+    const hasUsableConnection = Boolean(this.primaryConnector.provider || this.primaryConnector.solanaWallet);
+    if (!hasUsableConnection) {
+      return false;
+    }
+
+    return isAuthConnector(this.primaryConnector) ? this.primaryConnector.isAccountReady : true;
+  }
+
   get connection(): Connection | null {
     return this.getConnectedWalletConnectionByKey(this.activeWalletConnectorKey);
   }

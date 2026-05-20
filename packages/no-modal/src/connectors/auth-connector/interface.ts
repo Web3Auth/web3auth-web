@@ -19,6 +19,18 @@ export type PrivateKeyProvider = IBaseProvider<string>;
 
 export type WalletServicesSettings = Omit<WsEmbedParams, "chains" | "chainId"> & { modalZIndex?: number };
 
+export interface AuthConnectorProviderState {
+  chainId: string;
+  accounts: string[];
+  isUnlocked: boolean;
+}
+
+export interface AuthConnectorData {
+  providerState: AuthConnectorProviderState | null;
+  isProviderStateSyncing: boolean;
+  isAccountReady: boolean;
+}
+
 export interface AuthConnectorSessionTokens {
   accessToken: string | null;
   idToken: string | null;
@@ -110,6 +122,22 @@ export {
 } from "@web3auth/auth";
 
 export interface IAuthConnector {
+  /**
+   * Get Provider State Syncing status for the primary connector.
+   * On init or after chain namespace change, the provider state might not be ready yet, with the accounts still loading.
+   * During this time, the provider state syncing status will be true.
+   */
+  readonly isProviderStateSyncing: boolean;
+
+  /**
+   * Get Account Ready status for the primary connector.
+   * On init or after chain namespace change, the accounts might not be ready yet, with the accounts still loading.
+   * After the accounts are loaded, the account ready status will be true.
+   */
+  readonly isAccountReady: boolean;
+
+  syncProviderState(): Promise<AuthConnectorProviderState | null>;
+
   /**
    * Resolve the target account and connector-owned switch metadata.
    * `noModal` applies the returned result to SDK state and providers.

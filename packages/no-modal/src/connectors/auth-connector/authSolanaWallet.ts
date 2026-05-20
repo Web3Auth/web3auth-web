@@ -28,6 +28,7 @@ import {
   WalletLoginError,
   WEB3AUTH_ICON,
 } from "../../base";
+import { type AuthConnectorProviderState } from "./interface";
 
 const base58Encoder = getBase58Encoder();
 const base64Decoder = getBase64Decoder();
@@ -169,6 +170,19 @@ export class AuthSolanaWallet implements Wallet {
     return this._accounts ?? [];
   }
 
+  /**
+   * Syncs the provider state and add accounts to the Solana Wallet.
+   * @param providerState - The provider state to syncs.
+   */
+  public applyProviderState(providerState: Pick<AuthConnectorProviderState, "chainId" | "accounts">): void {
+    if (!SOLANA_PROVIDER_HEX_CHAIN_IDS.has(providerState.chainId.toLowerCase())) {
+      this.updateAccounts([]);
+      return;
+    }
+
+    this.updateAccounts(providerState.accounts);
+  }
+
   /** Throws if the embed is not on Solana; otherwise loads accounts once via {@link SOLANA_METHOD_TYPES.GET_ACCOUNTS}. */
   private async ensureAccountsLoaded(): Promise<void> {
     // assert solana chain
@@ -181,14 +195,36 @@ export class AuthSolanaWallet implements Wallet {
     if (this._accounts !== null) return;
 
     const addresses = (await this._provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS })) ?? [];
+    this.updateAccounts(addresses);
+  }
+
+  private updateAccounts(addresses: string[]): void {
+    const previousAccounts = this._accounts?.map((account) => account.address) ?? null;
+    const nextAccounts = this.toWalletAccounts(addresses);
+    const nextAddresses = nextAccounts.map((account) => account.address);
+
+    // we don't need to update the accounts if the previous and next accounts are the same
+    // this is to avoid emitting change events unnecessarily
+    if (
+      previousAccounts &&
+      previousAccounts.length === nextAddresses.length &&
+      previousAccounts.every((address, index) => address === nextAddresses[index])
+    ) {
+      return;
+    }
+
+    this._accounts = nextAccounts;
+    this.emitChange({ accounts: this.accounts });
+  }
+
+  private toWalletAccounts(addresses: string[]): WalletAccount[] {
     const accountChains = this.chains;
-    this._accounts = addresses.map((address) => ({
+    return addresses.map((address) => ({
       address,
       publicKey: new Uint8Array(base58Encoder.encode(address)),
       chains: accountChains.length ? accountChains : ([] as unknown as IdentifierArray),
       features: ACCOUNT_FEATURES,
     }));
-    this.emitChange({ accounts: this.accounts });
   }
 
   private emitChange(properties: StandardEventsChangeProperties): void {
