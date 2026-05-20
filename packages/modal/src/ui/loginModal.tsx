@@ -594,14 +594,14 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
       if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
-      this.setState({ status: MODAL_STATUS.AUTHORIZED });
+      this.setState({ status: MODAL_STATUS.AUTHORIZED, postLoadingMessage: "" });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, () => {
       this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => {
       if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
-        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true });
+        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true, postLoadingMessage: "" });
       } else if (!data.reconnected) {
         this.setState({
           status: MODAL_STATUS.CONNECTED,
