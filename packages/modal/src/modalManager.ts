@@ -972,6 +972,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
+  /**
+   * Runs a link/switch action for WalletConnect v2, racing connector.connect()
+   * against a modal-close promise to cancel and clean up the WC session if the
+   * user closes the modal during QR scanning.
+   * For synchronous connectors use {@link runNonWalletConnectAccountAction}.
+   */
   private async runWalletConnectV2AccountAction<T>(params: {
     connector: IConnector<unknown>;
     connectParams: { chainId: string; isAccountLinking?: boolean };
@@ -1114,6 +1120,12 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
+  /**
+   * Runs a link/switch action for synchronous connectors (injected wallets, already-connected).
+   * Shows the connecting loader, forwards AUTHORIZING events to the modal, and
+   * resolves/rejects the loader on completion.
+   * For WalletConnect v2 use {@link runWalletConnectV2AccountAction}.
+   */
   private async runNonWalletConnectAccountAction<T>(
     connectorName: WALLET_CONNECTOR_TYPE | string,
     fn: () => Promise<T>,
