@@ -11,7 +11,7 @@ export interface LinkAccountParams {
    * a wallet picker dedicated to account linking and uses the wallet selected by
    * the user. Required in the no-modal SDK (`@web3auth/no-modal`).
    */
-  connectorName?: WALLET_CONNECTOR_TYPE | string;
+  connectorName: WALLET_CONNECTOR_TYPE | string;
 
   /**
    * Chain ID to use when generating the wallet identity proof.
