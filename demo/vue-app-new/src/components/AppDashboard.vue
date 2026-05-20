@@ -33,7 +33,7 @@ const { t } = useI18n({ useScope: "global" });
 
 const formData = formDataStore;
 
-const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized } = useWeb3Auth();
+const { isConnected, connection, web3Auth, isMFAEnabled, isAuthorized, chainNamespace } = useWeb3Auth();
 const { loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
@@ -55,6 +55,7 @@ const balance = useBalance({
 // EIP-5792: only track calls id to show Refresh/Show Status buttons after Send Batch Calls
 const config = useConfig();
 const trackedCallsId = ref<string | undefined>();
+const switchNamespaceLoading = ref(false);
 
 const { accounts: solanaAccounts, getPrivateKey: getSolanaPrivateKey } = useSolanaWallet();
 const solanaClient = useSolanaClient();
@@ -90,10 +91,10 @@ const isDisplay = (name: "dashboard" | "ethServices" | "solServices" | "walletSe
       return formData.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN ? isAuthorized.value : isConnected.value;
 
     case "ethServices":
-      return Boolean(conn?.ethereumProvider);
+      return chainNamespace.value === CHAIN_NAMESPACES.EIP155 && Boolean(conn?.ethereumProvider);
 
     case "solServices":
-      return Boolean(conn?.solanaWallet);
+      return chainNamespace.value === CHAIN_NAMESPACES.SOLANA && Boolean(conn?.solanaWallet);
 
     case "walletServices":
       return web3Auth.value?.primaryConnectorName === WALLET_CONNECTORS.AUTH && Boolean(conn?.ethereumProvider || conn?.solanaWallet);
@@ -357,12 +358,20 @@ const onGetSolPrivateKey = async () => {
   }
 };
 
-// EVM-only: wagmi switchChain does not change Solana cluster; only show when multiple EIP-155 chains are configured.
+// EVM-only: wagmi switchChain does not change Solana cluster; use web3Auth.switchChain for namespace changes.
 const eip155Chains = computed(() => web3Auth.value?.coreOptions.chains?.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155) || []);
+const solanaChains = computed(() => web3Auth.value?.coreOptions.chains?.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA) || []);
 
 const canSwitchEvmChain = computed(() => {
   if (eip155Chains.value.length < 2) return false;
-  return Boolean(connection.value?.ethereumProvider);
+  return chainNamespace.value === CHAIN_NAMESPACES.EIP155 && Boolean(connection.value?.ethereumProvider);
+});
+
+const canSwitchChainNamespace = computed(() => {
+  if (!isConnected.value || connection.value?.connectorName !== WALLET_CONNECTORS.AUTH) return false;
+  if (chainNamespace.value === CHAIN_NAMESPACES.EIP155) return solanaChains.value.length > 0;
+  if (chainNamespace.value === CHAIN_NAMESPACES.SOLANA) return eip155Chains.value.length > 0;
+  return false;
 });
 
 const onSwitchChain = async () => {
@@ -378,6 +387,37 @@ const onSwitchChain = async () => {
     printToConsole("switchedChain", { chainId: data.id });
   } catch (error) {
     printToConsole("switchedChain error", error);
+  }
+};
+
+const onSwitchChainNamespace = async () => {
+  if (!web3Auth.value) throw new Error("Web3Auth is not ready");
+
+  switchNamespaceLoading.value = true;
+  try {
+    const targetChain =
+      chainNamespace.value === CHAIN_NAMESPACES.EIP155
+        ? solanaChains.value[0]
+        : chainNamespace.value === CHAIN_NAMESPACES.SOLANA
+          ? eip155Chains.value[0]
+          : null;
+
+    if (!targetChain) {
+      throw new Error("Please configure both EIP-155 and Solana chains in the config");
+    }
+
+    console.log("switchedChainNamespace:targetChain", targetChain);
+
+    await web3Auth.value.switchChain({ chainId: targetChain.chainId });
+    printToConsole("switchedChainNamespace", {
+      chainId: targetChain.chainId,
+      chainNamespace: targetChain.chainNamespace,
+      displayName: targetChain.displayName,
+    });
+  } catch (error) {
+    printToConsole("switchedChainNamespace error", error instanceof Error ? error.message : String(error));
+  } finally {
+    switchNamespaceLoading.value = false;
   }
 };
 </script>
@@ -462,6 +502,9 @@ const onSwitchChain = async () => {
             {{ t("app.buttons.btnGetBalance") }}
           </Button>
           <Button v-if="canSwitchEvmChain" block size="xs" pill class="mb-2" @click="onSwitchChain">{{ t("app.buttons.btnSwitchChain") }}</Button>
+          <Button v-if="canSwitchChainNamespace" :loading="switchNamespaceLoading" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">
+            {{ t("app.buttons.btnSwitchChainNamespace") }}
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
           <Button v-if="isSmartAccount" block size="xs" pill class="mb-2" @click="onSendAATx">{{ t("app.buttons.btnSendAATx") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
@@ -493,6 +536,9 @@ const onSwitchChain = async () => {
         <!-- SOLANA -->
         <Card v-if="isDisplay('solServices')" class="h-auto gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Solana Transaction</div>
+          <Button v-if="canSwitchChainNamespace" :loading="switchNamespaceLoading" block size="xs" pill class="mb-2" @click="onSwitchChainNamespace">
+            {{ t("app.buttons.btnSwitchChainNamespace") }}
+          </Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolPrivateKey">{{ t("app.buttons.btnGetPrivateKey") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onGetSolBalance">{{ t("app.buttons.btnGetBalance") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignSolMessage">{{ t("app.buttons.btnSignMessage") }}</Button>
