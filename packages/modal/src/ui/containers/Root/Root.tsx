@@ -1,6 +1,6 @@
 import { WALLET_CONNECTORS, type WalletRegistryItem } from "@web3auth/no-modal";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { twMerge } from "tailwind-merge";
+import { useTranslation } from "react-i18next";
 
 import Footer from "../../components/Footer/Footer";
 import Loader from "../../components/Loader";
@@ -10,6 +10,7 @@ import { useModalState } from "../../context/ModalStateContext";
 import { RootProvider } from "../../context/RootContext";
 import { useWidget } from "../../context/WidgetContext";
 import { type ExternalButton, MODAL_STATUS } from "../../interfaces";
+import i18n from "../../localeImport";
 import AccountLinking from "../AccountLinking";
 import ConnectWallet from "../ConnectWallet";
 import Login from "../Login";
@@ -19,6 +20,7 @@ import RootBodySheets from "./RootBodySheets/RootBodySheets";
 function RootContent(props: RootProps) {
   const { onCloseLoader } = props;
 
+  const [t] = useTranslation(undefined, { i18n });
   const { modalState, shouldShowLoginPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
   const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect, handleAcceptConsent, handleDeclineConsent } =
     useWidget();
@@ -194,7 +196,11 @@ function RootContent(props: RootProps) {
     return !isWalletConnectAccountLinkingVisible && modalState.status !== MODAL_STATUS.INITIALIZED;
   }, [isWalletConnectAccountLinkingVisible, modalState.status]);
 
-  const isConsentRequiringStatus = modalState.status === MODAL_STATUS.CONSENT_REQUIRING;
+  const loaderMessage = useMemo(() => {
+    const message = modalState.postLoadingMessage;
+    if (!message) return undefined;
+    return i18n.exists(message) ? t(message) : message;
+  }, [modalState.postLoadingMessage, t]);
 
   return (
     <div className="wta:relative wta:flex wta:flex-col">
@@ -205,19 +211,14 @@ function RootContent(props: RootProps) {
         }}
       >
         <div className="w3a--modal-curtain" />
-        <div
-          ref={contentRef}
-          className={twMerge(
-            "wta:relative wta:flex wta:flex-col wta:p-6",
-            isShowLoader && !isConsentRequiringStatus ? "wta:flex-1" : "wta:flex-none"
-          )}
-        >
+        <div ref={contentRef} className="wta:relative wta:flex wta:flex-none wta:flex-col wta:p-6">
           {/* Content */}
           {isShowLoader ? (
             <Loader
               connector={modalState.detailedLoaderConnector}
               connectorName={modalState.detailedLoaderConnectorName}
               modalStatus={modalState.status}
+              message={loaderMessage}
               onClose={onCloseLoader}
               isConnectAndSignAuthenticationMode={isConnectAndSignAuthenticationMode}
               externalWalletsConfig={modalState.externalWalletsConfig}
@@ -233,6 +234,7 @@ function RootContent(props: RootProps) {
               {isWalletConnectAccountLinkingVisible && <AccountLinking allExternalWallets={allExternalWallets} />}
               {/* Login Screen */}
               {!isWalletConnectAccountLinkingVisible &&
+                !modalState.accountLinking.pickerActive &&
                 modalState.currentPage === PAGES.LOGIN_OPTIONS &&
                 shouldShowLoginPage &&
                 modalState.status === MODAL_STATUS.INITIALIZED && (
@@ -245,7 +247,7 @@ function RootContent(props: RootProps) {
               {/* Connect Wallet Screen */}
               {!isWalletConnectAccountLinkingVisible &&
                 modalState.currentPage === PAGES.WALLET_LIST &&
-                (!shouldShowLoginPage || isExternalWalletModeOnly) &&
+                (!shouldShowLoginPage || isExternalWalletModeOnly || modalState.accountLinking.pickerActive) &&
                 modalState.status === MODAL_STATUS.INITIALIZED && (
                   <ConnectWallet
                     allRegistryButtons={allRegistryButtons}

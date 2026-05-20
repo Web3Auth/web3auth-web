@@ -47,6 +47,7 @@ function WidgetContent() {
         ...modalState,
         modalVisibility: true,
         status: MODAL_STATUS.INITIALIZED,
+        postLoadingMessage: "",
       });
     }
   };

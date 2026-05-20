@@ -356,6 +356,83 @@ export class LoginModal {
     return this.accountLinkingState.active;
   };
 
+  startAccountLinkingPicker = (params: { chainId: string }): void => {
+    this.accountLinkingState = {
+      ...DEFAULT_ACCOUNT_LINKING_STATE,
+      active: true,
+      pickerActive: true,
+      chainId: params.chainId,
+      intent: ACCOUNT_LINKING_INTENT.LINK,
+    };
+    this.setState({
+      accountLinking: this.accountLinkingState,
+      currentPage: PAGES.WALLET_LIST,
+      modalVisibility: true,
+      status: MODAL_STATUS.INITIALIZED,
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
+  };
+
+  endAccountLinkingPicker = (): void => {
+    this.accountLinkingState = { ...this.accountLinkingState, pickerActive: false, active: false };
+    this.setState({ accountLinking: this.accountLinkingState });
+  };
+
+  startConnectingLoader = (params: { connector: WALLET_CONNECTOR_TYPE | string; connectorName: string }): void => {
+    this.setState({
+      status: MODAL_STATUS.CONNECTING,
+      modalVisibility: true,
+      detailedLoaderConnector: params.connector,
+      detailedLoaderConnectorName: params.connectorName,
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
+  };
+
+  markLoaderAuthorizing = (): void => {
+    this.setState({ status: MODAL_STATUS.AUTHORIZING });
+  };
+
+  endConnectingLoader = (params: { success: boolean; errorMessage?: string; successMessage?: string; skipSuccessScreen?: boolean }): void => {
+    if (params.success) {
+      if (params.skipSuccessScreen) {
+        this.setState({ modalVisibility: false });
+        if (this.callbacks.onModalVisibility) {
+          this.callbacks.onModalVisibility(false);
+        }
+        return;
+      }
+      // Account-linking success is terminal regardless of authentication mode (no signing step),
+      // so emit the mode's terminal success status so the Loader renders the success UI and auto-closes:
+      // - CONNECT_AND_SIGN expects AUTHORIZED as terminal success.
+      // - Other modes expect CONNECTED.
+      const isConnectAndSign = this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+      this.setState({
+        status: isConnectAndSign ? MODAL_STATUS.AUTHORIZED : MODAL_STATUS.CONNECTED,
+        postLoadingMessage: params.successMessage ?? "modal.post-loading.connected",
+      });
+      return;
+    }
+
+    if (this.uiConfig.displayErrorsOnModal) {
+      this.setState({
+        modalVisibility: true,
+        status: MODAL_STATUS.ERRORED,
+        postLoadingMessage: params.errorMessage || "modal.post-loading.something-wrong",
+      });
+    } else {
+      this.setState({
+        modalVisibility: false,
+      });
+      if (this.callbacks.onModalVisibility) {
+        this.callbacks.onModalVisibility(false);
+      }
+    }
+  };
+
   open = () => {
     this.setState({
       modalVisibility: true,
@@ -517,14 +594,14 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
       if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
-      this.setState({ status: MODAL_STATUS.AUTHORIZED });
+      this.setState({ status: MODAL_STATUS.AUTHORIZED, postLoadingMessage: "" });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, () => {
       this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => {
       if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
-        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true });
+        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true, postLoadingMessage: "" });
       } else if (!data.reconnected) {
         this.setState({
           status: MODAL_STATUS.CONNECTED,

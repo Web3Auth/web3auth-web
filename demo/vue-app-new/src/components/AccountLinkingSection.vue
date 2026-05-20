@@ -63,6 +63,15 @@ const onLinkAccount = async () => {
   }
 };
 
+const onLinkAccountWithPicker = async () => {
+  lastUnlinkedAddress.value = null;
+  const result = await linkAccount();
+  if (result) {
+    await syncAccountState();
+    props.printToConsole("Link Wallet (picker) Result", result);
+  }
+};
+
 const onUnlinkAccount = async (address: string) => {
   lastUnlinkedAddress.value = null;
   pendingUnlinkAddress.value = address;
@@ -250,7 +259,7 @@ onMounted(async () => {
     <p v-else class="text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">No connected wallets found in user info yet.</p>
   </Card>
 
-  <Card v-if="showLinkWallet" class="mb-2 !h-auto gap-4 overflow-hidden px-4 py-4" :shadow="false">
+  <Card v-if="showLinkWallet" class="mb-2 !h-auto gap-2 overflow-hidden px-4 py-4 flex flex-col" :shadow="false">
     <div class="text-left text-xl font-bold leading-tight text-app-gray-900 dark:text-app-white">Link Wallet</div>
     <p class="mt-1 break-all text-xs leading-5 text-app-gray-500 dark:text-app-gray-300">
       Choose a wallet connector to start the account-linking flow.
@@ -259,5 +268,6 @@ onMounted(async () => {
       <Select v-model="linkConnector" :options="linkConnectorOptions" placeholder="Select wallet" matchParentsWidth />
     </div>
     <Button :loading="accountLinkingLoading" block size="xs" pill class="!mb-0" @click="onLinkAccount">Link Wallet</Button>
+    <Button :loading="accountLinkingLoading" block size="xs" pill @click="onLinkAccountWithPicker">Link with another wallet (modal picker)</Button>
   </Card>
 </template>
