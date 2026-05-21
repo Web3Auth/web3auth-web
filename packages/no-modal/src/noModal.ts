@@ -182,40 +182,28 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * Get Provider State Syncing status for the primary connector.
    */
   get isProviderStateSyncing(): boolean {
-    const activeConnectedWallet = this.getConnectedWalletConnectorStateByKey(this.activeWalletConnectorKey);
-    const connector =
-      activeConnectedWallet?.connector ??
-      (this.activeWalletConnectorKey === PRIMARY_CONNECTED_WALLET_KEY ? this.primaryConnector : null);
-
     // Only auth connectors expose provider state syncing.
-    if (!isAuthConnector(connector)) {
+    if (!isAuthConnector(this.primaryConnector)) {
       return false;
     }
 
-    return connector.isProviderStateSyncing;
+    return this.primaryConnector.isProviderStateSyncing;
   }
 
   /**
    * Get Account Ready status for the primary connector.
    */
   get isAccountReady(): boolean {
-    const activeConnectedWallet = this.getConnectedWalletConnectorStateByKey(this.activeWalletConnectorKey);
-    const connector =
-      activeConnectedWallet?.connector ??
-      (this.activeWalletConnectorKey === PRIMARY_CONNECTED_WALLET_KEY ? this.primaryConnector : null);
-
-    if (!CONNECTED_STATUSES.includes(this.status) || !connector) {
+    if (!CONNECTED_STATUSES.includes(this.status) || !this.primaryConnector) {
       return false;
     }
 
-    const hasUsableConnection = Boolean(
-      activeConnectedWallet?.signingProvider || activeConnectedWallet?.solanaWallet || connector.provider || connector.solanaWallet
-    );
+    const hasUsableConnection = Boolean(this.primaryConnector.provider || this.primaryConnector.solanaWallet);
     if (!hasUsableConnection) {
       return false;
     }
 
-    return isAuthConnector(connector) ? connector.isAccountReady : true;
+    return isAuthConnector(this.primaryConnector) ? this.primaryConnector.isAccountReady : true;
   }
 
   get connection(): Connection | null {
