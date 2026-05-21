@@ -156,7 +156,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   get isAccountReady(): boolean {
-    if (this.status !== CONNECTOR_STATUS.CONNECTED && this.status !== CONNECTOR_STATUS.AUTHORIZED) {
+    if (!CONNECTED_STATUSES.includes(this.status)) {
       return false;
     }
 
@@ -227,6 +227,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
               },
             })
             .then(() => {
+              this.bindWsEmbedProviderEvents();
+              this.syncProviderState().catch((error: unknown): null => {
+                log.debug("Failed to sync wallet embed provider state during init", error);
+                return null;
+              });
               this.wsEmbedInstancePromise = null;
               return;
             });
@@ -249,15 +254,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     // wait for auth instance to be ready.
     log.debug("initializing auth connector");
     await authInstancePromise;
-
-    if (this.wsEmbedInstancePromise) {
-      await this.wsEmbedInstancePromise;
-      this.bindWsEmbedProviderEvents();
-      await this.syncProviderState().catch((error: unknown): null => {
-        log.debug("Failed to sync wallet embed provider state during init", error);
-        return null;
-      });
-    }
 
     this.status = CONNECTOR_STATUS.READY;
     this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.AUTH);
