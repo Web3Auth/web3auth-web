@@ -48,7 +48,7 @@ export interface AuthConnectorSessionTokens {
 
 export interface AuthConnectorLinkAccountParams {
   authSessionTokens: AuthConnectorSessionTokens;
-  walletConnector: IConnector<unknown>;
+  connectorToLink: IConnector<unknown>;
   connectorName: WALLET_CONNECTOR_TYPE | string;
   chainId?: string;
 }

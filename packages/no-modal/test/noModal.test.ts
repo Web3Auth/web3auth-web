@@ -857,6 +857,44 @@ describe("Web3AuthNoModal", () => {
     await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).rejects.toThrow(WalletLoginError);
   });
 
+  it("preserves the selected Solana chain for injected wallets without an EVM chain id", async () => {
+    const solanaChainId = "0x2";
+    const connectorName = "phantom" as WALLET_CONNECTOR_TYPE;
+    const solanaWallet = { accounts: [{ address: "solana-address" }], chains: [] } as unknown as Connection["solanaWallet"];
+    const solanaUserInfo = { name: "solana-user" };
+    const sdk = createSdk(
+      {
+        chains: [createChain(), createChain({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: solanaChainId, rpcTarget: "", ticker: "SOL" })],
+      },
+      { currentChainId: solanaChainId }
+    );
+    const evmConnector = new MockConnector({ name: connectorName, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
+    const solanaConnector = new MockConnector({
+      name: connectorName,
+      connectorNamespace: CHAIN_NAMESPACES.SOLANA,
+      solanaWallet,
+      getUserInfo: vi.fn().mockResolvedValue(solanaUserInfo),
+    } as never);
+    solanaConnector.status = CONNECTOR_STATUS.CONNECTED;
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [evmConnector, solanaConnector];
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {};
+    sdk.exposeSubscribeToConnectorEvents(solanaConnector);
+
+    solanaConnector.emit(CONNECTOR_EVENTS.CONNECTED, {
+      connectorName,
+      ethereumProvider: null,
+      solanaWallet,
+      reconnected: false,
+    });
+
+    await vi.waitFor(() => {
+      expect(sdk.currentChainId).toBe(solanaChainId);
+      expect(sdk.primaryConnector).toBe(solanaConnector);
+    });
+    await expect(sdk.getUserInfo()).resolves.toEqual({ ...solanaUserInfo, linkedAccounts: [] });
+    expect(solanaConnector.getUserInfo).toHaveBeenCalledTimes(1);
+  });
+
   it("logout, getUserInfo, and getConnectedAccountsWithProviders throw when not connected", async () => {
     const sdk = createSdk();
     await expect(sdk.logout()).rejects.toThrow(WalletLoginError);

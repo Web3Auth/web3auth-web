@@ -559,11 +559,11 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     if (!CONNECTED_STATUSES.includes(this.status)) {
       throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before linking an account.");
     }
-    const { connectorName, chainId, walletConnector } = params;
+    const { connectorName, chainId, connectorToLink } = params;
 
     try {
-      if (!walletConnector.connected) {
-        const connection = await walletConnector.connect({ chainId, isAccountLinking: true });
+      if (!connectorToLink.connected) {
+        const connection = await connectorToLink.connect({ chainId, isAccountLinking: true });
         if (!connection) {
           throw AccountLinkingError.walletProofFailed(`Failed to connect to "${params.connectorName}" for account linking.`);
         }
@@ -585,7 +585,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
 
       const { accessToken, idToken } = await this.getPrimaryAuthSession(params.authSessionTokens);
-      const walletProof = await this.createWalletLinkingProof(params.walletConnector);
+      const walletProof = await this.createWalletLinkingProof(params.connectorToLink);
 
       const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
       const result = await makeAccountLinkingRequest(authServerUrl, accessToken, {
@@ -613,7 +613,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
       // disconnect the wallet connector to avoid any leftover state
       try {
-        await walletConnector.disconnect({ cleanup: true });
+        if (connectorToLink.connected) {
+          await connectorToLink.disconnect({ cleanup: true });
+        }
       } catch (disconnectError) {
         log.debug("Failed to disconnect wallet connector after linking failure", disconnectError);
       }

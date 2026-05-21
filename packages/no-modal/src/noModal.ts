@@ -1110,7 +1110,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       );
       this.setActiveWalletConnectorKey();
       this.connectionReconnected = data.reconnected;
-      const connectedChainId = ethereumProvider?.chainId;
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
@@ -1133,12 +1132,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
       // The following block only hits during rehydration
 
-      const { activeAccount } = this.state;
+      const { activeAccount, currentChainId } = this.state;
       // if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
       if (activeAccount && !activeAccount.isPrimary && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
         const accountLinkingConnector = isAuthConnector(connector) ? connector : this.getConnector(WALLET_CONNECTORS.AUTH);
         assertAuthConnector(accountLinkingConnector, "Account switching requires the AUTH connector to be available.");
-        const targetChainId = accountLinkingConnector.getChainIdForLinkedAccount(activeAccount, connectedChainId);
+        const targetChainId = accountLinkingConnector.getChainIdForLinkedAccount(activeAccount, currentChainId);
         const walletConnector = await this.createIsolatedWalletConnector(activeAccount.connector as WALLET_CONNECTOR_TYPE, targetChainId);
         let linkedAccountConnection: Connection | null = null;
 
@@ -1171,8 +1170,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         usePrimaryProxy: true,
       });
       this.setConnectedWalletConnectorState(primaryConnectedWalletState);
-
-      await this.setState({ primaryConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE, currentChainId: connectedChainId });
+      await this.setState({
+        primaryConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE,
+      });
       this.cacheWallet(data.connectorName);
 
       const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
@@ -1621,17 +1621,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected async linkAccountWithConnector(
     connectorName: WALLET_CONNECTOR_TYPE | string,
     chainId: string,
-    walletConnector: IConnector<unknown>
+    connectorToLink: IConnector<unknown>
   ): Promise<LinkAccountResult> {
     const authConnector = this.getMainAuthConnector();
     const result = await authConnector.linkAccount({
       connectorName,
       chainId,
-      walletConnector,
+      connectorToLink,
       authSessionTokens: { accessToken: this.accessToken, idToken: this.idToken },
     });
     await this.setState({ idToken: result.idToken });
-    await this.cacheConnectedLinkedWalletConnector(authConnector, walletConnector);
+    await this.cacheConnectedLinkedWalletConnector(authConnector, connectorToLink);
     return result;
   }
 
@@ -1832,7 +1832,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private async setCurrentChain(chainId: string): Promise<void> {
-    if (chainId === this.currentChainId) return;
+    const { currentChainId } = this.state;
+    if (chainId === currentChainId) return;
     const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
     if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
     await this.setState({ currentChainId: chainId });
