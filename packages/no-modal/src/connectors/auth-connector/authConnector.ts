@@ -1023,7 +1023,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         });
         if (isLoggedIn) {
           this.setupSolanaWallet();
-          await this.syncProviderState();
+          this.syncProviderState();
           // if getAuthTokenInfo is true, then get auth token info
           // No need to get auth token info for auth connector as it is already handled
           this.status = CONNECTOR_STATUS.CONNECTED;
