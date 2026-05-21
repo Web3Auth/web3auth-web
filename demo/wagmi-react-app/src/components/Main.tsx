@@ -1,9 +1,10 @@
-import { CHAIN_NAMESPACES } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, WALLET_CONNECTORS } from "@web3auth/modal";
+import { useLinkAccount } from "@web3auth/modal/account-linking/react";
 import {
+  useAuthTokenInfo,
   useChain,
   useCheckout,
   useEnableMFA,
-  useAuthTokenInfo,
   useManageMFA,
   useSwitchChain as useWeb3AuthSwitchChain,
   useWalletConnectScanner,
@@ -14,6 +15,7 @@ import {
   useWeb3AuthUser,
 } from "@web3auth/modal/react";
 import { useSolanaWallet } from "@web3auth/modal/react/solana";
+import type { LinkAccountResult } from "@web3auth/no-modal";
 import { useMemo, useState } from "react";
 import { parseEther } from "viem";
 import {
@@ -33,7 +35,14 @@ import {
 import styles from "../styles/Home.module.css";
 import X402 from "./X402";
 
-const Main = () => {
+type ConsentConfigMode = "disabled" | "required";
+
+type MainProps = {
+  consentConfigMode: ConsentConfigMode;
+  onConsentConfigModeChange: (value: ConsentConfigMode) => void;
+};
+
+const Main = ({ consentConfigMode, onConsentConfigModeChange }: MainProps) => {
   const { isConnected, web3Auth, status } = useWeb3Auth();
   const { accounts: solanaAccounts } = useSolanaWallet();
   const { chainNamespace: currentChainNamespace, chainId: currentChainId } = useChain();
@@ -73,6 +82,11 @@ const Main = () => {
 
   // EIP-5792: Show Calls Status in Wallet UI
   const { showCallsStatus, isPending: isShowCallsStatusPending, error: showCallsStatusError } = useShowCallsStatus();
+
+  // Account Linking
+  const { linkAccount, loading: isLinkAccountLoading, error: linkAccountError } = useLinkAccount();
+  const [linkConnector, setLinkConnector] = useState<string>(WALLET_CONNECTORS.METAMASK);
+  const [linkAccountResult, setLinkAccountResult] = useState<LinkAccountResult | null>(null);
 
   const chainNamespaces = useMemo(() => {
     if (status && web3Auth?.coreOptions?.chains) {
@@ -335,6 +349,42 @@ const Main = () => {
           ))}
         </div>
 
+        {/* Account Linking */}
+        <div style={{ marginTop: "16px", marginBottom: "16px" }}>
+          <p>Link Wallet</p>
+          <select
+            value={linkConnector}
+            onChange={(e) => {
+              setLinkConnector(e.target.value);
+              setLinkAccountResult(null);
+            }}
+            style={{ marginBottom: "8px", padding: "8px", width: "100%" }}
+          >
+            <option value={WALLET_CONNECTORS.METAMASK}>MetaMask</option>
+            <option value={WALLET_CONNECTORS.WALLET_CONNECT_V2}>WalletConnect</option>
+          </select>
+          {isLinkAccountLoading ? (
+            <p>Linking wallet...</p>
+          ) : (
+            <button
+              onClick={async () => {
+                const result = await linkAccount({ connectorName: linkConnector });
+                if (result) setLinkAccountResult(result);
+              }}
+              className={styles.card}
+            >
+              Link Wallet
+            </button>
+          )}
+          {linkAccountResult && (
+            <div>
+              <p style={{ color: "green" }}>Wallet linked successfully!</p>
+              <textarea disabled rows={4} value={JSON.stringify(linkAccountResult, null, 2)} style={{ width: "100%" }} />
+            </div>
+          )}
+          {linkAccountError && <p style={{ color: "red" }}>Error: {linkAccountError.message}</p>}
+        </div>
+
         {/* X402 Payment Protocol */}
         <X402 />
 
@@ -351,6 +401,22 @@ const Main = () => {
 
   const unloggedInView = (
     <>
+      <div className={styles.setting}>
+        <div className={styles.row}>
+          <label className={styles.label} htmlFor="consent-config-select">
+            Consent Config
+          </label>
+          <select
+            id="consent-config-select"
+            className={styles.select}
+            value={consentConfigMode}
+            onChange={(event) => onConsentConfigModeChange(event.target.value as ConsentConfigMode)}
+          >
+            <option value="disabled">Disabled</option>
+            <option value="required">Required</option>
+          </select>
+        </div>
+      </div>
       {connecting ? (
         <p>Connecting to {connectorName}...</p>
       ) : (

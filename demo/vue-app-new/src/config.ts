@@ -80,6 +80,13 @@ export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
   { name: "Amharic", value: LANGUAGES.am },
 ];
 
+export type ConsentConfigMode = "required" | "disabled";
+
+export const consentConfigOptions: { name: string; value: ConsentConfigMode }[] = [
+  { name: "Required", value: "required" },
+  { name: "Disabled", value: "disabled" },
+];
+
 export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, ModalConfig> = loginProviderOptions.reduce(
   (acc, curr) => ({
     ...acc,
@@ -128,6 +135,7 @@ export type FormData = {
   };
   connectors: string[];
   initialAuthenticationMode: ConnectorInitialAuthenticationModeType;
+  consentConfigMode: ConsentConfigMode;
   loginProviders: AUTH_CONNECTION_TYPE[];
   showWalletDiscovery: boolean;
   multiInjectedProviderDiscovery: boolean;

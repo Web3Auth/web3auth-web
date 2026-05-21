@@ -24,7 +24,7 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
         connectorName.value = null;
       }
       if (newVal && !connectorName.value) {
-        connectorName.value = web3Auth.value?.connectedConnectorName;
+        connectorName.value = web3Auth.value?.primaryConnectorName;
       }
     },
     { immediate: true }
@@ -36,7 +36,7 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
       error.value = null;
       loading.value = true;
       const localProvider = await web3Auth.value.connectTo(connectorType, loginParams);
-      connectorName.value = web3Auth.value.connectedConnectorName;
+      connectorName.value = web3Auth.value.primaryConnectorName;
       return localProvider;
     } catch (err) {
       log.error("Error connecting", err);

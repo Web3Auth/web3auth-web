@@ -25,7 +25,7 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
       setConnectorName(null);
     }
     if (isConnected && !connectorName) {
-      setConnectorName(web3Auth.connectedConnectorName);
+      setConnectorName(web3Auth.primaryConnectorName);
     }
   }, [isConnected, connectorName, web3Auth]);
 
@@ -36,7 +36,7 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
       try {
         const provider = await web3Auth.connectTo(connector, params);
         if (provider) {
-          setConnectorName(web3Auth.connectedConnectorName);
+          setConnectorName(web3Auth.primaryConnectorName);
         }
         return provider;
       } catch (error) {

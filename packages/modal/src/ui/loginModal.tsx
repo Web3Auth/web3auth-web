@@ -17,6 +17,7 @@ import {
   LoginModeType,
   type MetaMaskConnectorData,
   type SDK_CONNECTED_EVENT_DATA,
+  SDK_CONSENT_ACCEPTED_EVENT_DATA,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
@@ -34,12 +35,17 @@ import Widget from "./containers/Widget";
 import { AnalyticsContext } from "./context/AnalyticsContext";
 import { WidgetProvider } from "./context/WidgetContext";
 import {
+  ACCOUNT_LINKING_INTENT,
+  ACCOUNT_LINKING_STATUS,
+  type AccountLinkingState,
   browser,
+  DEFAULT_ACCOUNT_LINKING_STATE,
   ExternalWalletEventType,
   LoginModalCallbacks,
   LoginModalProps,
   MODAL_STATUS,
   ModalState,
+  ModalStatusType,
   os,
   platform,
   SocialLoginEventType,
@@ -80,6 +86,10 @@ export class LoginModal {
 
   private analytics: Analytics;
 
+  private modalStatus: ModalStatusType = MODAL_STATUS.INITIALIZED;
+
+  private accountLinkingState: AccountLinkingState = { ...DEFAULT_ACCOUNT_LINKING_STATE };
+
   constructor(uiConfig: LoginModalProps, callbacks: LoginModalCallbacks) {
     this.uiConfig = uiConfig;
 
@@ -111,6 +121,11 @@ export class LoginModal {
     this.callbacks = callbacks;
     this.analytics = uiConfig.analytics;
     this.subscribeCoreEvents(this.uiConfig.connectorListener);
+  }
+
+  get consentRequired(): boolean {
+    // consent required is true if the consent required is true and the privacy policy and tnc link are set
+    return (this.uiConfig.consentRequired && Boolean(this.uiConfig.privacyPolicy) && Boolean(this.uiConfig.tncLink)) || false;
   }
 
   get isDark(): boolean {
@@ -260,6 +275,8 @@ export class LoginModal {
             handleExternalWalletClick={this.handleExternalWalletClick}
             handleMobileVerifyConnect={this.handleMobileVerifyConnect}
             handleSocialLoginClick={this.handleSocialLoginClick}
+            handleAcceptConsent={this.handleAcceptConsent}
+            handleDeclineConsent={this.handleDeclineConsent}
             closeModal={this.closeModal}
           >
             <Widget stateListener={this.stateEmitter} />
@@ -306,6 +323,114 @@ export class LoginModal {
       showExternalWalletsOnly: !!options.showExternalWalletsOnly,
       externalWalletsVisibility: isMMAvailable ? false : !!options.externalWalletsVisibility,
     });
+  };
+
+  startAccountLinkingSession = (params: {
+    connectorName: WALLET_CONNECTOR_TYPE | string;
+    transportConnectorName?: WALLET_CONNECTOR_TYPE | string;
+    chainId: string;
+    intent?: (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
+  }): void => {
+    this.updateAccountLinkingState({
+      ...DEFAULT_ACCOUNT_LINKING_STATE,
+      active: true,
+      connectorName: params.connectorName,
+      transportConnectorName: params.transportConnectorName ?? params.connectorName,
+      chainId: params.chainId,
+      intent: params.intent ?? ACCOUNT_LINKING_INTENT.LINK,
+      status: ACCOUNT_LINKING_STATUS.INITIALIZING,
+    });
+  };
+
+  updateAccountLinkingState = (accountLinking: Partial<AccountLinkingState>): void => {
+    this.accountLinkingState = { ...this.accountLinkingState, ...accountLinking };
+    this.setState({ accountLinking: this.accountLinkingState });
+  };
+
+  resetAccountLinkingSession = (): void => {
+    this.accountLinkingState = { ...DEFAULT_ACCOUNT_LINKING_STATE };
+    this.setState({ accountLinking: this.accountLinkingState });
+  };
+
+  hasActiveAccountLinkingSession = (): boolean => {
+    return this.accountLinkingState.active;
+  };
+
+  startAccountLinkingPicker = (params: { chainId: string }): void => {
+    this.accountLinkingState = {
+      ...DEFAULT_ACCOUNT_LINKING_STATE,
+      active: true,
+      pickerActive: true,
+      chainId: params.chainId,
+      intent: ACCOUNT_LINKING_INTENT.LINK,
+    };
+    this.setState({
+      accountLinking: this.accountLinkingState,
+      currentPage: PAGES.WALLET_LIST,
+      modalVisibility: true,
+      status: MODAL_STATUS.INITIALIZED,
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
+  };
+
+  endAccountLinkingPicker = (): void => {
+    this.accountLinkingState = { ...this.accountLinkingState, pickerActive: false, active: false };
+    this.setState({ accountLinking: this.accountLinkingState });
+  };
+
+  startConnectingLoader = (params: { connector: WALLET_CONNECTOR_TYPE | string; connectorName: string }): void => {
+    this.setState({
+      status: MODAL_STATUS.CONNECTING,
+      modalVisibility: true,
+      detailedLoaderConnector: params.connector,
+      detailedLoaderConnectorName: params.connectorName,
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
+  };
+
+  markLoaderAuthorizing = (): void => {
+    this.setState({ status: MODAL_STATUS.AUTHORIZING });
+  };
+
+  endConnectingLoader = (params: { success: boolean; errorMessage?: string; successMessage?: string; skipSuccessScreen?: boolean }): void => {
+    if (params.success) {
+      if (params.skipSuccessScreen) {
+        this.setState({ modalVisibility: false });
+        if (this.callbacks.onModalVisibility) {
+          this.callbacks.onModalVisibility(false);
+        }
+        return;
+      }
+      // Account-linking success is terminal regardless of authentication mode (no signing step),
+      // so emit the mode's terminal success status so the Loader renders the success UI and auto-closes:
+      // - CONNECT_AND_SIGN expects AUTHORIZED as terminal success.
+      // - Other modes expect CONNECTED.
+      const isConnectAndSign = this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
+      this.setState({
+        status: isConnectAndSign ? MODAL_STATUS.AUTHORIZED : MODAL_STATUS.CONNECTED,
+        postLoadingMessage: params.successMessage ?? "modal.post-loading.connected",
+      });
+      return;
+    }
+
+    if (this.uiConfig.displayErrorsOnModal) {
+      this.setState({
+        modalVisibility: true,
+        status: MODAL_STATUS.ERRORED,
+        postLoadingMessage: params.errorMessage || "modal.post-loading.something-wrong",
+      });
+    } else {
+      this.setState({
+        modalVisibility: false,
+      });
+      if (this.callbacks.onModalVisibility) {
+        this.callbacks.onModalVisibility(false);
+      }
+    }
   };
 
   open = () => {
@@ -363,6 +488,14 @@ export class LoginModal {
     }
   };
 
+  private handleAcceptConsent = () => {
+    return this.callbacks.onAcceptConsent();
+  };
+
+  private handleDeclineConsent = () => {
+    return this.callbacks.onDeclineConsent();
+  };
+
   private handleSocialLoginClick = (params: SocialLoginEventType) => {
     log.info("social login clicked", params);
     const { loginParams } = params;
@@ -378,6 +511,7 @@ export class LoginModal {
   };
 
   private setState = (newState: Partial<ModalState>) => {
+    if (newState.status) this.modalStatus = newState.status;
     this.stateEmitter.emit("STATE_UPDATED", newState);
   };
 
@@ -410,6 +544,7 @@ export class LoginModal {
     });
     listener.on(CONNECTOR_EVENTS.CONNECTED, (data: SDK_CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);
+      if (data.pendingUserConsent) return;
       // only show success if not being reconnected again.
       if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
         this.setState({
@@ -466,10 +601,29 @@ export class LoginModal {
       this.handleConnectorData(connectorData);
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZING, () => {
+      if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.AUTHORIZING });
     });
     listener.on(CONNECTOR_EVENTS.AUTHORIZED, () => {
-      this.setState({ status: MODAL_STATUS.AUTHORIZED });
+      if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
+      this.setState({ status: MODAL_STATUS.AUTHORIZED, postLoadingMessage: "" });
+    });
+    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, () => {
+      this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
+    });
+    listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => {
+      if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
+        this.setState({ status: MODAL_STATUS.AUTHORIZED, modalVisibility: true, postLoadingMessage: "" });
+      } else if (!data.reconnected) {
+        this.setState({
+          status: MODAL_STATUS.CONNECTED,
+          modalVisibility: true,
+          postLoadingMessage: "modal.post-loading.connected",
+          currentPage: PAGES.LOGIN_OPTIONS,
+        });
+      } else {
+        this.setState({ status: MODAL_STATUS.CONNECTED });
+      }
     });
   };
 }

@@ -10,6 +10,7 @@ import {
   chainNamespaceOptions,
   clientIds,
   confirmationStrategyOptions,
+  consentConfigOptions,
   getDefaultBundlerUrl,
   languageOptions,
   loginProviderOptions,
@@ -243,6 +244,15 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
               { name: 'Connect Only', value: 'connect-only' },
               { name: 'Connect and Sign', value: 'connect-and-sign' },
             ]"
+            matchParentsWidth
+          />
+          <Select
+            v-model="formData.consentConfigMode"
+            data-testid="selectConsentConfig"
+            :label="$t('app.consentConfig')"
+            :aria-label="$t('app.consentConfig')"
+            :placeholder="$t('app.consentConfig')"
+            :options="consentConfigOptions"
             matchParentsWidth
           />
           <Toggle

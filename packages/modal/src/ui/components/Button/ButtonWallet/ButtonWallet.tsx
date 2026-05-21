@@ -33,18 +33,18 @@ function ButtonWallet(props: ButtonWalletProps) {
     <button
       type="button"
       className={cn(
-        `w3a--group w3a--relative w3a--overflow-hidden w3a--flex w3a--w-full w3a--items-center w3a--justify-between w3a--bg-app-gray-50 w3a--p-3 hover:w3a--bg-app-gray-200 
-        hover:w3a--text-app-gray-900 dark:w3a--bg-app-gray-800 dark:hover:w3a--bg-app-gray-600 active:w3a--scale-95 w3a--transition-all w3a--duration-150`,
+        `wta:group wta:relative wta:overflow-hidden wta:flex wta:w-full wta:items-center wta:justify-between wta:bg-app-gray-50 wta:p-3 wta:hover:bg-app-gray-200 
+        wta:hover:text-app-gray-900 wta:dark:bg-app-gray-800 wta:dark:hover:bg-app-gray-600 wta:active:scale-95 wta:transition-all wta:duration-150`,
         {
-          "w3a--rounded-full": buttonRadius === "pill",
-          "w3a--rounded-lg": buttonRadius === "rounded",
-          "w3a--rounded-none": buttonRadius === "square",
+          "wta:rounded-full": buttonRadius === "pill",
+          "wta:rounded-lg": buttonRadius === "rounded",
+          "wta:rounded-none": buttonRadius === "square",
         }
       )}
       onClick={handleBtnClick}
     >
-      <div className="w3a--flex w3a--items-center w3a--gap-x-2">
-        <figure className="w3a--size-5">
+      <div className="wta:flex wta:items-center wta:gap-x-2">
+        <figure className="wta:size-5">
           <Image
             imageData={button.icon}
             imageId={`login-${button.name}`}
@@ -56,20 +56,20 @@ function ButtonWallet(props: ButtonWalletProps) {
             extension={button.imgExtension || "webp"}
           />
         </figure>
-        <p className="w3a--max-w-[180px] w3a--truncate w3a--text-base w3a--font-normal w3a--text-app-gray-700 dark:w3a--text-app-white">{label}</p>
+        <p className="wta:max-w-[180px] wta:truncate wta:text-base wta:font-normal wta:text-app-gray-700 wta:dark:text-app-white">{label}</p>
       </div>
       {button.hasInjectedWallet && (
         <span
-          className="w3a--absolute w3a--right-4 w3a--top-1/2 w3a--flex w3a--w-auto -w3a--translate-y-1/2 w3a--items-center w3a--rounded-md w3a--bg-app-primary-100 w3a--px-2 w3a--py-1 w3a--text-xs w3a--font-medium w3a--text-app-primary-800 w3a--transition-all w3a--duration-300 group-hover:w3a--translate-x-6 group-hover:w3a--opacity-0 
-        dark:w3a--border dark:w3a--border-app-primary-400 dark:w3a--bg-transparent dark:w3a--text-app-primary-400"
+          className="wta:absolute wta:right-4 wta:top-1/2 wta:flex wta:w-auto wta:-translate-y-1/2 wta:items-center wta:rounded-md wta:bg-app-primary-100 wta:px-2 wta:py-1 wta:text-xs wta:font-medium wta:text-app-primary-800 wta:transition-all wta:duration-300 wta:group-hover:translate-x-6 wta:group-hover:opacity-0 
+        wta:dark:border wta:dark:border-app-primary-400 wta:dark:bg-transparent wta:dark:text-app-primary-400"
         >
           {t("modal.external.installed")}
         </span>
       )}
       <img
         id="injected-wallet-arrow"
-        className="w3a--absolute w3a--right-4 w3a--top-1/2 -w3a--translate-x-10 -w3a--translate-y-1/2 w3a--opacity-0 w3a--transition-all w3a--duration-300
-          group-hover:w3a--translate-x-0 group-hover:w3a--opacity-100"
+        className="wta:absolute wta:right-4 wta:top-1/2 wta:-translate-x-10 wta:-translate-y-1/2 wta:opacity-0 wta:transition-all wta:duration-300
+          wta:group-hover:translate-x-0 wta:group-hover:opacity-100"
         src={getIcons(isDark ? "chevron-right-light" : "chevron-right-dark")}
         alt="arrow"
       />

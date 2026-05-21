@@ -3,6 +3,7 @@ import { type Ref, ref, type ShallowRef, shallowRef, watch } from "vue";
 import {
   ANALYTICS_INTEGRATION_TYPE,
   type ChainNamespaceType,
+  CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
@@ -10,6 +11,7 @@ import {
   type IWeb3Auth,
   IWeb3AuthState,
   log,
+  LOGIN_MODE,
   WalletInitializationError,
 } from "../base";
 
@@ -130,13 +132,14 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         isInitialized.value = true;
       };
 
-      const connectedListener = () => {
+      const connectedListener = (data: CONNECTED_EVENT_DATA) => {
+        if (data.pendingUserConsent) return;
         status.value = web3Auth.value!.status;
         // We do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
         if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED) {
           if (!isInitialized.value) isInitialized.value = true;
           isConnected.value = true;
-          connection.value = newWeb3Auth.connection;
+          connection.value = web3Auth.value!.connection;
           chainId.value = web3Auth.value!.currentChainId;
           chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
         }
@@ -147,6 +150,20 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
           isAuthorized.value = true;
           isConnected.value = true;
+        }
+      };
+
+      const consentAcceptedListener = () => {
+        status.value = web3Auth.value!.status;
+        if (web3Auth.value!.status === CONNECTOR_STATUS.CONNECTED || web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
+          if (!isInitialized.value) isInitialized.value = true;
+          isConnected.value = true;
+          connection.value = web3Auth.value!.connection;
+          chainId.value = web3Auth.value!.currentChainId;
+          chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
+          if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
+            isAuthorized.value = true;
+          }
         }
       };
 
@@ -170,6 +187,13 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         isMFAEnabled.value = true;
       };
 
+      const connectionUpdatedListener = () => {
+        status.value = web3Auth.value!.status;
+        connection.value = web3Auth.value!.connection;
+        chainId.value = web3Auth.value!.currentChainId;
+        chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
+      };
+
       if (prevWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
@@ -180,6 +204,10 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.ERRORED, errorListener);
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+        prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+        if (prevWeb3Auth.loginMode === LOGIN_MODE.MODAL) {
+          prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
+        }
       }
 
       if (newWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
@@ -193,6 +221,10 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         newWeb3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
         newWeb3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
         newWeb3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+        newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+        if (newWeb3Auth.loginMode === LOGIN_MODE.MODAL) {
+          newWeb3Auth.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
+        }
       }
     },
     { immediate: true }

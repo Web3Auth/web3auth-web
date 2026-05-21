@@ -4,7 +4,7 @@
   "private": true,
   "dependencies": {
     "@tanstack/react-query": "^5.95.2",
-    "@web3auth/auth": "^11.5.0",
+    "@web3auth/auth": "^11.6.0",
     "@web3auth/modal": "file:../../packages/modal",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",

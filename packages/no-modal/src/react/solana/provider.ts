@@ -102,6 +102,9 @@ function useFrameworkKitSolanaClient(): SolanaClient {
         return;
       }
 
+      // only reconnect for the primary connector
+      if (conn.connectorName !== web3Auth?.primaryConnectorName) return;
+
       try {
         const solanaWalletId = "wallet-standard:" + conn.connectorName;
         const connector = createWalletStandardConnector(solanaWallet, {

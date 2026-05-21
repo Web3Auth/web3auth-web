@@ -246,6 +246,14 @@ function ConnectWallet(props: ConnectWalletProps) {
     } else {
       // show QR code if wallet connect v2 is supported
       if (button.hasWalletConnect) {
+        // In account-linking picker mode, hand off to the WC v2 account-linking flow in
+        // modalManager (via the picker resolver in onExternalWalletLogin) instead of showing
+        // the regular inline QR — the regular QR uses a connector owned by the login flow,
+        // which is not what we want for linking.
+        if (modalState.accountLinking.pickerActive) {
+          handleExternalWalletClick({ connector: button.name });
+          return;
+        }
         setSelectedButton(button);
         setSelectedWallet(true);
         setCurrentPage(CONNECT_WALLET_PAGES.SELECTED_WALLET);
@@ -284,7 +292,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   }, [selectedWallet, isExternalWalletModeOnly]);
 
   return (
-    <div className="w3a--relative w3a--flex w3a--flex-1 w3a--flex-col w3a--gap-y-4">
+    <div className="wta:relative wta:flex wta:flex-1 wta:flex-col wta:gap-y-4">
       {/* Header */}
       <ConnectWalletHeader
         hideBackButton={hideBackButton}
@@ -292,6 +300,7 @@ function ConnectWallet(props: ConnectWalletProps) {
         onBackClick={handleBack}
         currentPage={currentPage}
         selectedButton={selectedButton}
+        isLinking={modalState.accountLinking.pickerActive}
       />
       {/* Body */}
       {selectedWallet ? (
@@ -304,7 +313,7 @@ function ConnectWallet(props: ConnectWalletProps) {
           platform={deviceDetails.platform}
         />
       ) : (
-        <div className="w3a--flex w3a--flex-col w3a--gap-y-2">
+        <div className="wta:flex wta:flex-col wta:gap-y-2">
           <ConnectWalletChainFilter isDark={isDark} isLoading={isLoading} selectedChain={selectedChain} setSelectedChain={handleChainFilterChange} />
           {/* Search Input */}
           <ConnectWalletSearch

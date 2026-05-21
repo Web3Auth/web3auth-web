@@ -13,6 +13,8 @@ type WidgetContextType = {
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
+  handleAcceptConsent: () => void | Promise<void>;
+  handleDeclineConsent: () => void | Promise<void>;
   closeModal: () => void;
 };
 
@@ -25,6 +27,8 @@ type WidgetProviderProps = {
   handleExternalWalletClick: (params: ExternalWalletEventType) => void;
   handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
+  handleAcceptConsent: () => void | Promise<void>;
+  handleDeclineConsent: () => void | Promise<void>;
   closeModal: () => void;
 };
 
@@ -39,6 +43,8 @@ export const WidgetProvider: FC<WidgetProviderProps> = ({
   handleExternalWalletClick,
   handleMobileVerifyConnect,
   handleShowExternalWallets,
+  handleAcceptConsent,
+  handleDeclineConsent,
   closeModal,
 }) => {
   const appLogo = useMemo(() => {
@@ -62,6 +68,8 @@ export const WidgetProvider: FC<WidgetProviderProps> = ({
         handleExternalWalletClick,
         handleMobileVerifyConnect,
         handleShowExternalWallets,
+        handleAcceptConsent,
+        handleDeclineConsent,
         closeModal,
       }}
     >

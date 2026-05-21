@@ -41,7 +41,7 @@ async function main() {
     for (const localeKey of keys) {
       if (Object.prototype.hasOwnProperty.call(locales, localeKey)) {
         const filePath = path.resolve(`${folder}${localeKey}.json`);
-        await fs.promises.writeFile(filePath, JSON.stringify(locales[localeKey], null, 2), { flag: "w" });
+        await fs.promises.writeFile(filePath, `${JSON.stringify(locales[localeKey], null, 2)}\n`, { flag: "w" });
       }
     }
   } catch (error) {

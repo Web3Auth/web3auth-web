@@ -1,5 +1,17 @@
 {
   "modal": {
+    "account-linking.failed-connect-wallet": "{{wallet}} ile bağlantı kurulamadı.",
+    "account-linking.failed-switch-wallet": "{{wallet}} ile cüzdan değiştirme başarısız oldu.",
+    "account-linking.initializing-wallet": "{{wallet}} başlatılıyor...",
+    "account-linking.linking-wallet": "Cüzdan bağlanıyor...",
+    "account-linking.preparing-wallet-qr": "{{wallet}} QR kodu hazırlanıyor...",
+    "account-linking.scan-wallet": "QR kodunu {{wallet}} ile tarayın.",
+    "account-linking.scan-walletconnect": "QR kodunu WalletConnect uyumlu bir cüzdanla tarayın.",
+    "account-linking.switching-wallet": "Cüzdan değiştiriliyor...",
+    "account-linking.wallet-connected-preparing-linking": "Cüzdan bağlandı. Hesap bağlantısı hazırlanıyor...",
+    "account-linking.wallet-connected-preparing-switch": "Cüzdan bağlandı. Hesap değişimi hazırlanıyor...",
+    "account-linking.wallet-linked": "Cüzdan bağlandı.",
+    "account-linking.wallet-switched": "Cüzdan değiştirildi.",
     "adapter-loader.message": "Devam etmek için {{adapter}} hesabınızı doğrula",
     "adapter-loader.message1": "{{adapter}} doğrula",
     "adapter-loader.message2": "devam edecek hesap",
@@ -50,6 +62,7 @@
     "header-title": "Giriş yap",
     "header-tooltip-desc": "Cüzdan, dijital varlıklarınızı blockchain'de saklama ve yönetme görevi görür.",
     "header-tooltip-title": "Cüzdan",
+    "linkYourWallet": "Cüzdanınızı bağlayın",
     "loader.authorizing-header": "{{connector}} ile doğrula",
     "loader.authorizing-message": "Biz size bir istek gönderdik. Bu cüzdanınız olduğunu doğrulamak için cüzdanınızda doğrulayın.",
     "loader.authorizing-verify-btn": "Doğrulamak için buraya tıklayın",
@@ -100,6 +113,7 @@
     "social.view-more-socials": "Daha fazlasını görüntüle socials"
   },
   "passwordless": {
+    "captcha-default-error": "Doğrulama sırasında beklenmedik bir hata oluştu. Lütfen sayfayı yeniden yükleyin.",
     "error-invalid-link": "Hatalı ya da süresi geçmiş doğrulama linki",
     "error-invalid-origin": "Bir şeyler ters gitti, hata kodu: E002",
     "error-invalid-otp": "Hatalı OTP, lütfen tekrar deneyin.",

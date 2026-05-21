@@ -114,6 +114,8 @@ export interface LoginModalCallbacks {
   }) => Promise<void>;
   onModalVisibility: (visibility: boolean) => Promise<void>;
   onMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => Promise<void>;
+  onAcceptConsent: () => Promise<void>;
+  onDeclineConsent: () => Promise<void>;
 }
 
 export const LOGIN_MODAL_EVENTS = {
@@ -133,8 +135,64 @@ export const MODAL_STATUS = {
   BLOCKED: "blocked",
   AUTHORIZING: "authorizing",
   AUTHORIZED: "authorized",
+  CONSENT_REQUIRING: "consent_requiring",
 } as const;
 export type ModalStatusType = (typeof MODAL_STATUS)[keyof typeof MODAL_STATUS];
+
+export const ACCOUNT_LINKING_STATUS = {
+  IDLE: "idle",
+  INITIALIZING: "initializing",
+  AWAITING_CONNECTION: "awaiting_connection",
+  WALLET_CONNECTED: "wallet_connected",
+  LINKING: "linking",
+  ERRORED: "errored",
+  COMPLETED: "completed",
+} as const;
+export type AccountLinkingStatusType = (typeof ACCOUNT_LINKING_STATUS)[keyof typeof ACCOUNT_LINKING_STATUS];
+
+export const ACCOUNT_LINKING_INTENT = {
+  LINK: "link",
+  SWITCH: "switch",
+} as const;
+export type AccountLinkingIntentType = (typeof ACCOUNT_LINKING_INTENT)[keyof typeof ACCOUNT_LINKING_INTENT];
+
+export interface AccountLinkingState {
+  active: boolean;
+  /**
+   * True when the modal is showing the wallet picker for `linkAccount()` called
+   * without a `connectorName`. The user's selection in the ConnectWallet UI will
+   * be routed to the linking flow instead of the regular login flow.
+   */
+  pickerActive: boolean;
+  /**
+   * The name of the wallet to be linked to.
+   */
+  connectorName: WALLET_CONNECTOR_TYPE | string | null;
+  /**
+   * The underlying actual connector that is used to connect to the target account.
+   * This is different from the connectorName coz except for Metamask, others wallet can be used to connect with injectedEvmConnector/solanaStandardWalletConnector if installed.
+   * Otherwise, will fallback to the wallet-connect connector.
+   *
+   * This is useful when we want to rehydrate the linked account, using this transport connector to connect back to the target account.
+   **/
+  transportConnectorName: WALLET_CONNECTOR_TYPE | string | null;
+  chainId: string | null;
+  intent: AccountLinkingIntentType;
+  status: AccountLinkingStatusType;
+  walletConnectUri?: string;
+  errorMessage: string;
+}
+
+export const DEFAULT_ACCOUNT_LINKING_STATE: AccountLinkingState = {
+  active: false,
+  pickerActive: false,
+  connectorName: null,
+  transportConnectorName: null,
+  chainId: null,
+  intent: ACCOUNT_LINKING_INTENT.LINK,
+  status: ACCOUNT_LINKING_STATUS.IDLE,
+  errorMessage: "",
+};
 
 export interface ModalState {
   // UI State - changes frequently during user interaction
@@ -154,6 +212,7 @@ export interface ModalState {
   showExternalWalletsOnly: boolean;
   walletConnectUri: string;
   metamaskConnectUri: string;
+  accountLinking: AccountLinkingState;
 
   // Config State - set during initialization, rarely changes
   socialLoginsConfig: SocialLoginsConfig;

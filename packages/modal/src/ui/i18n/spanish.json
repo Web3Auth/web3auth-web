@@ -1,5 +1,17 @@
 {
   "modal": {
+    "account-linking.failed-connect-wallet": "Error al conectar con {{wallet}}.",
+    "account-linking.failed-switch-wallet": "Error al cambiar la billetera con {{wallet}}.",
+    "account-linking.initializing-wallet": "Inicializando {{wallet}}...",
+    "account-linking.linking-wallet": "Vinculando billetera...",
+    "account-linking.preparing-wallet-qr": "Preparando el código QR de {{wallet}}...",
+    "account-linking.scan-wallet": "Escanea el código QR con {{wallet}}.",
+    "account-linking.scan-walletconnect": "Escanea el código QR con una billetera compatible con WalletConnect.",
+    "account-linking.switching-wallet": "Cambiando billetera...",
+    "account-linking.wallet-connected-preparing-linking": "Billetera conectada. Preparando vinculación de cuenta...",
+    "account-linking.wallet-connected-preparing-switch": "Billetera conectada. Preparando cambio de cuenta...",
+    "account-linking.wallet-linked": "Billetera vinculada.",
+    "account-linking.wallet-switched": "Billetera cambiada.",
     "adapter-loader.message": "Verifica tu cuenta {{adapter}} para continuar",
     "adapter-loader.message1": "Verifique su {{adapter}}",
     "adapter-loader.message2": "cuenta para continuar",
@@ -50,6 +62,7 @@
     "header-title": "Iniciar sesión",
     "header-tooltip-desc": "La billetera sirve como una cuenta para almacenar y administrar sus activos digitales en la blockchain.",
     "header-tooltip-title": "Billetera",
+    "linkYourWallet": "Vincula tu billetera",
     "loader.authorizing-header": "Verificar en {{connector}}",
     "loader.authorizing-message": "Hemos enviado una solicitud a su cartera. Verifique en su cartera para confirmar que posee esta cartera.",
     "loader.authorizing-verify-btn": "Haga clic aquí para verificar",
@@ -100,6 +113,7 @@
     "social.view-more-socials": "Ver más socials"
   },
   "passwordless": {
+    "captcha-default-error": "Se ha producido un error inesperado durante la verificación. Por favor, inténtelo de nuevo recargando la página.",
     "error-invalid-link": "El enlace o el enlace de verificación ha expirado",
     "error-invalid-origin": "Algo salió mal, código de error: E002",
     "error-invalid-otp": "OTP no válido, intente nuevamente",

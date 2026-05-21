@@ -3,16 +3,20 @@ import { describe, expect, it, vi } from "vitest";
 import {
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
+  type Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   IConnector,
+  type LinkedAccountInfo,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
+  WEB3AUTH_STATE_STORAGE_KEY,
 } from "../src/base";
+import { authConnector } from "../src/connectors/auth-connector";
 import { Web3AuthNoModal } from "../src/noModal";
 import { createChain, createMockStorage, createProjectConfig, MockConnector, MULTICHAIN_CONNECTOR_NAMESPACE } from "./helpers";
 
@@ -31,6 +35,38 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
 
   public exposeCheckIfAutoConnect(connector: MockConnector) {
     return this.checkIfAutoConnect(connector as unknown as IConnector<unknown>);
+  }
+
+  public exposeSetConsentRequired(value: boolean) {
+    this.consentRequired = value;
+  }
+
+  public exposeSubscribeToConnectorEvents(connector: MockConnector) {
+    this.subscribeToConnectorEvents(connector as unknown as IConnector<unknown>);
+  }
+
+  public exposeCompleteConsentAcceptance() {
+    return this.completeConsentAcceptance();
+  }
+
+  public exposeHasUsableConnectedSwitchConnector(connector: IConnector<unknown> | null) {
+    return this.hasUsableConnectedSwitchConnector(connector);
+  }
+
+  public exposeGetConnectedWalletConnector(account?: LinkedAccountInfo | null) {
+    return this.getConnectedWalletConnector(account);
+  }
+
+  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: LinkedAccountInfo | null) {
+    this.setConnectedWalletConnector(connector, account);
+  }
+
+  public exposeSetActiveWalletConnectorKey(account?: LinkedAccountInfo | null) {
+    this.setActiveWalletConnectorKey(account);
+  }
+
+  public exposeProcessSwitchAccountResult(...args: Parameters<Web3AuthNoModal["processSwitchAccountResult"]>) {
+    return this.processSwitchAccountResult(...args);
   }
 }
 
@@ -56,7 +92,7 @@ describe("Web3AuthNoModal", () => {
     const sdk = createSdk(
       {},
       {
-        connectedConnectorName: WALLET_CONNECTORS.AUTH,
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
         cachedConnector: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
         idToken: "id-token",
@@ -65,7 +101,7 @@ describe("Web3AuthNoModal", () => {
       }
     );
     await Promise.resolve();
-    expect(sdk.connectedConnectorName).toBe(WALLET_CONNECTORS.AUTH);
+    expect(sdk.primaryConnectorName).toBe(WALLET_CONNECTORS.AUTH);
     expect(sdk.cachedConnector).toBe(WALLET_CONNECTORS.AUTH);
     expect(sdk.idToken).toBe("id-token");
   });
@@ -93,10 +129,393 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, CHAIN_NAMESPACES.SOLANA)).toBe(solana);
   });
 
+  it("treats a missing switch connector as unusable", () => {
+    const sdk = createSdk();
+
+    expect(sdk.exposeHasUsableConnectedSwitchConnector(null)).toBe(false);
+  });
+
+  it("returns the connected wallet provider for an active external account", async () => {
+    const activeAccount = createExternalAccount();
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        activeAccount,
+      }
+    );
+    await Promise.resolve();
+
+    const linkedProvider = { request: vi.fn() };
+    const linkedConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: linkedProvider as never,
+    } as never);
+    sdk.exposeSetConnectedWalletConnector(linkedConnector, activeAccount);
+    sdk.exposeSetActiveWalletConnectorKey(activeAccount);
+
+    expect(sdk.connection).toEqual({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: linkedProvider,
+      solanaWallet: null,
+    });
+  });
+
+  it("switches to a linked account without rebinding the AUTH provider proxy", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+      }
+    );
+    await Promise.resolve();
+
+    const activeAccount = createExternalAccount();
+    const authProvider = { chainId: "0x1" };
+    const linkedProvider = { request: vi.fn() };
+    const updateProviderEngineProxy = vi.fn();
+    const primaryConnector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: authProvider as never,
+    } as never);
+    const walletConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: linkedProvider as never,
+    } as never);
+    const authConnector = {
+      assertSwitchAccountConnectorMatchesTarget: vi.fn().mockResolvedValue(undefined),
+      toSwitchAccountConnectorError: vi.fn((_: unknown, error: unknown) => error),
+    } as never;
+
+    sdk.exposeSetConnectedWalletConnector(primaryConnector);
+    (sdk as unknown as { commonJRPCProvider: { updateProviderEngineProxy: ReturnType<typeof vi.fn> } }).commonJRPCProvider = {
+      updateProviderEngineProxy,
+    };
+
+    const connectionUpdatedListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+
+    await sdk.exposeProcessSwitchAccountResult(
+      authConnector,
+      {
+        kind: "external",
+        targetAccount: activeAccount,
+        activeAccount,
+        activeChainId: "0x1",
+      },
+      { walletConnector }
+    );
+
+    expect(updateProviderEngineProxy).not.toHaveBeenCalled();
+    expect(sdk.exposeGetConnectedWalletConnector()).toBe(primaryConnector);
+    expect(connectionUpdatedListener).toHaveBeenCalledWith({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: linkedProvider,
+      solanaWallet: null,
+    });
+    expect(sdk.connection).toEqual({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: linkedProvider,
+      solanaWallet: null,
+    });
+  });
+
+  it("keeps the preferred chain when the linked account stays in the same namespace", () => {
+    const connector = authConnector()({
+      projectConfig: createProjectConfig(),
+      coreOptions: {
+        clientId: "test-client-id",
+        web3AuthNetwork: "sapphire_devnet",
+        chains: [
+          createChain({
+            chainId: "0xaa36a7",
+            rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+            displayName: "Ethereum Sepolia",
+          }),
+          createChain(),
+        ],
+      } as never,
+      analytics: { track: vi.fn() } as never,
+    }) as unknown as {
+      getChainIdForLinkedAccount: (account: Pick<LinkedAccountInfo, "chainNamespace" | "connector">, preferredChainId?: string | null) => string;
+    };
+
+    expect(connector.getChainIdForLinkedAccount(createExternalAccount({ chainNamespace: "evm" }), "0xaa36a7")).toBe("0xaa36a7");
+  });
+
+  it("switches back to the primary account without rebinding the AUTH provider proxy", async () => {
+    const activeAccount = createExternalAccount();
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+      }
+    );
+    await Promise.resolve();
+
+    const authProvider = { chainId: "0x1" };
+    const linkedProvider = { request: vi.fn() };
+    const updateProviderEngineProxy = vi.fn();
+    const authConnector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: authProvider as never,
+    } as never);
+    const linkedConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: linkedProvider as never,
+    } as never);
+
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
+    (sdk as unknown as { commonJRPCProvider: { updateProviderEngineProxy: ReturnType<typeof vi.fn> } }).commonJRPCProvider = {
+      updateProviderEngineProxy,
+    };
+    sdk.exposeSubscribeToConnectorEvents(authConnector);
+
+    authConnector.emit(CONNECTOR_EVENTS.CONNECTED, {
+      connectorName: WALLET_CONNECTORS.AUTH,
+      ethereumProvider: authProvider,
+      solanaWallet: null,
+      reconnected: false,
+    });
+
+    await vi.waitFor(() => {
+      expect(updateProviderEngineProxy).toHaveBeenCalledWith(authProvider);
+    });
+
+    sdk.exposeSetConnectedWalletConnector(linkedConnector, activeAccount);
+    sdk.exposeSetActiveWalletConnectorKey(activeAccount);
+    updateProviderEngineProxy.mockClear();
+
+    const connectionUpdatedListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+
+    await sdk.exposeProcessSwitchAccountResult(
+      authConnector as never,
+      {
+        kind: "primary",
+        targetAccount: createPrimaryAccount(),
+        activeAccount: null,
+        activeChainId: "0x1",
+        connectorName: WALLET_CONNECTORS.AUTH,
+        connectorNamespace: CHAIN_NAMESPACES.EIP155,
+        ethereumProvider: authProvider as never,
+        solanaWallet: null,
+      },
+      {}
+    );
+
+    expect(updateProviderEngineProxy).not.toHaveBeenCalled();
+    expect(connectionUpdatedListener).toHaveBeenCalledWith({
+      connectorName: WALLET_CONNECTORS.AUTH,
+      ethereumProvider: (sdk as unknown as { commonJRPCProvider: unknown }).commonJRPCProvider,
+      solanaWallet: null,
+    });
+    expect(sdk.connection).toEqual({
+      connectorName: WALLET_CONNECTORS.AUTH,
+      ethereumProvider: (sdk as unknown as { commonJRPCProvider: unknown }).commonJRPCProvider,
+      solanaWallet: null,
+    });
+  });
+
+  it("reuses the current chain when switching linked accounts within the same namespace", async () => {
+    const sdk = createSdk(
+      {
+        chains: [
+          createChain({
+            chainId: "0xaa36a7",
+            rpcTarget: "https://rpc.ankr.com/eth_sepolia",
+            displayName: "Ethereum Sepolia",
+          }),
+          createChain(),
+        ],
+      },
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0xaa36a7",
+      }
+    );
+    await Promise.resolve();
+
+    const targetAccount = createExternalAccount({ chainNamespace: "evm" });
+    const linkedProvider = { request: vi.fn() };
+    const walletConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.READY,
+    } as never);
+    walletConnector.connect = vi.fn().mockResolvedValue({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: linkedProvider as never,
+      solanaWallet: null,
+    });
+
+    const authConnector = {
+      assertSwitchAccountConnectorMatchesTarget: vi.fn().mockResolvedValue(undefined),
+      toSwitchAccountConnectorError: vi.fn((_: unknown, error: unknown) => error),
+    } as never;
+
+    await sdk.exposeProcessSwitchAccountResult(
+      authConnector,
+      {
+        kind: "external",
+        targetAccount,
+        activeAccount: targetAccount,
+        activeChainId: "0x1",
+      },
+      { walletConnector }
+    );
+
+    expect(walletConnector.connect).toHaveBeenCalledWith(
+      expect.objectContaining({
+        chainId: "0xaa36a7",
+      })
+    );
+    expect(sdk.currentChainId).toBe("0xaa36a7");
+  });
+
+  it("rehydrates an active linked account without rebinding the AUTH proxy to the linked wallet", async () => {
+    const activeAccount = createExternalAccount();
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        cachedConnector: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        activeAccount,
+      }
+    );
+    await Promise.resolve();
+
+    const authProvider = { chainId: "0x1" };
+    const linkedProvider = { request: vi.fn() };
+    const updateProviderEngineProxy = vi.fn();
+    const authConnector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: authProvider as never,
+    } as never) as MockConnector & {
+      getChainIdForLinkedAccount: ReturnType<typeof vi.fn>;
+    };
+    const linkedConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: linkedProvider as never,
+    } as never);
+    authConnector.getChainIdForLinkedAccount = vi.fn().mockReturnValue("0x1");
+
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
+    (sdk as unknown as { commonJRPCProvider: { updateProviderEngineProxy: ReturnType<typeof vi.fn> } }).commonJRPCProvider = {
+      updateProviderEngineProxy,
+    };
+    vi.spyOn(sdk as unknown as { createIsolatedWalletConnector: () => Promise<MockConnector> }, "createIsolatedWalletConnector").mockResolvedValue(
+      linkedConnector
+    );
+    sdk.exposeSubscribeToConnectorEvents(authConnector);
+
+    authConnector.emit(CONNECTOR_EVENTS.CONNECTED, {
+      connectorName: WALLET_CONNECTORS.AUTH,
+      ethereumProvider: authProvider,
+      solanaWallet: null,
+      reconnected: true,
+    });
+
+    await vi.waitFor(() => {
+      expect(updateProviderEngineProxy).toHaveBeenCalledWith(authProvider);
+    });
+
+    expect(updateProviderEngineProxy).not.toHaveBeenCalledWith(linkedProvider);
+    expect(sdk.exposeGetConnectedWalletConnector()).toBe(authConnector);
+    expect(sdk.exposeGetConnectedWalletConnector(activeAccount)).toBe(linkedConnector);
+    expect(sdk.connection).toEqual({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: linkedProvider,
+      solanaWallet: null,
+    });
+  });
+
+  it("returns no connected accounts with providers before authorization", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+      }
+    );
+    await Promise.resolve();
+    sdk.status = CONNECTOR_STATUS.CONNECTED;
+
+    const primaryAccount = createPrimaryAccount();
+    const authProvider = { request: vi.fn() };
+    const authConnector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: authProvider as never,
+    } as never);
+
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
+    sdk.exposeSetConnectedWalletConnector(authConnector, primaryAccount);
+
+    expect(sdk.getConnectedAccountsWithProviders()).toEqual([]);
+  });
+
+  it("returns only usable connected accounts with providers after authorization", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+      }
+    );
+    await Promise.resolve();
+    sdk.status = CONNECTOR_STATUS.AUTHORIZED;
+
+    const primaryAccount = createPrimaryAccount();
+    const inactiveLinkedAccount = createExternalAccount({
+      id: "inactive-linked-account-id",
+      active: false,
+    });
+    const authProvider = { request: vi.fn() };
+    const inactiveLinkedProvider = { request: vi.fn() };
+    const authConnector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: authProvider as never,
+    } as never);
+    const inactiveLinkedConnector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      status: CONNECTOR_STATUS.READY,
+      provider: inactiveLinkedProvider as never,
+    } as never);
+
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector, inactiveLinkedConnector];
+    sdk.exposeSetConnectedWalletConnector(authConnector, primaryAccount);
+    sdk.exposeSetConnectedWalletConnector(inactiveLinkedConnector, inactiveLinkedAccount);
+
+    expect(sdk.getConnectedAccountsWithProviders()).toEqual([
+      expect.objectContaining({
+        id: primaryAccount.id,
+        isPrimary: true,
+        eoaAddress: primaryAccount.eoaAddress,
+        accountType: primaryAccount.accountType,
+        active: true,
+        connector: authConnector,
+        signingProvider: authProvider,
+        connected: true,
+      }),
+    ]);
+  });
+
   it("clearCache resets persisted state fields", async () => {
     const sdk = createSdk();
     (sdk as unknown as { state: Record<string, unknown> }).state = {
-      connectedConnectorName: WALLET_CONNECTORS.AUTH,
+      primaryConnectorName: WALLET_CONNECTORS.AUTH,
       cachedConnector: WALLET_CONNECTORS.AUTH,
       currentChainId: "0x1",
       idToken: "id-token",
@@ -106,12 +525,90 @@ describe("Web3AuthNoModal", () => {
 
     await sdk.clearCache();
     const state = (sdk as unknown as { state: Record<string, unknown> }).state;
-    expect(state.connectedConnectorName).toBeNull();
+    expect(state.primaryConnectorName).toBeNull();
     expect(state.cachedConnector).toBeNull();
     expect(state.currentChainId).toBeNull();
     expect(state.idToken).toBeNull();
     expect(state.accessToken).toBeNull();
     expect(state.refreshToken).toBeNull();
+  });
+
+  it("ignores inactive connector lifecycle events without clearing the active AUTH session", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        cachedConnector: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        idToken: "id-token",
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+        activeAccount: null,
+      }
+    );
+    await Promise.resolve();
+    sdk.status = CONNECTED_STATUSES[0];
+
+    const authProvider = { request: vi.fn() };
+    const primaryConnection: Connection = {
+      connectorName: WALLET_CONNECTORS.AUTH,
+      ethereumProvider: authProvider as never,
+      solanaWallet: null,
+    };
+
+    const authConnector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      status: CONNECTOR_STATUS.CONNECTED,
+      provider: authProvider as never,
+    } as never);
+    const inactiveConnector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+    sdk.exposeSetConnectedWalletConnector(authConnector);
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector, inactiveConnector];
+    sdk.exposeSubscribeToConnectorEvents(authConnector);
+    sdk.exposeSubscribeToConnectorEvents(inactiveConnector);
+
+    inactiveConnector.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.connectionError("User rejected request"));
+    inactiveConnector.emit(CONNECTOR_EVENTS.DISCONNECTED, { connector: WALLET_CONNECTORS.METAMASK });
+    inactiveConnector.emit(CONNECTOR_EVENTS.CACHE_CLEAR);
+    inactiveConnector.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, WalletLoginError.connectionError("rehydration failed"));
+    await Promise.resolve();
+
+    expect(sdk.status).toBe(CONNECTED_STATUSES[0]);
+    expect(sdk.primaryConnectorName).toBe(WALLET_CONNECTORS.AUTH);
+    expect(sdk.idToken).toBe("id-token");
+    expect(sdk.accessToken).toBe("access-token");
+    expect(sdk.refreshToken).toBe("refresh-token");
+    expect(sdk.connection).toEqual(primaryConnection);
+  });
+
+  it("still clears the session when the active connector errors", async () => {
+    const sdk = createSdk(
+      {},
+      {
+        primaryConnectorName: WALLET_CONNECTORS.AUTH,
+        cachedConnector: WALLET_CONNECTORS.AUTH,
+        currentChainId: "0x1",
+        idToken: "id-token",
+        accessToken: "access-token",
+        refreshToken: "refresh-token",
+      }
+    );
+    await Promise.resolve();
+    sdk.status = CONNECTED_STATUSES[0];
+
+    const authConnector = new MockConnector({ name: WALLET_CONNECTORS.AUTH } as never);
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
+    sdk.exposeSubscribeToConnectorEvents(authConnector);
+
+    authConnector.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.connectionError("active connector failed"));
+    await vi.waitFor(() => {
+      expect(sdk.status).toBe(CONNECTOR_STATUS.ERRORED);
+    });
+
+    expect(sdk.primaryConnectorName).toBeNull();
+    expect(sdk.idToken).toBeNull();
+    expect(sdk.accessToken).toBeNull();
+    expect(sdk.refreshToken).toBeNull();
   });
 
   it("initChainsConfig merges project and user chains with user precedence", () => {
@@ -176,7 +673,7 @@ describe("Web3AuthNoModal", () => {
     } as never);
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
     (sdk as unknown as { state: Record<string, unknown> }).state = {
-      connectedConnectorName: WALLET_CONNECTORS.METAMASK,
+      primaryConnectorName: WALLET_CONNECTORS.METAMASK,
       cachedConnector: null,
       currentChainId: "0x1",
       idToken: null,
@@ -199,44 +696,52 @@ describe("Web3AuthNoModal", () => {
 
   it("connectTo resolves in connect-only mode on CONNECTED", async () => {
     const sdk = createSdk({ initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY });
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {};
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never, { connected: { connectorName: WALLET_CONNECTORS.METAMASK } });
-    connector.connect = vi.fn(async () => {
-      sdk.emit(CONNECTOR_EVENTS.CONNECTED, {
+    const ethereumProvider = { request: vi.fn() };
+    const commonJRPCProvider = { updateProviderEngineProxy: vi.fn() };
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = commonJRPCProvider;
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never, {
+      connected: {
         connectorName: WALLET_CONNECTORS.METAMASK,
-        ethereumProvider: null,
+        ethereumProvider: ethereumProvider as never,
         solanaWallet: null,
         reconnected: false,
-        loginMode: "no-modal",
-      });
-      return null;
+      },
     });
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+    sdk.exposeSubscribeToConnectorEvents(connector);
 
-    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toBeNull();
+    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toEqual({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: commonJRPCProvider as never,
+      solanaWallet: null,
+    });
   });
 
   it("connectTo resolves in connect-and-sign mode after CONNECTED and AUTHORIZED", async () => {
     const sdk = createSdk({ initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN });
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {};
-    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
-    connector.connect = vi.fn(async () => {
-      sdk.emit(CONNECTOR_EVENTS.CONNECTED, {
+    const ethereumProvider = { request: vi.fn() };
+    const commonJRPCProvider = { updateProviderEngineProxy: vi.fn() };
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = commonJRPCProvider;
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never, {
+      connected: {
         connectorName: WALLET_CONNECTORS.METAMASK,
-        ethereumProvider: undefined,
-        solanaWallet: undefined,
+        ethereumProvider: ethereumProvider as never,
+        solanaWallet: null,
         reconnected: false,
-        loginMode: "modal",
-      });
-      sdk.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      },
+      authorized: {
         authTokenInfo: { idToken: "id-token" },
-        connector: "",
-      });
-      return null;
+        connector: WALLET_CONNECTORS.METAMASK,
+      },
     });
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+    sdk.exposeSubscribeToConnectorEvents(connector);
 
-    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toBeNull();
+    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toEqual({
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: commonJRPCProvider as never,
+      solanaWallet: null,
+    });
   });
 
   it("connectTo rejects on ERRORED event", async () => {
@@ -252,10 +757,90 @@ describe("Web3AuthNoModal", () => {
     await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).rejects.toThrow(WalletLoginError);
   });
 
-  it("logout and getUserInfo throw when not connected", async () => {
+  it("logout, getUserInfo, and getConnectedAccountsWithProviders throw when not connected", async () => {
     const sdk = createSdk();
     await expect(sdk.logout()).rejects.toThrow(WalletLoginError);
     await expect(sdk.getUserInfo()).rejects.toThrow(WalletLoginError);
+    expect(() => sdk.getConnectedAccountsWithProviders()).toThrow(WalletLoginError);
+  });
+
+  it("auto-skips consent UI when prior consent is true", async () => {
+    const storage = createMockStorage();
+    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ hasUserConsent: true }));
+    const sdk = createSdk({
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      storage: { sessionId: storage },
+    });
+    await Promise.resolve();
+    sdk.exposeSetConsentRequired(true);
+    const consentRequiredListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
+
+    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xAbC123"]) };
+    const authorizedListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+
+    const connector = emitMetaMaskConnected(sdk, ethereumProvider);
+    await vi.waitFor(() => {
+      expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
+    });
+    connector.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      connector: WALLET_CONNECTORS.METAMASK,
+      authTokenInfo: { idToken: "id-token" },
+    });
+    await vi.waitFor(() => {
+      expect(authorizedListener).toHaveBeenCalledTimes(1);
+    });
+
+    expect(sdk.status).toBe(CONNECTOR_STATUS.AUTHORIZED);
+    expect(consentRequiredListener).not.toHaveBeenCalled();
+  });
+
+  it("shows consent UI when prior consent is false", async () => {
+    const storage = createMockStorage();
+    await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ hasUserConsent: false }));
+    const sdk = createSdk({
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
+      storage: { sessionId: storage },
+    });
+    await Promise.resolve();
+    sdk.exposeSetConsentRequired(true);
+    const consentRequiredListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
+
+    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xBEEF"]) };
+
+    emitMetaMaskConnected(sdk, ethereumProvider);
+    await vi.waitFor(() => {
+      expect(consentRequiredListener).toHaveBeenCalledTimes(1);
+    });
+
+    expect(sdk.status).toBe(CONNECTOR_STATUS.CONSENT_REQUIRING);
+    await sdk.exposeCompleteConsentAcceptance();
+    expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
+  });
+
+  it("persists user consent when user accepts consent UI", async () => {
+    const storage = createMockStorage();
+    const sdk = createSdk({
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
+      storage: { sessionId: storage },
+    });
+    sdk.exposeSetConsentRequired(true);
+
+    const consentRequiredListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
+    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xFEEd"]) };
+
+    emitMetaMaskConnected(sdk, ethereumProvider);
+    await vi.waitFor(() => {
+      expect(consentRequiredListener).toHaveBeenCalledTimes(1);
+    });
+    await sdk.exposeCompleteConsentAcceptance();
+
+    const stateJson = await storage.get(WEB3AUTH_STATE_STORAGE_KEY);
+    const state = JSON.parse(stateJson!);
+    expect(state.hasUserConsent).toBe(true);
   });
 
   it("setConnectors deduplicates and emits updates only for new connectors", () => {
@@ -279,7 +864,7 @@ describe("Web3AuthNoModal", () => {
   it("checkIfAutoConnect returns true only for cached matching connector", () => {
     const sdk = createSdk();
     (sdk as unknown as { state: Record<string, unknown> }).state = {
-      connectedConnectorName: null,
+      primaryConnectorName: null,
       cachedConnector: WALLET_CONNECTORS.METAMASK,
       currentChainId: "0x1",
       idToken: null,
@@ -299,16 +884,68 @@ describe("Web3AuthNoModal", () => {
   });
 });
 
-function createSdk(overrides: Record<string, unknown> = {}, initialState?: Record<string, unknown>) {
+function createSdk(overrides: Record<string, unknown> = {}, initialState?: Record<string, unknown>): TestWeb3AuthNoModal {
   const storage = createMockStorage();
   return new TestWeb3AuthNoModal(
     {
       clientId: "test-client-id",
       web3AuthNetwork: "sapphire_devnet",
       chains: [createChain()],
+      disableAnalytics: true,
       storage: { sessionId: storage },
       ...overrides,
     } as never,
     initialState as never
   );
+}
+
+function emitMetaMaskConnected(sdk: TestWeb3AuthNoModal, ethereumProvider: unknown): MockConnector {
+  const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+  (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+  sdk.exposeSubscribeToConnectorEvents(connector);
+  (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
+    updateProviderEngineProxy: vi.fn(),
+    removeAllListeners: vi.fn(),
+  };
+
+  connector.emit(CONNECTOR_EVENTS.CONNECTED, {
+    connectorName: WALLET_CONNECTORS.METAMASK,
+    ethereumProvider: ethereumProvider as never,
+    solanaWallet: null,
+    reconnected: false,
+  });
+
+  return connector;
+}
+
+function createExternalAccount(overrides: Partial<LinkedAccountInfo> = {}): LinkedAccountInfo {
+  return {
+    id: "linked-account-id",
+    isPrimary: false,
+    active: true,
+    accountType: "external_wallet",
+    address: "0x1234567890abcdef1234567890abcdef12345678",
+    eoaAddress: "0x1234567890abcdef1234567890abcdef12345678",
+    connector: WALLET_CONNECTORS.METAMASK,
+    authConnectionId: null,
+    groupedAuthConnectionId: null,
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    ...overrides,
+  };
+}
+
+function createPrimaryAccount(overrides: Partial<LinkedAccountInfo> = {}): LinkedAccountInfo {
+  return {
+    id: "primary-account-id",
+    isPrimary: true,
+    active: true,
+    accountType: "social",
+    address: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+    eoaAddress: "0xabcdefabcdefabcdefabcdefabcdefabcdefabcd",
+    connector: WALLET_CONNECTORS.AUTH,
+    authConnectionId: "web3auth",
+    groupedAuthConnectionId: null,
+    chainNamespace: CHAIN_NAMESPACES.EIP155,
+    ...overrides,
+  };
 }
