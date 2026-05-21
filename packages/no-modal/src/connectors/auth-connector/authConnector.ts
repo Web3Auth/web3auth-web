@@ -1307,8 +1307,14 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   private readonly handleWsEmbedAccountsChanged = (accounts: string[]) => {
     if (accounts.length === 0) {
+      if (!CONNECTED_STATUSES.includes(this.status)) {
+        return;
+      }
+
       log.info("No accounts found in the wallet, disconnecting");
-      this.disconnect({ cleanup: true });
+      void this.disconnect({ cleanup: true }).catch((error: unknown) => {
+        log.error("Failed to disconnect auth connector after wallet accounts changed", error);
+      });
       return;
     }
     void this.syncProviderState();

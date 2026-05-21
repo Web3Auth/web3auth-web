@@ -406,8 +406,6 @@ const onSwitchChainNamespace = async () => {
       throw new Error("Please configure both EIP-155 and Solana chains in the config");
     }
 
-    console.log("switchedChainNamespace:targetChain", targetChain);
-
     await web3Auth.value.switchChain({ chainId: targetChain.chainId });
     printToConsole("switchedChainNamespace", {
       chainId: targetChain.chainId,

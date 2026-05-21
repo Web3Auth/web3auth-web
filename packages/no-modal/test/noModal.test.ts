@@ -1,3 +1,4 @@
+import { SafeEventEmitter } from "@web3auth/auth";
 import { describe, expect, it, vi } from "vitest";
 
 import {
@@ -10,6 +11,7 @@ import {
   CONNECTOR_STATUS,
   IConnector,
   type LinkedAccountInfo,
+  log,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -69,6 +71,68 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
     return this.processSwitchAccountResult(...args);
   }
 }
+
+type WsAccountsChangedTestProvider = SafeEventEmitter & {
+  chainId: string;
+  request: ReturnType<typeof vi.fn>;
+};
+
+type WsAccountsChangedTestConnector = {
+  bindWsEmbedProviderEvents: () => void;
+  disconnect: ReturnType<typeof vi.fn>;
+  status: string;
+  wsEmbedInstance: { provider: WsAccountsChangedTestProvider } | null;
+};
+
+function createWsAccountsChangedTestHarness() {
+  const connector = authConnector()({
+    projectConfig: createProjectConfig(),
+    coreOptions: {
+      clientId: "test-client-id",
+      web3AuthNetwork: "sapphire_devnet",
+      chains: [createChain()],
+    } as never,
+    analytics: { track: vi.fn() } as never,
+  }) as unknown as WsAccountsChangedTestConnector;
+  const provider = new SafeEventEmitter() as WsAccountsChangedTestProvider;
+  provider.chainId = "0x1";
+  provider.request = vi.fn();
+  connector.wsEmbedInstance = { provider };
+  return { connector, provider };
+}
+
+describe("authConnector", () => {
+  it("ignores zero-account wallet services events before the connector is connected", async () => {
+    const { connector, provider } = createWsAccountsChangedTestHarness();
+    connector.status = CONNECTOR_STATUS.NOT_READY;
+    connector.disconnect = vi.fn().mockRejectedValue(new Error("disconnect should not run"));
+
+    connector.bindWsEmbedProviderEvents();
+    provider.emit("accountsChanged", []);
+    await Promise.resolve();
+
+    expect(connector.disconnect).not.toHaveBeenCalled();
+  });
+
+  it("catches disconnect failures from zero-account wallet services events", async () => {
+    const { connector, provider } = createWsAccountsChangedTestHarness();
+    const disconnectError = new Error("disconnect failed");
+    const logErrorSpy = vi.spyOn(log, "error").mockImplementation((..._args: unknown[]) => undefined as never);
+    connector.status = CONNECTOR_STATUS.CONNECTED;
+    connector.disconnect = vi.fn().mockRejectedValue(disconnectError);
+
+    try {
+      connector.bindWsEmbedProviderEvents();
+      provider.emit("accountsChanged", []);
+      await Promise.resolve();
+
+      expect(connector.disconnect).toHaveBeenCalledWith({ cleanup: true });
+      expect(logErrorSpy).toHaveBeenCalledWith("Failed to disconnect auth connector after wallet accounts changed", disconnectError);
+    } finally {
+      logErrorSpy.mockRestore();
+    }
+  });
+});
 
 describe("Web3AuthNoModal", () => {
   it("throws when clientId is missing", () => {
