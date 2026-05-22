@@ -85,6 +85,20 @@ import {
   type WalletServicesSettings,
 } from "./interface";
 
+// Auth connections that have been deprecated and are no longer supported by the SDK.
+// Passing any of these as `authConnection` results in a hard error so consumers
+// migrate off the removed providers instead of silently continuing.
+const DEPRECATED_AUTH_CONNECTIONS: ReadonlySet<string> = new Set(["farcaster"]);
+
+function assertAuthConnectionSupported(authConnection: string | undefined): void {
+  if (DEPRECATED_AUTH_CONNECTIONS.has(authConnection)) {
+    throw WalletInitializationError.invalidParams(
+      `Auth connection "${authConnection}" has been deprecated and is no longer supported by the Web3Auth SDKs. ` +
+        `Please use a different authConnection value.`
+    );
+  }
+}
+
 class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConnector {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
 
@@ -245,6 +259,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   async connect(params: Partial<AuthLoginParams> & BaseConnectorLoginParams): Promise<Connection | null> {
+    assertAuthConnectionSupported(params?.authConnection);
     super.checkConnectionRequirements();
     this.status = CONNECTOR_STATUS.CONNECTING;
     this.emit(CONNECTOR_EVENTS.CONNECTING, { ...params, connector: WALLET_CONNECTORS.AUTH });
@@ -266,6 +281,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   public async enableMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
+    assertAuthConnectionSupported(params?.authConnection);
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
@@ -282,6 +298,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   public async manageMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
+    assertAuthConnectionSupported(params?.authConnection);
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {

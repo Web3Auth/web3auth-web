@@ -63,7 +63,8 @@ export const initWhiteLabel: WhiteLabelData = {
 };
 
 export const loginProviderOptions = Object.values(AUTH_CONNECTION)
-  .filter((x) => x !== "custom" && x !== "authenticator" && x !== "passkeys")
+  // "farcaster" is deprecated and no longer supported by the Web3Auth SDKs.
+  .filter((x) => x !== "custom" && x !== "authenticator" && x !== "passkeys" && x !== "farcaster")
   .map((x) => ({ name: x.replaceAll("_", " "), value: x }));
 
 export const languageOptions: { name: string; value: LANGUAGE_TYPE }[] = [
