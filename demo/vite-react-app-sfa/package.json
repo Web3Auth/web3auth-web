@@ -8,7 +8,7 @@
     "@web3auth/auth": "^11.6.0",
     "@web3auth/modal": "file:../../packages/modal",
     "@web3auth/sign-in-with-web3": "^6.1.0",
-    "ethers": "^6.13.4",
+    "ethers": "^6.16.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "wagmi": "^3.4.1"
