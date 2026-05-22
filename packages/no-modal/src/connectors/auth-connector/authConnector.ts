@@ -120,6 +120,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   private providerStateSyncPromise: Promise<AuthConnectorProviderState | null> | null = null;
 
+  private providerStateSyncPending = false;
+
   private _solanaWallet: AuthSolanaWallet | null = null;
 
   private analytics: Analytics;
@@ -136,9 +138,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   get provider(): IProvider | null {
     if (this.status !== CONNECTOR_STATUS.NOT_READY) {
-      if (this.getWsEmbedProvider()) {
-        return this.getWsEmbedProvider();
-      } else if (this.privateKeyProvider) return this.privateKeyProvider;
+      const wsEmbedProvider = this.getWsEmbedProvider();
+      return wsEmbedProvider || this.privateKeyProvider;
     }
     return null;
   }
@@ -404,6 +405,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
     this.bindWsEmbedProviderEvents();
     if (this.providerStateSyncPromise) {
+      // if a sync is already in progress, set the pending flag to true and return the promise
+      // after the sync is complete, the pending flag will be set to false and the sync will be triggered again
+      this.providerStateSyncPending = true;
       return this.providerStateSyncPromise;
     }
 
@@ -425,6 +429,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       .finally(() => {
         this.providerStateSyncPromise = null;
         this.setProviderStateSyncing(false);
+        if (this.providerStateSyncPending) {
+          this.providerStateSyncPending = false;
+          void this.syncProviderState();
+        }
       });
 
     return this.providerStateSyncPromise;
@@ -884,7 +892,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       return;
     }
 
-    rawProvider.on("chainChanged", this.handleWsEmbedChainChanged);
+    rawProvider.on("chainChanged", this.syncProviderState);
     rawProvider.on("accountsChanged", this.handleWsEmbedAccountsChanged);
     this.wsEmbedProviderListenerTarget = rawProvider;
   }
@@ -923,6 +931,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   private clearProviderSyncState(): void {
     this.unbindWsEmbedProviderEvents();
     this.providerStateSyncPromise = null;
+    this.providerStateSyncPending = false;
     this._providerState = null;
     this._isProviderStateSyncing = false;
     this.emitProviderStateData();
@@ -933,7 +942,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       return;
     }
 
-    this.wsEmbedProviderListenerTarget.removeListener("chainChanged", this.handleWsEmbedChainChanged);
+    this.wsEmbedProviderListenerTarget.removeListener("chainChanged", this.syncProviderState);
     this.wsEmbedProviderListenerTarget.removeListener("accountsChanged", this.handleWsEmbedAccountsChanged);
     this.wsEmbedProviderListenerTarget = null;
   }
@@ -1298,10 +1307,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       log.error("Error reporting `oauthFailed` audit progress", error);
     });
   }
-
-  private readonly handleWsEmbedChainChanged = () => {
-    void this.syncProviderState();
-  };
 
   private readonly handleWsEmbedAccountsChanged = (accounts: string[]) => {
     if (accounts.length === 0) {
