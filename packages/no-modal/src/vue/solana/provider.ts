@@ -1,5 +1,4 @@
 import { createClient, createWalletStandardConnector, type SolanaClient } from "@solana/client";
-import { StandardEvents, type StandardEventsFeature } from "@wallet-standard/features";
 import { defineComponent, Fragment, h, provide, ref, watch } from "vue";
 
 import { log } from "../../base";
@@ -102,30 +101,6 @@ export const SolanaProvider = defineComponent({
         }
       }
     };
-
-    watch(
-      () => connection.value?.solanaWallet ?? null,
-      (wallet, _, onCleanup) => {
-        if (!wallet) {
-          return;
-        }
-
-        const standardEvents = (wallet.features as Partial<StandardEventsFeature>)[StandardEvents];
-        if (!standardEvents) {
-          return;
-        }
-
-        // Wallet-standard `change` is imperative, so route it through the same sync path
-        // used by chain/connection watchers to rebuild the Framework Kit client.
-        const unsubscribe = standardEvents.on("change", () => {
-          void syncClient();
-        });
-        onCleanup(() => {
-          unsubscribe();
-        });
-      },
-      { immediate: true }
-    );
 
     // watch for changes in the connection and active chain
     watch(

@@ -50,7 +50,7 @@ async function setupConnector(provider: any, config: Config) {
 }
 
 // Helper to connect a wallet and update wagmi state
-async function connectWeb3AuthWithWagmi(connector: Connector, config: Config): Promise<boolean> {
+async function connectWeb3AuthWithWagmi(connector: Connector, config: Config) {
   await Promise.all([config.storage?.removeItem(`${connector.id}.disconnected`), config.storage?.setItem("recentConnectorId", connector.id)]);
 
   let chainId = await connector.getChainId();
@@ -59,9 +59,6 @@ async function connectWeb3AuthWithWagmi(connector: Connector, config: Config): P
   }
 
   const accounts = await connector.getAccounts();
-  if (accounts.length === 0) {
-    return false;
-  }
 
   const connections: Map<string, Connection> = new Map([
     [
@@ -81,8 +78,6 @@ async function connectWeb3AuthWithWagmi(connector: Connector, config: Config): P
     current: connector.uid,
     status: "connected",
   }));
-
-  return true;
 }
 
 function resetConnectorState(config: Config) {
@@ -156,18 +151,12 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
           throw new Error("Failed to setup connector");
         }
 
-        const didConnect = await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-        lastSyncedBinding.current = didConnect
-          ? {
-              provider: connection.ethereumProvider,
-              connectorName: connection.connectorName,
-            }
-          : { provider: null, connectorName: null };
-        if (didConnect) {
-          reconnect();
-        } else {
-          resetConnectorState(wagmiConfig);
-        }
+        await connectWeb3AuthWithWagmi(connector, wagmiConfig);
+        lastSyncedBinding.current = {
+          provider: connection.ethereumProvider,
+          connectorName: connection.connectorName,
+        };
+        reconnect();
       } else {
         lastSyncedBinding.current = { provider: null, connectorName: null };
         if (wagmiConfig.state.status === "connected") {
