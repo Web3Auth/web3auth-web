@@ -199,42 +199,6 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.exposeHasUsableConnectedSwitchConnector(null)).toBe(false);
   });
 
-  it("exposes provider sync and account readiness from the active AUTH connector", () => {
-    const sdk = createSdk();
-    const authConnector = new MockConnector({
-      name: WALLET_CONNECTORS.AUTH,
-      status: CONNECTOR_STATUS.CONNECTED,
-      provider: { request: vi.fn() } as never,
-    } as never) as MockConnector & {
-      isProviderStateSyncing: boolean;
-      isAccountReady: boolean;
-    };
-
-    authConnector.isProviderStateSyncing = true;
-    authConnector.isAccountReady = false;
-    (sdk as unknown as { state: Record<string, unknown> }).state = {
-      primaryConnectorName: WALLET_CONNECTORS.AUTH,
-      cachedConnector: null,
-      currentChainId: "0x1",
-      idToken: null,
-      accessToken: null,
-      refreshToken: null,
-      activeAccount: null,
-    };
-    sdk.exposeSetConnectors([authConnector]);
-    sdk.status = CONNECTOR_STATUS.CONNECTED;
-    sdk.exposeSetConnectedWalletConnector(authConnector);
-
-    expect(sdk.isProviderStateSyncing).toBe(true);
-    expect(sdk.isAccountReady).toBe(false);
-
-    authConnector.isProviderStateSyncing = false;
-    authConnector.isAccountReady = true;
-
-    expect(sdk.isProviderStateSyncing).toBe(false);
-    expect(sdk.isAccountReady).toBe(true);
-  });
-
   it("returns the connected wallet provider for an active external account", async () => {
     const activeAccount = createExternalAccount();
     const sdk = createSdk(

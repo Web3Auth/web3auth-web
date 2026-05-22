@@ -218,18 +218,6 @@ export interface IWeb3AuthCore extends SafeEventEmitter {
   primaryConnectorName: WALLET_CONNECTOR_TYPE | null;
   currentChain: CustomChainConfig | undefined;
   status: CONNECTOR_STATUS_TYPE;
-  /**
-   * Get Provider State Syncing status for the primary connector.
-   * On init or after chain namespace change, the provider state might not be ready yet, with the accounts still loading.
-   * During this time, the provider state syncing status will be true.
-   */
-  readonly isProviderStateSyncing: boolean;
-  /**
-   * Get Account Ready status for the primary connector.
-   * On init or after chain namespace change, the accounts might not be ready yet, with the accounts still loading.
-   * After the accounts are loaded, the account ready status will be true.
-   */
-  readonly isAccountReady: boolean;
   connection: Connection | null;
   init(options?: { signal?: AbortSignal }): Promise<void>;
   getConnector(connectorName: WALLET_CONNECTOR_TYPE): IConnector<unknown> | null;

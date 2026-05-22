@@ -26,8 +26,6 @@ type RenderSnapshot = {
   isConnected: boolean;
   isAuthorized: boolean;
   status: CONNECTOR_STATUS_TYPE | null;
-  isProviderStateSyncing: boolean;
-  isAccountReady: boolean;
 };
 
 type LiveSnapshot = RenderSnapshot & {
@@ -50,10 +48,6 @@ class TestWeb3Auth extends SafeEventEmitter<Web3AuthNoModalEvents> implements IW
   public currentChain: CustomChainConfig | undefined = undefined;
 
   public connection: IWeb3Auth["connection"] = null;
-
-  public isProviderStateSyncing = false;
-
-  public isAccountReady = false;
 
   constructor(options: TestWeb3AuthOptions, _initialState?: IWeb3AuthState) {
     super();
@@ -92,8 +86,6 @@ function TestComponent({ renders, onValue, status }: TestComponentProps): null {
     isConnected: value.isConnected,
     isAuthorized: value.isAuthorized,
     status: value.status,
-    isProviderStateSyncing: value.isProviderStateSyncing,
-    isAccountReady: value.isAccountReady,
     connection: value.connection,
     chainId: value.chainId,
     chainNamespace: value.chainNamespace,
@@ -103,8 +95,6 @@ function TestComponent({ renders, onValue, status }: TestComponentProps): null {
     isConnected: snapshot.isConnected,
     isAuthorized: snapshot.isAuthorized,
     status: snapshot.status,
-    isProviderStateSyncing: snapshot.isProviderStateSyncing,
-    isAccountReady: snapshot.isAccountReady,
   });
   onValue?.(snapshot);
 
@@ -160,8 +150,6 @@ describe("useWeb3AuthInnerContextValue", () => {
       isConnected: true,
       isAuthorized: false,
       status: CONNECTOR_STATUS.CONNECTED,
-      isProviderStateSyncing: false,
-      isAccountReady: false,
     });
   });
 
@@ -175,8 +163,6 @@ describe("useWeb3AuthInnerContextValue", () => {
       isConnected: true,
       isAuthorized: true,
       status: CONNECTOR_STATUS.AUTHORIZED,
-      isProviderStateSyncing: false,
-      isAccountReady: false,
     });
   });
 
@@ -212,8 +198,6 @@ describe("useWeb3AuthInnerContextValue", () => {
       isConnected: false,
       isInitialized: false,
       connection: null,
-      isProviderStateSyncing: false,
-      isAccountReady: false,
     });
 
     await act(async () => {
@@ -225,64 +209,9 @@ describe("useWeb3AuthInnerContextValue", () => {
       isAuthorized: false,
       isInitialized: true,
       status: CONNECTOR_STATUS.CONNECTED,
-      isProviderStateSyncing: false,
-      isAccountReady: false,
       connection,
       chainId: "0x1",
       chainNamespace: CHAIN_NAMESPACES.EIP155,
-    });
-  });
-
-  it("updates provider readiness flags from connector data without disconnecting the session", async () => {
-    const rendered = await renderHook({
-      status: CONNECTOR_STATUS.CONNECTING,
-    });
-    ({ root, container } = rendered);
-
-    const web3Auth = latestInstance;
-    expect(web3Auth).not.toBeNull();
-
-    const connection: Connection = {
-      ethereumProvider: null,
-      solanaWallet: null,
-      connectorName: "auth",
-    };
-
-    await act(async () => {
-      web3Auth!.connection = connection;
-      web3Auth!.currentChainId = "0x1";
-      web3Auth!.currentChain = { chainNamespace: CHAIN_NAMESPACES.EIP155 } as CustomChainConfig;
-      web3Auth!.status = CONNECTOR_STATUS.CONNECTED;
-      web3Auth!.isProviderStateSyncing = true;
-      web3Auth!.isAccountReady = false;
-      web3Auth!.emit(CONNECTOR_EVENTS.CONNECTED, {
-        ...connection,
-        reconnected: false,
-        loginMode: LOGIN_MODE.MODAL,
-      });
-    });
-
-    expect(rendered.latestValue.current).toMatchObject({
-      isConnected: true,
-      isProviderStateSyncing: true,
-      isAccountReady: false,
-      connection,
-    });
-
-    await act(async () => {
-      web3Auth!.isProviderStateSyncing = false;
-      web3Auth!.isAccountReady = true;
-      web3Auth!.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, {
-        connectorName: "auth",
-        data: {},
-      });
-    });
-
-    expect(rendered.latestValue.current).toMatchObject({
-      isConnected: true,
-      isProviderStateSyncing: false,
-      isAccountReady: true,
-      connection,
     });
   });
 });

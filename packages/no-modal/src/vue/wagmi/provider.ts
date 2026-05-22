@@ -103,7 +103,7 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 const Web3AuthWagmiProvider = defineComponent({
   name: "Web3AuthWagmiProvider",
   setup() {
-    const { isConnected, connection, chainNamespace, isProviderStateSyncing, isAccountReady } = useWeb3Auth();
+    const { isConnected, connection, chainNamespace } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
     const { mutate: reconnect } = useReconnect();
@@ -128,17 +128,12 @@ const Web3AuthWagmiProvider = defineComponent({
     });
 
     watch(
-      [isConnected, connection, chainNamespace, isProviderStateSyncing, isAccountReady],
+      [isConnected, connection, chainNamespace],
       async () => {
         const newIsConnected = isConnected.value;
         const newConnection = connection.value;
         const newEth = newConnection?.ethereumProvider ?? null;
-        const shouldBindToWagmi =
-          newIsConnected &&
-          chainNamespace.value === CHAIN_NAMESPACES.EIP155 &&
-          Boolean(newConnection && newEth) &&
-          !isProviderStateSyncing.value &&
-          isAccountReady.value;
+        const shouldBindToWagmi = newIsConnected && chainNamespace.value === CHAIN_NAMESPACES.EIP155 && Boolean(newConnection && newEth);
 
         if (shouldBindToWagmi && newConnection && newEth) {
           const hasSameBinding = lastSyncedProvider.value === newEth && lastSyncedConnectorName.value === newConnection.connectorName;

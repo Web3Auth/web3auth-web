@@ -1,4 +1,4 @@
-import { ChainNamespaceType, PROVIDER_JRPC_METHODS, type ProviderConfig } from "@toruslabs/base-controllers";
+import { ChainNamespaceType, type ProviderConfig } from "@toruslabs/base-controllers";
 import { CITADEL_SERVER_MAP } from "@toruslabs/constants";
 import { get, put } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
@@ -72,10 +72,8 @@ import {
 import { generateNonce, parseToken } from "../utils";
 import { AuthSolanaWallet } from "./authSolanaWallet";
 import {
-  type AuthConnectorData,
   type AuthConnectorLinkAccountParams,
   type AuthConnectorOptions,
-  type AuthConnectorProviderState,
   type AuthConnectorSessionTokens,
   type AuthConnectorSwitchAccountContext,
   type AuthConnectorSwitchAccountResult,
@@ -128,14 +126,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   private wsEmbedProviderListenerTarget: IProvider | null = null;
 
-  private _providerState: AuthConnectorProviderState | null = null;
-
-  private _isProviderStateSyncing = false;
-
-  private providerStateSyncPromise: Promise<AuthConnectorProviderState | null> | null = null;
-
-  private providerStateSyncPending = false;
-
   private _solanaWallet: AuthSolanaWallet | null = null;
 
   private analytics: Analytics;
@@ -164,22 +154,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   get solanaWallet(): Wallet | null {
     return this._solanaWallet;
-  }
-
-  get isProviderStateSyncing(): boolean {
-    return this._isProviderStateSyncing;
-  }
-
-  get isAccountReady(): boolean {
-    if (!CONNECTED_STATUSES.includes(this.status)) {
-      return false;
-    }
-
-    if (!this.getWsEmbedProvider()) {
-      return Boolean(this.provider || this.solanaWallet);
-    }
-
-    return !this.isProviderStateSyncing && Boolean(this._providerState?.accounts.length);
   }
 
   set provider(_: IProvider | null) {
@@ -243,10 +217,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
             })
             .then(() => {
               this.bindWsEmbedProviderEvents();
-              this.syncProviderState().catch((error: unknown): null => {
-                log.debug("Failed to sync wallet embed provider state during init", error);
-                return null;
-              });
               this.wsEmbedInstancePromise = null;
               return;
             });
@@ -362,7 +332,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
     this.rehydrated = false;
     this._solanaWallet = null;
-    this.clearProviderSyncState();
+    this.unbindWsEmbedProviderEvents();
     this.emit(CONNECTOR_EVENTS.DISCONNECTED, { connector: WALLET_CONNECTORS.AUTH });
   }
 
@@ -414,47 +384,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     }));
   }
 
-  public async syncProviderState(): Promise<AuthConnectorProviderState | null> {
-    const rawProvider = this.getWsEmbedProvider();
-    if (!rawProvider) {
-      return null;
-    }
-
-    this.bindWsEmbedProviderEvents();
-    if (this.providerStateSyncPromise) {
-      // if a sync is already in progress, set the pending flag to true and return the promise
-      // after the sync is complete, the pending flag will be set to false and the sync will be triggered again
-      this.providerStateSyncPending = true;
-      return this.providerStateSyncPromise;
-    }
-
-    this.setProviderStateSyncing(true);
-    this.providerStateSyncPromise = rawProvider
-      .request<unknown[], Partial<AuthConnectorProviderState>>({
-        method: PROVIDER_JRPC_METHODS.GET_PROVIDER_STATE,
-        params: [],
-      })
-      .then((providerStateResponse) => {
-        const latestProviderState = this.normalizeProviderState(rawProvider, providerStateResponse);
-        this._providerState = latestProviderState;
-        if (this._solanaWallet instanceof AuthSolanaWallet) {
-          this._solanaWallet.applyProviderState(latestProviderState);
-        }
-        this.emitProviderStateData();
-        return latestProviderState;
-      })
-      .finally(() => {
-        this.providerStateSyncPromise = null;
-        this.setProviderStateSyncing(false);
-        if (this.providerStateSyncPending) {
-          this.providerStateSyncPending = false;
-          void this.syncProviderState();
-        }
-      });
-
-    return this.providerStateSyncPromise;
-  }
-
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
 
@@ -484,7 +413,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       this.wsEmbedInstance.clearInit();
     }
     this._solanaWallet = null;
-    this.clearProviderSyncState();
+    this.unbindWsEmbedProviderEvents();
   }
 
   public getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
@@ -909,49 +838,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       return;
     }
 
-    rawProvider.on("chainChanged", this.handleWsEmbedChainChanged);
     rawProvider.on("accountsChanged", this.handleWsEmbedAccountsChanged);
     this.wsEmbedProviderListenerTarget = rawProvider;
-  }
-
-  private normalizeProviderState(
-    provider: IProvider,
-    providerStateResponse: Partial<AuthConnectorProviderState> | null | undefined
-  ): AuthConnectorProviderState {
-    return {
-      chainId: providerStateResponse?.chainId ?? provider.chainId,
-      accounts: Array.isArray(providerStateResponse?.accounts)
-        ? providerStateResponse.accounts.filter((account): account is string => typeof account === "string")
-        : [],
-      isUnlocked: Boolean(providerStateResponse?.isUnlocked),
-    };
-  }
-
-  private setProviderStateSyncing(isSyncing: boolean): void {
-    if (this._isProviderStateSyncing === isSyncing) {
-      return;
-    }
-
-    this._isProviderStateSyncing = isSyncing;
-    this.emitProviderStateData();
-  }
-
-  private emitProviderStateData(): void {
-    const connectorData: AuthConnectorData = {
-      providerState: this._providerState,
-      isProviderStateSyncing: this.isProviderStateSyncing,
-      isAccountReady: this.isAccountReady,
-    };
-    this.updateConnectorData(connectorData);
-  }
-
-  private clearProviderSyncState(): void {
-    this.unbindWsEmbedProviderEvents();
-    this.providerStateSyncPromise = null;
-    this.providerStateSyncPending = false;
-    this._providerState = null;
-    this._isProviderStateSyncing = false;
-    this.emitProviderStateData();
   }
 
   private unbindWsEmbedProviderEvents(): void {
@@ -959,7 +847,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       return;
     }
 
-    this.wsEmbedProviderListenerTarget.removeListener("chainChanged", this.handleWsEmbedChainChanged);
     this.wsEmbedProviderListenerTarget.removeListener("accountsChanged", this.handleWsEmbedAccountsChanged);
     this.wsEmbedProviderListenerTarget = null;
   }
@@ -973,9 +860,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     }
 
     this._solanaWallet = new AuthSolanaWallet(this.provider, solanaChains);
-    if (this._providerState) {
-      this._solanaWallet.applyProviderState(this._providerState);
-    }
   }
 
   private _getFinalPrivKey() {
@@ -1049,10 +933,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         });
         if (isLoggedIn) {
           this.setupSolanaWallet();
-          this.syncProviderState().catch((error: unknown): null => {
-            log.debug("Failed to sync wallet embed provider state during init", error);
-            return null;
-          });
           // if getAuthTokenInfo is true, then get auth token info
           // No need to get auth token info for auth connector as it is already handled
           this.status = CONNECTOR_STATUS.CONNECTED;
@@ -1328,10 +1208,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     });
   }
 
-  private readonly handleWsEmbedChainChanged = () => {
-    void this.syncProviderState();
-  };
-
   private readonly handleWsEmbedAccountsChanged = (accounts: string[]) => {
     if (accounts.length === 0) {
       if (!CONNECTED_STATUSES.includes(this.status)) {
@@ -1342,9 +1218,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       void this.disconnect({ cleanup: true }).catch((error: unknown) => {
         log.error("Failed to disconnect auth connector after wallet accounts changed", error);
       });
-      return;
     }
-    void this.syncProviderState();
   };
 }
 

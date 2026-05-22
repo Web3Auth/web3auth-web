@@ -24,18 +24,6 @@ export type IWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth> = {
   isInitializing: boolean;
   initError: Error | null;
   isMFAEnabled: boolean;
-  /**
-   * Get Provider State Syncing status for the primary connector.
-   * On init or after chain namespace change, the provider state might not be ready yet, with the accounts still loading.
-   * During this time, the provider state syncing status will be true.
-   */
-  isProviderStateSyncing: boolean;
-  /**
-   * Get Account Ready status for the primary connector.
-   * On init or after chain namespace change, the accounts might not be ready yet, with the accounts still loading.
-   * After the accounts are loaded, the account ready status will be true.
-   */
-  isAccountReady: boolean;
   chainId: string | null;
   chainNamespace: ChainNamespaceType | null;
   getPlugin: TWeb3Auth["getPlugin"];
@@ -57,8 +45,6 @@ type InitialWeb3AuthState = {
   chainNamespace: ChainNamespaceType | null;
   connection: Connection | null;
   isAuthorized: boolean;
-  isProviderStateSyncing: boolean;
-  isAccountReady: boolean;
   isConnected: boolean;
   isInitialized: boolean;
   status: CONNECTOR_STATUS_TYPE | null;
@@ -73,8 +59,6 @@ function getInitialState(web3Auth: IWeb3Auth): InitialWeb3AuthState {
     chainNamespace: isConnected ? (web3Auth.currentChain?.chainNamespace ?? null) : null,
     connection: isConnected ? web3Auth.connection : null,
     isAuthorized,
-    isProviderStateSyncing: web3Auth.isProviderStateSyncing,
-    isAccountReady: web3Auth.isAccountReady,
     isConnected,
     isInitialized: isConnected,
     status: web3Auth.status,
@@ -103,8 +87,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
   const [isConnected, setIsConnected] = useState<boolean>(initialWeb3AuthState.isConnected);
   const [status, setStatus] = useState<CONNECTOR_STATUS_TYPE | null>(initialWeb3AuthState.status);
   const [isAuthorized, setIsAuthorized] = useState<boolean>(initialWeb3AuthState.isAuthorized);
-  const [isProviderStateSyncing, setIsProviderStateSyncing] = useState<boolean>(initialWeb3AuthState.isProviderStateSyncing);
-  const [isAccountReady, setIsAccountReady] = useState<boolean>(initialWeb3AuthState.isAccountReady);
 
   const getPlugin = useCallback(
     ((name: string) => {
@@ -127,8 +109,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
         await web3Auth.init({ signal: controller.signal });
         setChainId(web3Auth.currentChainId);
         setChainNamespace(web3Auth.currentChain?.chainNamespace);
-        setIsProviderStateSyncing(web3Auth.isProviderStateSyncing);
-        setIsAccountReady(web3Auth.isAccountReady);
       } catch (error) {
         setInitError(error as Error);
       } finally {
@@ -159,24 +139,16 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
   }, [web3Auth.currentChain, connection?.ethereumProvider]);
 
   useEffect(() => {
-    const syncAccountState = () => {
-      setIsProviderStateSyncing(web3Auth.isProviderStateSyncing);
-      setIsAccountReady(web3Auth.isAccountReady);
-    };
-
     const notReadyListener = () => {
       setStatus(notReadyUsesCurrentStatus ? web3Auth.status : CONNECTOR_STATUS.NOT_READY);
-      syncAccountState();
     };
     const readyListener = () => {
       setStatus(web3Auth.status);
       setIsInitialized(true);
-      syncAccountState();
     };
     const connectedListener = (data: CONNECTED_EVENT_DATA) => {
       if (data.pendingUserConsent) return;
       setStatus(web3Auth.status);
-      syncAccountState();
       // we do this because of rehydration issues. status connected is fired first but web3auth sdk is not ready yet.
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED) {
         setIsInitialized(true);
@@ -191,26 +163,21 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       setIsConnected(false);
       setIsAuthorized(false);
       setConnection(null);
-      syncAccountState();
     };
     const connectingListener = () => {
       setStatus(web3Auth.status);
-      syncAccountState();
     };
     const errorListener = () => {
       setStatus(web3Auth.status);
-      syncAccountState();
     };
     const rehydrationErrorListener = () => {
       setStatus(web3Auth.status);
       setIsConnected(false);
       setIsAuthorized(false);
       setConnection(null);
-      syncAccountState();
     };
     const authorizedListener = () => {
       setStatus(web3Auth.status);
-      syncAccountState();
       if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
         setIsConnected(true);
         setIsAuthorized(true);
@@ -218,7 +185,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     };
     const consentAcceptedListener = () => {
       setStatus(web3Auth.status);
-      syncAccountState();
       if (web3Auth.status === CONNECTOR_STATUS.CONNECTED || web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
         setIsInitialized(true);
         setIsConnected(true);
@@ -233,12 +199,8 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     const mfaEnabledListener = (nextIsMFAEnabled: boolean) => {
       if (typeof nextIsMFAEnabled === "boolean") setIsMFAEnabled(nextIsMFAEnabled);
     };
-    const connectorDataUpdatedListener = () => {
-      syncAccountState();
-    };
     const connectionUpdatedListener = () => {
       setStatus(web3Auth.status);
-      syncAccountState();
       setConnection(web3Auth.connection);
       setChainId(web3Auth.currentChainId);
       setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
@@ -253,7 +215,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
       web3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
       web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
-      web3Auth.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, connectorDataUpdatedListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
 
       if (web3Auth.loginMode === LOGIN_MODE.MODAL) {
@@ -271,7 +232,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       web3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
-      web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, connectorDataUpdatedListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
 
       if (web3Auth.loginMode === LOGIN_MODE.MODAL) {
@@ -294,8 +254,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       isInitializing,
       initError,
       isMFAEnabled,
-      isProviderStateSyncing,
-      isAccountReady,
       chainId,
       chainNamespace,
       getPlugin,
@@ -312,8 +270,6 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     isInitializing,
     initError,
     isMFAEnabled,
-    isProviderStateSyncing,
-    isAccountReady,
     setIsMFAEnabled,
     chainId,
     chainNamespace,
