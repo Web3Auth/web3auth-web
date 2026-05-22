@@ -1148,15 +1148,28 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.cacheWallet(data.connectorName);
 
       const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
-      if (this.consentRequired && !isConnectAndSign && !this.state.hasUserConsent) {
+      const pendingUserConsent = this.consentRequired && !this.state.hasUserConsent;
+      if (pendingUserConsent && !isConnectAndSign) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
         this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING);
         log.debug("consent_requiring", this.status, this.primaryConnectorName);
       } else {
-        this.status = CONNECTOR_STATUS.CONNECTED;
+        // In CONNECT_AND_SIGN mode the AUTHORIZED handler can run before this point (e.g. when `ssr=true`
+        // this handler `await`s `connector.getAuthTokenInfo()` which fires AUTHORIZED mid-execution).
+        // Don't downgrade an already-advanced status (CONSENT_REQUIRING or AUTHORIZED) back to CONNECTED;
+        // otherwise `acceptConsent` would throw "Cannot accept consent: not in consent_requiring state".
+        if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING && this.status !== CONNECTOR_STATUS.AUTHORIZED) {
+          this.status = CONNECTOR_STATUS.CONNECTED;
+        }
         log.debug("connected", this.status, this.primaryConnectorName);
-        this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
-        this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
+        // Defer plugin connection until consent is accepted; otherwise plugins would start before the consent step completes.
+        // `completeConsentAcceptance` connects the plugins once the user accepts the consent.
+        if (!pendingUserConsent) {
+          this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
+        }
+        // `pendingUserConsent` signals listeners (LoginModal, React/Vue contexts) to skip processing this CONNECTED event,
+        // so the upcoming AUTHORIZED -> CONSENT_REQUIRING transition is not overridden by a late CONNECTED handler in CONNECT_AND_SIGN mode.
+        this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent });
       }
     });
 

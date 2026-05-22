@@ -866,6 +866,78 @@ describe("Web3AuthNoModal", () => {
     expect(() => sdk.getConnectedAccountsWithProviders()).toThrow(WalletLoginError);
   });
 
+  it("preserves CONSENT_REQUIRING status when AUTHORIZED transitions consent state before CONNECTED finalizes", async () => {
+    // Simulates the ssr=true path (and similar races) where the CONNECTED listener's `await`s let the AUTHORIZED
+    // listener advance the SDK status to CONSENT_REQUIRING before CONNECTED reaches its final status assignment.
+    // Without the guard the CONNECTED handler would downgrade the status back to CONNECTED, causing
+    // `acceptConsent` -> `completeConsentAcceptance` to throw "Cannot accept consent: not in consent_requiring state".
+    const storage = createMockStorage();
+    const sdk = createSdk({
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      storage: { sessionId: storage },
+    });
+    sdk.exposeSetConsentRequired(true);
+
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+    sdk.exposeSubscribeToConnectorEvents(connector);
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
+      updateProviderEngineProxy: vi.fn(),
+      removeAllListeners: vi.fn(),
+    };
+
+    // Pre-advance the SDK to CONSENT_REQUIRING to mimic the AUTHORIZED listener winning the race
+    // before this CONNECTED listener reaches its final status assignment.
+    (sdk as unknown as { status: string }).status = CONNECTOR_STATUS.CONSENT_REQUIRING;
+
+    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xAbC123"]) };
+    connector.emit(CONNECTOR_EVENTS.CONNECTED, {
+      connectorName: WALLET_CONNECTORS.METAMASK,
+      ethereumProvider: ethereumProvider as never,
+      solanaWallet: null,
+      reconnected: false,
+    });
+
+    // CONNECTED handler must not downgrade status back to CONNECTED.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    expect(sdk.status).toBe(CONNECTOR_STATUS.CONSENT_REQUIRING);
+    await expect(sdk.exposeCompleteConsentAcceptance()).resolves.toBeUndefined();
+  });
+
+  it("emits CONNECTED with pendingUserConsent=true in CONNECT_AND_SIGN mode when consent is required", async () => {
+    const storage = createMockStorage();
+    const sdk = createSdk({
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      storage: { sessionId: storage },
+    });
+    sdk.exposeSetConsentRequired(true);
+
+    const connectedListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONNECTED, connectedListener);
+    const consentRequiredListener = vi.fn();
+    sdk.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, consentRequiredListener);
+
+    const ethereumProvider = { request: vi.fn().mockResolvedValue(["0xAbC123"]) };
+    const connector = emitMetaMaskConnected(sdk, ethereumProvider);
+
+    await vi.waitFor(() => {
+      expect(connectedListener).toHaveBeenCalledTimes(1);
+    });
+    // CONNECTED must carry pendingUserConsent=true so downstream listeners (LoginModal, React/Vue contexts)
+    // skip mutating their state until the user acts on the consent UI shown by the AUTHORIZED -> CONSENT_REQUIRING flow.
+    expect(connectedListener.mock.calls[0][0]).toMatchObject({ pendingUserConsent: true });
+    expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
+
+    connector.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      connector: WALLET_CONNECTORS.METAMASK,
+      authTokenInfo: { idToken: "id-token" },
+    });
+    await vi.waitFor(() => {
+      expect(consentRequiredListener).toHaveBeenCalledTimes(1);
+    });
+    expect(sdk.status).toBe(CONNECTOR_STATUS.CONSENT_REQUIRING);
+  });
+
   it("auto-skips consent UI when prior consent is true", async () => {
     const storage = createMockStorage();
     await storage.set(WEB3AUTH_STATE_STORAGE_KEY, JSON.stringify({ hasUserConsent: true }));
