@@ -24,7 +24,7 @@ import { CookieStorage, LocalStorageAdapter, log, MemoryStorage, SessionStorageA
 import AppDashboard from "./components/AppDashboard.vue";
 import AppHeader from "./components/AppHeader.vue";
 import AppSettings from "./components/AppSettings.vue";
-import { clientIds, resolveBuildEnv } from "./config";
+import { clientIds, resolveBuildEnv, sanitizeChainNamespaces, sanitizeChains } from "./config";
 import { formDataStore } from "./store/form";
 import { getChainConfig } from "./utils/chainconfig";
 import { SmartAccountType } from "@toruslabs/ethereum-controllers";
@@ -237,9 +237,11 @@ onBeforeMount(() => {
     try {
       if (storedValue) {
         const json = JSON.parse(storedValue);
+        const chainNamespaces = sanitizeChainNamespaces(json.chainNamespaces);
+        const chains = sanitizeChains(chainNamespaces, json.chains);
         formData.connectors = json.connectors;
-        formData.chains = json.chains;
-        formData.chainNamespaces = json.chainNamespaces;
+        formData.chains = chains;
+        formData.chainNamespaces = chainNamespaces;
         formData.loginProviders = json.loginProviders;
         formData.showWalletDiscovery = json.showWalletDiscovery;
         formData.multiInjectedProviderDiscovery = json.multiInjectedProviderDiscovery;
@@ -249,9 +251,15 @@ onBeforeMount(() => {
         formData.walletPlugin = json.walletPlugin;
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
-        formData.smartAccountChains = json.smartAccountChains || [];
-        formData.smartAccountChainsConfig = json.smartAccountChainsConfig || {};
-        formData.defaultChainId = json.defaultChainId;
+        formData.smartAccountChains = (json.smartAccountChains || []).filter((chainId: string) => chains.includes(chainId));
+        formData.smartAccountChainsConfig = Object.entries(json.smartAccountChainsConfig || {}).reduce(
+          (acc, [chainId, config]) => {
+            if (chains.includes(chainId)) acc[chainId] = config as { bundlerUrl: string; paymasterUrl: string };
+            return acc;
+          },
+          {} as typeof formData.smartAccountChainsConfig
+        );
+        formData.defaultChainId = chains.includes(json.defaultChainId) ? json.defaultChainId : undefined;
         formData.initialAuthenticationMode = json.initialAuthenticationMode;
         formData.consentConfigMode = json.consentConfigMode || "required";
         formData.externalWalletOnly = json.externalWalletOnly || false;

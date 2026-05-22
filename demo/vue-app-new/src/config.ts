@@ -1,7 +1,6 @@
 import { AUTH_CONNECTION, AUTH_CONNECTION_TYPE, BUILD_ENV, type BUILD_ENV_TYPE, LANGUAGE_TYPE, LANGUAGES, WhiteLabelData } from "@web3auth/auth";
 import {
   CHAIN_NAMESPACES,
-  ChainNamespaceType,
   CONFIRMATION_STRATEGY,
   type CONFIRMATION_STRATEGY_TYPE,
   type ConnectorInitialAuthenticationModeType,
@@ -29,14 +28,33 @@ export const resolveBuildEnv = (value?: string): BUILD_ENV_TYPE => {
   return BUILD_ENV.TESTING;
 };
 
-export const chainNamespaceOptions = Object.values(CHAIN_NAMESPACES).map((x) => ({ name: x, value: x }));
+export const supportedChainNamespaces = [CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as const;
 
-export const chainConfigs: Record<ChainNamespaceType, string[]> = {
+export type SupportedChainNamespace = (typeof supportedChainNamespaces)[number];
+
+export const chainNamespaceOptions: { name: SupportedChainNamespace; value: SupportedChainNamespace }[] = supportedChainNamespaces.map((value) => ({
+  name: value,
+  value,
+}));
+
+export const isSupportedChainNamespace = (value: unknown): value is SupportedChainNamespace =>
+  supportedChainNamespaces.includes(value as SupportedChainNamespace);
+
+export const chainConfigs: Record<SupportedChainNamespace, string[]> = {
   [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x14a34", "0x61", "0x13882"],
   [CHAIN_NAMESPACES.SOLANA]: ["0x65", "0x67"],
-  [CHAIN_NAMESPACES.CASPER]: [],
-  [CHAIN_NAMESPACES.XRPL]: [],
-  [CHAIN_NAMESPACES.OTHER]: [],
+};
+
+export const sanitizeChainNamespaces = (chainNamespaces?: unknown[]): SupportedChainNamespace[] => {
+  const filtered = (chainNamespaces || []).filter(isSupportedChainNamespace);
+  return filtered.length > 0 ? filtered : [...supportedChainNamespaces];
+};
+
+export const sanitizeChains = (chainNamespaces: SupportedChainNamespace[], chains?: string[]): string[] => {
+  const allowedChains = new Set(chainNamespaces.flatMap((namespace) => chainConfigs[namespace]));
+  const filteredChains = (chains || []).filter((chainId) => allowedChains.has(chainId));
+
+  return filteredChains.length > 0 ? filteredChains : chainNamespaces.map((namespace) => chainConfigs[namespace][0]);
 };
 
 export const clientIds: Record<WEB3AUTH_NETWORK_TYPE, string> = {
@@ -125,7 +143,7 @@ export type FormData = {
   // authMode: string;
   network: WEB3AUTH_NETWORK_TYPE;
   authBuildEnv: BUILD_ENV_TYPE;
-  chainNamespaces: ChainNamespaceType[];
+  chainNamespaces: SupportedChainNamespace[];
   chains: string[];
   defaultChainId?: string;
   whiteLabel: {
