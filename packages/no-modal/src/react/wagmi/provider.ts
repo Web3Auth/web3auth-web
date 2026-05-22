@@ -129,7 +129,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
     (async () => {
       const shouldBindToWagmi = isConnected && chainNamespace === CHAIN_NAMESPACES.EIP155 && Boolean(connection?.ethereumProvider);
 
-      if (shouldBindToWagmi && connection?.ethereumProvider) {
+      if (shouldBindToWagmi) {
         const hasSameBinding =
           lastSyncedBinding.current.provider === connection.ethereumProvider && lastSyncedBinding.current.connectorName === connection.connectorName;
 
