@@ -88,7 +88,7 @@
     "@walletconnect/types": "^2.23.9",
     "@walletconnect/utils": "^2.23.9",
     "@web3auth/auth": "^11.8.0",
-    "@web3auth/ws-embed": "file:../../web3auth-ws-embed-6.0.1.tgz",
+    "@web3auth/ws-embed": "^6.0.4",
     "bignumber.js": "~9.3.1",
     "deepmerge": "^4.3.1",
     "ethers": "^6.16.0",
