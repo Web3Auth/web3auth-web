@@ -892,7 +892,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       return;
     }
 
-    rawProvider.on("chainChanged", this.syncProviderState);
+    rawProvider.on("chainChanged", this.handleWsEmbedChainChanged);
     rawProvider.on("accountsChanged", this.handleWsEmbedAccountsChanged);
     this.wsEmbedProviderListenerTarget = rawProvider;
   }
@@ -942,7 +942,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       return;
     }
 
-    this.wsEmbedProviderListenerTarget.removeListener("chainChanged", this.syncProviderState);
+    this.wsEmbedProviderListenerTarget.removeListener("chainChanged", this.handleWsEmbedChainChanged);
     this.wsEmbedProviderListenerTarget.removeListener("accountsChanged", this.handleWsEmbedAccountsChanged);
     this.wsEmbedProviderListenerTarget = null;
   }
@@ -1307,6 +1307,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       log.error("Error reporting `oauthFailed` audit progress", error);
     });
   }
+
+  private readonly handleWsEmbedChainChanged = () => {
+    void this.syncProviderState();
+  };
 
   private readonly handleWsEmbedAccountsChanged = (accounts: string[]) => {
     if (accounts.length === 0) {
