@@ -91,10 +91,6 @@ import {
 const DEPRECATED_AUTH_CONNECTIONS: ReadonlySet<string> = new Set(["farcaster"]);
 
 function assertAuthConnectionSupported(authConnection: string | undefined): void {
-  if (!authConnection) {
-    throw WalletInitializationError.invalidParams("authConnection is required");
-  }
-
   if (DEPRECATED_AUTH_CONNECTIONS.has(authConnection)) {
     throw WalletInitializationError.invalidParams(
       `Auth connection "${authConnection}" has been deprecated and is no longer supported by the Web3Auth SDKs. ` +
