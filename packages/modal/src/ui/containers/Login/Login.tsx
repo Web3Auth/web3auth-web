@@ -29,6 +29,8 @@ const restrictedLoginMethods: string[] = [
   AUTH_CONNECTION.PASSKEYS,
   AUTH_CONNECTION.TELEGRAM,
   AUTH_CONNECTION.CUSTOM,
+  // Farcaster login is deprecated and no longer supported by the Web3Auth SDKs.
+  AUTH_CONNECTION.FARCASTER,
 ];
 
 function Login(props: LoginProps) {

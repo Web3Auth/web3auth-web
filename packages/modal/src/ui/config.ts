@@ -9,6 +9,8 @@ export const restrictedLoginMethods: Set<AUTH_CONNECTION_TYPE> = new Set([
   AUTH_CONNECTION.PASSKEYS,
   AUTH_CONNECTION.TELEGRAM,
   AUTH_CONNECTION.AUTHENTICATOR,
+  // Farcaster login is deprecated and no longer supported by the Web3Auth SDKs.
+  AUTH_CONNECTION.FARCASTER,
 ]);
 export const AUTH_PROVIDERS = Object.values(AUTH_CONNECTION).filter((x) => !restrictedLoginMethods.has(x));
 

@@ -10,6 +10,10 @@ Web3Auth is where passwordless auth meets non-custodial key infrastructure for W
 
 Checkout the official [Web3Auth Documentation](https://web3auth.io/docs) and [SDK Reference](https://web3auth.io/docs/sdk/web/) to get started!
 
+## ⚠️ Deprecations
+
+- **Farcaster login is no longer supported.** The `farcaster` value of `AUTH_CONNECTION` has been deprecated and is no longer offered by either `@web3auth/modal` or `@web3auth/no-modal`. The modal will reject any project configuration that enables `loginMethods.farcaster`, and `noModal.connectTo(WALLET_CONNECTORS.AUTH, { authConnection: "farcaster" })` will throw a deprecation error. If you previously relied on Farcaster login, please migrate to one of the other supported `AUTH_CONNECTION` values.
+
 ## 💡 Features
 
 - Plug and Play, OAuth based Web3 Authentication Service
