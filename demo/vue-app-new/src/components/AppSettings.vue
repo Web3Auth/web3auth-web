@@ -107,7 +107,7 @@ const onChainNamespaceChange = (value: SupportedChainNamespace[]) => {
 const onChainChange = (chainIds: string[]) => {
   log.info("onChainChange", chainIds);
   // update default chain Id if not found in the new chains
-  if (formData.defaultChainId && chainIds.includes(formData.defaultChainId)) {
+  if (formData.defaultChainId && !chainIds.includes(formData.defaultChainId)) {
     formData.defaultChainId = chainIds[0];
   }
   // update smart account chains if not found in the new chains
