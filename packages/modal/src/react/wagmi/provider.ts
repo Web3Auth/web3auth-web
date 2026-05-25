@@ -62,7 +62,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         Boolean(newConnection && newEth) &&
         newConnection?.connectorName === primaryConnectorName;
 
-      if (shouldBindToWagmi && newConnection && newEth) {
+      if (shouldBindToWagmi) {
         // `ethereumProvider` is a stable proxy (`commonJRPCProvider`) across account switches,
         // so key wagmi resyncs off the Web3Auth connection object instead of provider identity.
         if (lastSyncedWeb3AuthConnection.current !== newConnection) {
