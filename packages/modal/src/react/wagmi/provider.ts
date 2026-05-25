@@ -33,12 +33,15 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
   const { mutate: reconnect } = useReconnect();
+  const suppressWagmiDisconnect = useRef(false);
   const lastSyncedWeb3AuthConnection = useRef<unknown>(null);
 
   useConnectionEffect({
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
-      if (isConnected) await disconnect();
+      const isSuppressed = suppressWagmiDisconnect.current;
+      suppressWagmiDisconnect.current = false;
+      if (!isSuppressed && isConnected) await disconnect();
 
       // reset wagmi connector state if the provider handles disconnection because of the accountsChanged event
       // from the connected provider
@@ -78,8 +81,11 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
       } else if (!isConnected || chainNamespace !== CHAIN_NAMESPACES.EIP155) {
         lastSyncedWeb3AuthConnection.current = null;
-        if (w3aWagmiConnector || wagmiConfig.state.status === "connected") {
+        if (wagmiConfig.state.status === "connected") {
+          suppressWagmiDisconnect.current = true;
           await disconnectWeb3AuthFromWagmi(wagmiConfig);
+        } else if (w3aWagmiConnector) {
+          resetConnectorState(wagmiConfig);
         }
       }
     })();

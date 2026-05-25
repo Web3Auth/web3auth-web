@@ -119,7 +119,7 @@ export async function disconnectWeb3AuthFromWagmi(config: Config) {
 const Web3AuthWagmiProvider = defineComponent({
   name: "Web3AuthWagmiProvider",
   setup() {
-    const { isConnected, connection, chainNamespace } = useWeb3Auth();
+    const { isConnected, connection, web3Auth, chainNamespace } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
     const { mutate: reconnect } = useReconnect();
@@ -153,7 +153,10 @@ const Web3AuthWagmiProvider = defineComponent({
         const w3aWagmiConnector = getWeb3authConnector(wagmiConfig);
 
         if (shouldBindToWagmi && newConnection && newEth) {
-          const hasSameBinding = lastSyncedProvider.value === newEth && lastSyncedConnectorName.value === newConnection.connectorName;
+          const hasSameBinding =
+            lastSyncedProvider.value === newEth &&
+            lastSyncedConnectorName.value === newConnection.connectorName &&
+            newConnection?.connectorName === web3Auth.value?.primaryConnectorName;
 
           if (hasSameBinding && wagmiConfig.state.status === "connected") {
             return;
@@ -177,7 +180,7 @@ const Web3AuthWagmiProvider = defineComponent({
           lastSyncedProvider.value = newEth;
           lastSyncedConnectorName.value = newConnection.connectorName;
           reconnect();
-        } else {
+        } else if (!newIsConnected || chainNamespace.value !== CHAIN_NAMESPACES.EIP155) {
           lastSyncedProvider.value = null;
           lastSyncedConnectorName.value = null;
           if (wagmiConfig.state.status === "connected") {

@@ -21,16 +21,19 @@ import { WagmiProviderProps } from "./interface";
 const Web3AuthWagmiProvider = defineComponent({
   name: "Web3AuthWagmiProvider",
   setup() {
-    const { isConnected, connection, web3Auth } = useWeb3Auth();
+    const { isConnected, connection, web3Auth, chainNamespace } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
     const { mutate: reconnect } = useReconnect();
     const lastSyncedWeb3AuthConnection = shallowRef<unknown>(null);
+    const suppressWagmiDisconnect = ref(false);
 
     useConnectionEffect({
       onDisconnect: async () => {
         log.info("Disconnected from wagmi");
-        if (isConnected.value) await disconnect();
+        const isSuppressed = suppressWagmiDisconnect.value;
+        suppressWagmiDisconnect.value = false;
+        if (!isSuppressed && isConnected.value) await disconnect();
 
         const connector = getWeb3authConnector(wagmiConfig);
         // reset wagmi connector state if the provider handles disconnection because of the accountsChanged event
@@ -42,18 +45,19 @@ const Web3AuthWagmiProvider = defineComponent({
     });
 
     watch(
-      [isConnected, connection, () => web3Auth.value?.currentChain?.chainNamespace],
+      [isConnected, connection, chainNamespace],
       async () => {
         const newIsConnected = isConnected.value;
         const newConnection = connection.value;
         const newEth = newConnection?.ethereumProvider ?? null;
-        const currentChainNamespace = web3Auth.value?.currentChain?.chainNamespace ?? null;
+        const w3aWagmiConnector = getWeb3authConnector(wagmiConfig);
+
         const shouldBindToWagmi =
           newIsConnected &&
-          currentChainNamespace === CHAIN_NAMESPACES.EIP155 &&
+          chainNamespace.value === CHAIN_NAMESPACES.EIP155 &&
           Boolean(newConnection && newEth) &&
           newConnection?.connectorName === web3Auth.value?.primaryConnectorName;
-        const w3aWagmiConnector = getWeb3authConnector(wagmiConfig);
+
         if (shouldBindToWagmi && newConnection && newEth) {
           // `ethereumProvider` is a stable proxy (`commonJRPCProvider`) across account switches,
           // so key wagmi resyncs off the Web3Auth connection object instead of provider identity.
@@ -71,10 +75,13 @@ const Web3AuthWagmiProvider = defineComponent({
             await connectWeb3AuthWithWagmi(connector, wagmiConfig);
             reconnect();
           }
-        } else if (!newIsConnected || currentChainNamespace !== CHAIN_NAMESPACES.EIP155) {
+        } else if (!newIsConnected || chainNamespace.value !== CHAIN_NAMESPACES.EIP155) {
           lastSyncedWeb3AuthConnection.value = null;
-          if (w3aWagmiConnector || wagmiConfig.state.status === "connected") {
+          if (wagmiConfig.state.status === "connected") {
+            suppressWagmiDisconnect.value = true;
             await disconnectWeb3AuthFromWagmi(wagmiConfig);
+          } else if (w3aWagmiConnector) {
+            resetConnectorState(wagmiConfig);
           }
         }
       },
