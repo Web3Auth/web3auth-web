@@ -3,7 +3,7 @@ import { JRPCRequest, providerErrors } from "@web3auth/auth";
 import { Chain, createWalletClient, Hex, http } from "viem";
 import { BundlerClient, SendUserOperationParameters, SmartAccount } from "viem/account-abstraction";
 
-import { IProvider, log } from "../../../base";
+import { IProvider } from "../../../base";
 import { IEthProviderHandlers, MessageParams, SignTypedDataMessageV4, TransactionParams, TypedMessageParams } from "../../ethereum-provider";
 
 export function getProviderHandlers({
@@ -29,8 +29,6 @@ export function getProviderHandlers({
         smartAccount.getAddress(),
         eoaProvider.request<never, string[]>({ method: "eth_accounts" }),
       ]);
-      log.info("smartAccounts", smartAccounts);
-      log.info("eoaAccounts", eoaAccounts);
       return [smartAccounts, ...eoaAccounts];
     },
     getPrivateKey: async (_: JRPCRequest<unknown>) => {
