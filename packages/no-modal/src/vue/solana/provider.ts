@@ -2,8 +2,8 @@ import { createClient, createWalletStandardConnector, type SolanaClient } from "
 import { defineComponent, Fragment, h, provide, ref, watch } from "vue";
 
 import { log } from "../../base";
-import { CHAIN_NAMESPACES, type CustomChainConfig } from "../../base/chain/IChainInterface";
-import { useWeb3Auth } from "../composables";
+import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
+import { useChain, useWeb3Auth } from "../composables";
 import { SOLANA_CLIENT_KEY } from "./constants";
 
 const disposeClient = async (client: SolanaClient) => {
@@ -24,63 +24,89 @@ export const SolanaProvider = defineComponent({
   name: "SolanaProvider",
   setup(_, { slots }) {
     const { isConnected, connection, web3Auth } = useWeb3Auth();
+    const { chainId } = useChain();
     const clientRef = ref<SolanaClient | null>(null);
+    // Holds the token for the newest requested sync run. Older async runs compare against it
+    // before publishing results so a slower reconnect cannot overwrite a newer chain/account update.
+    let activeSyncToken: symbol | null = null;
 
     // provide the client to the app
     provide(SOLANA_CLIENT_KEY, clientRef);
 
-    // watch for changes in the connection and chain namespace
-    watch(
-      [isConnected, connection],
-      async ([newIsConnected, newConnection]) => {
-        if (!newIsConnected || !newConnection?.solanaWallet) {
-          if (clientRef.value) {
-            await disposeClient(clientRef.value);
-            clientRef.value = null;
-          }
+    const syncClient = async () => {
+      // Only the latest async, `syncing` run should be allowed to attach its client.
+      // A fresh Symbol gives each run a unique identity without relying on counters.
+      const syncToken = Symbol("solana-client-sync");
+      activeSyncToken = syncToken;
+
+      const newIsConnected = isConnected.value;
+      const newConnection = connection.value;
+      const currentChain = web3Auth.value?.currentChain;
+      if (
+        !newIsConnected ||
+        !newConnection?.solanaWallet ||
+        currentChain?.chainNamespace !== CHAIN_NAMESPACES.SOLANA ||
+        // only reconnect for the primary connector
+        newConnection.connectorName !== web3Auth.value?.primaryConnectorName
+      ) {
+        const prevClient = clientRef.value;
+        clientRef.value = null;
+        if (prevClient) {
+          await disposeClient(prevClient);
+        }
+        return;
+      }
+
+      const prevClient = clientRef.value;
+      clientRef.value = null;
+      if (prevClient) {
+        await disposeClient(prevClient);
+      }
+
+      let client: SolanaClient | null = null;
+      try {
+        // create a wallet standard connector from connected wallet
+        const solanaWalletId = "wallet-standard:" + newConnection.connectorName;
+        const connector = createWalletStandardConnector(newConnection.solanaWallet, {
+          id: solanaWalletId,
+          name: newConnection.connectorName,
+        });
+
+        // create a solana client
+        const { rpcTarget, wsTarget } = currentChain;
+        client = createClient({
+          endpoint: rpcTarget,
+          websocketEndpoint: wsTarget,
+          walletConnectors: [connector],
+        });
+
+        // connect the client to the wallet
+        await client.actions.connectWallet(solanaWalletId, {
+          autoConnect: true,
+        });
+        // If another sync started while connectWallet was in flight, this client is stale.
+        if (activeSyncToken !== syncToken) {
+          await disposeClient(client);
           return;
         }
-
-        const currentChain = web3Auth.value.currentChain;
-        let chainConfig: CustomChainConfig;
-        if (currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-          chainConfig = currentChain;
-        } else {
-          // use the 1st Solana chain if current chain is not solana
-          chainConfig = web3Auth.value.coreOptions.chains.find((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
-          if (!chainConfig) return;
+        clientRef.value = client;
+      } catch (err) {
+        if (client) {
+          await disposeClient(client);
         }
-
-        // only reconnect for the primary connector
-        if (newConnection.connectorName !== web3Auth.value?.primaryConnectorName) return;
-
-        const prevClient = clientRef.value;
-        try {
-          // create a wallet standard connector from connected wallet
-          const solanaWalletId = "wallet-standard:" + connection.value.connectorName;
-          const connector = createWalletStandardConnector(connection.value.solanaWallet, {
-            id: solanaWalletId,
-            name: connection.value.connectorName,
-          });
-
-          // create a solana client
-          const { rpcTarget, wsTarget } = chainConfig;
-          const client = createClient({
-            endpoint: rpcTarget,
-            websocketEndpoint: wsTarget,
-            walletConnectors: [connector],
-          });
-          clientRef.value = client;
-          if (prevClient) await disposeClient(prevClient);
-
-          // connect the client to the wallet
-          await client.actions.connectWallet(solanaWalletId, {
-            autoConnect: true,
-          });
-        } catch (err) {
-          log.error("Failed to create or connect Solana client", err);
+        log.error("Failed to create or connect Solana client", err);
+        // Only clear the shared ref when this failing run is still the newest one.
+        if (activeSyncToken === syncToken) {
           clientRef.value = null;
         }
+      }
+    };
+
+    // watch for changes in the connection and active chain
+    watch(
+      [isConnected, connection, chainId],
+      () => {
+        void syncClient();
       },
       { immediate: true }
     );

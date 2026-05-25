@@ -1,4 +1,4 @@
-import { createElement, Fragment, PropsWithChildren, useEffect, useMemo } from "react";
+import { createElement, Fragment, PropsWithChildren, useEffect, useMemo, useRef } from "react";
 import { type Chain, defineChain } from "viem";
 import {
   Config,
@@ -99,15 +99,22 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 }
 
 function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
-  const { isConnected, connection } = useWeb3Auth();
+  const { isConnected, connection, chainNamespace } = useWeb3Auth();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
   const { mutate: reconnect } = useReconnect();
+  const suppressWagmiDisconnect = useRef(false);
+  const lastSyncedBinding = useRef<{ provider: unknown | null; connectorName: string | null }>({
+    provider: null,
+    connectorName: null,
+  });
 
   useConnectionEffect({
     onDisconnect: async () => {
       log.info("Disconnected from wagmi");
-      if (isConnected) await disconnect();
+      const isSuppressed = suppressWagmiDisconnect.current;
+      suppressWagmiDisconnect.current = false;
+      if (!isSuppressed && isConnected) await disconnect();
 
       const connector = getWeb3authConnector(wagmiConfig);
       // reset wagmi connector state if the provider handles disconnection because of the accountsChanged event
@@ -120,21 +127,47 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
 
   useEffect(() => {
     (async () => {
-      if (isConnected && connection?.ethereumProvider) {
+      const shouldBindToWagmi = isConnected && chainNamespace === CHAIN_NAMESPACES.EIP155 && Boolean(connection?.ethereumProvider);
+
+      if (shouldBindToWagmi) {
+        const hasSameBinding =
+          lastSyncedBinding.current.provider === connection.ethereumProvider && lastSyncedBinding.current.connectorName === connection.connectorName;
+
+        if (hasSameBinding && wagmiConfig.state.status === "connected") {
+          return;
+        }
+
+        if (!hasSameBinding && getWeb3authConnector(wagmiConfig)) {
+          if (wagmiConfig.state.status === "connected") {
+            suppressWagmiDisconnect.current = true;
+            await disconnectWeb3AuthFromWagmi(wagmiConfig);
+          } else {
+            resetConnectorState(wagmiConfig);
+          }
+        }
+
         const connector = await setupConnector(connection.ethereumProvider, wagmiConfig);
         if (!connector) {
           throw new Error("Failed to setup connector");
         }
 
         await connectWeb3AuthWithWagmi(connector, wagmiConfig);
+        lastSyncedBinding.current = {
+          provider: connection.ethereumProvider,
+          connectorName: connection.connectorName,
+        };
         reconnect();
-      } else if (!isConnected) {
+      } else {
+        lastSyncedBinding.current = { provider: null, connectorName: null };
         if (wagmiConfig.state.status === "connected") {
+          suppressWagmiDisconnect.current = true;
           await disconnectWeb3AuthFromWagmi(wagmiConfig);
+        } else if (getWeb3authConnector(wagmiConfig)) {
+          resetConnectorState(wagmiConfig);
         }
       }
     })();
-  }, [isConnected, wagmiConfig, connection, reconnect]);
+  }, [chainNamespace, connection, isConnected, reconnect, wagmiConfig]);
 
   return createElement(Fragment, null, children);
 }

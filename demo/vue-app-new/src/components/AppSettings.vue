@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
-import { CHAIN_NAMESPACES, ChainNamespaceType, CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_STATUS, log } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_STATUS, log } from "@web3auth/modal";
 import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
 import { computed, InputHTMLAttributes, ref } from "vue";
 import { getChainConfig } from "../utils/chainconfig";
@@ -16,6 +16,7 @@ import {
   loginProviderOptions,
   networkOptions,
   SmartAccountOptions,
+  SupportedChainNamespace,
 } from "../config";
 import { formDataStore } from "../store/form";
 
@@ -26,7 +27,7 @@ const { connect } = useWeb3AuthConnect();
 
 const chainOptions = computed(() => {
   const allChains: { name: string; value: string }[] = [];
-  formData.chainNamespaces.forEach((namespace: ChainNamespaceType) => {
+  formData.chainNamespaces.forEach((namespace: SupportedChainNamespace) => {
     const chainsForNamespace = chainConfigs[namespace].map((chainId) => {
       const chainConfig = getChainConfig(namespace, chainId, clientIds[formData.network]);
       if (!chainConfig) {
@@ -96,9 +97,9 @@ const onTabChange = (index: number) => {
 };
 const isActiveTab = (index: number) => activeTab.value === index;
 
-const onChainNamespaceChange = (value: string[]) => {
+const onChainNamespaceChange = (value: SupportedChainNamespace[]) => {
   log.info("onChainNamespaceChange", value);
-  formData.chains = value.map((namespace) => chainConfigs[namespace as ChainNamespaceType][0]);
+  formData.chains = value.flatMap((namespace) => chainConfigs[namespace]);
   onChainChange(formData.chains);
   formData.connectors = [];
 };
@@ -106,7 +107,7 @@ const onChainNamespaceChange = (value: string[]) => {
 const onChainChange = (chainIds: string[]) => {
   log.info("onChainChange", chainIds);
   // update default chain Id if not found in the new chains
-  if (formData.defaultChainId && chainIds.includes(formData.defaultChainId)) {
+  if (formData.defaultChainId && !chainIds.includes(formData.defaultChainId)) {
     formData.defaultChainId = chainIds[0];
   }
   // update smart account chains if not found in the new chains

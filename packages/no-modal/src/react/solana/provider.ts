@@ -43,7 +43,7 @@ function dispose(client: SolanaClient) {
  */
 function useFrameworkKitSolanaClient(): SolanaClient {
   const { isConnected, connection, web3Auth, isInitialized } = useWeb3Auth();
-  const { chainNamespace } = useChain();
+  const { chainId, chainNamespace } = useChain();
 
   const ref = useRef<SolanaClient | null>(null);
   const [client, setClient] = useState<SolanaClient>(() => {
@@ -103,7 +103,10 @@ function useFrameworkKitSolanaClient(): SolanaClient {
       }
 
       // only reconnect for the primary connector
-      if (conn.connectorName !== web3Auth?.primaryConnectorName) return;
+      if (conn.connectorName !== web3Auth?.primaryConnectorName) {
+        adopt(makePlaceholder(rpc));
+        return;
+      }
 
       try {
         const solanaWalletId = "wallet-standard:" + conn.connectorName;
@@ -132,7 +135,7 @@ function useFrameworkKitSolanaClient(): SolanaClient {
     return () => {
       stale = true;
     };
-  }, [isConnected, connection?.solanaWallet, chainNamespace, web3Auth, isInitialized, connection?.connectorName]);
+  }, [isConnected, connection?.solanaWallet, chainId, chainNamespace, web3Auth, isInitialized, connection?.connectorName]);
 
   return client;
 }
