@@ -67,7 +67,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
             resetConnectorState(wagmiConfig);
           }
           lastSyncedWeb3AuthConnection.current = newConnection;
-          const connector = setupConnector(newEth, wagmiConfig, w3aWagmiConnector);
+          const connector = setupConnector(newEth, wagmiConfig);
           if (!connector) {
             log.error("Failed to setup react wagmi connector");
             throw new Error("Failed to setup connector");

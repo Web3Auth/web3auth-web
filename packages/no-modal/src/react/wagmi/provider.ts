@@ -58,13 +58,15 @@ export function createWeb3AuthConnectorForWagmi(provider: any): CreateConnectorF
 
 // Helper to initialize connectors for the given wallets
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function setupConnector(provider: any, config: Config, connector?: Connector): Connector {
+export function setupConnector(provider: any, config: Config): Connector {
+  let connector: Connector | CreateConnectorFn = getWeb3authConnector(config);
+
   if (connector) return connector;
 
   // Create new connector if not already existing
-  const w3aConnector = createWeb3AuthConnectorForWagmi(provider);
+  connector = createWeb3AuthConnectorForWagmi(provider);
 
-  const result = config._internal.connectors.setup(w3aConnector);
+  const result = config._internal.connectors.setup(connector);
   config._internal.connectors.setState((current) => [...current, result]);
   return result;
 }
@@ -163,7 +165,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
           }
         }
 
-        const connector = setupConnector(connection.ethereumProvider, wagmiConfig, w3aWagmiConnector);
+        const connector = setupConnector(connection.ethereumProvider, wagmiConfig);
         if (!connector) {
           throw new Error("Failed to setup connector");
         }
