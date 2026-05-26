@@ -171,6 +171,9 @@ class MetaMaskConnector extends BaseConnector<void> {
         api: { supportedNetworks: caipSupportedNetworks },
         ui,
         debug: this.connectorSettings?.debug,
+        analytics: {
+          integrationType: "web3auth",
+        },
       });
 
       // Listen for QR code URI from the multichain client (for mobile wallet connection)
@@ -198,6 +201,9 @@ class MetaMaskConnector extends BaseConnector<void> {
           api: { supportedNetworks: hexSupportedNetworks },
           ui,
           debug: this.connectorSettings?.debug,
+          analytics: {
+            integrationType: "web3auth",
+          },
         });
 
         this.evmProvider = this.evmClient.getProvider() as unknown as IProvider;
@@ -209,6 +215,9 @@ class MetaMaskConnector extends BaseConnector<void> {
           dapp,
           api: { supportedNetworks: solanaSupportedNetworks },
           skipAutoRegister: true,
+          analytics: {
+            integrationType: "web3auth",
+          },
         });
         this.solanaProvider = this.solanaClient.getWallet();
       }
