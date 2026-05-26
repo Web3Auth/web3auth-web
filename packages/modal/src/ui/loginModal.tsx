@@ -545,6 +545,15 @@ export class LoginModal {
     listener.on(CONNECTOR_EVENTS.CONNECTED, (data: SDK_CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);
       if (data.pendingUserConsent) return;
+      // Don't change the modal status back to CONNECTED during these transitions.
+      // This mirrors the guard in noModal.ts.
+      if (
+        this.modalStatus === MODAL_STATUS.AUTHORIZING ||
+        this.modalStatus === MODAL_STATUS.AUTHORIZED ||
+        this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING
+      ) {
+        return;
+      }
       // only show success if not being reconnected again.
       if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
         this.setState({
