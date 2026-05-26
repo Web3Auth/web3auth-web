@@ -9,31 +9,24 @@ import {
 } from "@wagmi/vue";
 import { injected } from "@wagmi/vue/connectors";
 import { randomId } from "@web3auth/auth";
-import { type Chain, defineChain, fallback, http, webSocket } from "viem";
+import { type Chain, defineChain, fallback, http, isAddress as isEvmAddress, webSocket } from "viem";
 import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";
 
-import { CHAIN_NAMESPACES, type CustomChainConfig, WalletInitializationError } from "../../base";
+import { CHAIN_NAMESPACES, type CustomChainConfig, WalletInitializationError, WEB3AUTH_CONNECTOR_ID } from "../../base";
 import { log } from "../../base/loglevel";
 // import type { Config, Connection, Connector, CreateConfigParameters, CreateConnectorFn } from "wagmi";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../composables";
 import { defaultWagmiConfig } from "./constants";
 import { WagmiProviderProps } from "./interface";
 
-const WEB3AUTH_CONNECTOR_ID = "web3auth";
-
-function getWeb3authConnector(config: Config) {
+export function getWeb3authConnector(config: Config) {
   return config.connectors.find((c) => c.id === WEB3AUTH_CONNECTOR_ID);
 }
 
-// Helper to initialize connectors for the given wallets
+// Helper to create a Web3Auth connector to connect with wagmi
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function setupConnector(provider: any, config: Config) {
-  let connector: Connector | CreateConnectorFn = getWeb3authConnector(config);
-
-  if (connector) return connector;
-
-  // Create new connector if not already existing
-  connector = injected({
+export function createWeb3AuthConnectorForWagmi(provider: any): CreateConnectorFn {
+  const baseConnector = injected({
     target: {
       provider: provider,
       id: WEB3AUTH_CONNECTOR_ID,
@@ -41,13 +34,41 @@ async function setupConnector(provider: any, config: Config) {
     },
   });
 
+  return (config) => {
+    const connector = baseConnector(config);
+    const baseOnAccountsChanged = connector.onAccountsChanged.bind(connector);
+
+    connector.onAccountsChanged = (accounts: string[]) => {
+      // we need to handle the `accountsChanged` event emitted on the cross-namespace chain switch.
+      // on evm -> solana, the accountsChanged event is emitted with the solana address, which is not valid for evm.
+      // that causes the `invalid account address` error in wagmi. So, here, we're filtering out the solana addresses.
+      if (accounts.length > 0 && !accounts.every((account) => typeof account === "string" && isEvmAddress(account))) {
+        log.warn("onAccountsChanged::accountsChanged event received on non-EVM address");
+        return;
+      }
+      baseOnAccountsChanged(accounts);
+    };
+
+    return connector;
+  };
+}
+
+// Helper to initialize connectors for the given wallets
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function setupConnector(provider: any, config: Config): Connector {
+  let connector: Connector | CreateConnectorFn = getWeb3authConnector(config);
+  if (connector) return connector;
+
+  // Create new connector if not already existing
+  connector = createWeb3AuthConnectorForWagmi(provider);
+
   const result = config._internal.connectors.setup(connector);
   config._internal.connectors.setState((current) => [...current, result]);
   return result;
 }
 
 // Helper to connect a wallet and update wagmi state
-async function connectWeb3AuthWithWagmi(connector: Connector, config: Config) {
+export async function connectWeb3AuthWithWagmi(connector: Connector, config: Config) {
   await Promise.all([config.storage?.removeItem(`${connector.id}.disconnected`), config.storage?.setItem("recentConnectorId", connector.id)]);
 
   let chainId = await connector.getChainId();
@@ -77,12 +98,12 @@ async function connectWeb3AuthWithWagmi(connector: Connector, config: Config) {
   }));
 }
 
-function resetConnectorState(config: Config) {
+export function resetConnectorState(config: Config) {
   config._internal.connectors.setState((prev) => prev.filter((c) => c.id !== WEB3AUTH_CONNECTOR_ID));
   config.connectors.filter((c) => c.id !== WEB3AUTH_CONNECTOR_ID);
 }
 
-async function disconnectWeb3AuthFromWagmi(config: Config) {
+export async function disconnectWeb3AuthFromWagmi(config: Config) {
   const connector = getWeb3authConnector(config);
   await Promise.all([config.storage?.setItem(`${connector?.id}.disconnected`, true), config.storage?.removeItem("injected.connected")]);
   resetConnectorState(config);
@@ -98,7 +119,7 @@ async function disconnectWeb3AuthFromWagmi(config: Config) {
 const Web3AuthWagmiProvider = defineComponent({
   name: "Web3AuthWagmiProvider",
   setup() {
-    const { isConnected, connection, chainNamespace } = useWeb3Auth();
+    const { isConnected, connection, web3Auth, chainNamespace } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
     const { mutate: reconnect } = useReconnect();
@@ -129,15 +150,19 @@ const Web3AuthWagmiProvider = defineComponent({
         const newConnection = connection.value;
         const newEth = newConnection?.ethereumProvider ?? null;
         const shouldBindToWagmi = newIsConnected && chainNamespace.value === CHAIN_NAMESPACES.EIP155 && Boolean(newConnection && newEth);
+        const w3aWagmiConnector = getWeb3authConnector(wagmiConfig);
 
         if (shouldBindToWagmi && newConnection && newEth) {
-          const hasSameBinding = lastSyncedProvider.value === newEth && lastSyncedConnectorName.value === newConnection.connectorName;
+          const hasSameBinding =
+            lastSyncedProvider.value === newEth &&
+            lastSyncedConnectorName.value === newConnection.connectorName &&
+            newConnection?.connectorName === web3Auth.value?.primaryConnectorName;
 
           if (hasSameBinding && wagmiConfig.state.status === "connected") {
             return;
           }
 
-          if (!hasSameBinding && getWeb3authConnector(wagmiConfig)) {
+          if (!hasSameBinding && w3aWagmiConnector) {
             if (wagmiConfig.state.status === "connected") {
               suppressWagmiDisconnect.value = true;
               await disconnectWeb3AuthFromWagmi(wagmiConfig);
@@ -146,7 +171,7 @@ const Web3AuthWagmiProvider = defineComponent({
             }
           }
 
-          const connector = await setupConnector(newEth, wagmiConfig);
+          const connector = setupConnector(newEth, wagmiConfig);
           if (!connector) {
             throw new Error("Failed to setup connector");
           }
@@ -155,13 +180,13 @@ const Web3AuthWagmiProvider = defineComponent({
           lastSyncedProvider.value = newEth;
           lastSyncedConnectorName.value = newConnection.connectorName;
           reconnect();
-        } else {
+        } else if (!newIsConnected || chainNamespace.value !== CHAIN_NAMESPACES.EIP155) {
           lastSyncedProvider.value = null;
           lastSyncedConnectorName.value = null;
           if (wagmiConfig.state.status === "connected") {
             suppressWagmiDisconnect.value = true;
             await disconnectWeb3AuthFromWagmi(wagmiConfig);
-          } else if (getWeb3authConnector(wagmiConfig)) {
+          } else if (w3aWagmiConnector) {
             resetConnectorState(wagmiConfig);
           }
         }
