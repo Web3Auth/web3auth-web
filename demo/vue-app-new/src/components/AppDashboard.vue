@@ -452,7 +452,11 @@ const onSwitchChainNamespace = async () => {
             {{ isMFAEnabled ? "Manage MFA" : "Enable MFA" }}
           </Button>
         </div>
-        <AccountLinkingSection :show-link-wallet="isDisplay('walletServices')" :print-to-console="printToConsole" />
+        <AccountLinkingSection
+          v-if="web3Auth?.primaryConnectorName === WALLET_CONNECTORS.AUTH"
+          :show-link-wallet="isDisplay('walletServices')"
+          :print-to-console="printToConsole"
+        />
         <!-- Wallet Services -->
         <Card v-if="isDisplay('walletServices')" class="!h-auto lg:!h-[calc(100dvh_-_240px)] gap-4 px-4 py-4 mb-2" :shadow="false">
           <div class="mb-2 text-xl font-bold leading-tight text-left">Wallet Service</div>

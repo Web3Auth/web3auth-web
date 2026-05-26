@@ -179,7 +179,13 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     const authorizedListener = () => {
       setStatus(web3Auth.status);
       if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+        setIsInitialized(true);
         setIsConnected(true);
+        // on rehydration, `AUTHORIZED` event can be fired first in `CONNECT_AND_SIGN` mode, before `CONNECTED` event.
+        // Update the connection state here, so that clients can use the connection state immediately.
+        setConnection(web3Auth.connection);
+        setChainId(web3Auth.currentChainId);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
         setIsAuthorized(true);
       }
     };

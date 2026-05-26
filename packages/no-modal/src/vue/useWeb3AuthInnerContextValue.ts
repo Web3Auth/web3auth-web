@@ -147,9 +147,15 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
 
       const authorizedListener = () => {
         status.value = web3Auth.value!.status;
+        // on rehydration, `AUTHORIZED` event can be fired first in `CONNECT_AND_SIGN` mode, before `CONNECTED` event.
+        // Update the connection state here, so that clients can use the connection state immediately.
         if (web3Auth.value!.status === CONNECTOR_STATUS.AUTHORIZED) {
+          if (!isInitialized.value) isInitialized.value = true;
           isAuthorized.value = true;
           isConnected.value = true;
+          connection.value = web3Auth.value!.connection;
+          chainId.value = web3Auth.value!.currentChainId;
+          chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
         }
       };
 

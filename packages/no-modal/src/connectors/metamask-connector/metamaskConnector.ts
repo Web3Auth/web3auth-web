@@ -227,35 +227,20 @@ class MetaMaskConnector extends BaseConnector<void> {
     }
 
     const coreStatus = this.multichainClient.status;
-    if (coreStatus === "connected") {
+    // only connect if the multichain client is connected and autoConnect is true (i.e during the rehydration)
+    if (coreStatus === "connected" && options.autoConnect) {
       this.status = CONNECTOR_STATUS.CONNECTED;
-
       this.rehydrated = true;
-
-      if (options.autoConnect) {
-        this.emit(CONNECTOR_EVENTS.CONNECTED, {
-          connectorName: WALLET_CONNECTORS.METAMASK,
-          reconnected: this.rehydrated,
-          ethereumProvider: this.evmProvider,
-          solanaWallet: this.solanaProvider,
-        } as CONNECTED_EVENT_DATA);
-
-        if (options.getAuthTokenInfo) {
-          await this.getAuthTokenInfo();
-        }
-      }
-    } else if (coreStatus === "loaded" || coreStatus === "disconnected") {
+      this.emit(CONNECTOR_EVENTS.CONNECTED, {
+        connectorName: WALLET_CONNECTORS.METAMASK,
+        reconnected: true,
+        ethereumProvider: this.evmProvider,
+        solanaWallet: this.solanaProvider,
+      });
+      if (options.getAuthTokenInfo) await this.getAuthTokenInfo();
+    } else if (coreStatus === "connected" || coreStatus === "loaded" || coreStatus === "disconnected" || coreStatus === "pending") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
-    } else if (coreStatus === "pending") {
-      // 'pending' implies that a transport failed to resume the connection
-      // if (options.autoConnect) {
-      //   this.rehydrated = false;
-      //   this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, new Error("Failed to resume existing MetaMask Connect session.") as Web3AuthError);
-      // } else {
-      this.status = CONNECTOR_STATUS.READY;
-      this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
-      // }
     } else {
       // Something unexpected happened
       this.status = CONNECTOR_STATUS.ERRORED;
