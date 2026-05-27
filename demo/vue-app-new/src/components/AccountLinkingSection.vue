@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select } from "@toruslabs/vue-components";
-import { isUserRejectedError, WALLET_CONNECTORS } from "@web3auth/modal";
+import { WALLET_CONNECTORS } from "@web3auth/modal";
 import { useLinkAccount, useSwitchAccount } from "@web3auth/modal/account-linking/vue";
 import { useWallets, useWeb3AuthUser } from "@web3auth/modal/vue";
 import type { LinkedAccountInfo } from "@web3auth/no-modal";
