@@ -519,9 +519,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         }
       }
     } catch (error) {
-      if (error instanceof AccountLinkingError) {
-        throw error;
-      }
+      if (error instanceof Web3AuthError) throw error;
       throw AccountLinkingError.walletProofFailed(error instanceof Error ? error.message : String(error), error);
     }
 

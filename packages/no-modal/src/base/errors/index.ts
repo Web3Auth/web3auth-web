@@ -200,6 +200,7 @@ export class WalletOperationsError extends Web3AuthError {
     5000: "Custom",
     5201: "Provided chainId is not allowed",
     5202: "This operation is not allowed",
+    5203: "User rejected the request",
   };
 
   public constructor(code: number, message?: string, cause?: unknown) {
@@ -211,7 +212,11 @@ export class WalletOperationsError extends Web3AuthError {
   }
 
   public static fromCode(code: number, extraMessage = "", cause?: unknown): IWeb3AuthError {
-    return new WalletOperationsError(code, `${WalletOperationsError.messages[code]}, ${extraMessage}`, cause);
+    let message = WalletOperationsError.messages[code];
+    if (extraMessage) {
+      message = `${message}, ${extraMessage}`;
+    }
+    return new WalletOperationsError(code, message, cause);
   }
 
   // Custom methods
@@ -224,6 +229,10 @@ export class WalletOperationsError extends Web3AuthError {
   }
 
   public static chainNamespaceNotAllowed(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletOperationsError.fromCode(5203, extraMessage, cause);
+  }
+
+  public static userRejected(extraMessage = "", cause?: unknown): IWeb3AuthError {
     return WalletOperationsError.fromCode(5203, extraMessage, cause);
   }
 }
@@ -260,4 +269,15 @@ export class WalletProviderError extends Web3AuthError {
   public static invalidRequestParams(extraMessage = "", cause?: unknown): IWeb3AuthError {
     return WalletOperationsError.fromCode(5303, extraMessage, cause);
   }
+}
+
+export function isUserRejectedError(error: unknown): boolean {
+  if (error instanceof Web3AuthError && error.code === 5203) return true;
+
+  if (error instanceof Error) {
+    const normalizedMessage = error.message?.toLowerCase() || "";
+    return normalizedMessage.includes("user rejected the request");
+  }
+
+  return false;
 }

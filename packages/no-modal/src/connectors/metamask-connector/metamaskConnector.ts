@@ -33,10 +33,12 @@ import {
   getCaipChainId,
   getSolanaChainByChainConfig,
   type IProvider,
+  isUserRejectedError,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletLoginError,
+  WalletOperationsError,
   walletSignMessage,
   Web3AuthError,
 } from "../../base";
@@ -359,6 +361,8 @@ class MetaMaskConnector extends BaseConnector<void> {
           duration: Date.now() - startTime,
         });
       }
+      if (isUserRejectedError(error)) throw WalletOperationsError.userRejected();
+
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with MetaMask wallet", error);
     }

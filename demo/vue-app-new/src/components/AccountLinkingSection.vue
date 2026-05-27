@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Button, Card, Select } from "@toruslabs/vue-components";
-import { WALLET_CONNECTORS } from "@web3auth/modal";
+import { isUserRejectedError, WALLET_CONNECTORS } from "@web3auth/modal";
 import { useLinkAccount, useSwitchAccount } from "@web3auth/modal/account-linking/vue";
 import { useWallets, useWeb3AuthUser } from "@web3auth/modal/vue";
 import type { LinkedAccountInfo } from "@web3auth/no-modal";
@@ -55,11 +55,18 @@ const onActivateWallet = async (account: LinkedAccountInfo) => {
 };
 
 const onLinkAccount = async () => {
-  lastUnlinkedAddress.value = null;
-  const result = await linkAccount({ connectorName: linkConnector.value });
-  if (result) {
-    await syncAccountState();
-    props.printToConsole("Link Wallet Result", result);
+  try {
+    lastUnlinkedAddress.value = null;
+    const result = await linkAccount({ connectorName: linkConnector.value });
+    if (result) {
+      await syncAccountState();
+      props.printToConsole("Link Wallet Result", result);
+    }
+  } catch (error) {
+    props.printToConsole("Link Wallet Error", error);
+    if (!isUserRejectedError(error)) {
+      throw error;
+    }
   }
 };
 
