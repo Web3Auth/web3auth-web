@@ -1,4 +1,4 @@
-import { CaipAccountId } from "@metamask/connect-evm";
+import { type CaipAccountId } from "@metamask/connect-evm";
 import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controllers";
 import {
   type AccountAbstractionMultiChainConfig,
