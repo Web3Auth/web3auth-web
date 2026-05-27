@@ -1,4 +1,4 @@
-import { CaipAccountId } from "@metamask/connect-evm";
+import { type CaipAccountId } from "@metamask/connect-evm";
 import type { Wallet } from "@wallet-standard/base";
 import {
   AUTH_CONNECTION_TYPE,
