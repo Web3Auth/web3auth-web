@@ -26,6 +26,7 @@ import deepmerge from "deepmerge";
 import { numberToHex } from "viem";
 
 import {
+  AccountLinkingError,
   CITADEL_NETWORK,
   LinkAccountResult,
   makeAccountLinkingRequest,
@@ -33,7 +34,6 @@ import {
   UnlinkAccountResult,
 } from "../../account-linking";
 import {
-  AccountLinkingError,
   Analytics,
   ANALYTICS_EVENTS,
   AuthLoginParams,

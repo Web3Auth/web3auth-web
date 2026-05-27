@@ -19,7 +19,7 @@ import {
 import { WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
-import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "./account-linking";
+import { AccountLinkingError, type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "./account-linking";
 import {
   Analytics,
   ANALYTICS_EVENTS,
@@ -85,7 +85,6 @@ import {
   withAbort,
 } from "./base";
 import { deserialize } from "./base/deserialize";
-import { AccountLinkingError } from "./base/errors";
 import {
   assertAuthConnector,
   authConnector,
@@ -1401,7 +1400,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     chainId: string,
     config?: ProjectConfig
   ): Promise<IConnector<unknown>> {
-    return this.createIsolatedWalletConnector(connectorName, chainId, config);
+    try {
+      const linkingConnector = await this.createIsolatedWalletConnector(connectorName, chainId, config);
+      return linkingConnector;
+    } catch (error) {
+      if (error instanceof AccountLinkingError && error.code === 5405) {
+        throw error;
+      }
+      throw AccountLinkingError.walletProofFailed(error instanceof Error ? error.message : String(error), error);
+    }
   }
 
   protected async createSwitchingWalletConnector(
