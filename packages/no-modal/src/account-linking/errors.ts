@@ -53,6 +53,10 @@ export class AccountLinkingError extends Web3AuthError {
   public static cannotUnlinkPrimaryAccount(): AccountLinkingError {
     return AccountLinkingError.fromCode(5408);
   }
+
+  public toString(): string {
+    return `[${this.code}] ${this.message}`;
+  }
 }
 
 export async function getAccountLinkingRequestError(error: unknown): Promise<AccountLinkingError> {
@@ -70,4 +74,21 @@ export async function getAccountLinkingRequestError(error: unknown): Promise<Acc
     return error;
   }
   return AccountLinkingError.requestFailed(error instanceof Error ? error.message : JSON.stringify(error), error);
+}
+
+export function formatAccountLinkingErrorMessage(error: unknown, fallbackMessage: string = "Unknown error during the operation."): string {
+  if (error instanceof AccountLinkingError) {
+    return error.toString();
+  }
+
+  if (error instanceof Error) {
+    return error.message || fallbackMessage;
+  }
+
+  try {
+    const stringifiedError = JSON.stringify(error);
+    return stringifiedError;
+  } catch {
+    return fallbackMessage;
+  }
 }
