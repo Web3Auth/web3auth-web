@@ -173,6 +173,7 @@ class MetaMaskConnector extends BaseConnector<void> {
         debug: this.connectorSettings?.debug,
         analytics: {
           integrationType: "web3auth",
+          enabled: !this.coreOptions.disableAnalytics,
         },
       });
 
@@ -203,6 +204,7 @@ class MetaMaskConnector extends BaseConnector<void> {
           debug: this.connectorSettings?.debug,
           analytics: {
             integrationType: "web3auth",
+            enabled: !this.coreOptions.disableAnalytics,
           },
         });
 
@@ -217,6 +219,7 @@ class MetaMaskConnector extends BaseConnector<void> {
           skipAutoRegister: true,
           analytics: {
             integrationType: "web3auth",
+            enabled: !this.coreOptions.disableAnalytics,
           },
         });
         this.solanaProvider = this.solanaClient.getWallet();
