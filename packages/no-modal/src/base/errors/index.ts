@@ -200,7 +200,8 @@ export class WalletOperationsError extends Web3AuthError {
     5000: "Custom",
     5201: "Provided chainId is not allowed",
     5202: "This operation is not allowed",
-    5203: "User rejected the request",
+    5203: "Chain namespace is not allowed",
+    5204: "User rejected the request",
   };
 
   public constructor(code: number, message?: string, cause?: unknown) {
@@ -233,7 +234,7 @@ export class WalletOperationsError extends Web3AuthError {
   }
 
   public static userRejected(extraMessage = "", cause?: unknown): IWeb3AuthError {
-    return WalletOperationsError.fromCode(5203, extraMessage, cause);
+    return WalletOperationsError.fromCode(5204, extraMessage, cause);
   }
 }
 
