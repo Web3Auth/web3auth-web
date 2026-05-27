@@ -192,13 +192,17 @@ class MetaMaskConnector extends BaseConnector<void> {
           dapp,
           eventHandlers: {
             accountsChanged: (_accounts: string[]) => {
-              if (_accounts.length === 0) {
+              if (_accounts.length === 0 && this.connected) {
                 this.disconnect();
               }
             },
             chainChanged: (_chainId: string) => {},
             connect: (_result: { chainId: string; accounts: string[] }) => {},
-            disconnect: () => this.disconnect(),
+            disconnect: () => {
+              if (this.connected) {
+                this.disconnect();
+              }
+            },
           },
           api: { supportedNetworks: hexSupportedNetworks },
           ui,

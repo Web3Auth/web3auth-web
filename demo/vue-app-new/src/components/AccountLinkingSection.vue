@@ -55,18 +55,11 @@ const onActivateWallet = async (account: LinkedAccountInfo) => {
 };
 
 const onLinkAccount = async () => {
-  try {
-    lastUnlinkedAddress.value = null;
-    const result = await linkAccount({ connectorName: linkConnector.value });
-    if (result) {
-      await syncAccountState();
-      props.printToConsole("Link Wallet Result", result);
-    }
-  } catch (error) {
-    props.printToConsole("Link Wallet Error", error);
-    if (!isUserRejectedError(error)) {
-      throw error;
-    }
+  lastUnlinkedAddress.value = null;
+  const result = await linkAccount({ connectorName: linkConnector.value });
+  if (result) {
+    await syncAccountState();
+    props.printToConsole("Link Wallet Result", result);
   }
 };
 
