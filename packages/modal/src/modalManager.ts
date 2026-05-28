@@ -1137,7 +1137,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     try {
       const result = await fn();
-      console.log("runNonWalletConnectAccountAction::result", result);
       this.resetAccountLinkingModalSession();
       this.loginModal.endConnectingLoader({ success: true, skipSuccessScreen: options.skipSuccessScreen });
       return result;

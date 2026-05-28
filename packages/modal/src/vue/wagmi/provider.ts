@@ -1,7 +1,7 @@
 import { Config, CreateConfigParameters, hydrate } from "@wagmi/core";
 import { configKey, createConfig as createWagmiConfig, useConfig as useWagmiConfig, useConnectionEffect, useReconnect } from "@wagmi/vue";
 import { randomId } from "@web3auth/auth";
-import { CHAIN_NAMESPACES, type CustomChainConfig, log, WalletInitializationError } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, type CustomChainConfig, IProvider, log, WalletInitializationError } from "@web3auth/no-modal";
 import {
   connectWeb3AuthWithWagmi,
   disconnectWeb3AuthFromWagmi,
@@ -21,11 +21,12 @@ import { WagmiProviderProps } from "./interface";
 const Web3AuthWagmiProvider = defineComponent({
   name: "Web3AuthWagmiProvider",
   setup() {
-    const { isConnected, connection, web3Auth, chainNamespace } = useWeb3Auth();
+    const { isConnected, connection, chainNamespace, web3Auth } = useWeb3Auth();
     const { disconnect } = useWeb3AuthDisconnect();
     const wagmiConfig = useWagmiConfig();
     const { mutate: reconnect } = useReconnect();
-    const lastSyncedWeb3AuthConnection = shallowRef<unknown>(null);
+    const lastSyncedProvider = shallowRef<IProvider | null>(connection.value?.ethereumProvider ?? null);
+    const lastSyncedConnectorName = ref<string | null>(connection.value?.connectorName ?? null);
     const suppressWagmiDisconnect = ref(false);
 
     useConnectionEffect({
@@ -52,31 +53,39 @@ const Web3AuthWagmiProvider = defineComponent({
         const newEth = newConnection?.ethereumProvider ?? null;
         const w3aWagmiConnector = getWeb3authConnector(wagmiConfig);
 
-        const shouldBindToWagmi =
-          newIsConnected &&
-          chainNamespace.value === CHAIN_NAMESPACES.EIP155 &&
-          Boolean(newConnection && newEth) &&
-          newConnection?.connectorName === web3Auth.value?.primaryConnectorName;
+        const shouldBindToWagmi = newIsConnected && chainNamespace.value === CHAIN_NAMESPACES.EIP155 && Boolean(newConnection && newEth);
 
-        if (shouldBindToWagmi && newConnection && newEth) {
+        if (shouldBindToWagmi) {
+          const hasSameBinding =
+            lastSyncedProvider.value === newEth &&
+            lastSyncedConnectorName.value === newConnection.connectorName &&
+            newConnection?.connectorName === web3Auth.value?.connection.connectorName &&
+            wagmiConfig.state.status === "connected";
+
+          if (hasSameBinding) {
+            // rehydration: already connected to the same provider, so no need to reconnect
+            return;
+          }
+
           // `ethereumProvider` is a stable proxy (`commonJRPCProvider`) across account switches,
           // so key wagmi resyncs off the Web3Auth connection object instead of provider identity.
-          if (lastSyncedWeb3AuthConnection.value !== newConnection) {
-            if (w3aWagmiConnector) {
-              resetConnectorState(wagmiConfig);
-            }
-            lastSyncedWeb3AuthConnection.value = newConnection;
-            const connector = setupConnector(newEth, wagmiConfig);
-            if (!connector) {
-              log.error("Failed to setup vue wagmi connector");
-              throw new Error("Failed to setup connector");
-            }
-
-            await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-            reconnect();
+          if (w3aWagmiConnector) {
+            resetConnectorState(wagmiConfig);
           }
+
+          lastSyncedProvider.value = newEth;
+          lastSyncedConnectorName.value = newConnection.connectorName;
+          const connector = setupConnector(newEth, wagmiConfig);
+          if (!connector) {
+            log.error("Failed to setup vue wagmi connector");
+            throw new Error("Failed to setup connector");
+          }
+
+          await connectWeb3AuthWithWagmi(connector, wagmiConfig);
+          reconnect();
         } else if (!newIsConnected || chainNamespace.value !== CHAIN_NAMESPACES.EIP155) {
-          lastSyncedWeb3AuthConnection.value = null;
+          lastSyncedProvider.value = null;
+          lastSyncedConnectorName.value = null;
           if (wagmiConfig.state.status === "connected") {
             suppressWagmiDisconnect.value = true;
             await disconnectWeb3AuthFromWagmi(wagmiConfig);

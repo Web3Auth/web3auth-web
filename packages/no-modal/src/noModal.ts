@@ -1653,9 +1653,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     switchResult: AuthConnectorSwitchAccountResult,
     options: { walletConnector?: IConnector<unknown>; projectConfig?: ProjectConfig } = {}
   ): Promise<void> {
-    console.log("switchResult", switchResult);
     const resolvedSwitchChainId = this.resolveSwitchAccountChainId(switchResult.targetAccount, switchResult.activeChainId);
-    console.log("resolvedSwitchChainId", resolvedSwitchChainId);
     if (switchResult.kind === "primary") {
       const existingPrimaryConnectedWalletState = this.getConnectedWalletConnectorState();
       const primaryConnectedWalletState =
@@ -1700,7 +1698,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         }
 
         await authConnector.assertSwitchAccountConnectorMatchesTarget(walletConnector, switchResult.targetAccount);
-        console.log("linkedAccountConnection", linkedAccountConnection);
         const connectedWalletState = await this.resolveConnectedWalletConnectorState({
           connector: walletConnector,
           ethereumProvider: walletConnector.provider ?? linkedAccountConnection?.ethereumProvider ?? null,

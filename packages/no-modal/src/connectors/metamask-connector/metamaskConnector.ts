@@ -294,10 +294,14 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
         const evmConnectedPromise = new Promise<void>((resolve) => {
-          // Wait for EVM provider to be ready
-          this.evmProvider?.once("connect", () => {
+          if (this.evmClient.status === "connected") {
             resolve();
-          });
+          } else {
+            // Wait for EVM provider to be ready
+            this.evmProvider?.once("connect", () => {
+              resolve();
+            });
+          }
         });
 
         // Connect using the multichain client
@@ -324,6 +328,8 @@ class MetaMaskConnector extends BaseConnector<void> {
       //     await this.switchChain(chainConfig, true);
       //   }
       // }
+
+      console.log("connect::multichainClient", this.multichainClient);
 
       // check if connected
       if (this.multichainClient.status !== "connected") {

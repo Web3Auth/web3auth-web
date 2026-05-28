@@ -149,16 +149,18 @@ const Web3AuthWagmiProvider = defineComponent({
         const newIsConnected = isConnected.value;
         const newConnection = connection.value;
         const newEth = newConnection?.ethereumProvider ?? null;
-        const shouldBindToWagmi = newIsConnected && chainNamespace.value === CHAIN_NAMESPACES.EIP155 && Boolean(newConnection && newEth);
         const w3aWagmiConnector = getWeb3authConnector(wagmiConfig);
 
-        if (shouldBindToWagmi && newConnection && newEth) {
+        const shouldBindToWagmi = newIsConnected && chainNamespace.value === CHAIN_NAMESPACES.EIP155 && Boolean(newConnection && newEth);
+
+        if (shouldBindToWagmi) {
           const hasSameBinding =
             lastSyncedProvider.value === newEth &&
             lastSyncedConnectorName.value === newConnection.connectorName &&
-            newConnection?.connectorName === web3Auth.value?.primaryConnectorName;
+            newConnection?.connectorName === web3Auth.value?.connection.connectorName &&
+            wagmiConfig.state.status === "connected";
 
-          if (hasSameBinding && wagmiConfig.state.status === "connected") {
+          if (hasSameBinding) {
             return;
           }
 
