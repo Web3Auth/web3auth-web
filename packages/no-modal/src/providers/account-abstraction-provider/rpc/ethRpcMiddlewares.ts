@@ -1,5 +1,13 @@
 import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
-import { createScaffoldMiddlewareV2, type JRPCRequest, type MiddlewareConstraint, type MiddlewareParams, rpcErrors } from "@web3auth/auth";
+import {
+  cloneDeep,
+  createScaffoldMiddlewareV2,
+  type JRPCRequest,
+  Json,
+  type MiddlewareConstraint,
+  type MiddlewareParams,
+  rpcErrors,
+} from "@web3auth/auth";
 
 import { IProvider } from "../../../base";
 import { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../ethereum-provider";
@@ -210,8 +218,29 @@ export async function createEoaMiddleware({ aaProvider }: { aaProvider: IProvide
   });
 }
 
-export function providerAsMiddleware(provider: IProvider): MiddlewareConstraint {
+/**
+ * Creates a middleware that forwards the request to the given provider.
+ *
+ * If `overrideHandlers` is provided, the middleware will check if the request method is in the `overrideHandlers` object.
+ * If it is, the middleware will call the handler function with the request and return the result.
+ * If it is not, the middleware will forward the request to the given provider.
+ *
+ * @param provider - The provider to use.
+ * @param overrideHandlers - The handlers to override.
+ * @returns The middleware.
+ */
+export function providerAsMiddleware(
+  provider: IProvider,
+  overrideHandlers?: Record<string, (request: JRPCRequest<unknown>) => Promise<unknown>>
+): MiddlewareConstraint {
   return async ({ request }) => {
+    if (overrideHandlers) {
+      const handler = overrideHandlers[request.method as keyof IEthProviderHandlers];
+      if (handler) {
+        const mutableRequest = cloneDeep(request);
+        return handler(mutableRequest as JRPCRequest<unknown>) as Promise<void | Json>;
+      }
+    }
     return provider.request({ method: request.method, params: request.params });
   };
 }

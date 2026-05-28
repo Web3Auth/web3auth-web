@@ -2,6 +2,8 @@ import {
   type AccountAbstractionMultiChainConfig,
   type BiconomySmartAccountConfig,
   type BundlerConfig,
+  EIP_5792_METHODS,
+  EIP_7702_METHODS,
   type ISmartAccount,
   type KernelSmartAccountConfig,
   type MetamaskSmartAccountConfig,
@@ -154,7 +156,19 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       eoaProvider,
       handlers: providerHandlers,
     });
-    const eoaMiddleware = providerAsMiddleware(eoaProvider);
+
+    // override EIP-5792 and EIP-7702 methods to throw unsupported method error
+    // 4437 AA Account will not support the EIP7702/5792 methods
+    const overrideEip5792And7702MethodsHandlers = Object.fromEntries(
+      [...Object.values(EIP_5792_METHODS), ...Object.values(EIP_7702_METHODS)].map((method) => [
+        method,
+        async () => {
+          throw providerErrors.unsupportedMethod(`${method} is not supported for account abstraction provider`);
+        },
+      ])
+    );
+
+    const eoaMiddleware = providerAsMiddleware(eoaProvider, overrideEip5792And7702MethodsHandlers);
     const engine = JRPCEngineV2.create({ middleware: [aaMiddleware, eoaMiddleware] });
     const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
