@@ -3,9 +3,13 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 
 import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../src/account-linking/rest";
 
-vi.mock("@toruslabs/http-helpers", () => ({
-  post: vi.fn(),
-}));
+vi.mock("@toruslabs/http-helpers", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("@toruslabs/http-helpers")>();
+  return {
+    ...actual,
+    post: vi.fn(),
+  };
+});
 
 const mockPost = vi.mocked(post);
 

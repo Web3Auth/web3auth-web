@@ -33,10 +33,12 @@ import {
   getCaipChainId,
   getSolanaChainByChainConfig,
   type IProvider,
+  isUserRejectedError,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   WalletLoginError,
+  WalletOperationsError,
   walletSignMessage,
   Web3AuthError,
 } from "../../base";
@@ -191,13 +193,17 @@ class MetaMaskConnector extends BaseConnector<void> {
           dapp,
           eventHandlers: {
             accountsChanged: (_accounts: string[]) => {
-              if (_accounts.length === 0) {
+              if (_accounts.length === 0 && this.connected) {
                 this.disconnect();
               }
             },
             chainChanged: (_chainId: string) => {},
             connect: (_result: { chainId: string; accounts: string[] }) => {},
-            disconnect: () => this.disconnect(),
+            disconnect: () => {
+              if (this.connected) {
+                this.disconnect();
+              }
+            },
           },
           api: { supportedNetworks: hexSupportedNetworks },
           ui,
@@ -288,10 +294,14 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
         const evmConnectedPromise = new Promise<void>((resolve) => {
-          // Wait for EVM provider to be ready
-          this.evmProvider?.once("connect", () => {
+          if (this.evmClient.status === "connected") {
             resolve();
-          });
+          } else {
+            // Wait for EVM provider to be ready
+            this.evmProvider?.once("connect", () => {
+              resolve();
+            });
+          }
         });
 
         // Connect using the multichain client
@@ -362,6 +372,8 @@ class MetaMaskConnector extends BaseConnector<void> {
           duration: Date.now() - startTime,
         });
       }
+      if (isUserRejectedError(error)) throw WalletOperationsError.userRejected();
+
       if (error instanceof Web3AuthError) throw error;
       throw WalletLoginError.connectionError("Failed to login with MetaMask wallet", error);
     }

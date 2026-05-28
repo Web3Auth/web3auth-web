@@ -1,4 +1,4 @@
-import { CHAIN_NAMESPACES, type CustomChainConfig, log, WalletInitializationError } from "@web3auth/no-modal";
+import { CHAIN_NAMESPACES, type CustomChainConfig, IProvider, log, WalletInitializationError } from "@web3auth/no-modal";
 import {
   connectWeb3AuthWithWagmi,
   disconnectWeb3AuthFromWagmi,
@@ -24,17 +24,13 @@ import { WagmiProviderProps } from "./interface";
 
 // TODO: re-use the provider from the no-modal package
 function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
-  const {
-    isConnected,
-    connection,
-    chainNamespace,
-    web3Auth: { primaryConnectorName },
-  } = useWeb3Auth();
+  const { isConnected, connection, chainNamespace } = useWeb3Auth();
   const { disconnect } = useWeb3AuthDisconnect();
   const wagmiConfig = useWagmiConfig();
   const { mutate: reconnect } = useReconnect();
   const suppressWagmiDisconnect = useRef(false);
-  const lastSyncedWeb3AuthConnection = useRef<unknown>(null);
+  const lastSyncedProvider = useRef<IProvider | null>(connection?.ethereumProvider ?? null);
+  const lastSyncedConnectorName = useRef<string | null>(connection?.connectorName ?? null);
 
   useConnectionEffect({
     onDisconnect: async () => {
@@ -56,31 +52,39 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
       const newConnection = connection ?? null;
       const newEth = connection?.ethereumProvider ?? null;
       const w3aWagmiConnector = getWeb3authConnector(wagmiConfig);
-      const shouldBindToWagmi =
-        isConnected &&
-        chainNamespace === CHAIN_NAMESPACES.EIP155 &&
-        Boolean(newConnection && newEth) &&
-        newConnection?.connectorName === primaryConnectorName;
+      const shouldBindToWagmi = isConnected && chainNamespace === CHAIN_NAMESPACES.EIP155 && Boolean(newConnection && newEth);
 
       if (shouldBindToWagmi) {
+        const hasSameBinding =
+          lastSyncedProvider.current === newEth &&
+          lastSyncedConnectorName.current === newConnection.connectorName &&
+          wagmiConfig.state.status === "connected";
+
+        if (hasSameBinding) {
+          // rehydration: already connected to the same provider, so no need to reconnect
+          return;
+        }
+
         // `ethereumProvider` is a stable proxy (`commonJRPCProvider`) across account switches,
         // so key wagmi resyncs off the Web3Auth connection object instead of provider identity.
-        if (lastSyncedWeb3AuthConnection.current !== newConnection) {
-          if (w3aWagmiConnector) {
-            resetConnectorState(wagmiConfig);
-          }
-          lastSyncedWeb3AuthConnection.current = newConnection;
-          const connector = setupConnector(newEth, wagmiConfig);
-          if (!connector) {
-            log.error("Failed to setup react wagmi connector");
-            throw new Error("Failed to setup connector");
-          }
-
-          await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-          reconnect();
+        if (w3aWagmiConnector) {
+          resetConnectorState(wagmiConfig);
         }
+
+        lastSyncedProvider.current = newEth;
+        lastSyncedConnectorName.current = newConnection.connectorName;
+
+        const connector = setupConnector(newEth, wagmiConfig);
+        if (!connector) {
+          log.error("Failed to setup react wagmi connector");
+          throw new Error("Failed to setup connector");
+        }
+
+        await connectWeb3AuthWithWagmi(connector, wagmiConfig);
+        reconnect();
       } else if (!isConnected || chainNamespace !== CHAIN_NAMESPACES.EIP155) {
-        lastSyncedWeb3AuthConnection.current = null;
+        lastSyncedProvider.current = null;
+        lastSyncedConnectorName.current = null;
         if (wagmiConfig.state.status === "connected") {
           suppressWagmiDisconnect.current = true;
           await disconnectWeb3AuthFromWagmi(wagmiConfig);
@@ -89,7 +93,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
       }
     })();
-  }, [chainNamespace, isConnected, wagmiConfig, connection, reconnect, primaryConnectorName]);
+  }, [chainNamespace, isConnected, wagmiConfig, connection, reconnect]);
 
   return createElement(Fragment, null, children);
 }

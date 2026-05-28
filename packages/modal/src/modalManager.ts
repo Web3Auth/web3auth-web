@@ -1,6 +1,5 @@
 import { AuthConnectionConfigItem, serializeError } from "@web3auth/auth";
 import {
-  AccountLinkingError,
   ANALYTICS_EVENTS,
   ANALYTICS_SDK_TYPE,
   type AUTH_CONNECTION_TYPE,
@@ -47,6 +46,7 @@ import {
   Web3AuthNoModal,
   withAbort,
 } from "@web3auth/no-modal";
+import { AccountLinkingError, formatAccountLinkingErrorMessage } from "@web3auth/no-modal/account-linking";
 import deepmerge from "deepmerge";
 
 import { defaultConnectorsModalConfig } from "./config";
@@ -133,6 +133,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       super.checkInitRequirements();
       // get project config and wallet registry
       const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
+      // cache project config so that it can be re-used later
+      this.projectConfig = projectConfig;
 
       // init config
       this.initUIConfig(projectConfig);
@@ -379,14 +381,6 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   protected resetAccountLinkingModalSession(): void {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     this.loginModal.resetAccountLinkingSession();
-  }
-
-  protected formatAccountLinkingErrorMessage(error: unknown): string | undefined {
-    if (error instanceof AccountLinkingError) {
-      const isUnlink = error.code >= 5406 && error.code <= 5408;
-      return isUnlink ? `[${error.code}] Account unlinking failed` : `[${error.code}] Account linking failed`;
-    }
-    return (error as Error)?.message;
   }
 
   protected async prepareAccountLinkingConnector(connectorName: WALLET_CONNECTOR_TYPE | string, chainId: string): Promise<IConnector<unknown>> {
@@ -1046,7 +1040,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         this.resetAccountLinkingModalSession();
       } else {
         const fallbackMessage = params.intent === ACCOUNT_LINKING_INTENT.SWITCH ? "Failed to switch wallet." : undefined;
-        const errorMessage = this.formatAccountLinkingErrorMessage(error) || fallbackMessage;
+        const errorMessage = formatAccountLinkingErrorMessage(error, fallbackMessage);
         this.resetAccountLinkingModalSession();
         this.loginModal.endConnectingLoader({ success: false, errorMessage });
       }
@@ -1149,9 +1143,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       this.loginModal.endConnectingLoader({ success: true, skipSuccessScreen: options.skipSuccessScreen });
       return result;
     } catch (error) {
-      const message = this.formatAccountLinkingErrorMessage(error);
+      const errorMessage = formatAccountLinkingErrorMessage(error);
       this.resetAccountLinkingModalSession();
-      this.loginModal.endConnectingLoader({ success: false, errorMessage: message });
+      this.loginModal.endConnectingLoader({ success: false, errorMessage });
       throw error;
     } finally {
       if (options.connector) {
