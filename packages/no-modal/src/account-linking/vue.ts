@@ -46,7 +46,6 @@ export const useLinkAccount = (): IUseLinkAccount => {
       return result;
     } catch (err) {
       error.value = err as Web3AuthError;
-      throw err;
     } finally {
       loading.value = false;
     }

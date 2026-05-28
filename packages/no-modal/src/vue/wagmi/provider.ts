@@ -173,14 +173,14 @@ const Web3AuthWagmiProvider = defineComponent({
             }
           }
 
+          lastSyncedProvider.value = newEth;
+          lastSyncedConnectorName.value = newConnection.connectorName;
           const connector = setupConnector(newEth, wagmiConfig);
           if (!connector) {
             throw new Error("Failed to setup connector");
           }
 
           await connectWeb3AuthWithWagmi(connector, wagmiConfig);
-          lastSyncedProvider.value = newEth;
-          lastSyncedConnectorName.value = newConnection.connectorName;
           reconnect();
         } else if (!newIsConnected || chainNamespace.value !== CHAIN_NAMESPACES.EIP155) {
           lastSyncedProvider.value = null;
