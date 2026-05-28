@@ -133,6 +133,8 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       super.checkInitRequirements();
       // get project config and wallet registry
       const { projectConfig, walletRegistry } = await this.getProjectAndWalletConfig();
+      // cache project config so that it can be re-used later
+      this.projectConfig = projectConfig;
 
       // init config
       this.initUIConfig(projectConfig);

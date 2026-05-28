@@ -1104,7 +1104,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // The following block only hits during rehydration
 
       const { activeAccount, currentChainId } = this.state;
-      // if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
+      let rehydrateWithLinkedAccount = false;
+      // for rehydration, if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
       if (activeAccount && !activeAccount.isPrimary && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
         const accountLinkingConnector = isAuthConnector(connector) ? connector : this.getConnector(WALLET_CONNECTORS.AUTH);
         assertAuthConnector(accountLinkingConnector, "Account switching requires the AUTH connector to be available.");
@@ -1128,6 +1129,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         });
         this.setConnectedWalletConnectorState(connectedWalletState, activeAccount);
         this.setActiveWalletConnectorKey(activeAccount);
+        rehydrateWithLinkedAccount = true;
       }
 
       if (ethereumProvider) {
@@ -1166,9 +1168,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         if (!pendingUserConsent) {
           this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
         }
+
         // `pendingUserConsent` signals listeners (LoginModal, React/Vue contexts) to skip processing this CONNECTED event,
         // so the upcoming AUTHORIZED -> CONSENT_REQUIRING transition is not overridden by a late CONNECTED handler in CONNECT_AND_SIGN mode.
         this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent });
+
+        // if we're rehydrating with a linked account, we need to emit a CONNECTION_UPDATED event
+        // so that upstream listeners and context are updated with the linked connection.
+        if (rehydrateWithLinkedAccount) {
+          this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, {
+            ethereumProvider,
+            solanaWallet,
+            connectorName: data.connectorName,
+          });
+        }
       }
     });
 
