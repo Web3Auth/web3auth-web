@@ -214,7 +214,7 @@ class MetaMaskConnector extends BaseConnector<void> {
           },
         });
 
-        this.evmProvider = this.evmClient.getProvider() as unknown as IProvider;
+        this.evmProvider = this.createEvmProviderBridge(this.evmClient.getProvider() as unknown as IProvider);
       }
 
       // Create the Solana client only when Solana chains are configured
@@ -457,24 +457,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       throw WalletLoginError.unsupportedOperation("switchChain requires an EVM client, but no EVM chains are configured.");
     }
 
-    const chainConfig = this.coreOptions.chains.find(
-      (x) => x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
-    );
-
-    const chainConfiguration = chainConfig
-      ? {
-          chainId: params.chainId,
-          chainName: chainConfig.displayName,
-          rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: chainConfig.blockExplorerUrl ? [chainConfig.blockExplorerUrl] : undefined,
-          nativeCurrency: {
-            name: chainConfig.tickerName,
-            symbol: chainConfig.ticker,
-            decimals: chainConfig.decimals || 18,
-          },
-          iconUrls: chainConfig.logo ? [chainConfig.logo] : undefined,
-        }
-      : undefined;
+    const chainConfiguration = this.getEvmChainConfiguration(params.chainId);
 
     await this.evmClient.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
   }
@@ -549,6 +532,56 @@ class MetaMaskConnector extends BaseConnector<void> {
       throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
     }
     await this.initializationPromise;
+  }
+
+  private getEvmChainConfiguration(chainId: string) {
+    const chainConfig = this.coreOptions.chains.find(
+      (x) => x.chainId === chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
+    );
+
+    return chainConfig
+      ? {
+          chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: chainConfig.blockExplorerUrl ? [chainConfig.blockExplorerUrl] : undefined,
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+          iconUrls: chainConfig.logo ? [chainConfig.logo] : undefined,
+        }
+      : undefined;
+  }
+
+  private createEvmProviderBridge(provider: IProvider): IProvider {
+    return new Proxy(provider, {
+      get: (target, prop, receiver) => {
+        if (prop === "request") {
+          return async <S, R>(args: { method: string; params?: S }) => {
+            // handle `wallet_switchEthereumChain` request from the clients which uses the EVM provider directly (e.g. wagmi actions)
+            // we already handle this method, `wallet_switchEthereumChain` in other connectors, but metamask lacks of this
+            if (args?.method === "wallet_switchEthereumChain") {
+              const chainParams = Array.isArray(args.params) ? args.params[0] : undefined;
+              const chainId =
+                chainParams && typeof chainParams === "object" && "chainId" in chainParams ? (chainParams.chainId as string | undefined) : undefined;
+
+              if (chainId && this.evmClient) {
+                const chainConfiguration = this.getEvmChainConfiguration(chainId);
+                await this.evmClient.switchChain({ chainId: chainId as Hex, chainConfiguration });
+                return null as R;
+              }
+            }
+
+            return target.request(args);
+          };
+        }
+
+        const value = Reflect.get(target, prop, receiver);
+        return typeof value === "function" ? value.bind(target) : value;
+      },
+    }) as IProvider;
   }
 }
 

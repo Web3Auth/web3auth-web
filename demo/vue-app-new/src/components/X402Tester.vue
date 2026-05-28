@@ -4,12 +4,12 @@ import { useSwitchChain } from "@wagmi/vue";
 import { useX402Fetch } from "@web3auth/modal/x402/vue";
 import { useChain, useWeb3Auth } from "@web3auth/modal/vue";
 import { CHAIN_NAMESPACES } from "@web3auth/no-modal";
-import { ref, watch } from "vue";
+import { computed, ref, watch } from "vue";
 
 const BASE_SEPOLIA_CHAIN_ID = "0x14a34"; // 84532
 const SOLANA_DEVNET_CHAIN_ID = "0x67"; // 103
 const SOLANA_DEVNET_CAIP_CHAIN_ID = `solana:${Number(SOLANA_DEVNET_CHAIN_ID)}`;
-const DEFAULT_X402_URL = import.meta.env.VITE_APP_X402_TEST_CONTENT_URL || "https://x402.org/protected";
+const DEFAULT_X402_URL = "https://web3auth-dev-demo-x420.sapphire-dev-2-1.authnetwork.dev";
 
 const { isConnected, connection, web3Auth } = useWeb3Auth();
 const { chainId, chainNamespace } = useChain();
@@ -18,6 +18,8 @@ const { fetchWithPayment } = useX402Fetch();
 const emit = defineEmits<{
   (e: "print-to-console", title: string, payload?: unknown): void;
 }>();
+
+const eip155Chains = computed(() => web3Auth.value?.coreOptions.chains?.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.EIP155) || []);
 
 const url = ref(DEFAULT_X402_URL);
 const fetchLoading = ref(false);
@@ -45,9 +47,13 @@ watch(
 const onSwitchToBaseSepolia = async () => {
   fetchLoading.value = true;
   try {
-    await switchChainAsync({ chainId: parseInt(BASE_SEPOLIA_CHAIN_ID, 16) });
+    const newChain = eip155Chains.value.find((c) => c.chainId === BASE_SEPOLIA_CHAIN_ID);
+    if (!newChain) throw new Error(`Unsupported chainId: ${BASE_SEPOLIA_CHAIN_ID}`);
+    const data = await switchChainAsync({ chainId: Number(newChain.chainId) });
+    emit("print-to-console", "switchedChain", { chainId: data.id });
   } catch (err) {
-    emit("print-to-console", "x402 network error", err instanceof Error ? err.message : String(err));
+    console.error("Error", err);
+    emit("print-to-console", "switchedChain error", err instanceof Error ? err.message : String(err));
   } finally {
     fetchLoading.value = false;
   }
