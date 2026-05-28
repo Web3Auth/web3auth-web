@@ -2,8 +2,6 @@ import {
   type AccountAbstractionMultiChainConfig,
   type BiconomySmartAccountConfig,
   type BundlerConfig,
-  EIP_5792_METHODS,
-  EIP_7702_METHODS,
   type ISmartAccount,
   type KernelSmartAccountConfig,
   type MetamaskSmartAccountConfig,
@@ -20,7 +18,7 @@ import { type BundlerClient, createBundlerClient, createPaymasterClient, type Pa
 
 import { CHAIN_NAMESPACES, type CustomChainConfig, type IProvider, WalletInitializationError } from "../../../base";
 import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../../../providers/base-provider";
-import { createAaMiddleware, createEoaMiddleware, providerAsMiddleware } from "../rpc/ethRpcMiddlewares";
+import { createAaMiddleware, createEip7702And5792MiddlewareForAaProvider, createEoaMiddleware, providerAsMiddleware } from "../rpc/ethRpcMiddlewares";
 import { getProviderHandlers } from "./utils";
 
 interface AccountAbstractionProviderConfig extends BaseProviderConfig {
@@ -82,10 +80,9 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
   }
 
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
-    const currentChain = this.currentChain;
-    const chainNamespace = currentChain?.chainNamespace;
-    if (chainNamespace && chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE)
-      throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
+    const { currentChain } = this;
+    const { chainNamespace } = currentChain;
+    if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const bundlerAndPaymasterConfig = this.config.smartAccountChainsConfig.find((config) => config.chainId === currentChain.chainId);
     if (!bundlerAndPaymasterConfig)
       throw WalletInitializationError.invalidProviderConfigError(`Bundler and paymaster config not found for chain ${currentChain.chainId}`);
@@ -158,19 +155,11 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       handlers: providerHandlers,
     });
 
-    // override EIP-5792 and EIP-7702 methods to throw unsupported method error
-    // 4437 AA Account will not support the EIP7702/5792 methods
-    const overrideEip5792And7702MethodsHandlers = Object.fromEntries(
-      [...Object.values(EIP_5792_METHODS), ...Object.values(EIP_7702_METHODS)].map((method) => [
-        method,
-        async () => {
-          throw providerErrors.unsupportedMethod(`${method} is not supported for account abstraction provider`);
-        },
-      ])
-    );
-
-    const eoaMiddleware = providerAsMiddleware(eoaProvider, overrideEip5792And7702MethodsHandlers);
-    const engine = JRPCEngineV2.create({ middleware: [aaMiddleware, eoaMiddleware] });
+    // middleware to handle EIP-7702 and EIP-5792 methods,
+    // currently, we do not support EIP-7702 and EIP-5792 methods for account abstraction provider
+    const eip7702And5792Middleware = await createEip7702And5792MiddlewareForAaProvider();
+    const eoaMiddleware = providerAsMiddleware(eoaProvider);
+    const engine = JRPCEngineV2.create({ middleware: [aaMiddleware, eip7702And5792Middleware, eoaMiddleware] });
     const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
     eoaProvider.once("chainChanged", (chainId) => {

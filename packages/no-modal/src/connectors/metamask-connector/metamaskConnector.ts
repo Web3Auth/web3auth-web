@@ -557,7 +557,7 @@ class MetaMaskConnector extends BaseConnector<void> {
 
   private createEvmProviderBridge(provider: IProvider): IProvider {
     return new Proxy(provider, {
-      get: (target, prop, receiver) => {
+      get: (target, prop) => {
         if (prop === "request") {
           return async <S, R>(args: { method: string; params?: S }) => {
             // handle `wallet_switchEthereumChain` request from the clients which uses the EVM provider directly (e.g. wagmi actions)
@@ -578,7 +578,9 @@ class MetaMaskConnector extends BaseConnector<void> {
           };
         }
 
-        const value = Reflect.get(target, prop, receiver);
+        // Use the original provider as the receiver so SDK getters that rely on
+        // private fields (`#field`) keep the correct brand check context.
+        const value = Reflect.get(target, prop, target);
         return typeof value === "function" ? value.bind(target) : value;
       },
     }) as IProvider;

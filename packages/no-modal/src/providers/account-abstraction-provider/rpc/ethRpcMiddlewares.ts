@@ -1,11 +1,10 @@
-import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
+import { EIP_5792_METHODS, EIP_7702_METHODS, METHOD_TYPES } from "@toruslabs/ethereum-controllers";
 import {
-  cloneDeep,
   createScaffoldMiddlewareV2,
   type JRPCRequest,
-  Json,
   type MiddlewareConstraint,
   type MiddlewareParams,
+  providerErrors,
   rpcErrors,
 } from "@web3auth/auth";
 
@@ -218,29 +217,20 @@ export async function createEoaMiddleware({ aaProvider }: { aaProvider: IProvide
   });
 }
 
-/**
- * Creates a middleware that forwards the request to the given provider.
- *
- * If `overrideHandlers` is provided, the middleware will check if the request method is in the `overrideHandlers` object.
- * If it is, the middleware will call the handler function with the request and return the result.
- * If it is not, the middleware will forward the request to the given provider.
- *
- * @param provider - The provider to use.
- * @param overrideHandlers - The handlers to override.
- * @returns The middleware.
- */
-export function providerAsMiddleware(
-  provider: IProvider,
-  overrideHandlers?: Record<string, (request: JRPCRequest<unknown>) => Promise<unknown>>
-): MiddlewareConstraint {
-  return async ({ request }) => {
-    if (overrideHandlers) {
-      const handler = overrideHandlers[request.method as keyof IEthProviderHandlers];
-      if (handler) {
-        const mutableRequest = cloneDeep(request);
-        return handler(mutableRequest as JRPCRequest<unknown>) as Promise<void | Json>;
-      }
+export async function createEip7702And5792MiddlewareForAaProvider(): Promise<MiddlewareConstraint> {
+  const eip5792Methods = Object.values(EIP_5792_METHODS);
+  const eip7702Methods = Object.values(EIP_7702_METHODS);
+  const eip7702And5792Methods: string[] = [...eip5792Methods, ...eip7702Methods];
+  return async ({ request, next }) => {
+    if (eip7702And5792Methods.includes(request.method as string)) {
+      throw providerErrors.unsupportedMethod(`${request.method} is not supported for account abstraction provider`);
     }
+    return next(request);
+  };
+}
+
+export function providerAsMiddleware(provider: IProvider): MiddlewareConstraint {
+  return async ({ request }) => {
     return provider.request({ method: request.method, params: request.params });
   };
 }
