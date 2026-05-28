@@ -60,19 +60,25 @@ export class AccountLinkingError extends Web3AuthError {
 }
 
 export async function getAccountLinkingRequestError(error: unknown): Promise<AccountLinkingError> {
+  if (error instanceof AccountLinkingError) {
+    return error;
+  }
+
   if (error instanceof Response) {
     if (error.status === 409) {
       return AccountLinkingError.requestFailed("This wallet address is already registered on this dApp");
     }
 
     if (error.json && typeof error.json === "function") {
-      const json = await error.json();
-      return AccountLinkingError.requestFailed(json.message ?? "Failed to link account");
+      try {
+        const json = await error.json();
+        return AccountLinkingError.requestFailed(json.message ?? "Failed to link account");
+      } catch {
+        // continue
+      }
     }
   }
-  if (error instanceof AccountLinkingError) {
-    return error;
-  }
+
   return AccountLinkingError.requestFailed(error instanceof Error ? error.message : JSON.stringify(error), error);
 }
 

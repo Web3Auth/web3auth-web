@@ -1176,11 +1176,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         // if we're rehydrating with a linked account, we need to emit a CONNECTION_UPDATED event
         // so that upstream listeners and context are updated with the linked connection.
         if (rehydrateWithLinkedAccount) {
-          this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, {
-            ethereumProvider,
-            solanaWallet,
-            connectorName: data.connectorName,
-          });
+          this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, this.connection);
         }
       }
     });
