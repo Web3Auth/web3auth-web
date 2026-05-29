@@ -586,6 +586,10 @@ class MetaMaskConnector extends BaseConnector<void> {
 
     return {
       ...engineProvider,
+      // get the chainId from the original provider (i.e. metamask)
+      get chainId() {
+        return provider.chainId;
+      },
       // bind the provider events to the engine provider
       // without the binding, the engine provider could not forward events to the original provider
       on: provider.on.bind(provider),
