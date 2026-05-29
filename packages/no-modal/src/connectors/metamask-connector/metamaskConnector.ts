@@ -584,7 +584,17 @@ class MetaMaskConnector extends BaseConnector<void> {
     const engine = JRPCEngineV2.create({ middleware: [switchChainMiddleware, forwardMiddleware] });
     const engineProvider = providerFromEngineV2(engine) as IProvider;
 
-    return engineProvider;
+    return {
+      ...engineProvider,
+      // bind the provider events to the engine provider
+      // without the binding, the engine provider could not forward events to the original provider
+      on: provider.on.bind(provider),
+      once: provider.once.bind(provider),
+      removeListener: provider.removeListener.bind(provider),
+      off: typeof provider.off === "function" ? provider.off.bind(provider) : undefined,
+      emit: typeof provider.emit === "function" ? provider.emit.bind(provider) : undefined,
+      removeAllListeners: typeof provider.removeAllListeners === "function" ? provider.removeAllListeners.bind(provider) : undefined,
+    } as IProvider;
   }
 }
 
