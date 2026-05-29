@@ -5,6 +5,15 @@ import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-cont
 import { bytesToHexPrefixedString, utf8ToBytes } from "@toruslabs/metadata-helpers";
 import type { Wallet } from "@wallet-standard/base";
 import { StandardConnect, StandardConnectFeature } from "@wallet-standard/features";
+import {
+  createScaffoldMiddlewareV2,
+  JRPCEngineV2,
+  type JRPCRequest,
+  type MiddlewareConstraint,
+  type MiddlewareParams,
+  providerFromEngineV2,
+  rpcErrors,
+} from "@web3auth/auth";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import { generateSiweNonce } from "viem/siwe";
 
@@ -556,34 +565,39 @@ class MetaMaskConnector extends BaseConnector<void> {
   }
 
   private createEvmProviderBridge(provider: IProvider): IProvider {
-    return new Proxy(provider, {
-      get: (target, prop) => {
-        if (prop === "request") {
-          return async <S, R>(args: { method: string; params?: S }) => {
-            // handle `wallet_switchEthereumChain` request from the clients which uses the EVM provider directly (e.g. wagmi actions)
-            // we already handle this method, `wallet_switchEthereumChain` in other connectors, but metamask lacks of this
-            if (args?.method === "wallet_switchEthereumChain") {
-              const chainParams = Array.isArray(args.params) ? args.params[0] : undefined;
-              const chainId =
-                chainParams && typeof chainParams === "object" && "chainId" in chainParams ? (chainParams.chainId as string | undefined) : undefined;
+    const switchChainMiddleware = createScaffoldMiddlewareV2({
+      wallet_switchEthereumChain: async (params: MiddlewareParams<JRPCRequest<{ chainId: string }[]>>): Promise<null> => {
+        const chainParams = params.request.params?.length ? params.request.params[0] : undefined;
+        const chainId = chainParams?.chainId;
 
-              if (chainId && this.evmClient) {
-                const chainConfiguration = this.getEvmChainConfiguration(chainId);
-                await this.evmClient.switchChain({ chainId: chainId as Hex, chainConfiguration });
-                return null as R;
-              }
-            }
+        if (!chainId) throw rpcErrors.invalidParams("Missing chainId");
+        if (!this.evmClient) throw WalletLoginError.unsupportedOperation("MetaMask EVM client is not initialized");
 
-            return target.request(args);
-          };
-        }
-
-        // Use the original provider as the receiver so SDK getters that rely on
-        // private fields (`#field`) keep the correct brand check context.
-        const value = Reflect.get(target, prop, target);
-        return typeof value === "function" ? value.bind(target) : value;
+        const chainConfiguration = this.getEvmChainConfiguration(chainId);
+        await this.evmClient.switchChain({ chainId: chainId as Hex, chainConfiguration });
+        return null;
       },
-    }) as IProvider;
+    });
+    const forwardMiddleware: MiddlewareConstraint = async ({ request }) => {
+      return provider.request({ method: request.method, params: request.params });
+    };
+    const engine = JRPCEngineV2.create({ middleware: [switchChainMiddleware, forwardMiddleware] });
+    const engineProvider = providerFromEngineV2(engine) as IProvider;
+
+    return {
+      get chainId() {
+        return provider.chainId;
+      },
+      request: engineProvider.request.bind(engineProvider),
+      sendAsync: engineProvider.sendAsync.bind(engineProvider),
+      send: engineProvider.send.bind(engineProvider),
+      on: provider.on.bind(provider),
+      once: provider.once.bind(provider),
+      removeListener: provider.removeListener.bind(provider),
+      off: typeof provider.off === "function" ? provider.off.bind(provider) : undefined,
+      emit: typeof provider.emit === "function" ? provider.emit.bind(provider) : undefined,
+      removeAllListeners: typeof provider.removeAllListeners === "function" ? provider.removeAllListeners.bind(provider) : undefined,
+    } as IProvider;
   }
 }
 

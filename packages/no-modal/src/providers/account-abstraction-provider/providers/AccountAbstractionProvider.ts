@@ -80,7 +80,10 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
   }
 
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
-    const { currentChain } = this;
+    const currentChain = this.currentChain;
+    if (!currentChain) {
+      throw WalletInitializationError.invalidProviderConfigError(`AA chain config not found for chain ${this.chainId}`);
+    }
     const { chainNamespace } = currentChain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const bundlerAndPaymasterConfig = this.config.smartAccountChainsConfig.find((config) => config.chainId === currentChain.chainId);
