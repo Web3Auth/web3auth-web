@@ -1,4 +1,4 @@
-import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
+import { log, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -6,7 +6,7 @@ import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
 import Image from "../Image";
 import SpinnerLoader from "../SpinnerLoader";
-import { AuthorizingStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
+import { AuthorizingStatusType, BlockedStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
 
 /**
  * ConnectingStatus component
@@ -79,6 +79,37 @@ function ErroredStatus(props: ErroredStatusType) {
         />
       </svg>
       {message && <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-400">{message}</p>}
+    </div>
+  );
+}
+
+function BlockedStatus(props: BlockedStatusType) {
+  const { primaryMessage, secondaryMessage, buttonMessage } = props;
+
+  const handleChangeWallet = () => {
+    // TODO: wire up real action in a follow-up commit
+    log.info("change wallet");
+  };
+
+  return (
+    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--error-logo">
+        <path
+          fill="currentColor"
+          fillRule="evenodd"
+          d="M18 10a8 8 0 1 1-16.001 0A8 8 0 0 1 18 10m-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1"
+          clipRule="evenodd"
+        />
+      </svg>
+      <p className="w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{primaryMessage}</p>
+      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{secondaryMessage}</p>
+      <button
+        type="button"
+        onClick={handleChangeWallet}
+        className="w3a--rounded-xl w3a--bg-app-primary-600 w3a--px-6 w3a--py-3 w3a--text-center w3a--text-sm w3a--font-medium w3a--text-app-white hover:w3a--bg-app-primary-700"
+      >
+        {buttonMessage}
+      </button>
     </div>
   );
 }
@@ -213,6 +244,7 @@ function Loader(props: LoaderProps) {
     externalWalletsConfig,
     handleMobileVerifyConnect,
     hideSuccessScreen = false,
+    blockedUserConfig,
     onAcceptConsent,
     onDeclineConsent,
     privacyPolicy,
@@ -254,6 +286,14 @@ function Loader(props: LoaderProps) {
       {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
+
+      {modalStatus === MODAL_STATUS.BLOCKED && blockedUserConfig && (
+        <BlockedStatus
+          primaryMessage={blockedUserConfig.primaryMessage}
+          secondaryMessage={blockedUserConfig.secondaryMessage}
+          buttonMessage={blockedUserConfig.buttonMessage}
+        />
+      )}
 
       {modalStatus === MODAL_STATUS.AUTHORIZING && (
         <AuthorizingStatus

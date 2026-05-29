@@ -144,6 +144,7 @@ export class WalletLoginError extends Web3AuthError {
     5117: "Unsupported operation",
     5118: "useSFAKey flag is enabled but SFA key is not available",
     5119: "User not logged in.",
+    5120: "User is blocked by the application",
   };
 
   public constructor(code: number, message?: string, cause?: unknown) {
@@ -192,6 +193,10 @@ export class WalletLoginError extends Web3AuthError {
 
   public static userNotLoggedIn(extraMessage = "", cause?: unknown): IWeb3AuthError {
     return WalletLoginError.fromCode(5119, extraMessage, cause);
+  }
+
+  public static userBlocked(extraMessage = "", cause?: unknown): IWeb3AuthError {
+    return WalletLoginError.fromCode(5120, extraMessage, cause);
   }
 }
 

@@ -572,6 +572,18 @@ export class LoginModal {
     listener.on(CONNECTOR_EVENTS.ERRORED, (error: Web3AuthError, loginMode: LoginModeType) => {
       log.error("error", error, error.message);
       if (loginMode === LOGIN_MODE.NO_MODAL) return;
+      if (error.code === 5120) {
+        this.setState({
+          modalVisibility: true,
+          status: MODAL_STATUS.BLOCKED,
+          blockedUserConfig: {
+            primaryMessage: this.uiConfig.blockedUserConfig?.primaryMessage || "You cannot access the site.",
+            secondaryMessage: this.uiConfig.blockedUserConfig?.secondaryMessage || "Access to the site is restricted",
+            buttonMessage: this.uiConfig.blockedUserConfig?.buttonMessage || "Change wallet",
+          },
+        });
+        return;
+      }
       if (error.code === 5000) {
         if (this.uiConfig.displayErrorsOnModal)
           this.setState({

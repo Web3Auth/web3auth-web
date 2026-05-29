@@ -50,6 +50,13 @@ function WidgetContent() {
         postLoadingMessage: "",
       });
     }
+    if (modalState.status === MODAL_STATUS.BLOCKED) {
+      setModalState({
+        ...modalState,
+        modalVisibility: false,
+        externalWalletsVisibility: false,
+      });
+    }
   };
 
   const showCloseIcon = useMemo(() => {
@@ -57,6 +64,7 @@ function WidgetContent() {
       modalState.status === MODAL_STATUS.INITIALIZED ||
       modalState.status === MODAL_STATUS.CONNECTED ||
       modalState.status === MODAL_STATUS.ERRORED ||
+      modalState.status === MODAL_STATUS.BLOCKED ||
       modalState.status === MODAL_STATUS.AUTHORIZED
     );
   }, [modalState.status]);
