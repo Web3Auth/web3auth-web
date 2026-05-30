@@ -43,6 +43,7 @@ import {
   getSolanaChainByChainConfig,
   type IProvider,
   isUserRejectedError,
+  type ProviderEvents,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -77,6 +78,8 @@ export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
   connectorSettings?: MetaMaskConnectorSettings;
 }
 
+const EVM_PROVIDER_EVENTS = ["accountsChanged", "chainChanged", "connect", "disconnect"] as const satisfies (keyof ProviderEvents)[];
+
 class MetaMaskConnector extends BaseConnector<void> {
   readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 
@@ -103,6 +106,8 @@ class MetaMaskConnector extends BaseConnector<void> {
   private connectorSettings?: MetaMaskConnectorSettings;
 
   private analytics?: Analytics;
+
+  private evmProviderEventBridgeRemovers: (() => void)[] = [];
 
   constructor(connectorOptions: MetaMaskConnectorOptions) {
     super(connectorOptions);
@@ -303,7 +308,7 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
         const evmConnectedPromise = new Promise<void>((resolve) => {
-          if (this.evmClient.status === "connected") {
+          if (!this.evmClient || this.evmClient.status === "connected") {
             resolve();
           } else {
             // Wait for EVM provider to be ready
@@ -401,6 +406,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       this.initializationPromise = null;
       this.multichainClient = null;
       this.evmClient = null;
+      this.clearEvmProviderEventBridges();
       this.evmProvider = null;
       this.solanaClient = null;
       this.solanaProvider = null;
@@ -584,21 +590,39 @@ class MetaMaskConnector extends BaseConnector<void> {
     const engine = JRPCEngineV2.create({ middleware: [switchChainMiddleware, forwardMiddleware] });
     const engineProvider = providerFromEngineV2(engine) as IProvider;
 
-    return {
-      ...engineProvider,
-      // get the chainId from the original provider (i.e. metamask)
-      get chainId() {
+    // providerFromEngineV2 wraps requests with its own event emitter, while MetaMask
+    // emits wallet state changes on the original provider.
+    // so we need to bridge the events from the original provider to the engine provider
+    this.bridgeProviderEvents(provider, engineProvider);
+
+    Object.defineProperty(engineProvider, "chainId", {
+      configurable: true,
+      enumerable: true,
+      get() {
         return provider.chainId;
       },
-      // bind the provider events to the engine provider
-      // without the binding, the engine provider could not forward events to the original provider
-      on: provider.on.bind(provider),
-      once: provider.once.bind(provider),
-      removeListener: provider.removeListener.bind(provider),
-      off: typeof provider.off === "function" ? provider.off.bind(provider) : undefined,
-      emit: typeof provider.emit === "function" ? provider.emit.bind(provider) : undefined,
-      removeAllListeners: typeof provider.removeAllListeners === "function" ? provider.removeAllListeners.bind(provider) : undefined,
-    } as IProvider;
+    });
+
+    return engineProvider;
+  }
+
+  private bridgeProviderEvents(sourceProvider: IProvider, targetProvider: IProvider): void {
+    // clean up any existing event bridges before creating new ones
+    this.clearEvmProviderEventBridges();
+    this.evmProviderEventBridgeRemovers = EVM_PROVIDER_EVENTS.map((event) => this.bridgeProviderEvent(sourceProvider, targetProvider, event));
+  }
+
+  private bridgeProviderEvent<K extends keyof ProviderEvents>(sourceProvider: IProvider, targetProvider: IProvider, event: K): () => void {
+    const handler = ((...args: Parameters<ProviderEvents[K]>) => {
+      targetProvider.emit(event, ...args);
+    }) as unknown as ProviderEvents[K];
+    sourceProvider.on(event, handler);
+    return () => sourceProvider.removeListener(event, handler);
+  }
+
+  private clearEvmProviderEventBridges(): void {
+    this.evmProviderEventBridgeRemovers.forEach((remove) => remove());
+    this.evmProviderEventBridgeRemovers = [];
   }
 }
 
