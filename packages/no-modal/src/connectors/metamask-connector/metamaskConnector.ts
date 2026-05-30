@@ -5,6 +5,15 @@ import { getErrorAnalyticsProperties, signChallenge } from "@toruslabs/base-cont
 import { bytesToHexPrefixedString, utf8ToBytes } from "@toruslabs/metadata-helpers";
 import type { Wallet } from "@wallet-standard/base";
 import { StandardConnect, StandardConnectFeature } from "@wallet-standard/features";
+import {
+  createScaffoldMiddlewareV2,
+  JRPCEngineV2,
+  type JRPCRequest,
+  type MiddlewareConstraint,
+  type MiddlewareParams,
+  providerFromEngineV2,
+  rpcErrors,
+} from "@web3auth/auth";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
 import { generateSiweNonce } from "viem/siwe";
 
@@ -34,6 +43,7 @@ import {
   getSolanaChainByChainConfig,
   type IProvider,
   isUserRejectedError,
+  type ProviderEvents,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -68,6 +78,8 @@ export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
   connectorSettings?: MetaMaskConnectorSettings;
 }
 
+const EVM_PROVIDER_EVENTS = ["accountsChanged", "chainChanged", "connect", "disconnect"] as const satisfies (keyof ProviderEvents)[];
+
 class MetaMaskConnector extends BaseConnector<void> {
   readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
 
@@ -94,6 +106,8 @@ class MetaMaskConnector extends BaseConnector<void> {
   private connectorSettings?: MetaMaskConnectorSettings;
 
   private analytics?: Analytics;
+
+  private evmProviderEventBridgeRemovers: (() => void)[] = [];
 
   constructor(connectorOptions: MetaMaskConnectorOptions) {
     super(connectorOptions);
@@ -214,7 +228,7 @@ class MetaMaskConnector extends BaseConnector<void> {
           },
         });
 
-        this.evmProvider = this.evmClient.getProvider() as unknown as IProvider;
+        this.evmProvider = this.createEvmProviderBridge(this.evmClient.getProvider() as unknown as IProvider);
       }
 
       // Create the Solana client only when Solana chains are configured
@@ -294,7 +308,7 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
         const evmConnectedPromise = new Promise<void>((resolve) => {
-          if (this.evmClient.status === "connected") {
+          if (!this.evmClient || this.evmClient.status === "connected") {
             resolve();
           } else {
             // Wait for EVM provider to be ready
@@ -392,6 +406,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       this.initializationPromise = null;
       this.multichainClient = null;
       this.evmClient = null;
+      this.clearEvmProviderEventBridges();
       this.evmProvider = null;
       this.solanaClient = null;
       this.solanaProvider = null;
@@ -457,24 +472,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       throw WalletLoginError.unsupportedOperation("switchChain requires an EVM client, but no EVM chains are configured.");
     }
 
-    const chainConfig = this.coreOptions.chains.find(
-      (x) => x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
-    );
-
-    const chainConfiguration = chainConfig
-      ? {
-          chainId: params.chainId,
-          chainName: chainConfig.displayName,
-          rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: chainConfig.blockExplorerUrl ? [chainConfig.blockExplorerUrl] : undefined,
-          nativeCurrency: {
-            name: chainConfig.tickerName,
-            symbol: chainConfig.ticker,
-            decimals: chainConfig.decimals || 18,
-          },
-          iconUrls: chainConfig.logo ? [chainConfig.logo] : undefined,
-        }
-      : undefined;
+    const chainConfiguration = this.getEvmChainConfiguration(params.chainId);
 
     await this.evmClient.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
   }
@@ -549,6 +547,82 @@ class MetaMaskConnector extends BaseConnector<void> {
       throw WalletLoginError.notConnectedError("Connector is not initialized. Call init() first.");
     }
     await this.initializationPromise;
+  }
+
+  private getEvmChainConfiguration(chainId: string) {
+    const chainConfig = this.coreOptions.chains.find(
+      (x) => x.chainId === chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
+    );
+
+    return chainConfig
+      ? {
+          chainId,
+          chainName: chainConfig.displayName,
+          rpcUrls: [chainConfig.rpcTarget],
+          blockExplorerUrls: chainConfig.blockExplorerUrl ? [chainConfig.blockExplorerUrl] : undefined,
+          nativeCurrency: {
+            name: chainConfig.tickerName,
+            symbol: chainConfig.ticker,
+            decimals: chainConfig.decimals || 18,
+          },
+          iconUrls: chainConfig.logo ? [chainConfig.logo] : undefined,
+        }
+      : undefined;
+  }
+
+  private createEvmProviderBridge(provider: IProvider): IProvider {
+    const switchChainMiddleware = createScaffoldMiddlewareV2({
+      wallet_switchEthereumChain: async (params: MiddlewareParams<JRPCRequest<{ chainId: string }[]>>): Promise<null> => {
+        const chainParams = params.request.params?.length ? params.request.params[0] : undefined;
+        const chainId = chainParams?.chainId;
+
+        if (!chainId) throw rpcErrors.invalidParams("Missing chainId");
+        if (!this.evmClient) throw WalletLoginError.unsupportedOperation("MetaMask EVM client is not initialized");
+
+        const chainConfiguration = this.getEvmChainConfiguration(chainId);
+        await this.evmClient.switchChain({ chainId: chainId as Hex, chainConfiguration });
+        return null;
+      },
+    });
+    const forwardMiddleware: MiddlewareConstraint = async ({ request }) => {
+      return provider.request({ method: request.method, params: request.params });
+    };
+    const engine = JRPCEngineV2.create({ middleware: [switchChainMiddleware, forwardMiddleware] });
+    const engineProvider = providerFromEngineV2(engine) as IProvider;
+
+    // providerFromEngineV2 wraps requests with its own event emitter, while MetaMask
+    // emits wallet state changes on the original provider.
+    // so we need to bridge the events from the original provider to the engine provider
+    this.bridgeProviderEvents(provider, engineProvider);
+
+    Object.defineProperty(engineProvider, "chainId", {
+      configurable: true,
+      enumerable: true,
+      get() {
+        return provider.chainId;
+      },
+    });
+
+    return engineProvider;
+  }
+
+  private bridgeProviderEvents(sourceProvider: IProvider, targetProvider: IProvider): void {
+    // clean up any existing event bridges before creating new ones
+    this.clearEvmProviderEventBridges();
+    this.evmProviderEventBridgeRemovers = EVM_PROVIDER_EVENTS.map((event) => this.bridgeProviderEvent(sourceProvider, targetProvider, event));
+  }
+
+  private bridgeProviderEvent<K extends keyof ProviderEvents>(sourceProvider: IProvider, targetProvider: IProvider, event: K): () => void {
+    const handler = ((...args: Parameters<ProviderEvents[K]>) => {
+      targetProvider.emit(event, ...args);
+    }) as unknown as ProviderEvents[K];
+    sourceProvider.on(event, handler);
+    return () => sourceProvider.removeListener(event, handler);
+  }
+
+  private clearEvmProviderEventBridges(): void {
+    this.evmProviderEventBridgeRemovers.forEach((remove) => remove());
+    this.evmProviderEventBridgeRemovers = [];
   }
 }
 
