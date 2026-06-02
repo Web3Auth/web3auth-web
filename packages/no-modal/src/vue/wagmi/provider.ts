@@ -1,4 +1,4 @@
-import { type Config, type Connection, type Connector, type CreateConnectorFn, hydrate } from "@wagmi/core";
+import { type Config, type Connection, type Connector, type CreateConnectorFn, hydrate, injected } from "@wagmi/core";
 import {
   configKey,
   createConfig as createWagmiConfig,
@@ -7,7 +7,6 @@ import {
   useConnectionEffect,
   useReconnect,
 } from "@wagmi/vue";
-import { injected } from "@wagmi/vue/connectors";
 import { randomId } from "@web3auth/auth";
 import { type Chain, defineChain, fallback, http, isAddress as isEvmAddress, webSocket } from "viem";
 import { defineComponent, h, PropType, provide, ref, shallowRef, watch } from "vue";

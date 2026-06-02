@@ -9,13 +9,13 @@ import {
   CreateConnectorFn,
   fallback,
   http,
+  injected,
   useConfig as useWagmiConfig,
   useConnectionEffect,
   useReconnect,
   WagmiProvider as WagmiProviderBase,
   webSocket,
 } from "wagmi";
-import { injected } from "wagmi/connectors";
 
 import { CHAIN_NAMESPACES, CustomChainConfig, IProvider, log, WalletInitializationError, WEB3AUTH_CONNECTOR_ID } from "../../base";
 import { useWeb3Auth, useWeb3AuthDisconnect } from "../hooks";
