@@ -1,4 +1,4 @@
-import { ChainNamespaceType, type ProviderConfig } from "@toruslabs/base-controllers";
+import { ChainNamespaceType, getCaipChainId, type ProviderConfig } from "@toruslabs/base-controllers";
 import { CITADEL_SERVER_MAP } from "@toruslabs/constants";
 import { get, put } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
@@ -23,7 +23,6 @@ import {
 } from "@web3auth/auth";
 import { type default as WsEmbed, WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
-import { numberToHex } from "viem";
 
 import {
   AccountLinkingError,
@@ -408,13 +407,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
     const newChainConfig = this.coreOptions.chains.find((c) => c.chainId === newChainId);
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Chain config is not available");
-
     if (newChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA || newChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       if (!this.wsEmbedInstance?.provider) throw WalletInitializationError.notReady("Wallet embed is not ready");
-      const chainIdNum = parseInt(newChainConfig.chainId, 16);
-      // WsEmbed expects the chainId in hex format
-      const chainIdHex = numberToHex(chainIdNum);
-      await this.wsEmbedInstance.provider.request({ method: "wallet_switchChain", params: { chainId: chainIdHex } });
+      const caipChainId = getCaipChainId(newChainConfig);
+      await this.wsEmbedInstance.provider.request({ method: "wallet_switchChain", params: { chainId: caipChainId } });
     } else {
       await this.privateKeyProvider?.switchChain(params);
     }
