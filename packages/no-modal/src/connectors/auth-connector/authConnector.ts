@@ -378,7 +378,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     });
     if (!citadelUserInfo?.accounts?.length) return [];
 
-    const currentChainNamespace = this.solanaWallet.accounts.length > 0 ? CHAIN_NAMESPACES.SOLANA : "evm"; // Note: citadel chain namespace is "evm" for EVM chains
+    const currentChainNamespace = this.solanaWallet?.accounts.length > 0 ? CHAIN_NAMESPACES.SOLANA : "evm"; // Note: citadel chain namespace is "evm" for EVM chains
     const filteredLinkedAccounts: LinkedAccountInfo[] = [];
     for (const account of citadelUserInfo.accounts) {
       const { chainNamespace, isPrimary, accountType } = account;

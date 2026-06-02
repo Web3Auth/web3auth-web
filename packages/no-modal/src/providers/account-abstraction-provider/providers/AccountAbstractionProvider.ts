@@ -18,7 +18,7 @@ import { type BundlerClient, createBundlerClient, createPaymasterClient, type Pa
 
 import { CHAIN_NAMESPACES, type CustomChainConfig, type IProvider, WalletInitializationError } from "../../../base";
 import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../../../providers/base-provider";
-import { createAaMiddleware, createEoaMiddleware, providerAsMiddleware } from "../rpc/ethRpcMiddlewares";
+import { createAaMiddleware, createEip7702And5792MiddlewareForAaProvider, createEoaMiddleware, providerAsMiddleware } from "../rpc/ethRpcMiddlewares";
 import { getProviderHandlers } from "./utils";
 
 interface AccountAbstractionProviderConfig extends BaseProviderConfig {
@@ -80,7 +80,10 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
   }
 
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
-    const { currentChain } = this;
+    const currentChain = this.currentChain;
+    if (!currentChain) {
+      throw WalletInitializationError.invalidProviderConfigError(`AA chain config not found for chain ${this.chainId}`);
+    }
     const { chainNamespace } = currentChain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
     const bundlerAndPaymasterConfig = this.config.smartAccountChainsConfig.find((config) => config.chainId === currentChain.chainId);
@@ -154,8 +157,12 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       eoaProvider,
       handlers: providerHandlers,
     });
+
+    // middleware to handle EIP-7702 and EIP-5792 methods,
+    // currently, we do not support EIP-7702 and EIP-5792 methods for account abstraction provider
+    const eip7702And5792Middleware = await createEip7702And5792MiddlewareForAaProvider();
     const eoaMiddleware = providerAsMiddleware(eoaProvider);
-    const engine = JRPCEngineV2.create({ middleware: [aaMiddleware, eoaMiddleware] });
+    const engine = JRPCEngineV2.create({ middleware: [aaMiddleware, eip7702And5792Middleware, eoaMiddleware] });
     const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
     eoaProvider.once("chainChanged", (chainId) => {
