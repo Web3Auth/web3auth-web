@@ -6,6 +6,7 @@ import {
   SMART_ACCOUNT_EIP_STANDARD,
 } from "@toruslabs/ethereum-controllers";
 import {
+  BUILD_ENV,
   cloneDeep,
   CookieStorage,
   type IStorageAdapter,
@@ -147,7 +148,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     else log.setLevel("error");
     if (!options.initialAuthenticationMode) options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
 
-    this.coreOptions = options;
+    this.coreOptions = {
+      ...options,
+      authBuildEnv: options.authBuildEnv || BUILD_ENV.PRODUCTION,
+    };
     this.storage = this.getStorageMethod();
     this.analytics = new Analytics();
     if (options.disableAnalytics) {

@@ -1,4 +1,4 @@
-import { AuthConnectionConfigItem, serializeError } from "@web3auth/auth";
+import { AuthConnectionConfigItem, BUILD_ENV, serializeError } from "@web3auth/auth";
 import {
   ANALYTICS_EVENTS,
   ANALYTICS_SDK_TYPE,
@@ -95,7 +95,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   constructor(options: Web3AuthOptions, initialState?: Partial<IWeb3AuthState>) {
     super(options, initialState);
-    this.options = { ...options };
+    this.options = { ...options, authBuildEnv: options.authBuildEnv || BUILD_ENV.PRODUCTION };
     if (!this.options.initialAuthenticationMode) {
       this.options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
     }
