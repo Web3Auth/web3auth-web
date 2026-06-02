@@ -5,12 +5,12 @@
   },
   "description": "Monorepo for web3 auth packages",
   "devDependencies": {
-    "@toruslabs/config": "^4.0.0",
-    "@toruslabs/eslint-config-typescript": "^5.0.1",
-    "@toruslabs/torus-scripts": "^8.0.1",
+    "@toruslabs/config": "^4.0.1",
+    "@toruslabs/eslint-config-typescript": "^5.0.2",
+    "@toruslabs/torus-scripts": "^8.1.0",
     "@types/node": "^24",
-    "@vitest/browser-playwright": "^4.1.5",
-    "@vitest/coverage-istanbul": "^4.1.5",
+    "@vitest/browser-playwright": "^4.1.8",
+    "@vitest/coverage-istanbul": "^4.1.8",
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
     "eslint": "^9.39.2",
@@ -18,12 +18,12 @@
     "lerna": "^9.0.7",
     "lint-staged": "^16.4.0",
     "ox": "^0.11.3",
-    "playwright": "^1.59.1",
+    "playwright": "^1.60.0",
     "prettier": "^3.8.3",
     "rimraf": "^6.1.3",
     "typescript": "~5.9.3",
-    "vite": "^8.0.9",
-    "vitest": "^4.1.5"
+    "vite": "^8.0.16",
+    "vitest": "^4.1.8"
   },
   "engines": {
     "node": ">=22.x",
@@ -47,8 +47,8 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^22.7.1",
-    "@rollup/rollup-linux-x64-gnu": "^4.60.2"
+    "@nx/nx-linux-x64-gnu": "^22.7.5",
+    "@rollup/rollup-linux-x64-gnu": "^4.61.0"
   },
   "private": true,
   "repository": {
