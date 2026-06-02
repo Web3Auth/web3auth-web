@@ -87,8 +87,12 @@ export function formatAccountLinkingErrorMessage(error: unknown, fallbackMessage
     return error.toString();
   }
 
+  if (error instanceof Web3AuthError) {
+    return `[${error.code}] Account linking error: ${error.message || fallbackMessage}`;
+  }
+
   if (error instanceof Error) {
-    return error.message || fallbackMessage;
+    return `Account linking error: ${error.message || fallbackMessage}`;
   }
 
   try {
