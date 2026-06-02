@@ -60,7 +60,7 @@ describe("account-linking errors", () => {
   });
 
   it("formats regular errors using the error message", () => {
-    expect(formatAccountLinkingErrorMessage(new Error("Something failed"))).toBe("Something failed");
+    expect(formatAccountLinkingErrorMessage(new Error("Something failed"))).toBe("Account linking error: Something failed");
   });
 
   it("formats plain objects as json and uses the fallback for circular values", () => {
