@@ -127,6 +127,8 @@ export const ANALYTICS_EVENTS = {
   USER_CONSENT_ACCEPTED: "User Consent Accepted",
   USER_CONSENT_DECLINED: "User Consent Declined",
   USER_CONSENT_ERRORED: "User Consent Errored",
+  TERMS_OF_SERVICE_CLICKED: "Terms of Service Clicked",
+  PRIVACY_POLICY_CLICKED: "Privacy Policy Clicked",
   // Login Modal
   LOGIN_MODAL_OPENED: "Login Modal Opened",
   LOGIN_MODAL_CLOSED: "Login Modal Closed",
