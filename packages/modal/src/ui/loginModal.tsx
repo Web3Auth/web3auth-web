@@ -607,8 +607,8 @@ export class LoginModal {
       this.setState({ status: MODAL_STATUS.AUTHORIZED, postLoadingMessage: "" });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, (data: SDK_CONSENT_REQUIRING_EVENT_DATA) => {
+      if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
-
       this.analytics?.track(ANALYTICS_EVENTS.USER_CONSENT_STARTED, {
         connector: data.connectorName,
       });
