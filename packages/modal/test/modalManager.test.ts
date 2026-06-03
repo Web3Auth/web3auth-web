@@ -476,6 +476,61 @@ describe("Web3Auth (modal)", () => {
     expect(response).toEqual(result);
   });
 
+  it("linkAccount uses the picker-selected namespace chain when multi-chain selection is present", async () => {
+    const sdk = createSdk({
+      chains: [
+        {
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
+          chainId: "0x1",
+          rpcTarget: "https://rpc.ankr.com/eth",
+          displayName: "Ethereum Mainnet",
+          blockExplorerUrl: "https://etherscan.io",
+          logo: "https://example.com/eth.png",
+          ticker: "ETH",
+          tickerName: "Ethereum",
+        },
+        {
+          chainNamespace: CHAIN_NAMESPACES.SOLANA,
+          chainId: "solana-devnet",
+          rpcTarget: "https://api.devnet.solana.com",
+          displayName: "Solana Devnet",
+          blockExplorerUrl: "https://solscan.io",
+          logo: "https://example.com/sol.png",
+          ticker: "SOL",
+          tickerName: "Solana",
+        },
+      ],
+    });
+    const result: LinkAccountResult = {
+      success: true,
+      idToken: "linked-id-token",
+      linkedAccounts: [],
+    };
+
+    vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue({} as never);
+    vi.spyOn(
+      sdk as unknown as {
+        pickWalletForAccountLinking: (chainId: string) => Promise<{ connectorName: string; chainNamespace?: string }>;
+      },
+      "pickWalletForAccountLinking"
+    ).mockResolvedValue({
+      connectorName: "phantom",
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
+    });
+    const linkAccountWithChosenConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        linkAccountWithChosenConnector: (connectorName: string, chainId: string) => Promise<LinkAccountResult>;
+      },
+      "linkAccountWithChosenConnector"
+    );
+    linkAccountWithChosenConnectorSpy.mockResolvedValue(result);
+
+    const response = await sdk.linkAccount({ chainId: "0x1" } as never);
+
+    expect(linkAccountWithChosenConnectorSpy).toHaveBeenCalledWith("phantom", "solana-devnet");
+    expect(response).toEqual(result);
+  });
+
   it("initUIConfig merges whitelabel + ui config and deduplicates loginMethodsOrder", () => {
     const sdk = createSdk({
       uiConfig: {

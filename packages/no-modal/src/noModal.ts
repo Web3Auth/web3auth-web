@@ -677,7 +677,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!params?.connectorName) {
       throw WalletInitializationError.invalidParams("connectorName is required when calling linkAccount on the no-modal SDK");
     }
-    const chainId = this.resolveLinkAccountChainId(params.chainId);
+    const { chainId } = this.resolveLinkAccountChainConfig(params.chainId);
     const isolatedConnector = await this.createLinkingWalletConnector(params.connectorName, chainId);
     return this.linkAccountWithConnector(params.connectorName, chainId, isolatedConnector);
   }
@@ -1380,14 +1380,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, { reconnected: this.connectionReconnected });
   }
 
-  protected resolveLinkAccountChainId(chainId?: string | null): string {
+  protected resolveLinkAccountChainConfig(chainId?: string | null): CustomChainConfig {
     const finalChainId = chainId || this.state.currentChainId;
-    if (!finalChainId) {
+    const chainConfig = this.coreOptions.chains?.find((chain) => chain.chainId === finalChainId);
+    if (!chainConfig) {
       throw AccountLinkingError.walletProofFailed(
         "No chainId is available. Please specify chainId in LinkAccountParams or ensure the SDK has an active chain."
       );
     }
-    return finalChainId;
+    return chainConfig;
   }
 
   /**
