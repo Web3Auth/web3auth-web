@@ -1,7 +1,8 @@
-import { WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
-import { useEffect, useMemo, useState } from "react";
+import { ANALYTICS_EVENTS, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
+import { useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
+import { AnalyticsContext } from "../../context/AnalyticsContext";
 import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
 import Image from "../Image";
@@ -121,6 +122,7 @@ function ConsentRequiredStatus(props: {
   const { onAccept, onDecline, privacyPolicy, tncLink } = props;
   const [t] = useTranslation(undefined, { i18n });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { analytics } = useContext(AnalyticsContext);
 
   const handleAccept = async () => {
     setIsSubmitting(true);
@@ -161,6 +163,7 @@ function ConsentRequiredStatus(props: {
           {tncLink && (
             <a
               href={tncLink}
+              onClick={() => analytics?.track(ANALYTICS_EVENTS.TERMS_OF_SERVICE_CLICKED)}
               target="_blank"
               rel="noopener noreferrer"
               className="w3a--btn wta:text-sm! wta:font-light wta:justify-start! wta:rounded-full wta:border-app-gray-50 wta:bg-app-gray-50 wta:p-3 wta:text-left wta:text-app-gray-700 wta:hover:border-app-gray-200 wta:hover:bg-app-gray-200 wta:hover:text-app-gray-900 wta:dark:border-app-gray-800 wta:dark:bg-app-gray-800 wta:dark:text-app-white wta:dark:hover:border-app-gray-600 wta:dark:hover:bg-app-gray-600"
@@ -171,6 +174,7 @@ function ConsentRequiredStatus(props: {
           {privacyPolicy && (
             <a
               href={privacyPolicy}
+              onClick={() => analytics?.track(ANALYTICS_EVENTS.PRIVACY_POLICY_CLICKED)}
               target="_blank"
               rel="noopener noreferrer"
               className="w3a--btn wta:text-sm! wta:font-light wta:justify-start! wta:rounded-full wta:border-app-gray-50 wta:bg-app-gray-50 wta:p-3 wta:text-left wta:text-app-gray-700 wta:hover:border-app-gray-200 wta:hover:bg-app-gray-200 wta:hover:text-app-gray-900 wta:dark:border-app-gray-800 wta:dark:bg-app-gray-800 wta:dark:text-app-white wta:dark:hover:border-app-gray-600 wta:dark:hover:bg-app-gray-600"

@@ -122,6 +122,13 @@ export const ANALYTICS_EVENTS = {
   MFA_ENABLEMENT_FAILED: "MFA Enablement Failed",
   MFA_MANAGEMENT_SELECTED: "MFA Management Selected",
   MFA_MANAGEMENT_FAILED: "MFA Management Failed",
+  // Consent Flow
+  USER_CONSENT_STARTED: "User Consent Started",
+  USER_CONSENT_ACCEPTED: "User Consent Accepted",
+  USER_CONSENT_DECLINED: "User Consent Declined",
+  USER_CONSENT_ERRORED: "User Consent Errored",
+  TERMS_OF_SERVICE_CLICKED: "Terms of Service Clicked",
+  PRIVACY_POLICY_CLICKED: "Privacy Policy Clicked",
   // Login Modal
   LOGIN_MODAL_OPENED: "Login Modal Opened",
   LOGIN_MODAL_CLOSED: "Login Modal Closed",

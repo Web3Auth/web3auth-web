@@ -1156,7 +1156,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const pendingUserConsent = this.consentRequired && !this.state.hasUserConsent;
       if (pendingUserConsent && !isConnectAndSign) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
-        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING);
+        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, { ...data });
         log.debug("consent_requiring", this.status, this.primaryConnectorName);
       } else {
         // In CONNECT_AND_SIGN mode the AUTHORIZED handler can run before this point (e.g. when `ssr=true`
@@ -1315,7 +1315,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // if the user has not consented yet, we will ask for consent
       if (this.consentRequired && this.connection && !this.state.hasUserConsent) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
-        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING);
+        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, { connectorName: data.connector });
         log.debug("consent_requiring", this.status, this.primaryConnectorName);
       } else {
         this.status = CONNECTOR_STATUS.AUTHORIZED;

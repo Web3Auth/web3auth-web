@@ -23,12 +23,12 @@ vi.mock("@web3auth/no-modal", async () => {
 import {
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
-  type ConnectedAccountInfo,
   Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   type IConnector,
   type LinkAccountResult,
+  type LinkedAccountInfo,
   type ProjectConfig,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -49,11 +49,11 @@ class TestWeb3Auth extends Web3Auth {
     return this.getInitializationTrackData();
   }
 
-  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: ConnectedAccountInfo | null) {
+  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: LinkedAccountInfo | null) {
     this.setConnectedWalletConnector(connector, account);
   }
 
-  public exposeSetActiveWalletConnectorKey(account?: ConnectedAccountInfo | null) {
+  public exposeSetActiveWalletConnectorKey(account?: LinkedAccountInfo | null) {
     this.setActiveWalletConnectorKey(account);
   }
 }
@@ -85,7 +85,7 @@ function createSdk(overrides: Partial<Web3AuthOptions> = {}) {
   } as never);
 }
 
-function createConnectedWalletAccount(overrides: Partial<ConnectedAccountInfo> = {}): ConnectedAccountInfo {
+function createConnectedWalletAccount(overrides: Partial<LinkedAccountInfo> = {}): LinkedAccountInfo {
   return {
     id: "wallet-1",
     accountType: "external_wallet",
@@ -275,7 +275,7 @@ describe("Web3Auth (modal)", () => {
 
     vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
     vi.spyOn(
-      sdk as unknown as { getConnectedWalletConnector: (account?: ConnectedAccountInfo | null) => unknown },
+      sdk as unknown as { getConnectedWalletConnector: (account?: LinkedAccountInfo | null) => unknown },
       "getConnectedWalletConnector"
     ).mockReturnValue(existingConnector as never);
 
@@ -361,7 +361,7 @@ describe("Web3Auth (modal)", () => {
 
     vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
     vi.spyOn(
-      sdk as unknown as { getConnectedWalletConnector: (account?: ConnectedAccountInfo | null) => unknown },
+      sdk as unknown as { getConnectedWalletConnector: (account?: LinkedAccountInfo | null) => unknown },
       "getConnectedWalletConnector"
     ).mockReturnValue(null);
 
