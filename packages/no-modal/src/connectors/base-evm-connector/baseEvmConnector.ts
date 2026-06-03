@@ -1,6 +1,7 @@
 import { ChainNamespaceType, signChallenge } from "@toruslabs/base-controllers";
 import { bytesToHexPrefixedString, utf8ToBytes } from "@toruslabs/metadata-helpers";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
+import { checksumAddress } from "viem";
 import { generateSiweNonce } from "viem/siwe";
 
 import {
@@ -49,9 +50,9 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     const { chainNamespace } = currentChainConfig;
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
     const payload = {
-      domain: window.location.origin,
+      domain: window.location.host,
       uri: window.location.href,
-      address: accountsToUse[0],
+      address: checksumAddress(accountsToUse[0] as `0x${string}`),
       chainId: parseInt(chainId, 16),
       version: "1",
       nonce: generateSiweNonce(),

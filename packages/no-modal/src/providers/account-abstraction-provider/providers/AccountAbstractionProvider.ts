@@ -165,11 +165,24 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     const engine = JRPCEngineV2.create({ middleware: [aaMiddleware, eip7702And5792Middleware, eoaMiddleware] });
     const provider = providerFromEngineV2(engine);
     this.updateProviderEngineProxy(provider);
-    eoaProvider.once("chainChanged", (chainId) => {
+
+    const chainChangedHandler = (chainId: string) => {
       this.update({ chainId });
       this.setupChainSwitchMiddleware();
       this.emit("chainChanged", chainId);
-    });
+
+      if (eoaProvider?.removeListener && typeof eoaProvider.removeListener === "function") {
+        eoaProvider.removeListener("chainChanged", chainChangedHandler);
+      }
+    };
+
+    if (eoaProvider?.once && typeof eoaProvider.once === "function") {
+      eoaProvider.once("chainChanged", chainChangedHandler);
+    } else {
+      // some providers like trust wallet does not have `once` method, so we use `on` instead
+      // and cleanup the listener after the event triggers once
+      eoaProvider.on("chainChanged", chainChangedHandler);
+    }
   }
 
   public async updateAccount(_params: { privateKey: string }): Promise<void> {
