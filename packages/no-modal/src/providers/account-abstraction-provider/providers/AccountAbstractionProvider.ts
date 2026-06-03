@@ -170,7 +170,10 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       this.update({ chainId });
       this.setupChainSwitchMiddleware();
       this.emit("chainChanged", chainId);
-      eoaProvider.removeListener("chainChanged", chainChangedHandler);
+
+      if (eoaProvider?.removeListener && typeof eoaProvider.removeListener === "function") {
+        eoaProvider.removeListener("chainChanged", chainChangedHandler);
+      }
     };
 
     if (eoaProvider?.once && typeof eoaProvider.once === "function") {
