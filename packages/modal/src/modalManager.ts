@@ -288,7 +288,19 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
   }
 
   public async acceptConsent(): Promise<void> {
-    await super.completeConsentAcceptance();
+    try {
+      await super.completeConsentAcceptance();
+      this.analytics.track(ANALYTICS_EVENTS.USER_CONSENT_ACCEPTED, {
+        connector: this.primaryConnectorName,
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.analytics.track(ANALYTICS_EVENTS.USER_CONSENT_ERRORED, {
+        connector: this.primaryConnectorName,
+        error: `Error while accepting consent: ${errorMessage}`,
+      });
+      throw error;
+    }
   }
 
   public async switchAccount(account: LinkedAccountInfo): Promise<void> {
@@ -928,9 +940,17 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private onDeclineConsent = async (): Promise<void> => {
     try {
+      this.analytics.track(ANALYTICS_EVENTS.USER_CONSENT_DECLINED, {
+        connector: this.primaryConnectorName,
+      });
       await this.logout();
     } catch (error) {
       log.error("Error while declining consent", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.analytics.track(ANALYTICS_EVENTS.USER_CONSENT_ERRORED, {
+        connector: this.primaryConnectorName,
+        error: `Error while declining consent: ${errorMessage}`,
+      });
     } finally {
       this.loginModal.closeModal();
     }

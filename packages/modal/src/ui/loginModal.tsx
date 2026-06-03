@@ -18,6 +18,7 @@ import {
   type MetaMaskConnectorData,
   type SDK_CONNECTED_EVENT_DATA,
   SDK_CONSENT_ACCEPTED_EVENT_DATA,
+  SDK_CONSENT_REQUIRING_EVENT_DATA,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
@@ -605,8 +606,12 @@ export class LoginModal {
       if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.AUTHORIZED, postLoadingMessage: "" });
     });
-    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, () => {
+    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, (data: SDK_CONSENT_REQUIRING_EVENT_DATA) => {
       this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
+
+      this.analytics?.track(ANALYTICS_EVENTS.USER_CONSENT_STARTED, {
+        connector: data.connectorName,
+      });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => {
       if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {
