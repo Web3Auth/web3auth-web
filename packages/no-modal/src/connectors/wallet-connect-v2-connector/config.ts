@@ -16,6 +16,9 @@ export enum DEFAULT_EIP155_METHODS {
   SWITCH_ETHEREUM_CHAIN = "wallet_switchEthereumChain",
 }
 
+// methods that return `null` on success
+export const NULL_ON_SUCCESS_METHODS: string[] = [DEFAULT_EIP155_METHODS.SWITCH_ETHEREUM_CHAIN, DEFAULT_EIP155_METHODS.ADD_ETHEREUM_CHAIN];
+
 export enum DEFAULT_SOLANA_METHODS {
   SIGN_TRANSACTION = "solana_signTransaction",
   SIGN_MESSAGE = "solana_signMessage",

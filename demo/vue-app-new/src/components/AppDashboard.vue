@@ -17,7 +17,15 @@ import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/no-modal";
 import { useI18n } from "petite-vue-i18n";
 
 import { useSignMessage as useSolanaSignMessage, useSolanaWallet, useSolanaClient } from "@web3auth/modal/vue/solana";
-import { useConnection, useBalance, useSignMessage, useSignTypedData, useSwitchChain as useWagmiSwitchChain, useConfig } from "@wagmi/vue";
+import {
+  useConnection,
+  useBalance,
+  useSignMessage,
+  useSignTypedData,
+  useSwitchChain as useWagmiSwitchChain,
+  useConfig,
+  useChainId,
+} from "@wagmi/vue";
 import { getCapabilities, getCallsStatus, sendCalls, showCallsStatus } from "@wagmi/core";
 import { parseEther } from "viem";
 import { createWalletTransactionSigner, toAddress } from "@solana/client";
@@ -28,6 +36,7 @@ import AccountLinkingSection from "./AccountLinkingSection.vue";
 import X402Tester from "./X402Tester.vue";
 import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { formDataStore } from "../store/form";
+import { numberToHex } from "viem/utils";
 
 const { t } = useI18n({ useScope: "global" });
 
@@ -38,7 +47,7 @@ const { loading: userInfoLoading, getUserInfo } = useWeb3AuthUser();
 const { enableMFA } = useEnableMFA();
 const { manageMFA } = useManageMFA();
 const { mutateAsync: switchChainAsync } = useWagmiSwitchChain();
-
+const wagmiConnectedChainId = useChainId();
 const { showWalletUI, loading: showWalletUILoading } = useWalletUI();
 const { showWalletConnectScanner, loading: showWalletConnectScannerLoading } = useWalletConnectScanner();
 const { showCheckout, loading: showCheckoutLoading } = useCheckout();
@@ -174,7 +183,10 @@ const onGetPrivateKey = async () => {
 };
 
 const getConnectedChainId = async () => {
-  printToConsole("chainId", web3Auth.value?.currentChain?.chainId);
+  printToConsole("chainId", {
+    web3AuthChainId: web3Auth.value?.currentChain?.chainId,
+    wagmiChainId: numberToHex(wagmiConnectedChainId.value),
+  });
 };
 
 const onGetBalance = async () => {
@@ -375,7 +387,6 @@ const canSwitchChainNamespace = computed(() => {
 });
 
 const onSwitchChain = async () => {
-  log.info("switching chain");
   try {
     const chainId = connection.value?.ethereumProvider?.chainId;
     if (!chainId) throw new Error("No ethereum provider chainId");
@@ -383,6 +394,7 @@ const onSwitchChain = async () => {
 
     const newChain = eip155Chains.value.find((c) => c.chainId !== chainId);
     if (!newChain) throw new Error("Please configure at least 2 EVM chains in the config");
+    log.info("switching chain", newChain.chainId);
     const data = await switchChainAsync({ chainId: Number(newChain.chainId) });
     printToConsole("switchedChain", { chainId: data.id });
   } catch (error) {
@@ -429,7 +441,7 @@ const onSwitchChainNamespace = async () => {
             {{ $t("app.buttons.btnClearConsole") }}
           </Button>
         </div>
-        <div class="mb-2">
+        <div v-if="web3Auth?.primaryConnectorName === WALLET_CONNECTORS.AUTH" class="mb-2">
           <Button :loading="userInfoLoading" block size="xs" pill @click="onGetUserInfo">
             {{ $t("app.buttons.btnGetUserInfo") }}
           </Button>
