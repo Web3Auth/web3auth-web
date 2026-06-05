@@ -9,7 +9,7 @@ import { computed, ref, watch } from "vue";
 const BASE_SEPOLIA_CHAIN_ID = "0x14a34"; // 84532
 const SOLANA_DEVNET_CHAIN_ID = "0x67"; // 103
 const SOLANA_DEVNET_CAIP_CHAIN_ID = `solana:${Number(SOLANA_DEVNET_CHAIN_ID)}`;
-const DEFAULT_X402_URL = "https://web3auth-dev-demo-x420.sapphire-dev-2-1.authnetwork.dev/weather-plain";
+const DEFAULT_X402_URL = "https://web3auth-dev-demo-x402.node-1.dev-node.web3auth.io/weather-plain";
 
 const { isConnected, connection, web3Auth } = useWeb3Auth();
 const { chainId, chainNamespace } = useChain();

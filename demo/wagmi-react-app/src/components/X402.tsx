@@ -7,7 +7,7 @@ import { useWalletClient } from "wagmi";
 
 import styles from "../styles/Home.module.css";
 
-const X402_URL = import.meta.env.VITE_APP_X402_TEST_CONTENT_URL || "https://x402.org/protected";
+const X402_URL = "https://web3auth-dev-demo-x402.node-1.dev-node.web3auth.io/weather-plain";
 const FETCH_OPTIONS: RequestInit = { method: "GET", headers: { "Content-Type": "application/json" } };
 
 // ─── Shared response renderer ────────────────────────────────────────────────
