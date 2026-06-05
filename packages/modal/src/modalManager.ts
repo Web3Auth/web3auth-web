@@ -89,7 +89,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
   private removeAccountLinkingResetOnCloseListener: (() => void) | null = null;
 
-  private accountLinkingPickerResolver: ((connectorName: WALLET_CONNECTOR_TYPE | string) => void) | null = null;
+  private accountLinkingPickerResolver:
+    | ((selection: { connectorName: WALLET_CONNECTOR_TYPE | string; chainNamespace?: ChainNamespaceType }) => void)
+    | null = null;
 
   private removeAccountLinkingPickerCloseListener: (() => void) | null = null;
 
@@ -365,14 +367,23 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // Pre-flight: ensure user is connected via AUTH so we fail fast before opening the modal.
     this.getMainAuthConnector();
 
-    const chainId = this.resolveLinkAccountChainId(params?.chainId);
+    const resolvedChainConfig = this.resolveLinkAccountChainConfig(params?.chainId);
+    let resolvedChainId = resolvedChainConfig.chainId;
 
     if (!params?.connectorName) {
-      const pickedConnector = await this.pickWalletForAccountLinking(chainId);
-      return this.linkAccountWithChosenConnector(pickedConnector, chainId);
+      const pickedSelection = await this.pickWalletForAccountLinking(resolvedChainId);
+      // if user picked a different chain namespace from the wallet picker, then we will used the picked chain
+      if (pickedSelection.chainNamespace) {
+        if (resolvedChainConfig.chainNamespace !== pickedSelection.chainNamespace) {
+          resolvedChainId =
+            this.coreOptions.chains?.find((chain) => chain.chainNamespace === pickedSelection.chainNamespace)?.chainId || resolvedChainId;
+          return this.linkAccountWithChosenConnector(pickedSelection.connectorName, resolvedChainId);
+        }
+      }
+      return this.linkAccountWithChosenConnector(pickedSelection.connectorName, resolvedChainId);
     }
 
-    return this.linkAccountWithChosenConnector(params.connectorName, chainId);
+    return this.linkAccountWithChosenConnector(params.connectorName, resolvedChainId);
   }
 
   protected startAccountLinkingModalSession(params: {
@@ -868,7 +879,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     // to the linking flow instead of running the regular login `connectTo`.
     if (this.accountLinkingPickerResolver) {
       const resolver = this.accountLinkingPickerResolver;
-      resolver(params.connector);
+      resolver({ connectorName: params.connector, chainNamespace: params.loginParams?.chainNamespace });
       return;
     }
     try {
@@ -1099,7 +1110,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
   }
 
-  private pickWalletForAccountLinking(chainId: string): Promise<WALLET_CONNECTOR_TYPE | string> {
+  private pickWalletForAccountLinking(
+    chainId: string
+  ): Promise<{ connectorName: WALLET_CONNECTOR_TYPE | string; chainNamespace?: ChainNamespaceType }> {
     if (!this.loginModal) throw WalletInitializationError.notReady("Login modal is not initialized");
     if (this.accountLinkingPickerResolver) {
       throw AccountLinkingError.requestFailed("Another account linking picker is already in progress.");
@@ -1107,7 +1120,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
 
     this.loginModal.startAccountLinkingPicker({ chainId });
 
-    return new Promise<WALLET_CONNECTOR_TYPE | string>((resolve, reject) => {
+    return new Promise<{ connectorName: WALLET_CONNECTOR_TYPE | string; chainNamespace?: ChainNamespaceType }>((resolve, reject) => {
       const cleanup = () => {
         this.accountLinkingPickerResolver = null;
         if (this.removeAccountLinkingPickerCloseListener) {
@@ -1123,9 +1136,9 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         reject(WalletLoginError.popupClosed("User closed the modal"));
       };
 
-      this.accountLinkingPickerResolver = (connector) => {
+      this.accountLinkingPickerResolver = (selection) => {
         cleanup();
-        resolve(connector);
+        resolve(selection);
       };
       this.on(LOGIN_MODAL_EVENTS.MODAL_VISIBILITY, handleVisibility);
       this.removeAccountLinkingPickerCloseListener = () => {

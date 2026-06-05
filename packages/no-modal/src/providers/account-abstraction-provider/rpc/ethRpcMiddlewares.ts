@@ -2,6 +2,7 @@ import { EIP_5792_METHODS, EIP_7702_METHODS, METHOD_TYPES } from "@toruslabs/eth
 import {
   createScaffoldMiddlewareV2,
   type JRPCRequest,
+  Json,
   type MiddlewareConstraint,
   type MiddlewareParams,
   providerErrors,
@@ -9,6 +10,7 @@ import {
 } from "@web3auth/auth";
 
 import { IProvider } from "../../../base";
+import { NULL_ON_SUCCESS_METHODS } from "../../../connectors";
 import { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../ethereum-provider";
 
 export async function createAaMiddleware({
@@ -231,6 +233,13 @@ export async function createEip7702And5792MiddlewareForAaProvider(): Promise<Mid
 
 export function providerAsMiddleware(provider: IProvider): MiddlewareConstraint {
   return async ({ request }) => {
-    return provider.request({ method: request.method, params: request.params });
+    const result = await provider.request({ method: request.method, params: request.params });
+    if (result === undefined && NULL_ON_SUCCESS_METHODS.includes(request.method)) {
+      // For some RPC requests, such as `wallet_switchEthereumChain`, the standard rpc result is `null`.
+      // However, some wallet providers might return `undefined` instead and causing the JRPCEngineV2 to throw `Nothing ended the request` error.
+      // So, we handle this case by returning `null` instead, so that JRPCEngineV2 won't throw `Nothing ended the request` error
+      return null;
+    }
+    return result as Readonly<Json>;
   };
 }

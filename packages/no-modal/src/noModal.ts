@@ -638,7 +638,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const trackData = { connector: this.primaryConnector.name };
     try {
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_STARTED, trackData);
-      const authTokenInfo = await this.primaryConnector.getAuthTokenInfo();
+      // Thread the controller's active chain into connector auth so multichain
+      // connectors sign for the same chain the app/session is currently using.
+      const authTokenInfo = await this.primaryConnector.getAuthTokenInfo(this.currentChainId);
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
       return { idToken: authTokenInfo.idToken };
     } catch (error) {
@@ -677,7 +679,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!params?.connectorName) {
       throw WalletInitializationError.invalidParams("connectorName is required when calling linkAccount on the no-modal SDK");
     }
-    const chainId = this.resolveLinkAccountChainId(params.chainId);
+    const { chainId } = this.resolveLinkAccountChainConfig(params.chainId);
     const isolatedConnector = await this.createLinkingWalletConnector(params.connectorName, chainId);
     return this.linkAccountWithConnector(params.connectorName, chainId, isolatedConnector);
   }
@@ -1086,10 +1088,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.setActiveWalletConnectorKey();
       this.connectionReconnected = data.reconnected;
 
+      const { activeAccount, currentChainId } = this.state;
+
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
         try {
-          const data = await connector.getAuthTokenInfo();
+          const data = await connector.getAuthTokenInfo(currentChainId);
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           await this.setState({
             idToken: data.idToken,
@@ -1107,7 +1111,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
       // The following block only hits during rehydration
 
-      const { activeAccount, currentChainId } = this.state;
       let rehydrateWithLinkedAccount = false;
       // for rehydration, if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
       if (activeAccount && !activeAccount.isPrimary && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
@@ -1276,7 +1279,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error);
     });
 
-    connector.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, (data) => {
+    connector.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, async (data) => {
+      if (this.shouldIgnoreInactiveConnectorEvent(connector, CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED)) return;
+      // External wallets can resolve to a different active chain than the requested one,
+      // so let connector-reported chain updates reconcile Web3Auth state after connect.
+      if (typeof data?.data === "object" && data?.data !== null && "chainId" in data.data && typeof data.data.chainId === "string") {
+        await this.setCurrentChain(data.data.chainId);
+      }
       log.debug("connector data updated", data);
       this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, data);
     });
@@ -1380,14 +1389,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, { reconnected: this.connectionReconnected });
   }
 
-  protected resolveLinkAccountChainId(chainId?: string | null): string {
+  protected resolveLinkAccountChainConfig(chainId?: string | null): CustomChainConfig {
     const finalChainId = chainId || this.state.currentChainId;
-    if (!finalChainId) {
+    const chainConfig = this.coreOptions.chains?.find((chain) => chain.chainId === finalChainId);
+    if (!chainConfig) {
       throw AccountLinkingError.walletProofFailed(
         "No chainId is available. Please specify chainId in LinkAccountParams or ensure the SDK has an active chain."
       );
     }
-    return finalChainId;
+    return chainConfig;
   }
 
   /**

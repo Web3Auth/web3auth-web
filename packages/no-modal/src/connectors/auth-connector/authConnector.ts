@@ -544,7 +544,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
 
       const { accessToken, idToken } = await this.getPrimaryAuthSession(params.authSessionTokens);
-      const walletProof = await this.createWalletLinkingProof(params.connectorToLink);
+      const walletProof = await this.createWalletLinkingProof(params.connectorToLink, chainId);
 
       const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
       const result = await makeAccountLinkingRequest(authServerUrl, accessToken, {
@@ -773,7 +773,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     throw AccountLinkingError.requestFailed(`Unsupported chain namespace "${matchedAccount.chainNamespace}" for address "${address}".`);
   }
 
-  private async createWalletLinkingProof(connector: IConnector<unknown>): Promise<{
+  private async createWalletLinkingProof(
+    connector: IConnector<unknown>,
+    chainId?: string
+  ): Promise<{
     address: string;
     challenge: string;
     signature: string;
@@ -785,7 +788,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     // user reviews the signature request inside their wallet. Emitted on the isolated wallet
     // connector (not the auth connector) so it doesn't mutate the global SDK status.
     connector.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: connector.name as WALLET_CONNECTOR_TYPE });
-    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign();
+    // Reuse the caller's target chain so multichain wallets generate the linking
+    // proof for the same namespace they were connected for.
+    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign(undefined, undefined, chainId);
     const address = await this.getLinkingWalletAddress(connector, chainNamespace);
 
     if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
