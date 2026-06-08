@@ -371,7 +371,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public async cleanup(): Promise<void> {
     for (const connector of this.connectors) {
-      if (connector.cleanup) await connector.cleanup();
+      // if the connector is not ready, we don't need to cleanup
+      // this means that we load the connector (coz of the dashboard config) but the clients did not use it (i.e. with `showOnModal` set to false)
+      // example use case: external wallet **ONLY** login mode but the ClientID has enabled Auth connection in dashboard.
+      if (connector.cleanup && connector.status !== CONNECTOR_STATUS.NOT_READY) await connector.cleanup();
     }
   }
 
