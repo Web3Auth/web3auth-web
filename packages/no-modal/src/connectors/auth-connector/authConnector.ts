@@ -417,12 +417,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   public async cleanup(): Promise<void> {
-    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
-    await this.authInstance.cleanup();
+    await this.authInstance?.cleanup();
+    this.wsEmbedInstance?.clearInit();
 
-    if (this.wsEmbedInstance) {
-      this.wsEmbedInstance.clearInit();
-    }
     this._solanaWallet = null;
     this.unbindWsEmbedProviderEvents();
   }
