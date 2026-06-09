@@ -18,6 +18,7 @@ import {
   type MetaMaskConnectorData,
   type SDK_CONNECTED_EVENT_DATA,
   SDK_CONSENT_ACCEPTED_EVENT_DATA,
+  SDK_CONSENT_REQUIRING_EVENT_DATA,
   type WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
   type WalletConnectV2Data,
@@ -545,6 +546,15 @@ export class LoginModal {
     listener.on(CONNECTOR_EVENTS.CONNECTED, (data: SDK_CONNECTED_EVENT_DATA) => {
       log.debug("connected with connector", data);
       if (data.pendingUserConsent) return;
+      // Don't change the modal status back to CONNECTED during these transitions.
+      // This mirrors the guard in noModal.ts.
+      if (
+        this.modalStatus === MODAL_STATUS.AUTHORIZING ||
+        this.modalStatus === MODAL_STATUS.AUTHORIZED ||
+        this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING
+      ) {
+        return;
+      }
       // only show success if not being reconnected again.
       if (!data.reconnected && data.loginMode === LOGIN_MODE.MODAL) {
         this.setState({
@@ -608,8 +618,12 @@ export class LoginModal {
       if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.AUTHORIZED, postLoadingMessage: "" });
     });
-    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, () => {
+    listener.on(CONNECTOR_EVENTS.CONSENT_REQUIRING, (data: SDK_CONSENT_REQUIRING_EVENT_DATA) => {
+      if (this.modalStatus === MODAL_STATUS.CONSENT_REQUIRING) return;
       this.setState({ status: MODAL_STATUS.CONSENT_REQUIRING, modalVisibility: true });
+      this.analytics?.track(ANALYTICS_EVENTS.USER_CONSENT_STARTED, {
+        connector: data.connectorName,
+      });
     });
     listener.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, (data: SDK_CONSENT_ACCEPTED_EVENT_DATA) => {
       if (this.uiConfig.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN) {

@@ -1,15 +1,13 @@
-import { CHAIN_NAMESPACES, ChainNamespaceType, CustomChainConfig, WalletInitializationError } from "@web3auth/modal";
+import { CHAIN_NAMESPACES, CustomChainConfig, WalletInitializationError } from "@web3auth/modal";
+import type { SupportedChainNamespace } from "../config";
 
 const INFURA_PROXY_URL = "https://api.web3auth.io/infura-service/v1";
 
-const getDefaultNetworkId = (chainNamespace: ChainNamespaceType): number => {
+const getDefaultNetworkId = (chainNamespace: SupportedChainNamespace): number => {
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return 1;
   }
   if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-    return 1;
-  }
-  if (chainNamespace === CHAIN_NAMESPACES.XRPL) {
     return 1;
   }
   throw WalletInitializationError.invalidParams(`Chain namespace ${chainNamespace} is not supported`);
@@ -271,71 +269,14 @@ export const getSolanaChainConfig = (chainId: number): CustomChainConfig | null 
   return null;
 };
 
-export const getXrplChainConfig = (chainId: number): CustomChainConfig | null => {
-  const chainNamespace = CHAIN_NAMESPACES.XRPL;
-  if (chainId === 1) {
-    return {
-      chainNamespace,
-      decimals: 15,
-      chainId: "0x1",
-      logo: "https://images.toruswallet.io/XRP.svg",
-      rpcTarget: "https://ripple-node.tor.us",
-      wsTarget: "wss://s2.ripple.com",
-      ticker: "XRP",
-      tickerName: "XRPL",
-      displayName: "xrpl mainnet",
-      blockExplorerUrl: "https://livenet.xrpl.org",
-    };
-  }
-  if (chainId === 2) {
-    return {
-      chainNamespace,
-      decimals: 15,
-      chainId: "0x2",
-      logo: "https://images.toruswallet.io/XRP.svg",
-      rpcTarget: "https://testnet-ripple-node.tor.us",
-      wsTarget: "wss://s.altnet.rippletest.net",
-      ticker: "XRP",
-      tickerName: "XRPL",
-      displayName: "xrpl testnet",
-      blockExplorerUrl: "https://testnet.xrpl.org",
-      isTestnet: true,
-    };
-  }
-  if (chainId === 3) {
-    return {
-      chainNamespace,
-      decimals: 15,
-      chainId: "0x3",
-      logo: "https://images.toruswallet.io/XRP.svg",
-      rpcTarget: "https://devnet-ripple-node.tor.us",
-      wsTarget: "wss://s.devnet.rippletest.net/",
-      ticker: "XRP",
-      tickerName: "XRPL",
-      displayName: "xrpl devnet",
-      blockExplorerUrl: "https://devnet.xrpl.org",
-      isTestnet: true,
-    };
-  }
-
-  return null;
-};
-
 export const getChainConfig = (
-  chainNamespace: ChainNamespaceType,
+  chainNamespace: SupportedChainNamespace,
   chainId?: number | string,
   web3AuthClientId?: string
 ): CustomChainConfig | null => {
-  if (chainNamespace === CHAIN_NAMESPACES.OTHER) return null;
-
   const finalChainId = chainId ? (typeof chainId === "number" ? chainId : parseInt(chainId, 16)) : getDefaultNetworkId(chainNamespace);
   if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
     return getEvmChainConfig(finalChainId, web3AuthClientId);
-  } else if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-    return getSolanaChainConfig(finalChainId);
   }
-  if (chainNamespace === CHAIN_NAMESPACES.XRPL) {
-    return getXrplChainConfig(finalChainId);
-  }
-  return null;
+  return getSolanaChainConfig(finalChainId);
 };

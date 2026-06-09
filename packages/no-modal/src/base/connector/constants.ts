@@ -1,3 +1,5 @@
+export const WEB3AUTH_CONNECTOR_ID = "web3auth";
+
 export const CONNECTOR_STATUS = {
   NOT_READY: "not_ready",
   READY: "ready",

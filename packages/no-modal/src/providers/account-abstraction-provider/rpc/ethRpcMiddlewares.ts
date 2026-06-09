@@ -1,5 +1,12 @@
-import { METHOD_TYPES } from "@toruslabs/ethereum-controllers";
-import { createScaffoldMiddlewareV2, type JRPCRequest, type MiddlewareConstraint, type MiddlewareParams, rpcErrors } from "@web3auth/auth";
+import { EIP_5792_METHODS, EIP_7702_METHODS, METHOD_TYPES } from "@toruslabs/ethereum-controllers";
+import {
+  createScaffoldMiddlewareV2,
+  type JRPCRequest,
+  type MiddlewareConstraint,
+  type MiddlewareParams,
+  providerErrors,
+  rpcErrors,
+} from "@web3auth/auth";
 
 import { IProvider } from "../../../base";
 import { IEthProviderHandlers, MessageParams, TransactionParams, TypedMessageParams } from "../../ethereum-provider";
@@ -208,6 +215,18 @@ export async function createEoaMiddleware({ aaProvider }: { aaProvider: IProvide
     eth_accounts: getAccounts,
     eth_requestAccounts: requestAccounts,
   });
+}
+
+export async function createEip7702And5792MiddlewareForAaProvider(): Promise<MiddlewareConstraint> {
+  const eip5792Methods = Object.values(EIP_5792_METHODS);
+  const eip7702Methods = Object.values(EIP_7702_METHODS);
+  const eip7702And5792Methods: string[] = [...eip5792Methods, ...eip7702Methods];
+  return async ({ request, next }) => {
+    if (eip7702And5792Methods.includes(request.method as string)) {
+      throw providerErrors.unsupportedMethod(`${request.method} is not supported for account abstraction provider`);
+    }
+    return next(request);
+  };
 }
 
 export function providerAsMiddleware(provider: IProvider): MiddlewareConstraint {

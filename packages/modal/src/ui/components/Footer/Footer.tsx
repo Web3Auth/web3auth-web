@@ -1,5 +1,8 @@
+import { ANALYTICS_EVENTS } from "@web3auth/no-modal";
+import { useContext } from "react";
 import { useTranslation } from "react-i18next";
 
+import { AnalyticsContext } from "../../context/AnalyticsContext";
 import i18n from "../../localeImport";
 import { FooterProps } from "./Footer.type";
 /**
@@ -8,6 +11,7 @@ import { FooterProps } from "./Footer.type";
  */
 function Footer({ privacyPolicy, termsOfService }: FooterProps) {
   const [t] = useTranslation(undefined, { i18n });
+  const { analytics } = useContext(AnalyticsContext);
 
   return (
     <div className="wta:mx-auto wta:mt-auto wta:flex wta:flex-col wta:items-center wta:justify-center wta:gap-y-4 wta:pt-5">
@@ -15,14 +19,22 @@ function Footer({ privacyPolicy, termsOfService }: FooterProps) {
         <p className="wta:mx-auto wta:w-4/5 wta:text-center wta:text-xs wta:text-app-gray-500 wta:dark:text-app-gray-400">
           {t("modal.footer.by-signing-in")}{" "}
           {termsOfService && (
-            <a href={termsOfService} className="wta:text-app-primary-600 wta:dark:text-app-primary-500">
+            <a
+              href={termsOfService}
+              onClick={() => analytics?.track(ANALYTICS_EVENTS.TERMS_OF_SERVICE_CLICKED)}
+              className="wta:text-app-primary-600 wta:dark:text-app-primary-500"
+            >
               {t("modal.footer.terms-of-service")}{" "}
             </a>
           )}
           {privacyPolicy && (
             <>
               {t("modal.footer.and")}{" "}
-              <a href={privacyPolicy} className="wta:text-app-primary-600 wta:dark:text-app-primary-500">
+              <a
+                href={privacyPolicy}
+                onClick={() => analytics?.track(ANALYTICS_EVENTS.PRIVACY_POLICY_CLICKED)}
+                className="wta:text-app-primary-600 wta:dark:text-app-primary-500"
+              >
                 {t("modal.footer.privacy-policy")}
               </a>
             </>

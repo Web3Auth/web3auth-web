@@ -23,12 +23,12 @@ vi.mock("@web3auth/no-modal", async () => {
 import {
   CHAIN_NAMESPACES,
   CONNECTED_STATUSES,
-  type ConnectedAccountInfo,
   Connection,
   CONNECTOR_EVENTS,
   CONNECTOR_INITIAL_AUTHENTICATION_MODE,
   type IConnector,
   type LinkAccountResult,
+  type LinkedAccountInfo,
   type ProjectConfig,
   WALLET_CONNECTORS,
   WalletInitializationError,
@@ -49,11 +49,11 @@ class TestWeb3Auth extends Web3Auth {
     return this.getInitializationTrackData();
   }
 
-  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: ConnectedAccountInfo | null) {
+  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: LinkedAccountInfo | null) {
     this.setConnectedWalletConnector(connector, account);
   }
 
-  public exposeSetActiveWalletConnectorKey(account?: ConnectedAccountInfo | null) {
+  public exposeSetActiveWalletConnectorKey(account?: LinkedAccountInfo | null) {
     this.setActiveWalletConnectorKey(account);
   }
 }
@@ -85,7 +85,7 @@ function createSdk(overrides: Partial<Web3AuthOptions> = {}) {
   } as never);
 }
 
-function createConnectedWalletAccount(overrides: Partial<ConnectedAccountInfo> = {}): ConnectedAccountInfo {
+function createConnectedWalletAccount(overrides: Partial<LinkedAccountInfo> = {}): LinkedAccountInfo {
   return {
     id: "wallet-1",
     accountType: "external_wallet",
@@ -275,7 +275,7 @@ describe("Web3Auth (modal)", () => {
 
     vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
     vi.spyOn(
-      sdk as unknown as { getConnectedWalletConnector: (account?: ConnectedAccountInfo | null) => unknown },
+      sdk as unknown as { getConnectedWalletConnector: (account?: LinkedAccountInfo | null) => unknown },
       "getConnectedWalletConnector"
     ).mockReturnValue(existingConnector as never);
 
@@ -361,7 +361,7 @@ describe("Web3Auth (modal)", () => {
 
     vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue(authConnector as never);
     vi.spyOn(
-      sdk as unknown as { getConnectedWalletConnector: (account?: ConnectedAccountInfo | null) => unknown },
+      sdk as unknown as { getConnectedWalletConnector: (account?: LinkedAccountInfo | null) => unknown },
       "getConnectedWalletConnector"
     ).mockReturnValue(null);
 
@@ -473,6 +473,61 @@ describe("Web3Auth (modal)", () => {
     expect(prepareAccountLinkingConnectorSpy).toHaveBeenCalledWith("phantom", "0x1");
     expect(linkAccountWithConnectorSpy).toHaveBeenCalledWith("phantom", "0x1", phantomConnector);
     expect(runWalletConnectV2AccountActionSpy).not.toHaveBeenCalled();
+    expect(response).toEqual(result);
+  });
+
+  it("linkAccount uses the picker-selected namespace chain when multi-chain selection is present", async () => {
+    const sdk = createSdk({
+      chains: [
+        {
+          chainNamespace: CHAIN_NAMESPACES.EIP155,
+          chainId: "0x1",
+          rpcTarget: "https://rpc.ankr.com/eth",
+          displayName: "Ethereum Mainnet",
+          blockExplorerUrl: "https://etherscan.io",
+          logo: "https://example.com/eth.png",
+          ticker: "ETH",
+          tickerName: "Ethereum",
+        },
+        {
+          chainNamespace: CHAIN_NAMESPACES.SOLANA,
+          chainId: "solana-devnet",
+          rpcTarget: "https://api.devnet.solana.com",
+          displayName: "Solana Devnet",
+          blockExplorerUrl: "https://solscan.io",
+          logo: "https://example.com/sol.png",
+          ticker: "SOL",
+          tickerName: "Solana",
+        },
+      ],
+    });
+    const result: LinkAccountResult = {
+      success: true,
+      idToken: "linked-id-token",
+      linkedAccounts: [],
+    };
+
+    vi.spyOn(sdk as unknown as { getMainAuthConnector: () => unknown }, "getMainAuthConnector").mockReturnValue({} as never);
+    vi.spyOn(
+      sdk as unknown as {
+        pickWalletForAccountLinking: (chainId: string) => Promise<{ connectorName: string; chainNamespace?: string }>;
+      },
+      "pickWalletForAccountLinking"
+    ).mockResolvedValue({
+      connectorName: "phantom",
+      chainNamespace: CHAIN_NAMESPACES.SOLANA,
+    });
+    const linkAccountWithChosenConnectorSpy = vi.spyOn(
+      sdk as unknown as {
+        linkAccountWithChosenConnector: (connectorName: string, chainId: string) => Promise<LinkAccountResult>;
+      },
+      "linkAccountWithChosenConnector"
+    );
+    linkAccountWithChosenConnectorSpy.mockResolvedValue(result);
+
+    const response = await sdk.linkAccount({ chainId: "0x1" } as never);
+
+    expect(linkAccountWithChosenConnectorSpy).toHaveBeenCalledWith("phantom", "solana-devnet");
     expect(response).toEqual(result);
   });
 

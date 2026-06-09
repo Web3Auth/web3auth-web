@@ -1,4 +1,3 @@
-import "./global";
 import "./style.css";
 
 import { VueQueryPlugin } from "@tanstack/vue-query";

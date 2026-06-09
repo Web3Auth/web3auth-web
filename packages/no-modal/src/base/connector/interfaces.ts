@@ -1,4 +1,4 @@
-import { CaipAccountId } from "@metamask/connect-evm";
+import { type CaipAccountId } from "@metamask/connect-evm";
 import type { Wallet } from "@wallet-standard/base";
 import {
   AUTH_CONNECTION_TYPE,
@@ -122,10 +122,15 @@ export interface IConnector<T> extends SafeEventEmitter {
   enableMFA(params?: T): Promise<void>;
   manageMFA(params?: T): Promise<void>;
   switchChain(params: { chainId: string }): Promise<void>;
-  getAuthTokenInfo(): Promise<AuthTokenInfo>;
+  /**
+   * `chainId` is optional to keep the connector API backward compatible while still
+   * allowing multichain connectors to bind auth/signing to the caller's selected chain.
+   */
+  getAuthTokenInfo(chainId?: string): Promise<AuthTokenInfo>;
   generateChallengeAndSign(
     authServerUrl?: string,
-    accounts?: string[]
+    accounts?: string[],
+    chainId?: string
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
   cleanup?(): Promise<void>;
 }

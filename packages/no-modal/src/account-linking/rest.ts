@@ -1,6 +1,6 @@
 import { post } from "@toruslabs/http-helpers";
 
-import { AccountLinkingError } from "../base/errors";
+import { AccountLinkingError, getAccountLinkingRequestError } from "./errors";
 import { CitadelLinkAccountPayload, LinkAccountResult, UnlinkAccountPayload, UnlinkAccountResult } from "./interfaces";
 
 /**
@@ -24,8 +24,8 @@ export async function makeAccountLinkingRequest(
       },
     });
   } catch (cause: unknown) {
-    const message = cause instanceof Error ? cause.message : String(cause);
-    throw AccountLinkingError.requestFailed(message, cause);
+    const accountLinkingError = await getAccountLinkingRequestError(cause);
+    throw accountLinkingError;
   }
 
   if (!result.success) {

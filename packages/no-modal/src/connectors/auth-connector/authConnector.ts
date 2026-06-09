@@ -1,4 +1,4 @@
-import { ChainNamespaceType, type ProviderConfig } from "@toruslabs/base-controllers";
+import { ChainNamespaceType, getCaipChainId, type ProviderConfig } from "@toruslabs/base-controllers";
 import { CITADEL_SERVER_MAP } from "@toruslabs/constants";
 import { get, put } from "@toruslabs/http-helpers";
 import { SecurePubSub } from "@toruslabs/secure-pub-sub";
@@ -25,6 +25,7 @@ import { type default as WsEmbed, WS_EMBED_LOGIN_MODE } from "@web3auth/ws-embed
 import deepmerge from "deepmerge";
 
 import {
+  AccountLinkingError,
   CITADEL_NETWORK,
   LinkAccountResult,
   makeAccountLinkingRequest,
@@ -32,7 +33,6 @@ import {
   UnlinkAccountResult,
 } from "../../account-linking";
 import {
-  AccountLinkingError,
   Analytics,
   ANALYTICS_EVENTS,
   AuthLoginParams,
@@ -55,7 +55,6 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
-  getCaipChainId,
   getErrorAnalyticsProperties,
   IConnector,
   IProvider,
@@ -85,6 +84,20 @@ import {
   type WalletServicesSettings,
 } from "./interface";
 
+// Auth connections that have been deprecated and are no longer supported by the SDK.
+// Passing any of these as `authConnection` results in a hard error so consumers
+// migrate off the removed providers instead of silently continuing.
+const DEPRECATED_AUTH_CONNECTIONS: ReadonlySet<string> = new Set(["farcaster"]);
+
+function assertAuthConnectionSupported(authConnection: string | undefined): void {
+  if (DEPRECATED_AUTH_CONNECTIONS.has(authConnection)) {
+    throw WalletInitializationError.invalidParams(
+      `Auth connection "${authConnection}" has been deprecated and is no longer supported by the Web3Auth SDKs. ` +
+        `Please use a different authConnection value.`
+    );
+  }
+}
+
 class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConnector {
   readonly name: WALLET_CONNECTOR_TYPE = WALLET_CONNECTORS.AUTH;
 
@@ -110,7 +123,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   private wsEmbedInstancePromise: Promise<void> | null = null;
 
-  private _solanaWallet: Wallet | null = null;
+  private wsEmbedProviderListenerTarget: IProvider | null = null;
+
+  private _solanaWallet: AuthSolanaWallet | null = null;
 
   private analytics: Analytics;
 
@@ -126,9 +141,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
   get provider(): IProvider | null {
     if (this.status !== CONNECTOR_STATUS.NOT_READY) {
-      if (this.wsEmbedInstance?.provider) {
-        return this.wsEmbedInstance.provider as IProvider;
-      } else if (this.privateKeyProvider) return this.privateKeyProvider;
+      const wsEmbedProvider = this.getWsEmbedProvider();
+      return wsEmbedProvider || this.privateKeyProvider;
     }
     return null;
   }
@@ -201,6 +215,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
               },
             })
             .then(() => {
+              this.bindWsEmbedProviderEvents();
               this.wsEmbedInstancePromise = null;
               return;
             });
@@ -245,6 +260,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   async connect(params: Partial<AuthLoginParams> & BaseConnectorLoginParams): Promise<Connection | null> {
+    assertAuthConnectionSupported(params?.authConnection);
     super.checkConnectionRequirements();
     this.status = CONNECTOR_STATUS.CONNECTING;
     this.emit(CONNECTOR_EVENTS.CONNECTING, { ...params, connector: WALLET_CONNECTORS.AUTH });
@@ -266,6 +282,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   public async enableMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
+    assertAuthConnectionSupported(params?.authConnection);
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
@@ -282,6 +299,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
   }
 
   public async manageMFA(params: AuthLoginParams = { authConnection: "" }): Promise<void> {
+    assertAuthConnectionSupported(params?.authConnection);
     if (!this.connected) throw WalletLoginError.notConnectedError("Not connected with wallet");
     if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
     try {
@@ -313,6 +331,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
     this.rehydrated = false;
     this._solanaWallet = null;
+    this.unbindWsEmbedProviderEvents();
     this.emit(CONNECTOR_EVENTS.DISCONNECTED, { connector: WALLET_CONNECTORS.AUTH });
   }
 
@@ -356,12 +375,27 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         Authorization: `Bearer ${accessToken}`,
       },
     });
-    const linkedAccounts = citadelUserInfo?.accounts || [];
-    return linkedAccounts.map((account) => ({
-      ...account,
-      // by default, the primary account is the active account
-      active: account.isPrimary,
-    }));
+    if (!citadelUserInfo?.accounts?.length) return [];
+
+    const currentChainNamespace = this.solanaWallet?.accounts.length > 0 ? CHAIN_NAMESPACES.SOLANA : "evm"; // Note: citadel chain namespace is "evm" for EVM chains
+    const filteredLinkedAccounts: LinkedAccountInfo[] = [];
+    for (const account of citadelUserInfo.accounts) {
+      const { chainNamespace, isPrimary, accountType } = account;
+
+      // for now, we will take all primary accounts as a **SINGLE** linked account
+      // we don't wanna populate the multiple primary accounts as different linked accounts
+      // so, we hide the primary accounts for other chain namespaces
+      // also, linked `account_abstraction` accounts are derived from the primary account, so we don't need to show them separately
+      // TODO: revisit this logic once we have a concrete plan for handling multiple primary accounts
+      if ((isPrimary && chainNamespace && chainNamespace !== currentChainNamespace) || accountType === "account_abstraction") continue;
+
+      filteredLinkedAccounts.push({
+        ...account,
+        // by default, the primary account is the active account
+        active: isPrimary,
+      });
+    }
+    return filteredLinkedAccounts;
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
@@ -373,23 +407,21 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
     const newChainConfig = this.coreOptions.chains.find((c) => c.chainId === newChainId);
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Chain config is not available");
-
     if (newChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA || newChainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155) {
       if (!this.wsEmbedInstance?.provider) throw WalletInitializationError.notReady("Wallet embed is not ready");
-      const fullChainId = getCaipChainId(newChainConfig);
-      await this.wsEmbedInstance.provider.request({ method: "wallet_switchChain", params: { chainId: fullChainId } });
+      const caipChainId = getCaipChainId(newChainConfig);
+      await this.wsEmbedInstance.provider.request({ method: "wallet_switchChain", params: { chainId: caipChainId } });
     } else {
       await this.privateKeyProvider?.switchChain(params);
     }
   }
 
   public async cleanup(): Promise<void> {
-    if (!this.authInstance) throw WalletInitializationError.notReady("authInstance is not ready");
-    await this.authInstance.cleanup();
+    await this.authInstance?.cleanup();
+    this.wsEmbedInstance?.clearInit();
 
-    if (this.wsEmbedInstance) {
-      this.wsEmbedInstance.clearInit();
-    }
+    this._solanaWallet = null;
+    this.unbindWsEmbedProviderEvents();
   }
 
   public getOAuthProviderConfig(params: Pick<AuthLoginParams, "authConnection" | "authConnectionId" | "groupedAuthConnectionId">) {
@@ -485,19 +517,17 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     if (!CONNECTED_STATUSES.includes(this.status)) {
       throw WalletLoginError.notConnectedError("No wallet is connected. Connect with AUTH before linking an account.");
     }
-    const { connectorName, chainId, walletConnector } = params;
+    const { connectorName, chainId, connectorToLink } = params;
 
     try {
-      if (!walletConnector.connected) {
-        const connection = await walletConnector.connect({ chainId, isAccountLinking: true });
+      if (!connectorToLink.connected) {
+        const connection = await connectorToLink.connect({ chainId, isAccountLinking: true });
         if (!connection) {
           throw AccountLinkingError.walletProofFailed(`Failed to connect to "${params.connectorName}" for account linking.`);
         }
       }
     } catch (error) {
-      if (error instanceof AccountLinkingError) {
-        throw error;
-      }
+      if (error instanceof Web3AuthError) throw error;
       throw AccountLinkingError.walletProofFailed(error instanceof Error ? error.message : String(error), error);
     }
 
@@ -511,7 +541,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       await this.analytics.track(ANALYTICS_EVENTS.ACCOUNT_LINKING_STARTED, trackData);
 
       const { accessToken, idToken } = await this.getPrimaryAuthSession(params.authSessionTokens);
-      const walletProof = await this.createWalletLinkingProof(params.walletConnector);
+      const walletProof = await this.createWalletLinkingProof(params.connectorToLink, chainId);
 
       const authServerUrl = citadelServerUrl(this.coreOptions.authBuildEnv);
       const result = await makeAccountLinkingRequest(authServerUrl, accessToken, {
@@ -539,7 +569,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
       // disconnect the wallet connector to avoid any leftover state
       try {
-        await walletConnector.disconnect({ cleanup: true });
+        if (connectorToLink.connected) {
+          await connectorToLink.disconnect({ cleanup: true });
+        }
       } catch (disconnectError) {
         log.debug("Failed to disconnect wallet connector after linking failure", disconnectError);
       }
@@ -738,7 +770,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     throw AccountLinkingError.requestFailed(`Unsupported chain namespace "${matchedAccount.chainNamespace}" for address "${address}".`);
   }
 
-  private async createWalletLinkingProof(connector: IConnector<unknown>): Promise<{
+  private async createWalletLinkingProof(
+    connector: IConnector<unknown>,
+    chainId?: string
+  ): Promise<{
     address: string;
     challenge: string;
     signature: string;
@@ -750,7 +785,9 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     // user reviews the signature request inside their wallet. Emitted on the isolated wallet
     // connector (not the auth connector) so it doesn't mutate the global SDK status.
     connector.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: connector.name as WALLET_CONNECTOR_TYPE });
-    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign();
+    // Reuse the caller's target chain so multichain wallets generate the linking
+    // proof for the same namespace they were connected for.
+    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign(undefined, undefined, chainId);
     const address = await this.getLinkingWalletAddress(connector, chainNamespace);
 
     if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
@@ -797,9 +834,41 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     return accounts[0];
   }
 
+  private getWsEmbedProvider(): IProvider | null {
+    return (this.wsEmbedInstance?.provider as IProvider | null) ?? null;
+  }
+
+  private bindWsEmbedProviderEvents(): void {
+    const rawProvider = this.getWsEmbedProvider();
+    if (this.wsEmbedProviderListenerTarget === rawProvider) {
+      return;
+    }
+
+    this.unbindWsEmbedProviderEvents();
+    if (!rawProvider) {
+      return;
+    }
+
+    rawProvider.on("accountsChanged", this.handleWsEmbedAccountsChanged);
+    this.wsEmbedProviderListenerTarget = rawProvider;
+  }
+
+  private unbindWsEmbedProviderEvents(): void {
+    if (!this.wsEmbedProviderListenerTarget) {
+      return;
+    }
+
+    this.wsEmbedProviderListenerTarget.removeListener("accountsChanged", this.handleWsEmbedAccountsChanged);
+    this.wsEmbedProviderListenerTarget = null;
+  }
+
   private setupSolanaWallet(): void {
     const solanaChains = this.coreOptions.chains.filter((c) => c.chainNamespace === CHAIN_NAMESPACES.SOLANA);
     if (solanaChains.length === 0 || !this.provider) return;
+
+    if (this._solanaWallet instanceof AuthSolanaWallet) {
+      return;
+    }
 
     this._solanaWallet = new AuthSolanaWallet(this.provider, solanaChains);
   }
@@ -866,6 +935,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       const { sessionId, sessionNamespace } = this.authInstance || {};
       if (sessionId) {
         this.wsEmbedInstance.setAccessTokenProvider(this.accessTokenProvider.bind(this));
+        this.bindWsEmbedProviderEvents();
 
         const isLoggedIn = await this.wsEmbedInstance.connectWithSession({
           sessionId,
@@ -887,10 +957,6 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
           if (params.getAuthTokenInfo) {
             await this.getAuthTokenInfo();
           }
-          // handle disconnect from ws embed
-          this.wsEmbedInstance?.provider.on("accountsChanged", (accounts: unknown[] = []) => {
-            if ((accounts as string[]).length === 0 && CONNECTED_STATUSES.includes(this.status)) this.disconnect({ cleanup: false });
-          });
         }
       }
     } else {
@@ -1008,9 +1074,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         .catch((error: unknown) => {
           // swallow the error, dont need to throw.
           log.error("Error during login with social", error);
-          this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
-            log.error("Error reporting `oauthFailed` audit progress", error);
-          });
+          this.reportFailedOauthAudit(loginParams as LoginParams);
         });
 
       verifierWindow.once("close", () => {
@@ -1025,9 +1089,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
         .postLoginInitiatedMessage(loginParams as LoginParams, nonce)
         .then(resolve)
         .catch((error: unknown) => {
-          this.auditOAuditProgress(loginParams as LoginParams, "failed").catch((error: unknown) => {
-            log.error("Error reporting `oauthFailed` audit progress", error);
-          });
+          this.reportFailedOauthAudit(loginParams as LoginParams);
           if (error instanceof Web3AuthError) {
             throw error;
           }
@@ -1150,6 +1212,25 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
 
     await put(auditServerUrl, auditPayload);
   }
+
+  private reportFailedOauthAudit(loginParams: LoginParams): void {
+    void this.auditOAuditProgress(loginParams, "failed").catch((error: unknown) => {
+      log.error("Error reporting `oauthFailed` audit progress", error);
+    });
+  }
+
+  private readonly handleWsEmbedAccountsChanged = (accounts: string[]) => {
+    if (accounts.length === 0) {
+      if (!CONNECTED_STATUSES.includes(this.status)) {
+        return;
+      }
+
+      log.info("No accounts found in the wallet, disconnecting");
+      void this.disconnect({ cleanup: true }).catch((error: unknown) => {
+        log.error("Failed to disconnect auth connector after wallet accounts changed", error);
+      });
+    }
+  };
 }
 
 type AuthConnectorFuncParams = Omit<AuthConnectorOptions, "coreOptions" | "authConnectionConfig" | "connectorSettings"> & {

@@ -1,4 +1,4 @@
-import { CaipAccountId } from "@metamask/connect-evm";
+import { type CaipAccountId } from "@metamask/connect-evm";
 import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controllers";
 import {
   type AccountAbstractionMultiChainConfig,
@@ -6,6 +6,7 @@ import {
   SMART_ACCOUNT_EIP_STANDARD,
 } from "@toruslabs/ethereum-controllers";
 import {
+  BUILD_ENV,
   cloneDeep,
   CookieStorage,
   type IStorageAdapter,
@@ -19,7 +20,7 @@ import {
 import { WsEmbedParams } from "@web3auth/ws-embed";
 import deepmerge from "deepmerge";
 
-import { type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "./account-linking";
+import { AccountLinkingError, type LinkAccountParams, type LinkAccountResult, UnlinkAccountResult } from "./account-linking";
 import {
   Analytics,
   ANALYTICS_EVENTS,
@@ -85,7 +86,6 @@ import {
   withAbort,
 } from "./base";
 import { deserialize } from "./base/deserialize";
-import { AccountLinkingError } from "./base/errors";
 import {
   assertAuthConnector,
   authConnector,
@@ -148,7 +148,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     else log.setLevel("error");
     if (!options.initialAuthenticationMode) options.initialAuthenticationMode = CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
 
-    this.coreOptions = options;
+    this.coreOptions = {
+      ...options,
+      authBuildEnv: options.authBuildEnv || BUILD_ENV.PRODUCTION,
+    };
     this.storage = this.getStorageMethod();
     this.analytics = new Analytics();
     if (options.disableAnalytics) {
@@ -368,7 +371,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public async cleanup(): Promise<void> {
     for (const connector of this.connectors) {
-      if (connector.cleanup) await connector.cleanup();
+      // if the connector is not ready, we don't need to cleanup
+      // this means that we load the connector (coz of the dashboard config) but the clients did not use it (i.e. with `showOnModal` set to false)
+      // example use case: external wallet **ONLY** login mode but the ClientID has enabled Auth connection in dashboard.
+      if (connector.cleanup && connector.status !== CONNECTOR_STATUS.NOT_READY) await connector.cleanup();
     }
   }
 
@@ -635,7 +641,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const trackData = { connector: this.primaryConnector.name };
     try {
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_STARTED, trackData);
-      const authTokenInfo = await this.primaryConnector.getAuthTokenInfo();
+      // Thread the controller's active chain into connector auth so multichain
+      // connectors sign for the same chain the app/session is currently using.
+      const authTokenInfo = await this.primaryConnector.getAuthTokenInfo(this.currentChainId);
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
       return { idToken: authTokenInfo.idToken };
     } catch (error) {
@@ -674,7 +682,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!params?.connectorName) {
       throw WalletInitializationError.invalidParams("connectorName is required when calling linkAccount on the no-modal SDK");
     }
-    const chainId = this.resolveLinkAccountChainId(params.chainId);
+    const { chainId } = this.resolveLinkAccountChainConfig(params.chainId);
     const isolatedConnector = await this.createLinkingWalletConnector(params.connectorName, chainId);
     return this.linkAccountWithConnector(params.connectorName, chainId, isolatedConnector);
   }
@@ -1082,12 +1090,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       );
       this.setActiveWalletConnectorKey();
       this.connectionReconnected = data.reconnected;
-      const connectedChainId = ethereumProvider?.chainId;
+
+      const { activeAccount, currentChainId } = this.state;
 
       // when ssr is enabled, we need to get the idToken from the connector.
       if (this.coreOptions.ssr) {
         try {
-          const data = await connector.getAuthTokenInfo();
+          const data = await connector.getAuthTokenInfo(currentChainId);
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           await this.setState({
             idToken: data.idToken,
@@ -1105,12 +1114,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       }
       // The following block only hits during rehydration
 
-      const { activeAccount } = this.state;
-      // if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
+      let rehydrateWithLinkedAccount = false;
+      // for rehydration, if the active account is not the primary account, i.e. not `null`, create an isolated connector and connect to the chain
       if (activeAccount && !activeAccount.isPrimary && activeAccount.connector !== WALLET_CONNECTORS.AUTH) {
         const accountLinkingConnector = isAuthConnector(connector) ? connector : this.getConnector(WALLET_CONNECTORS.AUTH);
         assertAuthConnector(accountLinkingConnector, "Account switching requires the AUTH connector to be available.");
-        const targetChainId = accountLinkingConnector.getChainIdForLinkedAccount(activeAccount, connectedChainId);
+        const targetChainId = accountLinkingConnector.getChainIdForLinkedAccount(activeAccount, currentChainId);
         const walletConnector = await this.createIsolatedWalletConnector(activeAccount.connector as WALLET_CONNECTOR_TYPE, targetChainId);
         let linkedAccountConnection: Connection | null = null;
 
@@ -1130,6 +1139,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         });
         this.setConnectedWalletConnectorState(connectedWalletState, activeAccount);
         this.setActiveWalletConnectorKey(activeAccount);
+        rehydrateWithLinkedAccount = true;
       }
 
       if (ethereumProvider) {
@@ -1143,20 +1153,41 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         usePrimaryProxy: true,
       });
       this.setConnectedWalletConnectorState(primaryConnectedWalletState);
-
-      await this.setState({ primaryConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE, currentChainId: connectedChainId });
+      await this.setState({
+        primaryConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE,
+      });
       this.cacheWallet(data.connectorName);
 
       const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
-      if (this.consentRequired && !isConnectAndSign && !this.state.hasUserConsent) {
+      const pendingUserConsent = this.consentRequired && !this.state.hasUserConsent;
+      if (pendingUserConsent && !isConnectAndSign) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
-        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING);
+        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, { ...data });
         log.debug("consent_requiring", this.status, this.primaryConnectorName);
       } else {
-        this.status = CONNECTOR_STATUS.CONNECTED;
+        // In CONNECT_AND_SIGN mode the AUTHORIZED handler can run before this point (e.g. when `ssr=true`
+        // this handler `await`s `connector.getAuthTokenInfo()` which fires AUTHORIZED mid-execution).
+        // Don't downgrade an already-advanced status (CONSENT_REQUIRING or AUTHORIZED) back to CONNECTED;
+        // otherwise `acceptConsent` would throw "Cannot accept consent: not in consent_requiring state".
+        if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING && this.status !== CONNECTOR_STATUS.AUTHORIZED) {
+          this.status = CONNECTOR_STATUS.CONNECTED;
+        }
         log.debug("connected", this.status, this.primaryConnectorName);
-        this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
-        this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode });
+        // Defer plugin connection until consent is accepted; otherwise plugins would start before the consent step completes.
+        // `completeConsentAcceptance` connects the plugins once the user accepts the consent.
+        if (!pendingUserConsent) {
+          this.connectToPlugins({ ...data, connector: data.connectorName as WALLET_CONNECTOR_TYPE });
+        }
+
+        // `pendingUserConsent` signals listeners (LoginModal, React/Vue contexts) to skip processing this CONNECTED event,
+        // so the upcoming AUTHORIZED -> CONSENT_REQUIRING transition is not overridden by a late CONNECTED handler in CONNECT_AND_SIGN mode.
+        this.emit(CONNECTOR_EVENTS.CONNECTED, { ...data, loginMode: this.loginMode, pendingUserConsent });
+
+        // if we're rehydrating with a linked account, we need to emit a CONNECTION_UPDATED event
+        // so that upstream listeners and context are updated with the linked connection.
+        if (rehydrateWithLinkedAccount) {
+          this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, this.connection);
+        }
       }
     });
 
@@ -1251,7 +1282,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error);
     });
 
-    connector.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, (data) => {
+    connector.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, async (data) => {
+      if (this.shouldIgnoreInactiveConnectorEvent(connector, CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED)) return;
+      // External wallets can resolve to a different active chain than the requested one,
+      // so let connector-reported chain updates reconcile Web3Auth state after connect.
+      if (typeof data?.data === "object" && data?.data !== null && "chainId" in data.data && typeof data.data.chainId === "string") {
+        await this.setCurrentChain(data.data.chainId);
+      }
       log.debug("connector data updated", data);
       this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, data);
     });
@@ -1290,7 +1327,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // if the user has not consented yet, we will ask for consent
       if (this.consentRequired && this.connection && !this.state.hasUserConsent) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
-        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING);
+        this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, { connectorName: data.connector });
         log.debug("consent_requiring", this.status, this.primaryConnectorName);
       } else {
         this.status = CONNECTOR_STATUS.AUTHORIZED;
@@ -1355,14 +1392,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     this.emit(CONNECTOR_EVENTS.CONSENT_ACCEPTED, { reconnected: this.connectionReconnected });
   }
 
-  protected resolveLinkAccountChainId(chainId?: string | null): string {
+  protected resolveLinkAccountChainConfig(chainId?: string | null): CustomChainConfig {
     const finalChainId = chainId || this.state.currentChainId;
-    if (!finalChainId) {
+    const chainConfig = this.coreOptions.chains?.find((chain) => chain.chainId === finalChainId);
+    if (!chainConfig) {
       throw AccountLinkingError.walletProofFailed(
         "No chainId is available. Please specify chainId in LinkAccountParams or ensure the SDK has an active chain."
       );
     }
-    return finalChainId;
+    return chainConfig;
   }
 
   /**
@@ -1388,7 +1426,15 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     chainId: string,
     config?: ProjectConfig
   ): Promise<IConnector<unknown>> {
-    return this.createIsolatedWalletConnector(connectorName, chainId, config);
+    try {
+      const linkingConnector = await this.createIsolatedWalletConnector(connectorName, chainId, config);
+      return linkingConnector;
+    } catch (error) {
+      if (error instanceof AccountLinkingError && error.code === 5405) {
+        throw error;
+      }
+      throw AccountLinkingError.walletProofFailed(error instanceof Error ? error.message : String(error), error);
+    }
   }
 
   protected async createSwitchingWalletConnector(
@@ -1593,17 +1639,17 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected async linkAccountWithConnector(
     connectorName: WALLET_CONNECTOR_TYPE | string,
     chainId: string,
-    walletConnector: IConnector<unknown>
+    connectorToLink: IConnector<unknown>
   ): Promise<LinkAccountResult> {
     const authConnector = this.getMainAuthConnector();
     const result = await authConnector.linkAccount({
       connectorName,
       chainId,
-      walletConnector,
+      connectorToLink,
       authSessionTokens: { accessToken: this.accessToken, idToken: this.idToken },
     });
     await this.setState({ idToken: result.idToken });
-    await this.cacheConnectedLinkedWalletConnector(authConnector, walletConnector);
+    await this.cacheConnectedLinkedWalletConnector(authConnector, connectorToLink);
     return result;
   }
 
@@ -1634,7 +1680,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     options: { walletConnector?: IConnector<unknown>; projectConfig?: ProjectConfig } = {}
   ): Promise<void> {
     const resolvedSwitchChainId = this.resolveSwitchAccountChainId(switchResult.targetAccount, switchResult.activeChainId);
-
     if (switchResult.kind === "primary") {
       const existingPrimaryConnectedWalletState = this.getConnectedWalletConnectorState();
       const primaryConnectedWalletState =
@@ -1804,7 +1849,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private async setCurrentChain(chainId: string): Promise<void> {
-    if (chainId === this.currentChainId) return;
+    const { currentChainId } = this.state;
+    if (chainId === currentChainId) return;
     const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
     if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
     await this.setState({ currentChainId: chainId });

@@ -179,7 +179,13 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     const authorizedListener = () => {
       setStatus(web3Auth.status);
       if (web3Auth.status === CONNECTOR_STATUS.AUTHORIZED) {
+        setIsInitialized(true);
         setIsConnected(true);
+        // on rehydration, `AUTHORIZED` event can be fired first in `CONNECT_AND_SIGN` mode, before `CONNECTED` event.
+        // Update the connection state here, so that clients can use the connection state immediately.
+        setConnection(web3Auth.connection);
+        setChainId(web3Auth.currentChainId);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
         setIsAuthorized(true);
       }
     };
@@ -199,6 +205,12 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     const mfaEnabledListener = (nextIsMFAEnabled: boolean) => {
       if (typeof nextIsMFAEnabled === "boolean") setIsMFAEnabled(nextIsMFAEnabled);
     };
+    const connectionUpdatedListener = () => {
+      setStatus(web3Auth.status);
+      setConnection(web3Auth.connection);
+      setChainId(web3Auth.currentChainId);
+      setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
+    };
     if (web3Auth) {
       web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
       web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
@@ -209,6 +221,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       web3Auth.on(CONNECTOR_EVENTS.ERRORED, errorListener);
       web3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
       web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
 
       if (web3Auth.loginMode === LOGIN_MODE.MODAL) {
         web3Auth.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
@@ -225,6 +238,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       web3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
+      web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
 
       if (web3Auth.loginMode === LOGIN_MODE.MODAL) {
         web3Auth.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
