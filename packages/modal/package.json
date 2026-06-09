@@ -55,6 +55,7 @@
   "devDependencies": {
     "@babel/preset-react": "^7.29.7",
     "@coinbase/wallet-sdk": "^4.3.7",
+    "@csstools/postcss-cascade-layers": "^6.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-url": "^8.0.2",
