@@ -8,6 +8,7 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  IConnectorDataEvent,
   type IWeb3Auth,
   IWeb3AuthState,
   log,
@@ -200,6 +201,14 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
       };
 
+      const connectorDataUpdatedListener = (data: IConnectorDataEvent) => {
+        const updatedData = data.data as { chainId: string };
+        if (updatedData.chainId && chainId.value !== updatedData.chainId) {
+          chainId.value = updatedData.chainId;
+          chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace;
+        }
+      };
+
       if (prevWeb3Auth && newWeb3Auth !== prevWeb3Auth) {
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.READY, readyListener);
@@ -211,6 +220,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
         prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+        prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, connectorDataUpdatedListener);
         if (prevWeb3Auth.loginMode === LOGIN_MODE.MODAL) {
           prevWeb3Auth.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
         }
@@ -228,6 +238,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         newWeb3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, errorListener);
         newWeb3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
         newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+        newWeb3Auth.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, connectorDataUpdatedListener);
         if (newWeb3Auth.loginMode === LOGIN_MODE.MODAL) {
           newWeb3Auth.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
         }
