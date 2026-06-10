@@ -171,17 +171,25 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     challenge: string;
     authServer: string;
   }): Promise<AuthTokenInfo> {
-    const tokens = await verifySignedChallenge({
-      chainNamespace: params.chainNamespace,
-      signedMessage: params.signedMessage,
-      challenge: params.challenge,
-      connector: this.name,
-      authServer: params.authServer,
-      web3AuthClientId: this.coreOptions.clientId,
-      web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-      sessionTimeout: this.coreOptions.sessionTime,
-      deviceInfo: getDeviceInfo(),
-    });
+    let tokens: SiwwTokens;
+    try {
+      tokens = await verifySignedChallenge({
+        chainNamespace: params.chainNamespace,
+        signedMessage: params.signedMessage,
+        challenge: params.challenge,
+        connector: this.name,
+        authServer: params.authServer,
+        web3AuthClientId: this.coreOptions.clientId,
+        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+        sessionTimeout: this.coreOptions.sessionTime,
+        deviceInfo: getDeviceInfo(),
+      });
+    } catch (error) {
+      if ((error as { status?: number })?.status === 401) {
+        throw WalletLoginError.userBlocked("User is blocked by the application", error);
+      }
+      throw error;
+    }
     await this.saveAuthTokenInfo(tokens);
     const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
     this.status = CONNECTOR_STATUS.AUTHORIZED;
