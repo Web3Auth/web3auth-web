@@ -618,6 +618,9 @@ export class LoginModal {
       }
     });
     listener.on(CONNECTOR_EVENTS.DISCONNECTED, () => {
+      // A blocked user (error 5120) is disconnected as part of the block cleanup (authorizeOrDisconnect).
+      // User can be returned to initial state by clicking "Change wallet" button.
+      if (this.modalStatus === MODAL_STATUS.BLOCKED) return;
       this.setState({ status: MODAL_STATUS.INITIALIZED, externalWalletsVisibility: false });
       // this.toggleMessage("");
     });
