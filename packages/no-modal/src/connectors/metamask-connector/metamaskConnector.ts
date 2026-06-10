@@ -18,7 +18,6 @@ import {
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   citadelServerUrl,
-  CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_CATEGORY,
   type CONNECTOR_CATEGORY_TYPE,
@@ -266,6 +265,7 @@ class MetaMaskConnector extends BaseConnector<void> {
         reconnected: true,
         ethereumProvider: this.evmProvider,
         solanaWallet: this.solanaProvider,
+        connectorNamespace: this.connectorNamespace,
       });
       if (options.getAuthTokenInfo) await this.getAuthTokenInfo(options.chainId);
     } else if (coreStatus === "connected" || coreStatus === "loaded" || coreStatus === "disconnected" || coreStatus === "pending") {
@@ -358,13 +358,19 @@ class MetaMaskConnector extends BaseConnector<void> {
         reconnected: this.rehydrated,
         ethereumProvider: this.evmProvider,
         solanaWallet: this.solanaProvider,
-      } as CONNECTED_EVENT_DATA);
+        connectorNamespace: this.connectorNamespace,
+      });
 
       if (getAuthTokenInfo) {
         await this.getAuthTokenInfo(chainId);
       }
 
-      return { ethereumProvider: this.evmProvider, solanaWallet: this.solanaProvider, connectorName: this.name };
+      return {
+        ethereumProvider: this.evmProvider,
+        solanaWallet: this.solanaProvider,
+        connectorName: this.name,
+        connectorNamespace: this.connectorNamespace,
+      };
     } catch (error) {
       // Ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

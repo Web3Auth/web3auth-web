@@ -226,6 +226,7 @@ describe("Web3AuthNoModal", () => {
 
     expect(sdk.connection).toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: linkedProvider,
       solanaWallet: null,
     });
@@ -283,11 +284,13 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.exposeGetConnectedWalletConnector()).toBe(primaryConnector);
     expect(connectionUpdatedListener).toHaveBeenCalledWith({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: linkedProvider,
       solanaWallet: null,
     });
     expect(sdk.connection).toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: linkedProvider,
       solanaWallet: null,
     });
@@ -383,11 +386,13 @@ describe("Web3AuthNoModal", () => {
     expect(updateProviderEngineProxy).not.toHaveBeenCalled();
     expect(connectionUpdatedListener).toHaveBeenCalledWith({
       connectorName: WALLET_CONNECTORS.AUTH,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: (sdk as unknown as { commonJRPCProvider: unknown }).commonJRPCProvider,
       solanaWallet: null,
     });
     expect(sdk.connection).toEqual({
       connectorName: WALLET_CONNECTORS.AUTH,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: (sdk as unknown as { commonJRPCProvider: unknown }).commonJRPCProvider,
       solanaWallet: null,
     });
@@ -503,6 +508,7 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.exposeGetConnectedWalletConnector(activeAccount)).toBe(linkedConnector);
     expect(sdk.connection).toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: linkedProvider,
       solanaWallet: null,
     });
@@ -620,6 +626,7 @@ describe("Web3AuthNoModal", () => {
     const authProvider = { request: vi.fn() };
     const primaryConnection: Connection = {
       connectorName: WALLET_CONNECTORS.AUTH,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: authProvider as never,
       solanaWallet: null,
     };
@@ -780,6 +787,7 @@ describe("Web3AuthNoModal", () => {
 
     await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: commonJRPCProvider as never,
       solanaWallet: null,
     });
@@ -807,6 +815,7 @@ describe("Web3AuthNoModal", () => {
 
     await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: commonJRPCProvider as never,
       solanaWallet: null,
     });
@@ -1089,14 +1098,16 @@ describe("Web3AuthNoModal", () => {
 
   it("checkIfAutoConnect returns true only for cached matching connector", () => {
     const sdk = createSdk();
-    (sdk as unknown as { state: Record<string, unknown> }).state = {
+    const state = {
       primaryConnectorName: null,
       cachedConnector: WALLET_CONNECTORS.METAMASK,
+      cachedConnectorNamespace: CHAIN_NAMESPACES.EIP155,
       currentChainId: "0x1",
       idToken: null,
       accessToken: null,
       refreshToken: null,
     };
+    (sdk as unknown as { state: Record<string, unknown> }).state = state;
     const matching = new MockConnector({ name: WALLET_CONNECTORS.METAMASK, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
     const nonMatching = new MockConnector({ name: WALLET_CONNECTORS.AUTH, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
     const multichain = new MockConnector({
@@ -1106,6 +1117,8 @@ describe("Web3AuthNoModal", () => {
 
     expect(sdk.exposeCheckIfAutoConnect(matching)).toBe(true);
     expect(sdk.exposeCheckIfAutoConnect(nonMatching)).toBe(false);
+
+    state.cachedConnectorNamespace = CONNECTOR_NAMESPACES.MULTICHAIN;
     expect(sdk.exposeCheckIfAutoConnect(multichain)).toBe(true);
   });
 });

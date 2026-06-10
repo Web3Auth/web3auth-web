@@ -42,6 +42,7 @@ import {
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  ConnectorNamespaceType,
   type ConnectorParams,
   type CustomChainConfig,
   DISCONNECTED_EVENT_DATA,
@@ -139,6 +140,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     accessToken: null,
     refreshToken: null,
     activeAccount: null,
+    cachedConnectorNamespace: null,
   };
 
   constructor(options: IWeb3AuthCoreOptions, initialState?: Partial<IWeb3AuthState>) {
@@ -360,6 +362,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     await this.setState({
       primaryConnectorName: null,
       cachedConnector: null,
+      cachedConnectorNamespace: null,
       currentChainId: null,
       idToken: null,
       accessToken: null,
@@ -1158,7 +1161,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       await this.setState({
         primaryConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE,
       });
-      this.cacheWallet(data.connectorName);
+      this.cacheWallet(data.connectorName, data.connectorNamespace);
 
       const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
       const pendingUserConsent = this.consentRequired && !this.state.hasUserConsent;
@@ -1354,7 +1357,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected checkIfAutoConnect(connector: IConnector<unknown>): boolean {
-    let autoConnect = this.cachedConnector === connector.name;
+    let autoConnect = this.cachedConnector === connector.name && this.state.cachedConnectorNamespace === connector.connectorNamespace;
     if (autoConnect && this.currentChain?.chainNamespace) {
       if (connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN) autoConnect = true;
       else autoConnect = connector.connectorNamespace === this.currentChain.chainNamespace;
@@ -1610,6 +1613,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       ethereumProvider: connectedWallet.signingProvider,
       solanaWallet: connectedWallet.solanaWallet ?? null,
       connectorName: connectedWallet.connector.name,
+      connectorNamespace: connectedWallet.connector.connectorNamespace,
     };
   }
 
@@ -1766,11 +1770,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!connection) {
       throw WalletLoginError.connectionError("Failed to resolve the active connection after switching accounts.");
     }
-    this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, {
-      ethereumProvider: connection.ethereumProvider,
-      solanaWallet: connection.solanaWallet,
-      connectorName: connection.connectorName,
-    });
+    this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, connection);
   }
 
   private isActiveConnectorEventSource(connector: IConnector<unknown>): boolean {
@@ -1862,9 +1862,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  private async cacheWallet(walletName: string): Promise<void> {
+  private async cacheWallet(walletName: string, connectorNamespace: ConnectorNamespaceType): Promise<void> {
     await this.setState({
       cachedConnector: walletName,
+      cachedConnectorNamespace: connectorNamespace,
     });
   }
 
