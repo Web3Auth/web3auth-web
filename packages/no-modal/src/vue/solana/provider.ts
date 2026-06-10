@@ -1,5 +1,5 @@
 import { createClient, createWalletStandardConnector, type SolanaClient } from "@solana/client";
-import { defineComponent, Fragment, h, provide, ref, watch } from "vue";
+import { defineComponent, Fragment, h, onBeforeUnmount, provide, ref, watch } from "vue";
 
 import { type Connection, getCaipChainId, log } from "../../base";
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
@@ -61,6 +61,9 @@ export const SolanaProvider = defineComponent({
       const newConnection = connection.value;
       const currentChain = web3Auth.value?.currentChain;
       if (currentChain?.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        // Mirror the React provider behavior: hide the live Solana client from injected
+        // consumers whenever Web3Auth is currently scoped to a non-Solana namespace.
+        clientRef.value = null;
         return;
       }
       const preferredSolanaChain = resolveSolanaChain(web3Auth.value, newConnection);
@@ -135,6 +138,18 @@ export const SolanaProvider = defineComponent({
       },
       { immediate: true }
     );
+
+    onBeforeUnmount(() => {
+      const publishedClient = clientRef.value;
+      clientRef.value = null;
+      const prevClient = connectedClient;
+      connectedClient = null;
+      if (prevClient) {
+        void disposeClient(prevClient);
+      } else if (publishedClient) {
+        void disposeClient(publishedClient);
+      }
+    });
 
     return () => h(Fragment, null, slots.default?.() ?? []);
   },
