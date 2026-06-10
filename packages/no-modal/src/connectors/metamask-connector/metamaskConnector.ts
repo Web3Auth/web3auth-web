@@ -259,7 +259,11 @@ class MetaMaskConnector extends BaseConnector<void> {
         ethereumProvider: this.evmProvider,
         solanaWallet: this.solanaProvider,
       });
-      if (options.getAuthTokenInfo) await this.getAuthTokenInfo(options.chainId);
+      try {
+        await this.authorizeOrDisconnect(options.getAuthTokenInfo, options.chainId);
+      } catch (error) {
+        this.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, error as Web3AuthError);
+      }
     } else if (coreStatus === "connected" || coreStatus === "loaded" || coreStatus === "disconnected" || coreStatus === "pending") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);
@@ -352,9 +356,7 @@ class MetaMaskConnector extends BaseConnector<void> {
         solanaWallet: this.solanaProvider,
       } as CONNECTED_EVENT_DATA);
 
-      if (getAuthTokenInfo) {
-        await this.getAuthTokenInfo(chainId);
-      }
+      await this.authorizeOrDisconnect(getAuthTokenInfo, chainId);
 
       return { ethereumProvider: this.evmProvider, solanaWallet: this.solanaProvider, connectorName: this.name };
     } catch (error) {

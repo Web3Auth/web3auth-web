@@ -197,6 +197,27 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     return tokenInfo;
   }
 
+  protected async authorizeOrDisconnect(getAuthTokenInfo?: boolean, chainId?: string): Promise<void> {
+    if (!getAuthTokenInfo) return;
+    try {
+      await this.getAuthTokenInfo(chainId);
+    } catch (error) {
+      log.error("Authorization failed after connect; disconnecting wallet to keep state consistent", error);
+      const wasRehydrated = this.rehydrated;
+      try {
+        // getAuthTokenInfo moved status to AUTHORIZING; restore CONNECTED so disconnect requirements pass.
+        if (!this.connected) this.status = CONNECTOR_STATUS.CONNECTED;
+        await this.disconnect();
+      } catch (disconnectError) {
+        log.error("Failed to disconnect wallet after authorization error", disconnectError);
+      } finally {
+        // disconnect() resets rehydrated=false; restore so caller catch emits the right event.
+        this.rehydrated = wasRehydrated;
+      }
+      throw error;
+    }
+  }
+
   protected async clearWalletSession(): Promise<void> {
     if (!this.authSessionManager) return;
     try {
@@ -219,7 +240,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
-  abstract getAuthTokenInfo(): Promise<AuthTokenInfo>;
+  abstract getAuthTokenInfo(chainId?: string): Promise<AuthTokenInfo>;
   abstract generateChallengeAndSign(
     authServerUrl?: string,
     accounts?: string[]

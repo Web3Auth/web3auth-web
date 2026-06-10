@@ -129,9 +129,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
         solanaWallet: this.solanaWallet,
       } as CONNECTED_EVENT_DATA);
 
-      if (getAuthTokenInfo) {
-        await this.getAuthTokenInfo();
-      }
+      await this.authorizeOrDisconnect(getAuthTokenInfo);
 
       return { ethereumProvider: null, solanaWallet: this.solanaWallet, connectorName: this.name };
     } catch (error: unknown) {

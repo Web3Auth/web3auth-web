@@ -481,9 +481,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       solanaWallet: this._solanaWallet,
     } as CONNECTED_EVENT_DATA);
 
-    if (getAuthTokenInfo) {
-      await this.getAuthTokenInfo();
-    }
+    await this.authorizeOrDisconnect(getAuthTokenInfo);
   }
 
   private subscribeEvents(): void {

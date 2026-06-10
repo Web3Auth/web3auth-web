@@ -116,9 +116,7 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
         solanaWallet: null,
       } as CONNECTED_EVENT_DATA);
 
-      if (getAuthTokenInfo) {
-        await this.getAuthTokenInfo();
-      }
+      await this.authorizeOrDisconnect(getAuthTokenInfo);
 
       return { ethereumProvider: this.injectedProvider, solanaWallet: null, connectorName: this.name };
     } catch (error) {
