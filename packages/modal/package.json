@@ -1,6 +1,6 @@
 {
   "name": "@web3auth/modal",
-  "version": "11.0.2",
+  "version": "11.1.1",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
     "web3Auth/ui",
@@ -55,6 +55,7 @@
   "devDependencies": {
     "@babel/preset-react": "^7.29.7",
     "@coinbase/wallet-sdk": "^4.3.7",
+    "@csstools/postcss-cascade-layers": "^6.0.0",
     "@rollup/plugin-json": "^6.1.0",
     "@rollup/plugin-replace": "^6.0.3",
     "@rollup/plugin-url": "^8.0.2",
@@ -92,8 +93,8 @@
     "@toruslabs/base-controllers": "^9.10.0",
     "@toruslabs/http-helpers": "^9.0.0",
     "@web3auth/auth": "^11.8.1",
-    "@web3auth/no-modal": "^11.0.2",
-    "@web3auth/ws-embed": "^6.0.4",
+    "@web3auth/no-modal": "^11.1.0",
+    "@web3auth/ws-embed": "^6.1.0",
     "bowser": "^2.14.1",
     "classnames": "^2.5.1",
     "clsx": "^2.1.1",
