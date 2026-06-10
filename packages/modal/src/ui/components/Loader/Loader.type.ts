@@ -13,6 +13,7 @@ export interface LoaderProps {
   handleMobileVerifyConnect: (params: { connector: WALLET_CONNECTOR_TYPE }) => void;
   hideSuccessScreen?: boolean;
   blockedUserConfig?: BlockedUserConfig;
+  onChangeWallet?: () => void | Promise<void>;
   onAcceptConsent?: () => void | Promise<void>;
   onDeclineConsent?: () => void | Promise<void>;
   privacyPolicy?: string;
@@ -27,4 +28,4 @@ export type ErroredStatusType = Pick<LoaderProps, "message">;
 
 export type AuthorizingStatusType = Pick<LoaderProps, "connector" | "externalWalletsConfig" | "handleMobileVerifyConnect">;
 
-export type BlockedStatusType = BlockedUserConfig;
+export type BlockedStatusType = BlockedUserConfig & Pick<LoaderProps, "onChangeWallet">;

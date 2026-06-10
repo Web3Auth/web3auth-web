@@ -1,4 +1,4 @@
-import { ANALYTICS_EVENTS, log, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
+import { ANALYTICS_EVENTS, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -85,11 +85,11 @@ function ErroredStatus(props: ErroredStatusType) {
 }
 
 function BlockedStatus(props: BlockedStatusType) {
-  const { primaryMessage, secondaryMessage, buttonMessage } = props;
+  const { primaryMessage, secondaryMessage, buttonMessage, onChangeWallet } = props;
 
   const handleChangeWallet = () => {
-    // TODO: wire up real action in a follow-up commit
-    log.info("change wallet");
+    // Log the user out before letting them pick another wallet so all sessions are cleared.
+    return onChangeWallet?.();
   };
 
   return (
@@ -249,6 +249,7 @@ function Loader(props: LoaderProps) {
     handleMobileVerifyConnect,
     hideSuccessScreen = false,
     blockedUserConfig,
+    onChangeWallet,
     onAcceptConsent,
     onDeclineConsent,
     privacyPolicy,
@@ -296,6 +297,7 @@ function Loader(props: LoaderProps) {
           primaryMessage={blockedUserConfig.primaryMessage}
           secondaryMessage={blockedUserConfig.secondaryMessage}
           buttonMessage={blockedUserConfig.buttonMessage}
+          onChangeWallet={onChangeWallet}
         />
       )}
 

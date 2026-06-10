@@ -278,6 +278,7 @@ export class LoginModal {
             handleSocialLoginClick={this.handleSocialLoginClick}
             handleAcceptConsent={this.handleAcceptConsent}
             handleDeclineConsent={this.handleDeclineConsent}
+            handleChangeWallet={this.showLoginOptions}
             closeModal={this.closeModal}
           >
             <Widget stateListener={this.stateEmitter} />
@@ -458,6 +459,19 @@ export class LoginModal {
     this.analytics?.track(ANALYTICS_EVENTS.LOGIN_MODAL_CLOSED);
     if (this.callbacks.onModalVisibility) {
       this.callbacks.onModalVisibility(false);
+    }
+  };
+
+  showLoginOptions = () => {
+    this.setState({
+      status: MODAL_STATUS.INITIALIZED,
+      modalVisibility: true,
+      currentPage: PAGES.LOGIN_OPTIONS,
+      externalWalletsVisibility: false,
+      postLoadingMessage: "",
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
     }
   };
 
