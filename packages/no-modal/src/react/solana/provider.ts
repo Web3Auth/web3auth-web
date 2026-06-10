@@ -66,12 +66,11 @@ function useFrameworkKitSolanaClient(): SolanaClient {
   const { isConnected, connection, web3Auth, isInitialized } = useWeb3Auth();
   const { chainId, chainNamespace } = useChain();
 
-  const ref = useRef<SolanaClient | null>(null);
+  const solClientRef = useRef<SolanaClient | null>(null);
   const connectedClientRef = useRef<SolanaClient | null>(null);
-  const connectedClientKeyRef = useRef<string | null>(null);
   const [client, setClient] = useState<SolanaClient>(() => {
     const c = makePlaceholder({ rpcTarget: DEVNET_ENDPOINT });
-    ref.current = c;
+    solClientRef.current = c;
     return c;
   });
 
@@ -82,16 +81,15 @@ function useFrameworkKitSolanaClient(): SolanaClient {
   useEffect(
     () => () => {
       const connectedClient = connectedClientRef.current;
-      const c = ref.current;
-      if (c) {
-        dispose(c);
-        ref.current = null;
+      const currentClient = solClientRef.current;
+      if (currentClient) {
+        dispose(currentClient);
+        solClientRef.current = null;
       }
-      if (connectedClient && connectedClient !== c) {
+      if (connectedClient && connectedClient !== currentClient) {
         dispose(connectedClient);
       }
       connectedClientRef.current = null;
-      connectedClientKeyRef.current = null;
     },
     []
   );
@@ -99,22 +97,26 @@ function useFrameworkKitSolanaClient(): SolanaClient {
   useEffect(() => {
     let stale = false;
 
-    const adopt = (next: SolanaClient) => {
+    const adopt = (nextClient: SolanaClient) => {
       if (stale) {
-        dispose(next);
+        dispose(nextClient);
         return;
       }
-      const prev = ref.current;
-      if (prev === next) return;
-      if (prev) dispose(prev);
-      ref.current = next;
-      setClient(next);
+      const prevClient = solClientRef.current;
+      if (prevClient === nextClient) return;
+      if (prevClient) dispose(prevClient);
+      solClientRef.current = nextClient;
+      setClient(nextClient);
     };
 
     (async () => {
       const rpc = placeholderRpc(isInitialized, web3Auth);
       const conn = connection;
       const currentChain = web3Auth?.currentChain;
+      if (currentChain?.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        adopt(makePlaceholder(rpc));
+        return;
+      }
       const preferredSolanaChain = resolveSolanaChain(web3Auth, conn);
       const shouldKeepSolanaClient =
         isConnected &&
@@ -124,29 +126,12 @@ function useFrameworkKitSolanaClient(): SolanaClient {
         conn?.connectorName === web3Auth?.primaryConnectorName;
 
       if (!shouldKeepSolanaClient) {
-        connectedClientKeyRef.current = null;
         const connectedClient = connectedClientRef.current;
         connectedClientRef.current = null;
         if (connectedClient) {
           dispose(connectedClient);
         }
         adopt(makePlaceholder(rpc));
-        return;
-      }
-
-      const nextClientKey = [
-        conn.connectorName,
-        preferredSolanaChain.chainId,
-        preferredSolanaChain.rpcTarget,
-        preferredSolanaChain.wsTarget || "",
-      ].join(":");
-
-      if (connectedClientRef.current && connectedClientKeyRef.current === nextClientKey) {
-        if (chainNamespace === CHAIN_NAMESPACES.SOLANA && currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-          adopt(connectedClientRef.current);
-        } else {
-          adopt(makePlaceholder(rpc));
-        }
         return;
       }
 
@@ -169,7 +154,6 @@ function useFrameworkKitSolanaClient(): SolanaClient {
         }
         const prevConnectedClient = connectedClientRef.current;
         connectedClientRef.current = wired;
-        connectedClientKeyRef.current = nextClientKey;
         if (chainNamespace === CHAIN_NAMESPACES.SOLANA && currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
           adopt(wired);
         } else {

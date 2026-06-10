@@ -43,7 +43,7 @@ export const SolanaProvider = defineComponent({
     const { chainId } = useChain();
     const clientRef = ref<SolanaClient | null>(null);
     let connectedClient: SolanaClient | null = null;
-    let connectedClientKey: string | null = null;
+    // let connectedClientKey: string | null = null;
     // Holds the token for the newest requested sync run. Older async runs compare against it
     // before publishing results so a slower reconnect cannot overwrite a newer chain/account update.
     let activeSyncToken: symbol | null = null;
@@ -60,6 +60,9 @@ export const SolanaProvider = defineComponent({
       const newIsConnected = isConnected.value;
       const newConnection = connection.value;
       const currentChain = web3Auth.value?.currentChain;
+      if (currentChain?.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        return;
+      }
       const preferredSolanaChain = resolveSolanaChain(web3Auth.value, newConnection);
       const shouldKeepSolanaClient =
         newIsConnected &&
@@ -72,22 +75,10 @@ export const SolanaProvider = defineComponent({
         clientRef.value = null;
         const prevClient = connectedClient;
         connectedClient = null;
-        connectedClientKey = null;
+        // connectedClientKey = null;
         if (prevClient) {
           await disposeClient(prevClient);
         }
-        return;
-      }
-
-      const nextClientKey = [
-        newConnection.connectorName,
-        preferredSolanaChain.chainId,
-        preferredSolanaChain.rpcTarget,
-        preferredSolanaChain.wsTarget || "",
-      ].join(":");
-
-      if (connectedClient && connectedClientKey === nextClientKey) {
-        clientRef.value = currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA ? connectedClient : null;
         return;
       }
 
@@ -119,7 +110,7 @@ export const SolanaProvider = defineComponent({
         }
         const prevClient = connectedClient;
         connectedClient = client;
-        connectedClientKey = nextClientKey;
+        // connectedClientKey = nextClientKey;
         clientRef.value = currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA ? client : null;
         if (prevClient) {
           await disposeClient(prevClient);
