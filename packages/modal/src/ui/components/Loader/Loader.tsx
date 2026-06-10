@@ -1,4 +1,4 @@
-import { ANALYTICS_EVENTS, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
+import { ANALYTICS_EVENTS, log, WALLET_CONNECTOR_TYPE } from "@web3auth/no-modal";
 import { useContext, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -93,7 +93,7 @@ function BlockedStatus(props: BlockedStatusType) {
   };
 
   return (
-    <div className="w3a--flex w3a--flex-col w3a--items-center w3a--gap-y-4">
+    <div className="wta:flex wta:flex-col wta:items-center wta:gap-y-4">
       <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--error-logo">
         <path
           fill="currentColor"
@@ -102,12 +102,12 @@ function BlockedStatus(props: BlockedStatusType) {
           clipRule="evenodd"
         />
       </svg>
-      <p className="w3a--text-center w3a--text-base w3a--font-semibold w3a--text-app-gray-900 dark:w3a--text-app-white">{primaryMessage}</p>
-      <p className="w3a--text-center w3a--text-sm w3a--text-app-gray-500 dark:w3a--text-app-gray-400">{secondaryMessage}</p>
+      <p className="wta:text-center wta:text-base wta:font-semibold wta:text-app-gray-900 wta:dark:text-app-white">{primaryMessage}</p>
+      <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-400">{secondaryMessage}</p>
       <button
         type="button"
         onClick={handleChangeWallet}
-        className="w3a--rounded-xl w3a--bg-app-primary-600 w3a--px-6 w3a--py-3 w3a--text-center w3a--text-sm w3a--font-medium w3a--text-app-white hover:w3a--bg-app-primary-700"
+        className="wta:rounded-xl wta:bg-app-primary-600 wta:px-6 wta:py-3 wta:text-center wta:text-sm wta:font-medium wta:text-app-white hover:wta:bg-app-primary-700"
       >
         {buttonMessage}
       </button>

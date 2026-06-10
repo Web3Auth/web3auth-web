@@ -573,7 +573,7 @@ export class LoginModal {
     listener.on(CONNECTOR_EVENTS.ERRORED, (error: Web3AuthError, loginMode: LoginModeType) => {
       log.error("error", error, error.message);
       if (loginMode === LOGIN_MODE.NO_MODAL) return;
-      if (error.code === 5120) {
+      if ((error as { status?: number }).status === 401 || error.code === 5120) {
         this.setState({
           modalVisibility: true,
           status: MODAL_STATUS.BLOCKED,
