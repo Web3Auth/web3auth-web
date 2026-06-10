@@ -832,12 +832,12 @@ describe("Web3AuthNoModal", () => {
   });
 
   it("prefers defaultChainId for multichain connectors", () => {
-    const defaultEvmChainId = "0xaa36a7";
+    const defaultChainId = "0x65";
     const sdk = createSdk({
-      defaultChainId: defaultEvmChainId,
+      defaultChainId,
       chains: [
         createChain({ chainId: "0x1" }),
-        createChain({ chainId: defaultEvmChainId, displayName: "Sepolia", rpcTarget: "https://rpc.sepolia.org" }),
+        createChain({ chainId: defaultChainId, displayName: "Solana Mainnet", rpcTarget: "https://rpc.ankr.com/solana" }),
       ],
     });
     const connector = new MockConnector({
@@ -845,7 +845,7 @@ describe("Web3AuthNoModal", () => {
       connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
     } as never);
 
-    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe(defaultEvmChainId);
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe(defaultChainId);
   });
 
   it("picks the first chain for multichain connectors when no default chain id is set", () => {

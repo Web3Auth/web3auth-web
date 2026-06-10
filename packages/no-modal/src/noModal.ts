@@ -1174,7 +1174,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING && this.status !== CONNECTOR_STATUS.AUTHORIZED) {
           this.status = CONNECTOR_STATUS.CONNECTED;
         }
-        log.debug("connected", this.status, this.primaryConnectorName);
         // Defer plugin connection until consent is accepted; otherwise plugins would start before the consent step completes.
         // `completeConsentAcceptance` connects the plugins once the user accepts the consent.
         if (!pendingUserConsent) {
