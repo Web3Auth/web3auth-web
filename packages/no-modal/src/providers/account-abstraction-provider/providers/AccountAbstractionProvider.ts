@@ -119,7 +119,9 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       chain,
       transport: http(currentChain.rpcTarget),
     }) as Client;
-    const [eoaAddress] = (await eoaProvider.request({ method: METHOD_TYPES.ETH_REQUEST_ACCOUNTS })) as [string];
+    const existingAccounts = ((await eoaProvider.request({ method: METHOD_TYPES.GET_ACCOUNTS })) as string[] | null) ?? [];
+    const [eoaAddress] =
+      existingAccounts.length > 0 ? existingAccounts : ((await eoaProvider.request({ method: METHOD_TYPES.ETH_REQUEST_ACCOUNTS })) as [string]);
     const walletClient = createWalletClient({
       account: eoaAddress as Hex,
       chain,

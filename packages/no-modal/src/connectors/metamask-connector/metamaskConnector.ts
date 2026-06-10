@@ -253,6 +253,14 @@ class MetaMaskConnector extends BaseConnector<void> {
     if (coreStatus === "connected" && options.autoConnect) {
       this.status = CONNECTOR_STATUS.CONNECTED;
       this.rehydrated = true;
+
+      // Force sync the chain state before connect with rehydrated state.
+      // during rehydration, `createEVMClient` (from above) cause re-creating session for connected the evm provider,
+      // triggering `switchChain` internally and unintentionally update the connector data with the new chain id.
+      // This creates issue in rehydration flow, where Web3Auth connects to the incorrect chain id, not the rehydrated chain id.
+      // Force sync the chain state with the rehydrated chain id to avoid this issue.
+      await this.syncChainState(chainConfig, true);
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: true,
@@ -260,13 +268,6 @@ class MetaMaskConnector extends BaseConnector<void> {
         solanaWallet: this.solanaProvider,
       });
       if (options.getAuthTokenInfo) await this.getAuthTokenInfo(options.chainId);
-
-      // Force sync the chain state after connect.
-      // during rehydration, `createEVMClient` (from above) cause re-creating session for the evm provider,
-      // trigger `switchChain` and unintentionally update the connector data with the new chain id.
-      // This creates issue in rehydration flow, where Web3Auth connects to the incorrect chain id, not the rehydrated chain id.
-      // Force sync the chain state with the rehydrated chain id to avoid this issue.
-      await this.syncChainState(chainConfig, true);
     } else if (coreStatus === "connected" || coreStatus === "loaded" || coreStatus === "disconnected" || coreStatus === "pending") {
       this.status = CONNECTOR_STATUS.READY;
       this.emit(CONNECTOR_EVENTS.READY, WALLET_CONNECTORS.METAMASK);

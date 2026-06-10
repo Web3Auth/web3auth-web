@@ -4,7 +4,7 @@ import { SolanaProvider as SolanaProviderBase } from "@solana/react-hooks";
 import type { ComponentProps } from "react";
 import { createElement, PropsWithChildren, useEffect, useRef, useState } from "react";
 
-import { CHAIN_NAMESPACES, log } from "../../base";
+import { CHAIN_NAMESPACES, type Connection, getCaipChainId, log } from "../../base";
 import type { CustomChainConfig } from "../../base/chain/IChainInterface";
 import { useChain, useWeb3Auth } from "../hooks";
 
@@ -33,19 +33,42 @@ function makePlaceholder(rpc: Pick<CustomChainConfig, "rpcTarget" | "wsTarget">)
 }
 
 function dispose(client: SolanaClient) {
-  void client.actions.disconnectWallet().catch(() => {});
   client.destroy();
 }
 
+function resolveSolanaChain(web3Auth: ReturnType<typeof useWeb3Auth>["web3Auth"], connection: Connection | null) {
+  const currentChain = web3Auth?.currentChain;
+  if (currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    return currentChain;
+  }
+
+  const connectedScope =
+    connection?.solanaWallet && "scope" in connection.solanaWallet && typeof connection.solanaWallet.scope === "string"
+      ? connection.solanaWallet.scope
+      : null;
+
+  if (connectedScope) {
+    const connectedChain = web3Auth?.coreOptions.chains?.find((chain) => {
+      return chain.chainNamespace === CHAIN_NAMESPACES.SOLANA && getCaipChainId(chain) === connectedScope;
+    });
+    if (connectedChain) return connectedChain;
+  }
+
+  return web3Auth?.coreOptions.chains?.find((chain) => chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) || null;
+}
+
 /**
- * Builds the SolanaClient for Framework Kit React hooks: placeholder when idle, Web3Auth-backed when
- * connected on Solana. Ref + state so React re-renders on swap and effects dispose the right instance.
+ * Builds the SolanaClient for Framework Kit React hooks.
+ * For multichain wallets, keep the Solana client warm across namespace switches so
+ * switching back to Solana can reuse the existing wallet session.
  */
 function useFrameworkKitSolanaClient(): SolanaClient {
   const { isConnected, connection, web3Auth, isInitialized } = useWeb3Auth();
   const { chainId, chainNamespace } = useChain();
 
   const ref = useRef<SolanaClient | null>(null);
+  const connectedClientRef = useRef<SolanaClient | null>(null);
+  const connectedClientKeyRef = useRef<string | null>(null);
   const [client, setClient] = useState<SolanaClient>(() => {
     const c = makePlaceholder({ rpcTarget: DEVNET_ENDPOINT });
     ref.current = c;
@@ -58,11 +81,17 @@ function useFrameworkKitSolanaClient(): SolanaClient {
 
   useEffect(
     () => () => {
+      const connectedClient = connectedClientRef.current;
       const c = ref.current;
       if (c) {
         dispose(c);
         ref.current = null;
       }
+      if (connectedClient && connectedClient !== c) {
+        dispose(connectedClient);
+      }
+      connectedClientRef.current = null;
+      connectedClientKeyRef.current = null;
     },
     []
   );
@@ -84,37 +113,50 @@ function useFrameworkKitSolanaClient(): SolanaClient {
 
     (async () => {
       const rpc = placeholderRpc(isInitialized, web3Auth);
-      const solanaWallet = connection?.solanaWallet;
-      const onSolana =
-        isConnected &&
-        Boolean(solanaWallet) &&
-        chainNamespace === CHAIN_NAMESPACES.SOLANA &&
-        web3Auth?.currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA;
-
-      if (!onSolana) {
-        adopt(makePlaceholder(rpc));
-        return;
-      }
-
       const conn = connection;
-      if (!conn || !solanaWallet) {
+      const currentChain = web3Auth?.currentChain;
+      const preferredSolanaChain = resolveSolanaChain(web3Auth, conn);
+      const shouldKeepSolanaClient =
+        isConnected &&
+        Boolean(conn?.solanaWallet) &&
+        Boolean(preferredSolanaChain) &&
+        // only manage the client for the primary connector
+        conn?.connectorName === web3Auth?.primaryConnectorName;
+
+      if (!shouldKeepSolanaClient) {
+        connectedClientKeyRef.current = null;
+        const connectedClient = connectedClientRef.current;
+        connectedClientRef.current = null;
+        if (connectedClient) {
+          dispose(connectedClient);
+        }
         adopt(makePlaceholder(rpc));
         return;
       }
 
-      // only reconnect for the primary connector
-      if (conn.connectorName !== web3Auth?.primaryConnectorName) {
-        adopt(makePlaceholder(rpc));
+      const nextClientKey = [
+        conn.connectorName,
+        preferredSolanaChain.chainId,
+        preferredSolanaChain.rpcTarget,
+        preferredSolanaChain.wsTarget || "",
+      ].join(":");
+
+      if (connectedClientRef.current && connectedClientKeyRef.current === nextClientKey) {
+        if (chainNamespace === CHAIN_NAMESPACES.SOLANA && currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+          adopt(connectedClientRef.current);
+        } else {
+          adopt(makePlaceholder(rpc));
+        }
         return;
       }
 
       try {
         const solanaWalletId = "wallet-standard:" + conn.connectorName;
-        const connector = createWalletStandardConnector(solanaWallet, {
+        const connector = createWalletStandardConnector(conn.solanaWallet, {
           id: solanaWalletId,
           name: conn.connectorName,
         });
-        const { rpcTarget, wsTarget } = web3Auth.currentChain;
+        const { rpcTarget, wsTarget } = preferredSolanaChain;
         const wired = createClient({
           endpoint: rpcTarget,
           websocketEndpoint: wsTarget,
@@ -125,7 +167,17 @@ function useFrameworkKitSolanaClient(): SolanaClient {
           dispose(wired);
           return;
         }
-        adopt(wired);
+        const prevConnectedClient = connectedClientRef.current;
+        connectedClientRef.current = wired;
+        connectedClientKeyRef.current = nextClientKey;
+        if (chainNamespace === CHAIN_NAMESPACES.SOLANA && currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+          adopt(wired);
+        } else {
+          adopt(makePlaceholder(rpc));
+        }
+        if (prevConnectedClient && prevConnectedClient !== wired) {
+          dispose(prevConnectedClient);
+        }
       } catch (e) {
         log.error("Failed to create or connect Solana client", e);
         adopt(makePlaceholder(rpc));

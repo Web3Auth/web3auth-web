@@ -1287,7 +1287,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // External wallets can resolve to a different active chain than the requested one,
       // so let connector-reported chain updates reconcile Web3Auth state after connect.
       if (typeof data?.data === "object" && data?.data !== null && "chainId" in data.data && typeof data.data.chainId === "string") {
+        const previousChain = this.currentChain;
         await this.setCurrentChain(data.data.chainId);
+        const currentChain = this.currentChain;
+        const connectorEthereumProvider = connector.provider;
+        if (
+          previousChain?.chainNamespace !== currentChain?.chainNamespace &&
+          currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+          connectorEthereumProvider
+        ) {
+          // from sol -> evm namespace switch, we need to re-create AccountAbstractionProvider
+          await this.bindPrimaryEthereumSigningProxy(connectorEthereumProvider, connector.name);
+        }
       }
       log.debug("connector data updated", data);
       this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, data);
@@ -1880,7 +1891,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private async bindPrimaryEthereumSigningProxy(ethereumProvider: IProvider, connectorName: WALLET_CONNECTOR_TYPE | string): Promise<void> {
     if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-    let finalProvider = (ethereumProvider as IBaseProvider<unknown>)?.provider || (ethereumProvider as SafeEventEmitterProvider);
+    const primaryConnectorProvider = connectorName === this.primaryConnectorName ? this.primaryConnector?.provider : null;
+    const baseEthereumProvider =
+      ethereumProvider === this.commonJRPCProvider || ethereumProvider === this.aaProvider
+        ? (primaryConnectorProvider ?? ethereumProvider)
+        : ethereumProvider;
+    let finalProvider = (baseEthereumProvider as IBaseProvider<unknown>)?.provider || (baseEthereumProvider as SafeEventEmitterProvider);
     const { accountAbstractionConfig } = this.coreOptions;
     const is7702 = accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD["EIP_7702"];
     const isAaSupportedForCurrentChain =
@@ -1890,7 +1906,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // setup AA provider if AA is enabled (skip for EIP-7702; 7702 uses EOA + 5792/7702 RPC only)
     if (!is7702 && isAaSupportedForCurrentChain && (connectorName === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
       const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
-      const eoaProvider: IProvider = connectorName === WALLET_CONNECTORS.AUTH ? await toEoaProvider(ethereumProvider) : ethereumProvider;
+      const eoaProvider: IProvider = connectorName === WALLET_CONNECTORS.AUTH ? await toEoaProvider(baseEthereumProvider) : baseEthereumProvider;
       const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
       const aaProvider = await accountAbstractionProvider({
         accountAbstractionConfig,
