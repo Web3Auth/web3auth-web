@@ -812,7 +812,7 @@ describe("Web3AuthNoModal", () => {
     });
   });
 
-  it("prefers defaultChainId over the first namespace chain when resolving a connector from another namespace", () => {
+  it("uses the first matching namespace chain for namespace-specific connectors from another namespace", () => {
     const solanaChainId = "0x2";
     const defaultEvmChainId = "0xaa36a7";
     const sdk = createSdk(
@@ -828,7 +828,36 @@ describe("Web3AuthNoModal", () => {
     );
     const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
 
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe("0x1");
+  });
+
+  it("prefers defaultChainId for multichain connectors", () => {
+    const defaultEvmChainId = "0xaa36a7";
+    const sdk = createSdk({
+      defaultChainId: defaultEvmChainId,
+      chains: [
+        createChain({ chainId: "0x1" }),
+        createChain({ chainId: defaultEvmChainId, displayName: "Sepolia", rpcTarget: "https://rpc.sepolia.org" }),
+      ],
+    });
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
+    } as never);
+
     expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe(defaultEvmChainId);
+  });
+
+  it("picks the first chain for multichain connectors when no default chain id is set", () => {
+    const sdk = createSdk({
+      chains: [createChain({ chainId: "0x1" }), createChain({ chainId: "0xaa36a7" })],
+    });
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
+    } as never);
+
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe("0x1");
   });
 
   it("connectTo rejects on ERRORED event", async () => {
