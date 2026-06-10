@@ -119,7 +119,11 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       chain,
       transport: http(currentChain.rpcTarget),
     }) as Client;
+    // Firstly, try to get the accounts from the existing connected provider with `eth_accounts` method.
+    // We don't wanna do `eth_requestAccounts` method here, coz if the wallet is already connected, it will trigger chainChanged event and unintentionally update the AaProvider re-bind and
+    // re-bind run this again, so we will end up in infinite loop.
     const existingAccounts = ((await eoaProvider.request({ method: METHOD_TYPES.GET_ACCOUNTS })) as string[] | null) ?? [];
+    // only if the existing accounts are not found (that means wallet isn't connected), then we will trigger `eth_requestAccounts` method to get the accounts.
     const [eoaAddress] =
       existingAccounts.length > 0 ? existingAccounts : ((await eoaProvider.request({ method: METHOD_TYPES.ETH_REQUEST_ACCOUNTS })) as [string]);
     const walletClient = createWalletClient({

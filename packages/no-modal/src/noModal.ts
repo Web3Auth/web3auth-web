@@ -960,7 +960,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     // sync chainId
-    this.commonJRPCProvider.on("chainChanged", async (chainId) => this.setCurrentChain(chainId));
+    this.commonJRPCProvider.on("chainChanged", async (chainId) => {
+      await this.setCurrentChain(chainId);
+    });
   }
 
   protected async setupConnector(connector: IConnector<unknown>): Promise<void> {
@@ -1367,10 +1369,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    */
   protected getInitialChainIdForConnector(connector: IConnector<unknown>): CustomChainConfig {
     let initialChain = this.currentChain;
-    if (initialChain?.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
+    const defaultChainId = this.coreOptions.defaultChainId;
+    const isMultiChainConnector = connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN;
+
+    // if the connector is a multi-chain connector and a default chain id is set, use the default chain id
+    if (isMultiChainConnector && defaultChainId) {
+      initialChain = this.coreOptions.chains.find((chain) => chain.chainId === defaultChainId);
+    } else if (initialChain?.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
       initialChain = this.coreOptions.chains.find((x) => x.chainNamespace === connector.connectorNamespace);
-      if (!initialChain) throw WalletInitializationError.invalidParams(`No chain found for ${connector.connectorNamespace}`);
     }
+
+    if (!initialChain) throw WalletInitializationError.invalidParams(`No chain found for ${connector.connectorNamespace}`);
+
     return initialChain;
   }
 

@@ -39,6 +39,10 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
     return this.checkIfAutoConnect(connector as unknown as IConnector<unknown>);
   }
 
+  public exposeGetInitialChainIdForConnector(connector: MockConnector) {
+    return this.getInitialChainIdForConnector(connector as unknown as IConnector<unknown>);
+  }
+
   public exposeSetConsentRequired(value: boolean) {
     this.consentRequired = value;
   }
@@ -806,6 +810,25 @@ describe("Web3AuthNoModal", () => {
       ethereumProvider: commonJRPCProvider as never,
       solanaWallet: null,
     });
+  });
+
+  it("prefers defaultChainId over the first namespace chain when resolving a connector from another namespace", () => {
+    const solanaChainId = "0x2";
+    const defaultEvmChainId = "0xaa36a7";
+    const sdk = createSdk(
+      {
+        defaultChainId: defaultEvmChainId,
+        chains: [
+          createChain({ chainId: "0x1" }),
+          createChain({ chainId: defaultEvmChainId, displayName: "Sepolia", rpcTarget: "https://rpc.sepolia.org" }),
+          createChain({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: solanaChainId, rpcTarget: "", ticker: "SOL" }),
+        ],
+      },
+      { currentChainId: solanaChainId }
+    );
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
+
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe(defaultEvmChainId);
   });
 
   it("connectTo rejects on ERRORED event", async () => {
