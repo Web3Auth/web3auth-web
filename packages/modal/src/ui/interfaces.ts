@@ -79,12 +79,7 @@ export interface UIConfig extends CoreUIConfig, LoginModalConfig {
    * Configuration for the blocked user screen shown when a user is blocked by the dapp.
    * All fields are optional and have defaults.
    */
-  blockedUserConfig?: {
-    primaryMessage?: string;
-    secondaryMessage?: string;
-    buttonMessage?: string;
-  };
-
+  blockedUserConfig?: BlockedUserConfig;
   connectorListener: SafeEventEmitter<Web3AuthNoModalEvents>;
 }
 

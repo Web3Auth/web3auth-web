@@ -185,8 +185,14 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
         deviceInfo: getDeviceInfo(),
       });
     } catch (error) {
-      if ((error as { status?: number })?.status === 401) {
-        throw WalletLoginError.userBlocked("User is blocked by the application", error);
+      if (error instanceof Response && error.status === 401) {
+        const body = (await error
+          .clone()
+          .json()
+          .catch(() => ({}))) as { message?: string };
+        if (body.message === "ACCESS_CONTROL_DENIED") {
+          throw WalletLoginError.userBlocked("User is blocked by the application", error);
+        }
       }
       throw error;
     }

@@ -20,6 +20,7 @@ function WidgetContent() {
   const onCloseModal = () => {
     setModalState((prevState) => ({
       ...prevState,
+      status: MODAL_STATUS.INITIALIZED,
       externalWalletsVisibility: false,
       modalVisibility: false,
       currentPage: PAGES.LOGIN_OPTIONS,
