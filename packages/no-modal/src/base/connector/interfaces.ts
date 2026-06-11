@@ -102,6 +102,7 @@ export interface Connection {
   readonly ethereumProvider: IProvider | null;
   readonly solanaWallet: Wallet | null;
   readonly connectorName: WALLET_CONNECTOR_TYPE | string;
+  readonly connectorNamespace: ConnectorNamespaceType;
 }
 
 export interface IConnector<T> extends SafeEventEmitter {

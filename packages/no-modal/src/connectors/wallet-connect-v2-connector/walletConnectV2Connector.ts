@@ -16,7 +16,6 @@ import {
   CHAIN_NAMESPACES,
   ChainNamespaceType,
   citadelServerUrl,
-  CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
@@ -205,17 +204,18 @@ class WalletConnectV2Connector extends BaseConnector<void> {
         }
       };
 
+      const connectorNamespace = this.connectorNamespace;
       // if already connected
       if (this.connected) {
         await this.onConnectHandler({ chain: chainConfig, getAuthTokenInfo });
-        return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
+        return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name, connectorNamespace };
       }
 
       if (this.status !== CONNECTOR_STATUS.CONNECTING) {
         await this.createNewSession({ chainConfig, trackCompletionEvents, getAuthTokenInfo });
       }
 
-      return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
+      return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name, connectorNamespace };
     } catch (error) {
       log.error("Wallet connect v2 connector error while connecting", error);
       // ready again to be connected
@@ -479,7 +479,8 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       reconnected: this.rehydrated,
       ethereumProvider: this.provider,
       solanaWallet: this._solanaWallet,
-    } as CONNECTED_EVENT_DATA);
+      connectorNamespace: this.connectorNamespace,
+    });
 
     if (getAuthTokenInfo) {
       await this.getAuthTokenInfo();

@@ -380,7 +380,7 @@ const canSwitchEvmChain = computed(() => {
 });
 
 const canSwitchChainNamespace = computed(() => {
-  if (!isConnected.value || connection.value?.connectorName !== WALLET_CONNECTORS.AUTH) return false;
+  if (!isConnected.value) return false;
   if (chainNamespace.value === CHAIN_NAMESPACES.EIP155) return solanaChains.value.length > 0;
   if (chainNamespace.value === CHAIN_NAMESPACES.SOLANA) return eip155Chains.value.length > 0;
   return false;

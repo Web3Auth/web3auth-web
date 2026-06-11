@@ -114,6 +114,17 @@ const onChainChange = (chainIds: string[]) => {
   formData.smartAccountChains = formData.smartAccountChains.filter((chain) => chainIds.includes(chain));
 };
 
+const onDefaultChainChange = (chainId?: string) => {
+  log.info("onDefaultChainChange", chainId);
+  formData.defaultChainId = chainId;
+
+  if (!chainId || !formData.chains.includes(chainId)) return;
+
+  // Keep the selected default chain distinct from the first configured chain
+  // so external-wallet init can still exercise defaultChainId vs first-chain behavior.
+  formData.chains = [...formData.chains.filter((configuredChainId) => configuredChainId !== chainId), chainId];
+};
+
 const onSmartAccountChainChange = (chainIds: string[]) => {
   log.info("onSmartAccountChainChange", chainIds);
   formData.smartAccountChainsConfig = {};
@@ -223,6 +234,7 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :placeholder="$t('app.defaultChainId')"
             matchParentsWidth
             :options="defaultChainOptions"
+            @update:model-value="onDefaultChainChange"
           />
           <Select
             v-model="formData.connectors"

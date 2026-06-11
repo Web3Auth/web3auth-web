@@ -42,7 +42,6 @@ import {
   CHAIN_NAMESPACES,
   citadelServerUrl,
   cloneDeep,
-  CONNECTED_EVENT_DATA,
   CONNECTED_STATUSES,
   type Connection,
   CONNECTOR_CATEGORY,
@@ -266,7 +265,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     this.emit(CONNECTOR_EVENTS.CONNECTING, { ...params, connector: WALLET_CONNECTORS.AUTH });
     try {
       await this.connectWithProvider(params);
-      return { ethereumProvider: this.provider, solanaWallet: this._solanaWallet, connectorName: this.name };
+      return {
+        ethereumProvider: this.provider,
+        solanaWallet: this._solanaWallet,
+        connectorName: this.name,
+        connectorNamespace: this.connectorNamespace,
+      };
     } catch (error: unknown) {
       log.error("Failed to connect with auth provider", error);
       // ready again to be connected
@@ -927,6 +931,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
       );
     }
 
+    const connectorNamespace = this.connectorNamespace;
     // setup WS embed if chainNamespace is EIP155 or SOLANA
     if (chainNamespace === CHAIN_NAMESPACES.EIP155 || chainNamespace === CHAIN_NAMESPACES.SOLANA) {
       // wait for ws embed instance to be ready.
@@ -952,7 +957,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
             reconnected: this.rehydrated,
             ethereumProvider: this.provider,
             solanaWallet: this._solanaWallet,
-          } as CONNECTED_EVENT_DATA);
+            connectorNamespace,
+          });
 
           if (params.getAuthTokenInfo) {
             await this.getAuthTokenInfo();
@@ -970,7 +976,8 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
           ethereumProvider: this.provider,
           solanaWallet: this._solanaWallet,
           reconnected: this.rehydrated,
-        } as CONNECTED_EVENT_DATA);
+          connectorNamespace,
+        });
       }
     }
   }

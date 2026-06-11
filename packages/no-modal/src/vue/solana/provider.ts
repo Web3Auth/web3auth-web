@@ -1,24 +1,40 @@
 import { createClient, createWalletStandardConnector, type SolanaClient } from "@solana/client";
-import { defineComponent, Fragment, h, provide, ref, watch } from "vue";
+import { defineComponent, Fragment, h, onBeforeUnmount, provide, ref, watch } from "vue";
 
-import { log } from "../../base";
+import { type Connection, getCaipChainId, log } from "../../base";
 import { CHAIN_NAMESPACES } from "../../base/chain/IChainInterface";
 import { useChain, useWeb3Auth } from "../composables";
 import { SOLANA_CLIENT_KEY } from "./constants";
 
 const disposeClient = async (client: SolanaClient) => {
-  try {
-    await client.actions.disconnectWallet();
-  } catch (e) {
-    log.warn("Solana client disconnect", e);
-  }
   client.destroy();
+};
+
+const resolveSolanaChain = (web3Auth: ReturnType<typeof useWeb3Auth>["web3Auth"]["value"], connection: Connection | null) => {
+  const currentChain = web3Auth?.currentChain;
+  if (currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+    return currentChain;
+  }
+
+  const connectedScope =
+    connection?.solanaWallet && "scope" in connection.solanaWallet && typeof connection.solanaWallet.scope === "string"
+      ? connection.solanaWallet.scope
+      : null;
+
+  if (connectedScope) {
+    const connectedChain = web3Auth?.coreOptions.chains?.find((chain) => {
+      return chain.chainNamespace === CHAIN_NAMESPACES.SOLANA && getCaipChainId(chain) === connectedScope;
+    });
+    if (connectedChain) return connectedChain;
+  }
+
+  return web3Auth?.coreOptions.chains?.find((chain) => chain.chainNamespace === CHAIN_NAMESPACES.SOLANA) || null;
 };
 
 /**
  * Syncs Web3Auth Solana connection with Framework Kit client.
- * When user is connected via Web3Auth and current chain is Solana, creates a Framework Kit client
- * with Web3Auth as the wallet connector and connects it (same pattern as Wagmi provider).
+ * For multichain wallets, keep the Solana client warm across namespace switches so
+ * switching back to Solana can reuse the existing wallet session.
  */
 export const SolanaProvider = defineComponent({
   name: "SolanaProvider",
@@ -26,6 +42,8 @@ export const SolanaProvider = defineComponent({
     const { isConnected, connection, web3Auth } = useWeb3Auth();
     const { chainId } = useChain();
     const clientRef = ref<SolanaClient | null>(null);
+    let connectedClient: SolanaClient | null = null;
+    // let connectedClientKey: string | null = null;
     // Holds the token for the newest requested sync run. Older async runs compare against it
     // before publishing results so a slower reconnect cannot overwrite a newer chain/account update.
     let activeSyncToken: symbol | null = null;
@@ -42,25 +60,29 @@ export const SolanaProvider = defineComponent({
       const newIsConnected = isConnected.value;
       const newConnection = connection.value;
       const currentChain = web3Auth.value?.currentChain;
-      if (
-        !newIsConnected ||
-        !newConnection?.solanaWallet ||
-        currentChain?.chainNamespace !== CHAIN_NAMESPACES.SOLANA ||
-        // only reconnect for the primary connector
-        newConnection.connectorName !== web3Auth.value?.primaryConnectorName
-      ) {
-        const prevClient = clientRef.value;
+      if (currentChain?.chainNamespace !== CHAIN_NAMESPACES.SOLANA) {
+        // Mirror the React provider behavior: hide the live Solana client from injected
+        // consumers whenever Web3Auth is currently scoped to a non-Solana namespace.
         clientRef.value = null;
+        return;
+      }
+      const preferredSolanaChain = resolveSolanaChain(web3Auth.value, newConnection);
+      const shouldKeepSolanaClient =
+        newIsConnected &&
+        Boolean(newConnection?.solanaWallet) &&
+        Boolean(preferredSolanaChain) &&
+        // only manage the client for the primary connector
+        newConnection?.connectorName === web3Auth.value?.primaryConnectorName;
+
+      if (!shouldKeepSolanaClient) {
+        clientRef.value = null;
+        const prevClient = connectedClient;
+        connectedClient = null;
+        // connectedClientKey = null;
         if (prevClient) {
           await disposeClient(prevClient);
         }
         return;
-      }
-
-      const prevClient = clientRef.value;
-      clientRef.value = null;
-      if (prevClient) {
-        await disposeClient(prevClient);
       }
 
       let client: SolanaClient | null = null;
@@ -73,7 +95,7 @@ export const SolanaProvider = defineComponent({
         });
 
         // create a solana client
-        const { rpcTarget, wsTarget } = currentChain;
+        const { rpcTarget, wsTarget } = preferredSolanaChain;
         client = createClient({
           endpoint: rpcTarget,
           websocketEndpoint: wsTarget,
@@ -89,7 +111,13 @@ export const SolanaProvider = defineComponent({
           await disposeClient(client);
           return;
         }
-        clientRef.value = client;
+        const prevClient = connectedClient;
+        connectedClient = client;
+        // connectedClientKey = nextClientKey;
+        clientRef.value = currentChain?.chainNamespace === CHAIN_NAMESPACES.SOLANA ? client : null;
+        if (prevClient) {
+          await disposeClient(prevClient);
+        }
       } catch (err) {
         if (client) {
           await disposeClient(client);
@@ -110,6 +138,18 @@ export const SolanaProvider = defineComponent({
       },
       { immediate: true }
     );
+
+    onBeforeUnmount(() => {
+      const publishedClient = clientRef.value;
+      clientRef.value = null;
+      const prevClient = connectedClient;
+      connectedClient = null;
+      if (prevClient) {
+        void disposeClient(prevClient);
+      } else if (publishedClient) {
+        void disposeClient(publishedClient);
+      }
+    });
 
     return () => h(Fragment, null, slots.default?.() ?? []);
   },
