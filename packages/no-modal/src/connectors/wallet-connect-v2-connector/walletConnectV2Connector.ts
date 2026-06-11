@@ -482,9 +482,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       connectorNamespace: this.connectorNamespace,
     });
 
-    if (getAuthTokenInfo) {
-      await this.getAuthTokenInfo();
-    }
+    await this.authorizeOrDisconnect(getAuthTokenInfo);
   }
 
   private subscribeEvents(): void {

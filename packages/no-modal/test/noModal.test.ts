@@ -918,6 +918,24 @@ describe("Web3AuthNoModal", () => {
     await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).rejects.toThrow(WalletLoginError);
   });
 
+  it("does not connect the user when a blocked social login errors (code 5120)", async () => {
+    const sdk = createSdk({ initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN });
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {};
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.AUTH,
+      getOAuthProviderConfig: () => ({ isDefault: true }),
+    } as never);
+    connector.connect = vi.fn(async () => {
+      sdk.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.userBlocked() as never, "no-modal");
+      return null;
+    });
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
+
+    await expect(sdk.connectTo(WALLET_CONNECTORS.AUTH, { authConnection: "google" } as never)).rejects.toMatchObject({ code: 5120 });
+    expect(sdk.connected).toBe(false);
+    expect(CONNECTED_STATUSES.includes(sdk.status)).toBe(false);
+  });
+
   it("preserves the selected Solana chain for injected wallets without an EVM chain id", async () => {
     const solanaChainId = "0x2";
     const connectorName = "phantom" as WALLET_CONNECTOR_TYPE;

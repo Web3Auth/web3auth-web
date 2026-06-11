@@ -15,6 +15,7 @@ type WidgetContextType = {
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   handleAcceptConsent: () => void | Promise<void>;
   handleDeclineConsent: () => void | Promise<void>;
+  handleChangeWallet: () => void | Promise<void>;
   closeModal: () => void;
 };
 
@@ -29,6 +30,7 @@ type WidgetProviderProps = {
   handleShowExternalWallets: (externalWalletsInitialized: boolean) => void;
   handleAcceptConsent: () => void | Promise<void>;
   handleDeclineConsent: () => void | Promise<void>;
+  handleChangeWallet: () => void | Promise<void>;
   closeModal: () => void;
 };
 
@@ -45,6 +47,7 @@ export const WidgetProvider: FC<WidgetProviderProps> = ({
   handleShowExternalWallets,
   handleAcceptConsent,
   handleDeclineConsent,
+  handleChangeWallet,
   closeModal,
 }) => {
   const appLogo = useMemo(() => {
@@ -70,6 +73,7 @@ export const WidgetProvider: FC<WidgetProviderProps> = ({
         handleShowExternalWallets,
         handleAcceptConsent,
         handleDeclineConsent,
+        handleChangeWallet,
         closeModal,
       }}
     >

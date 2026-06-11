@@ -171,22 +171,57 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
     challenge: string;
     authServer: string;
   }): Promise<AuthTokenInfo> {
-    const tokens = await verifySignedChallenge({
-      chainNamespace: params.chainNamespace,
-      signedMessage: params.signedMessage,
-      challenge: params.challenge,
-      connector: this.name,
-      authServer: params.authServer,
-      web3AuthClientId: this.coreOptions.clientId,
-      web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-      sessionTimeout: this.coreOptions.sessionTime,
-      deviceInfo: getDeviceInfo(),
-    });
+    let tokens: SiwwTokens;
+    try {
+      tokens = await verifySignedChallenge({
+        chainNamespace: params.chainNamespace,
+        signedMessage: params.signedMessage,
+        challenge: params.challenge,
+        connector: this.name,
+        authServer: params.authServer,
+        web3AuthClientId: this.coreOptions.clientId,
+        web3AuthNetwork: this.coreOptions.web3AuthNetwork,
+        sessionTimeout: this.coreOptions.sessionTime,
+        deviceInfo: getDeviceInfo(),
+      });
+    } catch (error) {
+      if (error instanceof Response && error.status === 401) {
+        const body = (await error
+          .clone()
+          .json()
+          .catch(() => ({}))) as { message?: string };
+        if (body.message === "ACCESS_CONTROL_DENIED") {
+          throw WalletLoginError.userBlocked("User is blocked by the application", error);
+        }
+      }
+      throw error;
+    }
     await this.saveAuthTokenInfo(tokens);
     const tokenInfo: AuthTokenInfo = { idToken: tokens.idToken, accessToken: tokens.accessToken, refreshToken: tokens.refreshToken };
     this.status = CONNECTOR_STATUS.AUTHORIZED;
     this.emit(CONNECTOR_EVENTS.AUTHORIZED, { connector: this.name as WALLET_CONNECTOR_TYPE, authTokenInfo: tokenInfo });
     return tokenInfo;
+  }
+
+  protected async authorizeOrDisconnect(getAuthTokenInfo?: boolean, chainId?: string): Promise<void> {
+    if (!getAuthTokenInfo) return;
+    try {
+      await this.getAuthTokenInfo(chainId);
+    } catch (error) {
+      log.error("Authorization failed after connect; disconnecting wallet to keep state consistent", error);
+      const wasRehydrated = this.rehydrated;
+      try {
+        // getAuthTokenInfo moved status to AUTHORIZING; restore CONNECTED so disconnect requirements pass.
+        if (!this.connected) this.status = CONNECTOR_STATUS.CONNECTED;
+        await this.disconnect();
+      } catch (disconnectError) {
+        log.error("Failed to disconnect wallet after authorization error", disconnectError);
+      } finally {
+        // disconnect() resets rehydrated=false; restore so caller catch emits the right event.
+        this.rehydrated = wasRehydrated;
+      }
+      throw error;
+    }
   }
 
   protected async clearWalletSession(): Promise<void> {
@@ -211,7 +246,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract getUserInfo(): Promise<Partial<UserInfo>>;
   abstract enableMFA(params?: T): Promise<void>;
   abstract manageMFA(params?: T): Promise<void>;
-  abstract getAuthTokenInfo(): Promise<AuthTokenInfo>;
+  abstract getAuthTokenInfo(chainId?: string): Promise<AuthTokenInfo>;
   abstract generateChallengeAndSign(
     authServerUrl?: string,
     accounts?: string[]

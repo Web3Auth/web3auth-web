@@ -122,9 +122,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
         connectorNamespace: this.connectorNamespace,
       });
 
-      if (getAuthTokenInfo) {
-        await this.getAuthTokenInfo();
-      }
+      await this.authorizeOrDisconnect(getAuthTokenInfo);
 
       return { ethereumProvider: this.provider, solanaWallet: null, connectorName: this.name, connectorNamespace: this.connectorNamespace };
     } catch (error) {

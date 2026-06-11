@@ -278,6 +278,7 @@ export class LoginModal {
             handleSocialLoginClick={this.handleSocialLoginClick}
             handleAcceptConsent={this.handleAcceptConsent}
             handleDeclineConsent={this.handleDeclineConsent}
+            handleChangeWallet={this.showLoginOptions}
             closeModal={this.closeModal}
           >
             <Widget stateListener={this.stateEmitter} />
@@ -461,6 +462,19 @@ export class LoginModal {
     }
   };
 
+  showLoginOptions = () => {
+    this.setState({
+      status: MODAL_STATUS.INITIALIZED,
+      modalVisibility: true,
+      currentPage: PAGES.LOGIN_OPTIONS,
+      externalWalletsVisibility: false,
+      postLoadingMessage: "",
+    });
+    if (this.callbacks.onModalVisibility) {
+      this.callbacks.onModalVisibility(true);
+    }
+  };
+
   initExternalWalletContainer = () => {
     this.setState({
       hasExternalWallets: true,
@@ -573,6 +587,18 @@ export class LoginModal {
     listener.on(CONNECTOR_EVENTS.ERRORED, (error: Web3AuthError, loginMode: LoginModeType) => {
       log.error("error", error, error.message);
       if (loginMode === LOGIN_MODE.NO_MODAL) return;
+      if (error.code === 5120) {
+        this.setState({
+          modalVisibility: true,
+          status: MODAL_STATUS.BLOCKED,
+          blockedUserConfig: {
+            primaryMessage: this.uiConfig.blockedUserConfig?.primaryMessage,
+            secondaryMessage: this.uiConfig.blockedUserConfig?.secondaryMessage,
+            buttonMessage: this.uiConfig.blockedUserConfig?.buttonMessage,
+          },
+        });
+        return;
+      }
       if (error.code === 5000) {
         if (this.uiConfig.displayErrorsOnModal)
           this.setState({
@@ -592,6 +618,9 @@ export class LoginModal {
       }
     });
     listener.on(CONNECTOR_EVENTS.DISCONNECTED, () => {
+      // A blocked user (error 5120) is disconnected as part of the block cleanup (authorizeOrDisconnect).
+      // User can be returned to initial state by clicking "Change wallet" button.
+      if (this.modalStatus === MODAL_STATUS.BLOCKED) return;
       this.setState({ status: MODAL_STATUS.INITIALIZED, externalWalletsVisibility: false });
       // this.toggleMessage("");
     });

@@ -1100,7 +1100,12 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
           if (error instanceof Web3AuthError) {
             throw error;
           }
-          reject(WalletLoginError.connectionError(error instanceof Error ? error.message : (error as string) || "Failed to login with social"));
+          const errorMessage = error instanceof Error ? error.message : (error as string);
+          if (errorMessage === "Access control denied") {
+            reject(WalletLoginError.userBlocked(errorMessage, error));
+            return;
+          }
+          reject(WalletLoginError.connectionError(errorMessage || "Failed to login with social"));
         });
     });
   }

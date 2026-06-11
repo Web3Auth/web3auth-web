@@ -130,9 +130,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
         connectorNamespace,
       });
 
-      if (getAuthTokenInfo) {
-        await this.getAuthTokenInfo();
-      }
+      await this.authorizeOrDisconnect(getAuthTokenInfo);
 
       return { ethereumProvider: null, solanaWallet: this.solanaWallet, connectorName: this.name, connectorNamespace };
     } catch (error: unknown) {

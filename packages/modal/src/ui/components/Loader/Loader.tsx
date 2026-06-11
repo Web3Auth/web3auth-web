@@ -7,7 +7,7 @@ import { MODAL_STATUS } from "../../interfaces";
 import i18n from "../../localeImport";
 import Image from "../Image";
 import SpinnerLoader from "../SpinnerLoader";
-import { AuthorizingStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
+import { AuthorizingStatusType, BlockedStatusType, ConnectedStatusType, ConnectingStatusType, ErroredStatusType, LoaderProps } from "./Loader.type";
 
 /**
  * ConnectingStatus component
@@ -80,6 +80,42 @@ function ErroredStatus(props: ErroredStatusType) {
         />
       </svg>
       {message && <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-400">{message}</p>}
+    </div>
+  );
+}
+
+function BlockedStatus(props: BlockedStatusType) {
+  const [t] = useTranslation(undefined, { i18n });
+  const { primaryMessage, secondaryMessage, buttonMessage, onChangeWallet } = props;
+
+  const handleChangeWallet = () => {
+    // Log the user out before letting them pick another wallet so all sessions are cleared.
+    return onChangeWallet?.();
+  };
+
+  return (
+    <div className="wta:flex wta:flex-col wta:items-center wta:gap-y-4">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 20 20" className="w3a--error-logo">
+        <path
+          fill="currentColor"
+          fillRule="evenodd"
+          d="M18 10a8 8 0 1 1-16.001 0A8 8 0 0 1 18 10m-7 4a1 1 0 1 1-2 0 1 1 0 0 1 2 0m-1-9a1 1 0 0 0-1 1v4a1 1 0 1 0 2 0V6a1 1 0 0 0-1-1"
+          clipRule="evenodd"
+        />
+      </svg>
+      <p className="wta:text-center wta:text-base wta:font-semibold wta:text-app-gray-900 wta:dark:text-app-white">
+        {primaryMessage || t("modal.blocked.primary-message")}
+      </p>
+      <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-400">
+        {secondaryMessage || t("modal.blocked.secondary-message")}
+      </p>
+      <button
+        type="button"
+        onClick={handleChangeWallet}
+        className="wta:rounded-xl wta:bg-app-primary-600 wta:px-6 wta:py-3 wta:text-center wta:text-sm wta:font-medium wta:text-app-white hover:wta:bg-app-primary-700"
+      >
+        {buttonMessage || t("modal.blocked.change-wallet")}
+      </button>
     </div>
   );
 }
@@ -217,6 +253,8 @@ function Loader(props: LoaderProps) {
     externalWalletsConfig,
     handleMobileVerifyConnect,
     hideSuccessScreen = false,
+    blockedUserConfig,
+    onChangeWallet,
     onAcceptConsent,
     onDeclineConsent,
     privacyPolicy,
@@ -258,6 +296,15 @@ function Loader(props: LoaderProps) {
       {isConnectedAccordingToAuthenticationMode && !hideSuccessScreen && <ConnectedStatus message={message} />}
 
       {modalStatus === MODAL_STATUS.ERRORED && <ErroredStatus message={message} />}
+
+      {modalStatus === MODAL_STATUS.BLOCKED && blockedUserConfig && (
+        <BlockedStatus
+          primaryMessage={blockedUserConfig.primaryMessage}
+          secondaryMessage={blockedUserConfig.secondaryMessage}
+          buttonMessage={blockedUserConfig.buttonMessage}
+          onChangeWallet={onChangeWallet}
+        />
+      )}
 
       {modalStatus === MODAL_STATUS.AUTHORIZING && (
         <AuthorizingStatus

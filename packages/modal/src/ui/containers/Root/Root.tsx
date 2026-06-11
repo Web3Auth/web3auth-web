@@ -22,8 +22,15 @@ function RootContent(props: RootProps) {
 
   const [t] = useTranslation(undefined, { i18n });
   const { modalState, shouldShowLoginPage, showPasswordLessInput, areSocialLoginsVisible } = useModalState();
-  const { deviceDetails, uiConfig, isConnectAndSignAuthenticationMode, handleMobileVerifyConnect, handleAcceptConsent, handleDeclineConsent } =
-    useWidget();
+  const {
+    deviceDetails,
+    uiConfig,
+    isConnectAndSignAuthenticationMode,
+    handleMobileVerifyConnect,
+    handleAcceptConsent,
+    handleDeclineConsent,
+    handleChangeWallet,
+  } = useWidget();
   const { chainNamespaces, walletRegistry, privacyPolicy, tncLink, displayInstalledExternalWallets, hideSuccessScreen, consentRequired } = uiConfig;
 
   const contentRef = useRef<HTMLDivElement>(null);
@@ -224,6 +231,8 @@ function RootContent(props: RootProps) {
               externalWalletsConfig={modalState.externalWalletsConfig}
               handleMobileVerifyConnect={handleMobileVerifyConnect}
               hideSuccessScreen={hideSuccessScreen}
+              blockedUserConfig={modalState.blockedUserConfig}
+              onChangeWallet={handleChangeWallet}
               onAcceptConsent={handleAcceptConsent}
               onDeclineConsent={handleDeclineConsent}
               privacyPolicy={privacyPolicy}

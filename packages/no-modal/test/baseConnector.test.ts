@@ -5,6 +5,7 @@ import {
   BaseConnector,
   type BaseConnectorLoginParams,
   CHAIN_NAMESPACES,
+  type ChainNamespaceType,
   type Connection,
   CONNECTOR_CATEGORY,
   type CONNECTOR_CATEGORY_TYPE,
@@ -67,8 +68,15 @@ class TestConnector extends BaseConnector<void> {
 
   async manageMFA(): Promise<void> {}
 
-  async getAuthTokenInfo(): Promise<AuthTokenInfo> {
-    return { idToken: "test" };
+  // Overridable so tests can simulate authorization success/failure (e.g. blocked user).
+  public getAuthTokenInfoImpl: (chainId?: string) => Promise<AuthTokenInfo> = async () => ({ idToken: "test" });
+
+  async getAuthTokenInfo(chainId?: string): Promise<AuthTokenInfo> {
+    return this.getAuthTokenInfoImpl(chainId);
+  }
+
+  async generateChallengeAndSign(): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
+    return { challenge: "challenge", signature: "signature", chainNamespace: CHAIN_NAMESPACES.EIP155 };
   }
 
   async switchChain(params: { chainId: string }): Promise<void> {
@@ -77,6 +85,10 @@ class TestConnector extends BaseConnector<void> {
 
   exposedCheckInit(cfg: { chainConfig?: CustomChainConfig }) {
     this.checkInitializationRequirements(cfg);
+  }
+
+  exposedAuthorizeOrDisconnect(getAuthTokenInfo?: boolean, chainId?: string): Promise<void> {
+    return this.authorizeOrDisconnect(getAuthTokenInfo, chainId);
   }
 }
 
@@ -265,8 +277,7 @@ describe("BaseConnector", () => {
       c.updateConnectorData({ foo: "bar" });
 
       expect(c.connectorData).toEqual({ foo: "bar" });
-      expect(handler).toHaveBeenCalledOnce();
-      expect(handler).toHaveBeenCalledWith({ connectorName: c.name, data: { foo: "bar" } });
+      expect(handler).toHaveBeenCalledExactlyOnceWith({ connectorName: c.name, data: { foo: "bar" } });
     });
   });
 
@@ -274,6 +285,34 @@ describe("BaseConnector", () => {
     it("solanaWallet returns null by default", () => {
       const c = createConnector();
       expect(c.solanaWallet).toBeNull();
+    });
+  });
+
+  describe("authorizeOrDisconnect (blocked user)", () => {
+    it("disconnects and rethrows when authorization fails for a blocked user (code 5120)", async () => {
+      const c = createConnector({ status: CONNECTOR_STATUS.CONNECTED, name: WALLET_CONNECTORS.METAMASK });
+      c.getAuthTokenInfoImpl = vi.fn().mockRejectedValue(WalletLoginError.userBlocked());
+      const disconnectedHandler = vi.fn();
+      c.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedHandler);
+
+      await expect(c.exposedAuthorizeOrDisconnect(true)).rejects.toMatchObject({ code: 5120 });
+      expect(c.getAuthTokenInfoImpl).toHaveBeenCalledOnce();
+      expect(disconnectedHandler).toHaveBeenCalledOnce();
+    });
+
+    it("skips authorization and keeps the connection in connect-only mode (getAuthTokenInfo=false)", async () => {
+      const c = createConnector({ status: CONNECTOR_STATUS.CONNECTED, name: WALLET_CONNECTORS.METAMASK });
+      // Even if authorization would block the user, connect-only mode must never call it.
+      c.getAuthTokenInfoImpl = vi.fn().mockRejectedValue(WalletLoginError.userBlocked());
+      const disconnectedHandler = vi.fn();
+      c.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedHandler);
+
+      await expect(c.exposedAuthorizeOrDisconnect(false)).resolves.toBeUndefined();
+      expect(c.getAuthTokenInfoImpl).not.toHaveBeenCalled();
+      expect(disconnectedHandler).not.toHaveBeenCalled();
+      // The CONNECTED status emitted earlier in the connect flow is preserved.
+      expect(c.status).toBe(CONNECTOR_STATUS.CONNECTED);
+      expect(c.connected).toBe(true);
     });
   });
 });
