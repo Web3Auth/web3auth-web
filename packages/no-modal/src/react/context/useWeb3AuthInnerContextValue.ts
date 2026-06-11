@@ -214,7 +214,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
     };
     const connectorDataUpdatedListener = (data: IConnectorDataEvent) => {
       const updatedData = data.data as { chainId: string };
-      if (updatedData.chainId && chainId !== updatedData.chainId) {
+      if (updatedData.chainId) {
         setChainId(updatedData.chainId);
         setChainNamespace(web3Auth.currentChain?.chainNamespace);
       }
