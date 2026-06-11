@@ -200,7 +200,7 @@ class MetaMaskConnector extends BaseConnector<void> {
           dapp,
           eventHandlers: {
             accountsChanged: (_accounts: string[]) => {
-              if (_accounts.length === 0 && this.multichainClient?.status === "connected") {
+              if (_accounts.length === 0 && this.connected) {
                 this.disconnect();
               }
             },
@@ -210,7 +210,7 @@ class MetaMaskConnector extends BaseConnector<void> {
             },
             connect: (_result: { chainId: string; accounts: string[] }) => {},
             disconnect: () => {
-              if (this.multichainClient?.status === "connected") {
+              if (this.connected) {
                 this.disconnect();
               }
             },
@@ -408,7 +408,9 @@ class MetaMaskConnector extends BaseConnector<void> {
     await this.clearMultichainWalletSessions();
 
     // Disconnect using the multichain client
-    await this.multichainClient.disconnect();
+    if (this.multichainClient.status === "connected") {
+      await this.multichainClient.disconnect();
+    }
 
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
@@ -628,14 +630,12 @@ class MetaMaskConnector extends BaseConnector<void> {
 
     // MetaMask can authorize both EVM and Solana accounts in one session, but BaseConnector
     // caches SIWW tokens under one address at a time. Clear every connected address on disconnect.
-    await Promise.all(
-      Array.from(addresses).map((address) => {
-        this.initSessionManager(address);
-        return this.clearWalletSession();
-      })
-    ).catch((error) => {
-      log.error("Failed to clear multichain wallet sessions", error);
-    });
+    for (const address of addresses) {
+      this.initSessionManager(address);
+      await this.clearWalletSession().catch((error) => {
+        log.error("Failed to clear multichain wallet session", error);
+      });
+    }
   }
 }
 
