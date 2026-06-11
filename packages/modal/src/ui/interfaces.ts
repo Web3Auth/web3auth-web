@@ -223,9 +223,9 @@ export interface ModalState {
 }
 
 export interface BlockedUserConfig {
-  primaryMessage: string;
-  secondaryMessage: string;
-  buttonMessage: string;
+  primaryMessage?: string;
+  secondaryMessage?: string;
+  buttonMessage?: string;
 }
 
 export type SocialLoginEventType = { loginParams: ModalLoginParams };

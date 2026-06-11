@@ -85,6 +85,7 @@ function ErroredStatus(props: ErroredStatusType) {
 }
 
 function BlockedStatus(props: BlockedStatusType) {
+  const [t] = useTranslation(undefined, { i18n });
   const { primaryMessage, secondaryMessage, buttonMessage, onChangeWallet } = props;
 
   const handleChangeWallet = () => {
@@ -102,14 +103,18 @@ function BlockedStatus(props: BlockedStatusType) {
           clipRule="evenodd"
         />
       </svg>
-      <p className="wta:text-center wta:text-base wta:font-semibold wta:text-app-gray-900 wta:dark:text-app-white">{primaryMessage}</p>
-      <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-400">{secondaryMessage}</p>
+      <p className="wta:text-center wta:text-base wta:font-semibold wta:text-app-gray-900 wta:dark:text-app-white">
+        {primaryMessage || t("modal.blocked.primary-message")}
+      </p>
+      <p className="wta:text-center wta:text-sm wta:text-app-gray-500 wta:dark:text-app-gray-400">
+        {secondaryMessage || t("modal.blocked.secondary-message")}
+      </p>
       <button
         type="button"
         onClick={handleChangeWallet}
         className="wta:rounded-xl wta:bg-app-primary-600 wta:px-6 wta:py-3 wta:text-center wta:text-sm wta:font-medium wta:text-app-white hover:wta:bg-app-primary-700"
       >
-        {buttonMessage}
+        {buttonMessage || t("modal.blocked.change-wallet")}
       </button>
     </div>
   );

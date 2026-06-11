@@ -592,9 +592,9 @@ export class LoginModal {
           modalVisibility: true,
           status: MODAL_STATUS.BLOCKED,
           blockedUserConfig: {
-            primaryMessage: this.uiConfig.blockedUserConfig?.primaryMessage || "You cannot access the site.",
-            secondaryMessage: this.uiConfig.blockedUserConfig?.secondaryMessage || "Access to the site is restricted",
-            buttonMessage: this.uiConfig.blockedUserConfig?.buttonMessage || "Change wallet",
+            primaryMessage: this.uiConfig.blockedUserConfig?.primaryMessage,
+            secondaryMessage: this.uiConfig.blockedUserConfig?.secondaryMessage,
+            buttonMessage: this.uiConfig.blockedUserConfig?.buttonMessage,
           },
         });
         return;
