@@ -885,10 +885,13 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     try {
       const connector = this.getConnector(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams?.chainNamespace);
       // auto-connect WalletConnect in background to generate QR code URI without interfering with user's selected connection
-      const shouldStartConnectionInBackground = connector.name === WALLET_CONNECTORS.WALLET_CONNECT_V2;
+      const shouldStartConnectionInBackground = connector?.name === WALLET_CONNECTORS.WALLET_CONNECT_V2;
       if (shouldStartConnectionInBackground) {
         const initialChain = this.getInitialChainIdForConnector(connector);
-        await connector.connect({ chainId: initialChain.chainId });
+        await connector.connect({
+          chainId: initialChain.chainId,
+          getAuthTokenInfo: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+        });
       } else {
         await this.connectTo(params.connector as WALLET_CONNECTOR_TYPE, params.loginParams, LOGIN_MODE.MODAL);
       }
@@ -916,7 +919,10 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
         // refreshing session for wallet connect whenever modal is opened.
         try {
           const initialChain = this.getInitialChainIdForConnector(wcConnector);
-          wcConnector.connect({ chainId: initialChain.chainId });
+          wcConnector.connect({
+            chainId: initialChain.chainId,
+            getAuthTokenInfo: this.options.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+          });
         } catch (error) {
           log.error(`Error while disconnecting to wallet connect in core`, error);
         }

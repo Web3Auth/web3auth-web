@@ -10,6 +10,7 @@ import {
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   IConnector,
+  IWeb3AuthState,
   type LinkedAccountInfo,
   log,
   type WALLET_CONNECTOR_TYPE,
@@ -37,6 +38,10 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
 
   public exposeCheckIfAutoConnect(connector: MockConnector) {
     return this.checkIfAutoConnect(connector as unknown as IConnector<unknown>);
+  }
+
+  public exposeGetInitialChainIdForConnector(connector: MockConnector) {
+    return this.getInitialChainIdForConnector(connector as unknown as IConnector<unknown>);
   }
 
   public exposeSetConsentRequired(value: boolean) {
@@ -222,6 +227,7 @@ describe("Web3AuthNoModal", () => {
 
     expect(sdk.connection).toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: linkedProvider,
       solanaWallet: null,
     });
@@ -279,11 +285,13 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.exposeGetConnectedWalletConnector()).toBe(primaryConnector);
     expect(connectionUpdatedListener).toHaveBeenCalledWith({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: linkedProvider,
       solanaWallet: null,
     });
     expect(sdk.connection).toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: linkedProvider,
       solanaWallet: null,
     });
@@ -379,11 +387,13 @@ describe("Web3AuthNoModal", () => {
     expect(updateProviderEngineProxy).not.toHaveBeenCalled();
     expect(connectionUpdatedListener).toHaveBeenCalledWith({
       connectorName: WALLET_CONNECTORS.AUTH,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: (sdk as unknown as { commonJRPCProvider: unknown }).commonJRPCProvider,
       solanaWallet: null,
     });
     expect(sdk.connection).toEqual({
       connectorName: WALLET_CONNECTORS.AUTH,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: (sdk as unknown as { commonJRPCProvider: unknown }).commonJRPCProvider,
       solanaWallet: null,
     });
@@ -499,6 +509,7 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.exposeGetConnectedWalletConnector(activeAccount)).toBe(linkedConnector);
     expect(sdk.connection).toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: linkedProvider,
       solanaWallet: null,
     });
@@ -616,6 +627,7 @@ describe("Web3AuthNoModal", () => {
     const authProvider = { request: vi.fn() };
     const primaryConnection: Connection = {
       connectorName: WALLET_CONNECTORS.AUTH,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: authProvider as never,
       solanaWallet: null,
     };
@@ -776,6 +788,7 @@ describe("Web3AuthNoModal", () => {
 
     await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: commonJRPCProvider as never,
       solanaWallet: null,
     });
@@ -803,9 +816,93 @@ describe("Web3AuthNoModal", () => {
 
     await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).resolves.toEqual({
       connectorName: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: commonJRPCProvider as never,
       solanaWallet: null,
     });
+  });
+
+  it("uses the first matching namespace chain for namespace-specific connectors from another namespace", () => {
+    const solanaChainId = "0x2";
+    const defaultEvmChainId = "0xaa36a7";
+    const sdk = createSdk(
+      {
+        defaultChainId: defaultEvmChainId,
+        chains: [
+          createChain({ chainId: "0x1" }),
+          createChain({ chainId: defaultEvmChainId, displayName: "Sepolia", rpcTarget: "https://rpc.sepolia.org" }),
+          createChain({ chainNamespace: CHAIN_NAMESPACES.SOLANA, chainId: solanaChainId, rpcTarget: "", ticker: "SOL" }),
+        ],
+      },
+      { currentChainId: solanaChainId }
+    );
+    const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
+
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe("0x1");
+  });
+
+  it("prefers defaultChainId for multichain connectors", () => {
+    const defaultChainId = "0x65";
+    const sdk = createSdk({
+      defaultChainId,
+      chains: [
+        createChain({ chainId: "0x1" }),
+        createChain({ chainId: defaultChainId, displayName: "Solana Mainnet", rpcTarget: "https://rpc.ankr.com/solana" }),
+      ],
+    });
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
+    } as never);
+
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe(defaultChainId);
+  });
+
+  it("keeps the current chain for multichain connectors when defaultChainId is not configured in chains", () => {
+    const currentChainId = "0x1";
+    const sdk = createSdk(
+      {
+        defaultChainId: "0x65",
+        chains: [
+          createChain({ chainId: currentChainId }),
+          createChain({ chainId: "0xaa36a7", displayName: "Sepolia", rpcTarget: "https://rpc.sepolia.org" }),
+        ],
+      },
+      { currentChainId }
+    );
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
+    } as never);
+
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe(currentChainId);
+  });
+
+  it("throws for multichain connectors when defaultChainId is not configured in chains and no current chain is available", () => {
+    const sdk = createSdk({
+      defaultChainId: "0x65",
+      chains: [createChain({ chainId: "0x1" }), createChain({ chainId: "0xaa36a7", displayName: "Sepolia", rpcTarget: "https://rpc.sepolia.org" })],
+    });
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
+    } as never);
+
+    expect(() => sdk.exposeGetInitialChainIdForConnector(connector)).toThrow(
+      WalletInitializationError.invalidParams(`No chain found for ${MULTICHAIN_CONNECTOR_NAMESPACE}`)
+    );
+  });
+
+  it("picks the first chain for multichain connectors when no default chain id is set", () => {
+    const sdk = createSdk({
+      chains: [createChain({ chainId: "0x1" }), createChain({ chainId: "0xaa36a7" })],
+    });
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
+    } as never);
+
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe("0x1");
   });
 
   it("connectTo rejects on ERRORED event", async () => {
@@ -1055,14 +1152,17 @@ describe("Web3AuthNoModal", () => {
 
   it("checkIfAutoConnect returns true only for cached matching connector", () => {
     const sdk = createSdk();
-    (sdk as unknown as { state: Record<string, unknown> }).state = {
+    const state: IWeb3AuthState = {
       primaryConnectorName: null,
       cachedConnector: WALLET_CONNECTORS.METAMASK,
+      cachedConnectorNamespace: CHAIN_NAMESPACES.EIP155,
       currentChainId: "0x1",
       idToken: null,
       accessToken: null,
       refreshToken: null,
+      activeAccount: null,
     };
+    (sdk as unknown as { state: IWeb3AuthState }).state = state;
     const matching = new MockConnector({ name: WALLET_CONNECTORS.METAMASK, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
     const nonMatching = new MockConnector({ name: WALLET_CONNECTORS.AUTH, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
     const multichain = new MockConnector({
@@ -1072,6 +1172,8 @@ describe("Web3AuthNoModal", () => {
 
     expect(sdk.exposeCheckIfAutoConnect(matching)).toBe(true);
     expect(sdk.exposeCheckIfAutoConnect(nonMatching)).toBe(false);
+
+    state.cachedConnectorNamespace = CONNECTOR_NAMESPACES.MULTICHAIN;
     expect(sdk.exposeCheckIfAutoConnect(multichain)).toBe(true);
   });
 });

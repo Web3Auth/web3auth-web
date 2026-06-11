@@ -9,6 +9,7 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  IConnectorDataEvent,
   IWeb3Auth,
   type IWeb3AuthState,
   LOGIN_MODE,
@@ -211,6 +212,14 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       setChainId(web3Auth.currentChainId);
       setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
     };
+    const connectorDataUpdatedListener = (data: IConnectorDataEvent) => {
+      const updatedData = data.data as { chainId: string };
+      if (updatedData.chainId) {
+        setChainId(updatedData.chainId);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace);
+      }
+    };
+
     if (web3Auth) {
       web3Auth.on(CONNECTOR_EVENTS.NOT_READY, notReadyListener);
       web3Auth.on(CONNECTOR_EVENTS.READY, readyListener);
@@ -222,6 +231,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       web3Auth.on(CONNECTOR_EVENTS.REHYDRATION_ERROR, rehydrationErrorListener);
       web3Auth.on(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
       web3Auth.on(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+      web3Auth.on(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, connectorDataUpdatedListener);
 
       if (web3Auth.loginMode === LOGIN_MODE.MODAL) {
         web3Auth.on(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);
@@ -239,6 +249,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       web3Auth.removeListener(CONNECTOR_EVENTS.MFA_ENABLED, mfaEnabledListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.AUTHORIZED, authorizedListener);
       web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTION_UPDATED, connectionUpdatedListener);
+      web3Auth.removeListener(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, connectorDataUpdatedListener);
 
       if (web3Auth.loginMode === LOGIN_MODE.MODAL) {
         web3Auth.removeListener(CONNECTOR_EVENTS.CONSENT_ACCEPTED, consentAcceptedListener);

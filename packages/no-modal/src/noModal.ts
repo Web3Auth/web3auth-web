@@ -42,6 +42,7 @@ import {
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
+  ConnectorNamespaceType,
   type ConnectorParams,
   type CustomChainConfig,
   DISCONNECTED_EVENT_DATA,
@@ -139,6 +140,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     accessToken: null,
     refreshToken: null,
     activeAccount: null,
+    cachedConnectorNamespace: null,
   };
 
   constructor(options: IWeb3AuthCoreOptions, initialState?: Partial<IWeb3AuthState>) {
@@ -360,6 +362,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     await this.setState({
       primaryConnectorName: null,
       cachedConnector: null,
+      cachedConnectorNamespace: null,
       currentChainId: null,
       idToken: null,
       accessToken: null,
@@ -960,7 +963,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     });
 
     // sync chainId
-    this.commonJRPCProvider.on("chainChanged", async (chainId) => this.setCurrentChain(chainId));
+    this.commonJRPCProvider.on("chainChanged", async (chainId) => {
+      await this.setCurrentChain(chainId);
+    });
   }
 
   protected async setupConnector(connector: IConnector<unknown>): Promise<void> {
@@ -1156,7 +1161,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       await this.setState({
         primaryConnectorName: data.connectorName as WALLET_CONNECTOR_TYPE,
       });
-      this.cacheWallet(data.connectorName);
+      this.cacheWallet(data.connectorName, data.connectorNamespace);
 
       const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
       const pendingUserConsent = this.consentRequired && !this.state.hasUserConsent;
@@ -1172,7 +1177,6 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING && this.status !== CONNECTOR_STATUS.AUTHORIZED) {
           this.status = CONNECTOR_STATUS.CONNECTED;
         }
-        log.debug("connected", this.status, this.primaryConnectorName);
         // Defer plugin connection until consent is accepted; otherwise plugins would start before the consent step completes.
         // `completeConsentAcceptance` connects the plugins once the user accepts the consent.
         if (!pendingUserConsent) {
@@ -1287,7 +1291,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // External wallets can resolve to a different active chain than the requested one,
       // so let connector-reported chain updates reconcile Web3Auth state after connect.
       if (typeof data?.data === "object" && data?.data !== null && "chainId" in data.data && typeof data.data.chainId === "string") {
+        const previousChain = this.currentChain;
         await this.setCurrentChain(data.data.chainId);
+        const currentChain = this.currentChain;
+        const connectorEthereumProvider = connector.provider;
+        if (
+          previousChain?.chainNamespace !== currentChain?.chainNamespace &&
+          currentChain?.chainNamespace === CHAIN_NAMESPACES.EIP155 &&
+          connectorEthereumProvider
+        ) {
+          // from sol -> evm namespace switch, we need to re-create AccountAbstractionProvider
+          await this.bindPrimaryEthereumSigningProxy(connectorEthereumProvider, connector.name);
+        }
       }
       log.debug("connector data updated", data);
       this.emit(CONNECTOR_EVENTS.CONNECTOR_DATA_UPDATED, data);
@@ -1342,7 +1357,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected checkIfAutoConnect(connector: IConnector<unknown>): boolean {
-    let autoConnect = this.cachedConnector === connector.name;
+    let autoConnect = this.cachedConnector === connector.name && this.state.cachedConnectorNamespace === connector.connectorNamespace;
     if (autoConnect && this.currentChain?.chainNamespace) {
       if (connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN) autoConnect = true;
       else autoConnect = connector.connectorNamespace === this.currentChain.chainNamespace;
@@ -1356,10 +1371,18 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    */
   protected getInitialChainIdForConnector(connector: IConnector<unknown>): CustomChainConfig {
     let initialChain = this.currentChain;
-    if (initialChain?.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
+    const defaultChainId = this.coreOptions.defaultChainId;
+    const isMultiChainConnector = connector.connectorNamespace === CONNECTOR_NAMESPACES.MULTICHAIN;
+
+    // if the connector is a multi-chain connector and a default chain id is set, use the default chain id
+    if (isMultiChainConnector && defaultChainId) {
+      initialChain = this.coreOptions.chains.find((chain) => chain.chainId === defaultChainId) || this.currentChain;
+    } else if (initialChain?.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
       initialChain = this.coreOptions.chains.find((x) => x.chainNamespace === connector.connectorNamespace);
-      if (!initialChain) throw WalletInitializationError.invalidParams(`No chain found for ${connector.connectorNamespace}`);
     }
+
+    if (!initialChain) throw WalletInitializationError.invalidParams(`No chain found for ${connector.connectorNamespace}`);
+
     return initialChain;
   }
 
@@ -1590,6 +1613,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       ethereumProvider: connectedWallet.signingProvider,
       solanaWallet: connectedWallet.solanaWallet ?? null,
       connectorName: connectedWallet.connector.name,
+      connectorNamespace: connectedWallet.connector.connectorNamespace,
     };
   }
 
@@ -1746,11 +1770,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (!connection) {
       throw WalletLoginError.connectionError("Failed to resolve the active connection after switching accounts.");
     }
-    this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, {
-      ethereumProvider: connection.ethereumProvider,
-      solanaWallet: connection.solanaWallet,
-      connectorName: connection.connectorName,
-    });
+    this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, connection);
   }
 
   private isActiveConnectorEventSource(connector: IConnector<unknown>): boolean {
@@ -1842,9 +1862,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     }
   }
 
-  private async cacheWallet(walletName: string): Promise<void> {
+  private async cacheWallet(walletName: string, connectorNamespace: ConnectorNamespaceType): Promise<void> {
     await this.setState({
       cachedConnector: walletName,
+      cachedConnectorNamespace: connectorNamespace,
     });
   }
 
@@ -1880,7 +1901,12 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   private async bindPrimaryEthereumSigningProxy(ethereumProvider: IProvider, connectorName: WALLET_CONNECTOR_TYPE | string): Promise<void> {
     if (!this.commonJRPCProvider) throw WalletInitializationError.notFound(`CommonJrpcProvider not found`);
-    let finalProvider = (ethereumProvider as IBaseProvider<unknown>)?.provider || (ethereumProvider as SafeEventEmitterProvider);
+    const primaryConnectorProvider = connectorName === this.primaryConnectorName ? this.primaryConnector?.provider : null;
+    const baseEthereumProvider =
+      ethereumProvider === this.commonJRPCProvider || ethereumProvider === this.aaProvider
+        ? (primaryConnectorProvider ?? ethereumProvider)
+        : ethereumProvider;
+    let finalProvider = (baseEthereumProvider as IBaseProvider<unknown>)?.provider || (baseEthereumProvider as SafeEventEmitterProvider);
     const { accountAbstractionConfig } = this.coreOptions;
     const is7702 = accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD["EIP_7702"];
     const isAaSupportedForCurrentChain =
@@ -1890,7 +1916,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // setup AA provider if AA is enabled (skip for EIP-7702; 7702 uses EOA + 5792/7702 RPC only)
     if (!is7702 && isAaSupportedForCurrentChain && (connectorName === WALLET_CONNECTORS.AUTH || this.coreOptions.useAAWithExternalWallet)) {
       const { accountAbstractionProvider, toEoaProvider } = await import("./providers/account-abstraction-provider");
-      const eoaProvider: IProvider = connectorName === WALLET_CONNECTORS.AUTH ? await toEoaProvider(ethereumProvider) : ethereumProvider;
+      const eoaProvider: IProvider = connectorName === WALLET_CONNECTORS.AUTH ? await toEoaProvider(baseEthereumProvider) : baseEthereumProvider;
       const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
       const aaProvider = await accountAbstractionProvider({
         accountAbstractionConfig,

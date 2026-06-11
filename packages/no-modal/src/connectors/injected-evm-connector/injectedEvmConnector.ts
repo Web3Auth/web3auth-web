@@ -6,7 +6,6 @@ import {
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CONNECTED_EVENT_DATA,
   Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
@@ -109,16 +108,18 @@ class InjectedEvmConnector extends BaseEvmConnector<void> {
         }
       };
       this.injectedProvider.on("accountsChanged", accountDisconnectHandler);
+      const connectorNamespace = this.connectorNamespace;
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: this.name,
         reconnected: this.rehydrated,
         ethereumProvider: this.injectedProvider,
         solanaWallet: null,
-      } as CONNECTED_EVENT_DATA);
+        connectorNamespace,
+      });
 
       await this.authorizeOrDisconnect(getAuthTokenInfo);
 
-      return { ethereumProvider: this.injectedProvider, solanaWallet: null, connectorName: this.name };
+      return { ethereumProvider: this.injectedProvider, solanaWallet: null, connectorName: this.name, connectorNamespace };
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

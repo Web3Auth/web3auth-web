@@ -6,7 +6,6 @@ import {
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CONNECTED_EVENT_DATA,
   Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
@@ -120,11 +119,12 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
         reconnected: this.rehydrated,
         ethereumProvider: this.provider,
         solanaWallet: null,
-      } as CONNECTED_EVENT_DATA);
+        connectorNamespace: this.connectorNamespace,
+      });
 
       await this.authorizeOrDisconnect(getAuthTokenInfo);
 
-      return { ethereumProvider: this.provider, solanaWallet: null, connectorName: this.name };
+      return { ethereumProvider: this.provider, solanaWallet: null, connectorName: this.name, connectorNamespace: this.connectorNamespace };
     } catch (error) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

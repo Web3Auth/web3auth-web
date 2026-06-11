@@ -18,7 +18,6 @@ import {
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
   citadelServerUrl,
-  CONNECTED_EVENT_DATA,
   type Connection,
   CONNECTOR_CATEGORY,
   type CONNECTOR_CATEGORY_TYPE,
@@ -253,11 +252,20 @@ class MetaMaskConnector extends BaseConnector<void> {
     if (coreStatus === "connected" && options.autoConnect) {
       this.status = CONNECTOR_STATUS.CONNECTED;
       this.rehydrated = true;
+
+      // Force sync the chain state before connect with rehydrated state.
+      // during rehydration, `createEVMClient` (from above) cause re-creating session for connected the evm provider,
+      // triggering `switchChain` internally and unintentionally update the connector data with the new chain id.
+      // This creates issue in rehydration flow, where Web3Auth connects to the incorrect chain id, not the rehydrated chain id.
+      // Force sync the chain state with the rehydrated chain id to avoid this issue.
+      await this.forceSyncChainState(chainConfig);
+
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
         reconnected: true,
         ethereumProvider: this.evmProvider,
         solanaWallet: this.solanaProvider,
+        connectorNamespace: this.connectorNamespace,
       });
       try {
         await this.authorizeOrDisconnect(options.getAuthTokenInfo, options.chainId);
@@ -331,7 +339,7 @@ class MetaMaskConnector extends BaseConnector<void> {
 
       // sync the chain state after connect
       // metamask might not be connected to the requested chain, so we need to sync the chain state to/from Web3Auth state after connect.
-      await this.syncChainStateAfterConnect(chainConfig);
+      await this.forceSyncChainState(chainConfig);
 
       // check if connected
       if (this.multichainClient.status !== "connected") {
@@ -354,11 +362,17 @@ class MetaMaskConnector extends BaseConnector<void> {
         reconnected: this.rehydrated,
         ethereumProvider: this.evmProvider,
         solanaWallet: this.solanaProvider,
-      } as CONNECTED_EVENT_DATA);
+        connectorNamespace: this.connectorNamespace,
+      });
 
       await this.authorizeOrDisconnect(getAuthTokenInfo, chainId);
 
-      return { ethereumProvider: this.evmProvider, solanaWallet: this.solanaProvider, connectorName: this.name };
+      return {
+        ethereumProvider: this.evmProvider,
+        solanaWallet: this.solanaProvider,
+        connectorName: this.name,
+        connectorNamespace: this.connectorNamespace,
+      };
     } catch (error) {
       // Ready again to be connected
       this.status = CONNECTOR_STATUS.READY;
@@ -439,39 +453,43 @@ class MetaMaskConnector extends BaseConnector<void> {
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
+    await this.ensureInitialized();
 
     const targetChainConfig = this.coreOptions.chains.find((c) => c.chainId === params.chainId);
-    if (targetChainConfig?.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-      // no need to switch chain for Solana
+    if (!targetChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
+
+    if (targetChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
+      if (!this.solanaWallet) {
+        throw WalletLoginError.unsupportedOperation("switchChain requires a Solana client, but no Solana chains are configured.");
+      }
+
+      // For solana case, we don't have the `switchChain` method like `evmClient`.
+      // So, we just need to sync with the connected solana chain to the Web3Auth state.
+      await this.forceSyncChainState(targetChainConfig);
       return;
     }
-
-    await this.ensureInitialized();
 
     if (!this.evmClient) {
       throw WalletLoginError.unsupportedOperation("switchChain requires an EVM client, but no EVM chains are configured.");
     }
 
-    const chainConfig = this.coreOptions.chains.find(
-      (x) => x.chainId === params.chainId && ([CHAIN_NAMESPACES.EIP155] as ChainNamespaceType[]).includes(x.chainNamespace)
-    );
-
-    const chainConfiguration = chainConfig
+    const chainConfiguration = targetChainConfig
       ? {
           chainId: params.chainId,
-          chainName: chainConfig.displayName,
-          rpcUrls: [chainConfig.rpcTarget],
-          blockExplorerUrls: chainConfig.blockExplorerUrl ? [chainConfig.blockExplorerUrl] : undefined,
+          chainName: targetChainConfig.displayName,
+          rpcUrls: [targetChainConfig.rpcTarget],
+          blockExplorerUrls: targetChainConfig.blockExplorerUrl ? [targetChainConfig.blockExplorerUrl] : undefined,
           nativeCurrency: {
-            name: chainConfig.tickerName,
-            symbol: chainConfig.ticker,
-            decimals: chainConfig.decimals || 18,
+            name: targetChainConfig.tickerName,
+            symbol: targetChainConfig.ticker,
+            decimals: targetChainConfig.decimals || 18,
           },
-          iconUrls: chainConfig.logo ? [chainConfig.logo] : undefined,
+          iconUrls: targetChainConfig.logo ? [targetChainConfig.logo] : undefined,
         }
       : undefined;
 
     await this.evmClient.switchChain({ chainId: params.chainId as Hex, chainConfiguration });
+    this.updateConnectorData({ chainId: params.chainId });
   }
 
   public async generateChallengeAndSign(
@@ -541,7 +559,11 @@ class MetaMaskConnector extends BaseConnector<void> {
     await this.initializationPromise;
   }
 
-  private async syncChainStateAfterConnect(chainConfig: CustomChainConfig) {
+  /**
+   * Syncs the chain state with the Web3Auth state.
+   * @param chainConfig - The chain config to sync.
+   */
+  private async forceSyncChainState(chainConfig: CustomChainConfig) {
     // EVM connectors can switch chains, so align the wallet with the requested chain
     // before Web3Auth persists the active chain in controller state.
     if (chainConfig.chainNamespace === CHAIN_NAMESPACES.EIP155 && this.evmProvider?.chainId !== chainConfig.chainId) {
@@ -559,11 +581,7 @@ class MetaMaskConnector extends BaseConnector<void> {
           throw WalletLoginError.connectionError("Connected chain is not available in the chains config");
         }
 
-        if (connectedChainConfig.chainId !== chainConfig.chainId) {
-          // since, switchChain is not supported for solana (in metamask connect),
-          // we will make use of the connector data to update the Web3Auth state.
-          this.updateConnectorData({ chainId: connectedChainConfig.chainId });
-        }
+        this.updateConnectorData({ chainId: chainConfig.chainId });
       }
     }
   }

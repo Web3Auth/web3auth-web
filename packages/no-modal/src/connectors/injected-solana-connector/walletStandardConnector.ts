@@ -26,7 +26,6 @@ import {
   BaseConnectorSettings,
   CHAIN_NAMESPACES,
   ChainNamespaceType,
-  CONNECTED_EVENT_DATA,
   Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_CATEGORY_TYPE,
@@ -122,16 +121,18 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
       if (this.wallet.accounts.length === 0) throw WalletLoginError.connectionError();
 
       this.status = CONNECTOR_STATUS.CONNECTED;
+      const connectorNamespace = this.connectorNamespace;
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: this.name,
         reconnected: this.rehydrated,
         ethereumProvider: null,
         solanaWallet: this.solanaWallet,
-      } as CONNECTED_EVENT_DATA);
+        connectorNamespace,
+      });
 
       await this.authorizeOrDisconnect(getAuthTokenInfo);
 
-      return { ethereumProvider: null, solanaWallet: this.solanaWallet, connectorName: this.name };
+      return { ethereumProvider: null, solanaWallet: this.solanaWallet, connectorName: this.name, connectorNamespace };
     } catch (error: unknown) {
       // ready again to be connected
       this.status = CONNECTOR_STATUS.READY;

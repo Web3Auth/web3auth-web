@@ -1,11 +1,11 @@
 import type { Wallet } from "@wallet-standard/base";
 import { type IStorageAdapter, SafeEventEmitter } from "@web3auth/auth";
 
+import { LinkAccountParams, LinkAccountResult, UnlinkAccountResult } from "../src";
 import {
   type AuthTokenInfo,
   CHAIN_NAMESPACES,
   type ChainNamespaceType,
-  type LinkedAccountInfo,
   type Connection,
   CONNECTOR_CATEGORY,
   CONNECTOR_NAMESPACES,
@@ -13,10 +13,8 @@ import {
   type CustomChainConfig,
   type IConnector,
   type IProvider,
-  type LinkAccountParams,
-  type LinkAccountResult,
+  type LinkedAccountInfo,
   type ProjectConfig,
-  type UnlinkAccountResult,
   type UserInfo,
   WALLET_CONNECTORS,
 } from "../src/base";
