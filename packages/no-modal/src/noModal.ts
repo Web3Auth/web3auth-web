@@ -94,7 +94,7 @@ import {
   type AuthConnectorType,
   isAuthConnector,
 } from "./connectors/auth-connector";
-import { metaMaskConnector } from "./connectors/metamask-connector";
+import { METAMASK_ERC_6963_PROVIDER_RDNS, metaMaskConnector } from "./connectors/metamask-connector";
 import { walletServicesPlugin } from "./plugins/wallet-services-plugin";
 import { type AccountAbstractionProvider } from "./providers/account-abstraction-provider";
 import { CommonJRPCProvider } from "./providers/base-provider";
@@ -1024,12 +1024,20 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       if (chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
         const { createMipd, injectedEvmConnector } = await import("./connectors/injected-evm-connector");
         const evmMipd = createMipd();
+        // `@metamask/connect-evm` SDK announces its own EIP-6963 provider (`io.metamask.mmc`) so
+        // it can be discovered by generic wallet pickers. We already register MetaMask via
+        // `metaMaskConnector`, so we must exclude the SDK-announced provider here; otherwise
+        // it is misclassified as an injected wallet and the modal shows MetaMask as installed,
+        // even when the user does not have the extension installed.
+        const isNonSdkAnnouncedProvider = (providerDetail: { info: { rdns: string } }) =>
+          providerDetail.info.rdns !== METAMASK_ERC_6963_PROVIDER_RDNS;
         // subscribe to new injected connectors
         evmMipd.subscribe((providerDetails) => {
-          const newConnectors = providerDetails.map((providerDetail) => injectedEvmConnector(providerDetail)(config));
+          const filteredProviderDetails = providerDetails.filter(isNonSdkAnnouncedProvider);
+          const newConnectors = filteredProviderDetails.map((providerDetail) => injectedEvmConnector(providerDetail)(config));
           this.setConnectors(newConnectors);
         });
-        connectorFns.push(...evmMipd.getProviders().map(injectedEvmConnector));
+        connectorFns.push(...evmMipd.getProviders().filter(isNonSdkAnnouncedProvider).map(injectedEvmConnector));
       }
     }
 
