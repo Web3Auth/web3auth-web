@@ -1376,7 +1376,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // if the connector is a multi-chain connector and a default chain id is set, use the default chain id
     if (isMultiChainConnector && defaultChainId) {
-      initialChain = this.coreOptions.chains.find((chain) => chain.chainId === defaultChainId);
+      initialChain = this.coreOptions.chains.find((chain) => chain.chainId === defaultChainId) || this.currentChain;
     } else if (initialChain?.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
       initialChain = this.coreOptions.chains.find((x) => x.chainNamespace === connector.connectorNamespace);
     }

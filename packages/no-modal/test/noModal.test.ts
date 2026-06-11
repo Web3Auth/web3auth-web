@@ -10,6 +10,7 @@ import {
   CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   IConnector,
+  IWeb3AuthState,
   type LinkedAccountInfo,
   log,
   type WALLET_CONNECTOR_TYPE,
@@ -857,6 +858,41 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe(defaultChainId);
   });
 
+  it("keeps the current chain for multichain connectors when defaultChainId is not configured in chains", () => {
+    const currentChainId = "0x1";
+    const sdk = createSdk(
+      {
+        defaultChainId: "0x65",
+        chains: [
+          createChain({ chainId: currentChainId }),
+          createChain({ chainId: "0xaa36a7", displayName: "Sepolia", rpcTarget: "https://rpc.sepolia.org" }),
+        ],
+      },
+      { currentChainId }
+    );
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
+    } as never);
+
+    expect(sdk.exposeGetInitialChainIdForConnector(connector).chainId).toBe(currentChainId);
+  });
+
+  it("throws for multichain connectors when defaultChainId is not configured in chains and no current chain is available", () => {
+    const sdk = createSdk({
+      defaultChainId: "0x65",
+      chains: [createChain({ chainId: "0x1" }), createChain({ chainId: "0xaa36a7", displayName: "Sepolia", rpcTarget: "https://rpc.sepolia.org" })],
+    });
+    const connector = new MockConnector({
+      name: WALLET_CONNECTORS.METAMASK,
+      connectorNamespace: MULTICHAIN_CONNECTOR_NAMESPACE,
+    } as never);
+
+    expect(() => sdk.exposeGetInitialChainIdForConnector(connector)).toThrow(
+      WalletInitializationError.invalidParams(`No chain found for ${MULTICHAIN_CONNECTOR_NAMESPACE}`)
+    );
+  });
+
   it("picks the first chain for multichain connectors when no default chain id is set", () => {
     const sdk = createSdk({
       chains: [createChain({ chainId: "0x1" }), createChain({ chainId: "0xaa36a7" })],
@@ -1098,7 +1134,7 @@ describe("Web3AuthNoModal", () => {
 
   it("checkIfAutoConnect returns true only for cached matching connector", () => {
     const sdk = createSdk();
-    const state = {
+    const state: IWeb3AuthState = {
       primaryConnectorName: null,
       cachedConnector: WALLET_CONNECTORS.METAMASK,
       cachedConnectorNamespace: CHAIN_NAMESPACES.EIP155,
@@ -1106,8 +1142,9 @@ describe("Web3AuthNoModal", () => {
       idToken: null,
       accessToken: null,
       refreshToken: null,
+      activeAccount: null,
     };
-    (sdk as unknown as { state: Record<string, unknown> }).state = state;
+    (sdk as unknown as { state: IWeb3AuthState }).state = state;
     const matching = new MockConnector({ name: WALLET_CONNECTORS.METAMASK, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
     const nonMatching = new MockConnector({ name: WALLET_CONNECTORS.AUTH, connectorNamespace: CHAIN_NAMESPACES.EIP155 } as never);
     const multichain = new MockConnector({
