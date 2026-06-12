@@ -34,6 +34,7 @@ import {
   getSolanaChainByChainConfig,
   type IProvider,
   isUserRejectedError,
+  log,
   type UserInfo,
   WALLET_CONNECTOR_TYPE,
   WALLET_CONNECTORS,
@@ -67,6 +68,12 @@ export interface MetaMaskConnectorSettings {
 export interface MetaMaskConnectorOptions extends BaseConnectorSettings {
   connectorSettings?: MetaMaskConnectorSettings;
 }
+
+// `@metamask/connect-evm` announces its SDK-backed provider over EIP-6963 with this
+// RDNS value. Web3Auth uses the dedicated `metaMaskConnector` for MetaMask, so MIPD
+// discovery should ignore this provider to avoid treating the QR/deeplink transport
+// as a native injected wallet.
+export const METAMASK_ERC_6963_PROVIDER_RDNS = "io.metamask.mmc";
 
 class MetaMaskConnector extends BaseConnector<void> {
   readonly connectorNamespace: ConnectorNamespaceType = CONNECTOR_NAMESPACES.MULTICHAIN;
@@ -398,10 +405,12 @@ class MetaMaskConnector extends BaseConnector<void> {
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     if (!this.multichainClient) throw WalletLoginError.connectionError("Multichain client is not available");
     this.checkDisconnectionRequirements();
-    await this.clearWalletSession();
+    await this.clearMultichainWalletSessions();
 
     // Disconnect using the multichain client
-    await this.multichainClient.disconnect();
+    if (this.multichainClient.status === "connected") {
+      await this.multichainClient.disconnect();
+    }
 
     if (options.cleanup) {
       this.status = CONNECTOR_STATUS.NOT_READY;
@@ -600,6 +609,33 @@ class MetaMaskConnector extends BaseConnector<void> {
       : this.evmProvider
         ? this.coreOptions.chains.find((x) => x.chainId === evmChainId)
         : undefined;
+  }
+
+  private async clearMultichainWalletSessions(): Promise<void> {
+    const addresses = new Set<string>();
+
+    if (this.evmProvider) {
+      const evmAccounts = await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
+      evmAccounts.forEach((account) => addresses.add(account));
+    }
+
+    if (this.solanaProvider) {
+      this.solanaProvider.accounts.forEach((account) => addresses.add(account.address));
+    }
+
+    if (addresses.size === 0) {
+      await this.clearWalletSession();
+      return;
+    }
+
+    // MetaMask can authorize both EVM and Solana accounts in one session, but BaseConnector
+    // caches SIWW tokens under one address at a time. Clear every connected address on disconnect.
+    for (const address of addresses) {
+      this.initSessionManager(address);
+      await this.clearWalletSession().catch((error) => {
+        log.error("Failed to clear multichain wallet session", error);
+      });
+    }
   }
 }
 
