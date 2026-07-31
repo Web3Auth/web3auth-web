@@ -40,9 +40,9 @@ export function createWalletMiddlewareV2({
 
     const req = p.request;
     const txParams = req.params?.[0] ?? { from: "" };
-    txParams.from = await validateAndNormalizeKeyholder(txParams.from, req);
+    const from = await validateAndNormalizeKeyholder(txParams.from, req);
 
-    return processTransaction(txParams, req);
+    return processTransaction({ ...txParams, from }, req);
   }
 
   async function ethSignTransactionHandler(p: MiddlewareParams<JRPCRequest<[TransactionParams]>>) {
@@ -50,9 +50,9 @@ export function createWalletMiddlewareV2({
 
     const req = p.request;
     const txParams = req.params?.[0] ?? { from: "" };
-    txParams.from = await validateAndNormalizeKeyholder(txParams.from, req);
+    const from = await validateAndNormalizeKeyholder(txParams.from, req);
 
-    return processSignTransaction(txParams, req);
+    return processSignTransaction({ ...txParams, from }, req);
   }
 
   // Message signatures
