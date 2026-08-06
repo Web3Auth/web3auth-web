@@ -1914,7 +1914,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       ethereumProvider === this.commonJRPCProvider || ethereumProvider === this.aaProvider
         ? (primaryConnectorProvider ?? ethereumProvider)
         : ethereumProvider;
-    let finalProvider = (baseEthereumProvider as IBaseProvider<unknown>)?.provider || (baseEthereumProvider as SafeEventEmitterProvider);
+    // For WalletConnect v2, bind the provider wrapper: its inner `.provider` is a
+    // per-chain engine that is replaced on every chain switch and never emits events,
+    // so binding it leaves commonJRPCProvider on the connect-time chain forever.
+    let finalProvider =
+      connectorName === WALLET_CONNECTORS.WALLET_CONNECT_V2
+        ? (baseEthereumProvider as SafeEventEmitterProvider)
+        : (baseEthereumProvider as IBaseProvider<unknown>)?.provider || (baseEthereumProvider as SafeEventEmitterProvider);
     const { accountAbstractionConfig } = this.coreOptions;
     const is7702 = accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD["EIP_7702"];
     const isAaSupportedForCurrentChain =
