@@ -28,11 +28,11 @@
   "devDependencies": {
     "@toruslabs/eslint-config-react": "^4.1.4",
     "@types/node": "^22.10.1",
-    "@vitejs/plugin-react": "^4.3.4",
+    "@vitejs/plugin-react": "^4.7.0",
     "buffer": "^6.0.3",
     "process": "^0.11.10",
     "typescript": "^5.2.2",
-    "vite": "^6.4.2",
+    "vite": "^8.1.5",
     "vite-tsconfig-paths": "^5.1.3",
     "webpack-bundle-analyzer": "^4.10.2"
   }
