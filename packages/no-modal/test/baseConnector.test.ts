@@ -90,6 +90,14 @@ class TestConnector extends BaseConnector<void> {
   exposedAuthorizeOrDisconnect(getAuthTokenInfo?: boolean, chainId?: string): Promise<void> {
     return this.authorizeOrDisconnect(getAuthTokenInfo, chainId);
   }
+
+  exposedClearWalletSession(): Promise<void> {
+    return this.clearWalletSession();
+  }
+
+  exposedInitSessionManager(address: string): void {
+    this.initSessionManager(address);
+  }
 }
 
 function createConnector(
@@ -313,6 +321,22 @@ describe("BaseConnector", () => {
       // The CONNECTED status emitted earlier in the connect flow is preserved.
       expect(c.status).toBe(CONNECTOR_STATUS.CONNECTED);
       expect(c.connected).toBe(true);
+    });
+  });
+
+  describe("clearWalletSession", () => {
+    it("clears local session data without calling citadel logout when no SIWW tokens exist", async () => {
+      const c = createConnector({ status: CONNECTOR_STATUS.CONNECTED, name: WALLET_CONNECTORS.METAMASK });
+      c.exposedInitSessionManager("0xabc");
+      const sessionManager = (c as unknown as { authSessionManager: { logout: ReturnType<typeof vi.fn>; clearSessionData: ReturnType<typeof vi.fn> } })
+        .authSessionManager;
+      sessionManager.logout = vi.fn();
+      sessionManager.clearSessionData = vi.fn().mockResolvedValue(undefined);
+
+      await c.exposedClearWalletSession();
+
+      expect(sessionManager.logout).not.toHaveBeenCalled();
+      expect(sessionManager.clearSessionData).toHaveBeenCalledOnce();
     });
   });
 });

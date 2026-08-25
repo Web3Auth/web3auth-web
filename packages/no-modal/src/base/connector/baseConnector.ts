@@ -226,11 +226,19 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
 
   protected async clearWalletSession(): Promise<void> {
     if (!this.authSessionManager) return;
+    const sessionManager = this.authSessionManager;
     try {
-      await this.authSessionManager.logout();
+      const [accessToken, refreshToken] = await Promise.all([sessionManager.getAccessToken(), sessionManager.getRefreshToken()]);
+      // Connect-only flows never establish a SIWW session; skip the citadel logout
+      // call so disconnect does not emit a noisy 401 when no tokens exist.
+      if (accessToken || refreshToken) {
+        await sessionManager.logout();
+      } else {
+        await sessionManager.clearSessionData();
+      }
     } catch {
       try {
-        await this.authSessionManager.clearSessionData();
+        await sessionManager.clearSessionData();
       } catch {
         // best-effort cleanup; don't block disconnect
         log.error("Failed to clear wallet session");
