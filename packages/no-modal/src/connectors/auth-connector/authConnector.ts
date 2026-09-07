@@ -374,32 +374,38 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     const accessToken = await this.authInstance.authSessionManager.getAccessToken();
     if (!accessToken) throw WalletLoginError.connectionError("Could not obtain an access token from the current AUTH session.");
 
-    const citadelUserInfo = await get<UserInfoWithLinkedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    });
-    if (!citadelUserInfo?.accounts?.length) return [];
-
-    const currentChainNamespace = this.solanaWallet?.accounts.length > 0 ? CHAIN_NAMESPACES.SOLANA : "evm"; // Note: citadel chain namespace is "evm" for EVM chains
-    const filteredLinkedAccounts: LinkedAccountInfo[] = [];
-    for (const account of citadelUserInfo.accounts) {
-      const { chainNamespace, isPrimary, accountType } = account;
-
-      // for now, we will take all primary accounts as a **SINGLE** linked account
-      // we don't wanna populate the multiple primary accounts as different linked accounts
-      // so, we hide the primary accounts for other chain namespaces
-      // also, linked `account_abstraction` accounts are derived from the primary account, so we don't need to show them separately
-      // TODO: revisit this logic once we have a concrete plan for handling multiple primary accounts
-      if ((isPrimary && chainNamespace && chainNamespace !== currentChainNamespace) || accountType === "account_abstraction") continue;
-
-      filteredLinkedAccounts.push({
-        ...account,
-        // by default, the primary account is the active account
-        active: isPrimary,
+    try {
+      const citadelUserInfo = await get<UserInfoWithLinkedAccounts>(`${citadelServerUrl(this.coreOptions.authBuildEnv)}/v1/user`, {
+        headers: {
+          Authorization: `Bearer ${accessToken}`,
+        },
       });
+      if (!citadelUserInfo?.accounts?.length) return [];
+
+      const currentChainNamespace = this.solanaWallet?.accounts.length > 0 ? CHAIN_NAMESPACES.SOLANA : "evm"; // Note: citadel chain namespace is "evm" for EVM chains
+      const filteredLinkedAccounts: LinkedAccountInfo[] = [];
+      for (const account of citadelUserInfo.accounts) {
+        const { chainNamespace, isPrimary, accountType } = account;
+
+        // for now, we will take all primary accounts as a **SINGLE** linked account
+        // we don't wanna populate the multiple primary accounts as different linked accounts
+        // so, we hide the primary accounts for other chain namespaces
+        // also, linked `account_abstraction` accounts are derived from the primary account, so we don't need to show them separately
+        // TODO: revisit this logic once we have a concrete plan for handling multiple primary accounts
+        if ((isPrimary && chainNamespace && chainNamespace !== currentChainNamespace) || accountType === "account_abstraction") continue;
+
+        filteredLinkedAccounts.push({
+          ...account,
+          // by default, the primary account is the active account
+          active: isPrimary,
+        });
+      }
+      return filteredLinkedAccounts;
+    } catch (error) {
+      // Failed to get linked accounts from citadel, so we will return an empty array.
+      log.warn("Failed to get linked accounts with auth provider", error);
+      return [];
     }
-    return filteredLinkedAccounts;
   }
 
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
