@@ -185,10 +185,6 @@ const loginMethodsConfig = computed(() => {
       authConnectionId: customEmailAuthConnectionId,
       groupedAuthConnectionId: customEmailGroupedAuthConnectionId,
     },
-    sms_passwordless: {
-      authConnectionId: customSmsAuthConnectionId,
-      groupedAuthConnectionId: customSmsGroupedAuthConnectionId,
-    },
   };
   if (formData.loginProviders.length === 0) return customConfig;
 
@@ -201,10 +197,6 @@ const loginMethodsConfig = computed(() => {
   if (config.email_passwordless) {
     config.email_passwordless.authConnectionId = customEmailAuthConnectionId;
     config.email_passwordless.groupedAuthConnectionId = customEmailGroupedAuthConnectionId;
-  }
-  if (config.sms_passwordless) {
-    config.sms_passwordless.authConnectionId = customSmsAuthConnectionId;
-    config.sms_passwordless.groupedAuthConnectionId = customSmsGroupedAuthConnectionId;
   }
 
   const loginMethods: LoginMethodConfig = JSON.parse(JSON.stringify(config));
