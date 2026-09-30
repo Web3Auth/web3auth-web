@@ -5,6 +5,7 @@
   },
   "description": "Monorepo for web3 auth packages",
   "devDependencies": {
+    "@solana/kit": "^6.9.0",
     "@toruslabs/config": "^4.0.1",
     "@toruslabs/eslint-config-typescript": "^5.0.2",
     "@toruslabs/torus-scripts": "^8.1.0",
@@ -74,9 +75,6 @@
   ],
   "overrides": {
     "react": "19.2.7",
-    "react-dom": "19.2.7",
-    "@solana-program/compute-budget": "^0.15.0",
-    "@solana-program/token": "^0.12.0",
-    "@solana-program/token-2022": "^0.9.0"
+    "react-dom": "19.2.7"
   }
 }
