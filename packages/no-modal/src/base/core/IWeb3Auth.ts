@@ -135,7 +135,9 @@ export interface IWeb3AuthCoreOptions {
   /**
    * Account abstraction config for your chain namespace
    */
-  accountAbstractionConfig?: AccountAbstractionMultiChainConfig;
+  accountAbstractionConfig?: AccountAbstractionMultiChainConfig & {
+    gaslessTransfers?: boolean;
+  };
 
   /**
    * Whether to use AA with external wallet
