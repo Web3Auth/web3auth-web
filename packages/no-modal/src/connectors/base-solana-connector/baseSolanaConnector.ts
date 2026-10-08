@@ -9,6 +9,7 @@ import {
   CONNECTOR_EVENTS,
   CONNECTOR_STATUS,
   ConnectorInitOptions,
+  createSolanaSiwwPayload,
   getSolanaChainByChainConfig,
   WALLET_CONNECTOR_TYPE,
   WalletInitializationError,
@@ -56,18 +57,10 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     if (!currentChainConfig) {
       throw WalletInitializationError.invalidParams("No Solana chain in common between the connected wallet and Web3Auth chain configuration");
     }
-    const { chainId, chainNamespace } = currentChainConfig;
+    const { chainNamespace } = currentChainConfig;
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
 
-    const payload = {
-      domain: window.location.origin,
-      uri: window.location.href,
-      address: accountsToUse[0],
-      chainId: parseInt(chainId, 16),
-      version: "1",
-      nonce: generateSiweNonce(),
-      issuedAt: new Date().toISOString(),
-    };
+    const payload = createSolanaSiwwPayload(currentChainConfig, accountsToUse[0], generateSiweNonce(), new Date().toISOString());
 
     const challenge = await signChallenge(payload, chainNamespace, authServer);
     const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accountsToUse[0]);
