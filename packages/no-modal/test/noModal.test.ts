@@ -727,6 +727,70 @@ describe("Web3AuthNoModal", () => {
     expect(sdk.coreOptions.accountAbstractionConfig?.chains).toHaveLength(2);
   });
 
+  it("initAccountAbstractionConfig copies dashboard gaslessTransfers", () => {
+    const sdk = createSdk();
+    sdk.exposeInitAccountAbstractionConfig(
+      createProjectConfig({
+        smartAccounts: {
+          eipStandard: "7702",
+          smartAccountType: "metamask",
+          gaslessTransfers: true,
+          chains: [],
+        } as never,
+      })
+    );
+    expect(sdk.coreOptions.accountAbstractionConfig?.gaslessTransfers).toBe(true);
+    expect(sdk.coreOptions.accountAbstractionConfig?.smartAccountType).toBe("metamask");
+    expect(sdk.coreOptions.accountAbstractionConfig?.smartAccountEipStandard).toBe("7702");
+  });
+
+  it("initAccountAbstractionConfig lets constructor gaslessTransfers override dashboard", () => {
+    const sdk = createSdk({
+      accountAbstractionConfig: {
+        smartAccountType: "metamask",
+        smartAccountEipStandard: "7702",
+        gaslessTransfers: false,
+        chains: [],
+      },
+    });
+    sdk.exposeInitAccountAbstractionConfig(
+      createProjectConfig({
+        smartAccounts: {
+          eipStandard: "7702",
+          smartAccountType: "metamask",
+          gaslessTransfers: true,
+          chains: [],
+        } as never,
+      })
+    );
+    expect(sdk.coreOptions.accountAbstractionConfig?.gaslessTransfers).toBe(false);
+  });
+
+  it("initAccountAbstractionConfig keeps constructor gaslessTransfers when dashboard omits it", () => {
+    const sdk = createSdk({
+      accountAbstractionConfig: {
+        smartAccountType: "metamask",
+        smartAccountEipStandard: "7702",
+        gaslessTransfers: true,
+        chains: [],
+      },
+    });
+    sdk.exposeInitAccountAbstractionConfig(createProjectConfig({ smartAccounts: { chains: [] } as never }));
+    expect(sdk.coreOptions.accountAbstractionConfig?.gaslessTransfers).toBe(true);
+  });
+
+  it("initAccountAbstractionConfig rejects gaslessTransfers without MetaMask EIP-7702", () => {
+    const sdk = createSdk({
+      accountAbstractionConfig: {
+        smartAccountType: "safe",
+        smartAccountEipStandard: "4337",
+        gaslessTransfers: true,
+        chains: [{ chainId: "0x1", bundlerConfig: { url: "https://bundler.user.example.com" } }],
+      },
+    });
+    expect(() => sdk.exposeInitAccountAbstractionConfig(createProjectConfig())).toThrow(WalletInitializationError);
+  });
+
   it("switchChain no-ops on same chain and throws for unknown chain", async () => {
     const sdk = createSdk();
     const provider = { switchChain: vi.fn() };

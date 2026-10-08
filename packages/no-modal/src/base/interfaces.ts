@@ -38,6 +38,11 @@ export interface SmartAccountsConfig {
   eipStandard: SmartAccountEipStandardType | undefined;
   smartAccountType: SmartAccountType;
   walletScope: SmartAccountWalletScope;
+  /**
+   * Enable automatic gasless ERC-20 transfers for MetaMask EIP-7702 accounts.
+   * Constructor `accountAbstractionConfig.gaslessTransfers` overrides this value.
+   */
+  gaslessTransfers?: boolean;
   chains: {
     chainId: string;
     bundlerConfig: {
