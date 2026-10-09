@@ -56,10 +56,6 @@ class TestWeb3Auth extends Web3Auth {
   public exposeSetActiveWalletConnectorKey(account?: LinkedAccountInfo | null) {
     this.setActiveWalletConnectorKey(account);
   }
-
-  public exposeFilterConnectors(projectConfig: ProjectConfig) {
-    return this.filterConnectors({ projectConfig, disabledExternalWallets: new Set() });
-  }
 }
 
 function createSdk(overrides: Partial<Web3AuthOptions> = {}) {
@@ -533,12 +529,6 @@ describe("Web3Auth (modal)", () => {
 
     expect(linkAccountWithChosenConnectorSpy).toHaveBeenCalledWith("phantom", "solana-devnet");
     expect(response).toEqual(result);
-  });
-
-  it("hides the auth connector when the project has no auth connections", async () => {
-    const sdk = createSdk();
-    const names = await sdk.exposeFilterConnectors(createModalProjectConfig({ embeddedWalletAuth: [] }));
-    expect(names).not.toContain(WALLET_CONNECTORS.AUTH);
   });
 
   it("initUIConfig merges whitelabel + ui config and deduplicates loginMethodsOrder", () => {

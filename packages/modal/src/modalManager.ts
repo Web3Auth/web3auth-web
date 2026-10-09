@@ -598,7 +598,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  protected async filterConnectors({
+  private async filterConnectors({
     projectConfig,
     disabledExternalWallets,
   }: {
