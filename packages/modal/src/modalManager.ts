@@ -460,7 +460,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     });
 
     // merge login methods order from project config and user config, with user config taking precedence
-    const defaultAuthConnections = projectConfig.embeddedWalletAuth.filter((x) => x.isDefault).map((x) => x.authConnection);
+    const defaultAuthConnections = (projectConfig.embeddedWalletAuth || []).filter((x) => x.isDefault).map((x) => x.authConnection);
     const mergedAuthConnections = [...(this.options.uiConfig.loginMethodsOrder || []), ...defaultAuthConnections];
     const loginMethodsOrder = [];
     const authConnectionSet = new Set();
@@ -598,7 +598,7 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
     }
   }
 
-  private async filterConnectors({
+  protected async filterConnectors({
     projectConfig,
     disabledExternalWallets,
   }: {
@@ -691,6 +691,11 @@ export class Web3Auth extends Web3AuthNoModal implements IWeb3AuthModal {
       // check if connector is configured/added by user and exist in connectors map.
       const connectorConfig = this.modalConfig.connectors?.[connectorName];
       if (!connector) {
+        // No auth connections means the Auth connector is not loaded. Hide it instead of failing init.
+        if (connectorName === WALLET_CONNECTORS.AUTH && (projectConfig.embeddedWalletAuth?.length ?? 0) === 0) {
+          this.modalConfig.connectors[connectorName] = { ...connectorConfig, showOnModal: false };
+          return;
+        }
         if (connectorConfig.showOnModal) throw WalletInitializationError.invalidParams(`Connector ${connectorName} is not configured`);
         return;
       }

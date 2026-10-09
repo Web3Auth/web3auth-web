@@ -1,5 +1,6 @@
 "use client";
 
+import { CONNECTOR_INITIAL_AUTHENTICATION_MODE } from "@web3auth/modal";
 import {
   useCheckout,
   useEnableMFA,
@@ -15,7 +16,9 @@ import {
 import { useConnection, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain, useChains } from "wagmi";
 
 const Main = () => {
-  const { isConnected, isAuthorized } = useWeb3Auth();
+  const { isConnected, isAuthorized, web3Auth } = useWeb3Auth();
+  const showLoggedInView =
+    web3Auth?.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY ? isConnected : isAuthorized;
   const { mutate: switchChain } = useSwitchChain();
   const chains = useChains();
   const chainId = useChainId();
@@ -224,7 +227,7 @@ const Main = () => {
     <div className="grid">
       <p>Web3Auth: {isConnected ? "Connected" : "Disconnected"}</p>
       <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p>
-      {isAuthorized ? loggedInView : unloggedInView}
+      {showLoggedInView ? loggedInView : unloggedInView}
     </div>
   );
 };
