@@ -984,8 +984,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   protected async loadConnectors({ projectConfig, modalMode }: { projectConfig: ProjectConfig; modalMode?: boolean }) {
-    // always add auth connector
-    const connectorFns = [...(this.coreOptions.connectors || []), authConnector()];
+    // Auth init throws when embeddedWalletAuth is empty. Skip it for external-wallet-only projects.
+    const connectorFns = [...(this.coreOptions.connectors || [])];
+    if ((projectConfig.embeddedWalletAuth?.length ?? 0) > 0) {
+      connectorFns.push(authConnector());
+    }
     const config = {
       projectConfig,
       coreOptions: this.coreOptions,
@@ -1105,9 +1108,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.connectionReconnected = data.reconnected;
 
       const { activeAccount, currentChainId } = this.state;
+      const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
 
-      // when ssr is enabled, we need to get the idToken from the connector.
-      if (this.coreOptions.ssr) {
+      // In connect-and-sign mode the connector signs after CONNECTED and the AUTHORIZED handler stores the tokens.
+      // A second request here would show a second sign message.
+      if (this.coreOptions.ssr && !isConnectAndSign) {
         try {
           const data = await connector.getAuthTokenInfo(currentChainId);
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
@@ -1171,15 +1176,13 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       });
       this.cacheWallet(data.connectorName, data.connectorNamespace);
 
-      const isConnectAndSign = this.coreOptions.initialAuthenticationMode === CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN;
       const pendingUserConsent = this.consentRequired && !this.state.hasUserConsent;
       if (pendingUserConsent && !isConnectAndSign) {
         this.status = CONNECTOR_STATUS.CONSENT_REQUIRING;
         this.emit(CONNECTOR_EVENTS.CONSENT_REQUIRING, { ...data });
         log.debug("consent_requiring", this.status, this.primaryConnectorName);
       } else {
-        // In CONNECT_AND_SIGN mode the AUTHORIZED handler can run before this point (e.g. when `ssr=true`
-        // this handler `await`s `connector.getAuthTokenInfo()` which fires AUTHORIZED mid-execution).
+        // AUTHORIZED can run while this handler awaits rehydration or provider bind.
         // Don't downgrade an already-advanced status (CONSENT_REQUIRING or AUTHORIZED) back to CONNECTED;
         // otherwise `acceptConsent` would throw "Cannot accept consent: not in consent_requiring state".
         if (this.status !== CONNECTOR_STATUS.CONSENT_REQUIRING && this.status !== CONNECTOR_STATUS.AUTHORIZED) {

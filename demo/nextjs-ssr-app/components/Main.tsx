@@ -15,7 +15,7 @@ import {
 import { useConnection, useBalance, useChainId, useSignMessage, useSignTypedData, useSwitchChain, useChains } from "wagmi";
 
 const Main = () => {
-  const { provider, isConnected } = useWeb3Auth();
+  const { isConnected, isAuthorized } = useWeb3Auth();
   const { mutate: switchChain } = useSwitchChain();
   const chains = useChains();
   const chainId = useChainId();
@@ -224,7 +224,7 @@ const Main = () => {
     <div className="grid">
       <p>Web3Auth: {isConnected ? "Connected" : "Disconnected"}</p>
       <p>Wagmi: {isWagmiConnected ? "Connected" : "Disconnected"}</p>
-      {provider ? loggedInView : unloggedInView}
+      {isAuthorized ? loggedInView : unloggedInView}
     </div>
   );
 };
