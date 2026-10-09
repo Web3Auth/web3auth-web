@@ -75,6 +75,11 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
   public exposeProcessSwitchAccountResult(...args: Parameters<Web3AuthNoModal["processSwitchAccountResult"]>) {
     return this.processSwitchAccountResult(...args);
   }
+
+  public async exposeLoadConnectors(projectConfig: ReturnType<typeof createProjectConfig>) {
+    await this.loadConnectors({ projectConfig });
+    return this.connectors.map((connector) => connector.name);
+  }
 }
 
 type WsAccountsChangedTestProvider = SafeEventEmitter & {
@@ -1176,6 +1181,79 @@ describe("Web3AuthNoModal", () => {
     state.cachedConnectorNamespace = CONNECTOR_NAMESPACES.MULTICHAIN;
     expect(sdk.exposeCheckIfAutoConnect(multichain)).toBe(true);
   });
+
+  it("skips the auth connector when embeddedWalletAuth is empty", async () => {
+    const sdk = createSdk({ multiInjectedProviderDiscovery: false });
+    const names = await sdk.exposeLoadConnectors(
+      createProjectConfig({
+        embeddedWalletAuth: [],
+        externalWalletAuth: {},
+      })
+    );
+
+    expect(names).not.toContain(WALLET_CONNECTORS.AUTH);
+    expect(names).toContain(WALLET_CONNECTORS.METAMASK);
+  });
+
+  it("adds the auth connector when embeddedWalletAuth has an entry", async () => {
+    const sdk = createSdk({ multiInjectedProviderDiscovery: false });
+    const names = await sdk.exposeLoadConnectors(
+      createProjectConfig({
+        embeddedWalletAuth: [{ authConnection: "google", authConnectionId: "web3auth", isDefault: true }],
+        externalWalletAuth: {},
+      })
+    );
+
+    expect(names).toContain(WALLET_CONNECTORS.AUTH);
+  });
+
+  it("does not request the auth token from the CONNECTED handler in connect-and-sign mode when ssr is true", async () => {
+    const storage = createMockStorage();
+    const sdk = createSdk({
+      ssr: true,
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      storage: { sessionId: storage },
+    });
+    const getAuthTokenInfo = vi.fn(async () => ({ idToken: "id-token" }));
+    const connector = emitMetaMaskConnected(sdk, { request: vi.fn().mockResolvedValue(["0xAbC123"]) }, { getAuthTokenInfo });
+
+    await vi.waitFor(() => {
+      expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
+    });
+    expect(getAuthTokenInfo).not.toHaveBeenCalled();
+
+    connector.emit(CONNECTOR_EVENTS.AUTHORIZED, {
+      connector: WALLET_CONNECTORS.METAMASK,
+      authTokenInfo: { idToken: "id-token", accessToken: "access-token", refreshToken: "refresh-token" },
+    });
+    await vi.waitFor(async () => {
+      const stateJson = await storage.get(WEB3AUTH_STATE_STORAGE_KEY);
+      expect(JSON.parse(stateJson!).idToken).toBe("id-token");
+    });
+
+    const restored = createSdk({
+      ssr: true,
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
+      storage: { sessionId: storage },
+    });
+    await vi.waitFor(() => {
+      expect(restored.idToken).toBe("id-token");
+      expect(restored.status).toBe(CONNECTOR_STATUS.AUTHORIZED);
+    });
+  });
+
+  it("still requests the auth token from the CONNECTED handler in connect-only mode when ssr is true", async () => {
+    const sdk = createSdk({
+      ssr: true,
+      initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
+    });
+    const getAuthTokenInfo = vi.fn(async () => ({ idToken: "id-token" }));
+    emitMetaMaskConnected(sdk, { request: vi.fn().mockResolvedValue(["0xAbC123"]) }, { getAuthTokenInfo });
+
+    await vi.waitFor(() => {
+      expect(getAuthTokenInfo).toHaveBeenCalledTimes(1);
+    });
+  });
 });
 
 function createSdk(overrides: Record<string, unknown> = {}, initialState?: Record<string, unknown>): TestWeb3AuthNoModal {
@@ -1193,8 +1271,8 @@ function createSdk(overrides: Record<string, unknown> = {}, initialState?: Recor
   );
 }
 
-function emitMetaMaskConnected(sdk: TestWeb3AuthNoModal, ethereumProvider: unknown): MockConnector {
-  const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
+function emitMetaMaskConnected(sdk: TestWeb3AuthNoModal, ethereumProvider: unknown, connectorOverrides: Partial<MockConnector> = {}): MockConnector {
+  const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK, ...connectorOverrides } as never);
   (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
   sdk.exposeSubscribeToConnectorEvents(connector);
   (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {
