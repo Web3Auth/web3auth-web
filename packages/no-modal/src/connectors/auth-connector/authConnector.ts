@@ -984,6 +984,10 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
           reconnected: this.rehydrated,
           connectorNamespace,
         });
+
+        if (params.getAuthTokenInfo) {
+          await this.getAuthTokenInfo();
+        }
       }
     }
   }
