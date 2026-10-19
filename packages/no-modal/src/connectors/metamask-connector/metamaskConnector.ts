@@ -29,6 +29,7 @@ import {
   type ConnectorInitOptions,
   type ConnectorNamespaceType,
   type ConnectorParams,
+  createSolanaSiwwPayload,
   CustomChainConfig,
   getCaipChainId,
   getSolanaChainByChainConfig,
@@ -522,15 +523,18 @@ class MetaMaskConnector extends BaseConnector<void> {
     }
 
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
-    const payload = {
-      domain: window.location.origin,
-      uri: window.location.href,
-      address: accountsToUse[0],
-      chainId: parseInt(activeChainConfig.chainId, 16),
-      version: "1",
-      nonce: generateSiweNonce(),
-      issuedAt: new Date().toISOString(),
-    };
+    const payload =
+      chainNamespace === CHAIN_NAMESPACES.SOLANA
+        ? createSolanaSiwwPayload(activeChainConfig, accountsToUse[0], generateSiweNonce(), new Date().toISOString())
+        : {
+            domain: window.location.origin,
+            uri: window.location.href,
+            address: accountsToUse[0],
+            chainId: parseInt(activeChainConfig.chainId, 16),
+            version: "1",
+            nonce: generateSiweNonce(),
+            issuedAt: new Date().toISOString(),
+          };
 
     const challenge = await signChallenge(payload, chainNamespace, authServer);
 

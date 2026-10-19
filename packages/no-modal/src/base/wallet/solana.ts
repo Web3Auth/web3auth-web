@@ -24,6 +24,22 @@ export const getSolanaChainByChainConfig = (chainConfig: CustomChainConfig): Ide
   }
 };
 
+export const createSolanaSiwwPayload = (chainConfig: CustomChainConfig, address: string, nonce: string, issuedAt: string) => {
+  const chainId = getSolanaChainByChainConfig(chainConfig);
+  if (!chainId) throw new Error(`Unsupported Solana chain ID: ${chainConfig.chainId}`);
+
+  return {
+    domain: window.location.host,
+    uri: window.location.href,
+    address,
+    chainId,
+    version: "1",
+    nonce,
+    issuedAt,
+    statement: "Sign in with your Solana account.",
+  };
+};
+
 const base58Decoder = getBase58Decoder();
 const base64Encoder = getBase64Encoder();
 const transactionDecoder = getTransactionDecoder();

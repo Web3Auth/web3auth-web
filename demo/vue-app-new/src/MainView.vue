@@ -209,10 +209,6 @@ const loginMethodsConfig = computed(() => {
     config.email_passwordless.authConnectionId = customEmailAuthConnectionId;
     config.email_passwordless.groupedAuthConnectionId = customEmailGroupedAuthConnectionId;
   }
-  if (config.sms_passwordless) {
-    config.sms_passwordless.authConnectionId = customSmsAuthConnectionId;
-    config.sms_passwordless.groupedAuthConnectionId = customSmsGroupedAuthConnectionId;
-  }
 
   const loginMethods: LoginMethodConfig = JSON.parse(JSON.stringify(config));
   return loginMethods;

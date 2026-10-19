@@ -27,6 +27,7 @@ import {
   ConnectorInitOptions,
   ConnectorNamespaceType,
   ConnectorParams,
+  createSolanaSiwwPayload,
   CustomChainConfig,
   getCaipChainId,
   IProvider,
@@ -322,15 +323,18 @@ class WalletConnectV2Connector extends BaseConnector<void> {
       throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
     }
 
-    const payload = {
-      domain: window.location.origin,
-      uri: window.location.href,
-      address: accountsToUse[0],
-      chainId: parseInt(chainId, 16),
-      version: "1",
-      nonce: generateSiweNonce(),
-      issuedAt: new Date().toISOString(),
-    };
+    const payload =
+      chainNamespace === CHAIN_NAMESPACES.SOLANA
+        ? createSolanaSiwwPayload(currentChainConfig, accountsToUse[0], generateSiweNonce(), new Date().toISOString())
+        : {
+            domain: window.location.origin,
+            uri: window.location.href,
+            address: accountsToUse[0],
+            chainId: parseInt(chainId, 16),
+            version: "1",
+            nonce: generateSiweNonce(),
+            issuedAt: new Date().toISOString(),
+          };
 
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
     const challenge = await signChallenge(payload, chainNamespace, authServer);
