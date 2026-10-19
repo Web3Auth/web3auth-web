@@ -41,7 +41,7 @@ export const isSupportedChainNamespace = (value: unknown): value is SupportedCha
   supportedChainNamespaces.includes(value as SupportedChainNamespace);
 
 export const chainConfigs: Record<SupportedChainNamespace, string[]> = {
-  [CHAIN_NAMESPACES.EIP155]: ["0x1", "0xaa36a7", "0x2105", "0x14a34", "0x61", "0x13882"],
+  [CHAIN_NAMESPACES.EIP155]: ["0xa4b1", "0x1", "0xaa36a7", "0x2105", "0x14a34", "0x61", "0x13882"],
   [CHAIN_NAMESPACES.SOLANA]: ["0x65", "0x67"],
 };
 
@@ -125,6 +125,8 @@ export const defaultLoginMethod: Record<AUTH_CONNECTION_TYPE, ModalConfig> = log
 
 export type SmartAccountType = "biconomy" | "safe" | "nexus" | "kernel" | "trust" | "metamask";
 
+export type SmartAccountEipStandard = "4337" | "7702";
+
 export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = [
   { name: "Biconomy", value: "biconomy" },
   { name: "Safe", value: "safe" },
@@ -135,6 +137,20 @@ export const SmartAccountOptions: { name: string; value: SmartAccountType }[] = 
   // { name: "Light", value: "light" },
   // { name: "Simple", value: "simple" },
 ];
+
+export const SmartAccountEipStandardOptions: { name: string; value: SmartAccountEipStandard }[] = [
+  { name: "ERC-4337", value: "4337" },
+  { name: "EIP-7702", value: "7702" },
+];
+
+/** Default USDC addresses for gasless ERC-20 transfer tests. */
+export const defaultErc20ByChainId: Record<string, `0x${string}`> = {
+  "0xa4b1": "0xaf88d065e77c8cC2239327C5EDb3A432268e5831",
+  "0x1": "0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48",
+  "0xaa36a7": "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238",
+  "0x2105": "0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913",
+  "0x14a34": "0x036CbD53842c5426634e7929541eC2318b3d1b7B",
+};
 
 export const getDefaultBundlerUrl = (chainId: string): string => {
   return `https://api.pimlico.io/v2/${Number(chainId)}/rpc?apikey=${import.meta.env.VITE_APP_PIMLICO_API_KEY}`;
@@ -167,6 +183,12 @@ export type FormData = {
   useAccountAbstractionProvider: boolean;
   useAAWithExternalWallet?: boolean;
   smartAccountType?: SmartAccountType;
+  smartAccountEipStandard: SmartAccountEipStandard;
+  gaslessTransfers: boolean;
+  useLocalWalletServices: boolean;
+  erc20TokenAddress: string;
+  erc20Recipient: string;
+  erc20Amount: string;
   smartAccountChains: string[];
   smartAccountChainsConfig: Record<string, { bundlerUrl: string; paymasterUrl: string }>;
   tokenStorage: "default" | "local" | "session" | "cookies" | "memory";

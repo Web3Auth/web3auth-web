@@ -13,7 +13,7 @@ export const formDataStore = reactive<FormData>({
   authBuildEnv: resolveBuildEnv(import.meta.env.VITE_APP_AUTH_BUILD_ENV),
   chainNamespaces: [...supportedChainNamespaces],
   chains: supportedChainNamespaces.flatMap((namespace) => chainConfigs[namespace]),
-  defaultChainId: undefined,
+  defaultChainId: "0xa4b1",
   whiteLabel: {
     enable: false,
     config: initWhiteLabel,
@@ -30,7 +30,13 @@ export const formDataStore = reactive<FormData>({
   },
   useAccountAbstractionProvider: false,
   useAAWithExternalWallet: true,
-  smartAccountType: "metamask", // default smart account type to safe
+  smartAccountType: "metamask",
+  smartAccountEipStandard: "4337",
+  gaslessTransfers: false,
+  useLocalWalletServices: false,
+  erc20TokenAddress: "",
+  erc20Recipient: "",
+  erc20Amount: "1",
   smartAccountChains: [],
   smartAccountChainsConfig: {},
   tokenStorage: "default",
