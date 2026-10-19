@@ -2,7 +2,7 @@
 import { Button, Card, Select, Tab, Tabs, Tag, TextField, Toggle } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, CONNECTOR_INITIAL_AUTHENTICATION_MODE, CONNECTOR_STATUS, log } from "@web3auth/modal";
 import { useWeb3Auth, useWeb3AuthConnect } from "@web3auth/modal/vue";
-import { computed, InputHTMLAttributes, ref } from "vue";
+import { computed, InputHTMLAttributes, ref, watch } from "vue";
 import { getChainConfig } from "../utils/chainconfig";
 import {
   buildEnvOptions,
@@ -15,6 +15,7 @@ import {
   languageOptions,
   loginProviderOptions,
   networkOptions,
+  SmartAccountEipStandardOptions,
   SmartAccountOptions,
   SupportedChainNamespace,
 } from "../config";
@@ -81,10 +82,12 @@ const isDisabled = (name: string): boolean => {
       return !isInitialized.value;
 
     case "smartAccountType":
+    case "smartAccountEipStandard":
     case "smartAccountChains":
     case "bundlerUrl":
     case "paymasterUrl":
     case "useAAWithExternalWallet":
+    case "gaslessTransfers":
       return !formData.useAccountAbstractionProvider;
 
     case "accountAbstraction":
@@ -142,6 +145,16 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
     }
   }
 };
+
+watch(
+  () => formData.gaslessTransfers,
+  (enabled) => {
+    if (!enabled) return;
+    formData.useAccountAbstractionProvider = true;
+    formData.smartAccountType = "metamask";
+    formData.smartAccountEipStandard = "7702";
+  }
+);
 </script>
 
 <template>
@@ -509,6 +522,15 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             matchParentsWidth
             class=""
           />
+          <Toggle
+            v-model="formData.useLocalWalletServices"
+            data-testid="useLocalWalletServices"
+            :show-label="true"
+            :size="'small'"
+            :label-disabled="$t('app.walletPlugin.useLocalWalletServices')"
+            :label-enabled="$t('app.walletPlugin.useLocalWalletServices')"
+            class="mb-2"
+          />
         </Card>
         <Card v-if="isActiveTab(4)" class="grid grid-cols-1 gap-2 px-4 py-4" :shadow="false">
           <Toggle
@@ -537,40 +559,62 @@ const onSmartAccountChainChange = (chainIds: string[]) => {
             :aria-label="$t('app.accountAbstractionProvider.smartAccountType')"
             :placeholder="$t('app.accountAbstractionProvider.smartAccountType')"
             :options="SmartAccountOptions"
-            :disabled="isDisabled('smartAccountType')"
+            :disabled="isDisabled('smartAccountType') || formData.gaslessTransfers"
             matchParentsWidth
           />
           <Select
-            v-model="formData.smartAccountChains"
-            data-testid="selectSmartAccountChains"
-            :label="$t('app.chains')"
-            :aria-label="$t('app.chains')"
-            :placeholder="$t('app.chains')"
-            :options="aaSupportedChains"
-            multiple
+            v-model="formData.smartAccountEipStandard"
+            data-testid="smartAccountEipStandard"
+            :label="$t('app.accountAbstractionProvider.smartAccountEipStandard')"
+            :aria-label="$t('app.accountAbstractionProvider.smartAccountEipStandard')"
+            :placeholder="$t('app.accountAbstractionProvider.smartAccountEipStandard')"
+            :options="SmartAccountEipStandardOptions"
+            :disabled="isDisabled('smartAccountEipStandard') || formData.gaslessTransfers"
             matchParentsWidth
-            :disabled="isDisabled('smartAccountChains')"
-            @update:model-value="onSmartAccountChainChange"
           />
-          <Card v-for="c in formData.smartAccountChains" :key="c" :shadow="false" class="gap-2 px-4 py-4">
-            <div class="font-bold leading-tight text-left sm:col-span-2">{{ c }}</div>
-            <TextField
-              class="mt-3"
-              v-model="formData.smartAccountChainsConfig[c].bundlerUrl"
-              :label="$t('app.accountAbstractionProvider.bundlerUrl')"
-              :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
-              :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
-              :disabled="isDisabled('bundlerUrl')"
+          <Toggle
+            v-model="formData.gaslessTransfers"
+            data-testid="gaslessTransfers"
+            :show-label="true"
+            :size="'small'"
+            :label-disabled="$t('app.accountAbstractionProvider.gaslessTransfers')"
+            :label-enabled="$t('app.accountAbstractionProvider.gaslessTransfers')"
+            class="my-2"
+            :disabled="isDisabled('gaslessTransfers')"
+          />
+          <template v-if="formData.smartAccountEipStandard !== '7702'">
+            <Select
+              v-model="formData.smartAccountChains"
+              data-testid="selectSmartAccountChains"
+              :label="$t('app.chains')"
+              :aria-label="$t('app.chains')"
+              :placeholder="$t('app.chains')"
+              :options="aaSupportedChains"
+              multiple
+              matchParentsWidth
+              :disabled="isDisabled('smartAccountChains')"
+              @update:model-value="onSmartAccountChainChange"
             />
-            <TextField
-              class="mt-3"
-              v-model="formData.smartAccountChainsConfig[c].paymasterUrl"
-              :label="$t('app.accountAbstractionProvider.paymasterUrl')"
-              :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
-              :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"
-              :disabled="isDisabled('paymasterUrl')"
-            />
-          </Card>
+            <Card v-for="c in formData.smartAccountChains" :key="c" :shadow="false" class="gap-2 px-4 py-4">
+              <div class="font-bold leading-tight text-left sm:col-span-2">{{ c }}</div>
+              <TextField
+                class="mt-3"
+                v-model="formData.smartAccountChainsConfig[c].bundlerUrl"
+                :label="$t('app.accountAbstractionProvider.bundlerUrl')"
+                :aria-label="$t('app.accountAbstractionProvider.bundlerUrl')"
+                :placeholder="$t('app.accountAbstractionProvider.bundlerUrl')"
+                :disabled="isDisabled('bundlerUrl')"
+              />
+              <TextField
+                class="mt-3"
+                v-model="formData.smartAccountChainsConfig[c].paymasterUrl"
+                :label="$t('app.accountAbstractionProvider.paymasterUrl')"
+                :aria-label="$t('app.accountAbstractionProvider.paymasterUrl')"
+                :placeholder="$t('app.accountAbstractionProvider.paymasterUrl')"
+                :disabled="isDisabled('paymasterUrl')"
+              />
+            </Card>
+          </template>
         </Card>
         <div class="flex justify-center mt-5">
           <Button
