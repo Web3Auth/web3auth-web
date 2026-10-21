@@ -12,6 +12,11 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     steps:
+      - name: Wiz sensor
+        uses: Web3Auth/.github/.github/actions/wiz-sensor@2f62f5725c0aa2bbdf6ad947dbe589d44665f58c # feat/wiz-sensor-action
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
       - name: Check out Git repository
         uses: actions/checkout@v6
 
