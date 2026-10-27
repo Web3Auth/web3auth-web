@@ -3,6 +3,7 @@ import { BUTTON_POSITION, CONFIRMATION_STRATEGY } from "@toruslabs/base-controll
 import {
   type AccountAbstractionMultiChainConfig,
   EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES,
+  SMART_ACCOUNT,
   SMART_ACCOUNT_EIP_STANDARD,
 } from "@toruslabs/ethereum-controllers";
 import {
@@ -839,15 +840,19 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     };
 
     // if eipStandard is 7702, validate smart account type
-    const { smartAccountEipStandard, smartAccountType } = this.coreOptions.accountAbstractionConfig as {
+    const { smartAccountEipStandard, smartAccountType, gaslessTransfers } = this.coreOptions.accountAbstractionConfig as {
       smartAccountEipStandard?: string;
       smartAccountType?: string;
+      gaslessTransfers?: boolean;
     };
     const is7702SmartAccount = smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
     if (is7702SmartAccount && smartAccountType && !(EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES as readonly string[]).includes(smartAccountType)) {
       throw WalletInitializationError.invalidParams(
         `Smart account type "${smartAccountType}" does not support EIP-7702. Supported: ${EIP7702_SUPPORTED_SMART_ACCOUNT_TYPES.join(", ")}`
       );
+    }
+    if (gaslessTransfers && (smartAccountType !== SMART_ACCOUNT.METAMASK || !is7702SmartAccount)) {
+      throw WalletInitializationError.invalidParams("gaslessTransfers requires MetaMask smart account type with EIP-7702");
     }
 
     // determine if we should use AA with external wallet
