@@ -10,7 +10,14 @@ const solanaChain = (chainId: string): CustomChainConfig =>
   }) as CustomChainConfig;
 
 const createPayload = (chainId: string) =>
-  createSolanaSiwwPayload(solanaChain(chainId), "11111111111111111111111111111111", "a1b2c3d4", "2026-09-29T00:00:00.000Z");
+  createSolanaSiwwPayload(
+    solanaChain(chainId),
+    "11111111111111111111111111111111",
+    "a1b2c3d4",
+    "2026-09-29T00:00:00.000Z",
+    "test-client-id",
+    "sapphire_devnet"
+  );
 
 describe("createSolanaSiwwPayload", () => {
   it("uses the page host, a Solana CAIP chain id, and a single-line statement", () => {
@@ -21,6 +28,8 @@ describe("createSolanaSiwwPayload", () => {
       uri: window.location.href,
       chainId: "solana:devnet",
       statement: "Sign in with your Solana account.",
+      web3AuthClientId: "test-client-id",
+      web3AuthNetwork: "sapphire_devnet",
     });
     expect(payload.domain).not.toBe(window.location.origin);
     expect(payload.statement).not.toMatch(/\r|\n/);
