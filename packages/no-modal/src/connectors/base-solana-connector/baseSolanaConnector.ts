@@ -60,7 +60,14 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     const { chainNamespace } = currentChainConfig;
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
 
-    const payload = createSolanaSiwwPayload(currentChainConfig, accountsToUse[0], generateSiweNonce(), new Date().toISOString());
+    const payload = createSolanaSiwwPayload(
+      currentChainConfig,
+      accountsToUse[0],
+      generateSiweNonce(),
+      new Date().toISOString(),
+      this.coreOptions.clientId,
+      this.coreOptions.web3AuthNetwork
+    );
 
     const challenge = await signChallenge(payload, chainNamespace, authServer);
     const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accountsToUse[0]);

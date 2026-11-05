@@ -57,6 +57,8 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       version: "1",
       nonce: generateSiweNonce(),
       issuedAt: new Date().toISOString(),
+      web3AuthClientId: this.coreOptions.clientId,
+      web3AuthNetwork: this.coreOptions.web3AuthNetwork,
     };
 
     const challenge = await signChallenge(payload, chainNamespace, authServer);

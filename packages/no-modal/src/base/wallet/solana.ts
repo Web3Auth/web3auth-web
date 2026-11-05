@@ -8,6 +8,7 @@ import {
   type SolanaSignTransactionFeature,
 } from "@solana/wallet-standard-features";
 import type { IdentifierString, Wallet } from "@wallet-standard/base";
+import type { WEB3AUTH_NETWORK_TYPE } from "@web3auth/auth";
 
 import { type CustomChainConfig } from "../chain/IChainInterface";
 
@@ -24,7 +25,14 @@ export const getSolanaChainByChainConfig = (chainConfig: CustomChainConfig): Ide
   }
 };
 
-export const createSolanaSiwwPayload = (chainConfig: CustomChainConfig, address: string, nonce: string, issuedAt: string) => {
+export const createSolanaSiwwPayload = (
+  chainConfig: CustomChainConfig,
+  address: string,
+  nonce: string,
+  issuedAt: string,
+  web3AuthClientId: string,
+  web3AuthNetwork: WEB3AUTH_NETWORK_TYPE
+) => {
   const chainId = getSolanaChainByChainConfig(chainConfig);
   if (!chainId) throw new Error(`Unsupported Solana chain ID: ${chainConfig.chainId}`);
 
@@ -37,6 +45,8 @@ export const createSolanaSiwwPayload = (chainConfig: CustomChainConfig, address:
     nonce,
     issuedAt,
     statement: "Sign in with your Solana account.",
+    web3AuthClientId,
+    web3AuthNetwork,
   };
 };
 

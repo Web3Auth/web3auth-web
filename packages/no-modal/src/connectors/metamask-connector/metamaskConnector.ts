@@ -523,17 +523,21 @@ class MetaMaskConnector extends BaseConnector<void> {
     }
 
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
+    const issuedAt = new Date().toISOString();
+    const nonce = generateSiweNonce();
     const payload =
       chainNamespace === CHAIN_NAMESPACES.SOLANA
-        ? createSolanaSiwwPayload(activeChainConfig, accountsToUse[0], generateSiweNonce(), new Date().toISOString())
+        ? createSolanaSiwwPayload(activeChainConfig, accountsToUse[0], nonce, issuedAt, this.coreOptions.clientId, this.coreOptions.web3AuthNetwork)
         : {
             domain: window.location.origin,
             uri: window.location.href,
             address: accountsToUse[0],
             chainId: parseInt(activeChainConfig.chainId, 16),
             version: "1",
-            nonce: generateSiweNonce(),
-            issuedAt: new Date().toISOString(),
+            nonce,
+            issuedAt,
+            web3AuthClientId: this.coreOptions.clientId,
+            web3AuthNetwork: this.coreOptions.web3AuthNetwork,
           };
 
     const challenge = await signChallenge(payload, chainNamespace, authServer);
