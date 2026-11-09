@@ -52,7 +52,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
 
   public async setupProvider(connector: ISignClient): Promise<void> {
     this.onConnectorStateUpdate(connector);
-    await this.setupEngine(connector, this.config.chain.chainId);
+    await this.setupEngine(connector, this.getSessionChainId(connector));
   }
 
   public async switchChain({ chainId }: { chainId: string }): Promise<void> {
@@ -158,6 +158,27 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
       }
     }
     return accountAllowed;
+  }
+
+  // Start on a chain the wallet approved. Single-chain wallets (e.g. Safe{Wallet}) approve only their own chain,
+  // and the sign client rejects any request scoped to a chain outside the session.
+  private getSessionChainId(connector: ISignClient): string {
+    const preferred = this.config.chain.chainId;
+    if (this.config.chain.chainNamespace !== CHAIN_NAMESPACES.EIP155) return preferred;
+
+    const { session } = connector;
+    const namespace = session.length ? session.get(session.keys[session.keys.length - 1])?.namespaces?.[CHAIN_NAMESPACES.EIP155] : undefined;
+    const sessionChains = new Set([
+      ...(namespace?.chains ?? []),
+      ...(namespace?.accounts ?? []).map((account) => account.split(":").slice(0, 2).join(":")),
+    ]);
+    const toCaipChainId = (chainId: string) => `${CHAIN_NAMESPACES.EIP155}:${parseInt(chainId, 16)}`;
+    if (sessionChains.size === 0 || sessionChains.has(toCaipChainId(preferred))) return preferred;
+
+    const sessionChain = this.config.chains.find(
+      (chain) => chain.chainNamespace === CHAIN_NAMESPACES.EIP155 && sessionChains.has(toCaipChainId(chain.chainId))
+    );
+    return sessionChain?.chainId ?? preferred;
   }
 
   private async onConnectorStateUpdate(connector: ISignClient) {
