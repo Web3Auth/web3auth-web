@@ -131,7 +131,8 @@ export interface IConnector<T> extends SafeEventEmitter {
   generateChallengeAndSign(
     authServerUrl?: string,
     accounts?: string[],
-    chainId?: string
+    chainId?: string,
+    purpose?: "login" | "link"
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
   cleanup?(): Promise<void>;
 }

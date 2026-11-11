@@ -797,7 +797,7 @@ class AuthConnector extends BaseConnector<AuthLoginParams> implements IAuthConne
     connector.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: connector.name as WALLET_CONNECTOR_TYPE });
     // Reuse the caller's target chain so multichain wallets generate the linking
     // proof for the same namespace they were connected for.
-    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign(undefined, undefined, chainId);
+    const { challenge, signature, chainNamespace } = await connector.generateChallengeAndSign(undefined, undefined, chainId, "link");
     const address = await this.getLinkingWalletAddress(connector, chainNamespace);
 
     if (chainNamespace === CHAIN_NAMESPACES.EIP155) {
