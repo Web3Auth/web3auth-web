@@ -505,7 +505,8 @@ class MetaMaskConnector extends BaseConnector<void> {
   public async generateChallengeAndSign(
     authServerUrl?: string,
     accounts?: string[],
-    chainId?: string
+    chainId?: string,
+    purpose?: "login" | "link"
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
     const activeChainConfig = this.resolveAuthChainConfig(chainId);
     if (!activeChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
@@ -540,7 +541,7 @@ class MetaMaskConnector extends BaseConnector<void> {
             web3AuthNetwork: this.coreOptions.web3AuthNetwork,
           };
 
-    const challenge = await signChallenge(payload, chainNamespace, authServer);
+    const challenge = await signChallenge(payload, chainNamespace, authServer, purpose);
 
     let signedMessage: string;
     if (chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider) {

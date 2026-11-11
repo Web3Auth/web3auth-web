@@ -42,7 +42,9 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
   async generateChallengeAndSign(
     authServerUrl?: string,
-    accounts?: string[]
+    accounts?: string[],
+    _chainId?: string,
+    purpose?: "login" | "link"
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
     const accountsToUse = accounts || this.solanaWallet.accounts.map((a) => a.address);
     if (!accountsToUse || accountsToUse.length === 0) {
@@ -69,7 +71,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
       this.coreOptions.web3AuthNetwork
     );
 
-    const challenge = await signChallenge(payload, chainNamespace, authServer);
+    const challenge = await signChallenge(payload, chainNamespace, authServer, purpose);
     const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accountsToUse[0]);
     return { challenge, signature: signedMessage, chainNamespace };
   }

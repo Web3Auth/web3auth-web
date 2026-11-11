@@ -257,7 +257,9 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
   abstract getAuthTokenInfo(chainId?: string): Promise<AuthTokenInfo>;
   abstract generateChallengeAndSign(
     authServerUrl?: string,
-    accounts?: string[]
+    accounts?: string[],
+    chainId?: string,
+    purpose?: "login" | "link"
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }>;
   abstract switchChain(params: { chainId: string }): Promise<void>;
 }

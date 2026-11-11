@@ -307,7 +307,9 @@ class WalletConnectV2Connector extends BaseConnector<void> {
 
   public async generateChallengeAndSign(
     authServerUrl?: string,
-    accounts?: string[]
+    accounts?: string[],
+    _chainId?: string,
+    purpose?: "login" | "link"
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
     const { chainId } = this.provider;
     const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
@@ -341,7 +343,7 @@ class WalletConnectV2Connector extends BaseConnector<void> {
           };
 
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
-    const challenge = await signChallenge(payload, chainNamespace, authServer);
+    const challenge = await signChallenge(payload, chainNamespace, authServer, purpose);
     const signature = await this._getSignedMessage(challenge, accountsToUse, chainNamespace);
     return { challenge, signature, chainNamespace };
   }

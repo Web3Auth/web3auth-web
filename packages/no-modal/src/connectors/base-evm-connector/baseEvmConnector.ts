@@ -38,7 +38,9 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
 
   async generateChallengeAndSign(
     authServerUrl?: string,
-    accounts?: string[]
+    accounts?: string[],
+    _chainId?: string,
+    purpose?: "login" | "link"
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
     const accountsToUse = accounts || (await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS }));
     if (!accountsToUse || accountsToUse.length === 0) {
@@ -61,7 +63,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
       web3AuthNetwork: this.coreOptions.web3AuthNetwork,
     };
 
-    const challenge = await signChallenge(payload, chainNamespace, authServer);
+    const challenge = await signChallenge(payload, chainNamespace, authServer, purpose);
     const hexChallenge = bytesToHexPrefixedString(utf8ToBytes(challenge));
 
     const signature = await this.provider.request<[string, string], string>({
