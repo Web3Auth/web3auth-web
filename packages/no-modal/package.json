@@ -1,46 +1,242 @@
 {
   "name": "@web3auth/no-modal",
   "version": "11.4.3",
+  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16",
   "description": "Multi chain wallet aggregator for web3Auth",
   "keywords": [
-    "web3Auth/no-modal",
-    "web3Auth",
-    "multichainWallet",
     "blockchain",
     "ethereum",
-    "solana"
+    "multichainWallet",
+    "solana",
+    "web3Auth",
+    "web3Auth/no-modal"
   ],
-  "sideEffects": false,
-  "main": "dist/lib.cjs/index.js",
-  "module": "dist/lib.esm/index.js",
-  "unpkg": "dist/lib.esm/index.js",
-  "jsdelivr": "dist/lib.esm/index.js",
-  "types": "dist/lib.cjs/types/index.d.ts",
-  "author": "Torus Labs",
   "homepage": "https://github.com/Web3Auth/Web3Auth/tree/master/packages/no-modal#readme",
+  "bugs": {
+    "url": "https://github.com/Web3Auth/Web3Auth/issues"
+  },
   "license": "ISC",
-  "scripts": {
-    "test": "vitest run --config test/configs/browsers.config.mts --coverage",
-    "dev": "torus-scripts start",
-    "build": "torus-scripts build",
-    "lint": "torus-scripts lint --fix",
-    "prepack": "npm run build",
-    "pre-commit": "lint-staged --cwd ."
+  "author": "Torus Labs",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
   },
   "files": [
     "dist"
   ],
+  "sideEffects": false,
+  "main": "./dist/lib.cjs/index.js",
+  "module": "./dist/lib.esm/index.js",
+  "types": "./dist/lib.cjs/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "account-linking": [
+        "./dist/lib.cjs/account-linking/index.d.ts"
+      ],
+      "account-linking/react": [
+        "./dist/lib.cjs/account-linking/react.d.ts"
+      ],
+      "account-linking/vue": [
+        "./dist/lib.cjs/account-linking/vue.d.ts"
+      ],
+      "x402": [
+        "./dist/lib.cjs/x402/index.d.ts"
+      ],
+      "x402/react": [
+        "./dist/lib.cjs/x402/react.d.ts"
+      ],
+      "x402/vue": [
+        "./dist/lib.cjs/x402/vue.d.ts"
+      ],
+      "react": [
+        "./dist/lib.cjs/react/index.d.ts"
+      ],
+      "react/wagmi": [
+        "./dist/lib.cjs/react/wagmi/index.d.ts"
+      ],
+      "react/solana": [
+        "./dist/lib.cjs/react/solana/index.d.ts"
+      ],
+      "vue": [
+        "./dist/lib.cjs/vue/index.d.ts"
+      ],
+      "vue/solana": [
+        "./dist/lib.cjs/vue/solana/index.d.ts"
+      ],
+      "connectors/base-account-connector": [
+        "./dist/lib.cjs/connectors/base-account-connector/index.d.ts"
+      ],
+      "connectors/coinbase-connector": [
+        "./dist/lib.cjs/connectors/coinbase-connector/index.d.ts"
+      ],
+      "providers/xrpl-provider": [
+        "./dist/lib.cjs/providers/xrpl-provider/index.d.ts"
+      ]
+    }
+  },
+  "unpkg": "./dist/lib.esm/index.js",
+  "jsdelivr": "./dist/lib.esm/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/lib.esm/index.js",
+      "require": "./dist/lib.cjs/index.js",
+      "types": "./dist/lib.cjs/index.d.ts"
+    },
+    "./account-linking": {
+      "import": "./dist/lib.esm/account-linking/index.js",
+      "require": "./dist/lib.cjs/account-linking/index.js",
+      "types": "./dist/lib.cjs/account-linking/index.d.ts"
+    },
+    "./account-linking/react": {
+      "import": "./dist/lib.esm/account-linking/react.js",
+      "require": "./dist/lib.cjs/account-linking/react.js",
+      "types": "./dist/lib.cjs/account-linking/react.d.ts"
+    },
+    "./account-linking/vue": {
+      "import": "./dist/lib.esm/account-linking/vue.js",
+      "require": "./dist/lib.cjs/account-linking/vue.js",
+      "types": "./dist/lib.cjs/account-linking/vue.d.ts"
+    },
+    "./x402": {
+      "import": "./dist/lib.esm/x402/index.js",
+      "require": "./dist/lib.cjs/x402/index.js",
+      "types": "./dist/lib.cjs/x402/index.d.ts"
+    },
+    "./x402/react": {
+      "import": "./dist/lib.esm/x402/react.js",
+      "require": "./dist/lib.cjs/x402/react.js",
+      "types": "./dist/lib.cjs/x402/react.d.ts"
+    },
+    "./x402/vue": {
+      "import": "./dist/lib.esm/x402/vue.js",
+      "require": "./dist/lib.cjs/x402/vue.js",
+      "types": "./dist/lib.cjs/x402/vue.d.ts"
+    },
+    "./react": {
+      "import": "./dist/lib.esm/react/index.js",
+      "require": "./dist/lib.cjs/react/index.js",
+      "types": "./dist/lib.cjs/react/index.d.ts"
+    },
+    "./react/wagmi": {
+      "import": "./dist/lib.esm/react/wagmi/index.js",
+      "require": "./dist/lib.cjs/react/wagmi/index.js",
+      "types": "./dist/lib.cjs/react/wagmi/index.d.ts"
+    },
+    "./react/solana": {
+      "import": "./dist/lib.esm/react/solana/index.js",
+      "require": "./dist/lib.cjs/react/solana/index.js",
+      "types": "./dist/lib.cjs/react/solana/index.d.ts"
+    },
+    "./vue": {
+      "import": "./dist/lib.esm/vue/index.js",
+      "require": "./dist/lib.cjs/vue/index.js",
+      "types": "./dist/lib.cjs/vue/index.d.ts"
+    },
+    "./vue/solana": {
+      "import": "./dist/lib.esm/vue/solana/index.js",
+      "require": "./dist/lib.cjs/vue/solana/index.js",
+      "types": "./dist/lib.cjs/vue/solana/index.d.ts"
+    },
+    "./vue/wagmi": {
+      "import": "./dist/lib.esm/vue/wagmi/index.js",
+      "require": "./dist/lib.cjs/vue/wagmi/index.js",
+      "types": "./dist/lib.cjs/vue/wagmi/index.d.ts"
+    },
+    "./connectors/base-account-connector": {
+      "import": "./dist/lib.esm/connectors/base-account-connector/index.js",
+      "require": "./dist/lib.cjs/connectors/base-account-connector/index.js",
+      "types": "./dist/lib.cjs/connectors/base-account-connector/index.d.ts"
+    },
+    "./connectors/coinbase-connector": {
+      "import": "./dist/lib.esm/connectors/coinbase-connector/index.js",
+      "require": "./dist/lib.cjs/connectors/coinbase-connector/index.js",
+      "types": "./dist/lib.cjs/connectors/coinbase-connector/index.d.ts"
+    },
+    "./providers/xrpl-provider": {
+      "import": "./dist/lib.esm/providers/xrpl-provider/index.js",
+      "require": "./dist/lib.cjs/providers/xrpl-provider/index.js",
+      "types": "./dist/lib.cjs/providers/xrpl-provider/index.d.ts"
+    }
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "test": "vp test run --config test/configs/browsers.config.mts --coverage",
+    "dev": "vp pack --watch",
+    "build": "vp pack",
+    "lint": "vp lint --fix",
+    "prepack": "npm run build",
+    "pre-commit": "lint-staged --cwd ."
+  },
+  "dependencies": {
+    "@metamask/connect-evm": "^2.1.1",
+    "@metamask/connect-multichain": "^1.2.0",
+    "@metamask/connect-solana": "^2.1.1",
+    "@segment/analytics-next": "^1.84.3",
+    "@solana/client": "^1.7.0",
+    "@solana/kit": "^6.10.0",
+    "@solana/wallet-standard-features": "^1.5.0",
+    "@toruslabs/base-controllers": "^9.15.0",
+    "@toruslabs/constants": "^16.1.1",
+    "@toruslabs/eccrypto": "^8.0.0",
+    "@toruslabs/ethereum-controllers": "^9.14.0",
+    "@toruslabs/http-helpers": "^10.0.0",
+    "@toruslabs/loglevel-sentry": "^10.0.0",
+    "@toruslabs/metadata-helpers": "^9.0.0",
+    "@toruslabs/secure-pub-sub": "^5.0.0",
+    "@toruslabs/session-manager": "^6.0.0",
+    "@wallet-standard/app": "^1.1.1",
+    "@wallet-standard/base": "^1.1.1",
+    "@wallet-standard/features": "^1.1.1",
+    "@walletconnect/sign-client": "^2.26.0",
+    "@walletconnect/types": "^2.26.0",
+    "@walletconnect/utils": "^2.26.0",
+    "@web3auth/auth": "^11.8.1",
+    "@web3auth/ws-embed": "^6.1.0",
+    "bignumber.js": "~9.3.1",
+    "deepmerge": "^4.3.1",
+    "ethers": "^6.17.0",
+    "jwt-decode": "^4.0.0",
+    "loglevel": "^1.9.2",
+    "mipd": "^0.0.7",
+    "ripple-keypairs": "^1.4.0",
+    "xrpl": "^2.15.0"
+  },
+  "devDependencies": {
+    "@base-org/account": "^2.6.0",
+    "@coinbase/wallet-sdk": "^4.4.0",
+    "@solana/react-hooks": "^1.4.1",
+    "@types/react": "^19.3.0",
+    "@vitest/browser-playwright": "5.1.0",
+    "@wagmi/core": "^3.6.9",
+    "@wagmi/vue": "^0.5.34",
+    "@x402/evm": "~2.28.0",
+    "@x402/fetch": "~2.28.0",
+    "@x402/svm": "~2.28.0",
+    "playwright": "^1.65.0",
+    "react": "^19.3.1",
+    "viem": "^2.57.17",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+    "vitest": "5.1.0",
+    "vue": "^3.5.45",
+    "wagmi": "^3.7.11",
+    "vite-plus": "1.5.0",
+    "@toruslabs/torus-scripts": "^9.0.1",
+    "@toruslabs/config": "^5.0.0",
+    "@toruslabs/oxlint-config-typescript": "^1.1.0"
+  },
   "peerDependencies": {
-    "@babel/runtime": "^7.x",
-    "@base-org/account": "^2.5.1",
-    "@coinbase/wallet-sdk": "^4.3.x",
-    "@solana/react-hooks": "^1.4.0",
-    "@x402/evm": "^2.7.0",
-    "@x402/fetch": "^2.7.0",
-    "@x402/svm": "^2.7.0",
-    "react": ">=18",
-    "viem": ">=2.45",
-    "vue": "^3.x"
+    "@babel/runtime": "^7.29.13",
+    "@base-org/account": "^2.6.0",
+    "@coinbase/wallet-sdk": "^4.4.0",
+    "@solana/react-hooks": "^1.4.1",
+    "@x402/evm": "^2.28.0",
+    "@x402/fetch": "^2.28.0",
+    "@x402/svm": "^2.28.0",
+    "react": ">=18.3.1",
+    "viem": ">=2.57.17",
+    "vue": "^3.5.45"
   },
   "peerDependenciesMeta": {
     "@base-org/account": {
@@ -68,202 +264,14 @@
       "optional": true
     }
   },
-  "dependencies": {
-    "@metamask/connect-evm": "^2.0.0",
-    "@metamask/connect-multichain": "^1.0.0",
-    "@metamask/connect-solana": "^2.0.0",
-    "@segment/analytics-next": "^1.84.0",
-    "@solana/client": "^1.7.0",
-    "@solana/kit": "^6.9.0",
-    "@solana/wallet-standard-features": "^1.3.0",
-    "@toruslabs/base-controllers": "^9.15.0",
-    "@toruslabs/constants": "^16.1.1",
-    "@toruslabs/eccrypto": "^7.0.0",
-    "@toruslabs/ethereum-controllers": "^9.14.0",
-    "@toruslabs/http-helpers": "^9.0.0",
-    "@toruslabs/loglevel-sentry": "^9.0.0",
-    "@toruslabs/metadata-helpers": "^8.2.0",
-    "@toruslabs/secure-pub-sub": "4.3.0",
-    "@toruslabs/session-manager": "^5.6.0",
-    "@wallet-standard/app": "^1.1.0",
-    "@wallet-standard/base": "^1.1.0",
-    "@wallet-standard/features": "^1.1.0",
-    "@walletconnect/sign-client": "^2.23.9",
-    "@walletconnect/types": "^2.23.9",
-    "@walletconnect/utils": "^2.23.9",
-    "@web3auth/auth": "^11.8.1",
-    "@web3auth/ws-embed": "^6.1.0",
-    "bignumber.js": "~9.3.1",
-    "deepmerge": "^4.3.1",
-    "ethers": "^6.16.0",
-    "jwt-decode": "^4.0.0",
-    "loglevel": "^1.9.2",
-    "mipd": "^0.0.7",
-    "ripple-keypairs": "^1.3.1",
-    "xrpl": "^2.14.0"
-  },
-  "devDependencies": {
-    "@base-org/account": "^2.5.6",
-    "@coinbase/wallet-sdk": "^4.3.7",
-    "@solana/react-hooks": "^1.4.1",
-    "@types/react": "^19.2.16",
-    "@wagmi/core": "^3.6.5",
-    "@wagmi/vue": "^0.5.30",
-    "@x402/evm": "^2.14.0",
-    "@x402/fetch": "^2.14.0",
-    "@x402/svm": "^2.14.0",
-    "react": "^19.2.7",
-    "viem": "^2.52.0",
-    "vue": "^3.x",
-    "wagmi": "^3.6.16"
-  },
-  "exports": {
-    ".": {
-      "import": "./dist/lib.esm/index.js",
-      "require": "./dist/lib.cjs/index.js",
-      "types": "./dist/lib.cjs/types/index.d.ts"
-    },
-    "./account-linking": {
-      "import": "./dist/lib.esm/account-linking/index.js",
-      "require": "./dist/lib.cjs/account-linking/index.js",
-      "types": "./dist/lib.cjs/types/account-linking/index.d.ts"
-    },
-    "./account-linking/react": {
-      "import": "./dist/lib.esm/account-linking/react.js",
-      "require": "./dist/lib.cjs/account-linking/react.js",
-      "types": "./dist/lib.cjs/types/account-linking/react.d.ts"
-    },
-    "./account-linking/vue": {
-      "import": "./dist/lib.esm/account-linking/vue.js",
-      "require": "./dist/lib.cjs/account-linking/vue.js",
-      "types": "./dist/lib.cjs/types/account-linking/vue.d.ts"
-    },
-    "./x402": {
-      "import": "./dist/lib.esm/x402/index.js",
-      "require": "./dist/lib.cjs/x402/index.js",
-      "types": "./dist/lib.cjs/types/x402/index.d.ts"
-    },
-    "./x402/react": {
-      "import": "./dist/lib.esm/x402/react.js",
-      "require": "./dist/lib.cjs/x402/react.js",
-      "types": "./dist/lib.cjs/types/x402/react.d.ts"
-    },
-    "./x402/vue": {
-      "import": "./dist/lib.esm/x402/vue.js",
-      "require": "./dist/lib.cjs/x402/vue.js",
-      "types": "./dist/lib.cjs/types/x402/vue.d.ts"
-    },
-    "./react": {
-      "import": "./dist/lib.esm/react/index.js",
-      "require": "./dist/lib.cjs/react/index.js",
-      "types": "./dist/lib.cjs/types/react/index.d.ts"
-    },
-    "./react/wagmi": {
-      "import": "./dist/lib.esm/react/wagmi/index.js",
-      "require": "./dist/lib.cjs/react/wagmi/index.js",
-      "types": "./dist/lib.cjs/types/react/wagmi/index.d.ts"
-    },
-    "./react/solana": {
-      "import": "./dist/lib.esm/react/solana/index.js",
-      "require": "./dist/lib.cjs/react/solana/index.js",
-      "types": "./dist/lib.cjs/types/react/solana/index.d.ts"
-    },
-    "./vue": {
-      "import": "./dist/lib.esm/vue/index.js",
-      "require": "./dist/lib.cjs/vue/index.js",
-      "types": "./dist/lib.cjs/types/vue/index.d.ts"
-    },
-    "./vue/solana": {
-      "import": "./dist/lib.esm/vue/solana/index.js",
-      "require": "./dist/lib.cjs/vue/solana/index.js",
-      "types": "./dist/lib.cjs/types/vue/solana/index.d.ts"
-    },
-    "./vue/wagmi": {
-      "import": "./dist/lib.esm/vue/wagmi/index.js",
-      "require": "./dist/lib.cjs/vue/wagmi/index.js",
-      "types": "./dist/lib.cjs/types/vue/wagmi/index.d.ts"
-    },
-    "./connectors/base-account-connector": {
-      "import": "./dist/lib.esm/connectors/base-account-connector/index.js",
-      "require": "./dist/lib.cjs/connectors/base-account-connector/index.js",
-      "types": "./dist/lib.cjs/types/connectors/base-account-connector/index.d.ts"
-    },
-    "./connectors/coinbase-connector": {
-      "import": "./dist/lib.esm/connectors/coinbase-connector/index.js",
-      "require": "./dist/lib.cjs/connectors/coinbase-connector/index.js",
-      "types": "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
-    },
-    "./providers/xrpl-provider": {
-      "import": "./dist/lib.esm/providers/xrpl-provider/index.js",
-      "require": "./dist/lib.cjs/providers/xrpl-provider/index.js",
-      "types": "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
-    }
-  },
-  "typesVersions": {
-    "*": {
-      "account-linking": [
-        "./dist/lib.cjs/types/account-linking/index.d.ts"
-      ],
-      "account-linking/react": [
-        "./dist/lib.cjs/types/account-linking/react.d.ts"
-      ],
-      "account-linking/vue": [
-        "./dist/lib.cjs/types/account-linking/vue.d.ts"
-      ],
-      "x402": [
-        "./dist/lib.cjs/types/x402/index.d.ts"
-      ],
-      "x402/react": [
-        "./dist/lib.cjs/types/x402/react.d.ts"
-      ],
-      "x402/vue": [
-        "./dist/lib.cjs/types/x402/vue.d.ts"
-      ],
-      "react": [
-        "./dist/lib.cjs/types/react/index.d.ts"
-      ],
-      "react/wagmi": [
-        "./dist/lib.cjs/types/react/wagmi/index.d.ts"
-      ],
-      "react/solana": [
-        "./dist/lib.cjs/types/react/solana/index.d.ts"
-      ],
-      "vue": [
-        "./dist/lib.cjs/types/vue/index.d.ts"
-      ],
-      "vue/solana": [
-        "./dist/lib.cjs/types/vue/solana/index.d.ts"
-      ],
-      "connectors/base-account-connector": [
-        "./dist/lib.cjs/types/connectors/base-account-connector/index.d.ts"
-      ],
-      "connectors/coinbase-connector": [
-        "./dist/lib.cjs/types/connectors/coinbase-connector/index.d.ts"
-      ],
-      "providers/xrpl-provider": [
-        "./dist/lib.cjs/types/providers/xrpl-provider/index.d.ts"
-      ]
-    }
-  },
   "lint-staged": {
-    "!(*d).ts": [
-      "eslint --cache --fix",
-      "prettier --write"
+    "*": [
+      "vp fmt",
+      "vp lint --fix"
     ]
   },
-  "publishConfig": {
-    "access": "public"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Web3Auth/Web3Auth.git"
-  },
-  "bugs": {
-    "url": "https://github.com/Web3Auth/Web3Auth/issues"
-  },
   "engines": {
-    "node": ">=22.x",
-    "npm": ">=10.x"
-  },
-  "gitHead": "6c62ee11818e12b77eca33a78ee896e46549ac16"
+    "node": ">=24.22.0",
+    "npm": ">=12"
+  }
 }

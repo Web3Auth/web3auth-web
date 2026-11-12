@@ -1,12 +1,19 @@
 name: Build & Release
 
-on: [push]
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
-  build:
+  validate:
     strategy:
       matrix:
-        node: ["24.x"]
+        node: ["24.22.0", "26"]
         os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
@@ -17,31 +24,106 @@ jobs:
         with:
           enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
           token: ${{ secrets.WIZ_SENSOR_TOKEN }}
-      - name: Check out Git repository
-        uses: actions/checkout@v6
 
-      - name: Set up node
-        uses: actions/setup-node@v6
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Use Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
         with:
           node-version: ${{ matrix.node }}
           cache: "npm"
 
+      - name: Use npm 12
+        run: npm install --global npm@12.2.0
+
       - name: Install dependencies
         run: npm ci
 
-      - name: Install Playwright browsers
-        run: npx playwright install --with-deps chromium firefox webkit
+      - name: Harden check
+        run: npm exec --no -- harden check --package-manager npm
+
+      - name: Check format and lint
+        run: npm run lint
 
       - name: Build
         run: npm run build
 
+      - name: Check TypeScript projects
+        run: npm run typecheck
+
+      - name: Install Playwright browsers
+        run: npm exec --no -- playwright install --with-deps chromium firefox webkit
+
       - name: Test
         run: npm run test
 
-      # Set the credentials from repository settings/secrets
+      - name: Pack dry run
+        run: npm pack --workspaces --dry-run --json
+
+  release-notes:
+    if: github.event_name == 'pull_request' && !startsWith(github.head_ref, 'changeset-release/') && !startsWith(github.head_ref, 'dependabot/')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      - name: Use Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24.22.0"
+          cache: "npm"
+
+      - name: Use npm 12
+        run: npm install --global npm@12.2.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Check release notes
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          git fetch --no-tags origin "${BASE_REF}:refs/remotes/origin/${BASE_REF}"
+          npm exec --no -- changeset status --since="origin/${BASE_REF}"
+
+  deploy:
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Wiz sensor
+        uses: Web3Auth/.github/.github/actions/wiz-sensor@545f7c255313f85d38a02dc36c4ad01387d03149 # v1.0.0
+        with:
+          enabled: ${{ vars.WIZ_SENSOR_ENABLED }}
+          token: ${{ secrets.WIZ_SENSOR_TOKEN }}
+
+      - name: Check out Git repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - name: Use Node.js
+        uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6.5.0
+        with:
+          node-version: "24.22.0"
+          cache: "npm"
+
+      - name: Use npm 12
+        run: npm install --global npm@12.2.0
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build
+        run: npm run build
+
       - name: Configure AWS credentials
-        if: github.ref == 'refs/heads/master'
-        uses: aws-actions/configure-aws-credentials@v6
+        uses: aws-actions/configure-aws-credentials@e1253824e5c10ff9df46874f81ed3ec929e19cfd # v6.3.0
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
@@ -58,11 +140,8 @@ jobs:
           VITE_APP_SOLANA_DEVNET_RPC: ${{ secrets.SOLANA_DEVNET_RPC }}
           VITE_APP_PIMLICO_API_KEY: ${{ secrets.PIMLICO_API_KEY }}
 
-        # Copy the files from build folder to the S3 bucket
-        # Upload to S3
-      - name: sync vue app new s3
-        if: github.ref == 'refs/heads/master'
-        uses: jakejarvis/s3-sync-action@master
+      - name: Sync vue app new to S3
+        uses: jakejarvis/s3-sync-action@7ed8b112447abb09f1da74f3466e4194fc7a6311 # master
         env:
           SOURCE_DIR: "./demo/vue-app-new/dist"
           AWS_REGION: "us-east-1"
@@ -70,10 +149,8 @@ jobs:
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
-        # Invalidate Cloudfront (this action)
-      - name: invalidate vue app new s3
-        if: github.ref == 'refs/heads/master'
-        uses: chaitanyapotti/cloudfront-update-distribution@v5
+      - name: Invalidate vue app new CloudFront
+        uses: chaitanyapotti/cloudfront-update-distribution@b120c0220453e292a43e5563f008f8e9e52858d6 # v5
         with:
           cloudfront-distribution-id: ${{ secrets.AWS_CLOUDFRONT_NEW_DEMO_APP_DISTRIBUTION_ID }}
           cloudfront-invalidation-path: "/*"

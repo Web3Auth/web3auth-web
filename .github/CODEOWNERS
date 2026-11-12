@@ -19,10 +19,9 @@
 *                               @Web3Auth/Web3Auth-Admins
 
 # Product code
-packages/                       @Web3Auth/Web3Auth-Product
-test/                           @Web3Auth/Web3Auth-Product
+packages/*/src/                 @Web3Auth/Web3Auth-Product
+packages/*/test/                @Web3Auth/Web3Auth-Product
+demo/                           @Web3Auth/Web3Auth-Product
 
 # Most restrictive — last match wins
 .github/CODEOWNERS              @Web3Auth/Web3Auth-Admins
-packages/**/package.json        @Web3Auth/Web3Auth-Admins
-package.json                    @Web3Auth/Web3Auth-Admins

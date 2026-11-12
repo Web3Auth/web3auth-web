@@ -1,9 +1,11 @@
 {
-  "extends": "@toruslabs/config/tsconfig.default.json",
+  "extends": "@toruslabs/config/tsconfig.library.json",
   "compilerOptions": {
     "paths": {
-      "@web3auth/modal": ["./packages/modal"],
-      "@web3auth/no-modal": ["./packages/no-modal"]
+      "@web3auth/modal": ["./packages/modal/src/index.ts"],
+      "@web3auth/no-modal": ["./packages/no-modal/src/index.ts"],
+      "@web3auth/no-modal/*": ["./packages/no-modal/src/*"]
     }
-  }
+  },
+  "include": ["vite.config.mts", "scripts"]
 }

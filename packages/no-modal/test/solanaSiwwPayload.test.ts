@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 
 import { CHAIN_NAMESPACES, type CustomChainConfig } from "../src/base";
 import { createSolanaSiwwPayload } from "../src/base/wallet/solana";
@@ -16,7 +16,7 @@ const createPayload = (chainId: string) =>
     "a1b2c3d4",
     "2026-09-29T00:00:00.000Z",
     "test-client-id",
-    "sapphire_devnet"
+    "sapphire_devnet",
   );
 
 describe("createSolanaSiwwPayload", () => {

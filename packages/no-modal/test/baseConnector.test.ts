@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 
 import {
   type AuthTokenInfo,
@@ -69,14 +69,24 @@ class TestConnector extends BaseConnector<void> {
   async manageMFA(): Promise<void> {}
 
   // Overridable so tests can simulate authorization success/failure (e.g. blocked user).
-  public getAuthTokenInfoImpl: (chainId?: string) => Promise<AuthTokenInfo> = async () => ({ idToken: "test" });
+  public getAuthTokenInfoImpl: (chainId?: string) => Promise<AuthTokenInfo> = async () => ({
+    idToken: "test",
+  });
 
   async getAuthTokenInfo(chainId?: string): Promise<AuthTokenInfo> {
     return this.getAuthTokenInfoImpl(chainId);
   }
 
-  async generateChallengeAndSign(): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
-    return { challenge: "challenge", signature: "signature", chainNamespace: CHAIN_NAMESPACES.EIP155 };
+  async generateChallengeAndSign(): Promise<{
+    challenge: string;
+    signature: string;
+    chainNamespace: ChainNamespaceType;
+  }> {
+    return {
+      challenge: "challenge",
+      signature: "signature",
+      chainNamespace: CHAIN_NAMESPACES.EIP155,
+    };
   }
 
   async switchChain(params: { chainId: string }): Promise<void> {
@@ -107,7 +117,7 @@ function createConnector(
     connectorNamespace?: ConnectorNamespaceType;
     isInjected?: boolean;
     chains?: CustomChainConfig[];
-  } = {}
+  } = {},
 ): TestConnector {
   const chains = overrides.chains ?? [createChain()];
   const c = new TestConnector({
@@ -134,21 +144,34 @@ describe("BaseConnector", () => {
     });
 
     it("connected is false for non-connected statuses", () => {
-      for (const s of [CONNECTOR_STATUS.NOT_READY, CONNECTOR_STATUS.READY, CONNECTOR_STATUS.CONNECTING, CONNECTOR_STATUS.ERRORED]) {
+      for (const s of [
+        CONNECTOR_STATUS.NOT_READY,
+        CONNECTOR_STATUS.READY,
+        CONNECTOR_STATUS.CONNECTING,
+        CONNECTOR_STATUS.ERRORED,
+      ]) {
         const c = createConnector({ status: s });
         expect(c.connected).toBe(false);
       }
     });
 
     it("canAuthorize is true for CONNECTED, AUTHORIZING, AUTHORIZED", () => {
-      for (const s of [CONNECTOR_STATUS.CONNECTED, CONNECTOR_STATUS.AUTHORIZING, CONNECTOR_STATUS.AUTHORIZED]) {
+      for (const s of [
+        CONNECTOR_STATUS.CONNECTED,
+        CONNECTOR_STATUS.AUTHORIZING,
+        CONNECTOR_STATUS.AUTHORIZED,
+      ]) {
         const c = createConnector({ status: s });
         expect(c.canAuthorize).toBe(true);
       }
     });
 
     it("canAuthorize is false for READY / NOT_READY / CONNECTING", () => {
-      for (const s of [CONNECTOR_STATUS.READY, CONNECTOR_STATUS.NOT_READY, CONNECTOR_STATUS.CONNECTING]) {
+      for (const s of [
+        CONNECTOR_STATUS.READY,
+        CONNECTOR_STATUS.NOT_READY,
+        CONNECTOR_STATUS.CONNECTING,
+      ]) {
         const c = createConnector({ status: s });
         expect(c.canAuthorize).toBe(false);
       }
@@ -196,7 +219,9 @@ describe("BaseConnector", () => {
 
   describe("checkInitializationRequirements", () => {
     it("throws when clientId is empty", () => {
-      const c = new TestConnector({ coreOptions: { clientId: "", chains: [createChain()] } } as never);
+      const c = new TestConnector({
+        coreOptions: { clientId: "", chains: [createChain()] },
+      } as never);
       expect(() => c.exposedCheckInit({ chainConfig: createChain() })).toThrow("clientId");
     });
 
@@ -207,16 +232,22 @@ describe("BaseConnector", () => {
 
     it("throws when rpcTarget is missing for non-OTHER namespace", () => {
       const c = createConnector();
-      expect(() => c.exposedCheckInit({ chainConfig: createChain({ rpcTarget: "" }) })).toThrow("rpcTarget");
+      expect(() => c.exposedCheckInit({ chainConfig: createChain({ rpcTarget: "" }) })).toThrow(
+        "rpcTarget",
+      );
     });
 
     it("throws when chainId is missing for non-OTHER namespace", () => {
       const c = createConnector();
-      expect(() => c.exposedCheckInit({ chainConfig: createChain({ chainId: "" }) })).toThrow("chainID");
+      expect(() => c.exposedCheckInit({ chainConfig: createChain({ chainId: "" }) })).toThrow(
+        "chainID",
+      );
     });
 
     it("throws when connector namespace doesn't match chain namespace", () => {
-      const c = createConnector({ connectorNamespace: CHAIN_NAMESPACES.SOLANA as ConnectorNamespaceType });
+      const c = createConnector({
+        connectorNamespace: CHAIN_NAMESPACES.SOLANA as ConnectorNamespaceType,
+      });
       expect(() => c.exposedCheckInit({ chainConfig: createChain() })).toThrow("chain namespace");
     });
 
@@ -232,7 +263,9 @@ describe("BaseConnector", () => {
 
     it("throws when already initialized (READY)", () => {
       const c = createConnector({ status: CONNECTOR_STATUS.READY });
-      expect(() => c.exposedCheckInit({ chainConfig: createChain() })).toThrow("already initialized");
+      expect(() => c.exposedCheckInit({ chainConfig: createChain() })).toThrow(
+        "already initialized",
+      );
     });
   });
 
@@ -285,7 +318,10 @@ describe("BaseConnector", () => {
       c.updateConnectorData({ foo: "bar" });
 
       expect(c.connectorData).toEqual({ foo: "bar" });
-      expect(handler).toHaveBeenCalledExactlyOnceWith({ connectorName: c.name, data: { foo: "bar" } });
+      expect(handler).toHaveBeenCalledExactlyOnceWith({
+        connectorName: c.name,
+        data: { foo: "bar" },
+      });
     });
   });
 
@@ -298,7 +334,10 @@ describe("BaseConnector", () => {
 
   describe("authorizeOrDisconnect (blocked user)", () => {
     it("disconnects and rethrows when authorization fails for a blocked user (code 5120)", async () => {
-      const c = createConnector({ status: CONNECTOR_STATUS.CONNECTED, name: WALLET_CONNECTORS.METAMASK });
+      const c = createConnector({
+        status: CONNECTOR_STATUS.CONNECTED,
+        name: WALLET_CONNECTORS.METAMASK,
+      });
       c.getAuthTokenInfoImpl = vi.fn().mockRejectedValue(WalletLoginError.userBlocked());
       const disconnectedHandler = vi.fn();
       c.on(CONNECTOR_EVENTS.DISCONNECTED, disconnectedHandler);
@@ -309,7 +348,10 @@ describe("BaseConnector", () => {
     });
 
     it("skips authorization and keeps the connection in connect-only mode (getAuthTokenInfo=false)", async () => {
-      const c = createConnector({ status: CONNECTOR_STATUS.CONNECTED, name: WALLET_CONNECTORS.METAMASK });
+      const c = createConnector({
+        status: CONNECTOR_STATUS.CONNECTED,
+        name: WALLET_CONNECTORS.METAMASK,
+      });
       // Even if authorization would block the user, connect-only mode must never call it.
       c.getAuthTokenInfoImpl = vi.fn().mockRejectedValue(WalletLoginError.userBlocked());
       const disconnectedHandler = vi.fn();
@@ -326,10 +368,19 @@ describe("BaseConnector", () => {
 
   describe("clearWalletSession", () => {
     it("clears local session data without calling citadel logout when no SIWW tokens exist", async () => {
-      const c = createConnector({ status: CONNECTOR_STATUS.CONNECTED, name: WALLET_CONNECTORS.METAMASK });
+      const c = createConnector({
+        status: CONNECTOR_STATUS.CONNECTED,
+        name: WALLET_CONNECTORS.METAMASK,
+      });
       c.exposedInitSessionManager("0xabc");
-      const sessionManager = (c as unknown as { authSessionManager: { logout: ReturnType<typeof vi.fn>; clearSessionData: ReturnType<typeof vi.fn> } })
-        .authSessionManager;
+      const sessionManager = (
+        c as unknown as {
+          authSessionManager: {
+            logout: ReturnType<typeof vi.fn>;
+            clearSessionData: ReturnType<typeof vi.fn>;
+          };
+        }
+      ).authSessionManager;
       sessionManager.logout = vi.fn();
       sessionManager.clearSessionData = vi.fn().mockResolvedValue(undefined);
 

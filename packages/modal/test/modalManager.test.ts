@@ -16,7 +16,7 @@ vi.mock("@metamask/connect-solana", () => ({
 vi.mock("@paulmillr/qr", () => ({}));
 
 vi.mock("@web3auth/no-modal", async () => {
-  const actual = await vi.importActual<typeof import("../../no-modal/src")>("../../no-modal/src");
+  const actual = await vi.importActual<typeof import("@web3auth/no-modal")>("../../no-modal/src");
   return actual;
 });
 
@@ -181,6 +181,7 @@ describe("Web3Auth (modal)", () => {
     expect(open).toHaveBeenCalledOnce();
     sdk.emit(CONNECTOR_EVENTS.CONNECTED, {
       connectorName: WALLET_CONNECTORS.AUTH,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: null,
       solanaWallet: null,
       reconnected: false,

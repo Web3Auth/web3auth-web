@@ -1,9 +1,9 @@
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
-import { playwright } from "@vitest/browser-playwright";
+import { playwright } from "vite-plus/test/browser-playwright";
 import { loadEnv } from "vite";
-import { defineConfig } from "vitest/config";
+import { defineConfig } from "vite-plus";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkgRoot = resolve(__dirname, "../..");
@@ -57,7 +57,9 @@ export default defineConfig({
     include: noModalOptimizeDepsInclude,
   },
   define: {
-    "process.env.VITE_APP_INFURA_PROJECT_KEY": JSON.stringify(viteEnv.VITE_APP_INFURA_PROJECT_KEY ?? ""),
+    "process.env.VITE_APP_INFURA_PROJECT_KEY": JSON.stringify(
+      viteEnv.VITE_APP_INFURA_PROJECT_KEY ?? "",
+    ),
   },
   test: {
     reporters: ["default", "verbose"],
