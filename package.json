@@ -7,7 +7,7 @@
   "devDependencies": {
     "@changesets/cli": "^3.0.3",
     "@lavamoat/harden": "^0.8.1",
-    "@solana/kit": "^6.9.0",
+    "@solana/kit": "^6.10.0",
     "@toruslabs/config": "^5.0.0",
     "@toruslabs/oxlint-config-node": "^1.0.0",
     "@toruslabs/oxlint-config-react": "^1.0.0",
@@ -24,8 +24,8 @@
     "ox": "^0.11.3",
     "oxlint-plugin-vize": "^0.608.0",
     "oxlint-tailwindcss": "^1.17.1",
-    "playwright": "^1.60.0",
-    "rimraf": "^6.1.3",
+    "playwright": "^1.65.0",
+    "rimraf": "^6.1.4",
     "typescript": "^7.0.2",
     "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
     "vite-plus": "1.5.0",
@@ -60,10 +60,10 @@
   },
   "name": "web3auth",
   "optionalDependencies": {
-    "@nx/nx-linux-x64-gnu": "^22.7.5",
-    "@rollup/rollup-linux-x64-gnu": "^4.61.0",
-    "@tailwindcss/oxide-linux-x64-gnu": "^4.3.0",
-    "lightningcss-linux-x64-gnu": "^1.32.0"
+    "@nx/nx-linux-x64-gnu": "^22.7.12",
+    "@rollup/rollup-linux-x64-gnu": "^4.68.1",
+    "@tailwindcss/oxide-linux-x64-gnu": "^4.3.5",
+    "lightningcss-linux-x64-gnu": "^1.33.0"
   },
   "private": true,
   "repository": {
@@ -89,8 +89,8 @@
     "packages/modal"
   ],
   "overrides": {
-    "react": "19.2.7",
-    "react-dom": "19.2.7",
+    "react": "19.3.1",
+    "react-dom": "19.3.1",
     "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
     "vitest": "5.1.0"
   }
