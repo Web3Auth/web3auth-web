@@ -86,7 +86,7 @@ function Login(props: LoginProps) {
 
   const { visibleRow, otherRow, mainOptionsRow, canShowMore } = useMemo(() => {
     const maxOptions = Object.keys(socialLoginsConfig.loginMethods).filter((loginMethodKey) => {
-      return socialLoginsConfig.loginMethods[loginMethodKey as AUTH_CONNECTION_TYPE].showOnModal && !restrictedLoginMethods.includes(loginMethodKey);
+      return socialLoginsConfig.loginMethods[loginMethodKey as AUTH_CONNECTION_TYPE]!.showOnModal && !restrictedLoginMethods.includes(loginMethodKey);
     });
 
     const visibleRows: rowType[] = [];
@@ -103,7 +103,7 @@ function Login(props: LoginProps) {
 
     const loginOptions = Object.keys(socialLoginsConfig.loginMethods)
       .filter((method) => {
-        return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE].showOnModal === false && !restrictedLoginMethods.includes(method);
+        return !socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE]!.showOnModal === false && !restrictedLoginMethods.includes(method);
       })
       .sort((a, b) => {
         const maxOrder = (socialLoginsConfig.loginMethodsOrder || []).length;
@@ -127,7 +127,7 @@ function Login(props: LoginProps) {
       });
 
     loginOptions.forEach((method, index) => {
-      const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE];
+      const connectorConfig = socialLoginsConfig.loginMethods[method as AUTH_CONNECTION_TYPE]!;
       const name = capitalizeFirstLetter(connectorConfig.name || method);
       const order = index + 1;
 
@@ -214,7 +214,7 @@ function Login(props: LoginProps) {
     if (isEmailPasswordLessLoginVisible) {
       const isEmailValid = loginHint.match(/^([\w.%+-]+)@([\w-]+\.)+([\w]{2,})$/i);
       if (isEmailValid) {
-        const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS];
+        const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.EMAIL_PASSWORDLESS]!;
         if (connectorConfig.isDefault) {
           return handleSocialLoginClick({
             loginParams: {
@@ -237,7 +237,7 @@ function Login(props: LoginProps) {
       const result = await validatePhoneNumber(number);
       if (result.success) {
         const finalLoginHint = typeof result.parsed_number === "string" ? result.parsed_number : number;
-        const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS];
+        const connectorConfig = socialLoginsConfig.loginMethods[AUTH_CONNECTION.SMS_PASSWORDLESS]!;
         if (connectorConfig.isDefault) {
           return handleSocialLoginClick({
             loginParams: {
@@ -294,7 +294,7 @@ function Login(props: LoginProps) {
     if (otpErrorMessage) setOtpErrorMessage("");
 
     try {
-      const connectorConfig = socialLoginsConfig.loginMethods[authConnection];
+      const connectorConfig = socialLoginsConfig.loginMethods[authConnection!]!;
       const result = await passwordlessHandler?.verifyCode(otp);
       if (result?.error) {
         setOtpErrorMessage(t(result.error));
@@ -304,12 +304,12 @@ function Login(props: LoginProps) {
       if (result?.data?.id_token) {
         return handleSocialLoginClick({
           loginParams: {
-            authConnection: authConnection,
+            authConnection: authConnection!,
             authConnectionId: connectorConfig.authConnectionId,
             groupedAuthConnectionId: connectorConfig.groupedAuthConnectionId,
             extraLoginOptions: { ...connectorConfig.extraLoginOptions, id_token: result.data?.id_token },
-            loginHint: passwordlessHandler.passwordlessParams.loginHint,
-            name: passwordlessHandler.name,
+            loginHint: passwordlessHandler!.passwordlessParams.loginHint,
+            name: passwordlessHandler!.name,
           },
         });
       }
@@ -367,7 +367,7 @@ function Login(props: LoginProps) {
     }
 
     // when having multiple namespaces, ask user to select one
-    if (wallet.chainNamespaces?.length > 1 && wallet.name !== WALLET_CONNECTORS.METAMASK) {
+    if ((wallet.chainNamespaces?.length ?? 0) > 1 && wallet.name !== WALLET_CONNECTORS.METAMASK) {
       setBodyState({
         ...bodyState,
         multiChainSelector: {
@@ -405,7 +405,7 @@ function Login(props: LoginProps) {
         otpLoading={otpLoading}
         loginHint={passwordlessHandler?.passwordlessParams.loginHint}
         setShowOtpFlow={setShowOtpFlow}
-        authConnection={authConnection}
+        authConnection={authConnection!}
         handleOtpComplete={handleOtpComplete}
         errorMessage={otpErrorMessage}
         countryFlag={countryFlag}
@@ -532,7 +532,7 @@ function Login(props: LoginProps) {
     );
   };
 
-  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo) ? "" : appLogo;
+  const headerLogo = [DEFAULT_LOGO_DARK, DEFAULT_LOGO_LIGHT].includes(appLogo!) ? "" : appLogo;
 
   const delimiter = (index: number) => {
     return (

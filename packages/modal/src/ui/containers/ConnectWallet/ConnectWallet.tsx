@@ -27,7 +27,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   const [currentPage, setCurrentPage] = useState(CONNECT_WALLET_PAGES.CONNECT_WALLET);
   const [selectedWallet, setSelectedWallet] = useState(false);
   const [isLoading] = useState<boolean>(false);
-  const [selectedButton, setSelectedButton] = useState<ExternalButton>(null);
+  const [selectedButton, setSelectedButton] = useState<ExternalButton | null>(null);
   const [walletSearch, setWalletSearch] = useState<string>("");
   const [selectedChain, setSelectedChain] = useState<string>("all");
   const [isShowAllWallets, setIsShowAllWallets] = useState<boolean>(false);
@@ -121,11 +121,11 @@ function ConnectWallet(props: ConnectWalletProps) {
     const visibilityMap = connectorVisibilityMap;
     return Object.keys(config).reduce((acc, localConnector) => {
       if (localConnector !== WALLET_CONNECTORS.WALLET_CONNECT_V2 && visibilityMap[localConnector]) {
-        const connectorConfig = config[localConnector as WALLET_CONNECTOR_TYPE];
+        const connectorConfig = config[localConnector as WALLET_CONNECTOR_TYPE]!;
         acc.push({
           name: localConnector,
           displayName: connectorConfig.label || localConnector,
-          hasInjectedWallet: connectorConfig.isInjected,
+          hasInjectedWallet: connectorConfig.isInjected!,
           isInstalled: true,
           hasWalletConnect: false,
           hasInstallLinks: false,
@@ -156,7 +156,7 @@ function ConnectWallet(props: ConnectWalletProps) {
     if (walletDiscoverySupported) {
       return [...allUniqueButtons.filter((button) => button.hasInjectedWallet), ...allUniqueButtons.filter((button) => !button.hasInjectedWallet)]
         .sort((a, _) => (a.name === WALLET_CONNECTORS.METAMASK ? -1 : 1))
-        .filter((button) => selectedChain === "all" || button.chainNamespaces.includes(selectedChain as ChainNamespaceType))
+        .filter((button) => selectedChain === "all" || button.chainNamespaces!.includes(selectedChain as ChainNamespaceType))
         .filter(matchesSearch);
     }
     return installedWalletButtons.filter(matchesSearch);
@@ -239,7 +239,7 @@ function ConnectWallet(props: ConnectWalletProps) {
       }
 
       // show chain namespace selector if the button has multiple chain namespaces
-      if (button.chainNamespaces?.length > 1 && button.name !== WALLET_CONNECTORS.METAMASK) {
+      if ((button.chainNamespaces?.length ?? 0) > 1 && button.name !== WALLET_CONNECTORS.METAMASK) {
         setBodyState({
           ...bodyState,
           multiChainSelector: {
@@ -287,7 +287,7 @@ function ConnectWallet(props: ConnectWalletProps) {
   const qrCodeValue = useMemo(() => {
     if (!selectedWallet) return null;
 
-    if (selectedButton.name === WALLET_CONNECTORS.METAMASK && !selectedButton.hasInjectedWallet) {
+    if (selectedButton!.name === WALLET_CONNECTORS.METAMASK && !selectedButton!.hasInjectedWallet) {
       return metamaskConnectUri;
     }
     return walletConnectUri;
@@ -307,17 +307,17 @@ function ConnectWallet(props: ConnectWalletProps) {
         disableBackButton={disableBackButton}
         onBackClick={handleBack}
         currentPage={currentPage}
-        selectedButton={selectedButton}
+        selectedButton={selectedButton!}
         isLinking={modalState.accountLinking.pickerActive}
       />
       {/* Body */}
       {selectedWallet ? (
         <ConnectWalletQrCode
-          qrCodeValue={qrCodeValue}
+          qrCodeValue={qrCodeValue!}
           isDark={isDark}
-          selectedButton={selectedButton}
-          primaryColor={selectedButton.walletRegistryItem?.primaryColor}
-          logoImage={`https://images.web3auth.io/login-${selectedButton.name}.${selectedButton.imgExtension}`}
+          selectedButton={selectedButton!}
+          primaryColor={selectedButton!.walletRegistryItem?.primaryColor}
+          logoImage={`https://images.web3auth.io/login-${selectedButton!.name}.${selectedButton!.imgExtension}`}
           platform={deviceDetails.platform}
         />
       ) : (

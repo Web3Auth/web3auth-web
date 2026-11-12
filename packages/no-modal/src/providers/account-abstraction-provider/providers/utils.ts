@@ -27,7 +27,7 @@ export function getProviderHandlers({
     getAccounts: async (_: JRPCRequest<unknown>) => {
       const [smartAccounts, eoaAccounts] = await Promise.all([
         smartAccount.getAddress(),
-        eoaProvider.request<never, string[]>({ method: "eth_accounts" }),
+        eoaProvider.request<never, string[]>({ method: "eth_accounts" }) as Promise<string[]>,
       ]);
       return [smartAccounts, ...eoaAccounts];
     },
@@ -52,7 +52,7 @@ export function getProviderHandlers({
           {
             to,
             // Explicit conversation required to avoid value being passed as hex
-            value: BigInt(value),
+            value: BigInt(value!),
             data,
           },
         ],
@@ -77,7 +77,7 @@ export function getProviderHandlers({
         calls: [
           {
             to,
-            value: BigInt(value),
+            value: BigInt(value!),
             data,
           },
         ],
@@ -95,7 +95,7 @@ export function getProviderHandlers({
       return signature;
     },
     processEthSignMessage: async (_: MessageParams<string>, req: JRPCRequest<unknown>): Promise<string> => {
-      return eoaProvider.request(req);
+      return (await eoaProvider.request<unknown, string>(req)) as string;
     },
     processPersonalMessage: async (msgParams: MessageParams<string>, _: JRPCRequest<unknown>): Promise<string> => {
       const message = msgParams.data;
@@ -116,6 +116,8 @@ export function getProviderHandlers({
           account: smartAccount,
           domain: {
             ...data.domain,
+            name: data.domain.name ?? undefined,
+            version: data.domain.version ?? undefined,
             verifyingContract: data.domain.verifyingContract as Hex,
             salt: data.domain.salt as Hex,
             chainId: Number(data.domain.chainId),

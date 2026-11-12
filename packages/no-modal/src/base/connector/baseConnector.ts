@@ -181,7 +181,7 @@ export abstract class BaseConnector<T> extends SafeEventEmitter<ConnectorEvents>
         authServer: params.authServer,
         web3AuthClientId: this.coreOptions.clientId,
         web3AuthNetwork: this.coreOptions.web3AuthNetwork,
-        sessionTimeout: this.coreOptions.sessionTime,
+        sessionTimeout: this.coreOptions.sessionTime!,
         deviceInfo: getDeviceInfo(),
       });
     } catch (error) {

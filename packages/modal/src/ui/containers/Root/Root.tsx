@@ -77,8 +77,8 @@ function RootContent(props: RootProps) {
       return Object.keys(wallets).reduce((acc, wallet) => {
         if (connectorVisibilityMap[wallet] === false) return acc;
 
-        const walletRegistryItem: WalletRegistryItem = wallets[wallet];
-        let href = "";
+        const walletRegistryItem: WalletRegistryItem = wallets[wallet]!;
+        let href: string | undefined = "";
         if (deviceDetails.platform !== "desktop") {
           const universalLink = walletRegistryItem?.mobile?.universal;
           const deepLink = walletRegistryItem?.mobile?.native;
@@ -100,7 +100,7 @@ function RootContent(props: RootProps) {
           href,
           hasInjectedWallet: connectorConfig?.isInjected || false,
           isInstalled: !!connectorConfig,
-          hasWalletConnect: isWalletConnectConnectorIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2"),
+          hasWalletConnect: isWalletConnectConnectorIncluded && walletRegistryItem.walletConnect?.sdks?.includes("sign_v2")!,
           hasInstallLinks: Object.keys(walletRegistryItem.app || {}).length > 0,
           walletRegistryItem,
           imgExtension: walletRegistryItem.imgExtension || "svg",
@@ -142,7 +142,7 @@ function RootContent(props: RootProps) {
     // if metamask connector is not injected, use the registry button instead to display QR code
     const metamaskConnectorIdx = installedConnectors.findIndex((x) => x.name === WALLET_CONNECTORS.METAMASK && !x.hasInjectedWallet);
     if (metamaskConnectorIdx !== -1) {
-      const metamaskConnector = installedConnectors[metamaskConnectorIdx];
+      const metamaskConnector = installedConnectors[metamaskConnectorIdx]!;
       let metamaskRegistryButton = allRegistryButtons.find((button) => button.name === WALLET_CONNECTORS.METAMASK);
       if (!metamaskRegistryButton) {
         // use the default metamask registry item if it's not in the registry

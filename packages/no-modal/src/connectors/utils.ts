@@ -67,8 +67,8 @@ export async function getSiteIcon(window: Window): Promise<string | undefined> {
 export function parseToken<T>(token: string): { header: { alg: string; typ: string; kid?: string }; payload: T } {
   const [header, payload] = token.split(".");
   return {
-    header: base64toJSON(header),
-    payload: base64toJSON(payload) as T,
+    header: base64toJSON(header!),
+    payload: base64toJSON(payload!) as T,
   };
 }
 

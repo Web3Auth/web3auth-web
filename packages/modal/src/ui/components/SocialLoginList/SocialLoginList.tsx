@@ -109,7 +109,7 @@ function SocialLoginList(props: SocialLoginListProps) {
         <img src={getIcons(isDark ? "arrow-left-dark" : "arrow-left-light")} alt="Logo" className="wta:object-contain" />
       </button>
       <div className="w3a--social-container wta:grid wta:h-[300px] wta:w-full wta:auto-rows-min wta:grid-cols-1 wta:gap-y-2 wta:overflow-y-auto wta:pl-2 wta:pr-3">
-        {otherRow.map((row) => (
+        {otherRow!.map((row) => (
           <div className="wta:h-11 wta:w-full" key={row.method}>
             <Button
               type={BUTTON_TYPE.SOCIAL}

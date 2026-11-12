@@ -39,9 +39,9 @@ type ModalStateContextType = {
   areSocialLoginsVisible: boolean;
   isEmailPrimary: boolean;
   isExternalPrimary: boolean;
-  isEmailPasswordLessLoginVisible: boolean;
-  isSmsPasswordLessLoginVisible: boolean;
-  showPasswordLessInput: boolean;
+  isEmailPasswordLessLoginVisible: boolean | undefined;
+  isSmsPasswordLessLoginVisible: boolean | undefined;
+  showPasswordLessInput: boolean | undefined;
   showExternalWalletButton: boolean;
   shouldShowLoginPage: boolean;
 };

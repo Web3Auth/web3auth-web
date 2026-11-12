@@ -22,7 +22,7 @@ export const useReceive = (): IUseReceive => {
       if (!plugin) throw WalletServicesPluginError.notInitialized();
       if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      await plugin.value.showReceive(showReceiveParams);
+      await plugin.value!.showReceive(showReceiveParams);
     } catch (err) {
       log.error("Error showing receive", err);
       error.value = err as Web3AuthError;

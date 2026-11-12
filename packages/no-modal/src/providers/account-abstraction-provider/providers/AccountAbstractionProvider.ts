@@ -32,13 +32,13 @@ interface AccountAbstractionProviderState extends BaseProviderState {
 class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProviderConfig, AccountAbstractionProviderState, IProvider> {
   readonly PROVIDER_CHAIN_NAMESPACE = CHAIN_NAMESPACES.EIP155;
 
-  private _smartAccount: SmartAccount | null;
+  private _smartAccount!: SmartAccount | null;
 
-  private _publicClient: Client | null;
+  private _publicClient!: Client | null;
 
-  private _bundlerClient: BundlerClient | null;
+  private _bundlerClient!: BundlerClient | null;
 
-  private _paymasterClient: PaymasterClient | null;
+  private _paymasterClient!: PaymasterClient | null;
 
   private _useProviderAsTransport?: boolean;
 
@@ -76,7 +76,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
   public async enable(): Promise<string[]> {
     if (!this.state.eoaProvider) throw providerErrors.custom({ message: "eoaProvider is not found in state, please pass it", code: 4902 });
     await this.setupProvider(this.state.eoaProvider);
-    return this._providerEngineProxy.request({ method: "eth_accounts" });
+    return (await this._providerEngineProxy!.request<never, string[]>({ method: "eth_accounts" })) as string[];
   }
 
   public async setupProvider(eoaProvider: IProvider): Promise<void> {
@@ -86,7 +86,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     }
     const { chainNamespace } = currentChain;
     if (chainNamespace !== this.PROVIDER_CHAIN_NAMESPACE) throw WalletInitializationError.incompatibleChainNameSpace("Invalid chain namespace");
-    const bundlerAndPaymasterConfig = this.config.smartAccountChainsConfig.find((config) => config.chainId === currentChain.chainId);
+    const bundlerAndPaymasterConfig = this.config.smartAccountChainsConfig!.find((config) => config.chainId === currentChain.chainId);
     if (!bundlerAndPaymasterConfig)
       throw WalletInitializationError.invalidProviderConfigError(`Bundler and paymaster config not found for chain ${currentChain.chainId}`);
 
@@ -97,7 +97,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
       rpcUrls: {
         default: {
           http: [currentChain.rpcTarget],
-          webSocket: [currentChain.wsTarget],
+          webSocket: [currentChain.wsTarget!],
         },
       },
       blockExplorers: currentChain.blockExplorerUrl
@@ -145,10 +145,10 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
     }
     this._bundlerClient = createBundlerClient({
       ...bundlerConfig,
-      account: this.smartAccount,
+      account: this._smartAccount,
       client: this._publicClient,
       transport: this._useProviderAsTransport ? custom(eoaProvider) : (bundlerConfig.transport ?? http(bundlerConfig.url)),
-      paymaster: this._paymasterClient,
+      paymaster: this._paymasterClient ?? undefined,
     });
 
     const providerHandlers = getProviderHandlers({
@@ -204,7 +204,7 @@ class AccountAbstractionProvider extends BaseProvider<AccountAbstractionProvider
   }
 
   private async setupChainSwitchMiddleware() {
-    return this.setupProvider(this.state.eoaProvider);
+    return this.setupProvider(this.state.eoaProvider!);
   }
 }
 
@@ -223,7 +223,7 @@ export const accountAbstractionProvider = async ({
 }): Promise<AccountAbstractionProvider> => {
   let smartAccountInit: ISmartAccount;
   const { smartAccountType, chains: smartAccountChainsConfig } = accountAbstractionConfig;
-  const { smartAccountConfig } = smartAccountChainsConfig.find((config) => config.chainId === chain.chainId) || {};
+  const { smartAccountConfig } = smartAccountChainsConfig!.find((config) => config.chainId === chain.chainId) || {};
   switch (smartAccountType) {
     case SMART_ACCOUNT.BICONOMY: {
       const { BiconomySmartAccount } = await import("@toruslabs/ethereum-controllers");

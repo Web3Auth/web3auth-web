@@ -35,7 +35,7 @@ export const fetchProjectConfig = async ({
   aaProvider?: string;
   authBuildEnv?: BUILD_ENV_TYPE;
 }): Promise<ProjectConfig> => {
-  const url = new URL(`${dashboardPublicApiUrl(authBuildEnv)}/api/v2/configuration`);
+  const url = new URL(`${dashboardPublicApiUrl(authBuildEnv ?? BUILD_ENV.PRODUCTION)}/api/v2/configuration`);
   url.searchParams.append("project_id", clientId);
   url.searchParams.append("network", web3AuthNetwork);
   if (authBuildEnv) url.searchParams.append("build_env", authBuildEnv);
@@ -53,7 +53,7 @@ export const fetchWalletRegistry = async (url?: string): Promise<WalletRegistry>
 export const normalizeWalletName = (name: string) => {
   let normalizedName = name.toLowerCase();
   // remove decriptive part after | e.g. "Crypto.com | Defi Wallet" => "Crypto.com"
-  normalizedName = normalizedName.split("|")[0];
+  normalizedName = normalizedName.split("|")[0]!;
 
   // replace -  with space e.g. "Trust - Wallet" => "Trust Wallet"
   normalizedName = normalizedName.replace(/-/g, " ");
@@ -74,7 +74,7 @@ export const fromWagmiChain = (chain: Chain): CustomChainConfig => {
   return {
     chainNamespace: CHAIN_NAMESPACES.EIP155,
     chainId: `0x${chain.id.toString(16)}`,
-    rpcTarget: chain.rpcUrls.default.http[0],
+    rpcTarget: chain.rpcUrls.default.http[0]!,
     displayName: chain.name,
     blockExplorerUrl: chain.blockExplorers?.default.url || "",
     ticker: chain.nativeCurrency.symbol,
@@ -83,7 +83,7 @@ export const fromWagmiChain = (chain: Chain): CustomChainConfig => {
     decimals: chain.nativeCurrency.decimals,
     isTestnet: chain.testnet,
     wsTarget: chain.rpcUrls.default.webSocket?.[0],
-  };
+  } as CustomChainConfig;
 };
 
 export function withAbort<T>(fn: () => Promise<T>, signal?: AbortSignal, onAbort?: () => void): Promise<T> {
@@ -132,10 +132,10 @@ export const getWhitelabelAnalyticsProperties = (uiConfig?: UIConfig) => {
 
 export const getAaAnalyticsProperties = (accountAbstractionConfig?: AccountAbstractionMultiChainConfig) => {
   const bundlerHostnames = Array.from(
-    new Set(accountAbstractionConfig?.chains?.map((chain) => getHostname(chain.bundlerConfig?.url)).filter(Boolean))
+    new Set(accountAbstractionConfig?.chains?.map((chain) => getHostname(chain.bundlerConfig?.url ?? "")).filter(Boolean))
   );
   const paymasterHostnames = Array.from(
-    new Set(accountAbstractionConfig?.chains?.map((chain) => getHostname(chain.paymasterConfig?.url)).filter(Boolean))
+    new Set(accountAbstractionConfig?.chains?.map((chain) => getHostname(chain.paymasterConfig?.url ?? "")).filter(Boolean))
   );
   return {
     aa_smart_account_type: accountAbstractionConfig?.smartAccountType,

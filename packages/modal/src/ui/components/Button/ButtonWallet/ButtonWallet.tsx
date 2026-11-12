@@ -9,7 +9,9 @@ import { ButtonWalletProps } from "./ButtonWallet.type";
 
 function ButtonWallet(props: ButtonWalletProps) {
   const [t] = useTranslation(undefined, { i18n });
-  const { isDark, deviceDetails, button, walletConnectUri, onClick, label, buttonRadius } = props;
+  const { isDark, walletConnectUri, onClick, label, buttonRadius } = props;
+  const deviceDetails = props.deviceDetails!;
+  const button = props.button!;
 
   const isLink = useMemo(
     () => deviceDetails.platform !== "desktop" && button.href && button.hasWalletConnect && !button.isInstalled,
@@ -17,7 +19,7 @@ function ButtonWallet(props: ButtonWalletProps) {
   );
 
   const href = useMemo(
-    () => (button.href ? formatIOSMobile({ uri: walletConnectUri, link: button.href }) : walletConnectUri),
+    () => (button.href ? formatIOSMobile({ uri: walletConnectUri!, link: button.href }) : walletConnectUri),
     [button, walletConnectUri]
   );
 

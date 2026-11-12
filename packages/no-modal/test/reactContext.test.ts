@@ -131,7 +131,7 @@ describe("useWeb3AuthInnerContextValue", () => {
   afterEach(async () => {
     if (root) {
       await act(async () => {
-        root.unmount();
+        root!.unmount();
       });
     }
 

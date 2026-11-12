@@ -205,7 +205,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWatch
         const updatedData = data.data as { chainId: string };
         if (updatedData.chainId && chainId.value !== updatedData.chainId) {
           chainId.value = updatedData.chainId;
-          chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace;
+          chainNamespace.value = web3Auth.value!.currentChain?.chainNamespace ?? null;
         }
       };
 

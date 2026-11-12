@@ -114,7 +114,7 @@ export interface IAuthConnector {
    * Resolve the target account and connector-owned switch metadata.
    * `noModal` applies the returned result to SDK state and providers.
    */
-  switchAccount(account: LinkedAccountInfo, context: AuthConnectorSwitchAccountContext): Promise<AuthConnectorSwitchAccountResult>;
+  switchAccount(account: LinkedAccountInfo, context: AuthConnectorSwitchAccountContext): Promise<AuthConnectorSwitchAccountResult | undefined>;
 
   /**
    * Link an external wallet to the authenticated user by using the

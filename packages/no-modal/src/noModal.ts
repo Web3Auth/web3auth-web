@@ -81,6 +81,7 @@ import {
   WALLET_CONNECTORS,
   WalletInitializationError,
   WalletLoginError,
+  type WalletServicesConfig,
   WEB3AUTH_STATE_STORAGE_KEY,
   Web3AuthError,
   type Web3AuthNoModalEvents,
@@ -203,7 +204,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    * This is always the primary connector that is connected to the user.
    */
   get primaryConnector(): IConnector<unknown> | null {
-    return this.getConnector(this.primaryConnectorName, this.currentChain?.chainNamespace);
+    return this.primaryConnectorName ? this.getConnector(this.primaryConnectorName, this.currentChain?.chainNamespace) : null;
   }
 
   get accountAbstractionProvider(): AccountAbstractionProvider | null {
@@ -383,7 +384,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   public async switchChain(params: { chainId: string }): Promise<void> {
     if (params.chainId === this.currentChain?.chainId) return;
-    const newChainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
+    const newChainConfig = this.coreOptions.chains!.find((x) => x.chainId === params.chainId);
     if (!newChainConfig) throw WalletInitializationError.invalidParams("Invalid chainId");
 
     if (CONNECTED_STATUSES.includes(this.status)) {
@@ -439,7 +440,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     if (connectorName === WALLET_CONNECTORS.AUTH) {
       const authLoginParams = loginParams as Partial<AuthLoginParams>;
       const authConnectionConfig = (connector as AuthConnectorType).getOAuthProviderConfig({
-        authConnection: authLoginParams.authConnection,
+        authConnection: authLoginParams.authConnection!,
         authConnectionId: authLoginParams.authConnectionId,
         groupedAuthConnectionId: authLoginParams.groupedAuthConnectionId,
       });
@@ -646,7 +647,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_STARTED, trackData);
       // Thread the controller's active chain into connector auth so multichain
       // connectors sign for the same chain the app/session is currently using.
-      const authTokenInfo = await this.primaryConnector.getAuthTokenInfo(this.currentChainId);
+      const authTokenInfo = await this.primaryConnector.getAuthTokenInfo(this.currentChainId ?? undefined);
       this.analytics.track(ANALYTICS_EVENTS.IDENTITY_TOKEN_COMPLETED, trackData);
       return { idToken: authTokenInfo.idToken };
     } catch (error) {
@@ -777,11 +778,11 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     const is7702SmartAccount = this.coreOptions.accountAbstractionConfig?.smartAccountEipStandard === SMART_ACCOUNT_EIP_STANDARD.EIP_7702;
     if (this.coreOptions.accountAbstractionConfig && !is7702SmartAccount) {
       // write a for loop over accountAbstractionConfig.chains and check if the chainId is valid
-      if (this.coreOptions.accountAbstractionConfig.chains.length === 0) {
+      if (this.coreOptions.accountAbstractionConfig.chains!.length === 0) {
         log.error("Please configure chains for smart accounts on dashboard at https://dashboard.web3auth.io");
         throw WalletInitializationError.invalidParams("Please configure chains for smart accounts on dashboard at https://dashboard.web3auth.io");
       }
-      for (const chain of this.coreOptions.accountAbstractionConfig.chains) {
+      for (const chain of this.coreOptions.accountAbstractionConfig.chains!) {
         if (!isHexStrict(chain.chainId)) {
           log.error(`Please provide a valid chainId in accountAbstractionConfig.chains for chain ${chain.chainId}`);
           throw WalletInitializationError.invalidParams(
@@ -789,7 +790,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
           );
         }
         try {
-          new URL(chain.bundlerConfig?.url);
+          new URL(chain.bundlerConfig?.url as string);
         } catch (error) {
           log.error(`Please provide a valid bundlerConfig.url in accountAbstractionConfig.chains for chain ${chain.chainId}`, error);
           throw WalletInitializationError.invalidParams(
@@ -824,7 +825,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // merge smart account config from project config with core options, core options will take precedence over project config
     const { walletScope, eipStandard, ...configWithoutWalletScope } = (projectConfig?.smartAccounts || {}) as SmartAccountsConfig;
-    const aaChainMap = new Map<string, AccountAbstractionMultiChainConfig["chains"][number]>();
+    const aaChainMap = new Map<string, NonNullable<AccountAbstractionMultiChainConfig["chains"]>[number]>();
     const allAaChains = [...(configWithoutWalletScope?.chains || []), ...(this.coreOptions.accountAbstractionConfig?.chains || [])];
     for (const chain of allAaChains) {
       const existingChain = aaChainMap.get(chain.chainId);
@@ -834,7 +835,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     this.coreOptions.accountAbstractionConfig = {
       smartAccountEipStandard: eipStandard,
-      ...deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {}),
+      ...(deepmerge(configWithoutWalletScope || {}, this.coreOptions.accountAbstractionConfig || {}) as Partial<AccountAbstractionMultiChainConfig>),
       chains: Array.from(aaChainMap.values()),
     };
 
@@ -872,10 +873,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected async initCachedConnectorAndChainId(): Promise<void> {
     // init chainId using cached chainId if it exists and is valid, otherwise use the defaultChainId or the first chain
     const cachedChainId = this.state.currentChainId;
-    const isCachedChainIdValid = cachedChainId && this.coreOptions.chains.some((chain) => chain.chainId === cachedChainId);
+    const isCachedChainIdValid = cachedChainId && this.coreOptions.chains!.some((chain) => chain.chainId === cachedChainId);
     if (this.coreOptions.defaultChainId && !isHexStrict(this.coreOptions.defaultChainId))
       throw WalletInitializationError.invalidParams("Please provide a valid defaultChainId in constructor");
-    const currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains[0].chainId;
+    const currentChainId = isCachedChainIdValid ? cachedChainId : this.coreOptions.defaultChainId || this.coreOptions.chains![0]!.chainId;
     await this.setState({ currentChainId });
   }
 
@@ -921,7 +922,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       confirmationStrategy,
       whiteLabel,
       enableKeyExport: isKeyExportEnabled,
-    };
+    } as WalletServicesConfig;
   }
 
   protected getInitializationTrackData() {
@@ -958,8 +959,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
   protected async setupCommonJRPCProvider() {
     this.commonJRPCProvider = await CommonJRPCProvider.getProviderInstance({
-      chain: this.currentChain,
-      chains: this.coreOptions.chains,
+      chain: this.currentChain!,
+      chains: this.coreOptions.chains!,
     });
 
     // sync chainId
@@ -998,7 +999,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
     // add injected connectors
     const isExternalWalletEnabled = Boolean(projectConfig.externalWalletAuth);
     const isMipdEnabled = isExternalWalletEnabled && (this.coreOptions.multiInjectedProviderDiscovery ?? true);
-    const chainNamespaces = new Set(this.coreOptions.chains.map((chain) => chain.chainNamespace));
+    const chainNamespaces = new Set(this.coreOptions.chains!.map((chain) => chain.chainNamespace));
 
     // prioritize using MM connector over injected connector for EVM chains
     if (isBrowser() && chainNamespaces.has(CHAIN_NAMESPACES.EIP155)) {
@@ -1057,7 +1058,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   protected async initPlugins(): Promise<void> {
     const { chains, plugins } = this.coreOptions;
     const pluginFns = plugins || [];
-    const isWsSupportedChain = chains.some((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA);
+    const isWsSupportedChain = chains!.some((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155 || x.chainNamespace === CHAIN_NAMESPACES.SOLANA);
     if (isWsSupportedChain) {
       pluginFns.push(walletServicesPlugin());
     }
@@ -1114,7 +1115,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // A second request here would show a second sign message.
       if (this.coreOptions.ssr && !isConnectAndSign) {
         try {
-          const data = await connector.getAuthTokenInfo(currentChainId);
+          const data = await connector.getAuthTokenInfo(currentChainId ?? undefined);
           if (!data.idToken) throw WalletLoginError.connectionError("No idToken found");
           await this.setState({
             idToken: data.idToken,
@@ -1201,7 +1202,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
         // if we're rehydrating with a linked account, we need to emit a CONNECTION_UPDATED event
         // so that upstream listeners and context are updated with the linked connection.
         if (rehydrateWithLinkedAccount) {
-          this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, this.connection);
+          this.emit(CONNECTOR_EVENTS.CONNECTION_UPDATED, this.connection!);
         }
       }
     });
@@ -1237,7 +1238,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       this.activeWalletConnectorKey = PRIMARY_CONNECTED_WALLET_KEY;
       this.connectionReconnected = false;
       // re-setup commonJRPCProvider
-      this.commonJRPCProvider.removeAllListeners();
+      this.commonJRPCProvider!.removeAllListeners();
       this.setupCommonJRPCProvider();
 
       // get back to ready state for rehydrating.
@@ -1332,7 +1333,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       // mfa_enabled event is only emitted when using "popup" ux_mode
       // TODO: handle mfa_enabled event when using "redirect" ux_mode
       this.analytics.track(ANALYTICS_EVENTS.MFA_ENABLEMENT_COMPLETED, {
-        connector: this.primaryConnector.name,
+        connector: this.primaryConnector!.name,
         auth_ux_mode: authConnector.authInstance?.options?.uxMode,
         is_mfa_enabled: isMFAEnabled,
       });
@@ -1387,9 +1388,9 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
 
     // if the connector is a multi-chain connector and a default chain id is set, use the default chain id
     if (isMultiChainConnector && defaultChainId) {
-      initialChain = this.coreOptions.chains.find((chain) => chain.chainId === defaultChainId) || this.currentChain;
+      initialChain = this.coreOptions.chains!.find((chain) => chain.chainId === defaultChainId) || this.currentChain;
     } else if (initialChain?.chainNamespace !== connector.connectorNamespace && connector.connectorNamespace !== CONNECTOR_NAMESPACES.MULTICHAIN) {
-      initialChain = this.coreOptions.chains.find((x) => x.chainNamespace === connector.connectorNamespace);
+      initialChain = this.coreOptions.chains!.find((x) => x.chainNamespace === connector.connectorNamespace);
     }
 
     if (!initialChain) throw WalletInitializationError.invalidParams(`No chain found for ${connector.connectorNamespace}`);
@@ -1448,8 +1449,8 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
    */
   protected resolveSwitchAccountChainId(account: Pick<LinkedAccountInfo, "chainNamespace">, activeChainId: string): string {
     const targetChainNamespace = account.chainNamespace ? parseChainNamespaceFromCitadelResponse(account.chainNamespace) : null;
-    if (targetChainNamespace && this.currentChain.chainNamespace === targetChainNamespace) {
-      return this.currentChain.chainId;
+    if (targetChainNamespace && this.currentChain!.chainNamespace === targetChainNamespace) {
+      return this.currentChain!.chainId;
     }
 
     return activeChainId;
@@ -1744,7 +1745,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       let linkedAccountConnection: Connection | null = null;
       try {
         if (!this.hasUsableConnectedSwitchConnector(walletConnector)) {
-          const switchChainConfig = this.coreOptions.chains.find((c) => c.chainId === resolvedSwitchChainId);
+          const switchChainConfig = this.coreOptions.chains!.find((c) => c.chainId === resolvedSwitchChainId);
           if (!switchChainConfig) {
             throw WalletLoginError.connectionError(`Chain config is not available for chain ${resolvedSwitchChainId}`);
           }
@@ -1883,7 +1884,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   private async setCurrentChain(chainId: string): Promise<void> {
     const { currentChainId } = this.state;
     if (chainId === currentChainId) return;
-    const newChain = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
+    const newChain = this.coreOptions.chains!.find((chain) => chain.chainId === chainId);
     if (!newChain) throw WalletInitializationError.invalidParams(`Invalid chainId: ${chainId}`);
     await this.setState({ currentChainId: chainId });
   }
@@ -1941,10 +1942,10 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
       const eoaProvider: IProvider = connectorName === WALLET_CONNECTORS.AUTH ? await toEoaProvider(baseEthereumProvider) : baseEthereumProvider;
       const aaChainIds = new Set(accountAbstractionConfig?.chains?.map((chain) => chain.chainId) || []);
       const aaProvider = await accountAbstractionProvider({
-        accountAbstractionConfig,
+        accountAbstractionConfig: accountAbstractionConfig!,
         provider: eoaProvider,
         chain: this.currentChain,
-        chains: this.coreOptions.chains.filter((chain) => aaChainIds.has(chain.chainId)),
+        chains: this.coreOptions.chains!.filter((chain) => aaChainIds.has(chain.chainId)),
         useProviderAsTransport: connectorName === WALLET_CONNECTORS.AUTH,
       });
       this.aaProvider = aaProvider;
@@ -1957,7 +1958,7 @@ export class Web3AuthNoModal extends SafeEventEmitter<Web3AuthNoModalEvents> imp
   }
 
   private getChainConfigForIsolatedConnector(chainId: string): CustomChainConfig {
-    const chainConfig = this.coreOptions.chains.find((chain) => chain.chainId === chainId);
+    const chainConfig = this.coreOptions.chains!.find((chain) => chain.chainId === chainId);
     if (!chainConfig) {
       throw WalletInitializationError.invalidParams(`Chain config is not available for chain ${chainId}`);
     }

@@ -33,7 +33,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     if (!this.state.privateKey)
       throw providerErrors.custom({ message: "Private key is not found in state, plz pass it in constructor state param", code: 4902 });
     await this.setupProvider(this.state.privateKey, this.chainId);
-    return this._providerEngineProxy.request({ method: RPC_METHODS.GET_ACCOUNTS });
+    return (await this._providerEngineProxy!.request<never, string[]>({ method: RPC_METHODS.GET_ACCOUNTS })) as string[];
   }
 
   public async setupProvider(privKey: string, chainId: string): Promise<void> {
@@ -46,7 +46,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
     const providerHandlers = await getProviderHandlers({
       privKey,
       chainConfig: chain,
-      keyExportEnabled: this.config.keyExportEnabled,
+      keyExportEnabled: this.config.keyExportEnabled!,
     });
     const xrplWalletMiddleware = createXRPLMiddleware(providerHandlers);
     const { networkMiddleware } = createXrplJsonRpcClient(chain);
@@ -74,7 +74,7 @@ export class XrplPrivateKeyProvider extends BaseProvider<BaseProviderConfig, Xrp
       chainId: "loading",
     });
 
-    const { privateKey } = await this._providerEngineProxy.request<never, KeyPair>({ method: RPC_METHODS.GET_KEY_PAIR });
+    const { privateKey } = (await this._providerEngineProxy.request<never, KeyPair>({ method: RPC_METHODS.GET_KEY_PAIR })) as KeyPair;
     await this.setupProvider(privateKey, params.chainId);
   }
 

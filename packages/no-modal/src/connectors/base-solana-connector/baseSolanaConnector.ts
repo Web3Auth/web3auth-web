@@ -29,7 +29,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
     const accounts = this.solanaWallet.accounts.map((a) => a.address);
     if (accounts.length > 0) {
-      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0]);
+      const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0]!);
       if (cached) return cached;
 
       const authServer = citadelServerUrl(this.coreOptions.authBuildEnv);
@@ -46,12 +46,12 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     _chainId?: string,
     purpose?: "login" | "link"
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
-    const accountsToUse = accounts || this.solanaWallet.accounts.map((a) => a.address);
+    const accountsToUse = accounts || this.solanaWallet!.accounts.map((a) => a.address);
     if (!accountsToUse || accountsToUse.length === 0) {
       throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
     }
-    const walletChains = new Set(this.solanaWallet.chains);
-    const currentChainConfig = this.coreOptions.chains.find((c) => {
+    const walletChains = new Set(this.solanaWallet!.chains);
+    const currentChainConfig = this.coreOptions.chains!.find((c) => {
       if (c.chainNamespace !== CHAIN_NAMESPACES.SOLANA) return false;
       const id = getSolanaChainByChainConfig(c);
       return id != null && walletChains.has(id);
@@ -64,7 +64,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
 
     const payload = createSolanaSiwwPayload(
       currentChainConfig,
-      accountsToUse[0],
+      accountsToUse[0]!,
       generateSiweNonce(),
       new Date().toISOString(),
       this.coreOptions.clientId,
@@ -72,7 +72,7 @@ export abstract class BaseSolanaConnector<T> extends BaseConnector<T> {
     );
 
     const challenge = await signChallenge(payload, chainNamespace, authServer, purpose);
-    const signedMessage = await walletSignMessage(this.solanaWallet, challenge, accountsToUse[0]);
+    const signedMessage = await walletSignMessage(this.solanaWallet!, challenge, accountsToUse[0]);
     return { challenge, signature: signedMessage, chainNamespace };
   }
 

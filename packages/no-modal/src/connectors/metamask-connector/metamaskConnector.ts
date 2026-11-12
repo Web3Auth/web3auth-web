@@ -121,18 +121,18 @@ class MetaMaskConnector extends BaseConnector<void> {
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     // Build supported networks in CAIP-2 format for multichain client
     const caipSupportedNetworks: Record<string, string> = {};
-    for (const chain of this.coreOptions.chains) {
+    for (const chain of this.coreOptions.chains!) {
       caipSupportedNetworks[getCaipChainId(chain)] = chain.rpcTarget;
     }
 
     // Build supported networks in hex format for EVM client
     const hexSupportedNetworks: Record<string, string> = {};
-    for (const chain of this.coreOptions.chains) {
+    for (const chain of this.coreOptions.chains!) {
       if (chain.chainNamespace === CHAIN_NAMESPACES.EIP155) {
         hexSupportedNetworks[chain.chainId] = chain.rpcTarget;
       }
@@ -140,7 +140,7 @@ class MetaMaskConnector extends BaseConnector<void> {
 
     // Build supported networks for Solana client (MetaMask expects mainnet | testnet | devnet keys)
     const solanaSupportedNetworks: Record<string, string> = {};
-    for (const chain of this.coreOptions.chains) {
+    for (const chain of this.coreOptions.chains!) {
       if (chain.chainNamespace !== CHAIN_NAMESPACES.SOLANA) continue;
       const solanaChainId = getSolanaChainByChainConfig(chain);
       if (!solanaChainId) continue;
@@ -164,8 +164,8 @@ class MetaMaskConnector extends BaseConnector<void> {
       headless: this.connectorSettings?.ui?.headless ?? true,
     };
 
-    let initResolve: () => void;
-    let initReject: (reason?: Error) => void;
+    let initResolve!: () => void;
+    let initReject!: (reason?: Error) => void;
     this.initializationPromise = new Promise((resolve, reject) => {
       initResolve = resolve;
       initReject = reject;
@@ -266,7 +266,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       // triggering `switchChain` internally and unintentionally update the connector data with the new chain id.
       // This creates issue in rehydration flow, where Web3Auth connects to the incorrect chain id, not the rehydrated chain id.
       // Force sync the chain state with the rehydrated chain id to avoid this issue.
-      await this.forceSyncChainState(chainConfig);
+      await this.forceSyncChainState(chainConfig!);
 
       this.emit(CONNECTOR_EVENTS.CONNECTED, {
         connectorName: WALLET_CONNECTORS.METAMASK,
@@ -294,10 +294,10 @@ class MetaMaskConnector extends BaseConnector<void> {
     super.checkConnectionRequirements();
 
     await this.ensureInitialized();
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+    const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === chainId);
     if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
-    const scopes = this.coreOptions.chains.map((c) => getCaipChainId(c) as Scope);
+    const scopes = this.coreOptions.chains!.map((c) => getCaipChainId(c) as Scope);
     const caipAccountIds = caipAccountIdsFromParams || [];
 
     // Skip tracking for rehydration since only new connections are tracked
@@ -318,7 +318,7 @@ class MetaMaskConnector extends BaseConnector<void> {
         this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.METAMASK });
 
         const evmConnectedPromise = new Promise<void>((resolve) => {
-          if (this.evmClient.status === "connected") {
+          if (this.evmClient!.status === "connected") {
             resolve();
           } else {
             // Wait for EVM provider to be ready
@@ -329,7 +329,7 @@ class MetaMaskConnector extends BaseConnector<void> {
         });
 
         // Connect using the multichain client
-        await this.multichainClient.connect(scopes, caipAccountIds, {
+        await this.multichainClient!.connect(scopes, caipAccountIds, {
           solana_accountChanged_notifications: true,
         });
 
@@ -350,7 +350,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       await this.forceSyncChainState(chainConfig);
 
       // check if connected
-      if (this.multichainClient.status !== "connected") {
+      if (this.multichainClient!.status !== "connected") {
         throw WalletLoginError.notConnectedError("Failed to connect with MetaMask wallet");
       }
 
@@ -441,7 +441,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider
         ? this.solanaProvider.accounts.map((a) => a.address)
         : this.evmProvider
-          ? await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })
+          ? ((await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })) as string[])
           : [];
     if (accounts && accounts.length > 0) {
       const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
@@ -465,7 +465,7 @@ class MetaMaskConnector extends BaseConnector<void> {
     super.checkSwitchChainRequirements(params, init);
     await this.ensureInitialized();
 
-    const targetChainConfig = this.coreOptions.chains.find((c) => c.chainId === params.chainId);
+    const targetChainConfig = this.coreOptions.chains!.find((c) => c.chainId === params.chainId);
     if (!targetChainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
     if (targetChainConfig.chainNamespace === CHAIN_NAMESPACES.SOLANA) {
@@ -517,7 +517,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       (chainNamespace === CHAIN_NAMESPACES.SOLANA && this.solanaProvider
         ? this.solanaProvider.accounts.map((a) => a.address)
         : this.evmProvider
-          ? await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })
+          ? ((await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })) as string[])
           : []);
     if (!accountsToUse || accountsToUse.length === 0) {
       throw WalletLoginError.notConnectedError("Not connected with wallet, Please login/connect first");
@@ -528,11 +528,11 @@ class MetaMaskConnector extends BaseConnector<void> {
     const nonce = generateSiweNonce();
     const payload =
       chainNamespace === CHAIN_NAMESPACES.SOLANA
-        ? createSolanaSiwwPayload(activeChainConfig, accountsToUse[0], nonce, issuedAt, this.coreOptions.clientId, this.coreOptions.web3AuthNetwork)
+        ? createSolanaSiwwPayload(activeChainConfig, accountsToUse[0]!, nonce, issuedAt, this.coreOptions.clientId, this.coreOptions.web3AuthNetwork)
         : {
             domain: window.location.origin,
             uri: window.location.href,
-            address: accountsToUse[0],
+            address: accountsToUse[0]!,
             chainId: parseInt(activeChainConfig.chainId, 16),
             version: "1",
             nonce,
@@ -548,10 +548,10 @@ class MetaMaskConnector extends BaseConnector<void> {
       signedMessage = await walletSignMessage(this.solanaProvider, challenge, accountsToUse[0]);
     } else if (this.evmProvider) {
       const hexChallenge = bytesToHexPrefixedString(utf8ToBytes(challenge));
-      signedMessage = await this.evmProvider.request<[string, string], string>({
+      signedMessage = (await this.evmProvider.request<[string, string], string>({
         method: EVM_METHOD_TYPES.PERSONAL_SIGN,
-        params: [hexChallenge, accountsToUse[0]],
-      });
+        params: [hexChallenge, accountsToUse[0]!],
+      })) as string;
     } else {
       throw WalletLoginError.notConnectedError("No provider available for signing");
     }
@@ -590,7 +590,7 @@ class MetaMaskConnector extends BaseConnector<void> {
       // For solana case, metamask connect the first available scope in priority order: mainnet > devnet > testnet.
       // So, if the user requested chain is different from the connected chain,
       // we need to update the connector data with the connected chain id to keep the Web3Auth state aligned.
-      if ("scope" in this.solanaProvider && typeof this.solanaProvider.scope === "string") {
+      if ("scope" in this.solanaProvider! && typeof this.solanaProvider.scope === "string") {
         const connectedSolChain = this.solanaProvider.scope;
         const connectedChainConfig = this.coreOptions.chains?.find((chain) => {
           return getCaipChainId(chain) === connectedSolChain && chain.chainNamespace === CHAIN_NAMESPACES.SOLANA;
@@ -606,17 +606,17 @@ class MetaMaskConnector extends BaseConnector<void> {
 
   private resolveAuthChainConfig(chainId?: string) {
     if (chainId) {
-      return this.coreOptions.chains.find((x) => x.chainId === chainId);
+      return this.coreOptions.chains!.find((x) => x.chainId === chainId);
     }
 
-    const evmChainId = this.evmProvider?.chainId || this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155)?.chainId;
+    const evmChainId = this.evmProvider?.chainId || this.coreOptions.chains!.find((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155)?.chainId;
     const isSolanaOnly = !this.evmProvider && !!this.solanaProvider;
 
     // Keep the old fallback for callers that do not pass a chainId yet.
     return isSolanaOnly
-      ? this.coreOptions.chains.find((x) => x.chainNamespace === CHAIN_NAMESPACES.SOLANA)
+      ? this.coreOptions.chains!.find((x) => x.chainNamespace === CHAIN_NAMESPACES.SOLANA)
       : this.evmProvider
-        ? this.coreOptions.chains.find((x) => x.chainId === evmChainId)
+        ? this.coreOptions.chains!.find((x) => x.chainId === evmChainId)
         : undefined;
   }
 
@@ -624,7 +624,7 @@ class MetaMaskConnector extends BaseConnector<void> {
     const addresses = new Set<string>();
 
     if (this.evmProvider) {
-      const evmAccounts = await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
+      const evmAccounts = (await this.evmProvider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })) as string[];
       evmAccounts.forEach((account) => addresses.add(account));
     }
 

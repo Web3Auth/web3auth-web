@@ -43,7 +43,7 @@ export const useSolanaWallet = (): IUseSolanaWallet => {
 
   const rpc = useMemo(() => {
     if (!web3Auth || !solanaWallet || chainNamespace !== CHAIN_NAMESPACES.SOLANA) return null;
-    return createSolanaRpc(web3Auth.currentChain.rpcTarget);
+    return createSolanaRpc(web3Auth.currentChain!.rpcTarget);
   }, [web3Auth, solanaWallet, chainNamespace]);
 
   const getPrivateKey = useCallback(async (): Promise<string> => {

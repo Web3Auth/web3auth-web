@@ -20,7 +20,7 @@ export const useEnableMFA = (): IUseEnableMFA => {
       setLoading(true);
       setError(null);
       try {
-        await web3Auth.enableMFA(params);
+        await web3Auth!.enableMFA(params);
       } catch (error) {
         setError(error as Web3AuthError);
       } finally {
