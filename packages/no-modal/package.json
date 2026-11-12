@@ -217,8 +217,6 @@
     "playwright": "^1.65.0",
     "react": "^19.3.1",
     "viem": "^2.57.17",
-    "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
-    "vitest": "5.1.0",
     "vue": "^3.5.45",
     "wagmi": "^3.7.11",
     "vite-plus": "1.5.0",
@@ -227,7 +225,6 @@
     "@toruslabs/oxlint-config-typescript": "^1.1.0"
   },
   "peerDependencies": {
-    "@babel/runtime": "^7.29.13",
     "@base-org/account": "^2.6.0",
     "@coinbase/wallet-sdk": "^4.4.0",
     "@solana/react-hooks": "^1.4.1",
