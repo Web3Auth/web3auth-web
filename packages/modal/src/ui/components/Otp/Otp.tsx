@@ -60,7 +60,7 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
         inputRefs.current[index + 1]?.focus();
       } else if (e.key === " " || e.key === "Spacebar" || e.key === "Space" || (!isInputValueValid(e.key) && inputRefs.current[index + 1])) {
         e.preventDefault();
-        inputRefs.current[index + 1].value = "";
+        inputRefs.current[index + 1]!.value = "";
       }
     };
 
@@ -130,7 +130,7 @@ const OtpInput = forwardRef<HTMLDivElement, OtpProps>(
 
     useEffect(() => {
       if (inputRefs && autoFocus) {
-        inputRefs.current?.[0].focus();
+        inputRefs.current?.[0]!.focus();
       }
     }, [autoFocus]);
 

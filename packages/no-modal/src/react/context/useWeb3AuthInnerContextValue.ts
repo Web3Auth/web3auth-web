@@ -109,7 +109,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
         });
         await web3Auth.init({ signal: controller.signal });
         setChainId(web3Auth.currentChainId);
-        setChainNamespace(web3Auth.currentChain?.chainNamespace);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
       } catch (error) {
         setInitError(error as Error);
       } finally {
@@ -127,7 +127,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
   useEffect(() => {
     const handleChainChange = async (nextChainId: string) => {
       setChainId(nextChainId);
-      setChainNamespace(web3Auth.currentChain?.chainNamespace);
+      setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
     };
 
     const provider = connection?.ethereumProvider ?? null;
@@ -216,7 +216,7 @@ export function useWeb3AuthInnerContextValue<TWeb3Auth extends IWeb3Auth, TWeb3A
       const updatedData = data.data as { chainId: string };
       if (updatedData.chainId) {
         setChainId(updatedData.chainId);
-        setChainNamespace(web3Auth.currentChain?.chainNamespace);
+        setChainNamespace(web3Auth.currentChain?.chainNamespace ?? null);
       }
     };
 

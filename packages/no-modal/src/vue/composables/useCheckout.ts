@@ -22,7 +22,7 @@ export const useCheckout = (): IUseCheckout => {
       if (!plugin) throw WalletServicesPluginError.notInitialized();
       if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      await plugin.value.showCheckout(showCheckoutParams);
+      await plugin.value!.showCheckout(showCheckoutParams);
     } catch (err) {
       log.error("Error showing checkout", err);
       error.value = err as Web3AuthError;

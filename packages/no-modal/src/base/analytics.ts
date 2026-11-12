@@ -5,7 +5,7 @@ import { log } from "./loglevel";
 const SEGMENT_WRITE_KEY = "f6LbNqCeVRf512ggdME4b6CyflhF1tsX";
 
 export class Analytics {
-  private segment: AnalyticsBrowser;
+  private segment?: AnalyticsBrowser;
 
   private globalProperties: Record<string, unknown> = {};
 

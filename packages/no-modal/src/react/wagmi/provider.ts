@@ -59,7 +59,7 @@ export function createWeb3AuthConnectorForWagmi(provider: any): CreateConnectorF
 // Helper to initialize connectors for the given wallets
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export function setupConnector(provider: any, config: Config): Connector {
-  let connector: Connector | CreateConnectorFn = getWeb3authConnector(config);
+  let connector: Connector | CreateConnectorFn | undefined = getWeb3authConnector(config);
 
   if (connector) return connector;
 
@@ -85,7 +85,7 @@ export async function connectWeb3AuthWithWagmi(connector: Connector, config: Con
     [
       connector.uid,
       {
-        accounts: [accounts[0]],
+        accounts: [accounts[0]!],
         chainId,
         connector,
       },
@@ -114,7 +114,7 @@ export async function disconnectWeb3AuthFromWagmi(config: Config) {
     ...state,
     chainId: state.chainId,
     connections: new Map(),
-    current: undefined,
+    current: undefined as unknown as null,
     status: "disconnected",
   }));
 }
@@ -153,7 +153,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
       if (shouldBindToWagmi) {
         const hasSameBinding =
           lastSyncedProvider.current === newEth &&
-          lastSyncedConnectorName.current === newConnection.connectorName &&
+          lastSyncedConnectorName.current === newConnection!.connectorName &&
           wagmiConfig.state.status === "connected";
 
         if (hasSameBinding) {
@@ -168,7 +168,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
 
         lastSyncedProvider.current = newEth;
-        lastSyncedConnectorName.current = newConnection.connectorName;
+        lastSyncedConnectorName.current = newConnection!.connectorName;
 
         const connector = setupConnector(newEth, wagmiConfig);
         if (!connector) {
@@ -215,7 +215,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     const finalConfig: CreateConfigParameters = {
       ssr: true,
       ...config,
-      chains: undefined,
+      chains: undefined as unknown as CreateConfigParameters["chains"],
       connectors: [],
       transports: {},
       multiInjectedProviderDiscovery: false,
@@ -235,7 +235,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
           rpcUrls: {
             default: {
               http: [chain.rpcTarget],
-              webSocket: [chain.wsTarget],
+              webSocket: [chain.wsTarget!],
             },
           },
           blockExplorers: chain.blockExplorerUrl
@@ -258,10 +258,10 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
         } else {
           wagmiChains.push(wagmiChain);
         }
-        finalConfig.transports[wagmiChain.id] = getTransport(chain);
+        finalConfig.transports![wagmiChain.id] = getTransport(chain);
       });
 
-      finalConfig.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
+      finalConfig.chains = [wagmiChains[0]!, ...wagmiChains.slice(1)];
     }
 
     return createWagmiConfig(finalConfig);

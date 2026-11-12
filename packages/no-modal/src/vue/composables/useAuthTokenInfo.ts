@@ -25,10 +25,11 @@ export const useAuthTokenInfo = (): IUseAuthTokenInfo => {
       if (result?.idToken) {
         token.value = result.idToken;
       }
-      return result?.idToken;
+      return result?.idToken ?? null;
     } catch (err) {
       log.error("Error getting auth token info", err);
       error.value = err as Web3AuthError;
+      return null;
     } finally {
       loading.value = false;
     }

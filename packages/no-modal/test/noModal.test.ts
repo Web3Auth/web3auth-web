@@ -680,7 +680,7 @@ describe("Web3AuthNoModal", () => {
       },
     );
     await Promise.resolve();
-    sdk.status = CONNECTED_STATUSES[0];
+    sdk.status = CONNECTED_STATUSES[0]!;
 
     const authProvider = { request: vi.fn() };
     const primaryConnection: Connection = {
@@ -739,7 +739,7 @@ describe("Web3AuthNoModal", () => {
       },
     );
     await Promise.resolve();
-    sdk.status = CONNECTED_STATUSES[0];
+    sdk.status = CONNECTED_STATUSES[0]!;
 
     const authConnector = new MockConnector({ name: WALLET_CONNECTORS.AUTH } as never);
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
@@ -780,8 +780,8 @@ describe("Web3AuthNoModal", () => {
     });
 
     sdk.exposeInitChainsConfig(projectConfig);
-    expect(sdk.coreOptions.chains[0].displayName).toBe("User chain");
-    expect(sdk.coreOptions.chains[0].rpcTarget).toBe("https://user-rpc.example.com");
+    expect(sdk.coreOptions.chains![0]!.displayName).toBe("User chain");
+    expect(sdk.coreOptions.chains![0]!.rpcTarget).toBe("https://user-rpc.example.com");
   });
 
   it("initChainsConfig validates chain config", () => {
@@ -862,7 +862,7 @@ describe("Web3AuthNoModal", () => {
       accessToken: null,
       refreshToken: null,
     };
-    sdk.status = CONNECTED_STATUSES[0];
+    sdk.status = CONNECTED_STATUSES[0]!;
 
     await expect(sdk.switchChain({ chainId: "0x2" })).rejects.toThrow(WalletLoginError);
   });
@@ -1212,7 +1212,7 @@ describe("Web3AuthNoModal", () => {
     });
     // CONNECTED must carry pendingUserConsent=true so downstream listeners (LoginModal, React/Vue contexts)
     // skip mutating their state until the user acts on the consent UI shown by the AUTHORIZED -> CONSENT_REQUIRING flow.
-    expect(connectedListener.mock.calls[0][0]).toMatchObject({ pendingUserConsent: true });
+    expect(connectedListener.mock.calls[0]![0]).toMatchObject({ pendingUserConsent: true });
     expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
 
     connector.emit(CONNECTOR_EVENTS.AUTHORIZED, {

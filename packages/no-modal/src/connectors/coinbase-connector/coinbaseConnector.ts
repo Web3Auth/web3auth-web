@@ -65,13 +65,13 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
 
   async init(options: ConnectorInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
     const { createCoinbaseWalletSDK } = await import("@coinbase/wallet-sdk");
     const coinbaseInstance = createCoinbaseWalletSDK({
       ...this.coinbaseOptions,
       preference: { options: this.coinbaseOptions.options || "smartWalletOnly" },
-      appChainIds: this.coreOptions.chains.map((x) => Number.parseInt(x.chainId, 16)),
+      appChainIds: this.coreOptions.chains!.map((x) => Number.parseInt(x.chainId, 16)),
       appName: this.coinbaseOptions.appName || "Web3Auth",
       appLogoUrl: this.coinbaseOptions.appLogoUrl || "",
     });
@@ -99,7 +99,7 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
     this.status = CONNECTOR_STATUS.CONNECTING;
     this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.COINBASE });
     try {
-      const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+      const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === chainId);
       if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
       await this.coinbaseProvider.request({ method: "eth_requestAccounts" });
@@ -157,13 +157,13 @@ class CoinbaseConnector extends BaseEvmConnector<void> {
   public async switchChain(params: { chainId: string }, init = false): Promise<void> {
     super.checkSwitchChainRequirements(params, init);
     try {
-      await this.coinbaseProvider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
+      await this.coinbaseProvider!.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
     } catch (switchError: unknown) {
       // 4902 indicates that the client does not recognize the Harmony One network
       if ((switchError as ProviderRpcError).code === 4902) {
-        const chainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
+        const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === params.chainId);
         if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
-        await this.coinbaseProvider.request({
+        await this.coinbaseProvider!.request({
           method: "wallet_addEthereumChain",
           params: [
             {

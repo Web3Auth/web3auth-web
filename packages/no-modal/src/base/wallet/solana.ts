@@ -67,7 +67,7 @@ export const walletSignAndSendTransaction = async (wallet: Wallet, transaction: 
   const chain = wallet.chains?.[0] as IdentifierString;
   if (!account) throw new Error("No account found");
   const [output] = await feature.signAndSendTransaction({ account, transaction: serializeTx(transaction), chain });
-  return base58Decoder.decode(new Uint8Array(output.signature));
+  return base58Decoder.decode(new Uint8Array(output!.signature));
 };
 
 /**
@@ -82,7 +82,7 @@ export const walletSignTransaction = async (wallet: Wallet, transaction: Transac
   const chain = wallet.chains?.[0] as IdentifierString;
   const [output] = await feature.signTransaction({ account, transaction: serializeTx(transaction), chain });
   // Extract the first signature from the signed transaction
-  const decodedTx = transactionDecoder.decode(output.signedTransaction);
+  const decodedTx = transactionDecoder.decode(output!.signedTransaction);
   const sig = decodedTx.signatures[account.address as Address];
   if (!sig) throw new Error("No signature in signed transaction");
   return base58Decoder.decode(new Uint8Array(sig));
@@ -99,5 +99,5 @@ export const walletSignMessage = async (wallet: Wallet, message: string, from?: 
   if (!account) throw new Error("No account found");
   const msgBytes = new TextEncoder().encode(message);
   const [output] = await feature.signMessage({ account, message: msgBytes });
-  return base58Decoder.decode(new Uint8Array(output.signature));
+  return base58Decoder.decode(new Uint8Array(output!.signature));
 };

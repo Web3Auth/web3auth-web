@@ -28,6 +28,7 @@ export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
     } catch (err) {
       log.error("Error getting user info", err);
       error.value = err as Web3AuthError;
+      return null;
     } finally {
       loading.value = false;
     }

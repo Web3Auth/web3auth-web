@@ -20,7 +20,7 @@ export const useManageMFA = (): IUseManageMFA => {
       setLoading(true);
       setError(null);
       try {
-        await web3Auth.manageMFA(params);
+        await web3Auth!.manageMFA(params);
       } catch (error) {
         setError(error as Web3AuthError);
       } finally {

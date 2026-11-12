@@ -76,12 +76,12 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   }
 
   get isWalletConnected(): boolean {
-    return !!(this.connected && this.wallet.accounts.length > 0);
+    return !!(this.connected && this.wallet!.accounts.length > 0);
   }
 
   async init(options: ConnectorInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     this.status = CONNECTOR_STATUS.READY;
@@ -105,20 +105,20 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   async connect({ chainId, getAuthTokenInfo }: BaseConnectorLoginParams): Promise<Connection | null> {
     try {
       super.checkConnectionRequirements();
-      const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+      const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === chainId);
       if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
       this.status = CONNECTOR_STATUS.CONNECTING;
       this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: this.name });
 
       const chainName = getSolanaChainByChainConfig(chainConfig);
-      if (!this.wallet.chains.find((chain) => chain === chainName))
-        throw WalletLoginError.connectionError(`Chain ${chainName} not supported. Supported chains are ${this.wallet.chains.join(", ")}`);
+      if (!this.wallet!.chains.find((chain) => chain === chainName))
+        throw WalletLoginError.connectionError(`Chain ${chainName} not supported. Supported chains are ${this.wallet!.chains.join(", ")}`);
 
       if (!this.isWalletConnected) {
-        await this.wallet.features[StandardConnect].connect();
+        await this.wallet!.features[StandardConnect].connect();
       }
-      if (this.wallet.accounts.length === 0) throw WalletLoginError.connectionError();
+      if (this.wallet!.accounts.length === 0) throw WalletLoginError.connectionError();
 
       this.status = CONNECTOR_STATUS.CONNECTED;
       const connectorNamespace = this.connectorNamespace;
@@ -145,7 +145,7 @@ export class WalletStandardConnector extends BaseSolanaConnector<void> {
   async disconnect(options: { cleanup: boolean } = { cleanup: false }): Promise<void> {
     await super.disconnectSession();
     try {
-      await this.wallet.features[StandardDisconnect]?.disconnect();
+      await this.wallet!.features[StandardDisconnect]?.disconnect();
       if (options.cleanup) {
         this.status = CONNECTOR_STATUS.NOT_READY;
       } else {

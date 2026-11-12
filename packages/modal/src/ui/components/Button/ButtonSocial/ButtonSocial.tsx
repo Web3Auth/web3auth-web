@@ -4,7 +4,7 @@ import { cn } from "../../../utils";
 import Image from "../../Image";
 import { ButtonSocialProps } from "./ButtonSocial.type";
 
-function getProviderIcon(method: string, isDark: boolean, isPrimaryBtn: boolean) {
+function getProviderIcon(method?: string, isDark?: boolean, isPrimaryBtn?: boolean) {
   const imageId = method === AUTH_CONNECTION.TWITTER ? `login-X${isDark ? "-light" : "-dark"}` : `login-${method}${isDark ? "-light" : "-dark"}`;
   const hoverId =
     method === AUTH_CONNECTION.APPLE || method === AUTH_CONNECTION.GITHUB || method === AUTH_CONNECTION.TWITTER ? imageId : `login-${method}-active`;

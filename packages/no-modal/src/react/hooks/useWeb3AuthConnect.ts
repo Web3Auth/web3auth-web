@@ -34,13 +34,14 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
       setLoading(true);
       setError(null);
       try {
-        const provider = await web3Auth.connectTo(connector, params);
+        const provider = await web3Auth!.connectTo(connector, params);
         if (provider) {
-          setConnectorName(web3Auth.primaryConnectorName);
+          setConnectorName(web3Auth!.primaryConnectorName);
         }
         return provider;
       } catch (error) {
         setError(error as Web3AuthError);
+        return null;
       } finally {
         setLoading(false);
       }
