@@ -1,6 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it } from "vite-plus/test";
 
-import { AccountLinkingError, formatAccountLinkingErrorMessage, getAccountLinkingRequestError } from "../src/account-linking/errors";
+import {
+  AccountLinkingError,
+  formatAccountLinkingErrorMessage,
+  getAccountLinkingRequestError,
+} from "../src/account-linking/errors";
 
 describe("account-linking errors", () => {
   it("creates typed account-linking errors", () => {
@@ -10,7 +14,9 @@ describe("account-linking errors", () => {
     expect(error.name).toBe("AccountLinkingError");
     expect(error.code).toBe(5404);
     expect(error.message).toBe("Failed to obtain wallet proof token. Signature request failed");
-    expect(error.toString()).toBe("[5404] Failed to obtain wallet proof token. Signature request failed");
+    expect(error.toString()).toBe(
+      "[5404] Failed to obtain wallet proof token. Signature request failed",
+    );
   });
 
   it("returns the same account-linking error instance", async () => {
@@ -25,7 +31,8 @@ describe("account-linking errors", () => {
     await expect(getAccountLinkingRequestError(response)).resolves.toMatchObject({
       name: "AccountLinkingError",
       code: 5401,
-      message: "Account linking request failed. This wallet address is already registered on this dApp",
+      message:
+        "Account linking request failed. This wallet address is already registered on this dApp",
     });
   });
 
@@ -56,15 +63,21 @@ describe("account-linking errors", () => {
   it("formats account-linking errors with code and message", () => {
     const error = AccountLinkingError.accountNotLinked("Wallet not found");
 
-    expect(formatAccountLinkingErrorMessage(error)).toBe("[5407] Account not linked. Wallet not found");
+    expect(formatAccountLinkingErrorMessage(error)).toBe(
+      "[5407] Account not linked. Wallet not found",
+    );
   });
 
   it("formats regular errors using the error message", () => {
-    expect(formatAccountLinkingErrorMessage(new Error("Something failed"))).toBe("Account linking error: Something failed");
+    expect(formatAccountLinkingErrorMessage(new Error("Something failed"))).toBe(
+      "Account linking error: Something failed",
+    );
   });
 
   it("formats plain objects as json and uses the fallback for circular values", () => {
-    expect(formatAccountLinkingErrorMessage({ reason: "bad request" })).toBe('{"reason":"bad request"}');
+    expect(formatAccountLinkingErrorMessage({ reason: "bad request" })).toBe(
+      '{"reason":"bad request"}',
+    );
 
     const circular: { self?: unknown } = {};
     circular.self = circular;

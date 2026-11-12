@@ -1,7 +1,13 @@
 {
-  "extends": "../../tsconfig.json",
-  "include": ["src", "test"],
+  "extends": "@toruslabs/config/tsconfig.library.json",
   "compilerOptions": {
-    "strict": true
-  }
+    "jsx": "react-jsx",
+    "lib": ["ES2024", "DOM", "DOM.Iterable"],
+    "noUncheckedIndexedAccess": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "rootDir": "."
+  },
+  "include": ["src", "test", "vite.config.mts"],
+  "exclude": ["node_modules", "dist"]
 }

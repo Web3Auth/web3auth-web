@@ -1,7 +1,11 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 
 import { type SafeEventEmitterProvider } from "../src/base";
-import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../src/providers/base-provider";
+import {
+  BaseProvider,
+  type BaseProviderConfig,
+  type BaseProviderState,
+} from "../src/providers/base-provider";
 import { createChain } from "./helpers";
 
 class TestBaseProvider extends BaseProvider<BaseProviderConfig, BaseProviderState, never> {
@@ -84,10 +88,16 @@ describe("BaseProvider", () => {
     expect(oldTargetNativeListener).toHaveBeenCalledTimes(1);
     expect(wrapperChainChanged).toHaveBeenCalledTimes(1);
     expect(provider.chainId).toBe("0x2");
-    await expect(provider.request({ method: "eth_accounts" })).resolves.toBe("old-target:eth_accounts");
+    await expect(provider.request({ method: "eth_accounts" })).resolves.toBe(
+      "old-target:eth_accounts",
+    );
 
-    expect(() => provider.updateProviderEngineProxy(newTarget as unknown as SafeEventEmitterProvider)).not.toThrow();
-    await expect(provider.request({ method: "eth_accounts" })).resolves.toBe("new-target:eth_accounts");
+    expect(() =>
+      provider.updateProviderEngineProxy(newTarget as unknown as SafeEventEmitterProvider),
+    ).not.toThrow();
+    await expect(provider.request({ method: "eth_accounts" })).resolves.toBe(
+      "new-target:eth_accounts",
+    );
 
     oldTarget.emit("accountsChanged", ["0xstale"]);
     expect(wrapperAccountsChanged).toHaveBeenCalledTimes(1);

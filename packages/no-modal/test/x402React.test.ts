@@ -1,6 +1,6 @@
 import { act, createElement } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
 import { CHAIN_NAMESPACES } from "../src/base";
 import type { IUseX402FetchReturnValues } from "../src/x402/react";
@@ -68,6 +68,8 @@ describe("useX402Fetch", () => {
 
     ({ root, container } = await renderHook());
 
-    await expect(fetchWithPayment?.({ url: "https://example.com", options: {} })).rejects.toThrow("EVM provider not available");
+    await expect(fetchWithPayment?.({ url: "https://example.com", options: {} })).rejects.toThrow(
+      "EVM provider not available",
+    );
   });
 });

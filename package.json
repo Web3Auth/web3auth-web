@@ -5,30 +5,42 @@
   },
   "description": "Monorepo for web3 auth packages",
   "devDependencies": {
+    "@changesets/cli": "^3.0.3",
+    "@lavamoat/harden": "^0.8.1",
     "@solana/kit": "^6.9.0",
-    "@toruslabs/config": "^4.0.1",
-    "@toruslabs/eslint-config-typescript": "^5.0.2",
-    "@toruslabs/torus-scripts": "^8.1.0",
-    "@types/node": "^24",
-    "@vitest/browser-playwright": "^4.1.8",
-    "@vitest/coverage-istanbul": "^4.1.8",
+    "@toruslabs/config": "^5.0.0",
+    "@toruslabs/oxlint-config-node": "^1.0.0",
+    "@toruslabs/oxlint-config-react": "^1.0.0",
+    "@toruslabs/oxlint-config-typescript": "^1.1.0",
+    "@toruslabs/oxlint-config-vue": "^1.0.0",
+    "@toruslabs/torus-scripts": "^9.0.1",
+    "@types/node": "^26.6.6",
+    "@vitest/browser-playwright": "5.1.0",
+    "@vitest/coverage-istanbul": "5.1.0",
     "cross-env": "^10.1.0",
     "dotenv": "^17.4.2",
-    "eslint": "^9.39.2",
     "husky": "^9.1.7",
-    "lerna": "^9.0.7",
     "lint-staged": "^16.4.0",
     "ox": "^0.11.3",
+    "oxlint-plugin-vize": "^0.608.0",
+    "oxlint-tailwindcss": "^1.17.1",
     "playwright": "^1.60.0",
-    "prettier": "^3.8.3",
     "rimraf": "^6.1.3",
-    "typescript": "~5.9.3",
-    "vite": "^8.0.16",
-    "vitest": "^4.1.8"
+    "typescript": "^7.0.2",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+    "vite-plus": "1.5.0",
+    "vitest": "5.1.0"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "npm",
+      "version": ">=11.17.0",
+      "onFail": "error"
+    }
   },
   "engines": {
-    "node": ">=22.x",
-    "npm": ">=10.x"
+    "node": ">=24.22.0",
+    "npm": ">=12"
   },
   "homepage": "https://github.com/Web3Auth/Web3Auth#readme",
   "keywords": [
@@ -44,7 +56,7 @@
   ],
   "license": "ISC",
   "lint-staged": {
-    "*": "lerna run --concurrency 1 --stream --since HEAD --exclude-dependents pre-commit -- "
+    "*": ["vp fmt", "vp lint --fix"]
   },
   "name": "web3auth",
   "optionalDependencies": {
@@ -59,17 +71,18 @@
     "url": "git+https://github.com/Web3Auth/Web3Auth.git"
   },
   "scripts": {
-    "build": "cross-env FORCE_COLOR=1 lerna run --stream build",
-    "clean": "lerna clean --yes && lerna exec -- rimraf package-lock.json .rollup.cache/ tsconfig.build.tsbuildinfo yarn.lock dist/ .rts2_cache_{cjs,esm}/ web3auth-*.tgz .eslintcache",
-    "dev": "lerna run dev --parallel",
-    "just:publish:lerna": "lerna publish",
-    "lint": "cross-env FORCE_COLOR=1 lerna run lint --parallel",
+    "build": "vp run -r --fail-if-no-match build",
+    "clean": "rimraf packages/*/dist packages/*/*.tgz .eslintcache",
+    "dev": "vp run -r --fail-if-no-match dev",
+    "lint": "vp check && node scripts/lint-vue-templates.mjs",
     "locale": "node locales/importLocales.mjs",
-    "pack:lerna": "lerna exec 'npm pack'",
-    "pre-commit": "lerna run pre-commit",
+    "pack": "vp run -r --fail-if-no-match pack",
+    "pre-commit": "lint-staged",
     "prepare": "husky",
-    "publish:lerna": "npm run clean && npm install && lerna publish",
-    "test": "cross-env FORCE_COLOR=1 lerna run test --parallel"
+    "release-packages": "changeset publish",
+    "test": "vp run -r --fail-if-no-match test",
+    "typecheck": "tsc -p packages/no-modal --noEmit && tsc -p packages/modal --noEmit",
+    "version-packages": "changeset version && npm install --package-lock-only --ignore-scripts"
   },
   "workspaces": [
     "packages/no-modal",
@@ -77,6 +90,8 @@
   ],
   "overrides": {
     "react": "19.2.7",
-    "react-dom": "19.2.7"
+    "react-dom": "19.2.7",
+    "vite": "npm:@voidzero-dev/vite-plus-core@1.5.0",
+    "vitest": "5.1.0"
   }
 }
