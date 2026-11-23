@@ -1,4 +1,11 @@
 {
+  "allowScripts": {
+    "fsevents@2.3.3": false,
+    "protobufjs@7.6.6": false,
+    "tiny-secp256k1@1.1.7": false,
+    "vue-demi@0.13.11": false,
+    "vue-demi@0.14.10": false
+  },
   "author": "Torus Labs",
   "bugs": {
     "url": "https://github.com/Web3Auth/Web3Auth/issues"
