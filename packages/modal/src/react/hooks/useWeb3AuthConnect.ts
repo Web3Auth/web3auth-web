@@ -27,7 +27,7 @@ export const useWeb3AuthConnect = (): IUseWeb3AuthConnect => {
     setConnectError(null);
     let connection: Connection | null = null;
     try {
-      connection = await web3Auth.connect();
+      connection = await web3Auth!.connect();
     } catch (error) {
       setConnectError(error as Web3AuthError);
     } finally {

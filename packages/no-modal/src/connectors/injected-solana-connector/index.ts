@@ -8,7 +8,7 @@ import { walletStandardConnector } from "./walletStandardConnector";
 const hasSolanaWalletStandardFeatures = (wallet: Wallet): boolean => {
   const { chains, features } = wallet;
   const isSolana = chains.some((chain) => chain.startsWith("solana"));
-  if (!isSolana) return;
+  if (!isSolana) return false;
   const hasRequiredFeatures = [StandardConnect, SolanaSignMessage, SolanaSignTransaction, SolanaSignAndSendTransaction].every((feature) =>
     Object.keys(features).includes(feature)
   );

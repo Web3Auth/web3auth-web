@@ -33,6 +33,8 @@ export const useSignTransaction = (): IUseSignTransaction => {
     } catch (err) {
       log.error("Error signing transaction", err);
       error.value = err as Web3AuthError;
+      // keep the previous (undefined) result on failure without widening the public composable type
+      return undefined as unknown as string;
     } finally {
       loading.value = false;
     }

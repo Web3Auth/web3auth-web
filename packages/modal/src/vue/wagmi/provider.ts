@@ -58,8 +58,8 @@ const Web3AuthWagmiProvider = defineComponent({
         if (shouldBindToWagmi) {
           const hasSameBinding =
             lastSyncedProvider.value === newEth &&
-            lastSyncedConnectorName.value === newConnection.connectorName &&
-            newConnection?.connectorName === web3Auth.value?.connection.connectorName &&
+            lastSyncedConnectorName.value === newConnection!.connectorName &&
+            newConnection?.connectorName === web3Auth.value?.connection!.connectorName &&
             wagmiConfig.state.status === "connected";
 
           if (hasSameBinding) {
@@ -74,7 +74,7 @@ const Web3AuthWagmiProvider = defineComponent({
           }
 
           lastSyncedProvider.value = newEth;
-          lastSyncedConnectorName.value = newConnection.connectorName;
+          lastSyncedConnectorName.value = newConnection!.connectorName;
           const connector = setupConnector(newEth, wagmiConfig);
           if (!connector) {
             log.error("Failed to setup vue wagmi connector");
@@ -137,7 +137,7 @@ export const WagmiProvider = defineComponent({
       const configParams: CreateConfigParameters = {
         ssr: true,
         ...config,
-        chains: undefined,
+        chains: undefined as unknown as CreateConfigParameters["chains"],
         connectors: [],
         transports: {},
         multiInjectedProviderDiscovery: false,
@@ -157,7 +157,7 @@ export const WagmiProvider = defineComponent({
             rpcUrls: {
               default: {
                 http: [chain.rpcTarget],
-                webSocket: [chain.wsTarget],
+                webSocket: [chain.wsTarget!],
               },
             },
             blockExplorers: chain.blockExplorerUrl
@@ -180,10 +180,10 @@ export const WagmiProvider = defineComponent({
           } else {
             wagmiChains.push(wagmiChain);
           }
-          configParams.transports[wagmiChain.id] = getTransport(chain);
+          configParams.transports![wagmiChain.id] = getTransport(chain);
         });
 
-        configParams.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
+        configParams.chains = [wagmiChains[0]!, ...wagmiChains.slice(1)];
       }
 
       return createWagmiConfig(configParams);
@@ -197,7 +197,7 @@ export const WagmiProvider = defineComponent({
 
     watch(
       isInitialized,
-      (newIsInitialized: boolean, prevIsInitialized: boolean) => {
+      (newIsInitialized: boolean, prevIsInitialized: boolean | undefined) => {
         web3Auth.value?.setAnalyticsProperties({ wagmi_enabled: true });
         if (newIsInitialized && !prevIsInitialized) {
           finalConfig.value = defineWagmiConfig();

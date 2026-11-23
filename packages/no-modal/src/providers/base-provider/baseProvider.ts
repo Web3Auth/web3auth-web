@@ -70,7 +70,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   }
 
   get currentChain(): CustomChainConfig {
-    return this.config.chains.find((chain) => chain.chainId === this.state.chainId);
+    return this.config.chains.find((chain) => chain.chainId === this.state.chainId)!;
   }
 
   get provider(): SafeEventEmitterProvider<ProviderEvents> | null {
@@ -117,13 +117,13 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
 
   sendAsync<T, U>(req: JRPCRequest<T>, callback?: SendCallBack<JRPCResponse<U>>): void | Promise<JRPCResponse<U>> {
     if (callback) return this.send(req, callback);
-    return this.request(req);
+    return this.request<T, JRPCResponse<U>>(req) as Promise<JRPCResponse<U>>;
   }
 
   send<T, U>(req: JRPCRequest<T>, callback: SendCallBack<JRPCResponse<U>>): void {
     this.request(req)
       .then((res) => callback(null, { result: res } as JRPCResponse<U>))
-      .catch((err) => callback(err, null));
+      .catch((err) => callback(err, null as unknown as JRPCResponse<U>));
   }
 
   public updateProviderEngineProxy(provider: SafeEventEmitterProvider): void {
@@ -157,7 +157,7 @@ export abstract class BaseProvider<C extends BaseProviderConfig, S extends BaseP
   }
 
   protected getChain(chainId: string): CustomChainConfig {
-    return this.config.chains.find((chain) => chain.chainId === chainId);
+    return this.config.chains.find((chain) => chain.chainId === chainId)!;
   }
 
   private ensureProviderListenerBridge(): void {

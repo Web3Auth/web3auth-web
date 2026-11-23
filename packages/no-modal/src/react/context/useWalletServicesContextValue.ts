@@ -41,7 +41,7 @@ export function useWalletServicesContextValue<TWalletServicesPlugin>(
     const plugin = getPlugin(EVM_PLUGINS.WALLET_SERVICES) as IWalletServicesPluginState<TWalletServicesPlugin> | null;
     setWalletServicesPlugin(plugin);
     // When rehydrating, the connected listener may be registered after the connected event is emitted.
-    if (CONNECTED_STATUSES.includes(plugin?.status)) setReady(true);
+    if (plugin?.status && CONNECTED_STATUSES.includes(plugin.status)) setReady(true);
   }, [isConnected, getPlugin]);
 
   useEffect(() => {

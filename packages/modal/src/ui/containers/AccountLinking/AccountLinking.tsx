@@ -98,7 +98,7 @@ function AccountLinking(props: AccountLinkingProps) {
         </div>
       ) : (
         <ConnectWalletQrCode
-          qrCodeValue={modalState.accountLinking.walletConnectUri}
+          qrCodeValue={modalState.accountLinking.walletConnectUri!}
           isDark={isDark}
           selectedButton={accountLinkingButton}
           logoImage={accountLinkingQrLogoImage}

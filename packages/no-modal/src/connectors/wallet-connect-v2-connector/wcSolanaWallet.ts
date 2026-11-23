@@ -62,7 +62,7 @@ export class WCSolanaWallet implements Wallet {
 
   private readonly _listeners: { [E in keyof StandardEventsListeners]?: Set<StandardEventsListeners[E]> } = {};
 
-  private constructor(connector: ISignClient, wcCaipChainId: string, chainIdentifier: string, accounts: WalletAccount[]) {
+  private constructor(connector: ISignClient, wcCaipChainId: string, chainIdentifier: string | null, accounts: WalletAccount[]) {
     this.chains = chainIdentifier ? ([chainIdentifier] as IdentifierArray) : ([] as unknown as IdentifierArray);
     this._accounts = accounts;
 

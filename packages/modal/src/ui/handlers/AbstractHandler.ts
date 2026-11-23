@@ -21,7 +21,7 @@ export abstract class PasswordlessHandler {
 
   trackingIdentifier?: string;
 
-  version: string = `web3auth-${version.split(".")[0]}`;
+  version: string = `web3auth-${version!.split(".")[0]}`;
 
   constructor(params: PasswordlessHandlerParams) {
     if (!params.authConnection) throw WalletInitializationError.invalidParams("authConnection is required");

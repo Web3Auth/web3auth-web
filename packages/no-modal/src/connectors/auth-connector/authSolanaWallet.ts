@@ -110,10 +110,10 @@ export class AuthSolanaWallet implements Wallet {
           return Promise.all(
             inputs.map(async (input) => {
               const base64Tx = base64Decoder.decode(input.transaction);
-              const signature = await this._provider.request<{ message: string }, string>({
+              const signature = (await this._provider.request<{ message: string }, string>({
                 method: SOLANA_METHOD_TYPES.SEND_TRANSACTION,
                 params: { message: base64Tx },
-              });
+              })) as string;
               return { signature: new Uint8Array(base58Encoder.encode(signature)) };
             })
           );
@@ -126,10 +126,10 @@ export class AuthSolanaWallet implements Wallet {
           return Promise.all(
             inputs.map(async (input) => {
               const message = new TextDecoder().decode(input.message);
-              const signature = await this._provider.request<{ data: string; from: string }, string>({
+              const signature = (await this._provider.request<{ data: string; from: string }, string>({
                 method: SOLANA_METHOD_TYPES.SIGN_MESSAGE,
                 params: { data: message, from: input.account.address },
-              });
+              })) as string;
               return { signedMessage: new Uint8Array(input.message), signature: new Uint8Array(base58Encoder.encode(signature)) };
             })
           );
@@ -143,10 +143,10 @@ export class AuthSolanaWallet implements Wallet {
           return Promise.all(
             inputs.map(async (input) => {
               const base64Tx = base64Decoder.decode(input.transaction);
-              const signatureBase58 = await this._provider.request<{ message: string }, string>({
+              const signatureBase58 = (await this._provider.request<{ message: string }, string>({
                 method: SOLANA_METHOD_TYPES.SIGN_TRANSACTION,
                 params: { message: base64Tx },
-              });
+              })) as string;
               const sigBytes = new Uint8Array(base58Encoder.encode(signatureBase58));
               const decodedTx = transactionDecoder.decode(input.transaction);
               const signedTx = {
@@ -180,7 +180,7 @@ export class AuthSolanaWallet implements Wallet {
 
     if (this._accounts !== null) return;
 
-    const addresses = (await this._provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS })) ?? [];
+    const addresses = ((await this._provider.request<never, string[]>({ method: SOLANA_METHOD_TYPES.GET_ACCOUNTS })) as string[] | null | undefined) ?? [];
     const accountChains = this.chains;
     this._accounts = addresses.map((address) => ({
       address,

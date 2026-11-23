@@ -67,7 +67,7 @@ class BaseAccountConnector extends BaseEvmConnector<void> {
 
   async init(options: ConnectorInitOptions): Promise<void> {
     await super.init(options);
-    const chainConfig = this.coreOptions.chains.find((x) => x.chainId === options.chainId);
+    const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === options.chainId);
     super.checkInitializationRequirements({ chainConfig });
 
     const { createBaseAccountSDK } = await import("@base-org/account");
@@ -84,7 +84,7 @@ class BaseAccountConnector extends BaseEvmConnector<void> {
       }
     }
 
-    const appChainIds = this.coreOptions.chains
+    const appChainIds = this.coreOptions.chains!
       .filter((x) => x.chainNamespace === CHAIN_NAMESPACES.EIP155)
       .map((x) => Number.parseInt(x.chainId, 16));
 
@@ -121,7 +121,7 @@ class BaseAccountConnector extends BaseEvmConnector<void> {
     this.emit(CONNECTOR_EVENTS.CONNECTING, { connector: WALLET_CONNECTORS.BASE_ACCOUNT });
 
     try {
-      const chainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+      const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === chainId);
       if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
 
       await this.baseAccountProvider.request({ method: "eth_requestAccounts" });
@@ -186,7 +186,7 @@ class BaseAccountConnector extends BaseEvmConnector<void> {
       await this.baseAccountProvider?.request({ method: "wallet_switchEthereumChain", params: [{ chainId: params.chainId }] });
     } catch (switchError: unknown) {
       if ((switchError as JsonRpcError<undefined>).code === 4902) {
-        const chainConfig = this.coreOptions.chains.find((x) => x.chainId === params.chainId);
+        const chainConfig = this.coreOptions.chains!.find((x) => x.chainId === params.chainId);
         if (!chainConfig) throw WalletLoginError.connectionError("Chain config is not available");
         await this.baseAccountProvider?.request({
           method: "wallet_addEthereumChain",

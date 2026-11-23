@@ -5,14 +5,14 @@ import { ExternalButton, TOAST_TYPE, ToastType } from "../interfaces";
 export type BodyState = {
   installLinks?: {
     show: boolean;
-    wallet: ExternalButton;
+    wallet: ExternalButton | null;
   };
   multiChainSelector: {
     show: boolean;
-    wallet: ExternalButton;
+    wallet: ExternalButton | null;
   };
   // Pre-selected wallet to show QR code directly when navigating to ConnectWallet page
-  preSelectedWallet?: ExternalButton;
+  preSelectedWallet?: ExternalButton | null;
 };
 
 export type ToastState = {

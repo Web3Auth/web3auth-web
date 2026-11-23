@@ -20,7 +20,7 @@ export function createWalletMiddlewareV2({
 }: WalletMiddlewareOptions) {
   if (!getAccounts) throw new Error("opts.getAccounts is required");
 
-  async function validateAndNormalizeKeyholder(address: string, req: JRPCRequest<unknown>): Promise<string> {
+  async function validateAndNormalizeKeyholder(address: string | null | undefined, req: JRPCRequest<unknown>): Promise<string> {
     if (typeof address === "string" && address.length > 0) {
       const accounts = await getAccounts(req);
       const normalizedAddress = address.toLowerCase();

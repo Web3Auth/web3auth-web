@@ -22,7 +22,7 @@ export const useWalletConnectScanner = (): IUseWalletConnectScanner => {
       if (!plugin) throw WalletServicesPluginError.notInitialized();
       if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      await plugin.value.showWalletConnectScanner(showWalletConnectScannerParams);
+      await plugin.value!.showWalletConnectScanner(showWalletConnectScannerParams);
     } catch (err) {
       log.error("Error showing wallet connect scanner", err);
       error.value = err as Web3AuthError;

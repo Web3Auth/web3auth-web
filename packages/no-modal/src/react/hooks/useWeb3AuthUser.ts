@@ -22,11 +22,12 @@ export const useWeb3AuthUser = (): IUseWeb3AuthUser => {
     setLoading(true);
     setError(null);
     try {
-      const userInfo = await web3Auth.getUserInfo();
+      const userInfo = await web3Auth!.getUserInfo();
       setUserInfo(userInfo);
       return userInfo;
     } catch (error) {
       setError(error as Web3AuthError);
+      return null;
     } finally {
       setLoading(false);
     }

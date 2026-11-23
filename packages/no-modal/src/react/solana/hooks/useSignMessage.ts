@@ -27,6 +27,8 @@ export const useSignMessage = (): IUseSignMessage => {
         return signature;
       } catch (error) {
         setError(error as Web3AuthError);
+        // keep the previous (undefined) result on failure without widening the public hook type
+        return undefined as unknown as string;
       } finally {
         setLoading(false);
       }

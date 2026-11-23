@@ -2,6 +2,7 @@ import { EIP_5792_METHODS, EIP_7702_METHODS, METHOD_TYPES } from "@toruslabs/eth
 import {
   createScaffoldMiddlewareV2,
   type JRPCRequest,
+  type Json,
   type MiddlewareConstraint,
   type MiddlewareParams,
   providerErrors,
@@ -18,7 +19,7 @@ export async function createAaMiddleware({
   eoaProvider: IProvider;
   handlers: IEthProviderHandlers;
 }): Promise<MiddlewareConstraint> {
-  const [eoaAddress] = (await eoaProvider.request({ method: METHOD_TYPES.GET_ACCOUNTS })) as string[];
+  const [eoaAddress] = (await eoaProvider.request({ method: METHOD_TYPES.GET_ACCOUNTS })) as [string];
 
   /**
    * Validates the keyholder address, and returns a normalized (i.e. lowercase)
@@ -48,7 +49,7 @@ export async function createAaMiddleware({
       return eoaAddress;
     }
 
-    const [smartAccountAddress] = await handlers.getAccounts(req);
+    const [smartAccountAddress] = (await handlers.getAccounts(req)) as [string];
     // sender is smart account address
     if (address.toLowerCase() === smartAccountAddress.toLowerCase()) {
       // use EOA address as sender for signing
@@ -98,7 +99,7 @@ export async function createAaMiddleware({
       txParams.from = await normalizeSignSenderAddress(txParams.from, req);
     }
 
-    return handlers.processSignTransaction(txParams, req);
+    return handlers.processSignTransaction!(txParams, req);
   }
 
   async function ethSign(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
@@ -120,7 +121,7 @@ export async function createAaMiddleware({
     }
     msgParams = { ...extraParams, ...msgParams };
 
-    return handlers.processEthSignMessage(msgParams, req);
+    return handlers.processEthSignMessage!(msgParams, req);
   }
 
   async function signTypedDataV4(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
@@ -142,7 +143,7 @@ export async function createAaMiddleware({
       };
     }
 
-    return handlers.processTypedMessageV4(msgParams, req);
+    return handlers.processTypedMessageV4!(msgParams, req);
   }
 
   async function personalSign(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
@@ -172,7 +173,7 @@ export async function createAaMiddleware({
     }
     msgParams = { ...extraParams, ...msgParams };
 
-    return handlers.processPersonalMessage(msgParams, req);
+    return handlers.processPersonalMessage!(msgParams, req);
   }
 
   async function fetchPublicKey(params: MiddlewareParams<JRPCRequest<unknown>>): Promise<string> {
@@ -202,12 +203,12 @@ export async function createAaMiddleware({
 
 export async function createEoaMiddleware({ aaProvider }: { aaProvider: IProvider }): Promise<MiddlewareConstraint> {
   async function getAccounts(): Promise<string[]> {
-    const [, eoaAddress] = await aaProvider.request<never, string[]>({ method: METHOD_TYPES.GET_ACCOUNTS });
+    const [, eoaAddress] = (await aaProvider.request<never, string[]>({ method: METHOD_TYPES.GET_ACCOUNTS })) as [string, string];
     return [eoaAddress];
   }
 
   async function requestAccounts(): Promise<string[]> {
-    const [, eoaAddress] = await aaProvider.request<never, string[]>({ method: METHOD_TYPES.ETH_REQUEST_ACCOUNTS });
+    const [, eoaAddress] = (await aaProvider.request<never, string[]>({ method: METHOD_TYPES.ETH_REQUEST_ACCOUNTS })) as [string, string];
     return [eoaAddress];
   }
 
@@ -231,6 +232,6 @@ export async function createEip7702And5792MiddlewareForAaProvider(): Promise<Mid
 
 export function providerAsMiddleware(provider: IProvider): MiddlewareConstraint {
   return async ({ request }) => {
-    return provider.request({ method: request.method, params: request.params });
+    return (await provider.request({ method: request.method, params: request.params })) as Json;
   };
 }

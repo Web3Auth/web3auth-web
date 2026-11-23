@@ -22,7 +22,7 @@ export const useWalletUI = (): IUseWalletUI => {
       if (!plugin) throw WalletServicesPluginError.notInitialized();
       if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      await plugin.value.showWalletUi(showWalletUiParams);
+      await plugin.value!.showWalletUi(showWalletUiParams);
     } catch (err) {
       log.error("Error showing wallet UI", err);
       error.value = err as Web3AuthError;

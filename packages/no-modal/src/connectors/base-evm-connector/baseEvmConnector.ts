@@ -24,7 +24,7 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     if (!this.coreOptions) throw WalletInitializationError.invalidParams("Please initialize Web3Auth with valid options");
     this.status = CONNECTOR_STATUS.AUTHORIZING;
     this.emit(CONNECTOR_EVENTS.AUTHORIZING, { connector: this.name as WALLET_CONNECTOR_TYPE });
-    const accounts = await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS });
+    const accounts = (await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })) as string[];
     if (accounts && accounts.length > 0) {
       const cached = await this.getCachedOrNullAuthTokenInfo(accounts[0] as string);
       if (cached) return cached;
@@ -42,12 +42,12 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     _chainId?: string,
     purpose?: "login" | "link"
   ): Promise<{ challenge: string; signature: string; chainNamespace: ChainNamespaceType }> {
-    const accountsToUse = accounts || (await this.provider.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS }));
+    const accountsToUse = accounts || ((await this.provider!.request<never, string[]>({ method: EVM_METHOD_TYPES.GET_ACCOUNTS })) as string[]);
     if (!accountsToUse || accountsToUse.length === 0) {
       throw WalletLoginError.notConnectedError("No accounts found in the connected wallet");
     }
-    const chainId = await this.provider.request<never, string>({ method: "eth_chainId" });
-    const currentChainConfig = this.coreOptions.chains.find((x) => x.chainId === chainId);
+    const chainId = (await this.provider!.request<never, string>({ method: "eth_chainId" })) as string;
+    const currentChainConfig = this.coreOptions.chains!.find((x) => x.chainId === chainId);
     if (!currentChainConfig) throw WalletInitializationError.invalidParams("chainConfig is required before authentication");
     const { chainNamespace } = currentChainConfig;
     const authServer = authServerUrl || citadelServerUrl(this.coreOptions.authBuildEnv);
@@ -66,10 +66,10 @@ export abstract class BaseEvmConnector<T> extends BaseConnector<T> {
     const challenge = await signChallenge(payload, chainNamespace, authServer, purpose);
     const hexChallenge = bytesToHexPrefixedString(utf8ToBytes(challenge));
 
-    const signature = await this.provider.request<[string, string], string>({
+    const signature = (await this.provider!.request<[string, string], string>({
       method: EVM_METHOD_TYPES.PERSONAL_SIGN,
-      params: [hexChallenge, accountsToUse[0]],
-    });
+      params: [hexChallenge, accountsToUse[0]!],
+    })) as string;
     return { challenge, signature, chainNamespace };
   }
 

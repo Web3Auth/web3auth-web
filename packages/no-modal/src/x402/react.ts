@@ -31,7 +31,7 @@ export const useX402Fetch = (address?: Address): IUseX402FetchReturnValues => {
       if (!isConnected) throw new Error("Wallet not connected");
 
       if (chainNamespace === CHAIN_NAMESPACES.SOLANA) {
-        const { solanaWallet } = connection;
+        const { solanaWallet } = connection!;
         if (!solanaWallet || !solanaWallet.accounts?.[0]) throw new Error("Solana wallet not available");
 
         const account = solanaWallet.accounts[0];

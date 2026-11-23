@@ -20,7 +20,7 @@ export const useSwitchChain = (): IUseSwitchChain => {
       setLoading(true);
       setError(null);
       try {
-        await web3Auth.switchChain({ chainId });
+        await web3Auth!.switchChain({ chainId });
       } catch (error) {
         setError(error as Web3AuthError);
       } finally {

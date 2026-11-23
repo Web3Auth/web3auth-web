@@ -67,11 +67,11 @@ export default function RootBodySheets() {
         </li>
       );
       return acc;
-    }, []);
+    }, [] as JSX.Element[]);
     return installLinks;
   }, [bodyState.installLinks?.wallet?.walletRegistryItem?.app, deviceDetails.platform, isDark, t, buttonRadiusType]);
 
-  const desktopInstallLinks = useMemo<JSX.Element[]>(() => {
+  const desktopInstallLinks = useMemo<(JSX.Element | null)[]>(() => {
     if (deviceDetails.platform !== "desktop") return [];
     const browserType = deviceDetails.browser === "brave" ? "chrome" : deviceDetails.browser;
     const browserExtensionConfig = bodyState.installLinks?.wallet?.walletRegistryItem?.app || {};
@@ -138,7 +138,7 @@ export default function RootBodySheets() {
         >
           <ConnectWalletChainNamespaceSelect
             isDark={isDark}
-            wallet={bodyState.multiChainSelector.wallet}
+            wallet={bodyState.multiChainSelector.wallet!}
             handleExternalWalletClick={(params) => {
               preHandleExternalWalletClick(params);
               setBodyState({ ...bodyState, multiChainSelector: { show: false, wallet: null } });
@@ -159,13 +159,13 @@ export default function RootBodySheets() {
           </p>
           <div className="wta:my-4 wta:flex wta:justify-center">
             <Image
-              imageId={`login-${bodyState.installLinks.wallet.name}`}
-              hoverImageId={`login-${bodyState.installLinks.wallet.name}`}
+              imageId={`login-${bodyState.installLinks.wallet!.name}`}
+              hoverImageId={`login-${bodyState.installLinks.wallet!.name}`}
               fallbackImageId="wallet"
               height="80"
               width="80"
               isButton
-              extension={bodyState.installLinks.wallet.imgExtension}
+              extension={bodyState.installLinks.wallet!.imgExtension}
             />
           </div>
           <ul className="wta:flex wta:flex-col wta:gap-y-2">{deviceDetails.platform === "desktop" ? desktopInstallLinks : mobileInstallLinks}</ul>

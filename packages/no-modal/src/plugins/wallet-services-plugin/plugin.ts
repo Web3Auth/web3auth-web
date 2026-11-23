@@ -34,7 +34,7 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
 
   readonly pluginNamespace = PLUGIN_NAMESPACES.MULTICHAIN;
 
-  public wsEmbedInstance: WsEmbed;
+  public wsEmbedInstance!: WsEmbed;
 
   private web3auth: IWeb3AuthCore | null = null;
 
@@ -45,9 +45,9 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
   async initWithWeb3Auth(web3auth: IWeb3AuthCore, _whiteLabel?: WhiteLabelData, analytics?: Analytics): Promise<void> {
     if (this.isInitialized) return;
     if (!web3auth) throw WalletServicesPluginError.web3authRequired();
-    if (web3auth.connection && !this.SUPPORTED_CONNECTORS.includes(web3auth.primaryConnectorName)) throw WalletServicesPluginError.notInitialized();
+    if (web3auth.connection && !this.SUPPORTED_CONNECTORS.includes(web3auth.primaryConnectorName!)) throw WalletServicesPluginError.notInitialized();
     const currentChainConfig = web3auth.currentChain;
-    if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(currentChainConfig?.chainNamespace))
+    if (!([CHAIN_NAMESPACES.EIP155, CHAIN_NAMESPACES.SOLANA] as ChainNamespaceType[]).includes(currentChainConfig?.chainNamespace!))
       throw WalletServicesPluginError.unsupportedChainNamespace();
 
     this.web3auth = web3auth;
@@ -69,9 +69,9 @@ class WalletServicesPlugin extends SafeEventEmitter implements IPlugin {
     this.emit(PLUGIN_EVENTS.CONNECTING);
     this.status = PLUGIN_STATUS.CONNECTING;
 
-    if (!CAN_AUTHORIZE_STATUSES.includes(this.web3auth.status)) {
+    if (!CAN_AUTHORIZE_STATUSES.includes(this.web3auth!.status)) {
       throw WalletServicesPluginError.web3AuthNotConnected();
-    } else if (!this.web3auth.connection) {
+    } else if (!this.web3auth!.connection) {
       throw WalletServicesPluginError.providerRequired();
     }
 

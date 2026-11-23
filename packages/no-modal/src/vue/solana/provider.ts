@@ -88,14 +88,14 @@ export const SolanaProvider = defineComponent({
       let client: SolanaClient | null = null;
       try {
         // create a wallet standard connector from connected wallet
-        const solanaWalletId = "wallet-standard:" + newConnection.connectorName;
-        const connector = createWalletStandardConnector(newConnection.solanaWallet, {
+        const solanaWalletId = "wallet-standard:" + newConnection!.connectorName;
+        const connector = createWalletStandardConnector(newConnection!.solanaWallet!, {
           id: solanaWalletId,
-          name: newConnection.connectorName,
+          name: newConnection!.connectorName,
         });
 
         // create a solana client
-        const { rpcTarget, wsTarget } = preferredSolanaChain;
+        const { rpcTarget, wsTarget } = preferredSolanaChain!;
         client = createClient({
           endpoint: rpcTarget,
           websocketEndpoint: wsTarget,

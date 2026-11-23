@@ -4,7 +4,7 @@ import { Web3AuthNoModal } from "../../noModal";
 import { IWeb3AuthInnerContext, Web3AuthProviderProps } from "../interfaces";
 import { useWeb3AuthInnerContextValue } from "./useWeb3AuthInnerContextValue";
 
-export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null);
+export const Web3AuthInnerContext = createContext<IWeb3AuthInnerContext>(null as unknown as IWeb3AuthInnerContext);
 
 export function Web3AuthInnerProvider(params: PropsWithChildren<Web3AuthProviderProps>) {
   const { children, config, initialState } = params;

@@ -20,7 +20,7 @@ export const useWeb3AuthDisconnect = (): IUseWeb3AuthDisconnect => {
       setLoading(true);
       setError(null);
       try {
-        await web3Auth.logout(options);
+        await web3Auth!.logout(options);
       } catch (error) {
         setError(error as Web3AuthError);
       } finally {

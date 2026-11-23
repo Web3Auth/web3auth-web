@@ -83,7 +83,7 @@ export class LoginModal {
 
   private callbacks: LoginModalCallbacks;
 
-  private externalWalletsConfig: Record<string, BaseConnectorConfig>;
+  private externalWalletsConfig!: Record<string, BaseConnectorConfig>;
 
   private analytics: Analytics;
 
@@ -250,14 +250,14 @@ export class LoginModal {
       });
 
       if (this.uiConfig.widgetType === WIDGET_TYPE.MODAL) {
-        createWrapperForModal(this.uiConfig.modalZIndex);
+        createWrapperForModal(this.uiConfig.modalZIndex!);
       } else if (this.uiConfig.widgetType === WIDGET_TYPE.EMBED) {
-        createWrapperForEmbed(this.uiConfig.targetId);
+        createWrapperForEmbed(this.uiConfig.targetId!);
       } else {
         throw WalletInitializationError.invalidParams(`Invalid widget type: ${this.uiConfig.widgetType}`);
       }
 
-      const container = document.getElementById("w3a-parent-container");
+      const container = document.getElementById("w3a-parent-container")!;
 
       if (this.isDark) {
         container.classList.add("w3a--dark");
@@ -292,7 +292,7 @@ export class LoginModal {
         import("color")
           .then(({ default: Color }) => {
             const rootElement = document.getElementById("w3a-parent-container") as HTMLElement;
-            applyWhiteLabelTheme(Color, rootElement, this.uiConfig.theme);
+            applyWhiteLabelTheme(Color, rootElement, this.uiConfig.theme!);
             return;
           })
           .catch((error) => {
@@ -321,9 +321,9 @@ export class LoginModal {
     const isMMAvailable = !!externalWalletsConfig[WALLET_CONNECTORS.METAMASK];
     this.setState({
       externalWalletsConfig,
-      externalWalletsInitialized: !!options.externalWalletsInitialized,
-      showExternalWalletsOnly: !!options.showExternalWalletsOnly,
-      externalWalletsVisibility: isMMAvailable ? false : !!options.externalWalletsVisibility,
+      externalWalletsInitialized: !!options!.externalWalletsInitialized,
+      showExternalWalletsOnly: !!options!.showExternalWalletsOnly,
+      externalWalletsVisibility: isMMAvailable ? false : !!options!.externalWalletsVisibility,
     });
   };
 
@@ -491,7 +491,7 @@ export class LoginModal {
     log.info("external wallet clicked", params);
     const { connector, chainNamespace } = params;
     if (this.callbacks.onExternalWalletLogin) {
-      this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace } });
+      this.callbacks.onExternalWalletLogin({ connector, loginParams: { chainNamespace: chainNamespace! } });
     }
   };
 

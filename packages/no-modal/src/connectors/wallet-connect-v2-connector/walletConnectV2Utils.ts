@@ -17,7 +17,7 @@ import { formatChainId } from "./utils";
 async function getLastActiveSession(signClient: ISignClient): Promise<SessionTypes.Struct | null> {
   if (signClient.session.length) {
     const lastKeyIndex = signClient.session.keys.length - 1;
-    return signClient.session.get(signClient.session.keys[lastKeyIndex]);
+    return signClient.session.get(signClient.session.keys[lastKeyIndex]!);
   }
   return null;
 }

@@ -4,7 +4,7 @@ import { type WalletServicesPluginType } from "../../plugins/wallet-services-plu
 import { IWalletServicesContext, IWeb3AuthInnerContext } from "../interfaces";
 import { useWalletServicesContextValue } from "./useWalletServicesContextValue";
 
-export const WalletServicesContext = createContext<IWalletServicesContext>(null);
+export const WalletServicesContext = createContext<IWalletServicesContext>(null as unknown as IWalletServicesContext);
 
 export function WalletServicesContextProvider({ children, context }: PropsWithChildren<{ context: Context<IWeb3AuthInnerContext> }>) {
   const web3AuthContext = useContext(context);

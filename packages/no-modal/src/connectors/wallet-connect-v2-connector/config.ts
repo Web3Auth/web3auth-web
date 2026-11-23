@@ -40,7 +40,7 @@ const getSiteMetadata = async () => ({ name: getSiteName(window), icon: await ge
 export const getNamespacesFromChains = (chains: string[]) => {
   const supportedNamespaces: string[] = [];
   chains.forEach((chainId) => {
-    const [namespace] = chainId.split(":");
+    const [namespace] = chainId.split(":") as [string];
     if (!supportedNamespaces.includes(namespace)) {
       supportedNamespaces.push(namespace);
     }
@@ -87,7 +87,7 @@ export const getRequiredNamespaces = (chains: string[]): ProposalTypes.RequiredN
 
 export const getWalletConnectV2Settings = async (
   chains: CustomChainConfig[],
-  projectID: string
+  projectID?: string
 ): Promise<{ connectorSettings: IConnectorSettings; loginSettings: EngineTypes.ConnectParams }> => {
   const appMetadata = await getSiteMetadata();
   const connectorSettings: IConnectorSettings = {

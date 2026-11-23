@@ -22,7 +22,7 @@ export const useSwap = (): IUseSwap => {
       if (!plugin) throw WalletServicesPluginError.notInitialized();
       if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      await plugin.value.showSwap(showSwapParams);
+      await plugin.value!.showSwap(showSwapParams);
     } catch (err) {
       log.error("Error showing swap", err);
       error.value = err as Web3AuthError;

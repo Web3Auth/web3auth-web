@@ -57,7 +57,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
       if (shouldBindToWagmi) {
         const hasSameBinding =
           lastSyncedProvider.current === newEth &&
-          lastSyncedConnectorName.current === newConnection.connectorName &&
+          lastSyncedConnectorName.current === newConnection!.connectorName &&
           wagmiConfig.state.status === "connected";
 
         if (hasSameBinding) {
@@ -72,7 +72,7 @@ function Web3AuthWagmiProvider({ children }: PropsWithChildren) {
         }
 
         lastSyncedProvider.current = newEth;
-        lastSyncedConnectorName.current = newConnection.connectorName;
+        lastSyncedConnectorName.current = newConnection!.connectorName;
 
         const connector = setupConnector(newEth, wagmiConfig);
         if (!connector) {
@@ -119,7 +119,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
     const finalConfig: CreateConfigParameters = {
       ssr: true,
       ...config,
-      chains: undefined,
+      chains: undefined as unknown as CreateConfigParameters["chains"],
       connectors: [],
       transports: {},
       multiInjectedProviderDiscovery: false,
@@ -139,7 +139,7 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
           rpcUrls: {
             default: {
               http: [chain.rpcTarget],
-              webSocket: [chain.wsTarget],
+              webSocket: [chain.wsTarget!],
             },
           },
           blockExplorers: chain.blockExplorerUrl
@@ -162,10 +162,10 @@ export function WagmiProvider({ children, ...props }: PropsWithChildren<WagmiPro
         } else {
           wagmiChains.push(wagmiChain);
         }
-        finalConfig.transports[wagmiChain.id] = getTransport(chain);
+        finalConfig.transports![wagmiChain.id] = getTransport(chain);
       });
 
-      finalConfig.chains = [wagmiChains[0], ...wagmiChains.slice(1)];
+      finalConfig.chains = [wagmiChains[0]!, ...wagmiChains.slice(1)];
     }
 
     return createWagmiConfig(finalConfig);

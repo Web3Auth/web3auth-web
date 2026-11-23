@@ -34,6 +34,8 @@ export const useSignAndSendTransaction = (): IUseSignAndSendTransaction => {
         return signature;
       } catch (err) {
         setError(err as Web3AuthError);
+        // keep the previous (undefined) result on failure without widening the public hook type
+        return undefined as unknown as string;
       } finally {
         setLoading(false);
       }

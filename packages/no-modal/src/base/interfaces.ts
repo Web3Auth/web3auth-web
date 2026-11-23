@@ -16,7 +16,7 @@ export interface IWeb3AuthState {
   cachedConnector: string | null;
   cachedConnectorNamespace: ConnectorNamespaceType | null;
   primaryConnectorName: WALLET_CONNECTOR_TYPE | null;
-  currentChainId: string;
+  currentChainId: string | null;
   idToken: string | null;
   accessToken: string | null;
   refreshToken: string | null;

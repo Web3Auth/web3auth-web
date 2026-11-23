@@ -22,7 +22,7 @@ export async function getProviderHandlers({
   chainConfig: CustomChainConfig;
   keyExportEnabled: boolean;
 }): Promise<IXrplProviderHandlers> {
-  const client = new Client(chainConfig.wsTarget);
+  const client = new Client(chainConfig.wsTarget!);
   await client.connect();
   return {
     getAccounts: async (_: JRPCRequest<unknown>): Promise<string[]> => {

@@ -136,12 +136,12 @@ function useFrameworkKitSolanaClient(): SolanaClient {
       }
 
       try {
-        const solanaWalletId = "wallet-standard:" + conn.connectorName;
-        const connector = createWalletStandardConnector(conn.solanaWallet, {
+        const solanaWalletId = "wallet-standard:" + conn!.connectorName;
+        const connector = createWalletStandardConnector(conn!.solanaWallet!, {
           id: solanaWalletId,
-          name: conn.connectorName,
+          name: conn!.connectorName,
         });
-        const { rpcTarget, wsTarget } = preferredSolanaChain;
+        const { rpcTarget, wsTarget } = preferredSolanaChain!;
         const wired = createClient({
           endpoint: rpcTarget,
           websocketEndpoint: wsTarget,

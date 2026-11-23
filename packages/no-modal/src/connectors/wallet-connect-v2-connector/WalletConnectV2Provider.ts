@@ -47,7 +47,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     if (!this.connector)
       throw providerErrors.custom({ message: "Connector is not initialized, pass wallet connect connector in constructor", code: 4902 });
     await this.setupProvider(this.connector);
-    return this._providerEngineProxy.request({ method: "eth_accounts" });
+    return (await this._providerEngineProxy!.request<never, string[]>({ method: "eth_accounts" })) as string[];
   }
 
   public async setupProvider(connector: ISignClient): Promise<void> {
@@ -140,14 +140,14 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     if (this.connector?.session?.length) {
       // currently we are supporting only 1 active session
       const lastKeyIndex = this.connector.session.keys.length - 1;
-      return this.connector.session.get(this.connector.session.keys[lastKeyIndex])?.topic;
+      return this.connector.session.get(this.connector.session.keys[lastKeyIndex]!)?.topic;
     }
     return undefined;
   }
 
   private checkIfAccountAllowed(address: string) {
     if (!this.connector || !this.connectedTopic()) return false;
-    const sessionData = this.connector.session.get(this.connectedTopic());
+    const sessionData = this.connector.session.get(this.connectedTopic()!);
     const allAccounts = getAccountsFromNamespaces(sessionData.namespaces);
     let accountAllowed = false;
     for (const account of allAccounts) {
@@ -192,7 +192,7 @@ export class WalletConnectV2Provider extends BaseProvider<BaseProviderConfig, Wa
     const currentChain = this.state.chainId;
 
     if (!currentChain || currentChain === "loading") {
-      return this.config.chains[0].chainId;
+      return this.config.chains[0]!.chainId;
     }
 
     return currentChain;

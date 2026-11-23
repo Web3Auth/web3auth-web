@@ -47,7 +47,7 @@ describe("useX402Fetch", () => {
 
     if (root) {
       await act(async () => {
-        root.unmount();
+        root!.unmount();
       });
     }
 

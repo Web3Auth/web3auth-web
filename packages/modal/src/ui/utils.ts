@@ -146,7 +146,7 @@ export const getUserLanguage = (defaultLanguage: string | undefined): LANGUAGE_T
   if (!userLanguage) {
     const browserLanguage =
       typeof window !== "undefined" ? (window.navigator as NavigatorLanguage).userLanguage || window.navigator.language || "en-US" : "en-US";
-    userLanguage = browserLanguage.split("-")[0];
+    userLanguage = browserLanguage.split("-")[0]!;
   }
   return Object.prototype.hasOwnProperty.call(LANGUAGE_MAP, userLanguage) ? (userLanguage as LANGUAGE_TYPE) : LANGUAGES.en;
 };
@@ -161,7 +161,7 @@ export const getPlatform = (): platform => {
 
 export function formatIOSMobile(params: { uri: string; link?: string }) {
   const encodedUri: string = encodeURIComponent(params.uri);
-  if (params.link.startsWith("http")) return `${params.link}/wc?uri=${encodedUri}`;
+  if (params.link!.startsWith("http")) return `${params.link}/wc?uri=${encodedUri}`;
   if (params.link) return `${params.link}wc?uri=${encodedUri}`;
   return "";
 }

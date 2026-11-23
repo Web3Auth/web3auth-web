@@ -22,7 +22,7 @@ export const useFunding = (): IUseFunding => {
       if (!plugin) throw WalletServicesPluginError.notInitialized();
       if (!ready) throw WalletServicesPluginError.walletPluginNotConnected();
 
-      await plugin.value.showFunding(showFundingParams);
+      await plugin.value!.showFunding(showFundingParams);
     } catch (err) {
       log.error("Error showing funding", err);
       error.value = err as Web3AuthError;

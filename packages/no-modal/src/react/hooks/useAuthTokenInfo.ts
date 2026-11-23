@@ -21,13 +21,14 @@ export const useAuthTokenInfo = () => {
     setLoading(true);
     setError(null);
     try {
-      const userAuthInfo = await web3Auth.getAuthTokenInfo();
+      const userAuthInfo = await web3Auth!.getAuthTokenInfo();
       if (userAuthInfo?.idToken) {
         setToken(userAuthInfo.idToken);
       }
-      return userAuthInfo?.idToken;
+      return userAuthInfo?.idToken ?? null;
     } catch (error) {
       setError(error as Web3AuthError);
+      return null;
     } finally {
       setLoading(false);
     }
