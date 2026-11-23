@@ -46,9 +46,7 @@ export default defineConfig({
     dedupe: ["react", "react-dom"],
   },
   define: {
-    "process.env.VITE_APP_INFURA_PROJECT_KEY": JSON.stringify(
-      viteEnv.VITE_APP_INFURA_PROJECT_KEY ?? "",
-    ),
+    "process.env.VITE_APP_INFURA_PROJECT_KEY": JSON.stringify(viteEnv.VITE_APP_INFURA_PROJECT_KEY ?? ""),
   },
   test: {
     // Vitest v4 compatibility: preserve mock call history.

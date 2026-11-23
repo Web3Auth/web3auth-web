@@ -88,13 +88,13 @@ flowchart TB
 
 ## Keep vs Share Matrix
 
-| Category | Share from `no-modal` | Keep local in `modal` |
-| -------- | --------------------- | --------------------- |
-| React core | Most hook implementations | `useWeb3Auth`, `useWeb3AuthConnect`, `useWeb3AuthInner`, providers, context provider implementations |
-| React Solana | Hook files | `provider.ts` |
-| Vue core | Most composable implementations | `useWeb3Auth`, `useWeb3AuthConnect`, `useWeb3AuthInner`, providers |
-| Vue Solana | Composable files | `provider.ts`, `useSolanaClient.ts` |
-| Wagmi | Possibly `constants.ts` and `interface.ts` later | Providers in the first pass |
+| Category     | Share from `no-modal`                            | Keep local in `modal`                                                                                |
+| ------------ | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------- |
+| React core   | Most hook implementations                        | `useWeb3Auth`, `useWeb3AuthConnect`, `useWeb3AuthInner`, providers, context provider implementations |
+| React Solana | Hook files                                       | `provider.ts`                                                                                        |
+| Vue core     | Most composable implementations                  | `useWeb3Auth`, `useWeb3AuthConnect`, `useWeb3AuthInner`, providers                                   |
+| Vue Solana   | Composable files                                 | `provider.ts`, `useSolanaClient.ts`                                                                  |
+| Wagmi        | Possibly `constants.ts` and `interface.ts` later | Providers in the first pass                                                                          |
 
 ## Reviewable Rollout
 
@@ -580,17 +580,17 @@ flowchart TB
 
 ## Behavior Differences To Resolve Before Sharing
 
-| Area | Difference | Proposed source of truth |
-| ---- | ---------- | ------------------------ |
-| React `useAuthTokenInfo` | Different effect deps and guard behavior | Use the safer modal-style dependency and guard behavior in `no-modal` |
-| React `useWalletServicesPlugin` | `no-modal` skips null-context guard | Add the guard in `no-modal` |
-| React `useWalletConnectScanner` | Loading and error state order differs | Pick one behavior intentionally before sharing |
-| React `useSolanaWallet` | `useState + useEffect` vs `useMemo` for accounts | Use memoized derivation in `no-modal` |
-| React `useSignMessage` | Missing-wallet error type differs | Use `WalletInitializationError.notReady()` |
-| React `WalletServicesContextProvider` | `CONNECTED` only vs `CONNECTED_STATUSES.includes()` | Use `CONNECTED_STATUSES.includes()` |
-| Vue `useWalletServicesPlugin` | Plain `Error` vs `WalletInitializationError` | Use the modal-style Web3Auth error |
-| Vue `WalletServicesInnerProvider` | Rehydration readiness logic should match React decision | Mirror the shared React behavior if desired |
-| Vue `Web3AuthProvider` | `ref<Connection>` vs `shallowRef<Connection>` | Defer provider unification, but note the difference |
+| Area                                  | Difference                                              | Proposed source of truth                                              |
+| ------------------------------------- | ------------------------------------------------------- | --------------------------------------------------------------------- |
+| React `useAuthTokenInfo`              | Different effect deps and guard behavior                | Use the safer modal-style dependency and guard behavior in `no-modal` |
+| React `useWalletServicesPlugin`       | `no-modal` skips null-context guard                     | Add the guard in `no-modal`                                           |
+| React `useWalletConnectScanner`       | Loading and error state order differs                   | Pick one behavior intentionally before sharing                        |
+| React `useSolanaWallet`               | `useState + useEffect` vs `useMemo` for accounts        | Use memoized derivation in `no-modal`                                 |
+| React `useSignMessage`                | Missing-wallet error type differs                       | Use `WalletInitializationError.notReady()`                            |
+| React `WalletServicesContextProvider` | `CONNECTED` only vs `CONNECTED_STATUSES.includes()`     | Use `CONNECTED_STATUSES.includes()`                                   |
+| Vue `useWalletServicesPlugin`         | Plain `Error` vs `WalletInitializationError`            | Use the modal-style Web3Auth error                                    |
+| Vue `WalletServicesInnerProvider`     | Rehydration readiness logic should match React decision | Mirror the shared React behavior if desired                           |
+| Vue `Web3AuthProvider`                | `ref<Connection>` vs `shallowRef<Connection>`           | Defer provider unification, but note the difference                   |
 
 ## Risks and Mitigations
 

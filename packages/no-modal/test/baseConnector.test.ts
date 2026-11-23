@@ -117,7 +117,7 @@ function createConnector(
     connectorNamespace?: ConnectorNamespaceType;
     isInjected?: boolean;
     chains?: CustomChainConfig[];
-  } = {},
+  } = {}
 ): TestConnector {
   const chains = overrides.chains ?? [createChain()];
   const c = new TestConnector({
@@ -144,34 +144,21 @@ describe("BaseConnector", () => {
     });
 
     it("connected is false for non-connected statuses", () => {
-      for (const s of [
-        CONNECTOR_STATUS.NOT_READY,
-        CONNECTOR_STATUS.READY,
-        CONNECTOR_STATUS.CONNECTING,
-        CONNECTOR_STATUS.ERRORED,
-      ]) {
+      for (const s of [CONNECTOR_STATUS.NOT_READY, CONNECTOR_STATUS.READY, CONNECTOR_STATUS.CONNECTING, CONNECTOR_STATUS.ERRORED]) {
         const c = createConnector({ status: s });
         expect(c.connected).toBe(false);
       }
     });
 
     it("canAuthorize is true for CONNECTED, AUTHORIZING, AUTHORIZED", () => {
-      for (const s of [
-        CONNECTOR_STATUS.CONNECTED,
-        CONNECTOR_STATUS.AUTHORIZING,
-        CONNECTOR_STATUS.AUTHORIZED,
-      ]) {
+      for (const s of [CONNECTOR_STATUS.CONNECTED, CONNECTOR_STATUS.AUTHORIZING, CONNECTOR_STATUS.AUTHORIZED]) {
         const c = createConnector({ status: s });
         expect(c.canAuthorize).toBe(true);
       }
     });
 
     it("canAuthorize is false for READY / NOT_READY / CONNECTING", () => {
-      for (const s of [
-        CONNECTOR_STATUS.READY,
-        CONNECTOR_STATUS.NOT_READY,
-        CONNECTOR_STATUS.CONNECTING,
-      ]) {
+      for (const s of [CONNECTOR_STATUS.READY, CONNECTOR_STATUS.NOT_READY, CONNECTOR_STATUS.CONNECTING]) {
         const c = createConnector({ status: s });
         expect(c.canAuthorize).toBe(false);
       }
@@ -232,16 +219,12 @@ describe("BaseConnector", () => {
 
     it("throws when rpcTarget is missing for non-OTHER namespace", () => {
       const c = createConnector();
-      expect(() => c.exposedCheckInit({ chainConfig: createChain({ rpcTarget: "" }) })).toThrow(
-        "rpcTarget",
-      );
+      expect(() => c.exposedCheckInit({ chainConfig: createChain({ rpcTarget: "" }) })).toThrow("rpcTarget");
     });
 
     it("throws when chainId is missing for non-OTHER namespace", () => {
       const c = createConnector();
-      expect(() => c.exposedCheckInit({ chainConfig: createChain({ chainId: "" }) })).toThrow(
-        "chainID",
-      );
+      expect(() => c.exposedCheckInit({ chainConfig: createChain({ chainId: "" }) })).toThrow("chainID");
     });
 
     it("throws when connector namespace doesn't match chain namespace", () => {
@@ -263,9 +246,7 @@ describe("BaseConnector", () => {
 
     it("throws when already initialized (READY)", () => {
       const c = createConnector({ status: CONNECTOR_STATUS.READY });
-      expect(() => c.exposedCheckInit({ chainConfig: createChain() })).toThrow(
-        "already initialized",
-      );
+      expect(() => c.exposedCheckInit({ chainConfig: createChain() })).toThrow("already initialized");
     });
   });
 

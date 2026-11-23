@@ -74,25 +74,25 @@ npm run dev
 
 ## Endpoints Under Test
 
-| Method | Path | Expected behavior |
-| ------ | ---- | ----------------- |
-| `GET` | `/health` | Free health check |
-| `GET` | `/weather` | Standard paid x402 route |
-| `GET` | `/premium-data` | Paid route with higher price |
-| `GET` | `/weather-plain` | Debug-friendly route that returns payment requirements in the body when unpaid |
+| Method | Path             | Expected behavior                                                              |
+| ------ | ---------------- | ------------------------------------------------------------------------------ |
+| `GET`  | `/health`        | Free health check                                                              |
+| `GET`  | `/weather`       | Standard paid x402 route                                                       |
+| `GET`  | `/premium-data`  | Paid route with higher price                                                   |
+| `GET`  | `/weather-plain` | Debug-friendly route that returns payment requirements in the body when unpaid |
 
 ## Manual Test Cases
 
-| ID | Scenario | Steps | Expected result |
-| -- | -------- | ----- | --------------- |
-| `X402-01` | Server health | Call `GET /health` in a browser or with `curl` | `200 OK` with JSON status payload |
-| `X402-02` | Unpaid challenge for `/weather` | Call `GET /weather` without payment headers | `402 Payment Required` and x402 payment requirements |
-| `X402-03` | Successful paid fetch for `/weather` in Vue UI | Log in, connect wallet, switch to Base Sepolia, keep the tester URL on `/weather`, and press `Fetch with Payment` | shared UI console shows `x402 response`, `status: 200`, and a weather payload in `body` |
-| `X402-04` | Successful paid fetch for `/premium-data` in Vue UI | Change the tester URL to `/premium-data` and press `Fetch with Payment` | shared UI console shows `x402 response`, `status: 200`, and premium dataset JSON |
-| `X402-05` | Debug route without payment | Call `GET /weather-plain` without payment headers | `402` body includes `accepts` array and resource metadata |
-| `X402-06` | Debug route through Vue UI | Set the tester URL to `/weather-plain` and press `Fetch with Payment` | shared UI console shows `x402 response`, `status: 200`, and the weather payload |
-| `X402-07` | Wrong-network recovery | Open the Vue demo while connected to an EVM chain other than Base Sepolia | tester shows `Not on Base Sepolia`; after pressing `Switch to Base Sepolia`, the badge updates and fetch can be retried |
-| `X402-08` | Insufficient balance failure | Use a wallet without enough USDC or gas and attempt `Fetch with Payment` | fetch fails cleanly; UI console shows an actionable error or a 402-style response that can be inspected |
+| ID        | Scenario                                            | Steps                                                                                                             | Expected result                                                                                                         |
+| --------- | --------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `X402-01` | Server health                                       | Call `GET /health` in a browser or with `curl`                                                                    | `200 OK` with JSON status payload                                                                                       |
+| `X402-02` | Unpaid challenge for `/weather`                     | Call `GET /weather` without payment headers                                                                       | `402 Payment Required` and x402 payment requirements                                                                    |
+| `X402-03` | Successful paid fetch for `/weather` in Vue UI      | Log in, connect wallet, switch to Base Sepolia, keep the tester URL on `/weather`, and press `Fetch with Payment` | shared UI console shows `x402 response`, `status: 200`, and a weather payload in `body`                                 |
+| `X402-04` | Successful paid fetch for `/premium-data` in Vue UI | Change the tester URL to `/premium-data` and press `Fetch with Payment`                                           | shared UI console shows `x402 response`, `status: 200`, and premium dataset JSON                                        |
+| `X402-05` | Debug route without payment                         | Call `GET /weather-plain` without payment headers                                                                 | `402` body includes `accepts` array and resource metadata                                                               |
+| `X402-06` | Debug route through Vue UI                          | Set the tester URL to `/weather-plain` and press `Fetch with Payment`                                             | shared UI console shows `x402 response`, `status: 200`, and the weather payload                                         |
+| `X402-07` | Wrong-network recovery                              | Open the Vue demo while connected to an EVM chain other than Base Sepolia                                         | tester shows `Not on Base Sepolia`; after pressing `Switch to Base Sepolia`, the badge updates and fetch can be retried |
+| `X402-08` | Insufficient balance failure                        | Use a wallet without enough USDC or gas and attempt `Fetch with Payment`                                          | fetch fails cleanly; UI console shows an actionable error or a 402-style response that can be inspected                 |
 
 ## Focus Areas During Testing
 

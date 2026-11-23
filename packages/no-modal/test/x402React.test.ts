@@ -68,8 +68,6 @@ describe("useX402Fetch", () => {
 
     ({ root, container } = await renderHook());
 
-    await expect(fetchWithPayment?.({ url: "https://example.com", options: {} })).rejects.toThrow(
-      "EVM provider not available",
-    );
+    await expect(fetchWithPayment?.({ url: "https://example.com", options: {} })).rejects.toThrow("EVM provider not available");
   });
 });

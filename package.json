@@ -50,7 +50,10 @@
   ],
   "license": "ISC",
   "lint-staged": {
-    "*": ["vp fmt", "vp lint --fix"]
+    "*": [
+      "vp fmt",
+      "vp lint --fix"
+    ]
   },
   "name": "web3auth",
   "private": true,

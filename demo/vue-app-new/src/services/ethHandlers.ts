@@ -1,15 +1,7 @@
 import { IProvider, log, type Web3Auth } from "@web3auth/modal";
 import { eipVerifyMessage } from "@web3auth/sign-in-with-web3";
 import { EVM_METHOD_TYPES } from "@web3auth/ws-embed";
-import {
-  createPublicClient,
-  createWalletClient,
-  custom,
-  parseEther,
-  parseTransaction,
-  stringToHex,
-  type EIP1193Provider,
-} from "viem";
+import { createPublicClient, createWalletClient, custom, parseEther, parseTransaction, stringToHex, type EIP1193Provider } from "viem";
 
 import { getV4TypedData } from "../config";
 import { formDataStore } from "../store/form";

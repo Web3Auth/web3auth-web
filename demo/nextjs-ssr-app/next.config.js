@@ -1,4 +1,4 @@
-const path = require('path')
+const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -6,10 +6,10 @@ const nextConfig = {
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
-      wagmi: path.resolve(__dirname, 'node_modules/wagmi'),
+      wagmi: path.resolve(__dirname, "node_modules/wagmi"),
     };
     return config;
   },
-}
-  
-module.exports = nextConfig
+};
+
+module.exports = nextConfig;

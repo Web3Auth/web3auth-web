@@ -117,7 +117,7 @@ async function renderHook(options: TestWeb3AuthOptions) {
           latestValue.current = value;
         },
         status: options.status,
-      }),
+      })
     );
   });
 

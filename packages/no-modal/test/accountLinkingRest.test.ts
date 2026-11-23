@@ -1,10 +1,7 @@
 import { post } from "@toruslabs/http-helpers";
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
-import {
-  makeAccountLinkingRequest,
-  makeAccountUnlinkingRequest,
-} from "../src/account-linking/rest";
+import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../src/account-linking/rest";
 
 vi.mock("@toruslabs/http-helpers", async (importOriginal) => {
   const actual = await importOriginal<typeof import("@toruslabs/http-helpers")>();
@@ -45,9 +42,7 @@ describe("account-linking rest helpers", () => {
       linkedAccounts: [],
     });
 
-    await expect(
-      makeAccountLinkingRequest("https://auth.example.com", "access-token", linkPayload),
-    ).rejects.toMatchObject({
+    await expect(makeAccountLinkingRequest("https://auth.example.com", "access-token", linkPayload)).rejects.toMatchObject({
       name: "AccountLinkingError",
       code: 5401,
       message: "Account linking request failed. Failed to link account",
@@ -62,9 +57,7 @@ describe("account-linking rest helpers", () => {
       linkedAccounts: [],
     });
 
-    await expect(
-      makeAccountUnlinkingRequest("https://auth.example.com", "access-token", unlinkPayload),
-    ).rejects.toMatchObject({
+    await expect(makeAccountUnlinkingRequest("https://auth.example.com", "access-token", unlinkPayload)).rejects.toMatchObject({
       name: "AccountLinkingError",
       code: 5401,
       message: "Account linking request failed. Failed to unlink account",

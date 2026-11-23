@@ -21,13 +21,7 @@ import {
 } from "../src/base";
 import { authConnector } from "../src/connectors/auth-connector";
 import { Web3AuthNoModal } from "../src/noModal";
-import {
-  createChain,
-  createMockStorage,
-  createProjectConfig,
-  MockConnector,
-  MULTICHAIN_CONNECTOR_NAMESPACE,
-} from "./helpers";
+import { createChain, createMockStorage, createProjectConfig, MockConnector, MULTICHAIN_CONNECTOR_NAMESPACE } from "./helpers";
 
 class TestWeb3AuthNoModal extends Web3AuthNoModal {
   public exposeInitChainsConfig(projectConfig: ReturnType<typeof createProjectConfig>) {
@@ -70,10 +64,7 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
     return this.getConnectedWalletConnector(account);
   }
 
-  public exposeSetConnectedWalletConnector(
-    connector: IConnector<unknown>,
-    account?: LinkedAccountInfo | null,
-  ) {
+  public exposeSetConnectedWalletConnector(connector: IConnector<unknown>, account?: LinkedAccountInfo | null) {
     this.setConnectedWalletConnector(connector, account);
   }
 
@@ -81,9 +72,7 @@ class TestWeb3AuthNoModal extends Web3AuthNoModal {
     this.setActiveWalletConnectorKey(account);
   }
 
-  public exposeProcessSwitchAccountResult(
-    ...args: Parameters<Web3AuthNoModal["processSwitchAccountResult"]>
-  ) {
+  public exposeProcessSwitchAccountResult(...args: Parameters<Web3AuthNoModal["processSwitchAccountResult"]>) {
     return this.processSwitchAccountResult(...args);
   }
 
@@ -138,9 +127,7 @@ describe("authConnector", () => {
   it("catches disconnect failures from zero-account wallet services events", async () => {
     const { connector, provider } = createWsAccountsChangedTestHarness();
     const disconnectError = new Error("disconnect failed");
-    const logErrorSpy = vi
-      .spyOn(log, "error")
-      .mockImplementation((..._args: unknown[]) => undefined as never);
+    const logErrorSpy = vi.spyOn(log, "error").mockImplementation((..._args: unknown[]) => undefined as never);
     connector.status = CONNECTOR_STATUS.CONNECTED;
     connector.disconnect = vi.fn().mockRejectedValue(disconnectError);
 
@@ -150,10 +137,7 @@ describe("authConnector", () => {
       await Promise.resolve();
 
       expect(connector.disconnect).toHaveBeenCalledWith({ cleanup: true });
-      expect(logErrorSpy).toHaveBeenCalledWith(
-        "Failed to disconnect auth connector after wallet accounts changed",
-        disconnectError,
-      );
+      expect(logErrorSpy).toHaveBeenCalledWith("Failed to disconnect auth connector after wallet accounts changed", disconnectError);
     } finally {
       logErrorSpy.mockRestore();
     }
@@ -168,15 +152,13 @@ describe("Web3AuthNoModal", () => {
           clientId: "",
           web3AuthNetwork: "sapphire_devnet",
           chains: [createChain()],
-        } as never),
+        } as never)
     ).toThrow(WalletInitializationError);
   });
 
   it("sets default initialAuthenticationMode and initial status", () => {
     const sdk = createSdk();
-    expect(sdk.coreOptions.initialAuthenticationMode).toBe(
-      CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN,
-    );
+    expect(sdk.coreOptions.initialAuthenticationMode).toBe(CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_AND_SIGN);
     expect(sdk.status).toBe(CONNECTOR_STATUS.NOT_READY);
   });
 
@@ -190,7 +172,7 @@ describe("Web3AuthNoModal", () => {
         idToken: "id-token",
         accessToken: null,
         refreshToken: null,
-      },
+      }
     );
     await Promise.resolve();
     expect(sdk.primaryConnectorName).toBe(WALLET_CONNECTORS.AUTH);
@@ -227,9 +209,7 @@ describe("Web3AuthNoModal", () => {
 
     expect(sdk.getConnector(WALLET_CONNECTORS.METAMASK)).toBe(evm);
     expect(sdk.getConnector(WALLET_CONNECTORS.METAMASK, CHAIN_NAMESPACES.SOLANA)).toBeNull();
-    expect(sdk.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, CHAIN_NAMESPACES.SOLANA)).toBe(
-      solana,
-    );
+    expect(sdk.getConnector(WALLET_CONNECTORS.WALLET_CONNECT_V2, CHAIN_NAMESPACES.SOLANA)).toBe(solana);
   });
 
   it("treats a missing switch connector as unusable", () => {
@@ -246,7 +226,7 @@ describe("Web3AuthNoModal", () => {
         primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
         activeAccount,
-      },
+      }
     );
     await Promise.resolve();
 
@@ -273,7 +253,7 @@ describe("Web3AuthNoModal", () => {
       {
         primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
-      },
+      }
     );
     await Promise.resolve();
 
@@ -316,7 +296,7 @@ describe("Web3AuthNoModal", () => {
         activeAccount,
         activeChainId: "0x1",
       },
-      { walletConnector },
+      { walletConnector }
     );
 
     expect(updateProviderEngineProxy).not.toHaveBeenCalled();
@@ -352,18 +332,10 @@ describe("Web3AuthNoModal", () => {
       } as never,
       analytics: { track: vi.fn() } as never,
     }) as unknown as {
-      getChainIdForLinkedAccount: (
-        account: Pick<LinkedAccountInfo, "chainNamespace" | "connector">,
-        preferredChainId?: string | null,
-      ) => string;
+      getChainIdForLinkedAccount: (account: Pick<LinkedAccountInfo, "chainNamespace" | "connector">, preferredChainId?: string | null) => string;
     };
 
-    expect(
-      connector.getChainIdForLinkedAccount(
-        createExternalAccount({ chainNamespace: "evm" }),
-        "0xaa36a7",
-      ),
-    ).toBe("0xaa36a7");
+    expect(connector.getChainIdForLinkedAccount(createExternalAccount({ chainNamespace: "evm" }), "0xaa36a7")).toBe("0xaa36a7");
   });
 
   it("switches back to the primary account without rebinding the AUTH provider proxy", async () => {
@@ -373,7 +345,7 @@ describe("Web3AuthNoModal", () => {
       {
         primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
-      },
+      }
     );
     await Promise.resolve();
 
@@ -431,7 +403,7 @@ describe("Web3AuthNoModal", () => {
         ethereumProvider: authProvider as never,
         solanaWallet: null,
       },
-      {},
+      {}
     );
 
     expect(updateProviderEngineProxy).not.toHaveBeenCalled();
@@ -464,7 +436,7 @@ describe("Web3AuthNoModal", () => {
       {
         primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0xaa36a7",
-      },
+      }
     );
     await Promise.resolve();
 
@@ -493,13 +465,13 @@ describe("Web3AuthNoModal", () => {
         activeAccount: targetAccount,
         activeChainId: "0x1",
       },
-      { walletConnector },
+      { walletConnector }
     );
 
     expect(walletConnector.connect).toHaveBeenCalledWith(
       expect.objectContaining({
         chainId: "0xaa36a7",
-      }),
+      })
     );
     expect(sdk.currentChainId).toBe("0xaa36a7");
   });
@@ -513,7 +485,7 @@ describe("Web3AuthNoModal", () => {
         cachedConnector: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
         activeAccount,
-      },
+      }
     );
     await Promise.resolve();
 
@@ -542,10 +514,9 @@ describe("Web3AuthNoModal", () => {
     ).commonJRPCProvider = {
       updateProviderEngineProxy,
     };
-    vi.spyOn(
-      sdk as unknown as { createIsolatedWalletConnector: () => Promise<MockConnector> },
-      "createIsolatedWalletConnector",
-    ).mockResolvedValue(linkedConnector);
+    vi.spyOn(sdk as unknown as { createIsolatedWalletConnector: () => Promise<MockConnector> }, "createIsolatedWalletConnector").mockResolvedValue(
+      linkedConnector
+    );
     sdk.exposeSubscribeToConnectorEvents(authConnector);
 
     authConnector.emit(CONNECTOR_EVENTS.CONNECTED, {
@@ -576,7 +547,7 @@ describe("Web3AuthNoModal", () => {
       {
         primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
-      },
+      }
     );
     await Promise.resolve();
     sdk.status = CONNECTOR_STATUS.CONNECTED;
@@ -601,7 +572,7 @@ describe("Web3AuthNoModal", () => {
       {
         primaryConnectorName: WALLET_CONNECTORS.AUTH,
         currentChainId: "0x1",
-      },
+      }
     );
     await Promise.resolve();
     sdk.status = CONNECTOR_STATUS.AUTHORIZED;
@@ -624,10 +595,7 @@ describe("Web3AuthNoModal", () => {
       provider: inactiveLinkedProvider as never,
     } as never);
 
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [
-      authConnector,
-      inactiveLinkedConnector,
-    ];
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector, inactiveLinkedConnector];
     sdk.exposeSetConnectedWalletConnector(authConnector, primaryAccount);
     sdk.exposeSetConnectedWalletConnector(inactiveLinkedConnector, inactiveLinkedAccount);
 
@@ -677,7 +645,7 @@ describe("Web3AuthNoModal", () => {
         accessToken: "access-token",
         refreshToken: "refresh-token",
         activeAccount: null,
-      },
+      }
     );
     await Promise.resolve();
     sdk.status = CONNECTED_STATUSES[0];
@@ -697,25 +665,16 @@ describe("Web3AuthNoModal", () => {
     } as never);
     const inactiveConnector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
     sdk.exposeSetConnectedWalletConnector(authConnector);
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [
-      authConnector,
-      inactiveConnector,
-    ];
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector, inactiveConnector];
     sdk.exposeSubscribeToConnectorEvents(authConnector);
     sdk.exposeSubscribeToConnectorEvents(inactiveConnector);
 
-    inactiveConnector.emit(
-      CONNECTOR_EVENTS.ERRORED,
-      WalletLoginError.connectionError("User rejected request"),
-    );
+    inactiveConnector.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.connectionError("User rejected request"));
     inactiveConnector.emit(CONNECTOR_EVENTS.DISCONNECTED, {
       connector: WALLET_CONNECTORS.METAMASK,
     });
     inactiveConnector.emit(CONNECTOR_EVENTS.CACHE_CLEAR);
-    inactiveConnector.emit(
-      CONNECTOR_EVENTS.REHYDRATION_ERROR,
-      WalletLoginError.connectionError("rehydration failed"),
-    );
+    inactiveConnector.emit(CONNECTOR_EVENTS.REHYDRATION_ERROR, WalletLoginError.connectionError("rehydration failed"));
     await Promise.resolve();
 
     expect(sdk.status).toBe(CONNECTED_STATUSES[0]);
@@ -736,7 +695,7 @@ describe("Web3AuthNoModal", () => {
         idToken: "id-token",
         accessToken: "access-token",
         refreshToken: "refresh-token",
-      },
+      }
     );
     await Promise.resolve();
     sdk.status = CONNECTED_STATUSES[0];
@@ -745,10 +704,7 @@ describe("Web3AuthNoModal", () => {
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [authConnector];
     sdk.exposeSubscribeToConnectorEvents(authConnector);
 
-    authConnector.emit(
-      CONNECTOR_EVENTS.ERRORED,
-      WalletLoginError.connectionError("active connector failed"),
-    );
+    authConnector.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.connectionError("active connector failed"));
     await vi.waitFor(() => {
       expect(sdk.status).toBe(CONNECTOR_STATUS.ERRORED);
     });
@@ -787,19 +743,15 @@ describe("Web3AuthNoModal", () => {
   it("initChainsConfig validates chain config", () => {
     const sdk = createSdk({ chains: [] });
 
-    expect(() => sdk.exposeInitChainsConfig(createProjectConfig({ chains: [] }))).toThrow(
-      WalletInitializationError,
-    );
+    expect(() => sdk.exposeInitChainsConfig(createProjectConfig({ chains: [] }))).toThrow(WalletInitializationError);
     expect(() =>
       sdk.exposeInitChainsConfig(
         createProjectConfig({
           chains: [createChain({ chainNamespace: "invalid" as never, chainId: "0x1" })],
-        }),
-      ),
+        })
+      )
     ).toThrow(WalletInitializationError);
-    expect(() =>
-      sdk.exposeInitChainsConfig(createProjectConfig({ chains: [createChain({ chainId: "1" })] })),
-    ).toThrow(WalletInitializationError);
+    expect(() => sdk.exposeInitChainsConfig(createProjectConfig({ chains: [createChain({ chainId: "1" })] }))).toThrow(WalletInitializationError);
   });
 
   it("initAccountAbstractionConfig merges project and user AA config", () => {
@@ -812,11 +764,9 @@ describe("Web3AuthNoModal", () => {
     sdk.exposeInitAccountAbstractionConfig(
       createProjectConfig({
         smartAccounts: {
-          chains: [
-            { chainId: "0xaa36a7", bundlerConfig: { url: "https://bundler.project.example.com" } },
-          ],
+          chains: [{ chainId: "0xaa36a7", bundlerConfig: { url: "https://bundler.project.example.com" } }],
         } as never,
-      }),
+      })
     );
     expect(sdk.coreOptions.accountAbstractionConfig?.chains).toHaveLength(2);
   });
@@ -869,15 +819,11 @@ describe("Web3AuthNoModal", () => {
 
   it("connectTo validates connector and provider availability", async () => {
     const sdk = createSdk();
-    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).rejects.toThrow(
-      WalletInitializationError,
-    );
+    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).rejects.toThrow(WalletInitializationError);
 
     const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
-    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).rejects.toThrow(
-      WalletInitializationError,
-    );
+    await expect(sdk.connectTo(WALLET_CONNECTORS.METAMASK)).rejects.toThrow(WalletInitializationError);
   });
 
   it("connectTo resolves in connect-only mode on CONNECTED", async () => {
@@ -886,8 +832,7 @@ describe("Web3AuthNoModal", () => {
     });
     const ethereumProvider = { request: vi.fn() };
     const commonJRPCProvider = { updateProviderEngineProxy: vi.fn() };
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider =
-      commonJRPCProvider;
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = commonJRPCProvider;
     const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never, {
       connected: {
         connectorName: WALLET_CONNECTORS.METAMASK,
@@ -913,8 +858,7 @@ describe("Web3AuthNoModal", () => {
     });
     const ethereumProvider = { request: vi.fn() };
     const commonJRPCProvider = { updateProviderEngineProxy: vi.fn() };
-    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider =
-      commonJRPCProvider;
+    (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = commonJRPCProvider;
     const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never, {
       connected: {
         connectorName: WALLET_CONNECTORS.METAMASK,
@@ -959,7 +903,7 @@ describe("Web3AuthNoModal", () => {
           }),
         ],
       },
-      { currentChainId: solanaChainId },
+      { currentChainId: solanaChainId }
     );
     const connector = new MockConnector({
       name: WALLET_CONNECTORS.METAMASK,
@@ -1004,7 +948,7 @@ describe("Web3AuthNoModal", () => {
           }),
         ],
       },
-      { currentChainId },
+      { currentChainId }
     );
     const connector = new MockConnector({
       name: WALLET_CONNECTORS.METAMASK,
@@ -1032,9 +976,7 @@ describe("Web3AuthNoModal", () => {
     } as never);
 
     expect(() => sdk.exposeGetInitialChainIdForConnector(connector)).toThrow(
-      WalletInitializationError.invalidParams(
-        `No chain found for ${MULTICHAIN_CONNECTOR_NAMESPACE}`,
-      ),
+      WalletInitializationError.invalidParams(`No chain found for ${MULTICHAIN_CONNECTOR_NAMESPACE}`)
     );
   });
 
@@ -1057,11 +999,7 @@ describe("Web3AuthNoModal", () => {
     (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {};
     const connector = new MockConnector({ name: WALLET_CONNECTORS.METAMASK } as never);
     connector.connect = vi.fn(async () => {
-      sdk.emit(
-        CONNECTOR_EVENTS.ERRORED,
-        WalletLoginError.connectionError("failed") as never,
-        "no-modal",
-      );
+      sdk.emit(CONNECTOR_EVENTS.ERRORED, WalletLoginError.connectionError("failed") as never, "no-modal");
       return null;
     });
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
@@ -1084,9 +1022,7 @@ describe("Web3AuthNoModal", () => {
     });
     (sdk as unknown as { connectors: MockConnector[] }).connectors = [connector];
 
-    await expect(
-      sdk.connectTo(WALLET_CONNECTORS.AUTH, { authConnection: "google" } as never),
-    ).rejects.toMatchObject({ code: 5120 });
+    await expect(sdk.connectTo(WALLET_CONNECTORS.AUTH, { authConnection: "google" } as never)).rejects.toMatchObject({ code: 5120 });
     expect(sdk.connected).toBe(false);
     expect(CONNECTED_STATUSES.includes(sdk.status)).toBe(false);
   });
@@ -1111,7 +1047,7 @@ describe("Web3AuthNoModal", () => {
           }),
         ],
       },
-      { currentChainId: solanaChainId },
+      { currentChainId: solanaChainId }
     );
     const evmConnector = new MockConnector({
       name: connectorName,
@@ -1124,10 +1060,7 @@ describe("Web3AuthNoModal", () => {
       getUserInfo: vi.fn().mockResolvedValue(solanaUserInfo),
     } as never);
     solanaConnector.status = CONNECTOR_STATUS.CONNECTED;
-    (sdk as unknown as { connectors: MockConnector[] }).connectors = [
-      evmConnector,
-      solanaConnector,
-    ];
+    (sdk as unknown as { connectors: MockConnector[] }).connectors = [evmConnector, solanaConnector];
     (sdk as unknown as { commonJRPCProvider: Record<string, unknown> }).commonJRPCProvider = {};
     sdk.exposeSubscribeToConnectorEvents(solanaConnector);
 
@@ -1370,7 +1303,7 @@ describe("Web3AuthNoModal", () => {
       createProjectConfig({
         embeddedWalletAuth: [],
         externalWalletAuth: {},
-      }),
+      })
     );
 
     expect(names).not.toContain(WALLET_CONNECTORS.AUTH);
@@ -1381,11 +1314,9 @@ describe("Web3AuthNoModal", () => {
     const sdk = createSdk({ multiInjectedProviderDiscovery: false });
     const names = await sdk.exposeLoadConnectors(
       createProjectConfig({
-        embeddedWalletAuth: [
-          { authConnection: "google", authConnectionId: "web3auth", isDefault: true },
-        ],
+        embeddedWalletAuth: [{ authConnection: "google", authConnectionId: "web3auth", isDefault: true }],
         externalWalletAuth: {},
-      }),
+      })
     );
 
     expect(names).toContain(WALLET_CONNECTORS.AUTH);
@@ -1399,11 +1330,7 @@ describe("Web3AuthNoModal", () => {
       storage: { sessionId: storage },
     });
     const getAuthTokenInfo = vi.fn(async () => ({ idToken: "id-token" }));
-    const connector = emitMetaMaskConnected(
-      sdk,
-      { request: vi.fn().mockResolvedValue(["0xAbC123"]) },
-      { getAuthTokenInfo },
-    );
+    const connector = emitMetaMaskConnected(sdk, { request: vi.fn().mockResolvedValue(["0xAbC123"]) }, { getAuthTokenInfo });
 
     await vi.waitFor(() => {
       expect(sdk.status).toBe(CONNECTOR_STATUS.CONNECTED);
@@ -1440,11 +1367,7 @@ describe("Web3AuthNoModal", () => {
       initialAuthenticationMode: CONNECTOR_INITIAL_AUTHENTICATION_MODE.CONNECT_ONLY,
     });
     const getAuthTokenInfo = vi.fn(async () => ({ idToken: "id-token" }));
-    emitMetaMaskConnected(
-      sdk,
-      { request: vi.fn().mockResolvedValue(["0xAbC123"]) },
-      { getAuthTokenInfo },
-    );
+    emitMetaMaskConnected(sdk, { request: vi.fn().mockResolvedValue(["0xAbC123"]) }, { getAuthTokenInfo });
 
     await vi.waitFor(() => {
       expect(getAuthTokenInfo).toHaveBeenCalledTimes(1);
@@ -1452,10 +1375,7 @@ describe("Web3AuthNoModal", () => {
   });
 });
 
-function createSdk(
-  overrides: Record<string, unknown> = {},
-  initialState?: Record<string, unknown>,
-): TestWeb3AuthNoModal {
+function createSdk(overrides: Record<string, unknown> = {}, initialState?: Record<string, unknown>): TestWeb3AuthNoModal {
   const storage = createMockStorage();
   return new TestWeb3AuthNoModal(
     {
@@ -1466,15 +1386,11 @@ function createSdk(
       storage: { sessionId: storage },
       ...overrides,
     } as never,
-    initialState as never,
+    initialState as never
   );
 }
 
-function emitMetaMaskConnected(
-  sdk: TestWeb3AuthNoModal,
-  ethereumProvider: unknown,
-  connectorOverrides: Partial<MockConnector> = {},
-): MockConnector {
+function emitMetaMaskConnected(sdk: TestWeb3AuthNoModal, ethereumProvider: unknown, connectorOverrides: Partial<MockConnector> = {}): MockConnector {
   const connector = new MockConnector({
     name: WALLET_CONNECTORS.METAMASK,
     ...connectorOverrides,

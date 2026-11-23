@@ -9,11 +9,21 @@ const tailwind = tailwindLintPreset({
   entryPoint: "packages/modal/src/ui/css/index.css",
 });
 
-const ignorePatterns = ["**/node_modules/**", "**/dist/**", "**/coverage/**", "**/.git/**", "**/package-lock.json"];
+const ignorePatterns = [
+  "**/node_modules/**",
+  "**/dist/**",
+  "**/coverage/**",
+  "**/build/**",
+  "**/.git/**",
+  "**/package-lock.json",
+  "packages/*/types/**",
+  ".github/CODEOWNERS",
+];
 
 export default defineConfig({
   fmt: {
     ...formatPreset(),
+    sortImports: false,
     ignorePatterns,
   },
   lint: {

@@ -57,9 +57,7 @@ export default defineConfig({
     include: noModalOptimizeDepsInclude,
   },
   define: {
-    "process.env.VITE_APP_INFURA_PROJECT_KEY": JSON.stringify(
-      viteEnv.VITE_APP_INFURA_PROJECT_KEY ?? "",
-    ),
+    "process.env.VITE_APP_INFURA_PROJECT_KEY": JSON.stringify(viteEnv.VITE_APP_INFURA_PROJECT_KEY ?? ""),
   },
   test: {
     reporters: ["default", "verbose"],

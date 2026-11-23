@@ -14,8 +14,8 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }: { children: React.ReactNode }) {
-  const web3authInitialState = cookieToWeb3AuthState(((await headers())).get('cookie'))
-  console.log("web3authInitialState", web3authInitialState)
+  const web3authInitialState = cookieToWeb3AuthState((await headers()).get("cookie"));
+  console.log("web3authInitialState", web3authInitialState);
   return (
     <html lang="en">
       <body className={inter.className}>
