@@ -179,9 +179,9 @@
   },
   "dependencies": {
     "@hcaptcha/react-hcaptcha": "^2.2.0",
-    "@toruslabs/base-controllers": "^9.14.0",
-    "@toruslabs/http-helpers": "^10.0.0",
-    "@web3auth/auth": "^11.8.1",
+    "@toruslabs/base-controllers": "^10.0.0",
+    "@toruslabs/http-helpers": "^10.1.0",
+    "@web3auth/auth": "^12.0.0",
     "@web3auth/no-modal": "^11.4.3",
     "@web3auth/ws-embed": "^6.1.0",
     "bowser": "^2.15.0",
