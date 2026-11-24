@@ -48,11 +48,11 @@ jobs:
       - name: Harden check
         run: npm exec --no -- harden check --package-manager npm
 
-      - name: Check format and lint
-        run: npm run lint
-
       - name: Build
         run: npm run build
+
+      - name: Check format and lint
+        run: npm run lint
 
       - name: Check TypeScript projects
         run: npm run typecheck

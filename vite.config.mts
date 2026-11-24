@@ -32,10 +32,30 @@ export default defineConfig({
     jsPlugins: [...(react.jsPlugins ?? []), ...(vue.jsPlugins ?? []), ...(tailwind.jsPlugins ?? [])],
     rules: { ...react.rules, ...vue.rules, ...tailwind.rules },
     settings: { ...react.settings, ...vue.settings, ...tailwind.settings },
-    ignorePatterns,
+    ignorePatterns: [...ignorePatterns, "demo/**"],
     options: {
       typeAware: true,
       typeCheck: true,
     },
+    overrides: [
+      {
+        files: ["packages/**/vue/**"],
+        rules: {
+          "react/rules-of-hooks": "off",
+        },
+      },
+      {
+        files: ["scripts/**", "locales/**"],
+        rules: {
+          "no-console": "off",
+        },
+      },
+      {
+        files: ["packages/modal/src/ui/components/SpinnerLoader/**"],
+        rules: {
+          "tailwindcss/no-unknown-classes": "off",
+        },
+      },
+    ],
   },
 });
