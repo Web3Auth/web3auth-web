@@ -1,12 +1,13 @@
 import { SafeEventEmitter } from "@web3auth/auth";
 import { act, createElement, useMemo } from "react";
 import { createRoot, type Root } from "react-dom/client";
-import { afterEach, describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it } from "vite-plus/test";
 
 import {
   CHAIN_NAMESPACES,
   type Connection,
   CONNECTOR_EVENTS,
+  CONNECTOR_NAMESPACES,
   CONNECTOR_STATUS,
   type CONNECTOR_STATUS_TYPE,
   CustomChainConfig,
@@ -179,6 +180,7 @@ describe("useWeb3AuthInnerContextValue", () => {
       ethereumProvider: null,
       solanaWallet: null,
       connectorName: "auth",
+      connectorNamespace: CONNECTOR_NAMESPACES.MULTICHAIN,
     };
 
     await act(async () => {

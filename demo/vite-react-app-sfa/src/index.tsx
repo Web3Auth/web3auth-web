@@ -19,7 +19,7 @@ const web3authConfig: Web3AuthContextConfig = {
     useSFAKey: true,
     enableLogging: true,
     web3AuthNetwork: "sapphire_devnet",
-    clientId: clientId
+    clientId: clientId,
   },
 };
 

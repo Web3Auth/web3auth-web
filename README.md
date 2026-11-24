@@ -1,7 +1,6 @@
 # Web3Auth
 
 [![lerna](https://img.shields.io/badge/maintained%20with-lerna-cc00ff.svg)](https://lerna.js.org/)
-[![code style: prettier](https://img.shields.io/badge/code_style-prettier-ff69b4.svg?style=flat-square)](https://github.com/prettier/prettier)
 ![npm](https://img.shields.io/npm/dw/@web3auth/modal)
 
 Web3Auth is where passwordless auth meets non-custodial key infrastructure for Web3 apps and wallets. By aggregating OAuth (Google, Twitter, Discord) logins, different wallets and innovative Multi Party Computation (MPC) - Web3Auth provides a seamless login experience to every user on your application.
@@ -128,9 +127,9 @@ export default web3AuthContextConfig;
 ```html
 <!-- App.vue -->
 <script setup lang="ts">
-import Home from "./Home.vue";
-import { Web3AuthProvider } from "@web3auth/modal/vue";
-import web3AuthContextConfig from "./web3authContext";
+  import Home from "./Home.vue";
+  import { Web3AuthProvider } from "@web3auth/modal/vue";
+  import web3AuthContextConfig from "./web3authContext";
 </script>
 
 <template>

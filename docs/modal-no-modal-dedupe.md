@@ -22,14 +22,14 @@ The end goal was:
 
 ## Final Ownership Model
 
-| Area | Canonical implementation | What stays local in `modal` |
-| ---- | ------------------------ | ---------------------------- |
-| React core hooks | `packages/no-modal/src/react/hooks` | `useWeb3AuthInner`, `useWeb3Auth`, `useWeb3AuthConnect`, provider/context wiring |
-| Vue core composables | `packages/no-modal/src/vue/composables` | `useWeb3AuthInner`, `useWeb3Auth`, `useWeb3AuthConnect`, provider wiring |
-| React Solana | `packages/no-modal/src/react/solana` | thin public re-export files only |
-| Vue Solana | `packages/no-modal/src/vue/solana` | thin public re-export files only |
-| x402 | `packages/no-modal/src/x402` | thin public re-export files only |
-| Wagmi | still separate follow-up work | still separate follow-up work |
+| Area                 | Canonical implementation                | What stays local in `modal`                                                      |
+| -------------------- | --------------------------------------- | -------------------------------------------------------------------------------- |
+| React core hooks     | `packages/no-modal/src/react/hooks`     | `useWeb3AuthInner`, `useWeb3Auth`, `useWeb3AuthConnect`, provider/context wiring |
+| Vue core composables | `packages/no-modal/src/vue/composables` | `useWeb3AuthInner`, `useWeb3Auth`, `useWeb3AuthConnect`, provider wiring         |
+| React Solana         | `packages/no-modal/src/react/solana`    | thin public re-export files only                                                 |
+| Vue Solana           | `packages/no-modal/src/vue/solana`      | thin public re-export files only                                                 |
+| x402                 | `packages/no-modal/src/x402`            | thin public re-export files only                                                 |
+| Wagmi                | still separate follow-up work           | still separate follow-up work                                                    |
 
 ## What Changed
 

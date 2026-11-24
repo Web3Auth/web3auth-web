@@ -112,7 +112,7 @@ function BlockedStatus(props: BlockedStatusType) {
       <button
         type="button"
         onClick={handleChangeWallet}
-        className="wta:rounded-xl wta:bg-app-primary-600 wta:px-6 wta:py-3 wta:text-center wta:text-sm wta:font-medium wta:text-app-white hover:wta:bg-app-primary-700"
+        className="wta:rounded-xl wta:bg-app-primary-600 wta:px-6 wta:py-3 wta:text-center wta:text-sm wta:font-medium wta:text-app-white wta:hover:bg-app-primary-700"
       >
         {buttonMessage || t("modal.blocked.change-wallet")}
       </button>

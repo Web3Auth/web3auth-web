@@ -1,7 +1,7 @@
-import { createConfig, http } from "@wagmi/vue";
+import { type Config, createConfig, http } from "@wagmi/vue";
 import { mainnet } from "@wagmi/vue/chains";
 
-export const defaultWagmiConfig = createConfig({
+export const defaultWagmiConfig: Config = createConfig({
   chains: [mainnet],
   connectors: [], // or your basic wallets
   ssr: true,

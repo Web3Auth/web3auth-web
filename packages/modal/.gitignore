@@ -3,3 +3,4 @@ public/*.svg
 public/*.png
 public/*.map
 public/types
+.vitest/

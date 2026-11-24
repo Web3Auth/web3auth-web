@@ -23,7 +23,8 @@
   "devDependencies": {
     "@types/cors": "^2.8.19",
     "@types/express": "^4.17.21",
-    "@types/node": "^20.0.0",
+    "@toruslabs/config": "^5.0.0",
+    "@types/node": "^26.6.6",
     "ts-node": "^10.9.2",
     "typescript": "^5.3.3"
   }

@@ -1,4 +1,4 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi } from "vite-plus/test";
 
 import { type SafeEventEmitterProvider } from "../src/base";
 import { BaseProvider, type BaseProviderConfig, type BaseProviderState } from "../src/providers/base-provider";

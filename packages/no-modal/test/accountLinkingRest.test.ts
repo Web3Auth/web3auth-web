@@ -1,5 +1,5 @@
 import { post } from "@toruslabs/http-helpers";
-import { afterEach, describe, expect, it, vi } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
 import { makeAccountLinkingRequest, makeAccountUnlinkingRequest } from "../src/account-linking/rest";
 

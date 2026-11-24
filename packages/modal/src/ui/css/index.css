@@ -1,6 +1,6 @@
 @import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap");
 @import "tailwindcss" prefix(wta);
-@import "@toruslabs/vue-components/web3auth-theme.css";
+@import "../../../../../node_modules/@toruslabs/vue-components/styles/web3auth-theme.css";
 @config "../../../tailwind.config.js";
 @custom-variant dark (&:is(.w3a--dark *));
 

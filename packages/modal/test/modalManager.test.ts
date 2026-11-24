@@ -16,7 +16,7 @@ vi.mock("@metamask/connect-solana", () => ({
 vi.mock("@paulmillr/qr", () => ({}));
 
 vi.mock("@web3auth/no-modal", async () => {
-  const actual = await vi.importActual<typeof import("../../no-modal/src")>("../../no-modal/src");
+  const actual = await vi.importActual<typeof import("@web3auth/no-modal")>("../../no-modal/src");
   return actual;
 });
 
@@ -181,6 +181,7 @@ describe("Web3Auth (modal)", () => {
     expect(open).toHaveBeenCalledOnce();
     sdk.emit(CONNECTOR_EVENTS.CONNECTED, {
       connectorName: WALLET_CONNECTORS.AUTH,
+      connectorNamespace: CHAIN_NAMESPACES.EIP155,
       ethereumProvider: null,
       solanaWallet: null,
       reconnected: false,
@@ -265,7 +266,6 @@ describe("Web3Auth (modal)", () => {
     };
 
     const processSwitchAccountResultSpy = vi
-      // @ts-expect-error - processSwitchAccountResult is a protected method of Web3AuthNoModal, we need to mock it for testing
       .spyOn(Web3AuthNoModal.prototype as Web3AuthNoModal, "processSwitchAccountResult")
       .mockResolvedValue(undefined);
     const getProjectAndWalletConfigSpy = vi.spyOn(
@@ -340,7 +340,6 @@ describe("Web3Auth (modal)", () => {
     };
 
     const processSwitchAccountResultSpy = vi
-      // @ts-expect-error - processSwitchAccountResult is a protected method of Web3AuthNoModal, we need to mock it for testing
       .spyOn(Web3AuthNoModal.prototype as Web3AuthNoModal, "processSwitchAccountResult")
       .mockResolvedValue(undefined);
     const getProjectAndWalletConfigSpy = vi.spyOn(
@@ -411,7 +410,6 @@ describe("Web3Auth (modal)", () => {
       "runWalletConnectV2AccountAction"
     );
     runWalletConnectV2AccountActionSpy.mockResolvedValue(result);
-    // @ts-expect-error - linkAccountWithConnector is a protected method of Web3AuthNoModal
     const linkAccountWithConnectorSpy = vi.spyOn(Web3AuthNoModal.prototype as Web3AuthNoModal, "linkAccountWithConnector");
 
     const response = await sdk.linkAccount({ connectorName: "phantom", chainId: "0x1" });
@@ -463,9 +461,7 @@ describe("Web3Auth (modal)", () => {
       },
       "runWalletConnectV2AccountAction"
     );
-    // @ts-expect-error - linkAccountWithConnector is a private method of Web3AuthNoModal
     const linkAccountWithConnectorSpy = vi.spyOn(Web3AuthNoModal.prototype as Web3AuthNoModal, "linkAccountWithConnector");
-    // @ts-expect-error - mock for testing
     linkAccountWithConnectorSpy.mockResolvedValue(result);
 
     const response = await sdk.linkAccount({ connectorName: "phantom", chainId: "0x1" });
