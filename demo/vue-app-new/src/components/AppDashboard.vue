@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Button, Card } from "@toruslabs/vue-components";
+import { Button, Card, TextField } from "@toruslabs/vue-components";
 import { CHAIN_NAMESPACES, IProvider, log, WALLET_CONNECTORS } from "@web3auth/modal";
 import {
   useCheckout,
@@ -34,7 +34,7 @@ import { getTransferSolInstruction } from "@solana-program/system";
 import { computed, ref, watch } from "vue";
 import AccountLinkingSection from "./AccountLinkingSection.vue";
 import X402Tester from "./X402Tester.vue";
-import { getPrivateKey, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
+import { getPrivateKey, sendErc20Transfer, sendEth, sendEthWithSmartAccount, signTransaction as signEthTransaction } from "../services/ethHandlers";
 import { formDataStore } from "../store/form";
 import { numberToHex } from "viem/utils";
 
@@ -165,6 +165,10 @@ const onGetAuthTokenInfo = async () => {
 
 const onSendEth = async () => {
   await sendEth(connection.value?.ethereumProvider as IProvider, printToConsole);
+};
+
+const onSendErc20 = async () => {
+  await sendErc20Transfer(connection.value?.ethereumProvider as IProvider, printToConsole);
 };
 
 const onSignEthMessage = async () => {
@@ -392,7 +396,7 @@ const onSwitchChain = async () => {
     if (!chainId) throw new Error("No ethereum provider chainId");
     if (chainId !== currentChainId.value) throw new Error("chainId does not match current chainId");
 
-    const newChain = eip155Chains.value.find((c) => c.chainId !== chainId);
+    const newChain = eip155Chains.value.find((c) => c.chainId === "0xa4b1");
     if (!newChain) throw new Error("Please configure at least 2 EVM chains in the config");
     log.info("switching chain", newChain.chainId);
     const data = await switchChainAsync({ chainId: Number(newChain.chainId) });
@@ -520,6 +524,20 @@ const onSwitchChainNamespace = async () => {
             {{ t("app.buttons.btnSwitchChainNamespace") }}
           </Button>
           <Button block size="xs" pill class="mb-2" @click="onSendEth">{{ t("app.buttons.btnSendEth") }}</Button>
+          <TextField
+            v-model="formData.erc20TokenAddress"
+            class="mb-2"
+            :label="t('app.buttons.erc20TokenAddress')"
+            :placeholder="t('app.buttons.erc20TokenAddress')"
+          />
+          <TextField
+            v-model="formData.erc20Recipient"
+            class="mb-2"
+            :label="t('app.buttons.erc20Recipient')"
+            :placeholder="t('app.buttons.erc20Recipient')"
+          />
+          <TextField v-model="formData.erc20Amount" class="mb-2" :label="t('app.buttons.erc20Amount')" :placeholder="t('app.buttons.erc20Amount')" />
+          <Button block size="xs" pill class="mb-2" @click="onSendErc20">{{ t("app.buttons.btnSendErc20") }}</Button>
           <Button v-if="isSmartAccount" block size="xs" pill class="mb-2" @click="onSendAATx">{{ t("app.buttons.btnSendAATx") }}</Button>
           <Button block size="xs" pill class="mb-2" @click="onSignEthTransaction">
             {{ t("app.buttons.btnSignTransaction") }}

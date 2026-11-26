@@ -5,13 +5,17 @@ import {
   createPublicClient,
   createWalletClient,
   custom,
+  encodeFunctionData,
+  isAddress,
+  parseAbi,
   parseEther,
   parseTransaction,
+  parseUnits,
   stringToHex,
   type EIP1193Provider,
 } from "viem";
 
-import { getV4TypedData } from "../config";
+import { defaultErc20ByChainId, getV4TypedData } from "../config";
 import { formDataStore } from "../store/form";
 
 function createClients(provider: IProvider) {
@@ -37,6 +41,46 @@ export const sendEth = async (provider: IProvider, uiConsole: (name: string, val
       value: parseEther("0.01"),
     });
     uiConsole("txRes", { hash: txHash });
+  } catch (error) {
+    log.info("error", error);
+    uiConsole("error", error instanceof Error ? error.message : error);
+  }
+};
+
+const erc20Abi = parseAbi(["function decimals() view returns (uint8)", "function transfer(address to, uint256 amount)"]);
+
+export const sendErc20Transfer = async (provider: IProvider, uiConsole: (name: string, value: unknown) => void) => {
+  try {
+    const { walletClient, publicClient } = createClients(provider);
+    const [account] = await walletClient.getAddresses();
+    const defaultToken = defaultErc20ByChainId[provider.chainId];
+    const tokenAddress = (formDataStore.erc20TokenAddress.trim() || defaultToken) as `0x${string}` | undefined;
+    if (!tokenAddress || !isAddress(tokenAddress)) {
+      throw new Error("Set an ERC-20 token address for this chain");
+    }
+    const decimals = await publicClient.readContract({
+      address: tokenAddress,
+      abi: erc20Abi,
+      functionName: "decimals",
+    });
+    const recipient = formDataStore.erc20Recipient.trim() as `0x${string}`;
+    if (!isAddress(recipient)) {
+      throw new Error("Set an ERC-20 recipient address");
+    }
+    const amount = parseUnits(formDataStore.erc20Amount || "1", decimals);
+    const data = encodeFunctionData({
+      abi: erc20Abi,
+      functionName: "transfer",
+      args: [recipient, amount],
+    });
+    const txHash = await walletClient.sendTransaction({
+      chain: null,
+      account,
+      to: tokenAddress,
+      data,
+      value: 0n,
+    });
+    uiConsole("txRes", { hash: txHash, token: tokenAddress, recipient, amount: amount.toString(), decimals });
   } catch (error) {
     log.info("error", error);
     uiConsole("error", error instanceof Error ? error.message : error);

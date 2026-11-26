@@ -20,11 +20,14 @@
       "title": "Wallet Service Plugin",
       "logoLight": "Logo Light",
       "logoDark": "Logo Dark",
-      "confirmationStrategy": "Confirmation Strategy"
+      "confirmationStrategy": "Confirmation Strategy",
+      "useLocalWalletServices": "Use local wallet services (localhost:4050)"
     },
     "accountAbstractionProvider": {
       "title": "Account Abstraction Provider",
       "smartAccountType": "Smart Account Type",
+      "smartAccountEipStandard": "EIP Standard",
+      "gaslessTransfers": "Gasless ERC-20 transfers (MetaMask EIP-7702)",
       "bundlerUrl": "Bundler Url",
       "paymasterUrl": "Paymaster Url",
       "useAAWithExternalWallet": "Use Account Abstraction Provider with external wallet"
@@ -64,6 +67,7 @@
       "btnGetPrivateKey": "Get Private Key",
       "btnGetBalance": "Get Balance",
       "btnSendEth": "Send ETH",
+      "btnSendErc20": "Send ERC-20",
       "btnSendAATx": "Send ETH with Smart Account",
       "btnSignEthMessage": "Sign ETH Message",
       "btnGetConnectedChainId": "Get Connected Chain ID",
@@ -79,7 +83,10 @@
       "btnShowReceive": "Show Receive",
       "btnShowWalletConnectScanner": "Show WalletConnect Scanner",
       "btnSignTypedData_v4": "Sign Typed Data v4",
-      "btnSignPersonalMsg": "Sign Personal Message"
+      "btnSignPersonalMsg": "Sign Personal Message",
+      "erc20TokenAddress": "ERC-20 token address",
+      "erc20Recipient": "ERC-20 recipient",
+      "erc20Amount": "ERC-20 amount"
     },
     "widget": {
       "title": "Widget",

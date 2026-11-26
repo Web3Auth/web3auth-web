@@ -60,37 +60,48 @@ const options = computed((): Web3AuthOptions => {
   const { useAccountAbstractionProvider } = formData;
   let accountAbstractionConfig: Web3AuthOptions["accountAbstractionConfig"];
   if (showAAProviderSettings.value && useAccountAbstractionProvider) {
+    const is7702 = formData.smartAccountEipStandard === "7702";
     const chains: AccountAbstractionMultiChainConfig["chains"] = [];
-    Object.entries(formData.smartAccountChainsConfig).forEach(([chainId, { bundlerUrl, paymasterUrl }]) => {
-      if (formData.chains.includes(chainId)) {
-        chains.push({
-          chainId,
-          bundlerConfig: { url: bundlerUrl },
-          paymasterConfig: paymasterUrl ? { url: paymasterUrl } : undefined,
-          smartAccountConfig: undefined,
-        });
-      }
-    });
+    if (!is7702) {
+      Object.entries(formData.smartAccountChainsConfig).forEach(([chainId, { bundlerUrl, paymasterUrl }]) => {
+        if (formData.chains.includes(chainId)) {
+          chains.push({
+            chainId,
+            bundlerConfig: { url: bundlerUrl },
+            paymasterConfig: paymasterUrl ? { url: paymasterUrl } : undefined,
+            smartAccountConfig: undefined,
+          });
+        }
+      });
+    }
     accountAbstractionConfig = {
       smartAccountType: formData.smartAccountType as SmartAccountType,
+      smartAccountEipStandard: formData.smartAccountEipStandard,
+      gaslessTransfers: formData.gaslessTransfers,
       chains,
     };
   }
 
   // Wallet services settings
+  const localWalletUrl = { url: "http://localhost:4050" };
   let walletServicesConfig: Web3AuthOptions["walletServicesConfig"] = {
     loginMode: WS_EMBED_LOGIN_MODE.PLUGIN,
-    // walletUrls: {
-    //   production: {
-    //     url: "http://localhost:4050",
-    //   },
-    // },
+    ...(formData.useLocalWalletServices
+      ? {
+          walletUrls: {
+            production: localWalletUrl,
+            staging: localWalletUrl,
+            development: localWalletUrl,
+            testing: localWalletUrl,
+          },
+        }
+      : {}),
   };
-  if (formData.walletPlugin.enable) {
+  if (formData.walletPlugin.enable || formData.gaslessTransfers) {
     const { confirmationStrategy } = formData.walletPlugin;
     walletServicesConfig = {
       ...walletServicesConfig,
-      whiteLabel: { showWidgetButton: true },
+      whiteLabel: { showWidgetButton: formData.walletPlugin.enable },
       confirmationStrategy,
       loginMode: WS_EMBED_LOGIN_MODE.PLUGIN,
     };
@@ -245,6 +256,12 @@ onBeforeMount(() => {
         formData.walletPlugin = json.walletPlugin;
         formData.useAccountAbstractionProvider = json.useAccountAbstractionProvider;
         formData.smartAccountType = json.smartAccountType;
+        formData.smartAccountEipStandard = json.smartAccountEipStandard === "7702" ? "7702" : "4337";
+        formData.gaslessTransfers = Boolean(json.gaslessTransfers);
+        formData.useLocalWalletServices = Boolean(json.useLocalWalletServices);
+        formData.erc20TokenAddress = json.erc20TokenAddress || "";
+        formData.erc20Recipient = json.erc20Recipient || "";
+        formData.erc20Amount = json.erc20Amount || "1";
         formData.smartAccountChains = (json.smartAccountChains || []).filter((chainId: string) => chains.includes(chainId));
         formData.smartAccountChainsConfig = Object.entries(json.smartAccountChainsConfig || {}).reduce(
           (acc, [chainId, config]) => {
